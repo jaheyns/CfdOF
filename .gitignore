@@ -1,0 +1,5 @@
+*.pyc
+FoamCaseBuilder/*.pyc
+FoamCaseBuilder/__pycache__
+FoamCaseBuilder/PlyParse*
+
