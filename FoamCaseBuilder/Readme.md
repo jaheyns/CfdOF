@@ -69,7 +69,7 @@ Test FoamCaseBuilder module without FreeCAD: "python pathto/FoamCaseBuilder/Test
 Test with FreeCAD by download: https://www.iesensor.com/download/TestFoam.fcstd
 
 
-### FoamCaseBuilder as an independent module
+### FoamCaseBuilder as an independent python module
 
 FoamCaseBuilder  is designed as working without any GUI, seen "TestBuilder.py"
 
@@ -87,7 +87,7 @@ However, the mesh can not be re-generated from the macro/script, it needs to cli
 
 Material taskpanel is not needed in CFD mode as it is default to water. Change the viscosity in OpenFoam case setup please
 
-### see Roadmap.md for plan
+### see ./Roadmap.md for feature completion adn future plan
 
 Huge work is needed to make a GUI for case setup for CFD, I may just focus on making it work in script mode first. 
 

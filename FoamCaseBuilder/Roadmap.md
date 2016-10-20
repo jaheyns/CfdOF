@@ -40,18 +40,22 @@ branch: foambuilder_pre2
 
 - cpp code FemConstraintFluidBoundary merged (Aug 2016)
 - TaskPanelFemSolverControl:  a general FemSolver control TaskPanel
-- python codes CfdCaseWriterFoam and module FoamCaseBuilder etc. to be merged (Sep 2016)
-- basic RAS turbulent model testing and heat transfering case (Oct 2016)
+- python codes CfdCaseWriterFoam and module FoamCaseBuilder etc. (Sep 2016)
+- basic RAS turbulent model and heat transfering case support (Oct 2016)
 
+### Phase IV: a new module "Cfd"
 
-branch `foambuilder2` to be forked (Oct 2016)
+- branch `foambuilder1` is moved into a new module "Cfd" (Oct 2016)
+- VTK mesh import and export for both Fem and Cfd modules (Oct 2016)
+- CfdResult import and render pressure on FemMesh (Oct 2016)
 
+todo:
+
+- CfdExample.py for Cfd module
 - improve FreeCAD meshing quality for CFD, boundary layer inflation and mesh importing
     CFD mesh with viscous layer and hex meshcell supported,
     The best way to do that will be meshing externally like Salome, and importing back to FreeCAD
     Currently, the bad mesh quality make turbulence case hard to converge
-
-- More CFD Analysis Type supported, transient, heat transfer and LES model setup
 
 - FemMaterial: a general materail object serve all kinds of CAE Analysis
    
@@ -61,7 +65,10 @@ branch `foambuilder2` to be forked (Oct 2016)
    Part section: build3DFromCavity buildEnclosureBox
           for example, there a pipe section, how to extract void space in pipe for CFD
 
-### Phase IV  FSI (year 2017?)
+### Phase V  FSI (year 2017?)
+
+todo:
+- More CFD Analysis Type supported, transient, heat transfer and LES model setup
 
 - multiphase case setup
 
