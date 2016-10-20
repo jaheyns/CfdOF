@@ -54,28 +54,17 @@ class _ViewProviderCfdResult:
             FreeCADGui.activateWorkbench("CfdWorkbench")
         doc = FreeCADGui.getDocument(vobj.Object.Document)
         if not doc.getInEdit():
-            # may be go the other way around and just activate the analysis the user has doubleClicked on ?!
-            if FemGui.getActiveAnalysis():
-                if FemGui.getActiveAnalysis().Document is FreeCAD.ActiveDocument:
-                    if self.Object in FemGui.getActiveAnalysis().Member:
-                        doc.setEdit(vobj.Object.Name)
-                    else:
-                        FreeCAD.Console.PrintError('Activate the analysis this solver belongs to!\n')
-                else:
-                    FreeCAD.Console.PrintError('Active Analysis is not in active Document!\n')
-            else:
-                FreeCAD.Console.PrintError('No active Analysis found!\n')
+            doc.setEdit(vobj.Object.Name)
         else:
             FreeCAD.Console.PrintError('Active Task Dialog found! Please close this one first!\n')
         return True
         
     def setEdit(self, vobj, mode):
-        if FemGui.getActiveAnalysis():
-            from _TaskPanelCfdResult import _TaskPanelCfdResult
-            taskd = _TaskPanelCfdResult()
-            taskd.obj = vobj.Object
-            
-            FreeCADGui.Control.showDialog(taskd)
+        #if FemGui.getActiveAnalysis():
+        from _TaskPanelCfdResult import _TaskPanelCfdResult
+        taskd = _TaskPanelCfdResult()
+        taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(taskd)
         return True
 
     def unsetEdit(self, vobj, mode):

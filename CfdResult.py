@@ -41,10 +41,10 @@ class _CfdResult(object):
         self.Object = obj  # keep a ref to the DocObj for nonGui usage
         obj.Proxy = self  # link between App::DocumentObject to  this object
 
-        obj.addProperty("App::PropertyFloatList", "Pressure", "CFD",
-                            "fluid pressure")  # readonly in propertyEditor of combiView
         obj.addProperty("App::PropertyVectorList", "Velocity", "CFD",
-                            "fluid velocity")
+                            "fluid velocity", True)
+        obj.addProperty("App::PropertyFloatList", "Pressure", "CFD",
+                            "fluid pressure", True)  # readonly in propertyEditor of combiView
         # Temperature, Time has been defined in base cpp class
         obj.addProperty("App::PropertyFloatList", "TurbulenceViscosity", "CFD",
                             "turbulence visocisity for any turblulent flow", True)
