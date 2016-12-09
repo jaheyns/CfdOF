@@ -33,6 +33,9 @@ import os
 import sys
 import os.path
 import time
+import subprocess
+import Gnuplot
+from numpy import *
 
 import FreeCAD
 from FemTools import FemTools
@@ -66,13 +69,52 @@ class _TaskPanelCfdSolverControl:
 
         # update UI
         self.fem_console_message = ''
+        
+        
+        
+        
+        #======================================================================================================
+        #
+        # Code associated with running Openfoam from GUI
+        #
+        #======================================================================================================
+        self.solver_run_process = QtCore.QProcess()
+        
+        #self.solver_run_process.readyReadStandardOutput.connect(self.stdoutReady)
+        QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("finished(int)"), self.solverFinished)
+        QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.plotResiduals)
+        QtCore.QObject.connect(self.form.terminateOFsolver, QtCore.SIGNAL("clicked()"), self.killSolverProcess)
+        self.form.terminateOFsolver.setEnabled(False)
+        
+        self.g = Gnuplot.Gnuplot()
+        self.g('set style data lines')
+        self.g.title("Simulation residuals")
+        self.g.xlabel("Iteration")
+        self.g.ylabel("Residual")
 
+        self.g("set grid")
+        self.g("set logscale y")
+        self.g("set yrange [0.95:1.05]")
+        self.g("set xrange [0:1]")
+        
+
+        self.UxResiduals = [1]
+        self.UyResiduals = [1]
+        self.UzResiduals = [1]
+        self.pResiduals = [1]
+        self.niter = 0
+        #======================================================================================================
+        
+        
+        
         # Connect Signals and Slots
         QtCore.QObject.connect(self.form.tb_choose_working_dir, QtCore.SIGNAL("clicked()"), self.choose_working_dir)
         QtCore.QObject.connect(self.form.pb_write_inp, QtCore.SIGNAL("clicked()"), self.write_input_file_handler)
         QtCore.QObject.connect(self.form.pb_edit_inp, QtCore.SIGNAL("clicked()"), self.editSolverInputFile)
         QtCore.QObject.connect(self.form.pb_run_solver, QtCore.SIGNAL("clicked()"), self.runSolverProcess)
         QtCore.QObject.connect(self.form.pb_show_result, QtCore.SIGNAL("clicked()"), self.showResult)
+        
+        
         #
         QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("started()"), self.solverProcessStarted)
         QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("stateChanged(QProcess::ProcessState)"), self.solverProcessStateChanged)
@@ -128,6 +170,7 @@ class _TaskPanelCfdSolverControl:
         self.form.le_working_dir.setText(info_obj.WorkingDir)
 
     def write_input_file_handler(self):
+               
         QApplication.restoreOverrideCursor()
         if self.check_prerequisites_helper():
             # self.solver_object.SolverName == "OpenFOAM":
@@ -173,22 +216,97 @@ class _TaskPanelCfdSolverControl:
         self.femConsoleMessage("Edit case input file in FreeCAD is not implemented!")
         self.solver_runner.edit_case()
 
+    
+        
+    
+    
     def runSolverProcess(self):
         self.Start = time.time()
-        self.femConsoleMessage("Run {} at {} with command:".format(self.solver_object.SolverName, self.solver_object.WorkingDir))
+        #self.femConsoleMessage("Run {} at {} with command:".format(self.solver_object.SolverName, self.solver_object.WorkingDir))
         cmd = self.solver_runner.get_solver_cmd()
-        self.femConsoleMessage(cmd)
-        self.cwd = QtCore.QDir.currentPath()
-        QtCore.QDir.setCurrent(self.solver_object.WorkingDir)
-
-        if self.solver_object.SolverName == "OpenFOAM":
-            # CFD solver takes very long time to finish, therefore, return to GUI without blocking
-            self.SolverProcess.start("echo 'start the solver externally'")
-            #self.SolverProcess.start(["bash", "-i", "-c", "'"+cmd+"'"])  # cmd needs a single quote to enclose after -c option
+        #self.femConsoleMessage(cmd)
+        #self.cwd = QtCore.QDir.currentPath()
+        #QtCore.QDir.setCurrent(self.solver_object.WorkingDir)
+        #QtCore.QDir.setCurrent(self.solver_object.WorkingDir )
+        
+        splitCmd = cmd.split()
+        
+        solverDirectory = self.solver_object.WorkingDir + os.path.sep +self.solver_object.InputCaseName
+        #NOTE TODO currently splitCmd[0] is the solver name. Should handle retrieving solver name more elegantly
+        self.femConsoleMessage(splitCmd[0])
+        FreeCAD.Console.PrintMessage(solverDirectory +"\n")
+        self.solver_run_process.start(splitCmd[0],['-case',solverDirectory])
+        #FreeCAD.Console.PrintMessage("bbbbbbbbbbbbbbbbbbbbbbbb: \n")
+       
+        #NOTE: setting solve button to inactive to ensure that two instances of the same simulation aren's started simulataneously
+        self.form.pb_run_solver.setEnabled(False)
+        self.form.terminateOFsolver.setEnabled(True)
+        self.femConsoleMessage("OpenFOAM solver started")
+        
+        
+        
+        #if self.solver_object.SolverName == "OpenFOAM":
+            ## CFD solver takes very long time to finish, therefore, return to GUI without blocking
+            #self.SolverProcess.start("echo 'start the solver externally'")
+            ##self.SolverProcess.start(["bash", "-i", "-c", "'"+cmd+"'"])  # cmd needs a single quote to enclose after -c option
             
         QApplication.restoreOverrideCursor()
         # all the UI update will done after solver process finished signal
+        
+    def killSolverProcess(self):
+        self.femConsoleMessage("OpenFOAM solver manually stopped")
+        self.solver_run_process.terminate()
+        #NOTE: reactivating solver button
+        self.form.pb_run_solver.setEnabled(True)
+        self.form.terminateOFsolver.setEnabled(False)
+        #FreeCAD.Console.PrintMessage("Killing OF solver instance")
 
+    def solverFinished(self):
+        #self.femConsoleMessage(self.solver_run_process.exitCode())
+        self.femConsoleMessage("OpenFOAM simulation finished!")
+        self.form.pb_run_solver.setEnabled(True)
+        self.form.terminateOFsolver.setEnabled(False)
+    
+    def plotResiduals(self):
+        text = str(self.solver_run_process.readAllStandardOutput())
+        
+        loglines = text.split('\n')
+        printlines = []
+        for line in loglines:
+            #print line,
+            split = line.split()
+            
+            # Only store the first residual per timestep
+            if line.startswith(u"Time = "):
+                self.niter += 1
+
+            #print split
+            if "Ux," in split and self.niter > len(self.UxResiduals):
+                self.UxResiduals.append(float(split[7].split(',')[0]))
+            if "Uy," in split and self.niter > len(self.UyResiduals):
+                self.UyResiduals.append(float(split[7].split(',')[0]))
+            if "Uz," in split and self.niter > len(self.UzResiduals):
+                self.UzResiduals.append(float(split[7].split(',')[0]))
+            if "p," in split  and self.niter > len(self.pResiduals):
+                self.pResiduals.append(float(split[7].split(',')[0]))
+                
+                
+        #NOTE: the mod checker is in place for the possibility plotting takes longer
+        #NOTE: than a small test case to solve
+        if mod(self.niter,1)==0:
+            self.g.plot(Gnuplot.Data(self.UxResiduals, with_='line', title="Ux", inline=1),
+            Gnuplot.Data(self.UyResiduals, with_='line', title="Uy", inline=1),
+            Gnuplot.Data(self.UzResiduals, with_='line', title="Uz", inline=1),
+            Gnuplot.Data(self.pResiduals, with_='line', title="p"))
+        
+        if self.niter>=2:
+            self.g("set autoscale") #NOTE: this is just to supress the empty yrange error when GNUplot autscales
+        
+        #NOTE: can print the output from the OF solver to the console via the following command
+        #self.femConsoleMessage(text)
+        
+        FreeCAD.Console.PrintMessage(text)
+    
     def solverProcessStarted(self):
         #print("solver Started()")
         #print(self.SolverProcess.state())
