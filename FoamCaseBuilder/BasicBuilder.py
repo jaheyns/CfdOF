@@ -699,11 +699,8 @@ class BasicBuilder(object):
 
     ################################## solver control #####################################        
     def setupSolverControl(self):
-        # PyFoam always run into trouble when loading such file
-        #pRefValue must be set, since some case does not contains such requested
-        #residual control, currently all default from tutorial case setup, but can be setup
-        createRawFoamFile(self._casePath, "system", "fvSolution", getFvSolutionTemplate())
-        #createRawFoamFile(self._casePath, "system", "fvSchemes", getFvSchemesTemplate())
+        f = ParsedParameterFile(os.path.join(self._casePath, "system", "fvSolution"))
+        # Currently does nothing
 
     def setupRelaxationFactors(self, pressure_factor=0.1, velocity_factor=0.1, other_factor=0.3):
         # '.*' apply to all variables
@@ -1403,3 +1400,4 @@ class BasicBuilder(object):
             f["boundaryField"][bcName] = {}
             f["boundaryField"][bcName]["type"] = subtype
             f.writeFile()
+
