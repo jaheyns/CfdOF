@@ -157,7 +157,7 @@ class CfdCaseWriterFoam:
                                                 }
 
             bc_settings.append(bc_dict)
-        self.builder.internalFields = {'p': 0.0, 'U': (0, 0, 0.001)}  # must set a nonzero for velocity field
+        self.builder.internalFields = {'p': 0.0, 'U': (0, 0, 0)}
         self.builder.boundaryConditions = bc_settings
 
     def write_solver_control(self):
