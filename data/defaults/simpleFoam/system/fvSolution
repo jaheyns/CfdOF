@@ -1,0 +1,100 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    p
+    {
+        solver           GAMG;
+        tolerance        1e-7;
+        relTol           0.01;
+        smoother         GaussSeidel;
+        nPreSweeps       0;
+        nPostSweeps      2;
+        cacheAgglomeration on;
+        agglomerator     faceAreaPair;
+        nCellsInCoarsestLevel 10;
+        mergeLevels      1;
+    }
+
+    Phi
+    {
+        $p;
+    }
+
+    U
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-8;
+        relTol           0.1;
+        nSweeps          1;
+    }
+
+   "(k|epsilon|omega|f|v2)"
+   {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-8;
+        relTol           0.1;
+        nSweeps          1;
+    }
+
+    nuTilda
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         2;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+}
+
+SIMPLE
+{
+    // Non-orthogonal correctors for robustness on tet meshes
+    nNonOrthogonalCorrectors 3;
+
+    consistent yes;
+    residualControl
+    {
+        p 0.01;
+        U 0.001;
+        "(k|epsilon|omega|f|v2)" 0.001;
+    }
+    pRefValue 0;
+    pRefCell 0;
+}
+
+potentialFlow
+{
+    nNonOrthogonalCorrectors 10;
+}
+
+relaxationFactors
+{
+    // Conservative settings to solve reliably on bad
+    // meshes
+    equations
+    {
+        U               0.6;
+        ".*"            0.6;
+    }
+    fields
+    {
+        p               0.3;
+    }
+}
+
+cache
+{
+    grad(U);
+}
+
+// ************************************************************************* //

@@ -52,20 +52,27 @@ class CfdCaseWriterFoam:
         self.bc_group = CfdTools.getConstraintGroup(analysis_obj)
         self.mesh_generated = False
 
-        self.case_folder = self.solver_obj.WorkingDir + os.path.sep + self.solver_obj.InputCaseName
-        self.mesh_file_name = self.case_folder + os.path.sep + self.solver_obj.InputCaseName + u".unv"
-        if self.solver_obj.HeatTransfering:
-            self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj))
-        else:
-            self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj))
-        self.builder.createCase()
-
     def write_case(self, updating=False):
         """ Write_case() will collect case setings, and finally build a runnable case
         """
         FreeCAD.Console.PrintMessage("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
         _cwd = os.curdir
         os.chdir(self.solver_obj.WorkingDir)  # pyFoam can not write to cwd if FreeCAD is started NOT from terminal
+
+        # Perform initialisation here rather than __init__ in case of path changes
+        self.case_folder = os.path.join(self.solver_obj.WorkingDir, self.solver_obj.InputCaseName)
+        self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
+
+        # Create initial case from defaults
+        # Until module is integrated, store the defaults inside the module directory rather than the resource dir
+        if self.solver_obj.HeatTransfering:
+            #self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(FreeCAD.getResourceDir(), "Mod", "Cfd", "defaults", "chtMultiRegionSimpleFoam"))
+            self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(CfdTools.get_module_path(), "data", "defaults", "chtMultiRegionSimpleFoam"))
+        else:
+            #self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(FreeCAD.getResourceDir(), "Mod", "Cfd", "defaults", "simpleFoam"))
+            self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(CfdTools.get_module_path(), "data", "defaults", "simpleFoam"))
+        self.builder.createCase()
+
         self.write_mesh()
 
         self.write_material()

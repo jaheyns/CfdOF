@@ -344,6 +344,13 @@ def createCaseFromTemplate(output_path, source_path, backup_path=None):
             copySettingsFromExistentCase(output_path, source_path)
         else:
             raise Exception("Error: tutorial case folder: {} not found".format(source_path))
+    elif source_path.find("defaults")>=0:
+        if not os.path.isabs(source_path):  # create case from existent case folder
+            source_path = os.path.join(getFoamDir(), os.path.sep, source_path)
+        if os.path.exists(source_path):
+            copySettingsFromExistentCase(output_path, source_path)
+        else:
+            raise Exception("Error: defaults case folder: {} not found".format(source_path))
     elif source_path[-4:] == ".zip":  # zipped case template,outdated
         template_path = source_path
         if os.path.isfile(template_path):
@@ -353,7 +360,7 @@ def createCaseFromTemplate(output_path, source_path, backup_path=None):
         else:
             raise Exception("Error: template case file {} not found".format(source_path))
     else:
-        raise Exception('Error: template {} is not a tutorials case path or zipped file'.format(source_path))
+        raise Exception('Error: template {} is not a tutorials case path, defaults case path, or zipped file'.format(source_path))
     #foamCleanPolyMesh
     mesh_dir = os.path.join(output_path, "constant", "polyMesh")
     if os.path.isdir(mesh_dir):
@@ -432,8 +439,14 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
 def copySettingsFromExistentCase(output_path, source_path):
     """build case structure from string template, both folder paths must existent
     """
-    shutil.copytree(source_path + os.path.sep + "constant", output_path + os.path.sep + "constant")
     shutil.copytree(source_path + os.path.sep + "system", output_path + os.path.sep + "system")
+    source_const = os.path.join(source_path, "constant")
+    dest_const = os.path.join(output_path, "constant")
+    if os.path.exists(source_const):
+        shutil.copytree(source_const, dest_const)
+    else:
+        if not os.path.exists(dest_const):
+            os.makedirs(dest_const)
     #runFoamCommand('foamCopySettins  {} {}'.format(source_path, output_path))
     #foamCopySettins: Copy OpenFOAM settings from one case to another, without copying the mesh or results
     if os.path.exists(source_path + os.path.sep + "0"):
