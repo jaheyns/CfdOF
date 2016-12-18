@@ -559,7 +559,6 @@ def runFoamCommand(cmd):
     return exitCode
     """
 
-
 ###########################################################################
 
 def convertMesh(case, mesh_file, scale):
@@ -570,8 +569,10 @@ def convertMesh(case, mesh_file, scale):
     mesh_file = translatePath(mesh_file)
 
     if mesh_file.find(".unv")>0:
-        cmdline = ['ideasUnvToFoam', '-case', case, mesh_file]  # mesh_file path may also need translate
-        runFoamCommand(cmdline)
+        #cmdline = ['ideasUnvToFoam', '-case', case, mesh_file]  # mesh_file path may also need translate
+        #runFoamCommand(cmdline)
+        cmdline = ['ideasUnvToFoam', mesh_file]  # mesh_file path may also need translate
+        runFoamApplication(cmdline,case)
         changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
     if mesh_file[-4:] == ".geo":  # GMSH mesh
         print('Error:GMSH exported *.geo mesh is not support yet')
