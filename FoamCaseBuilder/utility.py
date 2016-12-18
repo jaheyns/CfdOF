@@ -385,7 +385,39 @@ def createCaseFromScratch(output_path, solver_name):
     createRawFoamFile(output_path, 'system', 'fvSchemes', getFvSchemesTemplate())
     # turbulence properties and fuid properties will be setup later in base builder
 
+def createRunScript(output_path, init_potential, run_parallel, solver_name, num_proc):
+    print("Create Allrun script ")
 
+    fname = output_path + os.path.sep + "Allrun"
+    if os.path.exists(fname):
+        if _debug: print("Warning: Overwrite existing Allrun script ")
+    with open(fname, 'w+') as f:
+        f.write("#!/bin/sh \n\n")
+        # NOTE: Although RunFunctions seem to be sourced, the functions `getApplication`  
+        # and `getNumberOfProcessors` are not available. solver_name and num_proc do not have   
+        # to be parsed if they can be read using these bash functions 
+        #f.write("# Source tutorial run functions \n")
+        #f.write(". $WM_PROJECT_DIR/bin/tools/RunFunctions \n\n")
+    
+        f.write("# Store mesh in polyMesh.org and create sym link, so that \n") 
+        f.write("# files are not lost when running Allclean \n\n")
+        
+        if (init_potential):
+            f.write ("potentialFoam -case "+output_path+" | tee "+output_path+"/log.potentialFoam \n\n")
+        
+        if (run_parallel):
+            # NOTE: See above
+            f.write ("# Run application in parallel \n")
+            f.write ("decomposePar | tee log.decomposePar \n")
+            f.write ("mpirun -np "+str(num_proc)+" "+solver_name+" -parallel -case "+output_path+" | tee "+output_path+"/log."+solver_name+" \n\n")
+        else:
+            f.write ("# Run application \n")
+            #f.write (solver_name+" -case "+output_path+" | tee "+output_path+"/log."+solver_name+" \n\n")
+            f.write ("{} -case {} | tee {}/log.{} \n\n".format(solver_name,output_path,output_path,solver_name))
+
+    cmdline = ("chmod a+x "+fname) # Update Allrun permission
+    out = subprocess.check_output(['bash', '-l', '-c', cmdline], stderr=subprocess.PIPE)
+    
 def copySettingsFromExistentCase(output_path, source_path):
     """build case structure from string template, both folder paths must existent
     """
@@ -409,7 +441,7 @@ def copySettingsFromExistentCase(output_path, source_path):
 #################################################################################
 
 _foamFileHeader_part1 = '''/*--------------------------------*- C++ -*----------------------------------*\\
-| =========                 |                                                 |
+| ===========                 |                                                 |
 | \\\\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\\\    /   O peration     | Version:  {}.{}                                   |
 |   \\\\  /    A nd           | Web:      www.OpenFOAM.org                      |

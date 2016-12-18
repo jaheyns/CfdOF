@@ -225,7 +225,7 @@ class BasicBuilder(object):
                         boundarySettings = [],
                         internalFields = {},
                         transientSettings = {"startTime":0, "endTime":1000, "timeStep":1, "writeInterval":100}, # simpleFoam
-                        paralleSettings = {'method':"simple", "numberOfSubdomains":multiprocessing.cpu_count()},
+                        paralleSettings = {'method':"simple", "numberOfSubdomains":multiprocessing.cpu_count()}, # NOTE: check typo should be paralle'l'Settings NOTE: Should we not use scotch for default
                 ):
         if casePath[0] == "~": casePath = os.path.expanduser(casePath)
         self._casePath = os.path.abspath(casePath)
@@ -254,6 +254,7 @@ class BasicBuilder(object):
         else:
             createCaseFromScratch(self._casePath, self._solverName)
         self._createInitVarables()
+        createRunScript(self._casePath, "True", self._solverSettings['parallel'], self._solverName, self._paralleSettings['numberOfSubdomains']) # Specify init_potential (defaults to true)
 
     def build(self):
         #if not rebuilding:
