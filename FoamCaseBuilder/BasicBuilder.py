@@ -278,9 +278,13 @@ class BasicBuilder(object):
             self.setupDynamicMeshingProperties()
         self.setupSolverControl() # residual, relaxfactor refValue, refCell etc
 
+        # Move mesh files, after being edited, to polyMesh.org  
+        movePolyMesh(self._casePath)
+
     def setupMesh(self, updated_mesh_path, scale):
         if os.path.exists(updated_mesh_path):
             convertMesh(self._casePath, updated_mesh_path, scale)
+
 
     def updateMesh(self, updated_mesh_path, scale):
         #runFoamCommand('foamCleanPolyMesh -case {}'.format(self._casePath)) #foamCleanPolyMesh v4.0+?
