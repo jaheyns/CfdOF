@@ -46,7 +46,7 @@ class CfdWorkbench(Workbench):
         #import _CommandCfdResult  # error in import vtk6 in python, this function is implemented in File->Open Instead
 
         # classes developed in FemWorkbench
-        import _CommandMeshGmshFromShape
+        import _CommandCfdMeshGmshFromShape
         import _CommandMeshNetgenFromShape
         import _CommandMeshRegion
         import _CommandPrintMeshInfo
@@ -54,10 +54,10 @@ class CfdWorkbench(Workbench):
         import _CommandCfdFluidMaterial
 
         # Post Processing commands are located in FemWorkbench, implemented and imported in C++
-        cmdlst = ['Cfd_Analysis', 'Fem_MeshNetgenFromShape', 'Fem_MeshGmshFromShape',
+        cmdlst = ['Cfd_Analysis', 'Fem_MeshNetgenFromShape', 'Cfd_MeshGmshFromShape',
                         'Fem_MeshRegion', 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
                         'Fem_ConstraintFluidBoundary', 'Cfd_SolverControl', 'Cfd_FluidMaterial', "Separator",
-                        "Fem_PostPipelineFromResult", "Fem_PostCreateClipFilter", 
+                        "Fem_PostPipelineFromResult", "Fem_PostCreateClipFilter",
                         "Fem_PostCreateScalarClipFilter", "Fem_PostCreateCutFilter"]
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
         self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
