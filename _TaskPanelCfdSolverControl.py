@@ -196,6 +196,14 @@ class _TaskPanelCfdSolverControl:
     
     
     def runSolverProcess(self):
+        #Re-starting a simulation from the last time step has currently been de-actived
+        #by using an AllRun script. Therefore just re-setting the residuals here for plotting
+        self.UxResiduals = [1]
+        self.UyResiduals = [1]
+        self.UzResiduals = [1]
+        self.pResiduals = [1]
+        self.niter = 0
+
         self.Start = time.time()
         #self.femConsoleMessage("Run {} at {} with command:".format(self.solver_object.SolverName, self.solver_object.WorkingDir))
         cmd = self.solver_runner.get_solver_cmd()
