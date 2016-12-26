@@ -5,7 +5,6 @@ fc_copy_to_mod_path("Cfd"
 
 INSTALL(
     FILES
-        # changes on the file list here needs to be made in App/CMakeLists.txt as well
         Init.py
         InitGui.py
         # OpenFOAM solver related

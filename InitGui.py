@@ -22,32 +22,48 @@
 #*                                                                         *
 #***************************************************************************/
 
+__title__ = "Cfd Analysis workbench"
+__author__ = "Qingfeng Xia"
+__url__ = "http://www.freecadweb.org"
+
 
 class CfdWorkbench(Workbench):
     "CFD workbench object"
     def __init__(self):
+        #self.__class__.Icon = FreeCAD.getResourceDir() + "Mod/Cfd/Resources/icons/CfdWorkbench.svg"
         self.__class__.Icon = FreeCAD.getResourceDir() + "Mod/Fem/Resources/icons/FemWorkbench.svg"
         self.__class__.MenuText = "CFD"
         self.__class__.ToolTip = "CFD workbench"
 
     def Initialize(self):
-        from PySide import QtCore  # must import in this function, not at the beginning of this file
+        from PySide import QtCore  # must import in this function, not at the beginning of this file for translation support
         import Fem
         import FemGui
 
         import _CommandCfdAnalysis
         import _CommandCfdSolverFoam
         import _CommandCfdSolverControl
-        #import _CommandCfdResult  # error in import vtk
+        #import _CommandCfdResult  # error in import vtk6 in python, this function is implemented in File->Open Instead
 
-        # Post Processing commands are located in FemWorkbench
-        cmdlst = ['Cfd_Analysis', 'Fem_ConstraintFluidBoundary', 'Cfd_SolverControl',
-                        "Separator", "Fem_PostPipelineFromResult", "Fem_PostCreateClipFilter", 
+        # classes developed in FemWorkbench
+        import _CommandMeshGmshFromShape
+        import _CommandMeshNetgenFromShape
+        import _CommandMeshRegion
+        import _CommandPrintMeshInfo
+        import _CommandClearMesh
+
+        # Post Processing commands are located in FemWorkbench, implemented and imported in C++
+        cmdlst = ['Cfd_Analysis', 'Fem_MeshNetgenFromShape', 'Fem_MeshGmshFromShape',
+                        'Fem_MeshRegion', 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
+                        'Fem_ConstraintFluidBoundary', 'Cfd_SolverControl', "Separator",
+                        "Fem_PostPipelineFromResult", "Fem_PostCreateClipFilter", 
                         "Fem_PostCreateScalarClipFilter", "Fem_PostCreateCutFilter"]
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
         self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
 
+        # enable QtCore translation here, todo
+
     def GetClassName(self):
         return "Gui::PythonWorkbench"
 
-Gui.addWorkbench(CfdWorkbench())
+FreeCADGui.addWorkbench(CfdWorkbench())
