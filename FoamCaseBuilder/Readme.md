@@ -36,9 +36,7 @@ Set the cygdrive prefix to /mnt in /etc/fstab
 ### Software prerequisits for Testing (Linux ONLY as in year 2016!!!)
 
 - both python 3.4+ and python 2.7 are supported
-- FreeCAD 0.17+: with all FEM features, netgen for meshing, 
-before merge of this this fork, you need to build my forK
-`git clone --branch foambuilder1 https://github.com/qingfengxia/FreeCAD.git  --single-branch`
+- FreeCAD 0.17 daily build: with all FEM features, netgen for meshing 
 If you install freecad-daily version 20160921 from PPA, CFD module can be tested with FreeCAD master
 
 - OpenFOAM: 3.0+ will be supported for simplified setting dict; 2.x should works but not tested
@@ -61,7 +59,7 @@ see [tutorials](http://cfd.direct/openfoam/user-guide/)
 
 Basically, I need several programs on PATH and some env var exported, like icoFoam, paraview, paraFoam. This be easily done by source a bash script: `source /opt/openfoam4/etc/bashrc.sh` in your ~/.bashrc. Notably, this script can not been sourced to system wide, like /etc/profile;  user can not log into desktop once source this. 
 
-`runFoamCommand('paraFoam')` is translates into `Popen("bash -c -i 'paraFoam'", shell=True)`:
+`runFoamCommand('paraFoam')` is translates into `Popen("bash -c -i 'paraFoam'", shell=True)` (check, it may outdatded!!!):
 
 https://www.iesensor.com/download/TestCase.unv and must be put into Mod/Fem/FoamCaseBuilder/
 Test FoamCaseBuilder module without FreeCAD: "python pathto/FoamCaseBuilder/TestBulderer.py"
@@ -87,7 +85,7 @@ However, the mesh can not be re-generated from the macro/script, it needs to cli
 
 Material taskpanel is not needed in CFD mode as it is default to water. Change the viscosity in OpenFoam case setup please
 
-### see ./Roadmap.md for feature completion adn future plan
+### see [cfdworkbench roadmap](../Roadmap.md) for feature completion adn future plan
 
 Huge work is needed to make a GUI for case setup for CFD, I may just focus on making it work in script mode first. 
 
@@ -98,6 +96,11 @@ Thanks for my wife, Ms Jia Wang's ultimate support by freeing me from housework 
 ########################################################################################################################
 
 ## previous pre-release
+
+### before merge of this fork (Sep 2016)
+
+before merge of this **foambuilder1** fork, you need to build my forK
+`git clone --branch foambuilder1 https://github.com/qingfengxia/FreeCAD.git  --single-branch`
 
 ### Test only on ubuntu 14.04 (for the fork foambuilder_pre2)
 tested: April 17, 2016
