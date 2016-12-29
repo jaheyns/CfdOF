@@ -99,7 +99,7 @@ class CfdRunnableFoam(CfdRunnable):
     def view_result(self):
         #  foamToVTK will write result into VTK data files
         #result = self.writer.builder.exportResult()
-        result = "/home/qingfeng/Documents/TestCase/VTK/TestCase_345.vtk"
+        result = "/home/qingfeng/Documents/TestCase/VTK/TestCase_345.vtk"  # this is test 
         from CfdResultFoamVTK import importVTK
         importVTK(result, self.analysis)
 

@@ -27,6 +27,7 @@ __url__ = "http://www.freecadweb.org"
 import FreeCAD
 import FreeCADGui
 import FemGui
+import CfdTools
 
 class _ViewProviderCfdSolverFoam:
     """A View Provider for the Solver object, base class for all derived solver
@@ -53,24 +54,28 @@ class _ViewProviderCfdSolverFoam:
         if FreeCADGui.activeWorkbench().name() != 'CfdWorkbench':
             FreeCADGui.activateWorkbench("CfdWorkbench")
         doc = FreeCADGui.getDocument(vobj.Object.Document)
-        if not doc.getInEdit():
-            # may be go the other way around and just activate the analysis the user has doubleClicked on ?!
-            if FemGui.getActiveAnalysis():
-                if FemGui.getActiveAnalysis().Document is FreeCAD.ActiveDocument:
-                    if self.Object in FemGui.getActiveAnalysis().Member:
-                        doc.setEdit(vobj.Object.Name)
-                    else:
-                        FreeCAD.Console.PrintError('Activate the analysis this solver belongs to!\n')
-                else:
-                    FreeCAD.Console.PrintError('Active Analysis is not in active Document!\n')
+        # it should be possible to find the AnalysisObject although it is not a documentObjectGroup
+        if not FemGui.getActiveAnalysis():
+            analysis_obj = CfdTools.getActiveAnalysis(self.Object)
+            if analysis_obj:
+                FemGui.setActiveAnalysis(analysis_obj)
             else:
-                FreeCAD.Console.PrintError('No active Analysis found!\n')
+                FreeCAD.Console.PrintError('No Active Analysis is detected from solver object in the active Document!\n')
+        if not doc.getInEdit():
+            if FemGui.getActiveAnalysis().Document is FreeCAD.ActiveDocument:
+                if self.Object in FemGui.getActiveAnalysis().Member:
+                    doc.setEdit(vobj.Object.Name)
+                else:
+                    FreeCAD.Console.PrintError('Activate the analysis this solver belongs to!\n')
+            else:
+                FreeCAD.Console.PrintError('Active Analysis is not in active Document!\n')
         else:
             FreeCAD.Console.PrintError('Active Task Dialog found! Please close this one first!\n')
         return True
         
     def setEdit(self, vobj, mode):
         if FemGui.getActiveAnalysis():
+            CfdTools.setupWorkingDir(self.Object)  # WorkingDir must existent and writable
             from CfdRunnableFoam import CfdRunnableFoam
             foamRunnable = CfdRunnableFoam(FemGui.getActiveAnalysis(), self.Object)
             from _TaskPanelCfdSolverControl import _TaskPanelCfdSolverControl

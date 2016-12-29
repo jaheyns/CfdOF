@@ -26,10 +26,48 @@ utility functions like mesh exporting, shared by any CFD solver
 """
 
 from __future__ import print_function
+import os
+import os.path
 
 import FreeCAD
 import Fem
 
+
+def isWorkingDirValid(wd):
+    if not (os.path.isdir(wd) and os.access(wd, os.W_OK)):
+        FreeCAD.Console.PrintError("Working dir: {}, is not existent or writable".format(wd))
+        return False
+    else:
+        return True
+
+
+def getTempWorkingDir():
+    #FreeCAD.Console.PrintMessage(FreeCAD.ActiveDocument.TransientDir)  # tmp folder for save transient data
+    #FreeCAD.ActiveDocument.FileName  # abspath to user folder, which is not portable across computers
+    #FreeCAD.Console.PrintMessage(os.path.dirname(__file__))  # this function is not usable in InitGui.py
+
+    import tempfile
+    if os.path.exists('/tmp/'):
+        workDir = '/tmp/'  # must exist for POSIX system
+    elif tempfile.tempdir:
+        workDir = tempfile.tempdir
+    else:
+        cwd = os.path.abspath('./')
+    return workDir
+
+
+def setupWorkingDir(solver_object):
+    wd = solver_object.WorkingDir
+    if not (os.path.exists(wd)):
+        try:
+            os.makedirs(wd)
+        except:
+            FreeCAD.Console.PrintWarning("Dir \'{}\' doesn't exist and cannot be created, using tmp dir instead".format(wd))
+            wd = getTempWorkingDir()
+            solver_object.WorkingDir = wd
+    return wd
+
+################################################
 
 if FreeCAD.GuiUp:
     def getResultObject():
@@ -43,6 +81,13 @@ if FreeCAD.GuiUp:
             if(i.isDerivedFrom("Fem::FemResultObject")):
                 return i
         return None
+
+    def getActiveAnalysis(fem_object):
+        # find the fem analysis object this fem_object belongs to
+        doc = fem_object.Document
+        for analysis_obj in doc.findObjects('Fem::FemAnalysis'):
+            if fem_object in analysis_obj.Member:
+                return analysis_obj
 
 
 def getMaterial(analysis_object):

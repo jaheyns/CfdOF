@@ -29,13 +29,14 @@ Naming is not consistent in this file
 solver specific setting is removed from ui
 """
 
-from FemTools import FemTools
-import FreeCAD
-
 import os
 import sys
 import os.path
 import time
+
+import FreeCAD
+from FemTools import FemTools
+import CfdTools
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -80,8 +81,8 @@ class _TaskPanelCfdSolverControl:
 
         QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.updateText)
         self.form.pb_show_result.setEnabled(True)
-        self.Start = time.time() #debug tobe removed
-        self.update()
+        self.Start = time.time() #debug tobe removed, it is not used in this taskpanel
+        self.update()  # update UI from FemSolverObject, like WorkingDir
 
     def femConsoleMessage(self, message="", color="#000000"):
         self.fem_console_message = self.fem_console_message + '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
@@ -97,8 +98,13 @@ class _TaskPanelCfdSolverControl:
         return int(QtGui.QDialogButtonBox.Close)
 
     def update(self):
-        'fills the widgets with solver properties'
-        self.form.le_working_dir.setText(self.solver_object.WorkingDir)  # need unification
+        'fills the widgets with solver properties, and it must exist and writable'
+        if CfdTools.isWorkingDirValid(self.solver_object.WorkingDir):
+            self.form.le_working_dir.setText(self.solver_object.WorkingDir)
+        else:
+            wd = CfdTools.getTempWorkingDir()
+            self.solver_object.WorkingDir = wd
+            self.form.le_working_dir.setText(wd)
         return
 
     def accept(self):
@@ -109,26 +115,13 @@ class _TaskPanelCfdSolverControl:
         #FreeCADGui.Control.closeDialog()
         FreeCADGui.ActiveDocument.resetEdit()
 
-    # That function overlaps with FemTools setup_working_dir and needs to be removed when we migrate fully to FemTools
-    def setup_working_dir(self):
-        wd = self.solver_object.WorkingDir
-        if not (os.path.isdir(wd)):
-            try:
-                os.makedirs(wd)
-            except:
-                print("Dir \'{}\' from FEM preferences doesn't exist and cannot be created.".format(wd))
-                import tempfile
-                wd = tempfile.gettempdir()
-                print("Dir \'{}\' will be used instead.".format(wd))
-        return wd
-
     def choose_working_dir(self):
-        current_wd = self.setup_working_dir()
+        current_wd = self.solver_object.WorkingDir
         wd = QtGui.QFileDialog.getExistingDirectory(None,
                                                     'Choose Solver working directory',
                                                     current_wd)
         info_obj = self.solver_object
-        if wd:
+        if wd and os.access(wd, os.W_OK):
             info_obj.WorkingDir = wd
         else:
             info_obj.WorkingDir = current_wd
