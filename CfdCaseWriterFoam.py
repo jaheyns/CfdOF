@@ -64,6 +64,8 @@ class CfdCaseWriterFoam:
         """ Write_case() will collect case setings, and finally build a runnable case
         """
         FreeCAD.Console.PrintMessage("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
+        _cwd = os.curdir
+        os.chdir(self.solver_obj.WorkingDir)  # pyFoam can not write to cwd if FreeCAD is started NOT from terminal
         self.write_mesh()
 
         self.write_material()
@@ -75,6 +77,7 @@ class CfdCaseWriterFoam:
 
         self.builder.check()
         self.builder.build()
+        os.chdir(_cwd)  # restore working dir
         FreeCAD.Console.PrintMessage("{} Sucessfully write {} case to folder \n".format(
                                                         self.solver_obj.SolverName, self.solver_obj.WorkingDir))
         return True
