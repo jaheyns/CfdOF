@@ -56,8 +56,9 @@ _DEFAULT_FOAM_VERSION = (4,0,0)
 
 
 def _detectFoamDir():
+    # compatible for python3, check_output() return bytes type in python3
     foam_dir = subprocess.check_output(['bash', '-i', '-c', 'echo $WM_PROJECT_DIR'], stderr=subprocess.PIPE)
-    foam_dir = str(foam_dir)  # compatible for python3, check_output() return bytes type in python3
+    foam_dir = str(foam_dir)
     if len(foam_dir)>1:  # if env var is not defined, return `b'\n'` for python3 and `\n` for python2
         if foam_dir[:2] == "b'":  # for python 3
             foam_dir = foam_dir[2:-3] #strip 2 chars from front and tail `b'/opt/openfoam4\n'`
