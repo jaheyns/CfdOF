@@ -85,17 +85,8 @@ to-be-update later
 
 ## Roadmap
 
-### [FoamCaseBuilder Roadmap.md](FoamBaseBuilder/Roadmap.md)
+### see external [Roadmap.md](./Roadmap.md)
 
-### todo for Cfd workbench
-
-+ testing CfdResult loaded into vtk pipeline built in FemWorkbench
-
-+ installation guide and tutorial on MacOSX and Win10
-  Currently, case path mapping has been done for win10 Linux subsystem, 
-
-## long-term
-+ pential new Cfd solver like fenics
 
 =======================================
 
