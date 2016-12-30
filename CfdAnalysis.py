@@ -30,4 +30,7 @@ __url__ = "http://www.freecadweb.org"
 def makeCfdAnalysis(name):
     '''makeCfdAnalysis(name): makes a Cfd Analysis object based on Fem::FemAnalysisPython'''
     obj = FreeCAD.ActiveDocument.addObject("Fem::FemAnalysisPython", name)
+    if FreeCAD.GuiUp:
+        from _ViewProviderCfdAnalysis import _ViewProviderCfdAnalysis
+        _ViewProviderCfdAnalysis(obj.ViewObject)
     return obj
