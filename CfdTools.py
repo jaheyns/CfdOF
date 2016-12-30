@@ -183,12 +183,14 @@ def _write_unv_bc_mesh(mesh_obj, bc_group, unv_mesh_file):
 def _write_unv_bc_faces(mesh_obj, f, bc_id, bc_object):
     facet_list = []
     for o, e in bc_object.References:  # list of (objectOfType<Part::PartFeature>, (stringName1, stringName2, ...))
-        elem = o.Shape.getElement(e[0])  # from 0.16 -> 0.17: e is a tuple of string, instead of a string
-        #FreeCAD.Console.PrintMessage('Write face_set on face: {} for boundary\n'.format(e[0]))
-        if elem.ShapeType == 'Face':  # OpenFOAM needs only 2D face boundary for 3D model, normally
-            ret = mesh_obj.FemMesh.getVolumesByFace(elem)  # FemMeshPyImp.cpp
-            # return a list of tuple (vol->GetID(), face->GetID())  FemMesh::getVolumesByFace()
-            facet_list.extend([i[1] for i in ret])
+        # merge bugfix from https://github.com/jaheyns/FreeCAD/blob/master/src/Mod/Cfd/CfdTools.py
+        # loop through all the features in e, since there might be multiple entities within a given boundary definition
+        for ii in range(len(e)):
+            elem = o.Shape.getElement(e[ii])  # from 0.16 -> 0.17: e is a tuple of string, instead of a string
+            #FreeCAD.Console.PrintMessage('Write face_set on face: {} for boundary\n'.format(e[0]))
+            if elem.ShapeType == 'Face':  # OpenFOAM needs only 2D face boundary for 3D model, normally
+                ret = mesh_obj.FemMesh.getFacesByFace(elem)  # FemMeshPyImp.cpp
+                facet_list.extend(i for i in ret)
     nr_facets = len(facet_list)
     f.write("{:>10d}         0         0         0         0         0         0{:>10d}\n".format(bc_id, nr_facets))
     f.writelines(bc_object.Label + "\n")
