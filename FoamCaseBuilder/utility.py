@@ -43,7 +43,7 @@ if _using_pyfoam:
     #import PyFoam.Error, etc
 else:
     # implement our own class: ParsedParameterFile, getDict, setDict
-    from six import string_types, iteritems
+    raise NotImplementedError("drop in replacement of PyFoam is not implemented")
 
 from FoamTemplateString import *
 
@@ -395,7 +395,7 @@ def _translateFoamCasePath(cmd):
 
 
 def runFoamCommand(cmd):
-    """ run OpenFOAM command in Shell mode
+    """ run OpenFOAM command via bash with OpenFOAM setup sourced into ~/.bashrc
     wait until finish, caller is not interested on output but whether succeeded
     source foam_dir/etc/bashrc before run foam related program
     `shell=True` does not work if freeCAD is not started in shell terminal
@@ -403,26 +403,31 @@ def runFoamCommand(cmd):
     """
 
     if isinstance(cmd, list):
-        cmd = _translateFoamCasePath(cmd)
+        _cmd = _translateFoamCasePath(cmd)  # do not modify input parameter, it may be used outside somewhere
         #cmd = ' '.join(cmd)
     else:
         print("Warning: runFoamCommand() command and options must be specified in a list")
 
+    cmdline = ' '.join(_cmd)
+    print("Run command: ", cmdline)
+
+    # this is the method works for both started in terminal and GUI launcher
     env_setup_script = "source {}/etc/bashrc".format(getFoamDir())
     #env_setup_script = "source ~/.bashrc"
+    cmdline_1 = ['bash', '-c', ' '.join([env_setup_script, '&&'] + _cmd)]
+    #cmdline = """bash -i -c  '{} && {}' """.format(env_setup_script, ' '.join(_cmd))
+    #cmdline_1 = """bash -c ' {} && {}'""".format(env_setup_script, cmdline)
+    print("Run command_1: ", cmdline_1)  # get correct command line, correct in terminal, but error in python
+    out = subprocess.check_output(cmdline_1, stderr=subprocess.PIPE)
 
-    #cmdline = """bash -c ' {} && {}'""".format(env_setup_script, cmd)
-    #cmdline = ['bash', '-c', "'", env_setup_script, '&&'] + cmd + ["'"]
-    #cmdline = """bash -i -c  '{} && {}' """.format(env_setup_script, ' '.join(cmd))
-    cmdline = ' '.join(cmd)
-    print("Run command: ", cmdline)
-    out = subprocess.check_output(['bash', '-i', '-c', cmdline], stderr=subprocess.PIPE)
+    # bug:  FreeCAD exit due to runFoamCommand() is called immediately after another  runFoamCommand() using `bash -i`
+    # '-l' means '--login' works in terminal, while  '-i' means '--interactive' works from unity GUI launcher
+    #out = subprocess.check_output(['bash', '-l', '-c', cmdline], stderr=subprocess.PIPE)
     if _debug: print(out)
-    '''
-    cmdline = ' '.join(cmd)
-    cmdline = """bash -c -i '{}'""".format(cmdline)
-    print("Run command: ", cmdline)
-    process = subprocess.Popen(cmdline, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+
+    """
+    # method3: error even at the first runFoamCommand(), running from terminal
+    process = subprocess.Popen(['bash', '-i', '-c', cmdline], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     stdout, stderr = process.communicate()
     exitCode = process.returncode
 
@@ -435,14 +440,15 @@ def runFoamCommand(cmd):
         #else:  # should allow runFoamCommand to fail
             #raise SystemError("Error in foamRunCommand:".format(cmdline), exitCode)
     return exitCode
-    '''
+    """
+
 
 ###########################################################################
 
 def convertMesh(case, mesh_file, scale):
     """ 
-    see all mesh conversion tool: <>
-    scale: CAD has mm as length unit usually, while CFD meshing using SI metre
+    see all mesh conversion tool for OpenFoam: <http://www.openfoam.com/documentation/user-guide/mesh-conversion.php>
+    scale: CAD has mm as length unit usually, while CFD meshing using SI unit metre
     """
     mesh_file = translatePath(mesh_file)
 
@@ -457,8 +463,10 @@ def convertMesh(case, mesh_file, scale):
         runFoamCommand(cmdline)
         changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary name (could be any name)
         print("Info: boundary exported from named selection, started with lower case")
+
     if scale and isinstance(scale, numbers.Number):
         cmdline = ['transformPoints', '-case', case, '-scale', '"({} {} {})"'.format(scale, scale, scale)]
+        runFoamCommand(cmdline)
     else:
         print("Error: mesh scaling ratio is must be a float or integer\n")
 
