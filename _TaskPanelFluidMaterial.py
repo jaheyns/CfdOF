@@ -134,10 +134,14 @@ class TaskPanelFluidProperties:
             self.form.PredefinedMaterialLibraryComboBox.addItem(QtGui.QIcon(icon), mat[0], mat[1])
 
     def import_materials(self):
+        import CfdTools
+
         self.materials = {}
         self.pathList = []
         self.form.PredefinedMaterialLibraryComboBox.clear()
 
-        system_mat_dir = FreeCAD.getResourceDir() + "/Mod/Material/FluidMaterialProperties"
+        # Until module is integrated, store the defaults inside the module directory rather than the resource dir
+        #system_mat_dir = FreeCAD.getResourceDir() + "/Mod/Material/FluidMaterialProperties"
+        system_mat_dir = os.path.join(CfdTools.get_module_path(), "data/FluidMaterialProperties")
         self.add_mat_dir(system_mat_dir, ":/icons/freecad.svg")
 

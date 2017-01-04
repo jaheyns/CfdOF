@@ -156,6 +156,19 @@ def convertQuantityToMKS(input, quantity_type, unit_system="MKS"):
     return input
 
 
+# Figure out where the module is installed - in the app's module directory or the
+# user's app data folder (the second overrides the first).
+def get_module_path():
+    """returns the current Cfd module path."""
+    import os
+    user_mod_path = os.path.join(FreeCAD.ConfigGet("UserAppData"), "Mod/Cfd")
+    app_mod_path = os.path.join(FreeCAD.ConfigGet("AppHomePath"), "Mod/Cfd")
+    if os.path.exists(user_mod_path):
+        return user_mod_path
+    else:
+        return app_mod_path
+
+
 #################### UNV mesh writer #########################################
 
 def write_unv_mesh(mesh_obj, bc_group, mesh_file_name):
