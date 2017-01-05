@@ -29,7 +29,11 @@ intended to use internally
 from __future__ import print_function
 
 import numbers
-import os, os.path, shutil
+import os
+import os.path
+import shutil
+import platform
+import tempfile
 import multiprocessing
 import subprocess
 
@@ -38,9 +42,8 @@ if _using_pyfoam:
     from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
     from PyFoam.RunDictionary.BoundaryDict import BoundaryDict
     from PyFoam.Applications.PlotRunner import PlotRunner
-    #from PyFoam.FoamInformation import foamVersionString, foamVersionNumber
+    #from PyFoam.FoamInformation import foamVersionString, foamVersionNumber  # works only in console
     from PyFoam.ThirdParty.six import string_types, iteritems
-    #import PyFoam.Error, etc
 else:
     # implement our own class: ParsedParameterFile, getDict, setDict
     raise NotImplementedError("drop in replacement of PyFoam is not implemented")
@@ -48,16 +51,91 @@ else:
 from FoamTemplateString import *
 
 _debug = True
-# ubuntu 14.04 defaullt to 3.x, while ubuntu 16.04 default to 4.x
+# ubuntu 14.04 defaullt to 3.x, while ubuntu 16.04 default to 4.x, windows 10 WSL simulate ubuntu 14.04/16.04
 #DEFAULT_FOAM_DIR = '/opt/openfoam30'
 #DEFAULT_FOAM_VERSION = (3,0,0)
 _DEFAULT_FOAM_DIR = '/opt/openfoam4'
-_DEFAULT_FOAM_VERSION = (4,0,0)
+_DEFAULT_FOAM_VERSION = (4,0)
 
+
+def _isWindowsPath(p):
+    if p.find(':') > 0:
+        return True
+    else:
+        return False
+
+def _toWindowsPath(p):
+    #fixedme: it does not deal with path with quote, space
+    pp = p.split('/')
+    assert pp[0] == '' and pp[1] == 'mnt' 
+    return pp[2] + ":\\" + ('\\').join(pp[3:])
+
+def _fromWindowsPath(p):
+    # bash on windows "C:\Path" -> /mnt/c/Path
+    # cygwin can set the mount point for all windows drives under /mnt in /etc/fstab
+    drive, tail = os.path.splitdrive(p)
+    pp = tail.replace('\\', '/')
+    return "/mnt/" + (drive[:-1]).lower() + pp
+
+def translatePath(p):
+    # remove quote at first, leave the quote protection done outside
+    pp = os.path.abspath(p)
+    if _isWindowsPath(p) and getFoamRuntime() == "BashWSL":
+        pp = _fromWindowsPath(pp)
+    return pp
+
+def runFoamCommandOnWSL(case, cmds, output_file=None):
+    """ Wait for command to complete on bash on windows 10
+    case path and output file path will be converted into ubuntu pass automatically in this function
+    """
+    if not output_file:
+        if tempfile.tempdir:
+            output_file = tempfile.tempdir + os.path.sep + "tmp_output.txt"
+        else:
+            output_file = "tmp_output.txt"
+    output_file = os.path.abspath(output_file)
+    print(output_file)
+    if os.path.exists(output_file):
+        os.remove(output_file)
+    output_file_wsl = _fromWindowsPath(output_file)
+    # using double quote to protect space in file path
+    app = cmds[0]
+    if case:
+        case_path = _fromWindowsPath(os.path.abspath(case))
+        cmdline = app + ' -case "' + case_path +'" ' + ' '.join(cmds[1:])
+    else:
+        cmdline = app + ' ' + ' '.join(cmds[1:])
+    #cmdline = ['bash', '-i', '-c', 'source ~/.bashrc && {} > "{}"'.format(cmdline, output_file_wsl)]
+    #cmdline = """bash -c 'source ~/.bashrc && {} > "{}"' """.format(cmdline, output_file_wsl)
+    cmdline = """bash -c 'source ~/.bashrc && {} > {}' """.format(cmdline, output_file_wsl)
+    print("Running: ", cmdline)
+
+    retcode = subprocess.call(cmdline)  # os.system() does not work!
+    if int(retcode):
+        print("Error: command line return with code", retcode)
+    # corret and write to file on ubuntu path
+    if os.path.exists(output_file):
+        of = open(output_file)
+        result = of.read()
+        of.close()
+        return result
+    else:
+        print("Error: can not find the output file: ",output_file)
+        return None
+
+###################################################
 
 def _detectFoamDir():
     # compatible for python3, check_output() return bytes type in python3
-    foam_dir = subprocess.check_output(['bash', '-i', '-c', 'echo $WM_PROJECT_DIR'], stderr=subprocess.PIPE)
+    if platform.system() == 'Windows':
+        case_path = None
+        foam_dir = runFoamCommandOnWSL(case_path, 'echo $WM_PROJECT_DIR')
+    else:
+        # OSError No such file or directory, for file '~/.bashrc'
+        #cmdline = """bash -i -c 'source ~/.bashrc && {}' """.format('echo $WM_PROJECT_DIR')
+        cmdline = ['bash', '-i', '-c', 'source ~/.bashrc && echo $WM_PROJECT_DIR']
+        #print(cmdline)
+        foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
     foam_dir = str(foam_dir)
     if len(foam_dir)>1:  # if env var is not defined, return `b'\n'` for python3 and `\n` for python2
         if foam_dir[:2] == "b'":  # for python 3
@@ -71,7 +149,13 @@ def _detectFoamDir():
         return _DEFAULT_FOAM_DIR
 
 def _detectFoamVersion():
-    foam_ver = subprocess.check_output(['bash', '-i', '-c', 'echo $WM_PROJECT_VERSION'], stderr=subprocess.PIPE)
+    if platform.system() == 'Windows':
+        case_path = None
+        foam_ver = runFoamCommandOnWSL(case_path, 'echo $WM_PROJECT_VERSION')
+    else:
+        #cmdline = """bash -i -c 'source ~/.bashrc && {}' """.format('echo $WM_PROJECT_VERSION')
+        cmdline = ['bash', '-i', '-c', 'source ~/.bashrc && echo $WM_PROJECT_VERSION']
+        foam_ver = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
     # there is warning for `-i` interative mode, but output is fine
     foam_ver = str(foam_ver)  # compatible for python3, check_output() return bytes type in python3
     if len(foam_ver)>1:
@@ -79,7 +163,7 @@ def _detectFoamVersion():
             foam_ver = foam_ver[2:-3] #strip 2 chars from front and tail `b'4.0\n'`
         else:
             foam_ver = foam_ver.strip()  # strip the EOL char
-        return tuple([int(s) for s in foam_ver.split('.')])
+        return tuple([int(s) if s.isdigit() else 0 for s in foam_ver.split('.')])  # version string 4.x should be parsed as 4.0
     else:
         print("""environment var 'WM_PROJECT_VERSION' is not defined\n,
               fallback to default {}""".format(_DEFAULT_FOAM_VERSION))
@@ -94,7 +178,7 @@ def setFoamDir(dir):
         if os.path.exists(dir + os.path.sep + "etc/bashrc"):
             _FOAM_SETTINGS['FOAM_DIR'] = dir
     else:
-        print("Warning: {} is not an existent folder to set as foam_dir".format(dir))
+        print("Warning: {} does not contain etc/bashrc file to set as foam_dir".format(dir))
 
 def setFoamVersion(ver):
     """specify OpenFOAM version by a list or tupe of integer like (3, 0, 0)
@@ -115,8 +199,8 @@ def getFoamVersion():
 
 # see more details on variants: https://openfoamwiki.net/index.php/Forks_and_Variants
 # http://www.cfdsupport.com/install-openfoam-for-windows.html, using cygwin
-#FOAM_VARIANTS = ['OpenFOAM', 'foam-extend', 'OpenFOAM+']
-#FOAM_RUNTIMES = ['FreeFOAM', 'Cygwin', 'BashWSL']
+# FOAM_VARIANTS = ['OpenFOAM', 'foam-extend', 'OpenFOAM+']
+# FOAM_RUNTIMES = ['Posix', 'Cygwin', 'BashWSL']
 def _detectFoamVarient():
     """ FOAM_EXT version is also detected from 'bash -i -c "echo $WM_PROJECT_VERSION"'  or $WM_FORK
     """
@@ -127,8 +211,10 @@ def _detectFoamVarient():
 
 # Bash on Ubuntu on Windows detection and path translation
 def _detectFoamRuntime():
-    return ""
-    #return "BashWSL"
+    if platform.system() == 'Windows':
+        return "BashWSL"  # 'Cygwin'
+    else:
+        return "Posix"
 
 _FOAM_SETTINGS['FOAM_VARIANT'] = _detectFoamVarient()
 _FOAM_SETTINGS['FOAM_RUNTIME'] = _detectFoamRuntime()
@@ -221,7 +307,7 @@ def getTurbulenceVariables(solverSettings):
     #elif turbulenceModelName == "qZeta":  # transient models has different var
     #    var_list = []  # not supported yet in boundary settings
     else:
-        print("Turbulence model {} is not supported yet".format(turbulenceModelName))
+        print("Error: Turbulence model {} is not supported yet".format(turbulenceModelName))
     return var_list
 
 
@@ -356,35 +442,66 @@ def createRawFoamFile(case, location, dictname, lines, classname = 'dictionary')
 
 ##################################################################
 
-def _isWindowsPath(p):
-    if p.find(':') > 0:
-        return True
+def runFoamApplication(case, cmd, logFile=None):
+    """
+    run OpenFOAM command, wait until finished
+    parameters:
+    case might be empty string or None for testing command, e.g. `simpleFoam -version`
+    application must be the first item of cmds sequence or first word of comline string
+    by default, output is not log but is print if in debug mode
+    error is reported in printing instead of raise exception
+    Bash on Ubuntu on Windows, may need case path translation done in Builder
+    unicode path and filename will be automatically supported when migrated to Python3
+    """
+
+    if (isinstance(cmd, list) or isinstance(cmd, tuple)):
+        cmds = cmd
+    elif isinstance(cmd, str):
+        cmds = cmd.split(' ')  # it does not matter if the following options is not split correctly like space and quote
     else:
-        return False
-            
-def _fromWindowsPath(p):
-    # bash on windows "C:\Path" -> /mnt/c/Path
-    # cygwin can set the mount point for all windows drives under /mnt in /etc/fstab
-    drive, tail = os.path.splitdrive(p)
-    pp = tail.replace('\\', '/')
-    return "/mnt/" + drive.lower() + os.path.sep + pp
+        print("Warning: command and options must be specified in a list or tuple")
 
-def _toWindowsPath(p):
-    #fixedme: it does not deal with path with quote
-    pp = p.split('/')
-    return pp[1] + ":" + (os.path.sep).join(pp[2:])
+    if getFoamRuntime() == "BashWSL":
+        out = runFoamCommandOnWSL(case, cmds, logFile)
+    else:
+        if logFile:
+            if not os.path.isabs(logFile):
+                if not case:
+                    print("Error: if logFile is not absolute path, case path must be specified")
+                else:
+                    logFile = os.path.abspath(case) + os.path.sep + logFile
+            if os.path.exists(logFile):
+                print ("Warning: " + logFile + " already exists under " + case + ", and is removed")
+                os.remove(logFile)
 
-def translatePath(p):
-    pp = os.path.abspath(p)
-    if _isWindowsPath(p) and getFoamRuntime() == "BashWSL":
-        pp = _fromWindowsPath(pp)
-    if pp.find('"') < 0:  # using double quote to protect space within path, if not yet provided
-        pp = '"' + pp + '"'
-    return pp
+        app = cmds[0]
+        if case:
+            case_path = os.path.abspath(case)
+            cmdline = app + ' -case "' + case_path +'" ' + ' '.join(cmds[1:])
+        else:
+            cmdline = app + ' ' + ' '.join(cmds[1:])  # an extra space to sep app and options
+        env_setup_script = "{}/etc/bashrc".format(getFoamDir())
 
+        if logFile:
+            # list of commands will works, but command string merged is not working
+            #cmdline = """bash -c 'source {} && {} > "{}" ' """.format(env_setup_script, cmdline, logFile)
+            cmdline = ['bash', '-c', """source "{}" && {} > "{}" """.format(env_setup_script, cmdline, logFile)]
+        else:
+            #cmdline = """bash -c 'source {} && {}' """.format(env_setup_script, cmdline)
+            cmdline = ['bash', '-c', """source "{}" && {} """.format(env_setup_script, cmdline)]
+        #cmdline += (" | tee "+logFile) # Pipe to screen and log file
+        print("Running: ", cmdline)
+        out = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
+    if _debug:
+        print(out)
+
+# not a good way to extract path in command line, double quote and space cause problem      
+# deprecated, just for compatible propurse, remove in next commit
 def _translateFoamCasePath(cmd):
     """ Bash on Windows (Windows Linux Subsystem) needs a translation from windows path to linux path
     """
+    if not (isinstance(cmd, list) or isinstance(cmd, tuple)):
+        print("Warning: command and options must be specified in a list or tuple")
     l = len(cmd)
     for i,s in enumerate(cmd):
         if s == "-case" and i+1 < l:
@@ -393,7 +510,7 @@ def _translateFoamCasePath(cmd):
             cmd[i+1] = pp
     return cmd
 
-
+# deprecated, replaced by runFoamApplication, remove it in next commit
 def runFoamCommand(cmd):
     """ run OpenFOAM command via bash with OpenFOAM setup sourced into ~/.bashrc
     wait until finish, caller is not interested on output but whether succeeded
