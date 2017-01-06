@@ -1,10 +1,14 @@
 # A computional fluid dynamics (CFD) module for FreeCAD
 
-by Qingfeng Xia
+by Qingfeng Xia, 2015 <http://www.iesensor.com/HTML5pptCV>
+Team from CSIR South Africa, 2016
++ Oliver Oxtoby <http://www.linkedin.com/in/oliver-oxtoby-05616835>
++ Alfred Bogears <http://www.csir.co.za/dr-alfred-bogaers>
++ Johan Heyns  <http://www.linkedin.com/in/johan-heyns-54b75511>
 
 ## LGPL license as FreeCAD
 
-Use only with FreeCAD version > 0.17
+Use only with FreeCAD-daily version since Dec 2016.
 Currently, only OpenFOAM (official 3.0 +) solver is implemented, tested on Ubuntu 16.04
 
 This module aims to accelerate CFD case build up. Limited by the long solving time and mesh quality sensitivity of CFD problem, this module will not as good as FEM module. For engineering application, please seek support from other commercial CFD software.
@@ -45,23 +49,26 @@ This module aims to accelerate CFD case build up. Limited by the long solving ti
 
 - OpenFOAM (3.0+)  `sudo apt-get install openfoam` once repo is added/imported
 
-> see more OpenFOAM official installation guide
+> see more [OpenFOAM official installation guide](http://openfoamwiki.net/index.php/Installation), make sure openfoam/etc/bashrc is sourced into ~/.bashrc
 
 - PyFoam (0.6.6+) `sudo pip install PyFoam`
  
-optional;
+optional:
 
 - paraFoam (paraview for Openfoam, usually installed with OpenFoam)
 - salome for mesihng
+- gnuplot
 
 Debian/Ubuntu: see more details of Prerequisites installation in *Readme.md* in *FoamCaseBuilder* folder
 
 RHEL/SL/Centos/Fedora: Installation tutorial/guide is welcomed from testers
 
-### install freecad-daily
+### Install freecad-daily and FEM
 After Oct 2016, Cfd boundary condition C++ code (FemConstraintFluidBoundary) has been merged into official master
+
+Make sure netgen and Gmsh function is enabled and installed 
         
-### install Cfd workbemch
+### Install Cfd workbemch
 from github using
 `git clone https://github.com/qingfengxia/Cfd.git`
         
@@ -75,11 +82,44 @@ ALTERNATIVELY, use FreeCAD-Addon-Installer macro from <https://github.com/FreeCA
 
 ========================================
 
-## testing
+## Testing
 
-to-be-update later
-[test procedure on freecad forum](http://forum.freecadweb.org/viewtopic.php?f=18&t=17322)
+### Test FoamCaseBuider
 
+There is a test script to test installation of this FoamCaseBuilder, copy the file FoamCaseBuilder/TestBuilder.py to somewhere writtable and run 
+
+`python2 pathtoFoamCaseBuilder/TestBuilder.py` 
+
+This script will download a mesh file and build up a case without FreeCAD.
+
+### tutorial to build up case in FreeCAD
+
+Similar with FemWorkbench
+
++ make a simple part  in PartWorkbench or complex shape in Partdesign workbench
+
++ select the part and click "makeCfdAnalysis" in CfdWorkbench
+> which creats a CfdAnalysis object, FemMesh object, and default materail
+
++ config the solver setting in property editor data tab on the left combi panel, by single click sovler object
+
++ double click mesh object to refine mesh
+
++ hide the mesh and show hte part, so part surface can be select in creatation of boundary condition
+
++ add boundary conditions by click the toolbar item, and link surface and bondary value
+
++ double click solver object to bring up the SolverControl task panel
+> select working directory, write up case, further edit the case setting up
+  then run the case (currently, copy the solver command in message box and run it in new console)
+
+### Test with prebuilt case
+
+Johan has built a case, see attachment [test procedure on freecad forum](http://forum.freecadweb.org/viewtopic.php?f=18&t=17322)
+
+
+A simple example of cube pipe with one inlet and one outlet. <https://www.iesensor.com/download/TestCfdCubePipe.fcstd>
+Example setup, calculation will diverge.
 
 ========================================
 
@@ -99,7 +139,7 @@ There is a ebook "Module developer's guide on FreeCAD source code", there are tw
 <https://github.com/qingfengxia/FreeCAD_Mod_Dev_Guide.git> where updated PDF could be found on this git repo
 
 This is an outdated version for early preview:
-<https://www.iesensor.com/download/FreeCAD_Mod_Dev_Guide__20160920.pdf>
+<https://www.iesensor.com/download/FreeCAD_Mod_Dev_Guide__20161224.pdf>
 
 ## Collaboration strategy
 
