@@ -99,7 +99,7 @@
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QPushButton" name="terminateOFsolver">
+      <widget class="QPushButton" name="terminateSolver">
        <property name="enabled">
         <bool>false</bool>
        </property>
