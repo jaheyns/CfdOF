@@ -25,11 +25,14 @@ __author__ = "Qingfeng Xia"
 __url__ = "http://www.freecadweb.org"
 
 import os.path
+import Gnuplot
+from numpy import *
 
 import FreeCAD
 
 import CfdCaseWriterFoam
 import CfdTools
+
 
 
 class CfdRunnable(object):
@@ -82,6 +85,23 @@ class CfdRunnableFoam(CfdRunnable):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
         self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam(self.analysis)
 
+        self.g = Gnuplot.Gnuplot()
+        self.g('set style data lines')
+        self.g.title("Simulation residuals")
+        self.g.xlabel("Iteration")
+        self.g.ylabel("Residual")
+
+        self.g("set grid")
+        self.g("set logscale y")
+        self.g("set yrange [0.95:1.05]")
+        self.g("set xrange [0:1]")
+
+        self.UxResiduals = [1]
+        self.UyResiduals = [1]
+        self.UzResiduals = [1]
+        self.pResiduals = [1]
+        self.niter = 0
+
     def check_prerequisites(self):
         return ""
 
@@ -103,3 +123,34 @@ class CfdRunnableFoam(CfdRunnable):
         from CfdResultFoamVTK import importVTK
         importVTK(result, self.analysis)
 
+    def process_output(self, text):
+        loglines = text.split('\n')
+        printlines = []
+        for line in loglines:
+            # print line,
+            split = line.split()
+
+            # Only store the first residual per timestep
+            if line.startswith(u"Time = "):
+                self.niter += 1
+
+            # print split
+            if "Ux," in split and self.niter > len(self.UxResiduals):
+                self.UxResiduals.append(float(split[7].split(',')[0]))
+            if "Uy," in split and self.niter > len(self.UyResiduals):
+                self.UyResiduals.append(float(split[7].split(',')[0]))
+            if "Uz," in split and self.niter > len(self.UzResiduals):
+                self.UzResiduals.append(float(split[7].split(',')[0]))
+            if "p," in split and self.niter > len(self.pResiduals):
+                self.pResiduals.append(float(split[7].split(',')[0]))
+
+        # NOTE: the mod checker is in place for the possibility plotting takes longer
+        # NOTE: than a small test case to solve
+        if mod(self.niter, 1) == 0:
+            self.g.plot(Gnuplot.Data(self.UxResiduals, with_='line', title="Ux", inline=1),
+                        Gnuplot.Data(self.UyResiduals, with_='line', title="Uy", inline=1),
+                        Gnuplot.Data(self.UzResiduals, with_='line', title="Uz", inline=1),
+                        Gnuplot.Data(self.pResiduals, with_='line', title="p"))
+
+        if self.niter >= 2:
+            self.g("set autoscale")  # NOTE: this is just to supress the empty yrange error when GNUplot autscales

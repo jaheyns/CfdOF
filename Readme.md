@@ -52,6 +52,8 @@ This module aims to accelerate CFD case build up. Limited by the long solving ti
 > see more [OpenFOAM official installation guide](http://openfoamwiki.net/index.php/Installation), make sure openfoam/etc/bashrc is sourced into ~/.bashrc
 
 - PyFoam (0.6.6+) `sudo pip install PyFoam`
+
+- gnuplot.py/gnuplot-py
  
 optional:
 
