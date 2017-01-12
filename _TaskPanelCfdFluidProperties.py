@@ -38,7 +38,7 @@ if FreeCAD.GuiUp:
     import FemGui
 
 
-class TaskPanelFluidProperties:
+class TaskPanelCfdFluidProperties:
     '''The editmode TaskPanel for FluidMaterial objects'''
     def __init__(self, obj):
         self.obj = obj
@@ -48,7 +48,7 @@ class TaskPanelFluidProperties:
             is not included.
         '''
 
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__) + os.path.sep + "TaskPanelFluidProperties.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdFluidProperties.ui")
 
         ''' In most cases, unlike FEM, fluid flow properties are defined by the user. A small number of reference
             values are store in the fcmat database for fluids to serve as a starting point for the user.  The properties

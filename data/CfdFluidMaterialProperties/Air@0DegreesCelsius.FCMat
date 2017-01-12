@@ -1,5 +1,0 @@
-[FCMat]
-Name = Air@0DegreesCelsius
-Description = Standard air properties at 0 Degrees Celsius and 1 atm
-Density = 1.29 kg/m^3
-DynamicViscosity = 1.71e-5 kg/m/s

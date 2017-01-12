@@ -1,5 +1,5 @@
 [FCdMat]
-Name = OilSAE10W@20DegreesCelsius
+Name = OilSAE10W
 Description = SAE 10W oil at 20 Degrees Celsius and 1 atm
 Density = 870 kg/m^3
 DynamicViscosity = 1.04e-1 kg/m/s

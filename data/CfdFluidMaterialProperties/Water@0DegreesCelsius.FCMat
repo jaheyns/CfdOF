@@ -1,5 +1,0 @@
-[FCdMat]
-Name = Water@0DegreesCelsius
-Description = Standard distilled water properties at 0 Degrees Celsius and 1 atm
-Density = 1000 kg/m^3
-DynamicViscosity = 1.788e-3 kg/m/s

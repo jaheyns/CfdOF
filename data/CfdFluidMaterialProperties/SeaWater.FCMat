@@ -1,5 +1,5 @@
 [FCdMat]
-Name = SeaWater@20DegreesCelsius
+Name = SeaWater
 Description = Sea water (30%) at 20 Degrees Celsius and 1 atm
 Density = 1025 kg/m^3
 DynamicViscosity = 1.07e-3 kg/m/s 
