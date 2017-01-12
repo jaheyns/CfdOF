@@ -38,26 +38,33 @@ if FreeCAD.GuiUp:
     import FemGui
 
 
-class TaskPanelCfdFluidProperties:
-    #def __init__(self, solver_runner_obj):
-    def __init__(self,obj):
+class TaskPanelFluidProperties:
+    '''The editmode TaskPanel for FluidMaterial objects'''
+    def __init__(self, obj):
         self.obj = obj
         self.material = self.obj.Material
 
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdFluidProperties.ui")
+        ''' Initial version of the flow solver only support single region analysis and therefore selection_mode_solid
+            is not included.
+        '''
 
-        #A little different from FEMMaterial. Here the predefined library is not linked back to on re-load (ie check which predefined library was used previosuly. 
-        # Only the qunatities that were saved are of interest, since in fluid flow the properties will mostly be user input
-        #Therefore always initialising to None with the previous quantities for density etc reloaded in the input fields.
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__) + os.path.sep + "TaskPanelFluidProperties.ui")
+
+        ''' In most cases, unlike FEM, fluid flow properties are defined by the user. A small number of reference
+            values are store in the fcmat database for fluids to serve as a starting point for the user.  The properties
+            are therefore always initialised to "None" with the previous quantities reloaded in the input fields,
+            instead of trying match to a database entry as in FEM.
+        '''
         self.import_materials()
         index = self.form.PredefinedMaterialLibraryComboBox.findText('None')
         self.form.PredefinedMaterialLibraryComboBox.setCurrentIndex(index)
 
         QtCore.QObject.connect(self.form.PredefinedMaterialLibraryComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.selectPredefine)
-        #NOTE Using different connect here because we would like access
-        #NOTE to the full text, where QtCore.QObject.connect, does not recognize textChanged signal, 
-        #NOTE We do so to allow the units to be pulled along with the values
-        #NOTE to ensure unit consistency, unlike FEMWB where units are assumed upon change/save
+
+        ''' NOTE Using different connect here because we would like access to the full text, where
+            QtCore.QObject.connect, does not recognize textChanged signal.  We do so to allow the units to be pulled
+            along with the values to ensure unit consistency, unlike FEM where units are assumed upon change/save.
+        '''
         self.form.fDens.textChanged.connect(self.DensityChanged)
         self.form.fViscosity.textChanged.connect(self.ViscosityChanged)
 
@@ -140,8 +147,8 @@ class TaskPanelCfdFluidProperties:
         self.pathList = []
         self.form.PredefinedMaterialLibraryComboBox.clear()
 
-        # Until module is integrated, store the defaults inside the module directory rather than the resource dir
-        #system_mat_dir = FreeCAD.getResourceDir() + "/Mod/Material/FluidMaterialProperties"
+        ''' Until module is integrated, store the defaults inside the module directory rather than the resource dir '''
+        # system_mat_dir = FreeCAD.getResourceDir() + "/Mod/Material/FluidMaterialProperties"
         system_mat_dir = os.path.join(CfdTools.get_module_path(), "data/CfdFluidMaterialProperties")
         self.add_mat_dir(system_mat_dir, ":/icons/freecad.svg")
 
