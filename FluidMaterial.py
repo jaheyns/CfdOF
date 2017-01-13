@@ -34,7 +34,8 @@ def makeFluidMaterial(name):
     #copied from FEM WB
     '''makeMaterial(name): makes an Material
     name there fore is a material name or an file name for a FCMat file'''
-    obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
+    #obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
+    obj = FreeCAD.ActiveDocument.addObject("_FemMaterialObject", name)
     #obj.Proxy = self
     import _FluidMaterial
     _FluidMaterial._FluidMaterial(obj)
