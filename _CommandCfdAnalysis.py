@@ -50,6 +50,11 @@ class _CommandCfdAnalysis(FemCommands):
         FreeCADGui.doCommand("FemGui.setActiveAnalysis(App.activeDocument().ActiveObject)")
         FreeCADGui.addModule("CfdSolverFoam")
         FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdSolverFoam.makeCfdSolverFoam()]")
+
+        #Adding the physics model creator here already, gets added as the analysis container is created.
+        FreeCADGui.addModule("CfdPhysicsSelection")
+        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
+
         sel = FreeCADGui.Selection.getSelection()
         if (len(sel) == 1):
             if(sel[0].isDerivedFrom("Fem::FemMeshObject")):
