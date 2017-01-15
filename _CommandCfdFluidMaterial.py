@@ -57,4 +57,4 @@ class setCfdFluidPropertyCommand(FemCommands):
             } 
 
 if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('setCfdFluidProperties', setCfdFluidPropertyCommand())
+    FreeCADGui.addCommand('Cfd_FluidMaterial', setCfdFluidPropertyCommand())
