@@ -28,7 +28,7 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
     import FemGui
 
-class setFluidPropertyCommand(FemCommands):
+class setCfdFluidPropertyCommand(FemCommands):
     def __init__(self):
         #neat little command from FemCommands to only activate when solver or analysis is active i.e. in this case OF
         #self.is_active = 'with_solver'
@@ -41,9 +41,9 @@ class setFluidPropertyCommand(FemCommands):
         FreeCAD.Console.PrintMessage("Set fluid properties \n")
 
 
-        FreeCAD.ActiveDocument.openTransaction("Set FluidMaterialProperty")
-        FreeCADGui.addModule("FluidMaterial")
-        FreeCADGui.doCommand("FluidMaterial.makeFluidMaterial('FluidProperties')")
+        FreeCAD.ActiveDocument.openTransaction("Set CfdFluidMaterialProperty")
+        FreeCADGui.addModule("CfdFluidMaterial")
+        FreeCADGui.doCommand("CfdFluidMaterial.makeCfdFluidMaterial('CfdFluidProperties')")
 
         #The CFD WB is still currently a member of FemGui
         FreeCADGui.doCommand("App.activeDocument()." + FemGui.getActiveAnalysis().Name + ".Member = App.activeDocument()." + FemGui.getActiveAnalysis().Name + ".Member + [App.ActiveDocument.ActiveObject]")
@@ -57,4 +57,4 @@ class setFluidPropertyCommand(FemCommands):
             } 
 
 if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('setFluidProperties', setFluidPropertyCommand())
+    FreeCADGui.addCommand('setCfdFluidProperties', setCfdFluidPropertyCommand())

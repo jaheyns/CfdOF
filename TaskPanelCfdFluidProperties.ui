@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FluidMaterial</class>
+ <class>CfdFluidMaterial</class>
  <widget class="QWidget" name="FluidMaterial">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>432</width>
+    <width>338</width>
     <height>593</height>
    </rect>
   </property>
@@ -23,26 +23,32 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0" colspan="2">
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Predefined material library</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
       <item row="2" column="0" colspan="2">
        <widget class="QComboBox" name="PredefinedMaterialLibraryComboBox"/>
+      </item>
+      <item row="4" column="0" colspan="2">
+       <widget class="QLabel" name="fluidDescriptor">
+        <property name="text">
+         <string>Material Description</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Predefined material library</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -56,7 +62,35 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="3" column="1">
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Dynamic Viscosity:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Density:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label_2">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Material Properties:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
        <widget class="Gui::InputField" name="fDens">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -83,7 +117,7 @@
          <double>2000000000.000000000000000</double>
         </property>
         <property name="unit" stdset="0">
-         <string notr="true"/>
+         <string notr="true">kg/m^3</string>
         </property>
         <property name="decimals" stdset="0">
          <number>5</number>
@@ -93,50 +127,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="text">
-         <string>Dynamic Viscosity [Pa*s]:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>Density [kg/m^3]:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QLabel" name="label_2">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Material Properties:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QLabel" name="label_4">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>WARNING: Units have been temporarily disabled.
-
-Please use SI units for consistency.</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
+      <item row="3" column="1">
        <widget class="Gui::InputField" name="fViscosity">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -163,7 +154,7 @@ Please use SI units for consistency.</string>
          <double>2000000000.000000000000000</double>
         </property>
         <property name="unit" stdset="0">
-         <string notr="true"/>
+         <string notr="true">kg/s/m</string>
         </property>
         <property name="decimals" stdset="0">
          <number>5</number>

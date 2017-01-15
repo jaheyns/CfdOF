@@ -1,6 +1,7 @@
 #***************************************************************************
-#*   (c) Bernd Hahnebach (bernd@bimstatik.org) 2014                    *
-#*   (c) Qingfeng Xia @ iesensor.com 2016                    *
+#*   (c) Bernd Hahnebach (bernd@bimstatik.org) 2014                        *
+#*   (c) Qingfeng Xia @ iesensor.com 2016                                  *
+#*   (c) CSIR, South Africa 2017                                           *
 #*                                                                         *
 #*   This file is part of the FreeCAD CAx development system.              *
 #*                                                                         *
@@ -37,14 +38,13 @@ if FreeCAD.GuiUp:
     import FemGui
 
 
-class TaskPanelFluidProperties:
+class TaskPanelCfdFluidProperties:
     #def __init__(self, solver_runner_obj):
     def __init__(self,obj):
         self.obj = obj
         self.material = self.obj.Material
 
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__) + os.path.sep + "TaskPanelFluidPropertiesWithUnits.ui")
-        #self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__) + os.path.sep + "TaskPanelFluidPropertiesNoUnits.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdFluidProperties.ui")
 
         #A little different from FEMMaterial. Here the predefined library is not linked back to on re-load (ie check which predefined library was used previosuly. 
         # Only the qunatities that were saved are of interest, since in fluid flow the properties will mostly be user input
@@ -142,6 +142,6 @@ class TaskPanelFluidProperties:
 
         # Until module is integrated, store the defaults inside the module directory rather than the resource dir
         #system_mat_dir = FreeCAD.getResourceDir() + "/Mod/Material/FluidMaterialProperties"
-        system_mat_dir = os.path.join(CfdTools.get_module_path(), "data/FluidMaterialProperties")
+        system_mat_dir = os.path.join(CfdTools.get_module_path(), "data/CfdFluidMaterialProperties")
         self.add_mat_dir(system_mat_dir, ":/icons/freecad.svg")
 

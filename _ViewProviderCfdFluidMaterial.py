@@ -28,7 +28,7 @@ import FreeCAD
 import FreeCADGui
 
 class _ViewProviderCfdFluidMaterial:
-    """A View Provider for the FemResultObject dervied CfdResult class
+    """A View Provider for the CfdFluidMaterial class
     """
 
     def __init__(self, vobj):
@@ -58,8 +58,8 @@ class _ViewProviderCfdFluidMaterial:
         #return
 
     def setEdit(self, vobj, mode):
-        import _TaskPanelFluidMaterial
-        taskd = _TaskPanelFluidMaterial.TaskPanelFluidProperties(self.Object)
+        import _TaskPanelCfdFluidProperties
+        taskd = _TaskPanelCfdFluidProperties.TaskPanelCfdFluidProperties(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True
