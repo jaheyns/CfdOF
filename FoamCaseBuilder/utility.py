@@ -484,7 +484,7 @@ def createRawFoamFile(case, location, dictname, lines, classname = 'dictionary')
 
 ##################################################################
 
-def runFoamApplication(case, cmd, logFile=None):
+def runFoamApplication(cmd, case=None, logFile=None):
     """
     run OpenFOAM command, wait until finished
     parameters:
@@ -517,11 +517,7 @@ def runFoamApplication(case, cmd, logFile=None):
                 os.remove(logFile)
 
         app = cmds[0]
-        if case:
-            case_path = os.path.abspath(case)
-            cmdline = app + ' -case "' + case_path +'" ' + ' '.join(cmds[1:])
-        else:
-            cmdline = app + ' ' + ' '.join(cmds[1:])  # an extra space to sep app and options
+        cmdline = app + ' ' + ' '.join(cmds[1:])  # an extra space to sep app and options
         env_setup_script = "{}/etc/bashrc".format(getFoamDir())
 
         if logFile:
@@ -533,7 +529,7 @@ def runFoamApplication(case, cmd, logFile=None):
             cmdline = ['bash', '-c', """source "{}" && {} """.format(env_setup_script, cmdline)]
         #cmdline += (" | tee "+logFile) # Pipe to screen and log file
         print("Running: ", cmdline)
-        out = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
+        out = subprocess.check_output(cmdline, cwd=case, stderr=subprocess.PIPE)
     if _debug:
         print(out)
 
