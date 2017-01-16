@@ -49,6 +49,8 @@ class CfdSolver(object):
                             "unique solver name to identify the solver")
             obj.addProperty("App::PropertyEnumeration", "PhysicalDomain", "Solver",
                             "unique solver name to identify the solver")
+            obj.addProperty("App::PropertyPath", "InstallationPath", "Solver",
+                            "Solver installation path")
             obj.PhysicalDomain = supported_physical_domains
             obj.PhysicalDomain = 'Fluidic'
             obj.addProperty("App::PropertyString", "Module", "Solver",

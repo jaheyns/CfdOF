@@ -62,15 +62,24 @@ class CfdCaseWriterFoam:
         # Perform initialisation here rather than __init__ in case of path changes
         self.case_folder = os.path.join(self.solver_obj.WorkingDir, self.solver_obj.InputCaseName)
         self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
+        self.installation_path = self.solver_obj.InstallationPath
 
         # Create initial case from defaults
         # Until module is integrated, store the defaults inside the module directory rather than the resource dir
-        if self.solver_obj.HeatTransfering:
-            #self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(FreeCAD.getResourceDir(), "Mod", "Cfd", "defaults", "chtMultiRegionSimpleFoam"))
-            self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(CfdTools.get_module_path(), "data", "defaults", "chtMultiRegionSimpleFoam"))
-        else:
-            #self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(FreeCAD.getResourceDir(), "Mod", "Cfd", "defaults", "simpleFoam"))
-            self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(CfdTools.get_module_path(), "data", "defaults", "simpleFoam"))
+        # if self.solver_obj.HeatTransfering:
+        #     #self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(FreeCAD.getResourceDir(), "Mod", "Cfd", "defaults", "chtMultiRegionSimpleFoam"))
+        #     self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(CfdTools.get_module_path(), "data", "defaults", "chtMultiRegionSimpleFoam"))
+        # else:
+        #     #self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(FreeCAD.getResourceDir(), "Mod", "Cfd", "defaults", "simpleFoam"))
+        #     self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(CfdTools.get_module_path(), "data", "defaults", "simpleFoam"))
+        self.builder = fcb.BasicBuilder(self.case_folder,
+                                        self.installation_path,
+                                        CfdTools.getSolverSettings(self.solver_obj),
+                                        os.path.join(CfdTools.get_module_path(), "data", "defaults", "simpleFoam"))
+
+
+        self.builder.setInstallationPath()
+
         self.builder.createCase()
 
         self.write_mesh()
@@ -97,9 +106,9 @@ class CfdCaseWriterFoam:
 
         self.mesh_generated = CfdTools.write_unv_mesh(self.mesh_obj, self.bc_group, unvMeshFile)
 
-        # FreecAD (internal standard length) mm; while in CFD, it is metre, so mesh needs scaling
-        # mesh generated from FreeCAD nees to be scaled by 0.001
-        # `transformPoints -scale "(1e-3 1e-3 1e-3)"`
+        ''' FreecAD (internal standard length) mm; while in CFD, it is metre, so mesh needs scaling mesh generated
+            from FreeCAD nees to be scaled by 0.001 `transformPoints -scale "(1e-3 1e-3 1e-3)"`
+        '''
         scale = 0.001
         self.builder.setupMesh(unvMeshFile, scale)
         #FreeCAD.Console.PrintMessage('mesh file {} converted and scaled with ratio {}\n'.format(unvMeshFile, scale))

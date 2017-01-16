@@ -126,59 +126,63 @@ def runFoamCommandOnWSL(case, cmds, output_file=None):
 ###################################################
 
 def _detectFoamDir():
-    # compatible for python3, check_output() return bytes type in python3
+    ''' Set foam installation directory if WM_PROJECT_DIR is detected else return none. If the user specified an
+        Instalation path it will overwrite the aforementioned.
+    '''
     if platform.system() == 'Windows':
         case_path = None
         foam_dir = runFoamCommandOnWSL(case_path, 'echo $WM_PROJECT_DIR')
     else:
-        # OSError No such file or directory, for file '~/.bashrc'
-        #cmdline = """bash -i -c 'source ~/.bashrc && {}' """.format('echo $WM_PROJECT_DIR')
         cmdline = ['bash', '-i', '-c', 'source ~/.bashrc && echo $WM_PROJECT_DIR']
-        #print(cmdline)
         foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
+    # Python 3 compatible, check_output() return type byte
     foam_dir = str(foam_dir)
-    if len(foam_dir)>1:  # if env var is not defined, return `b'\n'` for python3 and `\n` for python2
-        if foam_dir[:2] == "b'":  # for python 3
-            foam_dir = foam_dir[2:-3] #strip 2 chars from front and tail `b'/opt/openfoam4\n'`
+    if len(foam_dir)>1:                 # If env var is not defined, python 3 returns `b'\n'` and python 2`\n`
+        if foam_dir[:2] == "b'":
+            foam_dir = foam_dir[2:-3]   # Python3: Strip 'b' from front and EOL char
         else:
-            foam_dir= foam_dir.strip()  # strip the EOL char
+            foam_dir= foam_dir.strip()  # Python2: Strip EOL char
         return foam_dir
     else:
-        print("""Environment var 'WM_PROJECT_DIR' is not defined nor FOAM_DIR is set
-                 fallback to default {}""".format(_DEFAULT_FOAM_DIR))
-        return _DEFAULT_FOAM_DIR
+        ''' A warning message is generated when the installation path is also not available. '''
+        return None
 
 def _detectFoamVersion():
     if platform.system() == 'Windows':
         case_path = None
         foam_ver = runFoamCommandOnWSL(case_path, 'echo $WM_PROJECT_VERSION')
     else:
-        #cmdline = """bash -i -c 'source ~/.bashrc && {}' """.format('echo $WM_PROJECT_VERSION')
         cmdline = ['bash', '-i', '-c', 'source ~/.bashrc && echo $WM_PROJECT_VERSION']
         foam_ver = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
-    # there is warning for `-i` interative mode, but output is fine
-    foam_ver = str(foam_ver)  # compatible for python3, check_output() return bytes type in python3
+    # Python 3 compatible, check_output() return type byte
+    foam_ver = str(foam_ver)
     if len(foam_ver)>1:
-        if foam_ver[:2] == "b'":  # for python 3
-            foam_ver = foam_ver[2:-3] #strip 2 chars from front and tail `b'4.0\n'`
+        if foam_ver[:2] == "b'":
+            foam_ver = foam_ver[2:-3]    # Python3: Strip 'b' from front and EOL char
         else:
-            foam_ver = foam_ver.strip()  # strip the EOL char
-        return tuple([int(s) if s.isdigit() else 0 for s in foam_ver.split('.')])  # version string 4.x should be parsed as 4.0
+            foam_ver = foam_ver.strip()  # Python2: Strip EOL char
+        #return tuple([int(s) if s.isdigit() else 0 for s in foam_ver.split('.')])  # version string 4.x should be parsed as 4.0
+        return foam_ver.split('.')
+        # return tuple([int(s) for s in foam_ver.split('.')])
     else:
-        print("""environment var 'WM_PROJECT_VERSION' is not defined\n,
-              fallback to default {}""".format(_DEFAULT_FOAM_VERSION))
-        return _DEFAULT_FOAM_VERSION
+        ''' A warning message is generated when the installation path is also not available. '''
+        return None
 
 _FOAM_SETTINGS = {"FOAM_DIR": _detectFoamDir(), "FOAM_VERSION": _detectFoamVersion()}
 
 
 # public API getter and setter for FOAM_SETTINGS
 def setFoamDir(dir):
-    if os.path.exists(dir) and os.path.isabs(dir):
-        if os.path.exists(dir + os.path.sep + "etc/bashrc"):
-            _FOAM_SETTINGS['FOAM_DIR'] = dir
+    if os.path.exists(dir + os.path.sep + "etc/bashrc") and os.path.isabs(dir):
+        # Overwrite using user specified installation path
+        print (".................{} \n".format(dir))
+        _FOAM_SETTINGS['FOAM_DIR'] = dir
+    elif (os.path.exists(getFoamDir() + os.path.sep + "etc/bashrc")):
+        # Keep sourced WM_PROJECT_DIR
+        _FOAM_SETTINGS['FOAM_DIR'] = getFoamDir()
     else:
-        print("Warning: {} does not contain etc/bashrc file to set as foam_dir".format(dir))
+        print("Warning: The installation directory is not defined. Either source the relevant 'bashrc' file or \n)")
+        print("specify the installation path in Solver. \n")
 
 def setFoamVersion(ver):
     """specify OpenFOAM version by a list or tupe of integer like (3, 0, 0)
@@ -197,17 +201,17 @@ def getFoamVersion():
     if 'FOAM_VERSION' in _FOAM_SETTINGS:
         return _FOAM_SETTINGS['FOAM_VERSION']
 
-# see more details on variants: https://openfoamwiki.net/index.php/Forks_and_Variants
-# http://www.cfdsupport.com/install-openfoam-for-windows.html, using cygwin
-# FOAM_VARIANTS = ['OpenFOAM', 'foam-extend', 'OpenFOAM+']
-# FOAM_RUNTIMES = ['Posix', 'Cygwin', 'BashWSL']
-def _detectFoamVarient():
-    """ FOAM_EXT version is also detected from 'bash -i -c "echo $WM_PROJECT_VERSION"'  or $WM_FORK
-    """
-    if getFoamDir().find('ext') > 0:
-        return  "foam-extend"
-    else:
-       return "OpenFOAM"
+# # see more details on variants: https://openfoamwiki.net/index.php/Forks_and_Variants
+# # http://www.cfdsupport.com/install-openfoam-for-windows.html, using cygwin
+# #FOAM_VARIANTS = ['OpenFOAM', 'foam-extend', 'OpenFOAM+']
+# #FOAM_RUNTIMES = ['FreeFOAM', 'Cygwin', 'BashWSL']
+# def _detectFoamVarient():
+#     """ FOAM_EXT version is also detected from 'bash -i -c "echo $WM_PROJECT_VERSION"'  or $WM_FORK
+#     """
+#     if getFoamDir().find('ext') > 0:
+#         return  "foam-extend"
+#     else:
+#        return "OpenFOAM"
 
 # Bash on Ubuntu on Windows detection and path translation
 def _detectFoamRuntime():
@@ -216,16 +220,16 @@ def _detectFoamRuntime():
     else:
         return "Posix"
 
-_FOAM_SETTINGS['FOAM_VARIANT'] = _detectFoamVarient()
+# _FOAM_SETTINGS['FOAM_VARIANT'] = _detectFoamVarient()
 _FOAM_SETTINGS['FOAM_RUNTIME'] = _detectFoamRuntime()
-def getFoamVariant():
-    """detect from output of 'bash -i -c "echo $WM_PROJECT_DIR"', if default is not set
-    """
-    if 'FOAM_VARIANT' in _FOAM_SETTINGS:
-        return _FOAM_SETTINGS['FOAM_VARIANT']
-
-def isFoamExt():
-    return _FOAM_SETTINGS['FOAM_VARIANT'] == "foam-extend"
+# def getFoamVariant():
+#     """detect from output of 'bash -i -c "echo $WM_PROJECT_DIR"', if default is not set
+#     """
+#     if 'FOAM_VARIANT' in _FOAM_SETTINGS:
+#         return _FOAM_SETTINGS['FOAM_VARIANT']
+#
+# def isFoamExt():
+#     return _FOAM_SETTINGS['FOAM_VARIANT'] == "foam-extend"
 
 def getFoamRuntime():
     """detect from output of 'bash -i -c "echo $WM_PROJECT_DIR"', if default is not set
@@ -279,12 +283,12 @@ def getTurbulentViscosityVariable(solverSettings):
     # OpenFOAM versions after v3.0.0+ is always `nut`
     turbulenceModelName = solverSettings['turbulenceModel']
     if turbulenceModelName in LES_turbulence_models:
-        if getFoamVersion()[0] < 3 or isFoamExt():
+        if getFoamVersion()[0] < 3: # or isFoamExt():
             return 'muSgs'
         else:
             return 'nuSgs'
     if solverSettings['compressible']:
-        if getFoamVersion()[0] < 3 or isFoamExt():
+        if getFoamVersion()[0] < 3: # or isFoamExt():
             return 'mut'
         else:
             return 'nut'
@@ -298,8 +302,8 @@ def getTurbulenceVariables(solverSettings):
         var_list = []  # otherwise, generated from filename in folder case/0/, 
     elif turbulenceModelName in kEpsilon_models:
         var_list = ['k', 'epsilon', viscosity_var]
-    elif turbulenceModelName in kOmege_models:
-        var_list = ['k', 'omega', viscosity_var]
+    # elif turbulenceModelName in kOmege_models:
+    #     var_list = ['k', 'omega', viscosity_var]
     elif turbulenceModelName in spalartAllmaras_models:
         var_list = [viscosity_var, 'nuTilda'] # incompressible/simpleFoam/airFoil2D/
     #elif turbulenceModelName in LES_models:
@@ -611,32 +615,21 @@ def runFoamCommand(cmd):
     return exitCode
     """
 
-###########################################################################
+########################################  Mesh manupulation  ###############################
 
 def convertMesh(case, mesh_file, scale):
-    """ 
-    see all mesh conversion tool for OpenFoam: <http://www.openfoam.com/documentation/user-guide/mesh-conversion.php>
-    scale: CAD has mm as length unit usually, while CFD meshing using SI unit metre
+    """ FOAM mesh conversion: www.openfoam.com/documentation/user-guide/mesh-conversion.php
+        Scale: CAD is always in mm while FOAM uses SI units (m)
     """
     mesh_file = translatePath(mesh_file)
 
     if mesh_file.find(".unv")>0:
-        #cmdline = ['ideasUnvToFoam', '-case', case, mesh_file]  # mesh_file path may also need translate
-        #runFoamCommand(cmdline)
-        cmdline = ['ideasUnvToFoam', mesh_file]  # mesh_file path may also need translate
+        cmdline = ['ideasUnvToFoam', mesh_file]
         runFoamApplication(cmdline,case)
         changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
-    if mesh_file[-4:] == ".geo":  # GMSH mesh
-        print('Error:GMSH exported *.geo mesh is not support yet')
-    if mesh_file[-4:] == ".msh":  # ansys fluent mesh
-        cmdline = ['fluentMeshToFoam', '-case', case, mesh_file]  # mesh_file path may also need translate
-        runFoamCommand(cmdline)
-        changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary name (could be any name)
-        print("Info: boundary exported from named selection, started with lower case")
-
     if scale and isinstance(scale, numbers.Number):
-        cmdline = ['transformPoints', '-case', case, '-scale', '"({} {} {})"'.format(scale, scale, scale)]
-        runFoamCommand(cmdline)
+        cmdline = ['transformPoints', '-scale', '"({} {} {})"'.format(scale, scale, scale)]
+        runFoamApplication(cmdline,case)
     else:
         print("Error: mesh scaling ratio is must be a float or integer\n")
         
@@ -645,13 +638,13 @@ def listBoundaryNames(case):
     return BoundaryDict(case).patches()
 
 def changeBoundaryType(case, bc_name, bc_type):
-    """ change boundary named `bc_name` to `bc_type` in boundary dict file
+    """ Change boundary named `bc_name` to `bc_type`
     """    
     f = BoundaryDict(case)
     if bc_name in f.patches():
         f[bc_name]['type'] = bc_type
     else:
-        print("boundary `{}` not found, so boundary type is not changed".format(bc_name))
+        print("Boundary `{}` not found, so type is not changed".format(bc_name))
     f.writeFile()
 
 def movePolyMesh(case):

@@ -217,7 +217,7 @@ class BasicBuilder(object):
     transient boundary condition setup is not supported, search openfoam manual: Time-varying boundary conditions
     """
     def __init__(self,  casePath, 
-                        #meshPath,
+                        installationPath,
                         solverSettings=getDefaultSolverSettings(),
                         templatePath=None, #detected from solverName which is deduced from sovlerSettings
                         fluidProperties = {'name':'water', "compressible":False, 'kinematicViscosity':1e6, "density": 1e3},
@@ -229,14 +229,14 @@ class BasicBuilder(object):
                 ):
         if casePath[0] == "~": casePath = os.path.expanduser(casePath)
         self._casePath = os.path.abspath(casePath)
-        #self._meshPath = meshPath
+        self._installationPath = installationPath
 
         self._solverSettings = solverSettings
         self._solverName = self.getSolverName()
         if templatePath:
             self._templatePath = templatePath
         else:
-            self._templatePath = None # self.getFoamTemplate()
+            self._templatePath = None
         self._solverCreatedVariables = self.getSolverCreatedVariables()
         
         self._turbulenceProperties = turbulenceProperties
@@ -246,6 +246,9 @@ class BasicBuilder(object):
         self._boundarySettings = boundarySettings
         self._internalFields = internalFields
         self._transientSettings = transientSettings
+
+    def setInstallationPath(self):
+        setFoamDir(self._installationPath)
 
     def createCase(self):
         # it will remove existent case folder
@@ -1191,7 +1194,8 @@ class BasicBuilder(object):
                 del f['RAS']  # clear this content
         elif turbulanceModelName in RAS_turbulence_models:
             f['simulationType'] = "RAS"
-            if getFoamVariant() == "OpenFOAM" and getFoamVersion()[0] >= 3:
+            # if getFoamVariant() == "OpenFOAM" and getFoamVersion()[0] >= 3:
+            if getFoamVersion()[0] >= 3:
                 f['RAS'] = {'RASModel': turbulanceModelName, 'turbulence': "on", 'printCoeffs': "on"}
                 if turbulanceModelName in kEpsilon_models and 'kEpsilonCoeffs' in self._turbulenceProperties:
                     f['kEpsilonCoeffs'] = self._turbulenceProperties['kEpsilonCoeffs']
@@ -1207,7 +1211,8 @@ class BasicBuilder(object):
                 fRAS.writeFile()
 
         elif turbulanceModelName in LES_turbulence_models:
-            if getFoamVariant() == "OpenFOAM" and getFoamVersion()[0] >= 3:
+            # if getFoamVariant() == "OpenFOAM" and getFoamVersion()[0] >= 3:
+            if getFoamVersion()[0] >= 3:
                 # all LES model setup is done in file 'turbulenceProperties'
                 if not os.path.exists(fname):
                     createRawFoamFile(case, "constant", "turbulenceProperties",
