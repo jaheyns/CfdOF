@@ -412,18 +412,19 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
         f.write("ln -s {}/neighbour {} \n".format(meshOrg_dir, mesh_dir))
         f.write("ln -s {}/owner {} \n".format(meshOrg_dir, mesh_dir))
         f.write("ln -s {}/points {} \n".format(meshOrg_dir, mesh_dir))
+        f.write("\n")
         
         if (init_potential):
             f.write ("# Initialise flow \n")
-            f.write ("potentialFoam -case "+case+" | tee "+case+"/log.potentialFoam \n\n")
+            f.write ("potentialFoam -case "+case+" 2>&1 | tee "+case+"/log.potentialFoam \n\n")
         
         if (run_parallel):
             f.write ("# Run application in parallel \n")
-            f.write ("decomposePar | tee log.decomposePar \n")
-            f.write ("mpirun -np {} {} -parallel -case {} | tee {}/log.{} \n\n".format(str(num_proc), solver_name, case, case,solver_name))
+            f.write ("decomposePar 2>&1 | tee log.decomposePar \n")
+            f.write ("mpirun -np {} {} -parallel -case {} 2>&1 | tee {}/log.{} \n\n".format(str(num_proc), solver_name, case, case,solver_name))
         else:
             f.write ("# Run application \n")
-            f.write ("{} -case {} | tee {}/log.{} \n\n".format(solver_name,case,case,solver_name))
+            f.write ("{} -case {} 2>&1 | tee {}/log.{} \n\n".format(solver_name,case,case,solver_name))
 
     cmdline = ("chmod a+x "+fname) # Update Allrun permission
     out = subprocess.check_output(['bash', '-l', '-c', cmdline], stderr=subprocess.PIPE)
