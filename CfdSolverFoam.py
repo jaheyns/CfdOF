@@ -46,3 +46,6 @@ class CfdSolverFoam(CfdSolver.CfdSolver):
     def __init__(self, obj):
         super(CfdSolverFoam, self).__init__(obj)
         self.Type = "CfdSolverFoam"
+        if "PotentialInit" not in obj.PropertiesList:
+            obj.addProperty("App::PropertyBool", "PotentialInit", "Solver",
+                    "Initialise fields using potential flow solution", True)

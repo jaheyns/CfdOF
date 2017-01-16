@@ -254,7 +254,7 @@ class BasicBuilder(object):
         else:
             createCaseFromScratch(self._casePath, self._solverName)
         self._createInitVarables()
-        createRunScript(self._casePath, "True", self._solverSettings['parallel'], self._solverName, self._paralleSettings['numberOfSubdomains']) # Specify init_potential (defaults to true)
+        createRunScript(self._casePath, self._solverSettings['potentialInit'], self._solverSettings['parallel'], self._solverName, self._paralleSettings['numberOfSubdomains']) # Specify init_potential (defaults to true)
 
     def build(self):
         #if not rebuilding:
