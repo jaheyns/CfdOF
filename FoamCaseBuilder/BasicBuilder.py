@@ -109,6 +109,8 @@ def getDefaultSolverSettings():
             'transient':False,
             'turbulenceModel': 'laminar',
             #
+            'potentialInit': False, # CSIP team contributed feature, new property inserted into CfdSolverFoam
+            #
             'heatTransfering':False, 
             'conjugate': False, # conjugate heat transfer (CHT)
             'radiationModel': 'noRadiation',
@@ -366,20 +368,21 @@ class BasicBuilder(object):
     def viewResult(self):
         "view by external program paraview"
         if self._solverSettings['parallel']:
-            runFoamCommand(['reconstructPar', '-case',  self._casePath])
-        runFoamCommand(['paraFoam', '-case', self._casePath])
+            # if Allrun is excuted, it should reconstruct result
+            runFoamApplication(['reconstructPar'], self._casePath)
+        runFoamApplication(['paraFoam'], self._casePath)
 
     def exportResult(self):
         "export to VTK legacy format, ascii or binary format"
         if self._solverSettings['parallel']:
-            runFoamCommand(['reconstructPar', '-case',  self._casePath])
+            runFoamApplication(['reconstructPar'],  self._casePath)
         if os.path.exists(self._casePath + os.path.sep + "VTK"):
             shutil.rmtree(self._casePath + os.path.sep + "VTK")
         #pointSetName = 'wholeDomain'
         #createRawFoamFile(self._casePath, 'system', 'topoSetDict', getTopoSetDictTemplate(pointSetName, 'pointSet', boundingBox))
         #runFoamCommand(['topoSet', '-case', self._casePath, '-latestTime'])
         #runFoamCommand(['foamToVTK', '-case', self._casePath, '-latestTime', '-pointSet', pointSetName])
-        runFoamCommand(['foamToVTK', '-case', self._casePath, '-latestTime'])
+        runFoamApplication(['foamToVTK', '-latestTime'], self._casePath)
         #search for *.vtk
         import glob
         vtk_files = glob.glob(self._casePath + os.path.sep + "VTK" + os.path.sep + "*.vtk")

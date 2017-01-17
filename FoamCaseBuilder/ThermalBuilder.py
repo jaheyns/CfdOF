@@ -58,6 +58,8 @@ def getDefaultHeatTransferSolverSettings():
             'transient':False,
             'turbulenceModel': 'kEpsilon',
             #
+            'potentialInit': False, # CSIP team contributed feature, new property inserted into CfdSolverFoam
+            #
             'heatTransfering':True,
             'conjugate': False,
             'radiationModel': 'noRadiation',

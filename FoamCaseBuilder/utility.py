@@ -399,6 +399,32 @@ def createCaseFromScratch(output_path, solver_name):
     createRawFoamFile(output_path, 'system', 'fvSchemes', getFvSchemesTemplate())
     # turbulence properties and fuid properties will be setup later in base builder
 
+def copySettingsFromExistentCase(output_path, source_path):
+    """build case structure from string template, both folder paths must existent
+    """
+    shutil.copytree(source_path + os.path.sep + "system", output_path + os.path.sep + "system")
+    source_const = os.path.join(source_path, "constant")
+    dest_const = os.path.join(output_path, "constant")
+    if os.path.exists(source_const):
+        shutil.copytree(source_const, dest_const)
+    else:
+        if not os.path.exists(dest_const):
+            os.makedirs(dest_const)
+    #runFoamCommand('foamCopySettins  {} {}'.format(source_path, output_path))
+    #foamCopySettins: Copy OpenFOAM settings from one case to another, without copying the mesh or results
+    if os.path.exists(source_path + os.path.sep + "0"):
+        shutil.copytree(source_path + os.path.sep + "0", output_path + os.path.sep + "0")
+    init_dir = output_path + os.path.sep + "0"
+    if not os.path.exists(init_dir):
+        os.makedirs(init_dir) # mkdir -p
+    """
+    if os.path.isdir(output_path + os.path.sep +"0.orig") and not os.path.exists(init_dir):
+        shutil.copytree(output_path + os.path.sep +"0.orig", init_dir)
+    else:
+        print("Error: template case {} has no 0 or 0.orig subfolder".format(source_path))
+    """
+    #foamCloneCase:   Create a new case directory that includes time, system and constant directories from a source case.
+
 def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
     print("Create Allrun script ")
 
@@ -441,34 +467,8 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
             f.write ("# Run application\n")
             f.write ("{} -case {} 2>&1 | tee {}/log.{}\n\n".format(solver_name,case,case,solver_name))
 
-    cmdline = ("chmod a+x "+fname) # Update Allrun permission
+    cmdline = ("chmod a+x "+fname) # Update Allrun permission, it will fail silently on windows
     out = subprocess.check_output(['bash', '-l', '-c', cmdline], stderr=subprocess.PIPE)
-    
-def copySettingsFromExistentCase(output_path, source_path):
-    """build case structure from string template, both folder paths must existent
-    """
-    shutil.copytree(source_path + os.path.sep + "system", output_path + os.path.sep + "system")
-    source_const = os.path.join(source_path, "constant")
-    dest_const = os.path.join(output_path, "constant")
-    if os.path.exists(source_const):
-        shutil.copytree(source_const, dest_const)
-    else:
-        if not os.path.exists(dest_const):
-            os.makedirs(dest_const)
-    #runFoamCommand('foamCopySettins  {} {}'.format(source_path, output_path))
-    #foamCopySettins: Copy OpenFOAM settings from one case to another, without copying the mesh or results
-    if os.path.exists(source_path + os.path.sep + "0"):
-        shutil.copytree(source_path + os.path.sep + "0", output_path + os.path.sep + "0")
-    init_dir = output_path + os.path.sep + "0"
-    if not os.path.exists(init_dir):
-        os.makedirs(init_dir) # mkdir -p 
-    """
-    if os.path.isdir(output_path + os.path.sep +"0.orig") and not os.path.exists(init_dir):
-        shutil.copytree(output_path + os.path.sep +"0.orig", init_dir)
-    else:
-        print("Error: template case {} has no 0 or 0.orig subfolder".format(source_path))
-    """
-    #foamCloneCase:   Create a new case directory that includes time, system and constant directories from a source case.
 
 #################################################################################
 
@@ -555,69 +555,6 @@ def runFoamApplication(cmd, case=None, logFile=None):
     if _debug:
         print(out)
 
-# not a good way to extract path in command line, double quote and space cause problem      
-# deprecated, just for compatible propurse, remove in next commit
-def _translateFoamCasePath(cmd):
-    """ Bash on Windows (Windows Linux Subsystem) needs a translation from windows path to linux path
-    """
-    if not (isinstance(cmd, list) or isinstance(cmd, tuple)):
-        print("Warning: command and options must be specified in a list or tuple")
-    l = len(cmd)
-    for i,s in enumerate(cmd):
-        if s == "-case" and i+1 < l:
-            p = cmd[i+1]  # it must exist
-            pp = translatePath(p)
-            cmd[i+1] = pp
-    return cmd
-
-# deprecated, replaced by runFoamApplication, remove it in next commit
-def runFoamCommand(cmd):
-    """ run OpenFOAM command via bash with OpenFOAM setup sourced into ~/.bashrc
-    wait until finish, caller is not interested on output but whether succeeded
-    source foam_dir/etc/bashrc before run foam related program
-    `shell=True` does not work if freeCAD is not started in shell terminal
-    Bash on Ubuntu on Windows, may need case path translation done in Builder
-    """
-
-    if isinstance(cmd, list):
-        _cmd = _translateFoamCasePath(cmd)  # do not modify input parameter, it may be used outside somewhere
-        #cmd = ' '.join(cmd)
-    else:
-        print("Warning: runFoamCommand() command and options must be specified in a list")
-
-    cmdline = ' '.join(_cmd)
-    print("Run command: ", cmdline)
-
-    # this is the method works for both started in terminal and GUI launcher
-    env_setup_script = "source {}/etc/bashrc".format(getFoamDir())
-    #env_setup_script = "source ~/.bashrc"
-    cmdline_1 = ['bash', '-c', ' '.join([env_setup_script, '&&'] + _cmd)]
-    #cmdline = """bash -i -c  '{} && {}' """.format(env_setup_script, ' '.join(_cmd))
-    #cmdline_1 = """bash -c ' {} && {}'""".format(env_setup_script, cmdline)
-    print("Run command_1: ", cmdline_1)  # get correct command line, correct in terminal, but error in python
-    out = subprocess.check_output(cmdline_1, stderr=subprocess.PIPE)
-
-    # bug:  FreeCAD exit due to runFoamCommand() is called immediately after another  runFoamCommand() using `bash -i`
-    # '-l' means '--login' works in terminal, while  '-i' means '--interactive' works from unity GUI launcher
-    #out = subprocess.check_output(['bash', '-l', '-c', cmdline], stderr=subprocess.PIPE)
-    if _debug: print(out)
-
-    """
-    # method3: error even at the first runFoamCommand(), running from terminal
-    process = subprocess.Popen(['bash', '-i', '-c', cmdline], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    stdout, stderr = process.communicate()
-    exitCode = process.returncode
-
-    if _debug:
-        print(stdout)
-
-    if (exitCode != 0):
-        if _debug:
-            print(stderr)
-        #else:  # should allow runFoamCommand to fail
-            #raise SystemError("Error in foamRunCommand:".format(cmdline), exitCode)
-    return exitCode
-    """
 
 ########################################  Mesh manupulation  ###############################
 
@@ -628,15 +565,22 @@ def convertMesh(case, mesh_file, scale):
     mesh_file = translatePath(mesh_file)
 
     if mesh_file.find(".unv")>0:
-        cmdline = ['ideasUnvToFoam', mesh_file]
+        cmdline = ['ideasUnvToFoam', '"{}"'.format(mesh_file)]  # mesh_file path may also need translate
         runFoamApplication(cmdline,case)
         changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
+    if mesh_file[-4:] == ".geo":  # GMSH mesh
+        print('Error:GMSH exported *.geo mesh is not support yet')
+    if mesh_file[-4:] == ".msh":  # ansys fluent mesh
+        cmdline = ['fluentMeshToFoam', '"{}"'.format(mesh_file)]  # mesh_file path may also need translate
+        runFoamApplication(cmdline, case)
+        changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary name (could be any name)
+        print("Info: boundary exported from named selection, started with lower case")
+
     if scale and isinstance(scale, numbers.Number):
         cmdline = ['transformPoints', '-scale', '"({} {} {})"'.format(scale, scale, scale)]
-        runFoamApplication(cmdline,case)
+        runFoamApplication(cmdline, case)
     else:
         print("Error: mesh scaling ratio is must be a float or integer\n")
-        
 
 def listBoundaryNames(case):
     return BoundaryDict(case).patches()
@@ -701,7 +645,7 @@ def getDict(dict_file, key):
 def setDict(dict_file, key, value):
     """all parameters are string type, accept, None or empty string
     dict_file: file must exist, checked by caller
-    key:
+    key: create the key if not existent
     value: None or empty string  will delet such key
     """
 
@@ -733,6 +677,8 @@ def setDict(dict_file, key, value):
 #################################topoSet, multiregion#####################################
 
 def listVarablesInFolder(path):
+    """ list variable (fields) name for the case or under 0 path
+    """
     if os.path.split(path) == '0':
         initFolder = path
     else:
@@ -755,21 +701,21 @@ def listZones(case):
     to create cellSet, faceSet, pointSet: topoSet command and dict of '/system/topoSetDict'
     https://openfoamwiki.net/index.php/TopoSet
     """
-    pass  # check topoSetDict file???  mesh file folder should have a file 
+    raise NotImplementedError()  # check topoSetDict file???  mesh file folder should have a file 
 
 def listRegions(case):
     """
     conjugate heat transfer model needs multi-region
     """
-    pass
+    raise NotImplementedError()
     
 def listTimeSteps(case):
     """
     return a list of float time for tranisent simulation or iteration for steady case
     """
-    pass
+    raise NotImplementedError()
 
 def plotSolverProgress(case):
     """GNUplot to plot convergence progress of simulation
     """
-    pass
+    raise NotImplementedError()

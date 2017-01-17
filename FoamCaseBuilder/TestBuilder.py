@@ -22,67 +22,58 @@
 
 import sys
 import os
+import tempfile
+import platform
+import os.path
+
+from utility import runFoamApplication, getFoamDir, createRawFoamFile
 
 PACKAGE_PARENT = '..'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
 sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 
 script_path = os.path.dirname(os.path.abspath( __file__ ))
-mesh_file = script_path + '/TestCase.unv'
-from utility import runFoamCommand
+home_dir = os.path.expanduser("~")
+mesh_file = home_dir  + os.path.sep +'TestCase.unv' #script path may not writable
+
 if not os.path.exists(mesh_file):
     mesh_file_url = "https://www.iesensor.com/download/TestCase.unv"
     print('using curl to download mesh file first, it will fail if curl is abscent')
     print('you need to run this script twice to get the case built. \n reason unknown, could be mesh download not finished during building')
-    runFoamCommand('curl -o {} {}'.format(mesh_file, mesh_file_url))
+    runFoamApplication(['curl -o {} {}'.format(mesh_file, mesh_file_url)])
 
-def test_runCommand():
-    runFoamCommand(["icoFoam", '-help'])
-    
-def test_runCommand1():
-    cmd = ['transformPoints','-case', '/home/qingfeng/Documents/TestCase', '-scale', '"(1 1 1)"']
-    #cmd = ["icoFoam", '-help']
-    import subprocess
-    #cmdline = """bash -i -c '{}' """.format(' '.join(cmd))
-    cmdline = ' '.join(cmd)
-    print(cmdline)
-    out = subprocess.check_output(['bash', '-i', '-c', cmdline], stderr=subprocess.PIPE)
-    print(out)
-    #runFoamCommand(cmd)
-    
+def test_runFoamApplication():
+    runFoamApplication(["icoFoam", '-help'])
+
 def test_detectFoam():
     from utility import _detectFoamVersion, _detectFoamDir
     print(_detectFoamVersion())
 
 def test_dictFileLoad():
     #PyFoam 0.66 can parse dict file for OF>=3.0, with "#include file"
-    case="/opt/openfoam4/tutorials/incompressible/simpleFoam/pipeCyclic/"
+    case= getFoamDir() + "/tutorials/incompressible/simpleFoam/pipeCyclic"
     file="0.orig/U"
     from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-    f = ParsedParameterFile(case + file)
+    f = ParsedParameterFile(case + os.path.sep + file)
+    print(f['internalField'])
     print(f['boundaryField']['walls'])
 
-def test_dictFileLoad2():
-    #case="/opt/openfoam4/tutorials/incompressible/simpleFoam/pipeCyclic/"
-    case = '/tmp/'
+def test_createRawFoamFile():
+    case = home_dir
+    _constant_dir_created = False
     if not os.path.exists(case + os.path.sep + "constant"):
+        _constant_dir_created = True
         os.mkdir(case + os.path.sep + "constant")
     lines = ['transportModel  Newtonian;','\n', 'nu              nu [ 0 2 -1 0 0 0 0 ] 1e-06;']
     createRawFoamFile(case, "constant", "transportProperties", lines)
-    file = "constant/transportProperties" # #PyFoam 0.6.6 can not parse this dict for OpenFOAM 3.0+
+    file = case + os.path.sep + "constant" + os.path.sep + "transportProperties"  #PyFoam 0.6.6 can not parse this dict for OpenFOAM 3.0+
     from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-    f = ParsedParameterFile(case + file)
+    f = ParsedParameterFile(file)
     print(f['nu'])
-    
-def test_dictFileLoad3():
-    #case="/opt/openfoam4/tutorials/incompressible/simpleFoam/pipeCyclic/"
-    case = '/tmp/TestCaseCLI/'
-    file = '0/p'
-    from PyFoam.RunDictionary.ParsedParameterFile import ParsedParameterFile
-    f = ParsedParameterFile(case + file)
-    print(f['internalField'])
+    os.remove(file)
+    if _constant_dir_created:
+        os.rmdir(case + os.path.sep + "constant")
 
-    
 def test_basic_builder(using_laminar_model = True):
     """assuming mesh has generated with patches name same as bc_names list
     This is only a test, it will not generate accurate result due to low mesh quality
@@ -93,7 +84,7 @@ def test_basic_builder(using_laminar_model = True):
     
     from BasicBuilder import getDefaultSolverSettings, BasicBuilder
     solver_settings = getDefaultSolverSettings()
-    case="/tmp/TestCaseCLI"
+    case= home_dir + os.path.sep + "TestCaseCLI"
     #zipped_template_file is deprecated
 
     #default to setup in ~/.bashrc:  source '/opt/openfoam40/etc/bashrc'
@@ -160,13 +151,13 @@ def test_basic_builder(using_laminar_model = True):
     cmdline = "paraFoam -case {}".format(case)
     print("view result in command with: \n"+ cmdline)
 
-    
+
 def test_heat_transfer_builder(compressible=True):
     #
     from ThermalBuilder import getDefaultHeatTransferSolverSettings
     solver_settings = getDefaultHeatTransferSolverSettings()
     solver_settings['compressible'] = compressible
-    case="/tmp/TestCaseCLI"
+    case= home_dir + os.path.sep + "TestCaseCLI"
     #template_path = "tutorials/heatTransfer/buoyantBoussinesqSimpleFoam/hotRoom/"
     template_path = None
     
@@ -213,13 +204,15 @@ def test_heat_transfer_builder(compressible=True):
         print('Error: case setup check failed with message\n, {}, \n please check dict files'.format(msg))
     
     case_builder.summarize()
-    
+
 if __name__ == '__main__':
-    #test_runCommand()
-    #test_runCommand1()
-    #test_dictFileLoad()
-    #test_dictFileLoad2()
-    #test_dictFileLoad3()
-    test_basic_builder()
-    #test_basic_builder(using_laminar_model = False)
-    #test_heat_transfer_builder()
+    test_runFoamApplication()
+    test_detectFoam()
+    if platform.system() == 'Windows':
+        print("Test on Windows is not support, mainly because case path not translated, try Windows Linux System")
+    else:
+        test_dictFileLoad()
+        test_createRawFoamFile()
+        test_basic_builder()
+        #test_basic_builder(using_laminar_model = False)
+        #test_heat_transfer_builder()
