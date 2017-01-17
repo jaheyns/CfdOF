@@ -13,7 +13,7 @@ if FreeCAD.GuiUp:
 
 
 class _CommandCfdPhysicsSelection(FemCommands):
-    "the Cfd_SolverControl command definition"
+    "the CFD physics selection command definition"
     def __init__(self):
         super(_CommandCfdPhysicsSelection, self).__init__()
         self.resources = {'Pixmap': '',

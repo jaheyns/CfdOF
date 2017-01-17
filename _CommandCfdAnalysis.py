@@ -55,6 +55,10 @@ class _CommandCfdAnalysis(FemCommands):
         FreeCADGui.addModule("CfdPhysicsSelection")
         FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
 
+        #Adding the initialisation object upon creation of the analysis
+        FreeCADGui.addModule("CfdInitialiseFlowField")
+        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdInitialiseFlowField.makeCfdInitialFlowField()]")
+
         sel = FreeCADGui.Selection.getSelection()
         if (len(sel) == 1):
             if(sel[0].isDerivedFrom("Fem::FemMeshObject")):

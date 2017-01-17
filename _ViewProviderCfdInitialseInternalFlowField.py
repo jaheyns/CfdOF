@@ -1,15 +1,14 @@
 
-__title__ = "_ViewProviderPhysicsSelection"
+__title__ = "_ViewProviderInitialiseInternalFlowField"
 __author__ = ""
 __url__ = "http://www.freecadweb.org"
-
 
 import FreeCAD
 import FreeCADGui
 
 
-class _ViewProviderPhysicsSelection:
-    "A View Provider for the PhysicsModel object"
+class _ViewProviderCfdInitialseInternalFlowField:
+    "A View Provider for the InitialVariables object"
 
     def __init__(self, vobj):
         vobj.Proxy = self
@@ -28,8 +27,8 @@ class _ViewProviderPhysicsSelection:
         return
 
     def setEdit(self, vobj, mode):
-        import _TaskPanelCfdPhysicsSelection
-        taskd = _TaskPanelCfdPhysicsSelection._TaskPanelCfdPhysicsSelection(self.Object)
+        import _TaskPanelCfdInitialiseInternalFlowField
+        taskd = _TaskPanelCfdInitialiseInternalFlowField._TaskPanelCfdInitialiseInternalFlowField(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True

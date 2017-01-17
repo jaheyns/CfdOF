@@ -13,7 +13,7 @@ from PySide import QtCore
 
 
 class _TaskPanelCfdPhysicsSelection:
-    '''The editmode TaskPanel for FemMaterial objects'''
+    '''The editmode TaskPanel for PhysicsModel objects'''
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None

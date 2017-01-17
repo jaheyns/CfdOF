@@ -3,8 +3,6 @@ __title__ = "CFDPhysicsModel"
 __author__ = ""
 __url__ = "http://www.freecadweb.org"
 
-## @package FemMaterial
-#  \ingroup FEM
 
 
 class _CfdPhysicsModel:

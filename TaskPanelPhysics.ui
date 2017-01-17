@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Select physics model</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="2" column="0">
