@@ -292,7 +292,6 @@ class BasicBuilder(object):
 
 
     def updateMesh(self, updated_mesh_path, scale):
-        #runFoamCommand('foamCleanPolyMesh -case {}'.format(self._casePath)) #foamCleanPolyMesh v4.0+?
         casePath = self._casePath
         shutil.remove(casePath + os.path.sep + "constant" + os.path.sep + 'polyMesh')
         self.setupMesh(updated_mesh_path, scale)
@@ -364,16 +363,10 @@ class BasicBuilder(object):
             subprocess.Popen(['xdg-open', path])
         elif sys.platform == 'win32':
             subprocess.Popen(['explorer', path]) # check_call() will block the python code
-        
-    def viewResult(self):
-        "view by external program paraview"
-        if self._solverSettings['parallel']:
-            # if Allrun is excuted, it should reconstruct result
-            runFoamApplication(['reconstructPar'], self._casePath)
-        runFoamApplication(['paraFoam'], self._casePath)
 
     def exportResult(self):
-        "export to VTK legacy format, ascii or binary format"
+        '''  Export to VTK format (ascii or binary format) and allow user to directly view results in FC
+        '''
         if self._solverSettings['parallel']:
             runFoamApplication(['reconstructPar'],  self._casePath)
         if os.path.exists(self._casePath + os.path.sep + "VTK"):

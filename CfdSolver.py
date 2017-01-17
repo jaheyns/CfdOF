@@ -72,7 +72,7 @@ class CfdSolver(object):
                 obj.WorkingDir = tempfile.tempdir
             else:
                 obj.WorkingDir = './'
-            obj.InputCaseName = 'TestCase'
+            obj.InputCaseName = 'case'
 
         # API: addProperty(self,type,name='',group='',doc='',attr=0,readonly=False,hidden=False)
         if "TurbulenceModel" not in obj.PropertiesList:

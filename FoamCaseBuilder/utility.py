@@ -175,7 +175,6 @@ _FOAM_SETTINGS = {"FOAM_DIR": _detectFoamDir(), "FOAM_VERSION": _detectFoamVersi
 def setFoamDir(dir):
     if os.path.exists(dir + os.path.sep + "etc/bashrc") and os.path.isabs(dir):
         # Overwrite using user specified installation path
-        print (".................{} \n".format(dir))
         _FOAM_SETTINGS['FOAM_DIR'] = dir
     elif (os.path.exists(getFoamDir() + os.path.sep + "etc/bashrc")):
         # Keep sourced WM_PROJECT_DIR
@@ -436,16 +435,14 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
         if _debug: print("Warning: Overwrite existing Allrun script ")
     with open(fname, 'w+') as f:
         f.write("#!/bin/sh \n\n")
-        # NOTE: Although RunFunctions seem to be sourced, the functions `getApplication`  
-        # and `getNumberOfProcessors` are not available. solver_name and num_proc do not have   
-        # to be passed if they can be read using these bash functions 
-        #f.write("# Source tutorial run functions \n")
-        #f.write(". $WM_PROJECT_DIR/bin/tools/RunFunctions \n\n")
 
         f.write("# Unset and source bashrc\n")
         f.write("source {}/etc/config/unset.sh\n".format(getFoamDir()))
         f.write("source {}/etc/bashrc\n\n".format(getFoamDir()))
 
+        ''' Mesh is stored in PolyMesh.org to ensure the mesh is preserved if the user decide to clean the case from
+            the terminal.
+        '''
         f.write("# Create symbolic links to polyMesh.org\n")
         f.write("mkdir {}\n".format(mesh_dir))
         f.write("ln -s {}/boundary {}\n".format(meshOrg_dir, mesh_dir))
@@ -469,6 +466,32 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
 
     cmdline = ("chmod a+x "+fname) # Update Allrun permission, it will fail silently on windows
     out = subprocess.check_output(['bash', '-l', '-c', cmdline], stderr=subprocess.PIPE)
+
+    
+def copySettingsFromExistentCase(output_path, source_path):
+    """build case structure from string template, both folder paths must existent
+    """
+    shutil.copytree(source_path + os.path.sep + "system", output_path + os.path.sep + "system")
+    source_const = os.path.join(source_path, "constant")
+    dest_const = os.path.join(output_path, "constant")
+    if os.path.exists(source_const):
+        shutil.copytree(source_const, dest_const)
+    else:
+        if not os.path.exists(dest_const):
+            os.makedirs(dest_const)
+    #foamCopySettins: Copy OpenFOAM settings from one case to another, without copying the mesh or results
+    if os.path.exists(source_path + os.path.sep + "0"):
+        shutil.copytree(source_path + os.path.sep + "0", output_path + os.path.sep + "0")
+    init_dir = output_path + os.path.sep + "0"
+    if not os.path.exists(init_dir):
+        os.makedirs(init_dir) # mkdir -p 
+    """
+    if os.path.isdir(output_path + os.path.sep +"0.orig") and not os.path.exists(init_dir):
+        shutil.copytree(output_path + os.path.sep +"0.orig", init_dir)
+    else:
+        print("Error: template case {} has no 0 or 0.orig subfolder".format(source_path))
+    """
+    #foamCloneCase:   Create a new case directory that includes time, system and constant directories from a source case.
 
 #################################################################################
 
@@ -506,54 +529,55 @@ def createRawFoamFile(case, location, dictname, lines, classname = 'dictionary')
 
 ##################################################################
 
-def runFoamApplication(cmd, case=None, logFile=None):
+def runFoamApplication(cmd, case):
+    """ Run OpenFOAM application and automatically generate the log.application file (Wait until finished)
+        cmd  - String with the application being the first entry followied by the options.
+              e.g. `transformPoints -scale "(0.001 0.001 0.001)"
+        case - Case directory or path
     """
-    run OpenFOAM command, wait until finished
-    parameters:
-    case might be empty string or None for testing command, e.g. `simpleFoam -version`
-    application must be the first item of cmds sequence or first word of comline string
-    by default, output is not log but is print if in debug mode
-    error is reported in printing instead of raise exception
-    Bash on Ubuntu on Windows, may need case path translation done in Builder
-    unicode path and filename will be automatically supported when migrated to Python3
-    """
-
     if (isinstance(cmd, list) or isinstance(cmd, tuple)):
         cmds = cmd
     elif isinstance(cmd, str):
-        cmds = cmd.split(' ')  # it does not matter if the following options is not split correctly like space and quote
+        cmds = cmd.split(' ')  # Insensitive to incorrect split like space and quote
     else:
-        print("Warning: command and options must be specified in a list or tuple")
+        raise Exception("Error: Application and options must be specified as a list or tuple.")
+
+    app = cmds[0]
+    logFile = "{}/log.{}".format(os.path.abspath(case), app)
+
+    if os.path.exists(logFile):
+        print("Warning: {} already exists, removed to rerun {}.".format(logFile,app))
+        os.remove(logFile)
 
     if getFoamRuntime() == "BashWSL":
         out = runFoamCommandOnWSL(case, cmds, logFile)
     else:
-        if logFile:
-            if not os.path.isabs(logFile):
-                if not case:
-                    print("Error: if logFile is not absolute path, case path must be specified")
-                else:
-                    logFile = os.path.abspath(case) + os.path.sep + logFile
-            if os.path.exists(logFile):
-                print ("Warning: " + logFile + " already exists under " + case + ", and is removed")
-                os.remove(logFile)
-
-        app = cmds[0]
-        cmdline = app + ' ' + ' '.join(cmds[1:])  # an extra space to sep app and options
+        cmdline = app+' -case "'+case+'" '+' '.join(cmds[1:])   # Space to separate options
         env_setup_script = "{}/etc/bashrc".format(getFoamDir())
 
-        if logFile:
-            # list of commands will works, but command string merged is not working
-            #cmdline = """bash -c 'source {} && {} > "{}" ' """.format(env_setup_script, cmdline, logFile)
-            cmdline = ['bash', '-c', """source "{}" && {} > "{}" """.format(env_setup_script, cmdline, logFile)]
-        else:
-            #cmdline = """bash -c 'source {} && {}' """.format(env_setup_script, cmdline)
-            cmdline = ['bash', '-c', """source "{}" && {} """.format(env_setup_script, cmdline)]
-        #cmdline += (" | tee "+logFile) # Pipe to screen and log file
-        print("Running: ", cmdline)
+        print("Running ", cmdline)
+        # cmdline += (" | tee "+logFile) # Pipe to screen and log file
+        cmdline += (" > " + logFile)     # Pipe to log file
+        cmdline = ['bash', '-c', """source "{}" && {} """.format(env_setup_script, cmdline)]
+
         out = subprocess.check_output(cmdline, cwd=case, stderr=subprocess.PIPE)
-    if _debug:
-        print(out)
+    if _debug: print(out)
+
+
+# not a good way to extract path in command line, double quote and space cause problem      
+# deprecated, just for compatible propurse, remove in next commit
+def _translateFoamCasePath(cmd):
+    """ Bash on Windows (Windows Linux Subsystem) needs a translation from windows path to linux path
+    """
+    if not (isinstance(cmd, list) or isinstance(cmd, tuple)):
+        print("Warning: command and options must be specified in a list or tuple")
+    l = len(cmd)
+    for i,s in enumerate(cmd):
+        if s == "-case" and i+1 < l:
+            p = cmd[i+1]  # it must exist
+            pp = translatePath(p)
+            cmd[i+1] = pp
+    return cmd
 
 
 ########################################  Mesh manupulation  ###############################
