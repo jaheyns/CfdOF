@@ -45,18 +45,20 @@ class CfdWorkbench(Workbench):
         import _CommandCfdSolverControl
         import _CommandCfdPhysicsSelection
         #import _CommandCfdResult  # error in import vtk6 in python, this function is implemented in File->Open Instead
+        import _CommandCfdFluidMaterial
 
         # classes developed in FemWorkbench
         import _CommandCfdMeshGmshFromShape
         import _CommandMeshNetgenFromShape
-        import _CommandMeshRegion
-        import _CommandPrintMeshInfo
-        import _CommandClearMesh
-        import _CommandCfdFluidMaterial
+        # import _CommandMeshRegion # Not currently in-use (Confusing to users)
+        # import _CommandPrintMeshInfo # Create a fluid specific check as the current does not contain any
+        #                              # useful info for flow (see checkMesh)
+        # import _CommandClearMesh  # Not currently in-use (Confusing to users)
+
 
         # Post Processing commands are located in FemWorkbench, implemented and imported in C++
         cmdlst = ['Cfd_Analysis', 'Fem_MeshNetgenFromShape', 'Cfd_MeshGmshFromShape',
-                        'Fem_MeshRegion', 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
+                        #'Fem_MeshRegion', 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
                         'Fem_ConstraintFluidBoundary','Cfd_PhysicsModel', 'Cfd_SolverControl', 'Cfd_FluidMaterial', "Separator",
                         "Fem_PostPipelineFromResult", "Fem_PostCreateClipFilter",
                         "Fem_PostCreateScalarClipFilter", "Fem_PostCreateCutFilter"]
