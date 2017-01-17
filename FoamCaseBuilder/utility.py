@@ -405,7 +405,7 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
     fname = case + os.path.sep + "Allrun"
     meshOrg_dir = case + os.path.sep + "constant/polyMesh.org"
     mesh_dir = case + os.path.sep + "constant/polyMesh"
-        
+
     if os.path.exists(fname):
         if _debug: print("Warning: Overwrite existing Allrun script ")
     with open(fname, 'w+') as f:
@@ -415,27 +415,31 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
         # to be passed if they can be read using these bash functions 
         #f.write("# Source tutorial run functions \n")
         #f.write(". $WM_PROJECT_DIR/bin/tools/RunFunctions \n\n")
-    
-        f.write("# Create symbolic links to polyMesh.org \n")
-        f.write("mkdir {} \n".format(mesh_dir))
-        f.write("ln -s {}/boundary {} \n".format(meshOrg_dir, mesh_dir))
-        f.write("ln -s {}/faces {} \n".format(meshOrg_dir, mesh_dir))
-        f.write("ln -s {}/neighbour {} \n".format(meshOrg_dir, mesh_dir))
-        f.write("ln -s {}/owner {} \n".format(meshOrg_dir, mesh_dir))
-        f.write("ln -s {}/points {} \n".format(meshOrg_dir, mesh_dir))
+
+        f.write("# Unset and source bashrc\n")
+        f.write("source {}/etc/config/unset.sh\n".format(getFoamDir()))
+        f.write("source {}/etc/bashrc\n\n".format(getFoamDir()))
+
+        f.write("# Create symbolic links to polyMesh.org\n")
+        f.write("mkdir {}\n".format(mesh_dir))
+        f.write("ln -s {}/boundary {}\n".format(meshOrg_dir, mesh_dir))
+        f.write("ln -s {}/faces {}\n".format(meshOrg_dir, mesh_dir))
+        f.write("ln -s {}/neighbour {}\n".format(meshOrg_dir, mesh_dir))
+        f.write("ln -s {}/owner {}\n".format(meshOrg_dir, mesh_dir))
+        f.write("ln -s {}/points {}\n".format(meshOrg_dir, mesh_dir))
         f.write("\n")
         
         if (init_potential):
-            f.write ("# Initialise flow \n")
-            f.write ("potentialFoam -case "+case+" 2>&1 | tee "+case+"/log.potentialFoam \n\n")
+            f.write ("# Initialise flow\n")
+            f.write ("potentialFoam -case "+case+" 2>&1 | tee "+case+"/log.potentialFoam\n\n")
         
         if (run_parallel):
-            f.write ("# Run application in parallel \n")
-            f.write ("decomposePar 2>&1 | tee log.decomposePar \n")
-            f.write ("mpirun -np {} {} -parallel -case {} 2>&1 | tee {}/log.{} \n\n".format(str(num_proc), solver_name, case, case,solver_name))
+            f.write ("# Run application in parallel\n")
+            f.write ("decomposePar 2>&1 | tee log.decomposePar\n")
+            f.write ("mpirun -np {} {} -parallel -case {} 2>&1 | tee {}/log.{}\n\n".format(str(num_proc), solver_name, case, case,solver_name))
         else:
-            f.write ("# Run application \n")
-            f.write ("{} -case {} 2>&1 | tee {}/log.{} \n\n".format(solver_name,case,case,solver_name))
+            f.write ("# Run application\n")
+            f.write ("{} -case {} 2>&1 | tee {}/log.{}\n\n".format(solver_name,case,case,solver_name))
 
     cmdline = ("chmod a+x "+fname) # Update Allrun permission
     out = subprocess.check_output(['bash', '-l', '-c', cmdline], stderr=subprocess.PIPE)
