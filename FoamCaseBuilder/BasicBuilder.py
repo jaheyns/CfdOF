@@ -1018,19 +1018,28 @@ class BasicBuilder(object):
         # velocity intial value is default to wall: uniform (0,0,0)
         Uf = ParsedParameterFile(self._casePath + "/0/U")
         Uf["boundaryField"][bcName] = {}      
-        if inlet_type == "massFlowRate":  # compressible flow only?
+        if inlet_type == "massFlowRate":
             Uf["boundaryField"][bcName]["type"] = "flowRateInletVelocity"
             Uf["boundaryField"][bcName]["massFlowRate"] = value  # kg/s
             Uf["boundaryField"][bcName]["rho"] = "rho"
-            Uf["boundaryField"][bcName]["rhoInlet"] = "rho"
+            for k in set(['rho', 'density']):
+                Uf["boundaryField"][bcName]["rhoInlet"] = self._fluidProperties[k] # This is used if rho field is not found
             Uf["boundaryField"][bcName]["value"] = "$internalField"
         elif inlet_type == "volumetricFlowRate":
             Uf["boundaryField"][bcName]["type"] = "flowRateInletVelocity"
             Uf["boundaryField"][bcName]["volumetricFlowRate"] = value  # m3/s
-            Uf["boundaryField"][bcName]["value"] = "uniform (0 0 0)"
+            Uf["boundaryField"][bcName]["value"] = "$internalField"
         elif inlet_type == "uniformVelocity":
             assert len(value) == 3  # velocity must be a tuple or list with 3 components
-            Uf["boundaryField"][bcName]["type"] = "fixedValue"
+            '''
+                This fixes all three components of velocity on inflow and only the normal component on outflow,
+                in order to be well-posed if there are some faces on the patch which are actually outflows.
+            '''
+            Uf["boundaryField"][bcName]["type"] = "fixedNormalInletOutletVelocity"
+            Uf["boundaryField"][bcName]["fixTangentialInflow"] = "yes"
+            Uf["boundaryField"][bcName]["normalVelocity"] = {}
+            Uf["boundaryField"][bcName]["normalVelocity"]["type"] = "fixedValue"
+            Uf["boundaryField"][bcName]["normalVelocity"]["value"] = formatValue(value)
             Uf["boundaryField"][bcName]["value"] = formatValue(value)
         else:
             print(inlet_type + " is not supported as inlet boundary type")
@@ -1066,46 +1075,48 @@ class BasicBuilder(object):
 
         pf = ParsedParameterFile(self._casePath + "/0/p")
         pf["boundaryField"][bcName] = {}
-        if outlet_type == "totalPressure":
+        if outlet_type == "totalPressure": # For outflow, totalPressure BC actually imposes static pressure, so this should probably be changed
             pf["boundaryField"][bcName]["type"] = 'totalPressure'
             pf["boundaryField"][bcName]["p0"] = 'uniform {}'.format(value)
             pf["boundaryField"][bcName]["gamma"] = 0  # what?  1 .4
             pf["boundaryField"][bcName]["value"] = "$internalField"  # initial value
         elif outlet_type == "staticPressure":
-            pf["boundaryField"][bcName]["type"] = "fixedValue"  # totalPressure
-            pf["boundaryField"][bcName]["value"] = "uniform {}".format(value)
-        elif outlet_type == "massFlowRate" or outlet_type == "volumetricFlowRate":
-            #pf["boundaryField"][bcName]["type"] = "zeroGradient"
-            print("Error: massFlowRate  and volumetricFlowRate not yet supported")
-            return
-        elif outlet_type == "outFlow": #PressureInletVelocityOutlet
-            pf["boundaryField"][bcName]["type"] = "outletInlet"
-            #pf["boundaryField"][bcName]["outletValue"] = "uniform 0"  # not sure! check
-            pf["boundaryField"][bcName]["value"] ="$internalField"
-        else:
-            #default to zeroGradient, for velocityOutlet
+            pf["boundaryField"][bcName]["type"] = 'fixedValue'
+            pf["boundaryField"][bcName]["value"] = 'uniform {}'.format(value)
+        elif outlet_type == "uniformVelocity":
             pf["boundaryField"][bcName]["type"] = "zeroGradient"
-            print("pressure bundary default to zeroGradient for outlet type '{}' ".format(outlet_type))
+        elif outlet_type == "outFlow":
+            pf["boundaryField"][bcName]["type"] = "zeroGradient"
+            pf["boundaryField"][bcName]["value"] = "$internalField"
+        else:
+            pf["boundaryField"][bcName]["type"] = "zeroGradient"
+            print("pressure boundary default to zeroGradient for outlet type '{}' ".format(outlet_type))
         pf.writeFile()
         # velocity intial value is default to wall, uniform 0, so it needs to change
         Uf = ParsedParameterFile(self._casePath + "/0/U")
         Uf["boundaryField"][bcName] = {}
-        if outlet_type == "totalPressure" or outlet_type == "staticPressure" :
-            Uf["boundaryField"][bcName]["type"] = "pressureInletOutletVelocity"  # 
-            Uf["boundaryField"][bcName]["value"] ="uniform (0 0 0)"  # set as initial value only
+        if outlet_type == "totalPressure" or outlet_type == 'staticPressure':
+            Uf["boundaryField"][bcName]["type"] = "pressureInletOutletVelocity"
+            Uf["boundaryField"][bcName]["value"] = "$internalField"  # set as initial value only
         elif outlet_type == "uniformVelocity":
-            Uf["boundaryField"][bcName]["type"] = "fixedValue"
+            '''
+                This fixes only the normal component on outflow and all three components of velocity on inflow,
+                in order to be well-posed on outflow and also in case there are any faces with inflowing velocity.
+            '''
+            Uf["boundaryField"][bcName]["type"] = "fixedNormalInletOutletVelocity"
+            Uf["boundaryField"][bcName]["fixTangentialInflow"] = "true"
+            Uf["boundaryField"][bcName]["normalVelocity"]["type"] = "fixedValue"
+            Uf["boundaryField"][bcName]["normalVelocity"]["value"] = formatValue(value)
             Uf["boundaryField"][bcName]["value"] = formatValue(value)
         elif outlet_type == "outFlow":
             Uf["boundaryField"][bcName]["type"] = "inletOutlet"
-            Uf["boundaryField"][bcName]["outletValue"] ="uniform (0 0 0)"
-            Uf["boundaryField"][bcName]["value"] ="$internalField"
-            #Uf["boundaryField"][bcName]["inletValue"] ="$internalField"
-        else:  # "massFlowRate" "volumetricFlowRate"
-            print("velocity bundary set to inletOutlet for outlet type '{}' ".format(outlet_type))
+            Uf["boundaryField"][bcName]["inletValue"] = "uniform (0 0 0)"
+            Uf["boundaryField"][bcName]["value"] = "$internalField"  # TODO: We need to write an out-flowing value here so that adjustPhi can have an adjustable flux to work with at iteration 1
+        else:
+            print("velocity boundary set to inletOutlet for outlet type '{}' ".format(outlet_type))
             Uf["boundaryField"][bcName]["type"] = "zeroGradient"
         Uf.writeFile()
-        #
+
         if 'turbulenceSettings' in bcDict:
             turbulenceSettings = bcDict['turbulenceSettings']
         else:
