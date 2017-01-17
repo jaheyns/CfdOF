@@ -75,6 +75,9 @@ SIMPLE
 potentialFlow
 {
     nNonOrthogonalCorrectors 10;
+
+    PhiRefValue 0;
+    PhiRefCell 0;
 }
 
 relaxationFactors
