@@ -29,6 +29,7 @@ from FemCommands import FemCommands
 
 if FreeCAD.GuiUp:
     import FreeCADGui
+    import FemGui
     from PySide import QtCore
 
 
@@ -39,15 +40,26 @@ class _CommandCfdSolverControl(FemCommands):
         self.resources = {'Pixmap': 'fem-control-solver',
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Solver job control"),
                           'Accel': "S, C",
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Changes solver attributes and runs the calculations for the selected solver")}
-        self.is_active = 'with_solver'
+                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Edit properties and run solver")}
+        # self.is_active = 'with_solver'
+        self.is_active = 'with_analysis'
 
     def Activated(self):
 
         self.hide_parts_constraints_show_meshes()
 
-        solver_obj = FreeCADGui.Selection.getSelection()[0]
-        FreeCADGui.ActiveDocument.setEdit(solver_obj, 0)
+        isPresent = False
+        members = FemGui.getActiveAnalysis().Member
+        for i in members:
+            if "OpenFOAM" in i.Name:
+                FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
+                isPresent = True
+
+        # Allowing user to re-creation if CFDSolver was deleted.
+        if not isPresent:
+            FreeCADGui.addModule("FemGui")
+            FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdSolverFoam.makeCfdSolverFoam()]")
+            FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 
 
 if FreeCAD.GuiUp:
