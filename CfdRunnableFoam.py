@@ -114,15 +114,15 @@ class CfdRunnableFoam(CfdRunnable):
         FreeCAD.Console.PrintMessage("Solver run command: " + cmd + "\n")
         return cmd
 
-    def _view_result_externally(self):
-        self.writer.builder.viewResult()
+    def view_result_externally(self):
+        self.writer.builder.viewResult()  # paraview
 
     def view_result(self):
         #  foamToVTK will write result into VTK data files
-        #result = self.writer.builder.exportResult()
-        result = "/home/qingfeng/Documents/TestCase/VTK/TestCase_345.vtk"  # this is test 
-        from CfdResultFoamVTK import importVTK
-        importVTK(result, self.analysis)
+        result = self.writer.builder.exportResult()
+        #result = "/home/qingfeng/Documents/TestCase/VTK/TestCase_345.vtk"  # test passed
+        from CfdResultFoamVTK import importCfdResult
+        importCfdResult(result, self.analysis)
 
     def process_output(self, text):
         loglines = text.split('\n')
