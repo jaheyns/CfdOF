@@ -82,5 +82,5 @@ def importCfdResult(filename, analysis=None, result_name_prefix=None):
 
     if(FreeCAD.GuiUp) and analysis:
         import FemGui
-        FemGui.setActiveAnalysis(analysis_object)
+        FemGui.setActiveAnalysis(analysis)
         

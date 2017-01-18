@@ -40,12 +40,18 @@ if FreeCAD.GuiUp:
 
 
 class _TaskPanelCfdResult:
-    '''The task panel for the post-processing'''
+    '''
+    The task panel for the CFD post-processing,
+    only contour will be shown not velocity vector, using VTKpipeline in Fem workbench instead
+    property name is defined in CFdResult.py also in cpp code: Fem/App/FemVTKTools.cpp
+    CFD result needs be scaled back to mm, in order to show up with other geometry feature
+    in importVTK?
+    '''
     def __init__(self):
         ui_path = os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdResult.ui"
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
-        self.fem_prefs = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Fem")
-        self.restore_result_settings_in_dialog = self.fem_prefs.GetBool("RestoreResultDialog", True)
+        #self.fem_prefs = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Fem")
+        #self.restore_result_settings_in_dialog = self.fem_prefs.GetBool("RestoreResultDialog", True)
 
         # Connect Signals and Slots
         QtCore.QObject.connect(self.form.rb_none, QtCore.SIGNAL("toggled(bool)"), self.none_selected)
@@ -55,6 +61,7 @@ class _TaskPanelCfdResult:
         QtCore.QObject.connect(self.form.rb_mag_velocity, QtCore.SIGNAL("toggled(bool)"), self.mag_velocity_selected)
         QtCore.QObject.connect(self.form.rb_pressure, QtCore.SIGNAL("toggled(bool)"), self.pressure_selected)
         QtCore.QObject.connect(self.form.rb_temperature, QtCore.SIGNAL("toggled(bool)"), self.temperature_selected)
+        QtCore.QObject.connect(self.form.rb_turbulence_energy, QtCore.SIGNAL("toggled(bool)"), self.turbulence_energy_selected)
 
         #
         """
@@ -67,10 +74,11 @@ class _TaskPanelCfdResult:
         QtCore.QObject.connect(self.form.sb_velocity_factor_max, QtCore.SIGNAL("valueChanged(int)"), self.sb_vel_factor_max_changed)
         """
         self.update()
-        if self.restore_result_settings_in_dialog:
-            self.restore_result_dialog()
-        else:
-            self.restore_initial_result_dialog()
+        FreeCAD.FEM_dialog = {"results_type": 'None' }
+        self.restore_result_dialog()
+        #if self.restore_result_settings_in_dialog:
+        #    self.restore_result_dialog()
+
 
     def restore_result_dialog(self):
         try:
@@ -78,82 +86,65 @@ class _TaskPanelCfdResult:
             if rt == "None":
                 self.form.rb_none.setChecked(True)
                 self.none_selected(True)
+            # not very useful to show contour of Ux, Uy, Uz
+            elif rt == "Ux":
+                self.form.rb_x_velocity.setChecked(True)
+                self.x_velocity_selected(True)
+            elif rt == "Uy":
+                self.form.rb_y_velocity.setChecked(True)
+                self.y_velocity_selected(True)
+            elif rt == "Uz":
+                self.form.rb_z_velocity.setChecked(True)
+                self.z_velocity_selected(True)
+
             elif rt == "Umag":
                 self.form.rb_mag_velocity.setChecked(True)
                 self.mag_velocity_selected(True)
-                """
-                elif rt == "Ux":
-                    self.form.rb_x_velocity.setChecked(True)
-                    self.x_velocity_selected(True)
-                elif rt == "Uy":
-                    self.form.rb_y_velocity.setChecked(True)
-                    self.y_velocity_selected(True)
-                elif rt == "Uz":
-                    self.form.rb_z_velocity.setChecked(True)
-                    self.z_velocity_selected(True)
-                """
             elif rt == "Pressure":
                 self.form.rb_pressure.setChecked(True)
                 self.pressure_selected(True)
             elif rt == "Temperature":
                 self.form.rb_temperature.setChecked(True)
                 self.rb_temperature(True)
-            elif rt == "TurbulenceViscosity":
-                self.form.rb_turbulence_viscosity.setChecked(True)
-                self.rb_turbulence_viscosity(True)
             elif rt == "TurbulenceEnergy":
                 self.form.rb_turbulence_energy.setChecked(True)
                 self.rb_turbulence_energy(True)
             elif rt == "DissipationRate":
                 self.form.rb_turbulence_dissipation_rate.setChecked(True)
                 self.rb_turbulence_dissipation_rate(True)
-                """
-                sd = FreeCAD.FEM_dialog["show_vel"]
-                self.form.cb_show_velocity.setChecked(sd)
-                self.show_velocity(sd)
-
-                df = FreeCAD.FEM_dialog["vel_factor"]
-                dfm = FreeCAD.FEM_dialog["vel_factor_max"]
-                self.form.hsb_velocity_factor.setMaximum(dfm)
-                self.form.hsb_velocity_factor.setValue(df)
-                self.form.sb_velocity_factor_max.setValue(dfm)
-                self.form.sb_velocity_factor.setValue(df)
-                """
+            elif rt == "TurbulenceViscosity":
+                self.form.rb_turbulence_viscosity.setChecked(True)
+                self.rb_turbulence_viscosity(True)
         except:
-            self.restore_initial_result_dialog()
-
-    def restore_initial_result_dialog(self):
-        FreeCAD.FEM_dialog = {"results_type": "None", "show_vel": False,
-                              "vel_factor": 0, "vel_factor_max": 100}
-        fea = FemTools.FemTools()
-        fea.reset_mesh_color()
-        fea.reset_mesh_deformation()
-
-    def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Close)
+            pass
 
     def get_result_stats(self, type_name, analysis=None):
         if "Stats" in self.result_object.PropertiesList:
                 Stats = self.result_object.Stats
                 match_table = {"Ux": (Stats[0], Stats[1], Stats[2]),
-                               "Uy": (Stats[3], Stats[4], Stats[5]),
-                               "Uz": (Stats[6], Stats[7], Stats[8]),
-                               "Umag": (Stats[9], Stats[10], Stats[11]),
-                               "Pressure": (Stats[12], Stats[13], Stats[14]),
-                               "Temperature": (Stats[15], Stats[16], Stats[17]),
-                               "Turbulence": (Stats[18], Stats[19], Stats[20]),
-                               "TurbulenceEnergyViscosity": (Stats[21], Stats[22], Stats[23]),
-                               "TurbulenceDissipationRate": (Stats[24], Stats[25], Stats[26]),
-                               "TurbulenceSpecificDissipation": (Stats[27], Stats[28], Stats[29]),
-                               "None": (0.0, 0.0, 0.0)}
+                                       "Uy": (Stats[3], Stats[4], Stats[5]),
+                                       "Uz": (Stats[6], Stats[7], Stats[8]),
+                                       "Umag": (Stats[9], Stats[10], Stats[11]),
+                                       "Pressure": (Stats[12], Stats[13], Stats[14]),
+                                       "Temperature": (Stats[15], Stats[16], Stats[17]),
+                                       "TurbulenceEnergy": (Stats[18], Stats[19], Stats[20]),
+                                       "TurbulenceViscosity": (Stats[21], Stats[22], Stats[23]),
+                                       "TurbulenceDissipationRate": (Stats[24], Stats[25], Stats[26]),
+                                       "TurbulenceSpecificDissipation": (Stats[27], Stats[28], Stats[29]),
+                                       "None": (0.0, 0.0, 0.0)}
                 return match_table[type_name]
         return (0.0, 0.0, 0.0)
 
     def none_selected(self, state):
         FreeCAD.FEM_dialog["results_type"] = "None"
         self.set_result_stats("mm", 0.0, 0.0, 0.0)
-        fea = FemTools.FemTools()
-        fea.reset_mesh_color()
+        self.reset_mesh_color()
+
+    def reset_mesh_color(self):
+        if self.MeshObject:
+            self.MeshObject.ViewObject.NodeColor = {}
+            self.MeshObject.ViewObject.ElementColor = {}
+            self.MeshObject.ViewObject.setNodeColorByScalars()
 
     def mag_velocity_selected(self, state):
         FreeCAD.FEM_dialog["results_type"] = "Umag"
@@ -196,7 +187,7 @@ class _TaskPanelCfdResult:
         QApplication.setOverrideCursor(Qt.WaitCursor)
         if self.suitable_results:
             self.MeshObject.ViewObject.setNodeColorByScalars(self.result_object.NodeNumbers, self.result_object.TurbulenceEnergy)
-        (minm, avg, maxm) = self.get_result_stats("MTurbulenceEnergy")
+        (minm, avg, maxm) = self.get_result_stats("TurbulenceEnergy")
         self.set_result_stats("Unit?", minm, avg, maxm)
         QtGui.qApp.restoreOverrideCursor()
 
@@ -208,8 +199,9 @@ class _TaskPanelCfdResult:
         (minm, avg, maxm) = self.get_result_stats("TurbulenceDissipationRate")
         self.set_result_stats("Unit?", minm, avg, maxm)
         QtGui.qApp.restoreOverrideCursor()
-    """
-    def turbulence_dissipation_rate_selected(self, state):
+
+    # this funct is not in use
+    def turbulence_specific_dissipation_selected(self, state):
         FreeCAD.FEM_dialog["results_type"] = "TurbulenceSpecificDissipation"
         QApplication.setOverrideCursor(Qt.WaitCursor)
         if self.suitable_results:
@@ -217,7 +209,7 @@ class _TaskPanelCfdResult:
         (minm, avg, maxm) = self.get_result_stats("TurbulenceSpecificDissipation")
         self.set_result_stats("Unit?", minm, avg, maxm)
         QtGui.qApp.restoreOverrideCursor()
-    """
+
     def turbulence_viscosity_selected(self, state):
         FreeCAD.FEM_dialog["results_type"] = "TurbulenceViscosity"
         QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -227,32 +219,7 @@ class _TaskPanelCfdResult:
         self.set_result_stats("Unit?", minm, avg, maxm)
         QtGui.qApp.restoreOverrideCursor()
 
-    def user_defined_text(self, equation):
-        FreeCAD.FEM_dialog["results_type"] = "user"
-        self.form.user_def_eq.toPlainText()
-    """
-    def calculate(self):
-        FreeCAD.FEM_dialog["results_type"] = "None"
-        self.update()
-        self.restore_result_dialog()
-        # Convert existing values to numpy array
-        P1 = np.array(self.result_object.PrincipalMax)
-        P2 = np.array(self.result_object.PrincipalMed)
-        P3 = np.array(self.result_object.PrincipalMin)
 
-        p = np.array(self.result_object.StressValues)
-        T = np.array(self.result_object.Temperature)
-        vel_vectors = np.array(self.result_object.DisplacementVectors)
-        Ux = np.array(vel_vectors[:, 0])
-        Uy = np.array(vel_vectors[:, 1])
-        Uz = np.array(vel_vectors[:, 2])
-
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        if self.suitable_results:
-            self.MeshObject.ViewObject.setNodeColorByScalars(self.result_object.NodeNumbers, UserDefinedFormula)
-        self.set_result_stats("", minm, avg, maxm)
-        QtGui.qApp.restoreOverrideCursor()
-    """
     def select_velocity_type(self, vel_type):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         if vel_type == "Umag":
@@ -261,7 +228,7 @@ class _TaskPanelCfdResult:
                 self.MeshObject.ViewObject.setNodeColorByScalars(self.result_object.NodeNumbers, velMag)
         else:
             match = {"Ux": 0, "Uy": 1, "Uz": 2}
-            d = zip(*self.result_object.Velocity)  # DisplacementVectors -> VelocityVectors
+            d = zip(*self.result_object.Velocity)  # VelocityVectors
             velocity = list(d[match[vel_type]])
             if self.suitable_results:
                 self.MeshObject.ViewObject.setNodeColorByScalars(self.result_object.NodeNumbers, velocity)
@@ -279,19 +246,27 @@ class _TaskPanelCfdResult:
 
 
     def update(self):
-        self.MeshObject = None
         self.result_object = CfdTools.getResultObject()  # return the first one, or the currently selected result object
-        # Disable temperature radio button if it does not exist in results
-        if len(self.result_object.Temperature) == 1:
-                self.form.rb_temperature.setEnabled(0)
-        #
-        for i in FemGui.getActiveAnalysis().Member:
-            if i.isDerivedFrom("Fem::FemMeshObject"):
-                self.MeshObject = i
-                break
-
         self.suitable_results = False
         if self.result_object:
+            # todo: enable widget only if variable floatlist is not empty
+            if len(self.result_object.Temperature) == 1:  # default value for FloatList is : [0]
+                self.form.rb_temperature.setEnabled(0)
+            if len(self.result_object.TurbulenceEnergy) == 1:  # default value for FloatList is : [0]
+                self.form.rb_turbulence_energy.setEnabled(0)
+            
+            if self.result_object.Mesh:
+                self.MeshObject = self.result_object.Mesh
+            else:
+                FreeCAD.Console.PrintError('no Mesh object found in ResultObject {}'.format(self.result_object.Name))
+                """
+                # the first mesh object found is the mesh before writing case and solving
+                for i in FemGui.getActiveAnalysis().Member:
+                    if i.isDerivedFrom("Fem::FemMeshObject"):
+                        self.MeshObject = i
+                        break
+                """
+
             if (self.MeshObject.FemMesh.NodeCount == len(self.result_object.NodeNumbers)):
                 self.suitable_results = True
             else:
@@ -299,6 +274,8 @@ class _TaskPanelCfdResult:
                     FreeCAD.Console.PrintError('Only 3D FEM or CFD Meshes are supported!\n')
                 else:
                     FreeCAD.Console.PrintError('Result node numbers are not equal to FEM Mesh NodeCount!\n')
+        else:
+            FreeCAD.Console.PrintError('None returned by CfdTools.getResultObject() in update()')
 
     def accept(self):
         FreeCADGui.Control.closeDialog()
