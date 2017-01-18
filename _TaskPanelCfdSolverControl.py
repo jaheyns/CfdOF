@@ -58,8 +58,6 @@ class _TaskPanelCfdSolverControl:
 
         self.solver_runner = solver_runner_obj
         self.solver_object = solver_runner_obj.solver
-        # test if Proxy instance is not None and correct type, or create a new python instance
-        #self.solver_python_object = CfdTools.getSolverPythonFromAnalysis(self.analysis_object)
 
         self.SolverProcess = QtCore.QProcess()
         self.Timer = QtCore.QTimer()
@@ -88,8 +86,8 @@ class _TaskPanelCfdSolverControl:
         QtCore.QObject.connect(self.form.pb_edit_inp, QtCore.SIGNAL("clicked()"), self.editSolverInputFile)
         QtCore.QObject.connect(self.form.pb_run_solver, QtCore.SIGNAL("clicked()"), self.runSolverProcess)
         QtCore.QObject.connect(self.form.pb_show_result, QtCore.SIGNAL("clicked()"), self.showResult)
-        
-        
+        QtCore.QObject.connect(self.form.pb_view_externally, QtCore.SIGNAL("clicked()"), self.viewResultExternally)
+
         #
         QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("started()"), self.solverProcessStarted)
         QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("stateChanged(QProcess::ProcessState)"), self.solverProcessStateChanged)
@@ -97,7 +95,9 @@ class _TaskPanelCfdSolverControl:
         QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("finished(int)"), self.solverProcessFinished)
 
         QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.updateText)
-        self.form.pb_show_result.setEnabled(True)
+        self.form.pb_show_result.setEnabled(True)  # delete this once finished signal is correctly managed
+        if self.solver_object.ResultObtained:
+            self.form.pb_show_result.setEnabled(True)
         self.Start = time.time() #debug tobe removed, it is not used in this taskpanel
         self.update()  # update UI from FemSolverObject, like WorkingDir
 
@@ -145,7 +145,6 @@ class _TaskPanelCfdSolverControl:
         self.form.le_working_dir.setText(info_obj.WorkingDir)
 
     def write_input_file_handler(self):
-               
         QApplication.restoreOverrideCursor()
         if self.check_prerequisites_helper():
             # self.solver_object.SolverName == "OpenFOAM":
@@ -191,10 +190,7 @@ class _TaskPanelCfdSolverControl:
         self.femConsoleMessage("Edit case input file in FreeCAD is not implemented!")
         self.solver_runner.edit_case()
 
-    
-        
-    
-    
+
     def runSolverProcess(self):
         #Re-starting a simulation from the last time step has currently been de-actived
         #by using an AllRun script. Therefore just re-setting the residuals here for plotting
@@ -264,12 +260,14 @@ class _TaskPanelCfdSolverControl:
             self.femConsoleMessage("External solver process is done!", "#00AA00")
             self.printSolverProcessStdout()
             self.form.pb_run_solver.setText("Re-run Solver")
+            self.solver_object.ResultObtained = True
+            self.form.pb_show_result.setEnabled(True)
         else:
-                self.femConsoleMessage("Solver Process Finished with error code: {}".format(exitCode))
+            self.femConsoleMessage("Solver Process Finished with error code: {}".format(exitCode))
         # Restore previous cwd
         QtCore.QDir.setCurrent(self.cwd)
         self.Timer.stop()
-        self.form.pb_show_result.setEnabled(True)
+
 
     def printSolverProcessStdout(self):
         out = self.SolverProcess.readAllStandardOutput()
@@ -295,3 +293,5 @@ class _TaskPanelCfdSolverControl:
         QApplication.restoreOverrideCursor()
         self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
 
+    def viewResultExternally(self):
+        self.solver_runner.view_result_externally()

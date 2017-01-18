@@ -386,8 +386,10 @@ class BasicBuilder(object):
         #search for *.vtk
         import glob
         vtk_files = glob.glob(self._casePath + os.path.sep + "VTK" + os.path.sep + "*.vtk")
-        if len(vtk_files) != 1: 
+        if len(vtk_files) >= 1: 
             print("only one file name with full path is expected for the result vtk file")
+            return vtk_files[-1]
+
 
     ####################################################################################
     
