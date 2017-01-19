@@ -193,7 +193,8 @@ class CfdCaseWriterFoam:
         bc_settings = []
         for bc in self.bc_group:
             #FreeCAD.Console.PrintMessage("write boundary condition: {}\n".format(bc.Label))
-            assert bc.isDerivedFrom("Fem::ConstraintFluidBoundary")
+            assert bc.isDerivedFrom("CfdFluidBoundary")
+            print(bc.label)
             bc_dict = {'name': bc.Label, "type": bc.BoundaryType, "subtype": bc.Subtype, "value": bc.BoundaryValue}
             if bc_dict['type'] == 'inlet' and bc_dict['subtype'] == 'uniformVelocity':
                 bc_dict['value'] = [abs(v) * bc_dict['value'] for v in tuple(bc.DirectionVector)]
