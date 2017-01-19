@@ -54,10 +54,13 @@ This module aims to accelerate CFD case build up. Limited by the long solving ti
 - PyFoam (0.6.6+) `sudo pip install PyFoam`
 
 - gnuplot.py/gnuplot-py
+  Residual plotter  
+
+- paraview 
+  External results viewing
  
 optional:
 
-- paraFoam (paraview for Openfoam, usually installed with OpenFoam)
 - salome for mesihng
 - gnuplot
 

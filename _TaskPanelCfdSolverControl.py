@@ -59,9 +59,10 @@ class _TaskPanelCfdSolverControl:
         self.solver_runner = solver_runner_obj
         self.solver_object = solver_runner_obj.solver
 
-        self.SolverProcess = QtCore.QProcess()
-        self.Timer = QtCore.QTimer()
-        self.Timer.start(3000)
+        # NOTE: SolverProcess was replaced with solver_run_process
+        # self.SolverProcess = QtCore.QProcess()
+        # self.Timer = QtCore.QTimer()
+        # self.Timer.start(3000)
 
         # update UI
         self.fem_console_message = ''
@@ -72,12 +73,17 @@ class _TaskPanelCfdSolverControl:
         #
         #======================================================================================================
         self.solver_run_process = QtCore.QProcess()
+        self.Timer = QtCore.QTimer()
+        self.Timer.start(3000)
 
         #self.solver_run_process.readyReadStandardOutput.connect(self.stdoutReady)
         QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("finished(int)"), self.solverFinished)
         QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.plotResiduals)
         QtCore.QObject.connect(self.form.terminateSolver, QtCore.SIGNAL("clicked()"), self.killSolverProcess)
         self.form.terminateSolver.setEnabled(False)
+
+        self.open_paraview = QtCore.QProcess()
+
         #======================================================================================================
 
         # Connect Signals and Slots
@@ -86,18 +92,15 @@ class _TaskPanelCfdSolverControl:
         QtCore.QObject.connect(self.form.pb_edit_inp, QtCore.SIGNAL("clicked()"), self.editSolverInputFile)
         QtCore.QObject.connect(self.form.pb_run_solver, QtCore.SIGNAL("clicked()"), self.runSolverProcess)
         QtCore.QObject.connect(self.form.pb_show_result, QtCore.SIGNAL("clicked()"), self.showResult)
-        QtCore.QObject.connect(self.form.pb_view_externally, QtCore.SIGNAL("clicked()"), self.viewResultExternally)
+        QtCore.QObject.connect(self.form.pb_paraview, QtCore.SIGNAL("clicked()"), self.openParaview)
 
-        #
-        QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("started()"), self.solverProcessStarted)
-        QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("stateChanged(QProcess::ProcessState)"), self.solverProcessStateChanged)
-        QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("error(QProcess::ProcessError)"), self.solverProcessError)
-        QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("finished(int)"), self.solverProcessFinished)
+        # NOTE: Depreciated QtProcess SolverProcess
+        # QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("started()"), self.solverProcessStarted)
+        # QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("stateChanged(QProcess::ProcessState)"), self.solverProcessStateChanged)
+        # QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("error(QProcess::ProcessError)"), self.solverProcessError)
+        # QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("finished(int)"), self.solverProcessFinished)
 
-        QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.updateText)
-        self.form.pb_show_result.setEnabled(True)  # delete this once finished signal is correctly managed
-        if self.solver_object.ResultObtained:
-            self.form.pb_show_result.setEnabled(True)
+        # QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.updateText)
         self.Start = time.time() #debug tobe removed, it is not used in this taskpanel
         self.update()  # update UI from FemSolverObject, like WorkingDir
 
@@ -130,7 +133,12 @@ class _TaskPanelCfdSolverControl:
 
     def reject(self):
         #FreeCADGui.Control.closeDialog()
+        self.solver_run_process.terminate()
+        self.solver_run_process.waitForFinished()
+        self.open_paraview.terminate()
+        self.open_paraview.waitForFinished()
         FreeCADGui.ActiveDocument.resetEdit()
+
 
     def choose_working_dir(self):
         current_wd = self.solver_object.WorkingDir
@@ -158,6 +166,7 @@ class _TaskPanelCfdSolverControl:
             finally:
                 QApplication.restoreOverrideCursor()
             """
+            self.form.pb_paraview.setEnabled(False)
             ret = self.solver_runner.write_case()
             if ret:
                 self.femConsoleMessage("Write {} case is completed.".format(self.solver_object.SolverName))
@@ -213,11 +222,14 @@ class _TaskPanelCfdSolverControl:
         #NOTE: setting solve button to inactive to ensure that two instances of the same simulation aren's started simulataneously
         self.form.pb_run_solver.setEnabled(False)
         self.form.terminateSolver.setEnabled(True)
+        self.form.pb_show_result.setEnabled(True)
+        self.form.pb_paraview.setEnabled(True)
         self.femConsoleMessage("Solver started")
 
         QApplication.restoreOverrideCursor()
         # all the UI update will done after solver process finished signal
         
+
     def killSolverProcess(self):
         self.femConsoleMessage("Solver manually stopped")
         self.solver_run_process.terminate()
@@ -238,48 +250,35 @@ class _TaskPanelCfdSolverControl:
 
         #NOTE: can print the output from the solver to the console via the following command
         FreeCAD.Console.PrintMessage(text)
-    
-    def solverProcessStarted(self):
-        #print("solver Started()")
-        #print(self.SolverProcess.state())
-        self.form.pb_run_solver.setText("Break Solver process")
 
-    def solverProcessStateChanged(self, newState):
-        if (newState == QtCore.QProcess.ProcessState.Starting):
-            self.femConsoleMessage("Starting Solver...")
-        if (newState == QtCore.QProcess.ProcessState.Running):
-            self.femConsoleMessage("Solver is running...")
-        if (newState == QtCore.QProcess.ProcessState.NotRunning):
-            self.femConsoleMessage("Solver stopped.")
-
-    def solverProcessError(self, error):
-        self.femConsoleMessage("Solver execute error: {}".format(error), "#FF0000")
-
-    def solverProcessFinished(self, exitCode):
-        if not exitCode:
-            self.femConsoleMessage("External solver process is done!", "#00AA00")
-            self.printSolverProcessStdout()
-            self.form.pb_run_solver.setText("Re-run Solver")
-            self.solver_object.ResultObtained = True
-            self.form.pb_show_result.setEnabled(True)
-        else:
-            self.femConsoleMessage("Solver Process Finished with error code: {}".format(exitCode))
-        # Restore previous cwd
-        QtCore.QDir.setCurrent(self.cwd)
-        self.Timer.stop()
-
-
-    def printSolverProcessStdout(self):
-        out = self.SolverProcess.readAllStandardOutput()
-        if out.isEmpty():
-            self.femConsoleMessage("Solver stdout is empty", "#FF0000")
-        else:
-            try:
-                out = str(out)  # python3 has no unicode type, utf-8 is the default encoding, this is a portable way to deal with bytes
-                # solver specific error dection code has been deleted here
-                self.femConsoleMessage(out = '<br>'.join([s for s in out.splitlines() if s]))
-            except UnicodeDecodeError:
-                self.femConsoleMessage("Error converting stdout from Solver", "#FF0000")
+    # NOTE: Depreciated QtProcess SolverProcess
+    # def solverProcessStarted(self):
+    #     #print("solver Started()")
+    #     #print(self.SolverProcess.state())
+    #     self.form.pb_run_solver.setText("Break Solver process")
+    #
+    # def solverProcessStateChanged(self, newState):
+    #     if (newState == QtCore.QProcess.ProcessState.Starting):
+    #         self.femConsoleMessage("Starting Solver...")
+    #     if (newState == QtCore.QProcess.ProcessState.Running):
+    #         self.femConsoleMessage("Solver is running...")
+    #     if (newState == QtCore.QProcess.ProcessState.NotRunning):
+    #         self.femConsoleMessage("Solver stopped.")
+    #
+    # def solverProcessError(self, error):
+    #     self.femConsoleMessage("Solver execute error: {}".format(error), "#FF0000")
+    #
+    # def solverProcessFinished(self, exitCode):
+    #     if not exitCode:
+    #         self.femConsoleMessage("External solver process is done!", "#00AA00")
+    #         self.printSolverProcessStdout()
+    #         self.form.pb_run_solver.setText("Re-run Solver")
+    #     else:
+    #             self.femConsoleMessage("Solver Process Finished with error code: {}".format(exitCode))
+    #     # Restore previous cwd
+    #     QtCore.QDir.setCurrent(self.cwd)
+    #     self.Timer.stop()
+    #     self.form.pb_show_result.setEnabled(True)
 
     def showResult(self):
         self.femConsoleMessage("Loading result sets...")
@@ -293,5 +292,12 @@ class _TaskPanelCfdSolverControl:
         QApplication.restoreOverrideCursor()
         self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
 
-    def viewResultExternally(self):
-        self.solver_runner.view_result_externally()
+    def openParaview(self):
+        self.Start = time.time()
+
+        script_name = self.solver_runner.create_paraview_script()
+        cmd = ('paraview --script={}'.format(script_name))
+
+        self.femConsoleMessage("Running "+cmd)
+        self.open_paraview.start(cmd)
+        QApplication.restoreOverrideCursor()

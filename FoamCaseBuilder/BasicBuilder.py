@@ -286,6 +286,7 @@ class BasicBuilder(object):
         # Move mesh files, after being edited, to polyMesh.org  
         movePolyMesh(self._casePath)
 
+    # Adam: It seems like this is not being used?
     def setupMesh(self, updated_mesh_path, scale):
         if os.path.exists(updated_mesh_path):
             convertMesh(self._casePath, updated_mesh_path, scale)
@@ -383,6 +384,37 @@ class BasicBuilder(object):
             print("only one file name with full path is expected for the result vtk file")
             return vtk_files[-1]
 
+
+    def createParaviewScript(self, module_path):
+        fname = os.path.join(self._casePath, "pvScript.py")
+        if (self._solverSettings['parallel']):
+            case_type = "Decomposed Case"
+        else:
+            case_type = "Reconstructed Case"
+
+        script_head = os.path.join(module_path, "data/defaults/paraview/pvScriptHead.py")
+        script_tail = os.path.join(module_path, "data/defaults/paraview/pvScriptTail.py")
+
+        if os.path.exists(fname):
+            print("Warning: Overwrite existing pvScript.py script")
+        with open(fname, 'w+') as f:  # Delete existing content or create new
+
+            # Insert script head
+            with open(script_head, "rb") as infile:
+                f.write(infile.read())
+
+            f.write("\n# create a new OpenFOAMReader\n")
+            f.write("pfoam = OpenFOAMReader(FileName='{}/p.foam')\n".format(self._casePath))
+            f.write("pfoam.CaseType = '{}'\n\n".format(case_type))
+
+            # Insert script tail
+            with open(script_tail, "rb") as infile:
+                f.write(infile.read())
+
+            if not os.path.exists(os.path.join(self._casePath,"p.foam")):
+                os.mknod(os.path.join(self._casePath,"p.foam"))
+
+            return fname
 
     ####################################################################################
     
