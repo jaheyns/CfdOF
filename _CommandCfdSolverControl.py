@@ -58,6 +58,7 @@ class _CommandCfdSolverControl(FemCommands):
         # Allowing user to re-creation if CFDSolver was deleted.
         if not isPresent:
             FreeCADGui.addModule("FemGui")
+            FreeCADGui.addModule("CfdSolverFoam")
             FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdSolverFoam.makeCfdSolverFoam()]")
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 
