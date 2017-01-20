@@ -47,11 +47,11 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.radioButtonBuoyancy.toggled.connect(self.selectThermal)
 
         #temporarily disabling features whihc are not yet supported
-        #self.form.radioButtonRANS.setEnabled(False)
+        self.form.radioButtonRANS.setEnabled(False)
         #self.form.radioButtonTransient.setEnabled(False)
-        #self.form.radioButtonCompressible.setEnabled(False)
-        #self.form.radioButtonEnergy.setEnabled(False)
-        #self.form.radioButtonBuoyancy.setEnabled(False)
+        self.form.radioButtonCompressible.setEnabled(False)
+        self.form.radioButtonEnergy.setEnabled(False)
+        self.form.radioButtonBuoyancy.setEnabled(False)
         
         self.initialiseUponReload()
 
@@ -120,7 +120,7 @@ class _TaskPanelCfdPhysicsSelection:
         else:
             self.form.turbulenceChoiceFrame.setVisible(False)
             self.form.turbulenceModelFrame.setVisible(False)
-            self.physicsModel["Turbulence"] = "None"
+            self.physicsModel["Turbulence"] = None
 
     def thermalStateChanged(self):
         if self.form.thermalCheckBox.isChecked():
@@ -128,7 +128,7 @@ class _TaskPanelCfdPhysicsSelection:
             self.form.radioButtonEnergy.toggle()
         else:
             self.form.thermalSelectionFrame.setVisible(False)
-            self.physicsModel["Thermal"] = "None"
+            self.physicsModel["Thermal"] = None
 
     def RANSChosen(self):
         self.form.turbulenceModelFrame.setVisible(True)

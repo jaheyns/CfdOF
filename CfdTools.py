@@ -89,6 +89,15 @@ if FreeCAD.GuiUp:
             if fem_object in analysis_obj.Member:
                 return analysis_obj
 
+def getPhysicsObject(analysis_object):
+    isPresent = False
+    for i in analysis_object.Member:
+        if "PhysicsModel" in i.Name:
+            physicsModel = i.PhysicsModel
+            isPresent = True
+    if not(isPresent):
+        physicsModel = None #just a placeholder to be created in event that it is not present
+    return physicsModel,isPresent
 
 def getMaterial(analysis_object):
     for i in analysis_object.Member:

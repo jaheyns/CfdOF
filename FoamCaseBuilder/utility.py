@@ -698,6 +698,16 @@ def setDict(dict_file, key, value):
         print('Warning: check parameters for set_dict() key={} value={}'.format(key, value))
     f.writeFile()
 
+def modifyControlDictEntries(dict_file,key,value):
+    """Intent of this function is to change startTime,endTime,deltaT and writeInterval
+    for which setDict does not work because there is only 1 entry in the dict file
+    No error checking is done in this function, as it is assumed to be called correctly
+    """
+    f = ParsedParameterFile(dict_file)
+    f[key] = value
+    f.writeFile()
+
+
 #################################topoSet, multiregion#####################################
 
 def listVarablesInFolder(path):

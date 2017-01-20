@@ -68,16 +68,16 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.InitialVariables['P'] = unicode(value) + "kg*m/s^2"
 
     def fetchPhysicsObject(self):
-        members = FemGui.getActiveAnalysis().Member
-        isPresent = False
-        for i in members:
-            if "PhysicsModel" in i.Name:
-                physicsModel = i.PhysicsModel
-                isPresent = True
+        analysis_obj = FemGui.getActiveAnalysis()
+        from CfdTools import getPhysicsObject
+        PhysicsModel,isPresent = getPhysicsObject(analysis_obj)
         if not(isPresent):
             message = "Missing physics model! \n\nIt appears that the physics model has been deleted. Please re-create."
             QtGui.QMessageBox.critical(None,'Missing physics model',message)
-        return physicsModel
+            #if physics model is not present exit edit mode to allow for re-creation
+            doc = FreeCADGui.getDocument(self.obj.Document)
+            doc.resetEdit()
+        return PhysicsModel
 
     def requestPotentialFoamHelp(self):
         message = "Initialise flow field using PotentialFoam: \n\nPotentialFoam  is useful for generating initial conditions for Ux, Uy, Uz and Pressure for complex problems/geometries and generally assists convergence rates for steady state problems."

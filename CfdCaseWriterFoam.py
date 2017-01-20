@@ -47,6 +47,7 @@ class CfdCaseWriterFoam:
         """
         self.analysis_obj = analysis_obj
         self.solver_obj = CfdTools.getSolver(analysis_obj)
+        self.physics_obj,isPresent = CfdTools.getPhysicsObject(analysis_obj)
         self.mesh_obj = CfdTools.getMesh(analysis_obj)
         self.material_obj = CfdTools.getMaterial(analysis_obj)
         self.bc_group = CfdTools.getConstraintGroup(analysis_obj)
@@ -63,7 +64,40 @@ class CfdCaseWriterFoam:
         self.case_folder = os.path.join(self.solver_obj.WorkingDir, self.solver_obj.InputCaseName)
         self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
         self.installation_path = self.solver_obj.InstallationPath
+        self.solverName = self.fetchOpenFOAMSolverNameBasedOnPhysicsObject()
 
+        self.transientSettings = {"startTime":self.solver_obj.StartTime, 
+                                  "endTime":self.solver_obj.EndTime,
+                                  "timeStep":self.solver_obj.TimeStep, 
+                                  "writeInterval":self.solver_obj.WriteInterval}
+
+        """ NOTE NOTE NOTE: 20/01/2017 these are the default settings from BasicBuilder, which used to be pulled
+        in from the the solver object's settings. These settings currently do not exist within the solver object.
+        These settings are reproduced here from basicbuilder for ease of understanding for the intended developments
+        to come.
+        """
+        self.temporarySolverSettings = {
+                                        'parallel': False,
+                                        'compressible': False,
+                                        'nonNewtonian': False, 
+                                        'transonic': False,
+                                        'porous':False,
+                                        'dynamicMeshing':False,
+                                        'buoyant': False, # body force, like gravity, needs a dict file `constant/g`
+                                        'gravity': (0, -9.81, 0),
+                                        'transient':False,
+                                        'turbulenceModel': 'laminar',
+                                        #
+                                        'potentialInit': False, # CSIP team contributed feature, new property inserted into CfdSolverFoam
+                                        #
+                                        'heatTransfering':False, 
+                                        'conjugate': False, # conjugate heat transfer (CHT)
+                                        'radiationModel': 'noRadiation',
+                                        #'conbustionModel': 'noConbustion',
+                                        #
+                                        #'multiPhaseModel': 'singlePhase' # twoPhase, multiphase
+                                        #'missible': False, # two species can be mixed perfectly if missible == True
+                                        }
         # Create initial case from defaults
         # Until module is integrated, store the defaults inside the module directory rather than the resource dir
         # if self.solver_obj.HeatTransfering:
@@ -72,11 +106,14 @@ class CfdCaseWriterFoam:
         # else:
         #     #self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(FreeCAD.getResourceDir(), "Mod", "Cfd", "defaults", "simpleFoam"))
         #     self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(CfdTools.get_module_path(), "data", "defaults", "simpleFoam"))
-        self.builder = fcb.BasicBuilder(self.case_folder,
-                                        self.installation_path,
-                                        CfdTools.getSolverSettings(self.solver_obj),
-                                        os.path.join(CfdTools.get_module_path(), "data", "defaults", "simpleFoam"))
 
+        self.builder = fcb.BasicBuilder(casePath = self.case_folder,
+                                        installationPath = self.installation_path,
+                                        solverSettings = self.temporarySolverSettings,
+                                        #solverSettings = CfdTools.getSolverSettings(self.solver_obj),
+                                        templatePath = os.path.join(CfdTools.get_module_path(), "data", "defaults", self.solverName),
+                                        solverNameExternal = self.solverName,
+                                        transientSettings = self.transientSettings)
 
         self.builder.setInstallationPath()
 
@@ -86,7 +123,7 @@ class CfdCaseWriterFoam:
 
         self.write_material()
         self.write_boundary_condition()
-        self.builder.turbulenceProperties = {"name": self.solver_obj.TurbulenceModel}
+        #self.builder.turbulenceProperties = {"name": self.solver_obj.TurbulenceModel}
 
         self.write_solver_control()
         self.write_time_control()
@@ -97,6 +134,22 @@ class CfdCaseWriterFoam:
         FreeCAD.Console.PrintMessage("{} Sucessfully write {} case to folder \n".format(
                                                         self.solver_obj.SolverName, self.solver_obj.WorkingDir))
         return True
+
+
+    def fetchOpenFOAMSolverNameBasedOnPhysicsObject(self):
+        #NOTE: this should be built up slowly from thr ground up as more physics is made available
+        #I think a logical flow of thought would be to follow the outline within the tutorials
+        solver = None
+
+        if self.physics_obj['Flow'] == 'Incompressible' and (self.physics_obj['Thermal'] is None):
+            if self.physics_obj['Time'] == 'Transient':
+                solver = 'pimpleFoam'
+            else:
+                solver = 'simpleFoam'
+
+        return solver
+        
+
 
     def write_mesh(self):
         """ This is FreeCAD specific code, convert from UNV to OpenFoam
@@ -118,22 +171,21 @@ class CfdCaseWriterFoam:
         """
         #self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': 1e-3}
         #self.builder.fluidProperties = self.material_obj.FluidicProperties
-        
+
         #try:
             #Code for new material definitons. might have to consider how builder sees fluid properties in future
         #kinVisc = FreeCAD.Units.Quantity(self.material_obj.Material['KinematicViscosity'])
         #kinVisc = kinVisc.getValueAs('m^2/s')
-        
-        
+
         Viscosity = FreeCAD.Units.Quantity(self.material_obj.Material['DynamicViscosity'])
         Viscosity = Viscosity.getValueAs('Pa*s')
         Density = FreeCAD.Units.Quantity(self.material_obj.Material['Density'])
         Density = Density.getValueAs('kg/m^3')
-        
+
         kinVisc = Viscosity/Density
         #kinVisc = kinVisc.getValueAs('m^2/s')
-        
-        
+
+
         self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': float(kinVisc)}
         #except:
             #self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': 1e-3}
@@ -151,19 +203,25 @@ class CfdCaseWriterFoam:
             if bc_dict['type'] == 'inlet' and bc_dict['subtype'] == 'uniformVelocity':
                 bc_dict['value'] = [abs(v) * bc_dict['value'] for v in tuple(bc.DirectionVector)]
                 # fixme: App::PropertyVector should be normalized to unit length
-            if self.solver_obj.HeatTransfering:
-                bc_dict['thermalSettings'] = {"subtype": bc.ThermalBoundaryType,
-                                                "temperature": bc.TemperatureValue,
-                                                "heatFlux": bc.HeatFluxValue,
-                                                "HTC": bc.HTCoeffValue}
-            bc_dict['turbulenceSettings'] = {'name': self.solver_obj.TurbulenceModel}
-            # ["Intensity&DissipationRate","Intensity&LengthScale","Intensity&ViscosityRatio", "Intensity&HydraulicDiameter"]
-            if self.solver_obj.TurbulenceModel not in set(["laminar", "invisid", "DNS"]):
-                bc_dict['turbulenceSettings'] = {"name": self.solver_obj.TurbulenceModel,
-                                                "specification": bc.TurbulenceSpecification,
-                                                "intensityValue": bc.TurbulentIntensityValue,
-                                                "lengthValue": bc.TurbulentLengthValue
-                                                }
+            
+            """ NOTE NOTE NOTE 20/01/2017
+            Am temporarily disabling turbulent and heat transfer boundary conditon application
+            This functionality has not yet been added and has been removed from the CFDSolver object
+            Turbulence properties have been relocated to physics object
+            """
+            #if self.solver_obj.HeatTransfering:
+                #bc_dict['thermalSettings'] = {"subtype": bc.ThermalBoundaryType,
+                                                #"temperature": bc.TemperatureValue,
+                                                #"heatFlux": bc.HeatFluxValue,
+                                                #"HTC": bc.HTCoeffValue}
+            #bc_dict['turbulenceSettings'] = {'name': self.solver_obj.TurbulenceModel}
+            ## ["Intensity&DissipationRate","Intensity&LengthScale","Intensity&ViscosityRatio", "Intensity&HydraulicDiameter"]
+            #if self.solver_obj.TurbulenceModel not in set(["laminar", "invisid", "DNS"]):
+                #bc_dict['turbulenceSettings'] = {"name": self.solver_obj.TurbulenceModel,
+                                                #"specification": bc.TurbulenceSpecification,
+                                                #"intensityValue": bc.TurbulentIntensityValue,
+                                                #"lengthValue": bc.TurbulentLengthValue
+                                                #}
 
             bc_settings.append(bc_dict)
         self.builder.internalFields = {'p': 0.0, 'U': (0, 0, 0)}
@@ -178,7 +236,8 @@ class CfdCaseWriterFoam:
     def write_time_control(self):
         """ controlDict for time information
         """
-        if self.solver_obj.Transient:
+        #if self.solver_obj.Transient:
+        if self.physics_obj["Time"] == "Transient":
             self.builder.transientSettings = {"startTime": self.solver_obj.StartTime,
                                         "endTime": self.solver_obj.EndTime,
                                         "timeStep": self.solver_obj.TimeStep,

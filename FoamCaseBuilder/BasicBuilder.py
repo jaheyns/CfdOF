@@ -222,11 +222,13 @@ class BasicBuilder(object):
                         installationPath,
                         solverSettings=getDefaultSolverSettings(),
                         templatePath=None, #detected from solverName which is deduced from sovlerSettings
+                        solverNameExternal=None,
                         fluidProperties = {'name':'water', "compressible":False, 'kinematicViscosity':1e6, "density": 1e3},
                         turbulenceProperties = {'name':'laminar'},
                         boundarySettings = [],
                         internalFields = {},
-                        transientSettings = {"startTime":0, "endTime":1000, "timeStep":1, "writeInterval":100}, # simpleFoam
+                        #transientSettings = {"startTime":0, "endTime":100, "timeStep":1, "writeInterval":100}, # simpleFoam
+                        transientSettings = None,
                         paralleSettings = {'method':"simple", "numberOfSubdomains":multiprocessing.cpu_count()}, # NOTE: check typo should be paralle'l'Settings NOTE: Should we not use scotch for default
                 ):
         if casePath[0] == "~": casePath = os.path.expanduser(casePath)
@@ -234,17 +236,22 @@ class BasicBuilder(object):
         self._installationPath = installationPath
 
         self._solverSettings = solverSettings
-        self._solverName = self.getSolverName()
+
+        if solverNameExternal:
+            self._solverName = solverNameExternal
+        else:
+            self._solverName = self.getSolverName()
+
         if templatePath:
             self._templatePath = templatePath
         else:
             self._templatePath = None
         self._solverCreatedVariables = self.getSolverCreatedVariables()
-        
+
         self._turbulenceProperties = turbulenceProperties
         self._fluidProperties = fluidProperties  # incompressible only
         self._paralleSettings = paralleSettings
-        
+
         self._boundarySettings = boundarySettings
         self._internalFields = internalFields
         self._transientSettings = transientSettings
@@ -259,6 +266,8 @@ class BasicBuilder(object):
         else:
             createCaseFromScratch(self._casePath, self._solverName)
         self._createInitVarables()
+
+        self.updateTemplateControlDict()
         createRunScript(self._casePath, self._solverSettings['potentialInit'], self._solverSettings['parallel'], self._solverName, self._paralleSettings['numberOfSubdomains']) # Specify init_potential (defaults to true)
 
     def build(self):
@@ -271,8 +280,15 @@ class BasicBuilder(object):
         self.setupBoundaryConditions()
         self.setupInternalFields()
 
-        if self._solverSettings['transient']:
-            self.setupSolverControl()
+        """
+            NOTE NOTE NOTE: 20/01/2017 
+            setupSolverControl currently does not do anything
+            We are rather opting currently to copy all relevant solver control files
+            from a best practices directory. Therefore controlDict has already been copied
+            and rather opting to modify runtime information.
+        """
+        #if self._solverSettings['transient']:
+            #self.setupSolverControl()
         if self._solverSettings['parallel']:
             # see: http://cfd.direct/openfoam/user-guide/running-applications-parallel/
             self.setupParallelSettings()
@@ -281,7 +297,7 @@ class BasicBuilder(object):
             self.setupGravityProperties()
         if self._solverSettings['dynamicMeshing']:
             self.setupDynamicMeshingProperties()
-        self.setupSolverControl() # residual, relaxfactor refValue, refCell etc
+        #self.setupSolverControl() # residual, relaxfactor refValue, refCell etc
 
         # Move mesh files, after being edited, to polyMesh.org  
         movePolyMesh(self._casePath)
@@ -417,7 +433,14 @@ class BasicBuilder(object):
             return fname
 
     ####################################################################################
-    
+
+    def updateTemplateControlDict(self):
+        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","startTime",self._transientSettings['startTime'])
+        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","endTime",self._transientSettings['endTime'])
+        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","writeInterval",self._transientSettings['writeInterval'])
+        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","deltaT",self._transientSettings['timeStep'])
+
+
     def getSolverName(self):
         return _getSolverName(self._solverSettings)
 
