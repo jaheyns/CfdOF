@@ -35,6 +35,19 @@ import Fem
 
 ''' Working directory '''
 
+def is_planar(shape):
+    """ Return whether the shape is a planar face """
+    n = shape.normalAt(0.5, 0.5)
+    if len(shape.Vertexes) <= 3:
+        return True
+    for v in shape.Vertexes[1:]:
+        t = v.Point - shape.Vertexes[0].Point
+        c = t.dot(n)
+        if c / t.Length > 1e-8:
+            return False
+    return True
+
+
 def checkWorkingDir(wd):
     ''' Check validity of working directory.
     '''
