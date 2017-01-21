@@ -26,6 +26,8 @@
 
 import FreeCAD
 import FreeCADGui
+import CfdTools
+import os
 
 class _ViewProviderCfdFluidMaterial:
     """A View Provider for the CfdFluidMaterial class
@@ -35,8 +37,10 @@ class _ViewProviderCfdFluidMaterial:
         vobj.Proxy = self
 
     def getIcon(self):
-        """after load from FCStd file, self.icon does not exist, return constant path instead"""
-        return ":/icons/fem-material.svg"
+        # """after load from FCStd file, self.icon does not exist, return constant path instead"""
+        # return ":/icons/fem-material.svg"
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.png")
+        return icon_path
 
     def attach(self, vobj):
         self.ViewObject = vobj

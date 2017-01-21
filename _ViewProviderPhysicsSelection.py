@@ -6,7 +6,8 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import FreeCADGui
-
+import CfdTools
+import os
 
 class _ViewProviderPhysicsSelection:
     "A View Provider for the PhysicsModel object"
@@ -15,7 +16,8 @@ class _ViewProviderPhysicsSelection:
         vobj.Proxy = self
 
     def getIcon(self):
-        return ""
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "physics.png")
+        return icon_path
 
     def attach(self, vobj):
         self.ViewObject = vobj

@@ -29,13 +29,15 @@ from FemCommands import FemCommands
 import FreeCADGui
 import FemGui
 from PySide import QtCore
-
+import CfdTools
+import os
 
 class _CommandCfdMeshGmshFromShape(FemCommands):
     # the Cfd_MeshGmshFromShape command definition
     def __init__(self):
         super(_CommandCfdMeshGmshFromShape, self).__init__()
-        self.resources = {'Pixmap': 'fem-femmesh-gmsh-from-shape',
+        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","mesh_g.png")
+        self.resources = {'Pixmap': icon_path,
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape", "CFD mesh from shape by GMSH"),
                           'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape", "Create a CFD mesh from a shape by GMSH mesher")}
         self.is_active = 'with_part_feature'

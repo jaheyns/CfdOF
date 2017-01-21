@@ -22,6 +22,8 @@
 #***************************************************************************
 
 import FreeCAD
+import CfdTools
+import os
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -37,7 +39,9 @@ class _ViewProviderCfdAnalysis:
         vobj.Proxy = self
 
     def getIcon(self):
-        return ":/icons/fem-cfd-analysis.svg"
+        # return ":/icons/fem-cfd-analysis.svg"
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd_analysis.png")
+        return icon_path
 
     def attach(self, vobj):
         self.ViewObject = vobj

@@ -6,6 +6,8 @@ __url__ = "http://www.freecadweb.org"
 import FreeCAD
 from FemCommands import FemCommands
 import FemGui
+import CfdTools
+import os
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -16,7 +18,8 @@ class _CommandCfdInitialiseInternalFlowField(FemCommands):
     "the Cfd_SolverControl command definition"
     def __init__(self):
         super(_CommandCfdInitialiseInternalFlowField, self).__init__()
-        self.resources = {'Pixmap': '',
+        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","initialise.png")
+        self.resources = {'Pixmap': icon_path,
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_InitialiseInternal", "Initialise"),
                           'Accel': "",
                           'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_InitialiseInternal", "Initialise internal flow variables based on the selected physics model")}

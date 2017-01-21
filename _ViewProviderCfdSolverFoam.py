@@ -28,6 +28,7 @@ import FreeCAD
 import FreeCADGui
 import FemGui
 import CfdTools
+import os
 
 class _ViewProviderCfdSolverFoam:
     """A View Provider for the Solver object, base class for all derived solver
@@ -37,8 +38,10 @@ class _ViewProviderCfdSolverFoam:
         vobj.Proxy = self
 
     def getIcon(self):
-        """after load from FCStd file, self.icon does not exist, return constant path instead"""
-        return ":/icons/fem-solver.svg"
+        # """after load from FCStd file, self.icon does not exist, return constant path instead"""
+        # return ":/icons/fem-solver.svg"
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.png")
+        return icon_path
 
     def attach(self, vobj):
         self.ViewObject = vobj

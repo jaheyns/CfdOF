@@ -26,6 +26,8 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 from FemCommands import FemCommands
+import CfdTools
+import os
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -36,7 +38,8 @@ class _CommandCfdAnalysis(FemCommands):
     "the Cfd_Analysis command definition"
     def __init__(self):
         super(_CommandCfdAnalysis, self).__init__()
-        self.resources = {'Pixmap': 'fem-cfd-analysis',
+        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","cfd_analysis.png")
+        self.resources = {'Pixmap': icon_path,
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_Analysis", "Analysis container"),
                           'Accel': "N, C",
                           'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_Analysis", "Creates a analysis container with a Cfd solver")}

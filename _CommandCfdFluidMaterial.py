@@ -22,6 +22,8 @@
 
 import FreeCAD
 from FemCommands import FemCommands
+import CfdTools
+import os
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -49,9 +51,10 @@ class setCfdFluidPropertyCommand(FemCommands):
         FreeCADGui.doCommand("App.activeDocument()." + FemGui.getActiveAnalysis().Name + ".Member = App.activeDocument()." + FemGui.getActiveAnalysis().Name + ".Member + [App.ActiveDocument.ActiveObject]")
         FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 
-    def GetResources(self): 
+    def GetResources(self):
+        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","material.png")
         return {
-            'Pixmap' : ':/icons/fem-material.svg' , 
+            'Pixmap' : icon_path ,
             'MenuText': 'Add fluid properties', 
             'ToolTip': 'Add fluid properties'
             } 

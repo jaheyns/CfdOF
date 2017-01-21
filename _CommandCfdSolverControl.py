@@ -26,6 +26,8 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 from FemCommands import FemCommands
+import CfdTools
+import os
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -37,7 +39,8 @@ class _CommandCfdSolverControl(FemCommands):
     "the Cfd_SolverControl command definition"
     def __init__(self):
         super(_CommandCfdSolverControl, self).__init__()
-        self.resources = {'Pixmap': 'fem-control-solver',
+        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","solver.png")
+        self.resources = {'Pixmap': icon_path,
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Solver job control"),
                           'Accel': "S, C",
                           'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Edit properties and run solver")}
@@ -58,7 +61,6 @@ class _CommandCfdSolverControl(FemCommands):
         # Allowing user to re-creation if CFDSolver was deleted.
         if not isPresent:
             FreeCADGui.addModule("FemGui")
-            FreeCADGui.addModule("CfdSolverFoam")
             FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdSolverFoam.makeCfdSolverFoam()]")
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 

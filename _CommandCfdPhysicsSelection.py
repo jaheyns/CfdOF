@@ -6,6 +6,8 @@ __url__ = "http://www.freecadweb.org"
 import FreeCAD
 from FemCommands import FemCommands
 import FemGui
+import CfdTools
+import os
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -16,7 +18,8 @@ class _CommandCfdPhysicsSelection(FemCommands):
     "the CFD physics selection command definition"
     def __init__(self):
         super(_CommandCfdPhysicsSelection, self).__init__()
-        self.resources = {'Pixmap': '',
+        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","physics.png")
+        self.resources = {'Pixmap': icon_path,
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_PhysicsModel", "Select models"),
                           'Accel': "",
                           'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_PhysicsModel", "Select the physics model")}
@@ -26,7 +29,7 @@ class _CommandCfdPhysicsSelection(FemCommands):
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Choose appropriate physics model")
         FreeCADGui.addModule("CfdPhysicsSelection")
-        
+
         isPresent = False
         members = FemGui.getActiveAnalysis().Member
         for i in members:

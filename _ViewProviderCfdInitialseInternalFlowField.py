@@ -5,7 +5,8 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import FreeCADGui
-
+import CfdTools
+import os
 
 class _ViewProviderCfdInitialseInternalFlowField:
     "A View Provider for the InitialVariables object"
@@ -14,7 +15,8 @@ class _ViewProviderCfdInitialseInternalFlowField:
         vobj.Proxy = self
 
     def getIcon(self):
-        return ""
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "initialise.png")
+        return icon_path
 
     def attach(self, vobj):
         self.ViewObject = vobj

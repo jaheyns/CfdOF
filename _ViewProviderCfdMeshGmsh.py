@@ -27,7 +27,8 @@ __url__ = "http://www.freecadweb.org"
 import FreeCAD
 import FreeCADGui
 import FemGui
-
+import CfdTools
+import os
 
 class _ViewProviderCfdMeshGmsh:
     "A View Provider for the CfdMeshGmsh object"
@@ -35,7 +36,9 @@ class _ViewProviderCfdMeshGmsh:
         vobj.Proxy = self
 
     def getIcon(self):
-        return ":/icons/fem-femmesh-from-shape.svg"
+        # return ":/icons/fem-femmesh-from-shape.svg"
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
+        return icon_path
 
     def attach(self, vobj):
         self.ViewObject = vobj
