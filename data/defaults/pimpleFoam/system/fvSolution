@@ -19,44 +19,53 @@ solvers
 {
     p
     {
-        solver           GAMG;
-        tolerance        1e-7;
-        relTol           0.01;
-
-        smoother         DICGaussSeidel;
-
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-8;
+        relTol          0.01;
     }
 
     pFinal
     {
         $p;
+        tolerance       1e-8;
         relTol          0;
     }
 
-    "(U|k|epsilon)"
+    U
     {
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       1e-05;
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-8;
         relTol          0.1;
     }
 
-    "(U|k|epsilon)Final"
+    UFinal
     {
         $U;
+        tolerance       1e-8;
         relTol          0;
     }
 }
 
 PIMPLE
 {
-    nOuterCorrectors 5;
+    nOuterCorrectors 10;
     nNonOrthogonalCorrectors 2;
     nCorrectors         2;
+    residualControl
+    {
+        U
+        {
+                tolerance  0.01;
+                relTol      0;
+        }
+        p
+        {
+                tolerance  0.01;
+                relTol      0;
+        }
+     }
 }
 
 

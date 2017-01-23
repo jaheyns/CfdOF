@@ -52,7 +52,8 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.radioButtonCompressible.setEnabled(False)
         self.form.radioButtonEnergy.setEnabled(False)
         self.form.radioButtonBuoyancy.setEnabled(False)
-        
+        self.form.thermalCheckBox.setEnabled(False)
+
         self.initialiseUponReload()
 
 

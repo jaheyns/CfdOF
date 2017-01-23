@@ -137,6 +137,8 @@ class CfdSolver(object):
                             "Time step (second) for transient analysis")
             obj.addProperty("App::PropertyFloat", "WriteInterval", "TimeStepControl",
                             "WriteInterval (second) for transient analysis")
+            obj.addProperty("App::PropertyFloat", "ConvergenceCriteria", "TimeStepControl",
+                            "Global solution convergence criterion")
 
         """Setting initial default values here for transient settings.
         Unlike the intitial build, where time properties were only added
@@ -146,7 +148,7 @@ class CfdSolver(object):
         obj.EndTime = 1000
         obj.TimeStep = 1
         obj.WriteInterval = 100
-    
+        obj.ConvergenceCriteria = 1e-4
 
     ############ standard FeutureT methods ##########
     def execute(self, obj):

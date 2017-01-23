@@ -267,7 +267,8 @@ class BasicBuilder(object):
             createCaseFromScratch(self._casePath, self._solverName)
         self._createInitVarables()
 
-        self.updateTemplateControlDict()
+        self.updateTemplateControlDict() #updates the solver startTime, endTime, writeInterval
+        self.modifySolutionResidualTolerance() #updates the solver residual control tolerance for p and U fields
         createRunScript(self._casePath, self._solverSettings['potentialInit'], self._solverSettings['parallel'], self._solverName, self._paralleSettings['numberOfSubdomains']) # Specify init_potential (defaults to true)
 
     def build(self):
@@ -440,6 +441,17 @@ class BasicBuilder(object):
         modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","writeInterval",self._transientSettings['writeInterval'])
         modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","deltaT",self._transientSettings['timeStep'])
 
+    def modifySolutionResidualTolerance(self):
+        f = ParsedParameterFile(self._casePath + os.path.sep + "system" + os.path.sep + "fvSolution")
+        if "Simple" in self._solverName or "simple" in self._solverName:
+            f["SIMPLE"]['residualControl']['p'] = self._solverSettings['ConvergenceCriteria']
+            f["SIMPLE"]['residualControl']['U'] = self._solverSettings['ConvergenceCriteria']
+        elif "Pimple" in self._solverName or "pimple" in self._solverName:
+            f["PIMPLE"]['residualControl']['p']['tolerance'] = self._solverSettings['ConvergenceCriteria']
+            f["PIMPLE"]['residualControl']['U']['tolerance'] = self._solverSettings['ConvergenceCriteria']
+        else:
+            print("Solver not yet supported")
+        f.writeFile()
 
     def getSolverName(self):
         return _getSolverName(self._solverSettings)

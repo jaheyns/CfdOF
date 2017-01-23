@@ -95,6 +95,7 @@ class CfdCaseWriterFoam:
                                         'heatTransfering':False, 
                                         'conjugate': False, # conjugate heat transfer (CHT)
                                         'radiationModel': 'noRadiation',
+                                        'ConvergenceCriteria' : self.solver_obj.ConvergenceCriteria
                                         #'conbustionModel': 'noConbustion',
                                         #
                                         #'multiPhaseModel': 'singlePhase' # twoPhase, multiphase
