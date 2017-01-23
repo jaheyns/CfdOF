@@ -99,6 +99,16 @@ def getPhysicsObject(analysis_object):
         physicsModel = None #just a placeholder to be created in event that it is not present
     return physicsModel,isPresent
 
+def getInitialConditions(analysis_object):
+    isPresent = False
+    for i in analysis_object.Member:
+        if "InitializeInternalVariables" in i.Name:
+            InitialVariables = i.InitialVariables
+            isPresent = True
+    if not(isPresent):
+        InitialVariables = None #just a placeholder to be created in event that it is not present
+    return InitialVariables,isPresent
+
 def getMaterial(analysis_object):
     for i in analysis_object.Member:
         if i.isDerivedFrom('App::MaterialObjectPython'):

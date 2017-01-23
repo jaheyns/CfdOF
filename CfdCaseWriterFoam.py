@@ -51,6 +51,7 @@ class CfdCaseWriterFoam:
         self.mesh_obj = CfdTools.getMesh(analysis_obj)
         self.material_obj = CfdTools.getMaterial(analysis_obj)
         self.bc_group = CfdTools.getConstraintGroup(analysis_obj)
+        self.initialVariables_obj,isPresent = CfdTools.getInitialConditions(analysis_obj)
         self.mesh_generated = False
 
     def write_case(self, updating=False):
@@ -71,6 +72,7 @@ class CfdCaseWriterFoam:
                                   "timeStep":self.solver_obj.TimeStep, 
                                   "writeInterval":self.solver_obj.WriteInterval}
 
+
         """ NOTE NOTE NOTE: 20/01/2017 these are the default settings from BasicBuilder, which used to be pulled
         in from the the solver object's settings. These settings currently do not exist within the solver object.
         These settings are reproduced here from basicbuilder for ease of understanding for the intended developments
@@ -88,7 +90,7 @@ class CfdCaseWriterFoam:
                                         'transient':False,
                                         'turbulenceModel': 'laminar',
                                         #
-                                        'potentialInit': False, # CSIP team contributed feature, new property inserted into CfdSolverFoam
+                                        'potentialInit': self.initialVariables_obj["PotentialFoam"], # CSIP team contributed feature, new property inserted into CfdSolverFoam
                                         #
                                         'heatTransfering':False, 
                                         'conjugate': False, # conjugate heat transfer (CHT)
@@ -114,6 +116,7 @@ class CfdCaseWriterFoam:
                                         templatePath = os.path.join(CfdTools.get_module_path(), "data", "defaults", self.solverName),
                                         solverNameExternal = self.solverName,
                                         transientSettings = self.transientSettings)
+                                        #internalFields = self.internalFields)
 
         self.builder.setInstallationPath()
 
@@ -137,7 +140,7 @@ class CfdCaseWriterFoam:
 
 
     def fetchOpenFOAMSolverNameBasedOnPhysicsObject(self):
-        #NOTE: this should be built up slowly from thr ground up as more physics is made available
+        #NOTE: this should be built up slowly from the ground up as more physics is made available
         #I think a logical flow of thought would be to follow the outline within the tutorials
         solver = None
 
@@ -148,8 +151,18 @@ class CfdCaseWriterFoam:
                 solver = 'simpleFoam'
 
         return solver
-        
 
+    def extractInternalField(self):
+        Ux = FreeCAD.Units.Quantity(self.initialVariables_obj['Ux'])
+        Ux = Ux.getValueAs('m/s')
+        Uy = FreeCAD.Units.Quantity(self.initialVariables_obj['Uy'])
+        Uy = Uy.getValueAs('m/s')
+        Uz = FreeCAD.Units.Quantity(self.initialVariables_obj['Uz'])
+        Uz = Uz.getValueAs('m/s')
+        P = FreeCAD.Units.Quantity(self.initialVariables_obj['P'])
+        P = P.getValueAs('kg*m/s^2')
+        internalFields = {'p': float(P), 'U': (float(Ux), float(Uy), float(Uz))}
+        return internalFields
 
     def write_mesh(self):
         """ This is FreeCAD specific code, convert from UNV to OpenFoam
@@ -224,7 +237,8 @@ class CfdCaseWriterFoam:
                                                 #}
 
             bc_settings.append(bc_dict)
-        self.builder.internalFields = {'p': 0.0, 'U': (0, 0, 0)}
+        #self.builder.internalFields = {'p': 0.0, 'U': (0, 0, 0)}
+        self.builder.internalFields = self.extractInternalField()
         self.builder.boundaryConditions = bc_settings
 
     def write_solver_control(self):
