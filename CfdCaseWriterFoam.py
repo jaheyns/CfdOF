@@ -183,25 +183,20 @@ class CfdCaseWriterFoam:
         """ Air, Water, CustomedFluid, first step, default to Water, but here increase viscosity for quick convergence
         """
         #self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': 1e-3}
-        #self.builder.fluidProperties = self.material_obj.FluidicProperties
 
-        #try:
-            #Code for new material definitons. might have to consider how builder sees fluid properties in future
-        #kinVisc = FreeCAD.Units.Quantity(self.material_obj.Material['KinematicViscosity'])
-        #kinVisc = kinVisc.getValueAs('m^2/s')
+        if self.physics_obj['Turbulence']=='Inviscid':
+            kinVisc = 0.0
+        else:
+            Viscosity = FreeCAD.Units.Quantity(self.material_obj.Material['DynamicViscosity'])
+            Viscosity = Viscosity.getValueAs('Pa*s')
+            Density = FreeCAD.Units.Quantity(self.material_obj.Material['Density'])
+            Density = Density.getValueAs('kg/m^3')
 
-        Viscosity = FreeCAD.Units.Quantity(self.material_obj.Material['DynamicViscosity'])
-        Viscosity = Viscosity.getValueAs('Pa*s')
-        Density = FreeCAD.Units.Quantity(self.material_obj.Material['Density'])
-        Density = Density.getValueAs('kg/m^3')
+            kinVisc = Viscosity/Density
 
-        kinVisc = Viscosity/Density
-        #kinVisc = kinVisc.getValueAs('m^2/s')
 
 
         self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': float(kinVisc)}
-        #except:
-            #self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': 1e-3}
 
 
     def write_boundary_condition(self):

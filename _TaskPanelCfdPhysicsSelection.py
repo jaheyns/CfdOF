@@ -120,7 +120,7 @@ class _TaskPanelCfdPhysicsSelection:
         else:
             self.form.turbulenceChoiceFrame.setVisible(False)
             self.form.turbulenceModelFrame.setVisible(False)
-            self.physicsModel["Turbulence"] = None
+            self.physicsModel["Turbulence"] = 'Inviscid'
 
     def thermalStateChanged(self):
         if self.form.thermalCheckBox.isChecked():
