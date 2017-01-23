@@ -502,7 +502,7 @@ _foamFileHeader_part1 = '''/*--------------------------------*- C++ -*----------
 |   \\\\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\\\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-'''.format(getFoamVersion()[0], getFoamVersion()[1])
+'''
 
 _foamFileHeader_part2 = '''FoamFile
 {
