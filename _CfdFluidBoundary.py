@@ -35,8 +35,10 @@ class _CfdFluidBoundary:
     def __init__(self, obj):
         obj.Proxy = self
         self.Type = "CfdFluidBoundary"
+        obj.addProperty("App::PropertyPythonObject", "References")
         obj.addProperty("App::PropertyPythonObject", "BoundarySettings")
         # Default settings
+        obj.References = []
         obj.BoundarySettings = {"BoundaryType": "wall",
                                 "BoundarySubtype": "fixed",
                                 "VelocityIsCartesian": True,

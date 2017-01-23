@@ -50,7 +50,7 @@ class CfdCaseWriterFoam:
         self.physics_obj,isPresent = CfdTools.getPhysicsObject(analysis_obj)
         self.mesh_obj = CfdTools.getMesh(analysis_obj)
         self.material_obj = CfdTools.getMaterial(analysis_obj)
-        self.bc_group = CfdTools.getConstraintGroup(analysis_obj)
+        self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initialVariables_obj,isPresent = CfdTools.getInitialConditions(analysis_obj)
         self.mesh_generated = False
 
@@ -193,12 +193,47 @@ class CfdCaseWriterFoam:
         bc_settings = []
         for bc in self.bc_group:
             #FreeCAD.Console.PrintMessage("write boundary condition: {}\n".format(bc.Label))
-            assert bc.isDerivedFrom("CfdFluidBoundary")
-            print(bc.label)
-            bc_dict = {'name': bc.Label, "type": bc.BoundaryType, "subtype": bc.Subtype, "value": bc.BoundaryValue}
-            if bc_dict['type'] == 'inlet' and bc_dict['subtype'] == 'uniformVelocity':
-                bc_dict['value'] = [abs(v) * bc_dict['value'] for v in tuple(bc.DirectionVector)]
-                # fixme: App::PropertyVector should be normalized to unit length
+
+            import _CfdFluidBoundary
+            assert(isinstance(bc.Proxy, _CfdFluidBoundary._CfdFluidBoundary))
+
+            # Interface between CfdFluidBoundary (not, in principle, OpenFOAM-specific) and FoamCaseBuilder
+            bc_dict = {'name': bc.Label,
+                       'type': bc.BoundarySettings['BoundaryType'],
+                       'subtype': bc.BoundarySettings['BoundarySubtype']}
+            import Units
+            if bc.BoundarySettings['VelocityIsCartesian']:
+                velocity = [Units.Quantity(bc.BoundarySettings['Ux']).getValueAs("m/s"),
+                            Units.Quantity(bc.BoundarySettings['Uy']).getValueAs("m/s"),
+                            Units.Quantity(bc.BoundarySettings['Uz']).getValueAs("m/s")]
+            else:
+                veloMag = Units.Quantity(bc.BoundarySettings['VelocityMag']).getValueAs("m/s")
+                face = bc.BoundarySettings['DirectionFace'].split(':')
+                # See if entered face actually exists and is planar
+                try:
+                    selected_object = self.analysis_obj.Document.getObject(face[0])
+                    if hasattr(selected_object, "Shape"):
+                        elt = selected_object.Shape.getElement(face[1])
+                        if elt.ShapeType == 'Face' and CfdTools.is_planar(elt):
+                            n = elt.normalAt(0.5, 0.5)
+                            if bc.BoundarySettings['ReverseNormal']:
+                               n = [-ni for ni in n]
+                            velocity = [ni*veloMag for ni in n]
+                        else:
+                            raise RuntimeError
+                    else:
+                        raise RuntimeError
+                except SystemError, RuntimeError:
+                    from PySide import QtGui
+                    QtGui.QMessageBox.critical(None, "Face error",
+                                               bc.BoundarySettings['DirectionFace'] + " is not a valid, planar face.")
+                    raise RuntimeError
+
+            bc_dict['velocity'] = velocity
+            bc_dict['pressure'] = Units.Quantity(bc.BoundarySettings['Pressure']).getValueAs("kg*m/s^2")
+            bc_dict['massflowrate'] = Units.Quantity(bc.BoundarySettings['MassFlowRate']).getValueAs("kg/s")
+            bc_dict['volflowrate'] = Units.Quantity(bc.BoundarySettings['VolFlowRate']).getValueAs("m^3/s")
+            bc_dict['slipratio'] = Units.Quantity(bc.BoundarySettings['SlipRatio']).getValueAs("m/m")
 
             ''' NOTE: Code depreciated 20/01/2017 (AB)
                       Temporarily disabling turbulent and heat transfer boundary conditon application

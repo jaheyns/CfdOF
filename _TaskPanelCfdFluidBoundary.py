@@ -122,6 +122,7 @@ class TaskPanelCfdFluidBoundary:
         self.selecting_references = False
         self.selecting_direction = False
         self.obj = obj
+        self.References = self.obj.References
         self.BoundarySettings = self.obj.BoundarySettings.copy()
 
         ui_path = os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdFluidBoundary.ui"
@@ -286,8 +287,8 @@ class TaskPanelCfdFluidBoundary:
             if elt.ShapeType == 'Face':
                 selection = (selected_object.Name, sub)
                 if self.selecting_references:
-                    if selection not in self.BoundarySettings['References']:
-                        self.BoundarySettings['References'].append(selection)
+                    if selection not in self.References:
+                        self.References.append(selection)
                         self.rebuild_list_references()
                         # If the user hasn't picked anything for direction, use this face as the default
                         if self.form.lineDirection.text() == "":
@@ -306,7 +307,7 @@ class TaskPanelCfdFluidBoundary:
     def rebuild_list_references(self):
         self.form.listReferences.clear()
         items = []
-        for ref in self.BoundarySettings['References']:
+        for ref in self.References:
             item_name = ref[0] + ':' + ref[1]
             items.append(item_name)
         for listItemName in sorted(items):
@@ -315,7 +316,7 @@ class TaskPanelCfdFluidBoundary:
     def listReferencesRightClicked(self, QPos):
         self.form.contextMenu = QtGui.QMenu()
         menu_item = self.form.contextMenu.addAction("Remove Reference")
-        if not self.BoundarySettings['References']:
+        if not self.References:
             menu_item.setDisabled(True)
         self.form.connect(menu_item, QtCore.SIGNAL("triggered()"), self.remove_reference)
         parent_position = self.form.listReferences.mapToGlobal(QtCore.QPoint(0, 0))
@@ -323,13 +324,13 @@ class TaskPanelCfdFluidBoundary:
         self.form.contextMenu.show()
 
     def remove_reference(self):
-        if not self.BoundarySettings['References']:
+        if not self.References:
             return
         current_item_name = str(self.form.listReferences.currentItem().text())
-        for ref in self.BoundarySettings['References']:
+        for ref in self.References:
             refname = ref[0] + ':' + ref[1]
             if refname == current_item_name:
-                self.BoundarySettings['References'].remove(ref)
+                self.References.remove(ref)
         self.rebuild_list_references()
 
     def inputCheckAndStore(self, value, units, key):
@@ -412,6 +413,7 @@ class TaskPanelCfdFluidBoundary:
     def accept(self):
         if self.selecting_references or self.selecting_direction:
             FreeCADGui.Selection.removeObserver(self)
+        self.obj.References = self.References
         self.obj.BoundarySettings = self.BoundarySettings.copy()
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()

@@ -945,8 +945,8 @@ class BasicBuilder(object):
         """
         bcName = bcDict['name']
         wall_type = bcDict['subtype']
-        if "value" in bcDict:
-            value = bcDict['value']
+        if 'velocity' in bcDict:
+            value = bcDict['velocity']
 
         f = ParsedParameterFile(self._casePath + "/0/U")
         f["boundaryField"][bcName] = {}
@@ -961,8 +961,8 @@ class BasicBuilder(object):
             f["boundaryField"][bcName]["type"] = "slip"
         elif wall_type == 'partialSlip':  # for multiphase flow
             f["boundaryField"][bcName]["type"] = "partialSlip"
-            f["boundaryField"][bcName]["valueFraction"] = value
-            f["boundaryField"][bcName]["value"] = "uniform (0 0 0)" #
+            f["boundaryField"][bcName]["valueFraction"] = bcDict['slipratio']
+            f["boundaryField"][bcName]["value"] = "uniform (0 0 0)"
         elif wall_type == "moving":  # translatingWallVelocity  movingWallVelocity
             f["boundaryField"][bcName]["type"] = "movingWallVelocity"
             f["boundaryField"][bcName]["U"] = formatValue(value)
@@ -1042,9 +1042,9 @@ class BasicBuilder(object):
             subtype = bcDict['subtype']
             if bcDict['type'] in set(['inlet', 'outlet']):
                 if bcDict['subtype'] in set(["staticPressure", "pressure"]):
-                    f["boundaryField"][bc] = {'type': 'prghPressure', 'p': formatValue(bcDict['value'])}
+                    f["boundaryField"][bc] = {'type': 'prghPressure', 'p': formatValue(bcDict['pressure'])}
                 if bcDict['subtype'] == "totalPressure":
-                    f["boundaryField"][bc] = {'type': 'prghTotalPressure', 'p0': formatValue(bcDict['value'])}
+                    f["boundaryField"][bc] = {'type': 'prghTotalPressure', 'p0': formatValue(bcDict['pressure'])}
                 else:
                     f["boundaryField"][bc] = {'type': 'fixedFluxPressure', 'gradient':'uniform 0', 'value': "$internalField"}
             elif bcDict['type'] == 'freestream':
@@ -1061,7 +1061,7 @@ class BasicBuilder(object):
         # value is MPa in FreeCAD, but Pa is needed in OpenFOAM
         bcName = bcDict['name']
         inlet_type = bcDict['subtype']
-        value = bcDict['value']
+        value = bcDict['pressure']
 
         pf = ParsedParameterFile(self._casePath + "/0/p")
         pf["boundaryField"][bcName] = {}
@@ -1097,21 +1097,21 @@ class BasicBuilder(object):
         """
         bcName = bcDict['name']
         inlet_type = bcDict['subtype']
-        value = bcDict['value']
+        value = bcDict['velocity']
 
         # velocity intial value is default to wall: uniform (0,0,0)
         Uf = ParsedParameterFile(self._casePath + "/0/U")
         Uf["boundaryField"][bcName] = {}      
         if inlet_type == "massFlowRate":
             Uf["boundaryField"][bcName]["type"] = "flowRateInletVelocity"
-            Uf["boundaryField"][bcName]["massFlowRate"] = value  # kg/s
+            Uf["boundaryField"][bcName]["massFlowRate"] = bcDict['massflowrate']  # kg/s
             Uf["boundaryField"][bcName]["rho"] = "rho"
             for k in set(['rho', 'density']):
-                Uf["boundaryField"][bcName]["rhoInlet"] = self._fluidProperties[k] # This is used if rho field is not found
+                Uf["boundaryField"][bcName]["rhoInlet"] = self._fluidProperties[k]  # This is used if rho field is not found
             Uf["boundaryField"][bcName]["value"] = "$internalField"
         elif inlet_type == "volumetricFlowRate":
             Uf["boundaryField"][bcName]["type"] = "flowRateInletVelocity"
-            Uf["boundaryField"][bcName]["volumetricFlowRate"] = value  # m3/s
+            Uf["boundaryField"][bcName]["volumetricFlowRate"] = bcDict['volflowrate']  # m3/s
             Uf["boundaryField"][bcName]["value"] = "$internalField"
         elif inlet_type == "uniformVelocity":
             assert len(value) == 3  # velocity must be a tuple or list with 3 components
@@ -1135,7 +1135,7 @@ class BasicBuilder(object):
         else:
             pf["boundaryField"][bcName] = {}
             pf["boundaryField"][bcName]["type"] = "zeroGradient"
-            pf["boundaryField"][bcName]["value"] = "uniform 0"
+            # pf["boundaryField"][bcName]["value"] = "uniform 0" # zG does not require value
         pf.writeFile()
         #
         if 'turbulenceSettings' in bcDict:
@@ -1155,13 +1155,13 @@ class BasicBuilder(object):
         """
         bcName = bcDict['name']
         outlet_type = bcDict['subtype']
-        value = bcDict['value']
+        value = bcDict['pressure']
 
         pf = ParsedParameterFile(self._casePath + "/0/p")
         pf["boundaryField"][bcName] = {}
         if outlet_type == "totalPressure": # For outflow, totalPressure BC actually imposes static pressure, so this should probably be changed
             pf["boundaryField"][bcName]["type"] = 'totalPressure'
-            pf["boundaryField"][bcName]["p0"] = 'uniform {}'.format(value)
+            pf["boundaryField"][bcName]["p0"] = 'uniform {}'.format(bcDict['pressure'])
             pf["boundaryField"][bcName]["gamma"] = 0  # what?  1 .4
             pf["boundaryField"][bcName]["value"] = "$internalField"  # initial value
         elif outlet_type == "staticPressure":
@@ -1176,6 +1176,8 @@ class BasicBuilder(object):
             pf["boundaryField"][bcName]["type"] = "zeroGradient"
             print("pressure boundary default to zeroGradient for outlet type '{}' ".format(outlet_type))
         pf.writeFile()
+
+        value = bcDict['velocity']
         # velocity intial value is default to wall, uniform 0, so it needs to change
         Uf = ParsedParameterFile(self._casePath + "/0/U")
         Uf["boundaryField"][bcName] = {}
@@ -1214,7 +1216,7 @@ class BasicBuilder(object):
         """
         print('internalField must be set for each var in 0/ folder')
         bcName = bcDict['name']
-        value = bcDict['value']
+        value = bcDict['velocity']
         #
         f = ParsedParameterFile(self._casePath + "/0/p")
         f["boundaryField"][bcName] = {}

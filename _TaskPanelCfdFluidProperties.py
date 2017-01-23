@@ -76,8 +76,6 @@ class TaskPanelCfdFluidProperties:
         # self.check_material_keys()
         self.setTextFields(self.material)
 
-        FreeCAD.Console.PrintMessage("Task panel initialised \n")
-
     def selectPredefine(self):
         index = self.form.PredefinedMaterialLibraryComboBox.currentIndex()
 
