@@ -27,26 +27,27 @@ utility functions like mesh exporting, shared by any CFD solver
 
 from __future__ import print_function
 import os
-import os.path
+import os.path  # Is this necessary if os is already imported?
+import tempfile
 
 import FreeCAD
 import Fem
 
+''' Working directory '''
 
-def isWorkingDirValid(wd):
+def checkWorkingDir(wd):
+    ''' Check validity of working directory.
+    '''
     if not (os.path.isdir(wd) and os.access(wd, os.W_OK)):
-        FreeCAD.Console.PrintError("Working dir: {}, is not existent or writable".format(wd))
+        FreeCAD.Console.PrintError("Working directory \'{}\' is not valid".format(wd))
         return False
     else:
         return True
 
 
 def getTempWorkingDir():
-    #FreeCAD.Console.PrintMessage(FreeCAD.ActiveDocument.TransientDir)  # tmp folder for save transient data
-    #FreeCAD.ActiveDocument.FileName  # abspath to user folder, which is not portable across computers
-    #FreeCAD.Console.PrintMessage(os.path.dirname(__file__))  # this function is not usable in InitGui.py
-
-    import tempfile
+    ''' Return temporary working directory
+    '''
     if os.path.exists('/tmp/'):
         workDir = '/tmp/'  # must exist for POSIX system
     elif tempfile.tempdir:
@@ -57,17 +58,20 @@ def getTempWorkingDir():
 
 
 def setupWorkingDir(solver_object):
+    ''' Create working directory
+    '''
     wd = solver_object.WorkingDir
     if not (os.path.exists(wd)):
         try:
             os.makedirs(wd)
         except:
-            FreeCAD.Console.PrintWarning("Dir \'{}\' doesn't exist and cannot be created, using tmp dir instead".format(wd))
+            FreeCAD.Console.PrintWarning("Directory \'{}\' doesn't exist and cannot be created, using tmp dir instead".format(wd))
             wd = getTempWorkingDir()
             solver_object.WorkingDir = wd
     return wd
 
-################################################
+
+''' Various get functions '''
 
 if FreeCAD.GuiUp:
     def getResultObject():
@@ -164,21 +168,11 @@ def getResult(analysis_object):
             return i
     return None
 
-
-def convertQuantityToMKS(input, quantity_type, unit_system="MKS"):
-    """ convert non MKS unit quantity to SI MKS (metre, kg, second)
-    FreeCAD default length unit is mm, not metre, thereby, area is mm^2, pressure is MPa, etc
-    MKS (metre, kg, second) could be selected from "Edit->Preference", "General -> Units",
-    but not recommended since all CAD use mm as basic length unit.
-    see:
-    """
-    return input
-
-
-# Figure out where the module is installed - in the app's module directory or the
-# user's app data folder (the second overrides the first).
 def get_module_path():
-    """returns the current Cfd module path."""
+    """ Returns the current Cfd module path.
+        Check if the module is installed in the app's module directory
+        or the user's app data folder. The second overrides the first.
+    """
     import os
     user_mod_path = os.path.join(FreeCAD.ConfigGet("UserAppData"), "Mod/Cfd")
     app_mod_path = os.path.join(FreeCAD.ConfigGet("AppHomePath"), "Mod/Cfd")
@@ -187,8 +181,18 @@ def get_module_path():
     else:
         return app_mod_path
 
+''' NOTE: Code depreciated'''
+# def convertQuantityToMKS(input, quantity_type, unit_system="MKS"):
+#     """ convert non MKS unit quantity to SI MKS (metre, kg, second)
+#     FreeCAD default length unit is mm, not metre, thereby, area is mm^2, pressure is MPa, etc
+#     MKS (metre, kg, second) could be selected from "Edit->Preference", "General -> Units",
+#     but not recommended since all CAD use mm as basic length unit.
+#     see:
+#     """
+#     return input
 
-#################### UNV mesh writer #########################################
+
+''' UNV mesh writer '''
 
 def write_unv_mesh(mesh_obj, bc_group, mesh_file_name):
     __objs__ = []
@@ -196,31 +200,31 @@ def write_unv_mesh(mesh_obj, bc_group, mesh_file_name):
     FreeCAD.Console.PrintMessage("Export FemMesh to UNV format file: {}\n".format(mesh_file_name))
     Fem.export(__objs__, mesh_file_name)
     del __objs__
-    # repen this unv file and write the boundary faces
+    # Repen the unv file and write the boundary faces.
     _write_unv_bc_mesh(mesh_obj, bc_group, mesh_file_name)
 
 
 def _write_unv_bc_mesh(mesh_obj, bc_group, unv_mesh_file):
     #FreeCAD.Console.PrintMessage('Write face_set on boundaries\n')
-    f = open(unv_mesh_file, 'a')  # appending bc to the volume mesh, which contains node and element definition, ends with '-1'
-    f.write("{:6d}\n".format(-1))  # start of a section
-    f.write("{:6d}\n".format(2467))  # group section
+    f = open(unv_mesh_file, 'a')     # Appending bc to the volume mesh, which contains node and
+                                     # element definition, ends with '-1'
+    f.write("{:6d}\n".format(-1))    # Start of a section
+    f.write("{:6d}\n".format(2467))  # Group section
     for bc_id, bc_obj in enumerate(bc_group):
         _write_unv_bc_faces(mesh_obj, f, bc_id + 1, bc_obj)
-    f.write("{:6d}\n".format(-1))  # end of a section
-    f.write("{:6d}\n".format(-1))  # end of file
+    f.write("{:6d}\n".format(-1))    # end of a section
+    f.write("{:6d}\n".format(-1))    # end of file
     f.close()
 
 
 def _write_unv_bc_faces(mesh_obj, f, bc_id, bc_object):
     facet_list = []
-    for o, e in bc_object.References:  # list of (objectOfType<Part::PartFeature>, (stringName1, stringName2, ...))
-        # merge bugfix from https://github.com/jaheyns/FreeCAD/blob/master/src/Mod/Cfd/CfdTools.py
-        # loop through all the features in e, since there might be multiple entities within a given boundary definition
+    for o, e in bc_object.References:  # List of (objectOfType<Part::PartFeature>, (stringName1, stringName2, ...))
+        # Loop through all the features in e, since there might be multiple entities within a given boundary definition
         for ii in range(len(e)):
-            elem = o.Shape.getElement(e[ii])  # from 0.16 -> 0.17: e is a tuple of string, instead of a string
+            elem = o.Shape.getElement(e[ii])  # From 0.16 -> 0.17: e is a tuple of string, instead of a string
             #FreeCAD.Console.PrintMessage('Write face_set on face: {} for boundary\n'.format(e[0]))
-            if elem.ShapeType == 'Face':  # OpenFOAM needs only 2D face boundary for 3D model, normally
+            if elem.ShapeType == 'Face':      # OpenFOAM uses 2D face boundary patches
                 ret = mesh_obj.FemMesh.getFacesByFace(elem)  # FemMeshPyImp.cpp
                 facet_list.extend(i for i in ret)
     nr_facets = len(facet_list)

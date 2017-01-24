@@ -119,7 +119,7 @@ class _TaskPanelCfdSolverControl:
 
     def update(self):
         'fills the widgets with solver properties, and it must exist and writable'
-        if CfdTools.isWorkingDirValid(self.solver_object.WorkingDir):
+        if CfdTools.checkWorkingDir(self.solver_object.WorkingDir):
             self.form.le_working_dir.setText(self.solver_object.WorkingDir)
         else:
             wd = CfdTools.getTempWorkingDir()
