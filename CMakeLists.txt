@@ -14,7 +14,7 @@ INSTALL(
         CfdTools.py
         CfdCaseWriterFoam.py
         CfdRunnableFoam.py
-	CfdResult.py
+        CfdResult.py
 
         TaskPanelCfdSolverControl.ui
         _TaskPanelCfdSolverControl.py
@@ -26,12 +26,11 @@ INSTALL(
         _CommandCfdAnalysis.py
         _CommandCfdSolverFoam.py
         _CommandCfdSolverControl.py
-	_CommandCfdResult.py
+        _CommandCfdResult.py
 
         FoamCaseBuilder/BasicBuilder.py
         FoamCaseBuilder/__init__.py
         FoamCaseBuilder/utility.py
-        FoamCaseBuilder/ThermalBuilder.py
         FoamCaseBuilder/FoamTemplateString.py
         FoamCaseBuilder/TestBuilder.py
         FoamCaseBuilder/Readme.md

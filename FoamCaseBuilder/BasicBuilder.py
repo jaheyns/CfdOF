@@ -109,12 +109,12 @@ def getDefaultSolverSettings():
             'transient':False,
             'turbulenceModel': 'laminar',
             #
-            'potentialInit': False, # CSIP team contributed feature, new property inserted into CfdSolverFoam
-            #
-            'heatTransfering':False, 
+            'potentialInit': False,
+            # NOTE: Code depreciated 25/02/2016 (JAH)
+            'heatTransfering':False,
             'conjugate': False, # conjugate heat transfer (CHT)
             'radiationModel': 'noRadiation',
-            #'conbustionModel': 'noConbustion',
+            'conbustionModel': 'noConbustion',
             #
             #'multiPhaseModel': 'singlePhase' # twoPhase, multiphase
             #'missible': False, # two species can be mixed perfectly if missible == True
@@ -134,25 +134,26 @@ def _getSolverName(settings):
     if settings['turbulenceModel'] == "invisid":
         return 'potentialFoam'
     #
-    if settings['heatTransfering']:
-        if settings['dynamicMeshing'] or settings['porous'] or settings['nonNewtonian']:
-            print("Error: no matched solver for heat transfering, please develop such a solver")
-            raise NotImplementedError()
-        if settings['transient']:
-            if settings['conjugate']:
-                return 'chtMultiRegionFoam'
-            if settings['compressible']:
-                return 'buoyantPimpleFoam'  # natural convection of compressible
-            else:
-                return 'buoyantBoussinesqPimpleFoam'  # natural convection of incompressible
-        else:
-            if settings['conjugate']:
-                return 'chtMultiRegionSimpleFoam'
-            if settings['compressible']:
-                return 'buoyantSimpleFoam'
-            else:
-                return 'buoyantBoussinesqSimpleFoam'
-    #
+    ''' NOTE: Code depreciated 25/02/2017 (JAH)'''
+    # if settings['heatTransfering']:
+    #     if settings['dynamicMeshing'] or settings['porous'] or settings['nonNewtonian']:
+    #         print("Error: no matched solver for heat transfering, please develop such a solver")
+    #         raise NotImplementedError()
+    #     if settings['transient']:
+    #         if settings['conjugate']:
+    #             return 'chtMultiRegionFoam'
+    #         if settings['compressible']:
+    #             return 'buoyantPimpleFoam'  # natural convection of compressible
+    #         else:
+    #             return 'buoyantBoussinesqPimpleFoam'  # natural convection of incompressible
+    #     else:
+    #         if settings['conjugate']:
+    #             return 'chtMultiRegionSimpleFoam'
+    #         if settings['compressible']:
+    #             return 'buoyantSimpleFoam'
+    #         else:
+    #             return 'buoyantBoussinesqSimpleFoam'
+
     if 'multiphaseModel' in settings and settings['multiphaseModel'] != "singlePhase":
         print("Error: multiphase model case builder is not implemented yet")
         raise NotImplementedError()
@@ -323,8 +324,9 @@ class BasicBuilder(object):
                 return "Error: 'constant/dynamicMeshDict' is not existent while dynamcMeshing opiton is selected"
             if not os.path.exists(case + os.path.sep + '0/pointDisplacement'):
                 return "Error: '0/pointDisplacement' is not existent while dynamcMeshing opiton is selected"            
+        ''' NOTE: Code depreciated - 25/02/2017 (JAH) '''
         if self._solverSettings['porous']:
-            return 'Error: Porous flow need temperatuare field, use ThermalBuilder'    
+            return 'Error: Porous flow need temperatuare field, use ThermalBuilder'
         if self._solverSettings['parallel']:
             if not os.path.exists(case + os.path.sep + 'constant/decomposeParDict'):
                 return "Warning: 'constant/decomposeParDict' is not existent while parellel opiton is selected"

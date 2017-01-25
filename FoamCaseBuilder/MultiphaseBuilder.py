@@ -21,129 +21,131 @@
 #***************************************************************************
 
 
-
-
-"""
-MultiphaseBuilder: 
-naming of dict file: fieldname.phasename, like 'U.air' except for pressure field
-`EularFoam` implies "compressible", while `iterFoam` suggests incompressible
-sovler program name without the ending "Foam", `Lagrangian`, `Multiphase`
-
-Lagrangian: kinematicCloudProperties  kinematicCloudPositions
-"""
-
-def _listPhases(case):
-    pass
-
-_Eular_multiphase_models = set(['singlePhase', 'twoLiquidMixing', 'twoPhaseEuler', 'multiphaseImmiscible'])
-_Lagrangian_multiphase_models = set(['DPM', 'spray']) # there is a continuous phase: phasec
-supported_multiphase_models = _Eular_multiphase_models + _Langarange_multiphase_models
-
-def getDefaultMultiphaseSolverSettings():
-    pass
-
-def _getMultiphaseSolver(settings):
-    if multiphaseModel in settigns and settings['multiphaseModel'] != "":
-        if settings['multiphaseModel'] in _Eular_multiphase_models:
-            if settings['compressible']:
-                if settings['multiphaseModel'] in set([]):
-                    return settings['multiphaseModel'] + "Foam"
-                elif settings['multiphaseModel'] in set([]):
-                    return settings['multiphaseModel'] + "Foam"
-                else:
-                    raise Exception("You should not get here")
-            else:
-                if settings['multiphaseModel'] in set([]):
-                    return settings['multiphaseModel'] + "Foam"
-                elif settings['multiphaseModel'] in set([]):
-                    return settings['multiphaseModel'] + "Foam"
-                else:
-                    raise Exception("You should not get here")
-        else: # Langarange models
-            return settings['multiphaseModel'] + "Foam"
-    else:
-        raise Exception("") 
-
-class MultiphaseBuilder(ThermalBuilder):
-    """ support both compressible flow and heat transferring
-    """
-    def __init__(self,  casePath, 
-                        solverSettings=getDefaultMultiphaseSolverSettings(),
-                        templatePath="tutorials/heatTransfer/buoyantBoussinesqSimpleFoam/hotRoom/",
-                        fluidProperties = {'name':'air', "compressible":False, 'kinematicViscosity':1e5},
-                        turbulenceProperties = {'name':'kEpsilon'},
-                        boundarySettings = [],
-                        internalFields = {},
-                        paralleSettings = {'method':"simple", "numberOfSubdomains":multiprocessing.cpu_count()},
-                        transientSettings = {"startTime":0.0, "endTime":1.0, "timeStep":0.001, "writeInterval":100}
-                ):
-        """ 
-        """
-        super(MultiphaseBuilder, self).__init__(casePath, 
-                        solverSettings,
-                        templatePath,
-                        fluidProperties,
-                        turbulenceProperties,
-                        boundarySettings,
-                        internalFields,
-                        paralleSettings,
-                        transientSettings,
-                        )
-        self._solverName = getMultiphaseSolver(self._solverSettings)
-        self._solverCreatedVariables = self.getSolverCreatedVariables()
-    
-    def build(self):
-        pass
-
-    def getSolverName(self):
-        return _getMultiphaseSolver(self._solverSettings)
-    
-    def getFoamTemplate(self):
-        raise
-        
-    def setupFluidProperties(self, value=None):
-        if value and isinstance(value, dict):
-            self.fluidProperties = value
-        if self._solverSettings['compressible']:
-            self.setupThermophysicalProperties()
-        else:
-            self.setupTransportProperties()
-        
-    def setInternalFields(self):
-        pass
-    
-    def getPhases(self):
-        pass
-
-    def getSolverCreatedVariables(self):
-        pass
-         
-    
-    
-    
-    
-    
-    
-    
-    
+''' NOTE: Code depreciated - 25/01/2017 (JAH)
 '''
-# cat constant/transportProperties
 
-phases ( water air );
 
-water
-{
-	transportModel  Newtonian;
-	nu              nu [ 0 2 -1 0 0 0 0 ] 1e-06;
-	rho             rho [ 1 -3 0 0 0 0 0 ] 1000;
-}
-
-air
-{
-	transportModel  Newtonian;
-	nu              nu [ 0 2 -1 0 0 0 0 ] 1.48e-05;
-	rho             rho [ 1 -3 0 0 0 0 0 ] 1;
-}
-
-sigma           sigma [ 1 0 -2 0 0 0 0 ] 0;
-'''
+# """
+# MultiphaseBuilder:
+# naming of dict file: fieldname.phasename, like 'U.air' except for pressure field
+# `EularFoam` implies "compressible", while `iterFoam` suggests incompressible
+# sovler program name without the ending "Foam", `Lagrangian`, `Multiphase`
+#
+# Lagrangian: kinematicCloudProperties  kinematicCloudPositions
+# """
+#
+# def _listPhases(case):
+#     pass
+#
+# _Eular_multiphase_models = set(['singlePhase', 'twoLiquidMixing', 'twoPhaseEuler', 'multiphaseImmiscible'])
+# _Lagrangian_multiphase_models = set(['DPM', 'spray']) # there is a continuous phase: phasec
+# supported_multiphase_models = _Eular_multiphase_models + _Langarange_multiphase_models
+#
+# def getDefaultMultiphaseSolverSettings():
+#     pass
+#
+# def _getMultiphaseSolver(settings):
+#     if multiphaseModel in settigns and settings['multiphaseModel'] != "":
+#         if settings['multiphaseModel'] in _Eular_multiphase_models:
+#             if settings['compressible']:
+#                 if settings['multiphaseModel'] in set([]):
+#                     return settings['multiphaseModel'] + "Foam"
+#                 elif settings['multiphaseModel'] in set([]):
+#                     return settings['multiphaseModel'] + "Foam"
+#                 else:
+#                     raise Exception("You should not get here")
+#             else:
+#                 if settings['multiphaseModel'] in set([]):
+#                     return settings['multiphaseModel'] + "Foam"
+#                 elif settings['multiphaseModel'] in set([]):
+#                     return settings['multiphaseModel'] + "Foam"
+#                 else:
+#                     raise Exception("You should not get here")
+#         else: # Langarange models
+#             return settings['multiphaseModel'] + "Foam"
+#     else:
+#         raise Exception("")
+#
+# class MultiphaseBuilder(ThermalBuilder):
+#     """ support both compressible flow and heat transferring
+#     """
+#     def __init__(self,  casePath,
+#                         solverSettings=getDefaultMultiphaseSolverSettings(),
+#                         templatePath="tutorials/heatTransfer/buoyantBoussinesqSimpleFoam/hotRoom/",
+#                         fluidProperties = {'name':'air', "compressible":False, 'kinematicViscosity':1e5},
+#                         turbulenceProperties = {'name':'kEpsilon'},
+#                         boundarySettings = [],
+#                         internalFields = {},
+#                         paralleSettings = {'method':"simple", "numberOfSubdomains":multiprocessing.cpu_count()},
+#                         transientSettings = {"startTime":0.0, "endTime":1.0, "timeStep":0.001, "writeInterval":100}
+#                 ):
+#         """
+#         """
+#         super(MultiphaseBuilder, self).__init__(casePath,
+#                         solverSettings,
+#                         templatePath,
+#                         fluidProperties,
+#                         turbulenceProperties,
+#                         boundarySettings,
+#                         internalFields,
+#                         paralleSettings,
+#                         transientSettings,
+#                         )
+#         self._solverName = getMultiphaseSolver(self._solverSettings)
+#         self._solverCreatedVariables = self.getSolverCreatedVariables()
+#
+#     def build(self):
+#         pass
+#
+#     def getSolverName(self):
+#         return _getMultiphaseSolver(self._solverSettings)
+#
+#     def getFoamTemplate(self):
+#         raise
+#
+#     def setupFluidProperties(self, value=None):
+#         if value and isinstance(value, dict):
+#             self.fluidProperties = value
+#         if self._solverSettings['compressible']:
+#             self.setupThermophysicalProperties()
+#         else:
+#             self.setupTransportProperties()
+#
+#     def setInternalFields(self):
+#         pass
+#
+#     def getPhases(self):
+#         pass
+#
+#     def getSolverCreatedVariables(self):
+#         pass
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# '''
+# # cat constant/transportProperties
+#
+# phases ( water air );
+#
+# water
+# {
+# 	transportModel  Newtonian;
+# 	nu              nu [ 0 2 -1 0 0 0 0 ] 1e-06;
+# 	rho             rho [ 1 -3 0 0 0 0 0 ] 1000;
+# }
+#
+# air
+# {
+# 	transportModel  Newtonian;
+# 	nu              nu [ 0 2 -1 0 0 0 0 ] 1.48e-05;
+# 	rho             rho [ 1 -3 0 0 0 0 0 ] 1;
+# }
+#
+# sigma           sigma [ 1 0 -2 0 0 0 0 ] 0;
+# '''

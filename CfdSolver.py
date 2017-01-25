@@ -26,26 +26,20 @@ __url__ = "http://www.freecadweb.org"
 
 import os.path
 
-supported_physical_domains = ['Mechanical', 'Fluidic', 'Electromagnetic']  # to identify physical domains
+supported_physical_domains = ['Fluidic']
+''' NOTE: Code depreciated 25/02/2017 (JAH) '''
+# supported_physical_domains = ['Mechanical', 'Fluidic', 'Electromagnetic']  # to identify physical domains
 
 from FoamCaseBuilder import supported_turbulence_models
 #from FoamCaseBuilder import supported_multiphase_models
 supported_multiphase_models = ['singplePhase']
-from FoamCaseBuilder import supported_radiation_models
+''' NOTE: Code depreciated 25/02/2017 (JAH) '''
+# from FoamCaseBuilder import supported_radiation_models
 
-"""
-NOTE NOTE NOTE: 20/01/2017 
-have commented out many of the properties that used to reside within cfdSolver object.
-Many will be temporary removals, or relocated to other objects. 
-The primary reasoning is that it becomes confusing to have so many
-properties available especially since most of them are not yet functional.
-Therefore rather opting for a semi-groun up approach here, by systematically
-adding and testing functionality..
-TODO: once a final design has been decided upon the properties which are
-either no longer needed or moved to other objects should be deleted.
-"""
-
-
+''' NOTE: Code depreciated 20/01/2017 (AB)
+    Removed properties that used to reside within cfdSolver object which is either not active or
+    has been relocated. Only active functionality that can be tested are included.
+'''
 
 ## Fem::FemSolverObject 's Proxy python type for CFD solver
 ## common CFD properties are defined, solver specific properties in derived class
@@ -59,24 +53,24 @@ class CfdSolver(object):
         # some properties previously defined in FemSolver C++ object are moved here
         if "SolverName" not in obj.PropertiesList:
             obj.addProperty("App::PropertyString", "SolverName", "Solver",
-                            "unique solver name to identify the solver")
+                            "Name to identify the solver.")
             obj.SolverName = "OpenFOAM"
             #obj.addProperty("App::PropertyEnumeration", "PhysicalDomain", "Solver",
                             #"unique solver name to identify the solver")
             obj.addProperty("App::PropertyPath", "InstallationPath", "Solver",
-                            "Solver installation path")
+                            "Solver installation path.")
             #obj.PhysicalDomain = supported_physical_domains
             #obj.PhysicalDomain = 'Fluidic'
             #obj.addProperty("App::PropertyString", "Module", "Solver",
             #                "python module for case writer")
             obj.addProperty("App::PropertyPath", "WorkingDir", "Solver",
-                            "Solver process is run in this directory")
+                            "Directory where the case is saved.")
             obj.addProperty("App::PropertyString", "InputCaseName", "Solver",
-                            "input file name without suffix or case folder name")
+                            "Name of case containing the input files and from where the solver is executed.")
             obj.addProperty("App::PropertyBool", "Parallel", "Solver",
-                            "solver is run with muliticore or on cluster")
+                            "Parallel analysis on on multiple CPU cores")
             obj.addProperty("App::PropertyBool", "ResultObtained", "Solver",
-                            "result of analysis has been obtained, i.e. case setup is fine")
+                            "Check if the results have been obtained.")
 
             import tempfile
             if os.path.exists('/tmp/'):
@@ -89,6 +83,8 @@ class CfdSolver(object):
 
         ## API: addProperty(self,type,name='',group='',doc='',attr=0,readonly=False,hidden=False)
         if "TurbulenceModel" not in obj.PropertiesList:
+
+            ''' NOTE: Code depreciated 20/01/2017 (AB) '''
             #obj.addProperty("App::PropertyEnumeration", "TurbulenceModel", "CFD",
                             #"Laminar,KE,KW,LES,etc",True)
             #obj.TurbulenceModel = list(supported_turbulence_models)
@@ -121,12 +117,11 @@ class CfdSolver(object):
                             #"MultiRegion fluid and solid conjugate heat transfering analysis", True)
 
             # Transient solver related: CurrentTime TimeStep StartTime, StopTime, not activated yet!
-            """ 
-            NOTE: removed the True from these variables to allow them to be modified in the GUI data tab
-            Please note that it is possible to create negative values. 
-            Once a proper settings .ui has been created this should be fixed, else the user may enter 
-            negative numbers for time step, start time, end time etc
-            """
+
+            ''' NOTE: Removed the True option from addProperty to allow values be modified in the
+                GUI data tab. Current implementation does not prevent user entering negative values
+                and should be fixed once a proper settings .ui has been created.
+            '''
             #obj.addProperty("App::PropertyBool", "Transient", "Transient",
                             #"Static or transient analysis", True)
             obj.addProperty("App::PropertyFloat", "StartTime", "TimeStepControl",
@@ -140,11 +135,9 @@ class CfdSolver(object):
             obj.addProperty("App::PropertyFloat", "ConvergenceCriteria", "TimeStepControl",
                             "Global solution convergence criterion")
 
-        """Setting initial default values here for transient settings.
-        Unlike the intitial build, where time properties were only added
-        in the event that the problem was transient, it is beneficial to be able
-        to speficy some of this information for steady state problems as well
-        """
+        ''' Default time step values
+            Temporarily use steady state compliant values (simpleFoam)
+        '''
         obj.EndTime = 1000
         obj.TimeStep = 1
         obj.WriteInterval = 100

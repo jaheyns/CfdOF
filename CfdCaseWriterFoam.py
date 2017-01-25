@@ -195,8 +195,6 @@ class CfdCaseWriterFoam:
 
             kinVisc = Viscosity/Density
 
-
-
         self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': float(kinVisc)}
 
 
@@ -212,12 +210,12 @@ class CfdCaseWriterFoam:
             if bc_dict['type'] == 'inlet' and bc_dict['subtype'] == 'uniformVelocity':
                 bc_dict['value'] = [abs(v) * bc_dict['value'] for v in tuple(bc.DirectionVector)]
                 # fixme: App::PropertyVector should be normalized to unit length
-            
-            """ NOTE NOTE NOTE 20/01/2017
-            Am temporarily disabling turbulent and heat transfer boundary conditon application
-            This functionality has not yet been added and has been removed from the CFDSolver object
-            Turbulence properties have been relocated to physics object
-            """
+
+            ''' NOTE: Code depreciated 20/01/2017 (AB)
+                Temporarily disabling turbulent and heat transfer boundary conditon application
+                This functionality has not yet been added and has been removed from the CFDSolver object
+                Turbulence properties have been relocated to physics object
+            '''
             #if self.solver_obj.HeatTransfering:
                 #bc_dict['thermalSettings'] = {"subtype": bc.ThermalBoundaryType,
                                                 #"temperature": bc.TemperatureValue,
@@ -231,8 +229,8 @@ class CfdCaseWriterFoam:
                                                 #"intensityValue": bc.TurbulentIntensityValue,
                                                 #"lengthValue": bc.TurbulentLengthValue
                                                 #}
-
             bc_settings.append(bc_dict)
+
         #self.builder.internalFields = {'p': 0.0, 'U': (0, 0, 0)}
         self.builder.internalFields = self.extractInternalField()
         self.builder.boundaryConditions = bc_settings
