@@ -27,7 +27,9 @@ __url__ = "http://www.freecadweb.org"
 import os.path
 
 supported_physical_domains = ['Fluidic']
-''' NOTE: Code depreciated 25/02/2017 (JAH) '''
+''' NOTE: Code depreciated 25/02/2017 (JAH)
+    Currently the solver only support fluid analysis
+'''
 # supported_physical_domains = ['Mechanical', 'Fluidic', 'Electromagnetic']  # to identify physical domains
 
 from FoamCaseBuilder import supported_turbulence_models
@@ -58,7 +60,7 @@ class CfdSolver(object):
             #obj.addProperty("App::PropertyEnumeration", "PhysicalDomain", "Solver",
                             #"unique solver name to identify the solver")
             obj.addProperty("App::PropertyPath", "InstallationPath", "Solver",
-                            "Solver installation path.")
+                            "Solver installation path (by default sources the WM_PROJECT_DIR if available).")
             #obj.PhysicalDomain = supported_physical_domains
             #obj.PhysicalDomain = 'Fluidic'
             #obj.addProperty("App::PropertyString", "Module", "Solver",
@@ -68,9 +70,9 @@ class CfdSolver(object):
             obj.addProperty("App::PropertyString", "InputCaseName", "Solver",
                             "Name of case containing the input files and from where the solver is executed.")
             obj.addProperty("App::PropertyBool", "Parallel", "Solver",
-                            "Parallel analysis on on multiple CPU cores")
+                            "Parallel analysis on on multiple CPU cores", True)  # Currently not active
             obj.addProperty("App::PropertyBool", "ResultObtained", "Solver",
-                            "Check if the results have been obtained.")
+                            "Check if the results have been obtained.", True)    # Currently not active
 
             import tempfile
             if os.path.exists('/tmp/'):
@@ -124,30 +126,34 @@ class CfdSolver(object):
             '''
             #obj.addProperty("App::PropertyBool", "Transient", "Transient",
                             #"Static or transient analysis", True)
-            obj.addProperty("App::PropertyFloat", "StartTime", "TimeStepControl",
-                            "Time settings for transient analysis")
+            # NOTE: This implementation does not support restart and therefor StartTime
+            #       should always be set to zero.
+            # obj.addProperty("App::PropertyFloat", "StartTime", "TimeStepControl",
+            #                 "Time settings for transient analysis")
             obj.addProperty("App::PropertyFloat", "EndTime", "TimeStepControl",
-                            "Time settings for transient analysis")
+                            "Duration limit if the solver did not reach convergence.")
             obj.addProperty("App::PropertyFloat", "TimeStep", "TimeStepControl",
-                            "Time step (second) for transient analysis")
+                            "Time step increment.")
             obj.addProperty("App::PropertyFloat", "WriteInterval", "TimeStepControl",
-                            "WriteInterval (second) for transient analysis")
+                            "Output interval.")
             obj.addProperty("App::PropertyFloat", "ConvergenceCriteria", "TimeStepControl",
-                            "Global solution convergence criterion")
+                            "Global solution convergence criterion.")
 
         ''' Default time step values
-            Temporarily use steady state compliant values (simpleFoam)
+            Temporarily use steady state (simpleFoam) compliant values
         '''
         obj.EndTime = 1000
         obj.TimeStep = 1
         obj.WriteInterval = 100
         obj.ConvergenceCriteria = 1e-4
 
-    ############ standard FeutureT methods ##########
+
+    ''' Standard FeutureT methods '''
+
     def execute(self, obj):
-        """"this method is executed on object creation and whenever the document is recomputed"
-        update Part or Mesh should NOT lead to recompution of the analysis automatically, time consuming
-        """
+        ''' Method is executed on object creation and whenever the document is recomputed. Updating Part or Mesh
+            should NOT automatically trigger an expensive recompute of the analysis.
+        '''
         return
 
     def onChanged(self, obj, prop):

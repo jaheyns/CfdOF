@@ -24,6 +24,7 @@
 
 import FreeCAD
 import CfdAnalysis
+import CfdSolverFoam
 # import csv
 import tempfile
 import unittest
@@ -76,8 +77,11 @@ class CfdTest(unittest.TestCase):
 
     def create_new_solver(self):
         self.solver_object = CfdSolverFoam.makeCfdSolverFoam()
-        self.physics_object = CfdPhysicsSelection.makeCfdPhysicsSelection()
-        self.initial_object = CfdInitialiseFlowField.makeCfdInitialFlowField()
+        # print (self.solver_object.InputCaseName)
+
+        # self.physics_object = CfdPhysicsSelection.makeCfdPhysicsSelection()
+        # self.initial_object = CfdInitialiseFlowField.makeCfdInitialFlowField()
+
         # self.solver_object.GeometricalNonlinearity = 'linear'
         # self.solver_object.ThermoMechSteadyState = False
         # self.solver_object.MatrixSolverType = 'default'

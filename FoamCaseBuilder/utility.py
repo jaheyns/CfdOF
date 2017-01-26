@@ -667,11 +667,11 @@ def getDict(dict_file, key):
             return None
 
 def setDict(dict_file, key, value):
-    """all parameters are string type, accept, None or empty string
-    dict_file: file must exist, checked by caller
-    key: create the key if not existent
-    value: None or empty string  will delet such key
-    """
+    ''' All parameters are of type 'string' type, but it does accept 'None' or an empty string.
+        dict_file  - File must exist and is checked by caller
+        key        - Create the key if it does not exist
+        value      - None or empty string entry will delete the key
+    '''
 
     if isinstance(key, string_types) and key.find('/')>=0:
         group = [k for k in key.split('/') if k]
@@ -699,10 +699,10 @@ def setDict(dict_file, key, value):
     f.writeFile()
 
 def modifyControlDictEntries(dict_file,key,value):
-    """Intent of this function is to change startTime,endTime,deltaT and writeInterval
-    for which setDict does not work because there is only 1 entry in the dict file
-    No error checking is done in this function, as it is assumed to be called correctly
-    """
+    ''' Function to change time step controls.
+        NOTE: * setDict is not used because there is only 1 entry in the dict file.
+              * No error checking is done, it assumes the function is called correctly
+    '''
     f = ParsedParameterFile(dict_file)
     f[key] = value
     f.writeFile()

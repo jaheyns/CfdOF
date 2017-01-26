@@ -268,9 +268,11 @@ class BasicBuilder(object):
             createCaseFromScratch(self._casePath, self._solverName)
         self._createInitVarables()
 
-        self.updateTemplateControlDict() #updates the solver startTime, endTime, writeInterval
-        self.modifySolutionResidualTolerance() #updates the solver residual control tolerance for p and U fields
-        createRunScript(self._casePath, self._solverSettings['potentialInit'], self._solverSettings['parallel'], self._solverName, self._paralleSettings['numberOfSubdomains']) # Specify init_potential (defaults to true)
+        self.updateTemplateControlDict()       # Updates the solver time step controls
+        self.modifySolutionResidualTolerance() # Updates the solver convergence tolerance for p and U fields.
+        createRunScript(self._casePath, self._solverSettings['potentialInit'],
+                        self._solverSettings['parallel'],
+                        self._solverName, self._paralleSettings['numberOfSubdomains'])
 
     def build(self):
         #if not rebuilding:
@@ -435,13 +437,23 @@ class BasicBuilder(object):
 
             return fname
 
-    ####################################################################################
+
+    ''' Update solver time step and convergence controls  '''
 
     def updateTemplateControlDict(self):
-        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","startTime",self._transientSettings['startTime'])
-        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","endTime",self._transientSettings['endTime'])
-        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","writeInterval",self._transientSettings['writeInterval'])
-        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict","deltaT",self._transientSettings['timeStep'])
+        # NOTE: Not supporting restart so StartTime should always be zero
+        # modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict",
+        #                          "startTime",
+        #                          self._transientSettings['startTime'])
+        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict",
+                                 "endTime",
+                                 self._transientSettings['endTime'])
+        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict",
+                                 "writeInterval",
+                                 self._transientSettings['writeInterval'])
+        modifyControlDictEntries(self._casePath + os.path.sep + "system" + os.path.sep + "controlDict",
+                                 "deltaT",
+                                 self._transientSettings['timeStep'])
 
     def modifySolutionResidualTolerance(self):
         f = ParsedParameterFile(self._casePath + os.path.sep + "system" + os.path.sep + "fvSolution")
@@ -457,6 +469,7 @@ class BasicBuilder(object):
 
     def getSolverName(self):
         return _getSolverName(self._solverSettings)
+
 
     def getFoamTemplate(self):
         """
@@ -727,19 +740,20 @@ class BasicBuilder(object):
             else:
                 print("Warning: variable:{} is not recognised/created thus ignored in setupInternalFields()".format(k))
 
-    """
-    see: http://cfd.direct/openfoam/user-guide/controldict/
-    startFrom   Controls the start time of the simulation.
-    - firstTime: Earliest time step from the set of time directories.
-    - startTime: Time specified by the startTime keyword entry.
-    - latestTime: Most recent time step from the set of time directories.
-    startTime   Start time for the simulation with startFrom startTime;
-    stopAt  Controls the end time of the simulation.
-    - endTime : Time specified by the endTime keyword entry.
-    - writeNow : Stops simulation on completion of current time step and writes data.
-    - noWriteNow: Stops simulation on completion of current time step and does not write out data.
-    - nextWrite: Stops simulation on completion of next scheduled write time, specified by writeControl.
-    """
+    # """
+    # see: http://cfd.direct/openfoam/user-guide/controldict/
+    # startFrom   Controls the start time of the simulation.
+    # - firstTime: Earliest time step from the set of time directories.
+    # - startTime: Time specified by the startTime keyword entry.
+    # - latestTime: Most recent time step from the set of time directories.
+    # startTime   Start time for the simulation with startFrom startTime;
+    # stopAt  Controls the end time of the simulation.
+    # - endTime : Time specified by the endTime keyword entry.
+    # - writeNow : Stops simulation on completion of current time step and writes data.
+    # - noWriteNow: Stops simulation on completion of current time step and does not write out data.
+    # - nextWrite: Stops simulation on completion of next scheduled write time, specified by writeControl.
+    # """
+
     @property
     def transientSettings(self):
         return self._transientSettings
@@ -753,7 +767,7 @@ class BasicBuilder(object):
             self.transientSettings = tSettings
         if self._transientSettings:
             f = ParsedParameterFile(self._casePath + "/system/controlDict")
-            f["startTime"] = self._transientSettings["startTime"]
+            # f["startTime"] = self._transientSettings["startTime"] # Should always be zero
             f["endTime"] = self._transientSettings["endTime"]
             f["deltaT"] = self._transientSettings["timeStep"]
             f["writeInterval"] = self._transientSettings["writeInterval"]

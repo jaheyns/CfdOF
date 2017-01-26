@@ -67,7 +67,7 @@ class CfdCaseWriterFoam:
         self.installation_path = self.solver_obj.InstallationPath
         self.solverName = self.fetchOpenFOAMSolverNameBasedOnPhysicsObject()
 
-        self.transientSettings = {"startTime":self.solver_obj.StartTime, 
+        self.transientSettings = {#"startTime":self.solver_obj.StartTime,
                                   "endTime":self.solver_obj.EndTime,
                                   "timeStep":self.solver_obj.TimeStep, 
                                   "writeInterval":self.solver_obj.WriteInterval}
@@ -246,8 +246,7 @@ class CfdCaseWriterFoam:
         """
         #if self.solver_obj.Transient:
         if self.physics_obj["Time"] == "Transient":
-            self.builder.transientSettings = {"startTime": self.solver_obj.StartTime,
-                                        "endTime": self.solver_obj.EndTime,
-                                        "timeStep": self.solver_obj.TimeStep,
-                                        "writeInterval": self.solver_obj.WriteInterval
-                                        }
+            self.builder.transientSettings = {#"startTime": self.solver_obj.StartTime,
+                                              "endTime": self.solver_obj.EndTime,
+                                              "timeStep": self.solver_obj.TimeStep,
+                                              "writeInterval": self.solver_obj.WriteInterval}
