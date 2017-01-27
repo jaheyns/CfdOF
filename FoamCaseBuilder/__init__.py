@@ -26,6 +26,7 @@ __url__ = "http://www.iesensor.com"
 
 from .utility import *
 from .BasicBuilder import BasicBuilder, supported_turbulence_models
+
 ''' NOTE: Code depreciated - 25/02/2017 (JAH) '''
 # from .ThermalBuilder import ThermalBuilder, supported_radiation_models
 # from .ThermalBuilder import getDefaultHeatTransferSolverSettings

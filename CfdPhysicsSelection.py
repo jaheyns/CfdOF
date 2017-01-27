@@ -14,7 +14,6 @@ import _CfdPhysics
 
 def makeCfdPhysicsSelection(name="PhysicsModel"):
     obj = FreeCAD.ActiveDocument.addObject("App::FeaturePython", name)
-    #obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
     _CfdPhysics._CfdPhysicsModel(obj)
 
     if FreeCAD.GuiUp:

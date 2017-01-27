@@ -1,6 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2013 - Juergen Riegel <FreeCAD@juergen-riegel.net>      *
+# *   Copyright (c) 2017 - .... <...>                *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -20,21 +20,20 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "CfdFluidMaterial"
-__author__ = "Juergen Riegel, Bernd Hahnebach"
+__title__ = "CfdMaterial"
+__author__ = ""
 __url__ = "http://www.freecadweb.org"
 
 
-import FreeCAD
-import _CfdMaterial
+class _CfdMaterial:
+    ''' The CFD Material object '''
+    def __init__(self, obj):
+        obj.addProperty("App::PropertyLinkSubList", "References", "Material", "List of material shapes")
+        ''' Default values '''
+        obj.Material = {"Density": "1.20 kg/m^3",
+                        "DynamicViscosity":"0.000018 kg/m/s"}
+        obj.Proxy = self
+        self.Type = "CfdMaterial"
 
-def makeCfdFluidMaterial(name):
-    ''' Material name or a file name for a FCMat file '''
-    obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
-
-    _CfdMaterial._CfdMaterial(obj) # Include default fluid properties
-    if FreeCAD.GuiUp:
-        import _ViewProviderCfdFluidMaterial
-        _ViewProviderCfdFluidMaterial._ViewProviderCfdFluidMaterial(obj.ViewObject)
-    # FreeCAD.ActiveDocument.recompute()
-    return obj
+    def execute(self, obj):
+        return

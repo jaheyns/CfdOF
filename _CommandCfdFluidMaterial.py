@@ -32,9 +32,7 @@ if FreeCAD.GuiUp:
 
 class setCfdFluidPropertyCommand(FemCommands):
     def __init__(self):
-        #neat little command from FemCommands to only activate when solver or analysis is active i.e. in this case OF
-        #self.is_active = 'with_solver'
-        self.is_active = 'with_analysis'
+        self.is_active = 'with_analysis'    # Only activate when analysis is active
 
     def Activated(self):
         #selection = FreeCADGui.Selection.getSelectionEx()
@@ -45,11 +43,29 @@ class setCfdFluidPropertyCommand(FemCommands):
 
         FreeCAD.ActiveDocument.openTransaction("Set CfdFluidMaterialProperty")
         FreeCADGui.addModule("CfdFluidMaterial")
-        FreeCADGui.doCommand("CfdFluidMaterial.makeCfdFluidMaterial('CfdFluidProperties')")
 
-        #The CFD WB is still currently a member of FemGui
-        FreeCADGui.doCommand("App.activeDocument()." + FemGui.getActiveAnalysis().Name + ".Member = App.activeDocument()." + FemGui.getActiveAnalysis().Name + ".Member + [App.ActiveDocument.ActiveObject]")
-        FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
+        isPresent = False
+        members = FemGui.getActiveAnalysis().Member
+        for i in members:
+            ''' Check for existing fluid material entity as the solver currently only support single region analysis.
+            '''
+            if "CfdFluidProperties" in i.Name:
+                FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
+                isPresent = True
+
+        ''' NOTE: Since it is possible to delete the FluidProperties, allowing here for re-creation if it is not
+                  present.
+        '''
+        if not(isPresent):
+            FreeCADGui.doCommand("CfdFluidMaterial.makeCfdFluidMaterial('CfdFluidProperties')")
+
+            # CFD WB is still a member of FemGui
+            FreeCADGui.doCommand("App.activeDocument()." + FemGui.getActiveAnalysis().Name +
+                                 ".Member = App.activeDocument()." + FemGui.getActiveAnalysis().Name +
+                                 ".Member + [App.ActiveDocument.ActiveObject]")
+            FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
+
+
 
     def GetResources(self):
         icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","material.png")

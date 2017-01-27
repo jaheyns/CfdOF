@@ -23,8 +23,13 @@
 # ***************************************************************************
 
 import FreeCAD
+
 import CfdAnalysis
 import CfdSolverFoam
+import CfdPhysicsSelection
+import CfdInitialiseFlowField
+import CfdFluidMaterial
+
 # import csv
 import tempfile
 import unittest
@@ -37,7 +42,7 @@ __url__ = "http://www.freecadweb.org"
 
 ''' Unit tests for the CFD WB
 
-To run the test paste the following in the FreeCAD console:
+To run the test execute the following in the FreeCAD console:
 
 import unittest
 suite = unittest.TestSuite()
@@ -77,18 +82,22 @@ class CfdTest(unittest.TestCase):
 
     def create_new_solver(self):
         self.solver_object = CfdSolverFoam.makeCfdSolverFoam()
-        # print (self.solver_object.InputCaseName)
+        self.solver_object.EndTime = 100
+        self.solver_object.ConvergenceCriteria = 0.001
+        self.solver_object.Parallel = False
+        # print ('Installation directory: {}'.format(self.solver_object.InstallationPath))
+        self.active_doc.recompute()
 
-        # self.physics_object = CfdPhysicsSelection.makeCfdPhysicsSelection()
-        # self.initial_object = CfdInitialiseFlowField.makeCfdInitialFlowField()
+    def create_new_physics(self):
+        self.physics_object = CfdPhysicsSelection.makeCfdPhysicsSelection()
+        self.active_doc.recompute()
 
-        # self.solver_object.GeometricalNonlinearity = 'linear'
-        # self.solver_object.ThermoMechSteadyState = False
-        # self.solver_object.MatrixSolverType = 'default'
-        # self.solver_object.IterationsControlParameterTimeUse = False
-        # self.solver_object.EigenmodesCount = 10
-        # self.solver_object.EigenmodeHighLimit = 1000000.0
-        # self.solver_object.EigenmodeLowLimit = 0.0
+    def create_new_initialise(self):
+        self.initialise_object = CfdInitialiseFlowField.makeCfdInitialFlowField()
+        self.active_doc.recompute()
+
+    def create_new_fluid_property(self):
+        self.property_object = CfdFluidMaterial.makeCfdFluidMaterial('CfdFluidProperties')
         self.active_doc.recompute()
 
 
@@ -102,4 +111,19 @@ class CfdTest(unittest.TestCase):
         self.create_new_solver()
         self.assertTrue(self.solver_object, "CfdTest of new solver failed")
         self.analysis.Member = self.analysis.Member + [self.solver_object]
+
+        fcc_print('Checking CFD new physics object...')
+        self.create_new_physics()
+        self.assertTrue(self.physics_object, "CfdTest of new physics object failed")
+        self.analysis.Member = self.analysis.Member + [self.physics_object]
+
+        fcc_print('Checking CFD new initialise...')
+        self.create_new_initialise()
+        self.assertTrue(self.initialise_object, "CfdTest of new initialise failed")
+        self.analysis.Member = self.analysis.Member + [self.initialise_object]
+
+        fcc_print('Checking CFD new fluid property...')
+        self.create_new_fluid_property()
+        self.assertTrue(self.property_object, "CfdTest of new fluid property failed")
+        self.analysis.Member = self.analysis.Member + [self.property_object]
 

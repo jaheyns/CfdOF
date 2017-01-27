@@ -1,6 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2015 - Qingfeng Xia <qingfeng.xia eng ox ac uk>                 *       *
+# *   Copyright (c) 2015 - Qingfeng Xia <qingfeng.xia eng ox ac uk>         *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -89,27 +89,14 @@ class CfdCaseWriterFoam:
                                         'gravity': (0, -9.81, 0),
                                         'transient':False,
                                         'turbulenceModel': 'laminar',
-                                        #
-                                        'potentialInit': self.initialVariables_obj["PotentialFoam"], # CSIP team contributed feature, new property inserted into CfdSolverFoam
-                                        #
-                                        'heatTransfering':False, 
-                                        'conjugate': False, # conjugate heat transfer (CHT)
-                                        'radiationModel': 'noRadiation',
+                                        'potentialInit': self.initialVariables_obj["PotentialFoam"],
+                                        # 'heatTransfering':False,
+                                        # 'conjugate': False, # conjugate heat transfer (CHT)
+                                        # 'radiationModel': 'noRadiation',
                                         'ConvergenceCriteria' : self.solver_obj.ConvergenceCriteria
-                                        #'conbustionModel': 'noConbustion',
-                                        #
-                                        #'multiPhaseModel': 'singlePhase' # twoPhase, multiphase
-                                        #'missible': False, # two species can be mixed perfectly if missible == True
                                         }
-        # Create initial case from defaults
-        # Until module is integrated, store the defaults inside the module directory rather than the resource dir
-        # if self.solver_obj.HeatTransfering:
-        #     #self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(FreeCAD.getResourceDir(), "Mod", "Cfd", "defaults", "chtMultiRegionSimpleFoam"))
-        #     self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(CfdTools.get_module_path(), "data", "defaults", "chtMultiRegionSimpleFoam"))
-        # else:
-        #     #self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(FreeCAD.getResourceDir(), "Mod", "Cfd", "defaults", "simpleFoam"))
-        #     self.builder = fcb.BasicBuilder(self.case_folder, CfdTools.getSolverSettings(self.solver_obj), os.path.join(CfdTools.get_module_path(), "data", "defaults", "simpleFoam"))
 
+        ''' Initial case from defaults '''
         self.builder = fcb.BasicBuilder(casePath = self.case_folder,
                                         installationPath = self.installation_path,
                                         solverSettings = self.temporarySolverSettings,
@@ -141,8 +128,9 @@ class CfdCaseWriterFoam:
 
 
     def fetchOpenFOAMSolverNameBasedOnPhysicsObject(self):
-        #NOTE: this should be built up slowly from the ground up as more physics is made available
-        #I think a logical flow of thought would be to follow the outline within the tutorials
+        ''' NOTE: This should be built up slowly from the ground up as more physics is made available. A logical flow
+                  of thought would be to follow the outline within the tutorials
+        '''
         solver = None
 
         if self.physics_obj['Flow'] == 'Incompressible' and (self.physics_obj['Thermal'] is None):
@@ -212,9 +200,9 @@ class CfdCaseWriterFoam:
                 # fixme: App::PropertyVector should be normalized to unit length
 
             ''' NOTE: Code depreciated 20/01/2017 (AB)
-                Temporarily disabling turbulent and heat transfer boundary conditon application
-                This functionality has not yet been added and has been removed from the CFDSolver object
-                Turbulence properties have been relocated to physics object
+                      Temporarily disabling turbulent and heat transfer boundary conditon application
+                      This functionality has not yet been added and has been removed from the CFDSolver object
+                      Turbulence properties have been relocated to physics object
             '''
             #if self.solver_obj.HeatTransfering:
                 #bc_dict['thermalSettings'] = {"subtype": bc.ThermalBoundaryType,
@@ -239,7 +227,7 @@ class CfdCaseWriterFoam:
         """ relaxRatio, fvOptions, pressure reference value, residual contnrol
         """
         self.builder.setupSolverControl()
-        # set relaxationFactors like 0.1 for the coarse 3D mesh, this is a temperoary solution
+
 
     def write_time_control(self):
         """ controlDict for time information

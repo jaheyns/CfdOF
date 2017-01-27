@@ -48,10 +48,10 @@ class TaskPanelCfdFluidProperties:
             is not included.
         '''
 
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdFluidProperties.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__)+os.path.sep+"TaskPanelCfdFluidProperties.ui")
 
         ''' In most cases, unlike FEM, fluid flow properties are defined by the user. A small number of reference
-            values are store in the fcmat database for fluids to serve as a starting point for the user.  The properties
+            values are store in the fcmat database for fluids to serve as a starting point for the user. The properties
             are therefore always initialised to "None" with the previous quantities reloaded in the input fields,
             instead of trying match to a database entry as in FEM.
         '''
@@ -59,7 +59,9 @@ class TaskPanelCfdFluidProperties:
         index = self.form.PredefinedMaterialLibraryComboBox.findText('None')
         self.form.PredefinedMaterialLibraryComboBox.setCurrentIndex(index)
 
-        QtCore.QObject.connect(self.form.PredefinedMaterialLibraryComboBox, QtCore.SIGNAL("currentIndexChanged(int)"), self.selectPredefine)
+        QtCore.QObject.connect(self.form.PredefinedMaterialLibraryComboBox,
+                               QtCore.SIGNAL("currentIndexChanged(int)"),
+                               self.selectPredefine)
 
         ''' NOTE Using different connect here because we would like access to the full text, where
             QtCore.QObject.connect, does not recognize textChanged signal.  We do so to allow the units to be pulled
@@ -68,7 +70,10 @@ class TaskPanelCfdFluidProperties:
         self.form.fDens.textChanged.connect(self.DensityChanged)
         self.form.fViscosity.textChanged.connect(self.ViscosityChanged)
 
-        self.check_material_keys()
+        ''' NOTE: Code depreciate 27/01/2017 (JAH)
+            Defaults now set in CfdMaterial
+        '''
+        # self.check_material_keys()
         self.setTextFields(self.material)
 
         FreeCAD.Console.PrintMessage("Task panel initialised \n")
@@ -111,11 +116,16 @@ class TaskPanelCfdFluidProperties:
         doc.resetEdit()
         doc.Document.recompute()
 
-    def check_material_keys(self):
-        if 'Density' not in self.material:
-            self.material['Density'] = '0 kg/m^3'
-        if 'DynamicViscosity' not in self.material:
-            self.material['DynamicViscosity'] = '0 kg/m/s'
+    ''' NOTE: Code depreciate 27/01/2017 (JAH)
+        Defaults now set in CfdMaterial
+    '''
+    # def check_material_keys(self):
+    #     ''' Default values if properties is initiated for the first time '''
+    #     print ("set default mat prop")
+    #     if 'Density' not in self.material:
+    #         self.material['Density'] = '0 kg/m^3'
+    #     if 'DynamicViscosity' not in self.material:
+    #         self.material['DynamicViscosity'] = '0 kg/m/s'
 
     def reject(self):
         #self.remove_active_sel_server()

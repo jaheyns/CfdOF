@@ -51,16 +51,24 @@ class _CommandCfdAnalysis(FemCommands):
         FreeCADGui.addModule("CfdAnalysis")
         FreeCADGui.doCommand("CfdAnalysis.makeCfdAnalysis('CfdAnalysis')")
         FreeCADGui.doCommand("FemGui.setActiveAnalysis(App.activeDocument().ActiveObject)")
-        FreeCADGui.addModule("CfdSolverFoam")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdSolverFoam.makeCfdSolverFoam()]")
 
-        #Adding the physics model creator here already, gets added as the analysis container is created.
+        ''' Objects ordered according to expected workflow '''
+
+        # Add physics object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdPhysicsSelection")
         FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
 
-        #Adding the initialisation object upon creation of the analysis
+        # Add fluid properties object when CfdAnalysis container is created
+        FreeCADGui.addModule("CfdFluidMaterial")
+        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdFluidMaterial.makeCfdFluidMaterial('CfdFluidProperties')]")
+
+        # Add initialisation object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdInitialiseFlowField")
         FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdInitialiseFlowField.makeCfdInitialFlowField()]")
+
+        # Add solver object when CfdAnalysis container is created
+        FreeCADGui.addModule("CfdSolverFoam")
+        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdSolverFoam.makeCfdSolverFoam()]")
 
         sel = FreeCADGui.Selection.getSelection()
         if (len(sel) == 1):
