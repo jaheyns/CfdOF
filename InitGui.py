@@ -46,6 +46,7 @@ class CfdWorkbench(Workbench):
         import _CommandCfdPhysicsSelection
         import _CommandCfdInitialiseInternalFlowField
         import _CommandCfdFluidBoundary
+        import _CommandCfdPorousZone
         #import _CommandCfdResult  # error in import vtk6 in python, this function is implemented in File->Open Instead
         import _CommandCfdFluidMaterial
 
@@ -62,9 +63,10 @@ class CfdWorkbench(Workbench):
         cmdlst = ['Cfd_Analysis', 'Cfd_MeshGmshFromShape',
                   #'Fem_MeshRegion', 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
                   'Cfd_FluidBoundary','Cfd_PhysicsModel', 'Cfd_InitialiseInternal',
-                  'Cfd_FluidMaterial','Cfd_SolverControl', "Separator",
+                  'Cfd_FluidMaterial','Cfd_SolverControl','Cfd_PorousZone',"Separator",
                   'Fem_PostPipelineFromResult', 'Fem_PostCreateClipFilter',
                   'Fem_PostCreateScalarClipFilter', 'Fem_PostCreateCutFilter']
+
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
         self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
