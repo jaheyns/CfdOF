@@ -52,6 +52,7 @@ class CfdCaseWriterFoam:
         self.material_obj = CfdTools.getMaterial(analysis_obj)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initialVariables_obj,isPresent = CfdTools.getInitialConditions(analysis_obj)
+        self.porousZone_obj,self.porousZonePresent = CfdTools.getPorousObject(analysis_obj)
         self.mesh_generated = False
 
     def write_case(self, updating=False):
@@ -103,12 +104,18 @@ class CfdCaseWriterFoam:
                                         #solverSettings = CfdTools.getSolverSettings(self.solver_obj),
                                         templatePath = os.path.join(CfdTools.get_module_path(), "data", "defaults", self.solverName),
                                         solverNameExternal = self.solverName,
-                                        transientSettings = self.transientSettings)
+                                        transientSettings = self.transientSettings,
+                                        porousZonePresent = self.porousZonePresent,
+                                        porousZone_obj = self.porousZone_obj)
                                         #internalFields = self.internalFields)
 
         self.builder.setInstallationPath()
 
         self.builder.createCase()
+
+
+        self.exportPorousZoneStlSurfaces()
+        self.writeFVOptions()
 
         self.write_mesh()
 
@@ -126,6 +133,98 @@ class CfdCaseWriterFoam:
                                                         self.solver_obj.SolverName, self.solver_obj.WorkingDir))
         return True
 
+
+    def exportPorousZoneStlSurfaces(self):
+        if self.porousZonePresent:
+            for ii in range(len(self.porousZone_obj)):
+                import Mesh
+                for i in range(len(self.porousZone_obj[ii].shapeList)):
+                    shape = self.porousZone_obj[ii].shapeList[i].Shape
+                    path = os.path.join(self.solver_obj.WorkingDir,self.solver_obj.InputCaseName,"STLSurfaces")
+                    if not os.path.exists(path):
+                        os.makedirs(path)
+                    fname = os.path.join(self.solver_obj.WorkingDir,self.solver_obj.InputCaseName,"STLSurfaces",self.porousZone_obj[ii].partNameList[i]+u".stl")
+                    shape.exportStl(fname)
+                    FreeCAD.Console.PrintMessage("succesfully wrote stl surface\n")
+            self.writeTopoSetDictFile()
+
+
+    def writeTopoSetDictFile(self):
+        #NOTE: this function opens the helper file topoSetDuctStlToCellZone and fills in the necessary pieces of information
+        #This way, for compatibility with different versions of OpenFOAM, all OF version specific files can be stored in
+        #data/defuaults folder. The entries that are entered are located within {} in the specified file.
+        porousObject = self.porousZone_obj
+        fname = os.path.join(self.solver_obj.WorkingDir,self.solver_obj.InputCaseName,"system","topoSetDict")
+        fid  = open(fname,'w')
+
+        helperFile = open(os.path.join(CfdTools.get_module_path(), "data", "defaults", "helperFiles","Header"),'r')
+        helperText = helperFile.read()
+        fid.write(helperText.format("system","topoSetDict"))
+        helperFile.close()
+
+
+        fid.write("                                                                               \n")
+        fid.write("actions                                                                        \n")
+        fid.write("(                                                                              \n")
+        counter = 0
+        for ii in range(len(porousObject)):
+            for jj in range(len(porousObject[ii].partNameList)):
+                p = porousObject[ii].porousZoneProperties
+                counter += 1
+                helperFile = open(os.path.join(CfdTools.get_module_path(), "data", "defaults", "helperFiles","topoSetDictStlToCellZone"),'r')
+                helperText = helperFile.read()
+                fid.write(helperText.format(porousObject[ii].partNameList[jj]+"SelectedCells",
+                                            porousObject[ii].partNameList[jj]+u".stl",
+                                            str(p["OX"]),
+                                            str(p["OY"]),
+                                            str(p["OZ"]),
+                                            "porosity"+str(counter),
+                                            porousObject[ii].partNameList[jj]+"SelectedCells"))
+                helperFile.close()
+        fid.write(");\n")
+        fid.close()
+
+
+    def writeFVOptions(self):
+        #NOTE: this function opens the helper file fvOptionsPorousZone and fills in the necessary pieces of information
+        #This way, for compatibility with different versions of OpenFOAM, all OF version specific files can be stored in
+        #data/defuaults folder. The entries that are entered are located within {} in the specified file.
+        if self.porousZonePresent:
+            porousObject = self.porousZone_obj
+            fname = os.path.join(self.solver_obj.WorkingDir,self.solver_obj.InputCaseName,"constant","fvOptions")
+            fid  = open(fname,'w')
+
+            helperFile = open(os.path.join(CfdTools.get_module_path(), "data", "defaults", "helperFiles","Header"),'r')
+            helperText = helperFile.read()
+            fid.write(helperText.format("constant","fvOptions"))
+            helperFile.close()
+
+            counter = 0
+            for ii in range(len(porousObject)):
+                for jj in range(len(porousObject[ii].partNameList)):
+                    p = porousObject[ii].porousZoneProperties
+                    counter += 1
+
+                    helperFile = open(os.path.join(CfdTools.get_module_path(), "data", "defaults", "helperFiles","fvOptionsPorousZone"),'r')
+                    helperText = helperFile.read()
+                    helperFile.close()
+                    fid.write(helperText.format("porosity"+str(counter),
+                                                "porosity"+str(counter),
+                                                str(p["dx"]),
+                                                str(p["dy"]),
+                                                str(p["dz"]),
+                                                str(p["fx"]),
+                                                str(p["fy"]),
+                                                str(p["fz"]),
+                                                str(p["e1x"]),
+                                                str(p["e1y"]),
+                                                str(p["e1z"]),
+                                                str(p["e3x"]),
+                                                str(p["e3y"]),
+                                                str(p["e3z"])))
+
+            fid.write("//************************************************************************ //  \n")
+            fid.close()
 
     def fetchOpenFOAMSolverNameBasedOnPhysicsObject(self):
         ''' NOTE: This should be built up slowly from the ground up as more physics is made available. A logical flow

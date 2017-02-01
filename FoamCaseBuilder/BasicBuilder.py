@@ -231,6 +231,8 @@ class BasicBuilder(object):
                         #transientSettings = {"startTime":0, "endTime":100, "timeStep":1, "writeInterval":100}, # simpleFoam
                         transientSettings = None,
                         paralleSettings = {'method':"simple", "numberOfSubdomains":multiprocessing.cpu_count()}, # NOTE: check typo should be paralle'l'Settings NOTE: Should we not use scotch for default
+                        porousZonePresent = False,
+                        porousZone_obj = None
                 ):
         if casePath[0] == "~": casePath = os.path.expanduser(casePath)
         self._casePath = os.path.abspath(casePath)
@@ -248,6 +250,9 @@ class BasicBuilder(object):
         else:
             self._templatePath = None
         self._solverCreatedVariables = self.getSolverCreatedVariables()
+
+        self._porousZonePresent = porousZonePresent
+        self._porousZone_obj = porousZone_obj
 
         self._turbulenceProperties = turbulenceProperties
         self._fluidProperties = fluidProperties  # incompressible only
@@ -272,7 +277,8 @@ class BasicBuilder(object):
         self.modifySolutionResidualTolerance() # Updates the solver convergence tolerance for p and U fields.
         createRunScript(self._casePath, self._solverSettings['potentialInit'],
                         self._solverSettings['parallel'],
-                        self._solverName, self._paralleSettings['numberOfSubdomains'])
+                        self._solverName, self._paralleSettings['numberOfSubdomains'],
+                        self._porousZonePresent,self._porousZone_obj)
 
     def build(self):
         #if not rebuilding:

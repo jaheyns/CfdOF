@@ -1,0 +1,15 @@
+Please note: {} placeholders should be set at locations where information has to be set at runtime.
+
+Because openfoam makes use of a lot of "{" and "}" as place holders in dictionaries, these curly brackets should be doubled.
+i.e. 
+FoamFile
+{{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "{0}";
+    object      ;
+}}
+
+The {0} will be inserted at runtime via ==> text.format("Hello") where the curly brackets which have to appear
+within the actual file has been doubled .ie {{ and }}

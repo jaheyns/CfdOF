@@ -1,0 +1,27 @@
+    {{
+        name    {};
+        type    cellSet;
+        action  new;
+        source  surfaceToCell;
+        sourceInfo
+        {{
+            file            "{}";
+            outsidePoints   (({} {} {}));
+            includeCut      true;
+            includeInside   true;
+            includeOutside  false;
+            nearDistance    -1;
+            curvature       -100;
+        }}
+    }}
+
+    {{
+        name    {};
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {{
+            set {};
+        }}
+    }}

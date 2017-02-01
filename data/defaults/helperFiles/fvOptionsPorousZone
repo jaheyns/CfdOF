@@ -1,0 +1,32 @@
+
+{}
+{{
+    type            explicitPorositySource;
+    active          yes;
+
+    explicitPorositySourceCoeffs
+    {{
+        selectionMode   cellZone;
+        cellZone        {};
+
+        type            DarcyForchheimer;
+
+        DarcyForchheimerCoeffs
+        {{
+            d   d [0 -2 0 0 0 0 0] ({} {} {});
+            f   f [0 -1 0 0 0 0 0] ({} {} {});
+
+            coordinateSystem
+            {{
+                type    cartesian;
+                origin  (0 0 0);
+                coordinateRotation
+                {{
+                    type    axesRotation;
+                    e1  ({} {} {});
+                    e3  ({} {} {});
+                }}
+            }}
+        }}
+    }}
+}}

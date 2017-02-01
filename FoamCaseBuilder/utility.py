@@ -424,7 +424,7 @@ def copySettingsFromExistentCase(output_path, source_path):
     """
     #foamCloneCase:   Create a new case directory that includes time, system and constant directories from a source case.
 
-def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
+def createRunScript(case, init_potential, run_parallel, solver_name, num_proc,porousZonePresent,porousZone_obj):
     print("Create Allrun script ")
 
     fname = case + os.path.sep + "Allrun"
@@ -451,11 +451,24 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc):
         f.write("ln -s {}/owner {}\n".format(meshOrg_dir, mesh_dir))
         f.write("ln -s {}/points {}\n".format(meshOrg_dir, mesh_dir))
         f.write("\n")
-        
+
+        if porousZonePresent:
+            f.write("# Scaling .stl files exported from FreeCAD from mm to m\n")
+            counter = 0
+            for ii in range(len(porousZone_obj)):
+                for jj in range(len(porousZone_obj[ii].partNameList)):
+                    counter += 1
+                    f.write("surfaceTransformPoints -scale '(0.001 0.001 0.001)' " + os.path.join(case,"STLSurfaces",porousZone_obj[ii].partNameList[jj]+".stl") +" " + porousZone_obj[ii].partNameList[jj]+".stl \n")
+            f.write("\n")
+            f.write("# Set all cells contained inside the .stl surfaces to relevant cell zones\n")
+            f.write("topoSet \n")
+            f.write("\n")
+
+
         if (init_potential):
             f.write ("# Initialise flow\n")
             f.write ("potentialFoam -case "+case+" 2>&1 | tee "+case+"/log.potentialFoam\n\n")
-        
+
         if (run_parallel):
             f.write ("# Run application in parallel\n")
             f.write ("decomposePar 2>&1 | tee log.decomposePar\n")
