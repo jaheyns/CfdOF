@@ -124,6 +124,7 @@ class TaskPanelCfdFluidBoundary:
         self.obj = obj
         self.References = self.obj.References
         self.BoundarySettings = self.obj.BoundarySettings.copy()
+        self.faceList = list(self.obj.faceList)
 
         ui_path = os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdFluidBoundary.ui"
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
@@ -242,6 +243,8 @@ class TaskPanelCfdFluidBoundary:
         else:
             self.form.labelHelpText.setText("")
             FreeCADGui.Selection.removeObserver(self)
+        docName = str(self.obj.Document.Name)
+        FreeCADGui.doCommand("FreeCAD.getDocument('"+docName+"').recompute()") # Create compound part
         self.update_selectionbuttons_ui()
 
     def update_selectionbuttons_ui(self):
@@ -416,6 +419,8 @@ class TaskPanelCfdFluidBoundary:
         self.obj.References = self.References
         self.obj.BoundarySettings = self.BoundarySettings.copy()
         doc = FreeCADGui.getDocument(self.obj.Document)
+        docName = str(self.obj.Document.Name)
+        FreeCADGui.doCommand("FreeCAD.getDocument('"+docName+"').recompute()")
         doc.resetEdit()
 
     def reject(self):

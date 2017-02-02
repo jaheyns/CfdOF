@@ -212,6 +212,24 @@ def get_module_path():
 #     return input
 
 
+''' Various set functions '''
+
+def setPartVisibility(vobj, partVis, compoundVis, meshVis, boundVis):
+    ''' Set visibility of feature parts, compounded parts, mesh and boundaries.'''
+    docName = str(vobj.Object.Document.Name)
+    doc = FreeCAD.getDocument(docName)
+    for obj in doc.Objects:
+        if obj.isDerivedFrom("Part::Feature") and not ("CfdFluidBoundary" in obj.Name):
+            FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = partVis
+        if obj.isDerivedFrom("Part::Feature") and ("Compound" in obj.Name):
+            FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = compoundVis
+        if obj.isDerivedFrom("Fem::FemMeshObject"):
+            FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = meshVis
+        if obj.isDerivedFrom("Part::Feature") and ("CfdFluidBoundary" in obj.Name) and not boundVis:
+            ''' Only turn boundary visibility off, if set to true it will keep visibility as is. '''
+            FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = boundVis
+
+
 ''' UNV mesh writer '''
 
 def write_unv_mesh(mesh_obj, bc_group, mesh_file_name):

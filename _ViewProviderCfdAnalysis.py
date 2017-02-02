@@ -55,12 +55,26 @@ class _ViewProviderCfdAnalysis:
         return
 
     def doubleClicked(self, vobj):
+        self.makePartTransparent(vobj)
         if not FemGui.getActiveAnalysis() == self.Object:
             if FreeCADGui.activeWorkbench().name() != 'CfdWorkbench':
                 FreeCADGui.activateWorkbench("CfdWorkbench")
             FemGui.setActiveAnalysis(self.Object)
             return True
         return True
+
+    def makePartTransparent (self, vobj):
+        ''' Make parts transparent so that the boundary conditions and cell zones are clearly visible.'''
+        docName = str(vobj.Object.Document.Name)
+        doc = FreeCAD.getDocument(docName)
+        for obj in doc.Objects:
+            if obj.isDerivedFrom("Part::Feature") and not("CfdFluidBoundary" in obj.Name):
+                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Transparency = 70
+                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.LineWidth = 1
+                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.LineColor = (0.5,0.5,0.5)
+                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.PointColor = (0.5,0.5,0.5)
+            if obj.isDerivedFrom("Part::Feature") and ("Compound" in obj.Name):
+                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = False
 
     def __getstate__(self):
         return None

@@ -1,6 +1,5 @@
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
-renderView1.ViewSize = [1062, 529]
 
 # get color transfer function/color map for 'p'
 pLUT = GetColorTransferFunction('p')

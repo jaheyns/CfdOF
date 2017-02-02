@@ -51,19 +51,20 @@ class CfdWorkbench(Workbench):
 
         # classes developed in FemWorkbench
         import _CommandCfdMeshGmshFromShape
-        import _CommandMeshNetgenFromShape
-        # import _CommandMeshRegion # Not currently in-use (Confusing to users)
+        # import _CommandMeshNetgenFromShape
+        # import _CommandMeshRegion # Not currently in-use
         # import _CommandPrintMeshInfo # Create a fluid specific check as the current does not contain any
         #                              # useful info for flow (see checkMesh)
-        # import _CommandClearMesh  # Not currently in-use (Confusing to users)
+        # import _CommandClearMesh  # Not currently in-use
 
 
         # Post Processing commands are located in FemWorkbench, implemented and imported in C++
-        cmdlst = ['Cfd_Analysis', 'Fem_MeshNetgenFromShape', 'Cfd_MeshGmshFromShape',
-                        #'Fem_MeshRegion', 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
-                        'Cfd_FluidBoundary','Cfd_PhysicsModel', 'Cfd_InitialiseInternal','Cfd_FluidMaterial','Cfd_SolverControl', "Separator",
-                        "Fem_PostPipelineFromResult", "Fem_PostCreateClipFilter",
-                        "Fem_PostCreateScalarClipFilter", "Fem_PostCreateCutFilter"]
+        cmdlst = ['Cfd_Analysis', 'Cfd_MeshGmshFromShape',
+                  #'Fem_MeshRegion', 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
+                  'Cfd_FluidBoundary','Cfd_PhysicsModel', 'Cfd_InitialiseInternal',
+                  'Cfd_FluidMaterial','Cfd_SolverControl', "Separator",
+                  'Fem_PostPipelineFromResult', 'Fem_PostCreateClipFilter',
+                  'Fem_PostCreateScalarClipFilter', 'Fem_PostCreateCutFilter']
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
         self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)

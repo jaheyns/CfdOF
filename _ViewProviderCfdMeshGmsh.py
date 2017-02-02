@@ -36,13 +36,14 @@ class _ViewProviderCfdMeshGmsh:
         vobj.Proxy = self
 
     def getIcon(self):
-        # return ":/icons/fem-femmesh-from-shape.svg"
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
         return icon_path
 
     def attach(self, vobj):
         self.ViewObject = vobj
         self.Object = vobj.Object
+        self.ViewObject.ShapeColor = (0.4, 0.4, 0.4)
+        self.ViewObject.LineWidth = 2
 
     def updateData(self, obj, prop):
         return
@@ -51,7 +52,7 @@ class _ViewProviderCfdMeshGmsh:
         return
 
     def setEdit(self, vobj, mode):
-        self.ViewObject.show()  # show the mesh on edit if it is hided
+        CfdTools.setPartVisibility(vobj, False, False, True, True)
         import _TaskPanelCfdMeshGmsh
         taskd = _TaskPanelCfdMeshGmsh._TaskPanelCfdMeshGmsh(self.Object)
         taskd.obj = vobj.Object

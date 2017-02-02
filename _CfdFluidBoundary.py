@@ -29,14 +29,26 @@ __url__ = "http://www.freecadweb.org"
 #  \ingroup CFD
 
 import FreeCAD
+import Part
 
-class _CfdFluidBoundary:
+class PartFeature:
+    "Part containing CfdFluidBoundary faces"
+    def __init__(self, obj):
+        obj.Proxy = self
+
+class _CfdFluidBoundary(PartFeature):
     "The CfdFluidBoundary object"
     def __init__(self, obj):
+        PartFeature.__init__(self, obj)
+
         obj.Proxy = self
         self.Type = "CfdFluidBoundary"
         obj.addProperty("App::PropertyPythonObject", "References")
         obj.addProperty("App::PropertyPythonObject", "BoundarySettings")
+
+        # obj.addProperty("App::PropertyPythonObject","partNameList").partNameList = []
+        obj.addProperty("App::PropertyLinkList","faceList")
+
         # Default settings
         obj.References = []
         obj.BoundarySettings = {"BoundaryType": "wall",
@@ -56,4 +68,35 @@ class _CfdFluidBoundary:
                                 "ThermalBoundaryType": "fixedValue"}
 
     def execute(self, obj):
+        '''Create compound part at recompute'''
+        docName = str(obj.Document.Name)
+        doc = FreeCAD.getDocument(docName)
+        listOfFaces = []
+        for i in range(len(obj.References)):
+            ref = obj.References[i]
+            selection_object = doc.getObject(ref[0]) # Check that object is always stored in [0] and what happens if it is a compound.
+            listOfFaces.append(selection_object.Shape.getElement(ref[1]))
+        if len(listOfFaces)>0:
+            obj.Shape = Part.makeCompound(listOfFaces)
+        self.updateBoundaryColors(obj)
         return
+
+    def updateBoundaryColors(self,obj):
+        vobj = obj.ViewObject
+        vobj.Transparency = 20
+        if obj.BoundarySettings['BoundaryType'] == 'wall':
+            vobj.ShapeColor = (0.1, 0.1, 0.1)  # Dark grey
+        elif obj.BoundarySettings['BoundaryType'] == 'inlet':
+            vobj.ShapeColor = (0.0, 1.0, 0.0)  # Green
+        elif obj.BoundarySettings['BoundaryType'] == 'outlet':
+            vobj.ShapeColor = (1.0, 0.0, 0.0)  # Red
+        elif obj.BoundarySettings['BoundaryType'] == 'interface':
+            vobj.ShapeColor = (0.0, 0.0, 1.0)  # Blue
+        else:
+            vobj.ShapeColor = (1.0, 1.0, 1.0)  # White
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

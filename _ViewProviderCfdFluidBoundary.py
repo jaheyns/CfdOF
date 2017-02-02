@@ -33,10 +33,13 @@ from pivy import coin
 import os
 import CfdTools
 
+import pivy
+from pivy import coin
 
 class _ViewProviderCfdFluidBoundary:
     "A View Provider for the CfdBoundary object"
     def __init__(self, vobj):
+        ''' Set this object to the proxy object of the actual view provider '''
         vobj.Proxy = self
 
     def getIcon(self):
@@ -49,12 +52,17 @@ class _ViewProviderCfdFluidBoundary:
         self.Object = vobj.Object
         self.standard = coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
+        return
 
     def getDisplayModes(self, obj):
-        return ["Standard"]
+        modes=[]
+        return modes
 
     def getDefaultDisplayMode(self):
-        return "Standard"
+        return "Shaded"
+
+    def setDisplayMode(self,mode):
+        return mode
 
     def updateData(self, obj, prop):
         return
@@ -74,6 +82,7 @@ class _ViewProviderCfdFluidBoundary:
     def setEdit(self, vobj, mode):
         import _TaskPanelCfdFluidBoundary
         taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object)
+        CfdTools.setPartVisibility(vobj, True, False, False, True)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True
