@@ -31,9 +31,124 @@ class _TaskPanelCfdPorousZone:
         self.form.listWidget.itemClicked.connect(self.setSelection)
         self.form.pushButtonDelete.clicked.connect(self.deleteFeature)
         self.form.helpButton.clicked.connect(self.requestHelp)
+        self.form.checkPoint.clicked.connect(self.checkPoint)
+        self.form.automaticSelect.clicked.connect(self.autoDefinePoint)
 
         self.form.pushButtonDelete.setEnabled(False)
 
+
+    def extractMainShapeFromMesh(self):
+        isPresent = False
+        meshObjects = []
+        members = FemGui.getActiveAnalysis().Member
+        mainShape = False
+        message = None
+        for i in members:
+            if "Mesh" in i.Name:
+                meshObjects.append(i)
+                isPresent = True
+        if len(meshObjects)>1:
+            message = "More than 1 mesh objects were found! Cannot proceed!"
+            #QtGui.QMessageBox.critical(None, "More than 1 mesh objects", message)
+            return mainShape,message
+        if isPresent == False:
+            message = "No mesh objects were found. Cannot proceed!"
+            #QtGui.QMessageBox.critical(None, "0 mesh objects found", message)
+            return mainShape,message
+        if len(self.obj.shapeList) == 0:
+            message = "No porous zone regions have been selected yet. Please select a porous region."
+            #QtGui.QMessageBox.critical(None, "No porous zones", message)
+            return mainShape,message
+        try:
+            #Netgen mesh object
+            mainShape = meshObjects[0].Shape
+        except:
+            #Gmsh mesh object
+            mainShape = meshObjects[0].Part
+        return mainShape,message
+
+    def checkPoint(self):
+        import FemGui
+        mainShape,message = self.extractMainShapeFromMesh()
+        if not(mainShape):
+            QtGui.QMessageBox.critical(None, "Error", message)
+            return
+
+        px = float((FreeCAD.Units.Quantity(self.form.OX.text())).getValueAs("mm"))
+        py = float((FreeCAD.Units.Quantity(self.form.OY.text())).getValueAs("mm"))
+        pz = float((FreeCAD.Units.Quantity(self.form.OZ.text())).getValueAs("mm"))
+        point = FreeCAD.Vector(float(px),float(py),float(pz))
+
+        Result = self.checkOnePoint(mainShape,self.obj.shapeList,point)
+        if Result:
+            message = "Valid"
+        else:
+            message = "Not Valid\n"
+
+        QtGui.QMessageBox.information(None, "Point check", message)
+
+    def autoDefinePoint(self):
+        point = self.autoFindPoint()
+        if point == "criticalError":
+            return
+        elif point:
+            self.form.OX.setText("{}{}".format(str(point[0]) ,'mm'))
+            self.form.OY.setText("{}{}".format(str(point[1]),'mm'))
+            self.form.OZ.setText("{}{}".format(str(point[2]),'mm'))
+        else:
+            message = "No valid points were automatically found. Please ensure that the selected shapes are valid. If valid, please select a point manually"
+            QtGui.QMessageBox.critical(None, "Error", message)
+
+    def autoFindPoint(self):
+        porousShapes = self.obj.shapeList
+
+        mainShape,message = self.extractMainShapeFromMesh()
+        if not(mainShape):
+            QtGui.QMessageBox.critical(None, "Error", message)
+            return "criticalError"
+
+        """
+            NOTE The automatic selection algorithm is not full proof.
+            1.) First check each vertex of the main shape.
+            2.) Check each vertex of the intersecting shapes between the main shape an the porous zones 
+            2.b) Each interseting vertex is perturbed about the vertex in 6 directions
+            The first valid point is popped out
+        """
+
+        mainVertices = mainShape.Shape.Vertexes
+        for ii in range(len(mainVertices)):
+            point = mainVertices[ii].Point
+            Result = self.checkOnePoint(mainShape,porousShapes,point)
+            if Result:
+                return point
+
+        for ii in range(len(porousShapes)):
+            import Part
+            common = mainShape.Shape.common(porousShapes[ii].Shape)
+            combinedVertices = common.Vertexes
+            for jj in range(len(combinedVertices)):
+                point = combinedVertices[jj].Point
+                change = [FreeCAD.Vector(-1,0.0,0.0),FreeCAD.Vector(1,0.0,0.0),FreeCAD.Vector(0,-1.0,0.0),FreeCAD.Vector(0,1.0,0.0),FreeCAD.Vector(0.0,0.0,-1.0),FreeCAD.Vector(0.0,0.0,1.0)]
+                for kk in range(2):
+                    pointC = point + change[kk]
+                    Result = self.checkOnePoint(mainShape,porousShapes,pointC)
+                    if Result:
+                        return point
+
+
+
+    def checkOnePoint(self,mainShape,porousShapes,point):
+        Result = True
+        for ii in range(len(porousShapes)):
+            shape = porousShapes[ii].Shape
+            result = shape.isInside(point,0.001,False)
+            if result:
+                Result = False
+            #QtGui.QMessageBox.critical(None, "No porous zones", str(result))
+        if Result:
+            if not(mainShape.Shape.isInside(point,0.001,True)):
+                Result = False
+        return Result
 
     def setInitialValues(self):
 	for i in range(len(self.obj.partNameList)):
@@ -99,7 +214,7 @@ class _TaskPanelCfdPorousZone:
 
 
     def requestHelp(self):
-        message = "Outside point Help.\nPlease specify a point location (x,y,z) which falls outside the porous zone regions but is still within fluid flow domain to be analysed (contained within the meshed region)."
+        message = "Outside point Help.\nPlease specify a point location (x,y,z) which falls outside the porous zone regions but is still within fluid flow domain to be analysed (contained within the meshed region).\n\nHelpers:\nClick Automatic: Automatically find a point\nClick Check: Checks whether a given point is valid."
         QtGui.QMessageBox.information(None, "Outside point", message)
 
     def accept(self):
