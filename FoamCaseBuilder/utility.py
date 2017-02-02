@@ -570,7 +570,7 @@ def runFoamApplication(cmd, case):
 
         print("Running ", cmdline)
         # cmdline += (" | tee "+logFile) # Pipe to screen and log file
-        cmdline += (" > " + logFile)     # Pipe to log file
+        cmdline += (" > " + logFile + " 2>&1")     # Pipe to log file
         cmdline = ['bash', '-c', """source "{}" && {} """.format(env_setup_script, cmdline)]
 
         out = subprocess.check_output(cmdline, cwd=case, stderr=subprocess.PIPE)
