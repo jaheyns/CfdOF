@@ -1,160 +1,128 @@
-# A computional fluid dynamics (CFD) module for FreeCAD
+# Computional fluid dynamics (CFD) workbench for FreeCAD
 
-by Qingfeng Xia, 2015 <http://www.iesensor.com/HTML5pptCV>
-Team from CSIR South Africa, 2016
-+ Oliver Oxtoby <http://www.linkedin.com/in/oliver-oxtoby-05616835>
-+ Alfred Bogears <http://www.csir.co.za/dr-alfred-bogaers>
-+ Johan Heyns  <http://www.linkedin.com/in/johan-heyns-54b75511>
+This workbench aims to help users set up and run CFD analysis. It guides the user in selecting the relevant physics, 
+specifying the material properties, generating a mesh, assigning boundary conditions and setting the solver settings
+before running the simulation. Where possible best practices are included to improve the stability of the solvers.
 
-## LGPL license as FreeCAD
+This software is a fork of the CFD workbench developed by [Qingfeng Xia](http://github.com/qingfengxia/Cfd) which
+rather focuses on assisting new CFD users. This fork therefor places emphasis on usability and solver stability over 
+functionality.
 
-Use only with FreeCAD-daily version since Dec 2016.
-Currently, only OpenFOAM (official 3.0 +) solver is implemented, tested on Ubuntu 16.04
+## Features
 
-This module aims to accelerate CFD case build up. Limited by the long solving time and mesh quality sensitivity of CFD problem, this module will not as good as FEM module. For engineering application, please seek support from other commercial CFD software.
+### Current:
 
+1. Incompressible, laminar flow (simpleFoam and pimpleFoam).
+2. Basic material data base.
+3. Flow initialisation with a potential solver.
+4. Tetrahedral meshing using GMSH.
+5. Post processing using paraview.
 
-## Features and limitation
+### Under development:
 
-![FreeCAD CFDworkbench screenshot](https://github.com/qingfengxia/qingfengxia.github.io/blob/master/images/FreeCAD_CFDworkbench_screenshot.png)
+1. Porous regions and porous baffles.
+2. Multiple region meshing
+3. Unit testing
+4. Run on Windows 7-10
 
-### Highlight for this initial commit:
+### Future (2017):
 
-1. Python code to run a basic laminar flow simulation is added into CfdWorkbench
-2. An independent python module, FoamCaseBuilder (LGPL), can work with and without FreeCAD to build up case for OpenFOAM
-3. A general FemSolverControlTaskPanel is proposed for any FemSolver.
+1. Cut-cell Cartesian meshing with boundary layers.
+2. Extension to turbulent using RANS (k-w SST).
+3. Conjugate heat transfer.
 
-### Limitation:
+### Platform supported
 
-1. only laminar flow with dedicate solver and boundary setup can converge, and I suspect the the current meshing tool, netgen is not ideal for CFD, which needs very thin layer near wall. Please download my 2 test file to evaluate for this stage.
-2. result can only be viewed in paraview. but possible to export result to VTK format then load back to FreeCAD. (it is implemented in Oct 2016)
+Linux: 
 
+        Ubuntu 16.04 
+        Fedora 24
 
-### Platform support status
-- install on Linux:
-        Ubuntu 16.04 as a baseline implementation
+Windows:
 
-- install on Windows 10 with Bash on Windows support:
-        Official OpenFOAM  (Ubuntu deb) can be installed and run on windows via Bash on Windows,
-        but it is tricky to run windows python script to call the command with python via subprocess module
+        Not yet supported. 
 
-- install on MAC (not tested):
-        As a POSIX system, it is possible to run OpenFOAM and this moduel, assuming openfoam/etc/bashrc has been sourced for bash
+MAC 
+
+        Not tested, but a POSIX system. Possible to install and run OpenFOAM. 
       
 =============================================
   
-## Installation guide
+## Getting started
 
-### Prerequisites OpenFOAM related software
+### Prerequisites
 
-- OpenFOAM (3.0+)  `sudo apt-get install openfoam` once repo is added/imported
+- [OpenFOAM (3.0+)](http://openfoam.org/download/)
 
-> see more [OpenFOAM official installation guide](http://openfoamwiki.net/index.php/Installation), make sure openfoam/etc/bashrc is sourced into ~/.bashrc
+- [PyFoam (0.6.6+)](http://pypi.python.org/pypi/PyFoam)
 
-- PyFoam (0.6.6+) `sudo pip install PyFoam`
+- gnuplot.py or gnuplot-py
 
-- gnuplot.py/gnuplot-py
-  Residual plotter  
-
-- paraview 
-  External results viewing
+- [Paraview](http://www.paraview.org/)
  
-optional:
+- [GMSH](http://gmsh.info/)
 
-- salome for mesihng
-- gnuplot
 
-Debian/Ubuntu: see more details of Prerequisites installation in *Readme.md* in *FoamCaseBuilder* folder
+### Setting up Cfd workbemch
 
-RHEL/SL/Centos/Fedora: Installation tutorial/guide is welcomed from testers
+As the CFD workbench is fully developed in Python the user is not required to compile any libraries and can directly 
+copy the folder to <FreeCAD/Mod/Cfd>. 
 
-### Install freecad-daily and FEM
-After Oct 2016, Cfd boundary condition C++ code (FemConstraintFluidBoundary) has been merged into official master
-
-Make sure netgen and Gmsh function is enabled and installed 
+From command line, clone the CFD workbench
+    
+    $ git clone https://github.com/jaheyns/Cfd.git`
         
-### Install Cfd workbemch
-from github using
-`git clone https://github.com/qingfengxia/Cfd.git`
-        
-symbolic link or copy the folder into `<freecad installation folder>/Mod`, 
-e.g, on POSIX system: 
-
-`sudo ln -s (path_to_CFD)  (path_to_freecad)/Mod`
+and create a symbolic link the local FreeCAD instalation directory. 
+    
+    $ ln -s <path/to/Cfd)  <path/to/freecad>/Mod
         
 
-ALTERNATIVELY, use FreeCAD-Addon-Installer macro from <https://github.com/FreeCAD/FreeCAD-addons>
-
-========================================
-
-## Testing
-
-### Test FoamCaseBuider
-
-There is a test script to test installation of this FoamCaseBuilder, copy the file FoamCaseBuilder/TestBuilder.py to somewhere writtable and run 
-
-`python2 pathtoFoamCaseBuilder/TestBuilder.py` 
-
-This script will download a mesh file and build up a case without FreeCAD.
-
-### tutorial to build up case in FreeCAD
-
-Similar with FemWorkbench
-
-+ make a simple part  in PartWorkbench or complex shape in Partdesign workbench
-
-+ select the part and click "makeCfdAnalysis" in CfdWorkbench
-> which creats a CfdAnalysis object, FemMesh object, and default materail
-
-+ config the solver setting in property editor data tab on the left combi panel, by single click sovler object
-
-+ double click mesh object to refine mesh
-
-+ hide the mesh and show hte part, so part surface can be select in creatation of boundary condition
-
-+ add boundary conditions by click the toolbar item, and link surface and bondary value
-
-+ double click solver object to bring up the SolverControl task panel
-> select working directory, write up case, further edit the case setting up
-  then run the case (currently, copy the solver command in message box and run it in new console)
-
-### Test with prebuilt case
-
-Johan has built a case, see attachment [test procedure on freecad forum](http://forum.freecadweb.org/viewtopic.php?f=18&t=17322)
+This fork is unfortunately not available under the  FreeCAD-Addon-Installer.
 
 
-A simple example of cube pipe with one inlet and one outlet. <https://www.iesensor.com/download/TestCfdCubePipe.fcstd>
-Example setup, calculation will diverge.
+##Developement
 
-========================================
+### Testing
 
-## Roadmap
-
-### see external [Roadmap.md](./Roadmap.md)
+Unit testing is currently under development.
 
 
-=======================================
+### Style guide
 
-## How to contribute this module
+For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
+1. Use 4 spaces per indentation level (Spaces are the preferred over tabs).
+2. Limit all lines to a maximum of 120 characters.
+3. Break lines before binary operators.
+4. Blank lines 
+    
+    - Surround top-level function and class definitions with two lines.
 
-You can fork this module to add new CFD solver or fix bugs for this OpenFOAM solver.
+    - Definitions inside a class are surrounded by a single line.
+    
+5. Imports should usually be on separate lines.
+6. Comments
 
-There is a ebook "Module developer's guide on FreeCAD source code", there are two chapters describing how Fem and Cfd modules are designed and implemented.
+    - Docstrings always use """triple double quotes"""
+    
+    - Block comment starts with a # and a single space and are indented to the same level as that code
+    
+    - Use inline comments sparingly, they are on the same line as a statement and should be separated by at least two
+ spaces from the statement. 
 
-<https://github.com/qingfengxia/FreeCAD_Mod_Dev_Guide.git> where updated PDF could be found on this git repo
+7. Avoid trailing whitespaces
+8. Naming convention
 
-This is an outdated version for early preview:
-<https://www.iesensor.com/download/FreeCAD_Mod_Dev_Guide__20161224.pdf>
+    - ClassNames (Camel)
+    - variable_names_without_capitals (Underscore)
+    - CONSTANTS_USE_CAPITALS (Uppercase)
+    - functionsWithoutCapitals (Camel instead of underscore to ensure consistency with FreeCAD)
+    - __class_attribute (Double leading underscore)
 
-## Collaboration strategy
 
-Cfd is still under testing and dev, it will not be ready to be included into official in the next 6 m.
+## Developers
 
-Currently route I can imagine:
-CFD workbench new developers fork official FreeCAD and my Cfd githttps://github.com/qingfengxia/Cfd.git.
-
-Cfd workbench depends on Fem for meshing and boundary(FemConstraint) and post-processing, most of them are coded in C++ so it is hard to split from Fem. If you need add feature on above, you branch FreeCAD official, not mime (but do let me know, pull request will only accepted if it is fully discussed on forum and reviewed by other dev like Bernd, me). see my ebook on how to pull request. Any other cfd python code, do pull request me (my Cfd.git) e.g. I developed vtk mesh and result import and export feature, git directly to official Fem workbench.
-
-User can install freecad-daily, and git update/install Cfd.git so all got updated code without pain for installation.
-
+Qingfeng Xia, 2015 <www.iesensor.com/HTML5pptCV>
+Johan Heyns (CSIR, 2016) <jheyns@csir.co.za>         
+Oliver Oxtoby (CSIR, 2016) <ooxtoby@csir.co.za>      
+Alfred Bogaers (CSIR, 2016) <abogaers@csir.co.za>    
 

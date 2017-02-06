@@ -1,7 +1,9 @@
 #***************************************************************************
 #*                                                                         *
 #*   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
-#*   Copyright (c) 2017 - CSIR, South Africa                               *
+#*   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+#*   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+#*   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
 #*                                                                         *
 #*   This program is free software; you can redistribute it and/or modify  *
 #*   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -45,53 +47,53 @@ if FreeCAD.GuiUp:
 # Constants
 
 BOUNDARY_TYPES = ["wall", "inlet", "outlet", "interface", "freestream"]
-SUBTYPES = [ ["fixed", "slip", "partialSlip", "moving", "rough"],
-             ["totalPressure", "uniformVelocity", "volumetricFlowRate", "massFlowRate"],
-             ["totalPressure", "staticPressure", "uniformVelocity", "outFlow"],
-             ["symmetryPlane", "cyclic", "wedge", "empty", "coupled"],
-             ["freestream"] ]
+SUBTYPES = [["fixed", "slip", "partialSlip", "moving", "rough"],
+            ["totalPressure", "uniformVelocity", "volumetricFlowRate", "massFlowRate"],
+            ["totalPressure", "staticPressure", "uniformVelocity", "outFlow"],
+            ["symmetryPlane", "cyclic", "wedge", "empty", "coupled"],
+            ["freestream"]]
 
-SUBTYPES_HELPTEXT = [ ["Viscous wall boundary (zero velocity)",
-                       "Frictionless wall",
-                       "Blended fixed/slip",
-                       "Viscous moving wall",
-                       "Wall roughness function"],
-                      ["Total pressure specified, treated as static pressure for reverse flow",
-                       "Velocity specified, normal component imposed for reverse flow",
-                       "Uniform volume flow rate specified",
-                       "Uniform mass flow rate specified"],
-                      ["Static pressure specified, treated as total pressure for reverse flow",
-                       "Static pressure specified for outflow and reverse flow",
-                       "Normal component imposed for outflow, velocity fixed for reverse flow",
-                       "All fields extrapolated; use with care!"],
-                      ["Symmetry plane",
-                       "Periodic boundary, treated as physically connected",
-                       "Axi-symmetric periodic boundary",
-                       "Front and back for single layer 2D mesh and axi-symmetric axis line",
-                       "Exchange boundary value with external program, requires manual setup"],
-                      ["Far-field conditions"] ]
+SUBTYPES_HELPTEXT = [["Viscous wall boundary (zero velocity)",
+                      "Frictionless wall",
+                      "Blended fixed/slip",
+                      "Viscous moving wall",
+                      "Wall roughness function"],
+                     ["Total pressure specified, treated as static pressure for reverse flow",
+                      "Velocity specified, normal component imposed for reverse flow",
+                      "Uniform volume flow rate specified",
+                      "Uniform mass flow rate specified"],
+                     ["Static pressure specified, treated as total pressure for reverse flow",
+                      "Static pressure specified for outflow and reverse flow",
+                      "Normal component imposed for outflow, velocity fixed for reverse flow",
+                      "All fields extrapolated; use with care!"],
+                     ["Symmetry plane",
+                      "Periodic boundary, treated as physically connected",
+                      "Axi-symmetric periodic boundary",
+                      "Front and back for single layer 2D mesh and axi-symmetric axis line",
+                      "Exchange boundary value with external program, requires manual setup"],
+                     ["Far-field conditions"]]
 
 # For each sub-type, whether the basic tab is enabled, the row number to show, and (for panel 0 only) whether
 # direction reversal is checked by default
-BOUNDARY_BASICTAB = [ [[False],
-                       [False],
-                       [True, 2],
-                       [True, 0, False],
-                       [True, 0, False]],
-                      [[True, 1],
-                       [True, 0, True],
-                       [True, 3],
-                       [True, 4]],
-                      [[True, 1],
-                       [True, 1],
-                       [True, 0, False],
-                       [False]],
-                      [[False],
-                       [False],
-                       [False],
-                       [False],
-                       [False]],
-                      [[True, 0, True]] ]
+BOUNDARY_BASICTAB = [[[False],
+                      [False],
+                      [True, 2],
+                      [True, 0, False],
+                      [True, 0, False]],
+                     [[True, 1],
+                      [True, 0, True],
+                      [True, 3],
+                      [True, 4]],
+                     [[True, 1],
+                      [True, 1],
+                      [True, 0, False],
+                      [False]],
+                     [[False],
+                      [False],
+                      [False],
+                      [False],
+                      [False]],
+                     [[True, 0, True]]]
 
 TURBULENCE_SPECIFICATIONS = ["intensity&DissipationRate",
                              "intensity&LengthScale",
@@ -117,7 +119,7 @@ BOUNDARY_THERMALTAB = [[0], [], [1], [0, 1], [2], []]
 
 
 class TaskPanelCfdFluidBoundary:
-    ''' Taskpanel for adding fluid boundary '''
+    """ Taskpanel for adding fluid boundary """
     def __init__(self, obj):
         self.selecting_references = False
         self.selecting_direction = False
@@ -188,11 +190,11 @@ class TaskPanelCfdFluidBoundary:
             self.update_selectionbuttons_ui()
 
     def add_selection_to_ref_list(self):
-        # Add currently selected objects to reference list
+        """ Add currently selected objects to reference list. """
         for sel in FreeCADGui.Selection.getSelectionEx():
             if sel.HasSubObjects:
                 for sub in sel.SubElementNames:
-                    self.addSelection(sel.DocumentName, sel.ObjectName, sub, None)
+                    self.addSelection(sel.DocumentName, sel.ObjectName, sub)
 
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
@@ -205,8 +207,6 @@ class TaskPanelCfdFluidBoundary:
         type_index = self.form.comboBoundaryType.currentIndex()
         subtype_index = self.form.comboSubtype.currentIndex()
         self.form.labelBoundaryDescription.setText(SUBTYPES_HELPTEXT[type_index][subtype_index])
-
-
         self.BoundarySettings['BoundarySubtype'] = self.form.comboSubtype.currentText()
         self.update_boundary_type_ui()
 
@@ -223,11 +223,11 @@ class TaskPanelCfdFluidBoundary:
             self.form.layoutBasicValues.itemAt(panel_number).widget().setVisible(True)
             if panel_number == 0:
                 reverse = BOUNDARY_BASICTAB[type_index][subtype_index][2]
-                if self.form.lineDirection.text() == "":  # If user hasn't set a patch yet, initialise 'reverse' to default
+                if self.form.lineDirection.text() == "":  # If user hasn't set a patch, initialise 'reverse' to default
                     self.form.checkReverse.setChecked(reverse)
 
     def buttonReferenceClicked(self):
-        '''Called if Button buttonReference is triggered'''
+        """Called if Button buttonReference is triggered. """
         self.selecting_direction = False
         self.selecting_references = not self.selecting_references
         if self.selecting_references:
@@ -243,8 +243,8 @@ class TaskPanelCfdFluidBoundary:
         else:
             self.form.labelHelpText.setText("")
             FreeCADGui.Selection.removeObserver(self)
-        docName = str(self.obj.Document.Name)
-        FreeCADGui.doCommand("FreeCAD.getDocument('"+docName+"').recompute()") # Create compound part
+        doc_name = str(self.obj.Document.Name)
+        FreeCADGui.doCommand("FreeCAD.getDocument('"+doc_name+"').recompute()")  # Create compound part
         self.update_selectionbuttons_ui()
 
     def update_selectionbuttons_ui(self):
@@ -257,7 +257,7 @@ class TaskPanelCfdFluidBoundary:
         self.form.frameMagNormal.setVisible(self.form.radioButtonMagNormal.isChecked())
 
     def buttonDirectionClicked(self):
-        '''Called if Button buttonDirection is triggered'''
+        """Called if Button buttonDirection is triggered. """
         self.selecting_references = False
         self.selecting_direction = not self.selecting_direction
         if self.selecting_direction:
@@ -268,7 +268,7 @@ class TaskPanelCfdFluidBoundary:
                 if sel.HasSubObjects:
                     if len(sel.SubElementNames) == 1:
                         sub = sel.SubElementNames[0]
-                        self.addSelection(sel.DocumentName, sel.ObjectName, sub, None)
+                        self.addSelection(sel.DocumentName, sel.ObjectName, sub)
         FreeCADGui.Selection.clearSelection()
         # start SelectionObserver and parse the function to add the References to the widget
         if self.selecting_direction:
@@ -278,12 +278,14 @@ class TaskPanelCfdFluidBoundary:
             FreeCADGui.Selection.removeObserver(self)
         self.update_selectionbuttons_ui()
 
-    def addSelection(self, docName, objName, sub, pos):
-        # Don't allow selection in other document
+    def addSelection(self, doc_name, obj_name, sub):
+        """ Add the selected sub-element (face) of the part to the Reference list. Prevent selection in other
+        document.
+        """
         if FreeCADGui.activeDocument().Document.Name != self.obj.Document.Name:
             return
-        selected_object = FreeCAD.getDocument(docName).getObject(objName)  # get the obj objName
-        # on double click on a vertex of a solid sub is None and obj is the solid
+        selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
+        # On double click on a vertex of a solid sub is None and obj is the solid
         print('Selection: ' + selected_object.Shape.ShapeType + '  ' + selected_object.Name + ':' + sub)
         if hasattr(selected_object, "Shape") and sub:
             elt = selected_object.Shape.getElement(sub)
@@ -293,7 +295,7 @@ class TaskPanelCfdFluidBoundary:
                     if selection not in self.References:
                         self.References.append(selection)
                         self.rebuild_list_references()
-                        # If the user hasn't picked anything for direction, use this face as the default
+                        # If the user hasn't picked anything for direction the selected face is used as default.
                         if self.form.lineDirection.text() == "":
                             self.form.lineDirection.setText(selection[0] + ':' + selection[1])
                     else:
@@ -407,7 +409,7 @@ class TaskPanelCfdFluidBoundary:
         panel_numbers = BOUNDARY_THERMALTAB[index]
         # Enables specified rows of a QFormLayout
         from PySide.QtGui import QFormLayout
-        for rowi in range(2, self.form.layoutThermal.rowCount()): # Input values only start at row 2 of this form
+        for rowi in range(2, self.form.layoutThermal.rowCount()):  # Input values only start at row 2 of this form
             for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
                 item = self.form.layoutThermal.itemAt(rowi, role)
                 if isinstance(item, QtGui.QWidgetItem):
@@ -419,8 +421,8 @@ class TaskPanelCfdFluidBoundary:
         self.obj.References = self.References
         self.obj.BoundarySettings = self.BoundarySettings.copy()
         doc = FreeCADGui.getDocument(self.obj.Document)
-        docName = str(self.obj.Document.Name)
-        FreeCADGui.doCommand("FreeCAD.getDocument('"+docName+"').recompute()")
+        doc_name = str(self.obj.Document.Name)
+        FreeCADGui.doCommand("FreeCAD.getDocument('"+doc_name+"').recompute()")
         doc.resetEdit()
 
     def reject(self):

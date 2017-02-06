@@ -21,9 +21,7 @@
 #*                                                                         *
 #***************************************************************************
 
-"""
-utility functions like mesh exporting, shared by any CFD solver
-"""
+# Utility functions like mesh exporting, shared by any CFD solver
 
 from __future__ import print_function
 import os
@@ -33,24 +31,11 @@ import tempfile
 import FreeCAD
 import Fem
 
-''' Working directory '''
 
-def is_planar(shape):
-    """ Return whether the shape is a planar face """
-    n = shape.normalAt(0.5, 0.5)
-    if len(shape.Vertexes) <= 3:
-        return True
-    for v in shape.Vertexes[1:]:
-        t = v.Point - shape.Vertexes[0].Point
-        c = t.dot(n)
-        if c / t.Length > 1e-8:
-            return False
-    return True
-
+# Working directory
 
 def checkWorkingDir(wd):
-    ''' Check validity of working directory.
-    '''
+    """ Check validity of working directory. """
     if not (os.path.isdir(wd) and os.access(wd, os.W_OK)):
         FreeCAD.Console.PrintError("Working directory \'{}\' is not valid".format(wd))
         return False
@@ -59,20 +44,19 @@ def checkWorkingDir(wd):
 
 
 def getTempWorkingDir():
-    ''' Return temporary working directory
-    '''
+    """ Return temporary working directory. """
+    work_dir = ''
     if os.path.exists('/tmp/'):
-        workDir = '/tmp/'  # must exist for POSIX system
+        work_dir = '/tmp/'  # Must exist for POSIX system.
     elif tempfile.tempdir:
-        workDir = tempfile.tempdir
-    else:
-        cwd = os.path.abspath('./')
-    return workDir
+        work_dir = tempfile.tempdir
+    # else:
+    #     cwd = os.path.abspath('./')
+    return work_dir
 
 
 def setupWorkingDir(solver_object):
-    ''' Create working directory
-    '''
+    """Create working directory"""
     wd = solver_object.WorkingDir
     if not (os.path.exists(wd)):
         try:
@@ -84,7 +68,7 @@ def setupWorkingDir(solver_object):
     return wd
 
 
-''' Various get functions '''
+# Get functions
 
 if FreeCAD.GuiUp:
     def getResultObject():
@@ -100,11 +84,12 @@ if FreeCAD.GuiUp:
         return None
 
     def getActiveAnalysis(fem_object):
-        # find the fem analysis object this fem_object belongs to
+        """ Find the Fem analysis object to which this fem_object belongs. """
         doc = fem_object.Document
         for analysis_obj in doc.findObjects('Fem::FemAnalysis'):
             if fem_object in analysis_obj.Member:
                 return analysis_obj
+
 
 def getPhysicsObject(analysis_object):
     isPresent = False
@@ -113,7 +98,7 @@ def getPhysicsObject(analysis_object):
             physicsModel = i.PhysicsModel
             isPresent = True
     if not(isPresent):
-        physicsModel = None #just a placeholder to be created in event that it is not present
+        physicsModel = None  # A placeholder to be created in event that it is not present.
     return physicsModel,isPresent
 
 def getPorousObject(analysis_object):
@@ -133,9 +118,10 @@ def getInitialConditions(analysis_object):
         if "InitializeInternalVariables" in i.Name:
             InitialVariables = i.InitialVariables
             isPresent = True
-    if not(isPresent):
-        InitialVariables = None #just a placeholder to be created in event that it is not present
-    return InitialVariables,isPresent
+    if not isPresent:
+        InitialVariables = None  # A placeholder to be created in event that it is not present.
+    return InitialVariables, isPresent
+
 
 def getMaterial(analysis_object):
     for i in analysis_object.Member:
@@ -150,7 +136,7 @@ def getSolver(analysis_object):
 
 
 def getSolverSettings(solver):
-    # convert properties into python dict, while key must begin with lower letter
+    """ Convert properties into python dict, while key must begin with lower letter. """
     dict = {}
     f = lambda s: s[0].lower() + s[1:]
     for prop in solver.PropertiesList:
@@ -173,6 +159,7 @@ def getCfdConstraintGroup(analysis_object):
             group.append(i)
     return group
 
+
 def getCfdBoundaryGroup(analysis_object):
     group = []
     import _CfdFluidBoundary
@@ -181,11 +168,25 @@ def getCfdBoundaryGroup(analysis_object):
             group.append(i)
     return group
 
+
+def is_planar(shape):
+    """ Return whether the shape is a planar face """
+    n = shape.normalAt(0.5, 0.5)
+    if len(shape.Vertexes) <= 3:
+        return True
+    for v in shape.Vertexes[1:]:
+        t = v.Point - shape.Vertexes[0].Point
+        c = t.dot(n)
+        if c / t.Length > 1e-8:
+            return False
+    return True
+
+
 def getMesh(analysis_object):
     for i in analysis_object.Member:
         if i.isDerivedFrom("Fem::FemMeshObject"):
             return i
-    # python will return None by default, so check None outside
+    # Python return None by default, so check None outside
 
 
 def isSolidMesh(fem_mesh):
@@ -195,14 +196,15 @@ def isSolidMesh(fem_mesh):
 
 def getResult(analysis_object):
     for i in analysis_object.Member:
-        if(i.isDerivedFrom("Fem::FemResultObject")):
+        if i.isDerivedFrom("Fem::FemResultObject"):
             return i
     return None
 
+
 def get_module_path():
     """ Returns the current Cfd module path.
-        Check if the module is installed in the app's module directory
-        or the user's app data folder. The second overrides the first.
+    Check if the module is installed in the app's module directory or the user's app data folder. The second overrides
+    the first.
     """
     import os
     user_mod_path = os.path.join(FreeCAD.ConfigGet("UserAppData"), "Mod/Cfd")
@@ -212,7 +214,7 @@ def get_module_path():
     else:
         return app_mod_path
 
-''' NOTE: Code depreciated'''
+# NOTE: Code depreciated (JH) 27/01/2016
 # def convertQuantityToMKS(input, quantity_type, unit_system="MKS"):
 #     """ convert non MKS unit quantity to SI MKS (metre, kg, second)
 #     FreeCAD default length unit is mm, not metre, thereby, area is mm^2, pressure is MPa, etc
@@ -223,25 +225,25 @@ def get_module_path():
 #     return input
 
 
-''' Various set functions '''
+# Set functions
 
-def setPartVisibility(vobj, partVis, compoundVis, meshVis, boundVis):
-    ''' Set visibility of feature parts, compounded parts, mesh and boundaries.'''
-    docName = str(vobj.Object.Document.Name)
-    doc = FreeCAD.getDocument(docName)
+def setPartVisibility(vobj, part_vis, compound_vis, mesh_vis, bound_vis):
+    """ Set visibility of feature parts, compounded parts, mesh and boundaries. """
+    doc_name = str(vobj.Object.Document.Name)
+    doc = FreeCAD.getDocument(doc_name)
     for obj in doc.Objects:
         if obj.isDerivedFrom("Part::Feature") and not ("CfdFluidBoundary" in obj.Name):
-            FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = partVis
+            FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = part_vis
         if obj.isDerivedFrom("Part::Feature") and ("Compound" in obj.Name):
-            FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = compoundVis
+            FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = compound_vis
         if obj.isDerivedFrom("Fem::FemMeshObject"):
-            FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = meshVis
-        if obj.isDerivedFrom("Part::Feature") and ("CfdFluidBoundary" in obj.Name) and not boundVis:
+            FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = mesh_vis
+        if obj.isDerivedFrom("Part::Feature") and ("CfdFluidBoundary" in obj.Name) and not bound_vis:
             ''' Only turn boundary visibility off, if set to true it will keep visibility as is. '''
-            FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = boundVis
+            FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = bound_vis
 
 
-''' UNV mesh writer '''
+# UNV mesh writer
 
 def write_unv_mesh(mesh_obj, bc_group, mesh_file_name):
     __objs__ = []
@@ -254,7 +256,6 @@ def write_unv_mesh(mesh_obj, bc_group, mesh_file_name):
 
 
 def _write_unv_bc_mesh(mesh_obj, bc_group, unv_mesh_file):
-    #FreeCAD.Console.PrintMessage('Write face_set on boundaries\n')
     f = open(unv_mesh_file, 'a')     # Appending bc to the volume mesh, which contains node and
                                      # element definition, ends with '-1'
     f.write("{:6d}\n".format(-1))    # Start of a section
@@ -268,10 +269,10 @@ def _write_unv_bc_mesh(mesh_obj, bc_group, unv_mesh_file):
 
 def _write_unv_bc_faces(mesh_obj, f, bc_id, bc_object):
     facet_list = []
-    for o, e in bc_object.References:  # list of (ObjectName, StringName)
+    for o, e in bc_object.References:  # List of (ObjectName, StringName)
         import FreeCADGui
-        object = FreeCADGui.activeDocument().Document.getObject(o)
-        elem = object.Shape.getElement(e)
+        obj = FreeCADGui.activeDocument().Document.getObject(o)
+        elem = obj.Shape.getElement(e)
         if elem.ShapeType == 'Face':  # OpenFOAM needs only 2D face boundary for 3D model, normally
             ret = mesh_obj.FemMesh.getFacesByFace(elem)  # FemMeshPyImp.cpp
             facet_list.extend(i for i in ret)

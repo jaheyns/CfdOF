@@ -845,14 +845,13 @@ class BasicBuilder(object):
     ############################## non public API ######################################
 
     def initBoundaryConditions(self):
-        """ set all boundary as wall if no boundary setting is specified for this boundary
-        write default value in 'case/0/p' 'case/0/U' and turbulence related case/0/var
-        in polyMesh/boundary  "defaultFaces" must be wall type, 
-        but mesh conversion tool does not rename
+        """ If not boundary condition is specified default to 'fixed wall'. Update '<case/dir>/0/p', '<case/dir>/0/U'
+        as well as turbulence values. In polyMesh/boundary "defaultFaces" is set to 'wall', but mesh conversion is not
+        renamed.
         """
         bc_names = listBoundaryNames(self._casePath)
         specified_bc_names = set([bc['name'] for bc in self._boundarySettings])
-        unspecified_bc_names = set(bc_names) - specified_bc_names
+        # unspecified_bc_names = set(bc_names) - specified_bc_names
         #for bc in unspecified_bc_names:
         self._initVelocityBoundaryAsWall()
         self._initPressureBoundaryAsWall()

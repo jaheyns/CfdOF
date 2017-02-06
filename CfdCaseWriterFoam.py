@@ -1,6 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2015 - Qingfeng Xia <qingfeng.xia eng ox ac uk>         *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -51,8 +54,8 @@ class CfdCaseWriterFoam:
         self.mesh_obj = CfdTools.getMesh(analysis_obj)
         self.material_obj = CfdTools.getMaterial(analysis_obj)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
-        self.initialVariables_obj,isPresent = CfdTools.getInitialConditions(analysis_obj)
-        self.porousZone_obj,self.porousZonePresent = CfdTools.getPorousObject(analysis_obj)
+        self.initialVariables_obj, isPresent = CfdTools.getInitialConditions(analysis_obj)
+        self.porousZone_obj, self.porousZonePresent = CfdTools.getPorousObject(analysis_obj)
         self.mesh_generated = False
 
     def write_case(self, updating=False):
