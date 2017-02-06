@@ -87,7 +87,7 @@ class _CfdFluidBoundary(PartFeature):
         if obj.BoundarySettings['BoundaryType'] == 'wall':
             vobj.ShapeColor = (0.1, 0.1, 0.1)  # Dark grey
         elif obj.BoundarySettings['BoundaryType'] == 'inlet':
-            vobj.ShapeColor = (0.0, 1.0, 0.0)  # Green
+            vobj.ShapeColor = (0.0, 0.0, 1.0)  # Blue
         elif obj.BoundarySettings['BoundaryType'] == 'outlet':
             vobj.ShapeColor = (1.0, 0.0, 0.0)  # Red
         elif obj.BoundarySettings['BoundaryType'] == 'interface':

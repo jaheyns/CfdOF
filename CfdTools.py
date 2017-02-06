@@ -232,15 +232,16 @@ def setPartVisibility(vobj, part_vis, compound_vis, mesh_vis, bound_vis):
     doc_name = str(vobj.Object.Document.Name)
     doc = FreeCAD.getDocument(doc_name)
     for obj in doc.Objects:
-        if obj.isDerivedFrom("Part::Feature") and not ("CfdFluidBoundary" in obj.Name):
-            FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = part_vis
-        if obj.isDerivedFrom("Part::Feature") and ("Compound" in obj.Name):
-            FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = compound_vis
+        if obj.isDerivedFrom("Part::Feature"):
+            if not ("CfdFluidBoundary" in obj.Name):
+                FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = part_vis
+            if ("CfdFluidBoundary" in obj.Name) and not bound_vis:
+                ''' Only turn boundary visibility off, if set to true it will keep visibility as is. '''
+                FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = bound_vis
+            if ("Compound" in obj.Name) or ("Fusion" in obj.Name):
+                FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = compound_vis
         if obj.isDerivedFrom("Fem::FemMeshObject"):
             FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = mesh_vis
-        if obj.isDerivedFrom("Part::Feature") and ("CfdFluidBoundary" in obj.Name) and not bound_vis:
-            ''' Only turn boundary visibility off, if set to true it will keep visibility as is. '''
-            FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = bound_vis
 
 
 # UNV mesh writer

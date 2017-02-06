@@ -63,7 +63,7 @@ class CfdWorkbench(Workbench):
         cmdlst = ['Cfd_Analysis', 'Cfd_MeshGmshFromShape',
                   #'Fem_MeshRegion', 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
                   'Cfd_FluidBoundary','Cfd_PhysicsModel', 'Cfd_InitialiseInternal',
-                  'Cfd_FluidMaterial','Cfd_SolverControl','Cfd_PorousZone',"Separator",
+                  'Cfd_FluidMaterial','Cfd_PorousZone','Cfd_SolverControl',"Separator",
                   'Fem_PostPipelineFromResult', 'Fem_PostCreateClipFilter',
                   'Fem_PostCreateScalarClipFilter', 'Fem_PostCreateCutFilter']
 

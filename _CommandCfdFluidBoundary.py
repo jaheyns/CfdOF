@@ -1,6 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -20,7 +23,7 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "Command constraint self weight"
+__title__ = "Command fluid boundary"
 __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
@@ -37,7 +40,7 @@ import CfdTools
 
 
 class _CommandCfdFluidBoundary(FemCommands):
-    "The Fem_CfdFluidBoundary command definition"
+    """ The Fem_CfdFluidBoundary command definition """
     def __init__(self):
         super(_CommandCfdFluidBoundary, self).__init__()
         self.resources = self.GetResources()

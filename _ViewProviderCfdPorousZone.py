@@ -1,126 +1,97 @@
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
 
-__title__ = "_ViewProviderCfdPorousZone"
-__author__ = ""
-__url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import FreeCADGui
 import CfdTools
 import os
 
-import pivy
-from pivy import coin
+# import pivy
+# from pivy import coin
+
+__title__ = "_ViewProviderCfdPorousZone"
+__author__ = ""
+__url__ = "http://www.freecadweb.org"
+
 
 class _ViewProviderCfdPorousZone:
-    "A View Provider for the InitialVariables object"
-    def __init__(self, obj):
-            ''' Set this object to the proxy object of the actual view provider '''
-            obj.Proxy = self
+    """ A View Provider for the Porous Zone object. """
+    def __init__(self, vobj):
+        """ Set this object to the proxy object of the actual view provider """
+        vobj.Proxy = self
 
     def attach(self, vobj):
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.ViewObject.ShapeColor = (0.0,0.0,1.0)
-        #self.ViewObject.LineColor = (1.0,0.0,0.0)
-        #self.ViewObject.PointColor = (1.0,0.0,0.0)
-        #self.ViewObject.LineWidth = 5
+        self.ViewObject.ShapeColor = (0.5,0.0,1.0)
         self.ViewObject.Transparency = 70
-        #self.ViewObject.PointSize = 5
-        ''' Setup the scene sub-graph of the view provider, this method is mandatory '''
+        # Setup the scene sub-graph of the view provider, this method is mandatory
         return
 
     def updateData(self, fp, prop):
-            ''' If a property of the handled feature has changed we have the chance to handle this here '''
-            return
+        """ If a property of the handled feature has changed we have the chance to handle this here """
+        return
 
-    def getDisplayModes(self,obj):
-            ''' Return a list of display modes. '''
-            modes=[]
-            return modes
+    def getDisplayModes(self, obj):
+        """ Return a list of display modes. """
+        modes=[]
+        return modes
 
     def getDefaultDisplayMode(self):
-            ''' Return the name of the default display mode. It must be defined in getDisplayModes. '''
-            return "Shaded"
+        """ Return the name of the default display mode. It must be defined in getDisplayModes. """
+        return "Shaded"
 
     def setDisplayMode(self,mode):
-            ''' Map the display mode defined in attach with those defined in getDisplayModes.
-            Since they have the same names nothing needs to be done. This method is optinal.
-            '''
-            return mode
+        """ Map the display mode defined in attach with those defined in getDisplayModes. Since they have the same
+        names nothing needs to be done. This method is optinal.
+        """
+        return mode
 
     def onChanged(self, vp, prop):
-            ''' Print the name of the property that has changed '''
-            FreeCAD.Console.PrintMessage("Change property: " + str(prop) + "\n")
+        return
 
     def getIcon(self):
-            ''' Return the icon in XMP format which will appear in the tree view. This method is optional
-            and if not defined a default icon is shown.
-            '''
-            return """
-                    /* XPM */
-                    static const char * ViewProviderBox_xpm[] = {
-                    "16 16 6 1",
-                    " 	c None",
-                    ".	c #141010",
-                    "+	c #615BD2",
-                    "@	c #C39D55",
-                    "#	c #000000",
-                    "$	c #57C355",
-                    "        ........",
-                    "   ......++..+..",
-                    "   .@@@@.++..++.",
-                    "   .@@@@.++..++.",
-                    "   .@@  .++++++.",
-                    "  ..@@  .++..++.",
-                    "###@@@@ .++..++.",
-                    "##$.@@$#.++++++.",
-                    "#$#$.$$$........",
-                    "#$$#######      ",
-                    "#$$#$$$$$#      ",
-                    "#$$#$$$$$#      ",
-                    "#$$#$$$$$#      ",
-                    " #$#$$$$$#      ",
-                    "  ##$$$$$#      ",
-                    "   #######      "};
-                    """
-
-    def __getstate__(self):
-            ''' When saving the document this object gets stored using Python's cPickle module.
-            Since we have some un-pickable here -- the Coin stuff -- we must define this method
-            to return a tuple of all pickable objects or None.
-            '''
-            return None
-
-    def __setstate__(self,state):
-            ''' When restoring the pickled object from document we have the chance to set some
-            internals here. Since no data were pickled nothing needs to be done here.
-            '''
-            return None
-
-
-    def makeSolidsVisible(self,makeVisible):
-        for ShapeNameObj in FreeCAD.ActiveDocument.Objects:
-                if ShapeNameObj.isDerivedFrom("Part::Feature") and  not("PorousZone" in ShapeNameObj.Name) :
-                    #FreeCADGui.ActiveDocument.getObject(ShapeNameObj.Name).Visibility = True/False
-                    FreeCADGui.ActiveDocument.getObject(ShapeNameObj.Name).Visibility = makeVisible
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "porous.png")
+        return icon_path
 
     def setEdit(self, vobj, mode):
         import _TaskPanelCfdPorousZone
         taskd = _TaskPanelCfdPorousZone._TaskPanelCfdPorousZone(self.Object)
         taskd.obj = vobj.Object
-        self.makeSolidsVisible(True)
+        # CfdTools.setPartVisibility(vobj, True, False, False, True)
         FreeCADGui.Control.showDialog(taskd)
         return True
-    
 
     def unsetEdit(self, vobj, mode):
-        self.makeSolidsVisible(False)
         FreeCADGui.Control.closeDialog()
         return
 
-    # overwrite the doubleClicked to make sure no other Material taskd (and thus no selection observer) is still active
     def doubleClicked(self, vobj):
         doc = FreeCADGui.getDocument(vobj.Object.Document)
+        # Overwrite the doubleClicked to make sure no other Material taskd (and thus no selection observer) is still
+        # active
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:

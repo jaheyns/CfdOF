@@ -16,11 +16,8 @@ import Part
 
 
 def makeCfdPorousZone(name="PorousZone"):
-    #obj = FreeCAD.ActiveDocument.addObject("App::FeaturePython", name)
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    #obj = FreeCAD.ActiveDocument.addObject("Part::Feature", name)
     _CfdPorousZone._CfdPorousZone(obj)
-    #FreeCAD.ActiveDocument.recompute()
 
     if FreeCAD.GuiUp:
         from _ViewProviderCfdPorousZone import _ViewProviderCfdPorousZone
