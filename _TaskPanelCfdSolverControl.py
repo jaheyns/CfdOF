@@ -245,11 +245,12 @@ class _TaskPanelCfdSolverControl:
         self.form.terminateSolver.setEnabled(False)
     
     def plotResiduals(self):
-        text = str(self.solver_run_process.readAllStandardOutput())
-        self.solver_runner.process_output(text)
-
-        #NOTE: can print the output from the solver to the console via the following command
+        # Ensure only complete lines are passed on
+        text = ""
+        while self.solver_run_process.canReadLine():
+            text += str(self.solver_run_process.readLine())
         FreeCAD.Console.PrintMessage(text)
+        self.solver_runner.process_output(text)
 
     # NOTE: Depreciated QtProcess SolverProcess
     # def solverProcessStarted(self):

@@ -151,13 +151,20 @@ class CfdRunnableFoam(CfdRunnable):
             if "p," in split and self.niter > len(self.pResiduals):
                 self.pResiduals.append(float(split[7].split(',')[0]))
 
-        # NOTE: the mod checker is in place for the possibility plotting takes longer
-        # NOTE: than a small test case to solve
-        if mod(self.niter, 1) == 0:
-            self.g.plot(Gnuplot.Data(self.UxResiduals, with_='line', title="Ux", inline=1),
-                        Gnuplot.Data(self.UyResiduals, with_='line', title="Uy", inline=1),
-                        Gnuplot.Data(self.UzResiduals, with_='line', title="Uz", inline=1),
-                        Gnuplot.Data(self.pResiduals, with_='line', title="p"))
+        # Workaround for 'Interrupted System Call' error - see PEP 475 (not necessary in Python >= 3.5)
+        while True:
+            try:
+                self.g.plot(Gnuplot.Data(self.UxResiduals, with_='line', title="Ux", inline=1),
+                            Gnuplot.Data(self.UyResiduals, with_='line', title="Uy", inline=1),
+                            Gnuplot.Data(self.UzResiduals, with_='line', title="Uz", inline=1),
+                            Gnuplot.Data(self.pResiduals, with_='line', title="p"))
+                break
+            except IOError as ioe:
+                import errno
+                if ioe.errno == errno.EINTR:
+                    pass
+                else:
+                    raise
 
         if self.niter >= 2:
-            self.g("set autoscale")  # NOTE: this is just to supress the empty yrange error when GNUplot autscales
+            self.g("set autoscale")  # NOTE: this is just to suppress the empty yrange error when Gnuplot autoscales
