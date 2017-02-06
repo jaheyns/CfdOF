@@ -67,7 +67,7 @@ def _isWindowsPath(p):
 def _toWindowsPath(p):
     #fixedme: it does not deal with path with quote, space
     pp = p.split('/')
-    assert pp[0] == '' and pp[1] == 'mnt' 
+    assert pp[0] == '' and pp[1] == 'mnt'
     return pp[2] + ":\\" + ('\\').join(pp[3:])
 
 def _fromWindowsPath(p):
@@ -187,7 +187,7 @@ def setFoamVersion(ver):
     """specify OpenFOAM version by a list or tupe of integer like (3, 0, 0)
     """
     _FOAM_SETTINGS['FOAM_VERSION'] = tuple(ver)
-        
+
 def getFoamDir():
     """detect from output of 'bash -i -c "echo $WM_PROJECT_DIR"', if default is not set
     """
@@ -235,7 +235,7 @@ def getFoamRuntime():
     """
     if 'FOAM_RUNTIME' in _FOAM_SETTINGS:
         return _FOAM_SETTINGS['FOAM_RUNTIME']
-        
+
 ######################################################################
 """
 turbulence models supporting both compressible and incompressible are listed here
@@ -265,14 +265,14 @@ LES_turbulence_models = set([
 "dynamicKEqn", #    Dynamic one equation eddy-viscosity model.
 "dynamicLagrangian", #    Dynamic SGS model with Lagrangian averaging.
 "kEqn", #    One equation eddy-viscosity model.
-"kOmegaSSTDES", #    Implementation of the k-omega-SST-DES turbulence model for incompressible and compressible flows. 
+"kOmegaSSTDES", #    Implementation of the k-omega-SST-DES turbulence model for incompressible and compressible flows.
 ])
 supported_turbulence_models = set(['laminar', 'DNS', 'invisid']) | RAS_turbulence_models
 
 _LES_turbulenceModel_templates = {
                      'kOmegaSSTDES': "tutorials/incompressible/pisoFoam/les/pitzDaily/",
-                     "SpalartAllmarasDES": "", 
-                     "Smagorinsky": "", 
+                     "SpalartAllmarasDES": "",
+                     "Smagorinsky": "",
                      "kEqn":"tutorials/incompressible/pisoFoam/les/pitzDailyMapped",
                      "WALE":"",
                      "SpalartAllmarasIDDES": ""
@@ -424,7 +424,9 @@ def copySettingsFromExistentCase(output_path, source_path):
     """
     #foamCloneCase:   Create a new case directory that includes time, system and constant directories from a source case.
 
-def createRunScript(case, init_potential, run_parallel, solver_name, num_proc,porousZonePresent,porousZone_obj):
+
+def createRunScript(case, init_potential, run_parallel, solver_name, num_proc, porousZonePresent, porousZone_obj,
+                    bafflesPresent):
     print("Create Allrun script ")
 
     fname = case + os.path.sep + "Allrun"
@@ -450,6 +452,8 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc,po
         f.write("ln -s {}/neighbour {}\n".format(meshOrg_dir, mesh_dir))
         f.write("ln -s {}/owner {}\n".format(meshOrg_dir, mesh_dir))
         f.write("ln -s {}/points {}\n".format(meshOrg_dir, mesh_dir))
+        if bafflesPresent:
+            f.write("ln -s {}/faceZones {}\n".format(meshOrg_dir, mesh_dir))
         f.write("\n")
 
         if porousZonePresent:
@@ -464,6 +468,10 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc,po
             f.write("topoSet \n")
             f.write("\n")
 
+        if bafflesPresent:
+            f.write("# Creating baffles\n")
+            f.write("createBaffles -overwrite -case "+case+" 2>&1 | tee "+case+"/log.createBaffles\n")
+            f.write("\n")
 
         if (init_potential):
             f.write ("# Initialise flow\n")
@@ -480,7 +488,7 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc,po
     cmdline = ("chmod a+x "+fname) # Update Allrun permission, it will fail silently on windows
     out = subprocess.check_output(['bash', '-l', '-c', cmdline], stderr=subprocess.PIPE)
 
-    
+
 def copySettingsFromExistentCase(output_path, source_path):
     """build case structure from string template, both folder paths must existent
     """
@@ -497,7 +505,7 @@ def copySettingsFromExistentCase(output_path, source_path):
         shutil.copytree(source_path + os.path.sep + "0", output_path + os.path.sep + "0")
     init_dir = output_path + os.path.sep + "0"
     if not os.path.exists(init_dir):
-        os.makedirs(init_dir) # mkdir -p 
+        os.makedirs(init_dir) # mkdir -p
     """
     if os.path.isdir(output_path + os.path.sep +"0.orig") and not os.path.exists(init_dir):
         shutil.copytree(output_path + os.path.sep +"0.orig", init_dir)
@@ -624,7 +632,7 @@ def listBoundaryNames(case):
 
 def changeBoundaryType(case, bc_name, bc_type):
     """ Change boundary named `bc_name` to `bc_type`
-    """    
+    """
     f = BoundaryDict(case)
     if bc_name in f.patches():
         f[bc_name]['type'] = bc_type
@@ -694,7 +702,7 @@ def setDict(dict_file, key, value):
         print("Warning: input key is not string or sequence type, so do nothing but return".format(key))
         return
 
-    f = ParsedParameterFile(dict_file)        
+    f = ParsedParameterFile(dict_file)
     if len(group) == 3:
         d = f[group[0]][group[1]]  # at most 3 levels, assuming it will auto create not existent key
     elif len(group) == 2:
@@ -755,7 +763,7 @@ def listRegions(case):
     conjugate heat transfer model needs multi-region
     """
     raise NotImplementedError()
-    
+
 def listTimeSteps(case):
     """
     return a list of float time for tranisent simulation or iteration for steady case
@@ -766,3 +774,12 @@ def plotSolverProgress(case):
     """GNUplot to plot convergence progress of simulation
     """
     raise NotImplementedError()
+
+
+def readTemplate(fileName, replaceDict=None):
+    helperFile = open(fileName, 'r')
+    helperText = helperFile.read()
+    for key in replaceDict:
+        helperText = helperText.replace("#"+key+"#", "{}".format(replaceDict[key]))
+    helperFile.close()
+    return helperText

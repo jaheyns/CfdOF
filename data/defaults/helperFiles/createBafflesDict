@@ -1,0 +1,13 @@
+#HEADER#
+
+internalFacesOnly true;
+
+noFields true;
+
+baffles
+{
+#BAFFLES#
+}
+
+
+// ************************************************************************* //

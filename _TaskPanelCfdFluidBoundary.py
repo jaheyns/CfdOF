@@ -24,7 +24,7 @@
 # ***************************************************************************
 
 __title__ = "_TaskPanelCfdFluidBoundary"
-__author__ = ""
+__author__ = "AB, JH, OO"
 __url__ = "http://www.freecadweb.org"
 
 
@@ -46,12 +46,13 @@ if FreeCAD.GuiUp:
 
 # Constants
 
-BOUNDARY_TYPES = ["wall", "inlet", "outlet", "interface", "freestream"]
+BOUNDARY_TYPES = ["wall", "inlet", "outlet", "interface", "freestream", "baffle"]
 SUBTYPES = [["fixed", "slip", "partialSlip", "moving", "rough"],
             ["totalPressure", "uniformVelocity", "volumetricFlowRate", "massFlowRate"],
             ["totalPressure", "staticPressure", "uniformVelocity", "outFlow"],
             ["symmetryPlane", "cyclic", "wedge", "empty", "coupled"],
-            ["freestream"]]
+            ["freestream"],
+            ["porousBaffle"]]
 
 SUBTYPES_HELPTEXT = [["Viscous wall boundary (zero velocity)",
                       "Frictionless wall",
@@ -71,9 +72,10 @@ SUBTYPES_HELPTEXT = [["Viscous wall boundary (zero velocity)",
                       "Axi-symmetric periodic boundary",
                       "Front and back for single layer 2D mesh and axi-symmetric axis line",
                       "Exchange boundary value with external program, requires manual setup"],
-                     ["Far-field conditions"]]
+                     ["Far-field conditions"],
+                     ["Permeable screen"]]
 
-# For each sub-type, whether the basic tab is enabled, the row number to show, and (for panel 0 only) whether
+# For each sub-type, whether the basic tab is enabled, the panel number to show, and (for panel 0 only) whether
 # direction reversal is checked by default
 BOUNDARY_BASICTAB = [[[False],
                       [False],
@@ -93,7 +95,8 @@ BOUNDARY_BASICTAB = [[[False],
                       [False],
                       [False],
                       [False]],
-                     [[True, 0, True]]]
+                     [[True, 0, True]],
+                     [[True, 5]]]
 
 TURBULENCE_SPECIFICATIONS = ["intensity&DissipationRate",
                              "intensity&LengthScale",
@@ -152,6 +155,13 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputSlipRatio.textChanged.connect(self.inputSlipRatioChanged)
         self.form.inputVolFlowRate.textChanged.connect(self.inputVolFlowRateChanged)
         self.form.inputMassFlowRate.textChanged.connect(self.inputMassFlowRateChanged)
+        self.form.buttonGroupPorous.buttonClicked.connect(self.buttonGroupPorousClicked)
+        # Annoyingly can't find a way to set ID's from .ui file...
+        self.form.buttonGroupPorous.setId(self.form.radioButtonPorousCoeff, 0)
+        self.form.buttonGroupPorous.setId(self.form.radioButtonPorousScreen, 1)
+        self.form.inputPressureDropCoeff.textChanged.connect(self.inputPressureDropCoeffChanged)
+        self.form.inputWireDiameter.textChanged.connect(self.inputWireDiameterChanged)
+        self.form.inputSpacing.textChanged.connect(self.inputSpacingChanged)
         self.form.comboTurbulenceSpecification.currentIndexChanged.connect(self.comboTurbulenceSpecificationChanged)
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.comboThermalBoundaryTypeChanged)
 
@@ -174,6 +184,18 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputSlipRatio.setText(str(self.obj.BoundarySettings['SlipRatio']))
         self.form.inputVolFlowRate.setText(self.obj.BoundarySettings['VolFlowRate'])
         self.form.inputMassFlowRate.setText(self.obj.BoundarySettings['MassFlowRate'])
+        self.form.radioButtonCart.setChecked(self.obj.BoundarySettings['VelocityIsCartesian'])
+        self.form.radioButtonMagNormal.setChecked(not self.obj.BoundarySettings['VelocityIsCartesian'])
+        buttonId = CfdTools.getOrDefault(self.obj.BoundarySettings, 'PorousBaffleMethod', 0)
+        selButton = self.form.buttonGroupPorous.button(buttonId)
+        if selButton is not None:
+            selButton.setChecked(True)
+            self.buttonGroupPorousClicked(selButton)  # Signal is not generated on setChecked above
+        self.form.inputPressureDropCoeff.setText(
+            CfdTools.getOrDefault(self.obj.BoundarySettings, 'PressureDropCoeff', ""))
+        self.form.inputWireDiameter.setText(
+            CfdTools.getOrDefault(self.obj.BoundarySettings, 'ScreenWireDiameter', ""))
+        self.form.inputSpacing.setText(CfdTools.getOrDefault(self.obj.BoundarySettings, 'ScreenSpacing', ""))
         self.form.comboTurbulenceSpecification.addItems(TURBULENCE_SPECIFICATIONS)
         self.form.comboTurbulenceSpecification.setCurrentIndex(
             self.form.comboTurbulenceSpecification.findText(self.obj.BoundarySettings['TurbulenceSpecification']))
@@ -223,7 +245,8 @@ class TaskPanelCfdFluidBoundary:
             self.form.layoutBasicValues.itemAt(panel_number).widget().setVisible(True)
             if panel_number == 0:
                 reverse = BOUNDARY_BASICTAB[type_index][subtype_index][2]
-                if self.form.lineDirection.text() == "":  # If user hasn't set a patch, initialise 'reverse' to default
+                # If user hasn't set a patch yet, initialise 'reverse' to default
+                if self.form.lineDirection.text() == "":
                     self.form.checkReverse.setChecked(reverse)
 
     def buttonReferenceClicked(self):
@@ -278,7 +301,7 @@ class TaskPanelCfdFluidBoundary:
             FreeCADGui.Selection.removeObserver(self)
         self.update_selectionbuttons_ui()
 
-    def addSelection(self, doc_name, obj_name, sub):
+    def addSelection(self, doc_name, obj_name, sub, selectedPoint=None):
         """ Add the selected sub-element (face) of the part to the Reference list. Prevent selection in other
         document.
         """
@@ -286,7 +309,7 @@ class TaskPanelCfdFluidBoundary:
             return
         selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
         # On double click on a vertex of a solid sub is None and obj is the solid
-        print('Selection: ' + selected_object.Shape.ShapeType + '  ' + selected_object.Name + ':' + sub)
+        print('Selection: ' + selected_object.Shape.ShapeType + '  ' + selected_object.Name + ':' + sub + " @ " + str(extra))
         if hasattr(selected_object, "Shape") and sub:
             elt = selected_object.Shape.getElement(sub)
             if elt.ShapeType == 'Face':
@@ -382,6 +405,22 @@ class TaskPanelCfdFluidBoundary:
 
     def inputMassFlowRateChanged(self, value):
         self.inputCheckAndStore(value, "kg/s", 'MassFlowRate')
+
+    def buttonGroupPorousClicked(self, button):
+        method = self.form.buttonGroupPorous.checkedId()
+        self.BoundarySettings['PorousBaffleMethod'] = method
+        self.form.stackedWidgetPorous.setCurrentIndex(method)
+
+    def inputPressureDropCoeffChanged(self, value):
+        self.inputCheckAndStore(value, "m/m", 'PressureDropCoeff')
+        print(value)
+        print(self.BoundarySettings['PressureDropCoeff'])
+
+    def inputWireDiameterChanged(self, value):
+        self.inputCheckAndStore(value, "mm", 'ScreenWireDiameter')
+
+    def inputSpacingChanged(self, value):
+        self.inputCheckAndStore(value, "mm", 'ScreenSpacing')
 
     def comboTurbulenceSpecificationChanged(self, index):
         self.form.labelTurbulenceDescription.setText(TURBULENCE_HELPTEXT[index])

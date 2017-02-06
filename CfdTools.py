@@ -285,3 +285,10 @@ def _write_unv_bc_faces(mesh_obj, f, bc_id, bc_object):
         f.write("         8{:>10d}         0         0         \n".format(facet_list[2 * i + 1]))
     if nr_facets % 2:
         f.write("         8{:>10d}         0         0         \n".format(facet_list[-1]))
+
+
+def getOrDefault(dictionary, key, default):
+    if key in dictionary:
+        return dictionary[key]
+    else:
+        return default

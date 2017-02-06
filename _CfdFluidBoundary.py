@@ -1,7 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2015 - Bernd Hahnebach <bernd@bimstatik.org>            *
-# *   Copyright (c) 2017 - CSIR, South Africa                               *
+# *   Copyright (c) 2017 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
+# *   Copyright (c) 2017 - Johan Heyns <jheyns@csir.co.za>                  *
+# *   Copyright (c) 2017 - Alfred Bogaers <abogaers@csir.co.za>             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -64,6 +66,7 @@ class _CfdFluidBoundary(PartFeature):
                                 "SlipRatio": "0",
                                 "VolFlowRate": "0.0 m^3/s",
                                 "MassFlowRate": "0.0 kg/s",
+                                "PressureDropCoeff": "0.0",
                                 "TurbulenceSpecification": "intensity&DissipationRate",
                                 "ThermalBoundaryType": "fixedValue"}
 

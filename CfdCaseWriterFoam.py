@@ -1,9 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2015 - Qingfeng Xia <qingfeng.xia eng ox ac uk>         *
-# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
 # *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
 # *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -111,7 +111,7 @@ class CfdCaseWriterFoam:
                                         installationPath = self.installation_path,
                                         solverSettings = self.temporarySolverSettings,
                                         #solverSettings = CfdTools.getSolverSettings(self.solver_obj),
-                                        templatePath = os.path.join(CfdTools.get_module_path(), "data", "defaults", self.solverName),
+                                        templatePath = os.path.join(CfdTools.get_module_path(), "data", "defaults"),
                                         solverNameExternal = self.solverName,
                                         transientSettings = self.transientSettings,
                                         porousZonePresent = self.porousZonePresent,
@@ -331,7 +331,7 @@ class CfdCaseWriterFoam:
                             raise RuntimeError
                     else:
                         raise RuntimeError
-                except SystemError, RuntimeError:
+                except (SystemError, RuntimeError):
                     from PySide import QtGui
                     QtGui.QMessageBox.critical(None, "Face error",
                                                bc.BoundarySettings['DirectionFace'] + " is not a valid, planar face.")
@@ -339,9 +339,19 @@ class CfdCaseWriterFoam:
 
             bc_dict['velocity'] = velocity
             bc_dict['pressure'] = Units.Quantity(bc.BoundarySettings['Pressure']).getValueAs("kg*m/s^2")
-            bc_dict['massflowrate'] = Units.Quantity(bc.BoundarySettings['MassFlowRate']).getValueAs("kg/s")
-            bc_dict['volflowrate'] = Units.Quantity(bc.BoundarySettings['VolFlowRate']).getValueAs("m^3/s")
-            bc_dict['slipratio'] = Units.Quantity(bc.BoundarySettings['SlipRatio']).getValueAs("m/m")
+            bc_dict['massFlowRate'] = Units.Quantity(bc.BoundarySettings['MassFlowRate']).getValueAs("kg/s")
+            bc_dict['volFlowRate'] = Units.Quantity(bc.BoundarySettings['VolFlowRate']).getValueAs("m^3/s")
+            bc_dict['slipRatio'] = Units.Quantity(bc.BoundarySettings['SlipRatio']).getValueAs("m/m")
+            if bc.BoundarySettings['PorousBaffleMethod'] == 0:
+                bc_dict['pressureDropCoeff'] = Units.Quantity(bc.BoundarySettings['PressureDropCoeff']).getValueAs("m/m")
+            elif bc.BoundarySettings['PorousBaffleMethod'] == 1:
+                wireDiam = Units.Quantity(bc.BoundarySettings['ScreenWireDiameter']).getValueAs("m").Value
+                spacing = Units.Quantity(bc.BoundarySettings['ScreenSpacing']).getValueAs("m").Value
+                CD = 1.0  # Drag coeff of wire (Simmons - valid for Re > ~300)
+                beta = (1-wireDiam/spacing)**2
+                bc_dict['pressureDropCoeff'] = CD*(1-beta)
+            else:
+                raise Exception("Unrecognised method for porous baffle resistance")
 
             ''' NOTE: Code depreciated 20/01/2017 (AB)
                       Temporarily disabling turbulent and heat transfer boundary conditon application

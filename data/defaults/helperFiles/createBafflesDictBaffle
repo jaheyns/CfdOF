@@ -1,0 +1,10 @@
+    #NAME#
+    {
+        type        faceZone;
+        zoneName    #NAME#;
+
+        patchPairs
+        {
+            type    cyclic;
+        }
+    }

@@ -23,8 +23,8 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "Command fluid boundary"
-__author__ = "Bernd Hahnebach"
+__title__ = "Command to add CFD fluid boundary"
+__author__ = ""
 __url__ = "http://www.freecadweb.org"
 
 ## @package CommandCfdFluidBoundary
