@@ -59,8 +59,6 @@ class CfdSolver(object):
             obj.SolverName = "OpenFOAM"
             #obj.addProperty("App::PropertyEnumeration", "PhysicalDomain", "Solver",
                             #"unique solver name to identify the solver")
-            obj.addProperty("App::PropertyPath", "InstallationPath", "Solver",
-                            "Solver installation path (by default sources the WM_PROJECT_DIR if available).")
             #obj.PhysicalDomain = supported_physical_domains
             #obj.PhysicalDomain = 'Fluidic'
             #obj.addProperty("App::PropertyString", "Module", "Solver",

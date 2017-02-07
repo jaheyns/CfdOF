@@ -68,7 +68,13 @@ class CfdCaseWriterFoam:
         # Perform initialisation here rather than __init__ in case of path changes
         self.case_folder = os.path.join(self.solver_obj.WorkingDir, self.solver_obj.InputCaseName)
         self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
-        self.installation_path = self.solver_obj.InstallationPath
+
+        # Get OpenFOAM install path from parameters
+        paramPath = "User parameter:BaseApp/Preferences/Mod/Cfd/OpenFOAM"
+        self.installation_path = FreeCAD.ParamGet(paramPath).GetString("InstallationPath", "")
+        # Ensure parameter exists for future editing
+        FreeCAD.ParamGet(paramPath).SetString("InstallationPath", self.installation_path)
+
         self.solverName = self.fetchOpenFOAMSolverNameBasedOnPhysicsObject()
 
         self.transientSettings = {#"startTime":self.solver_obj.StartTime,

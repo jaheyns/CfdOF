@@ -173,15 +173,15 @@ _FOAM_SETTINGS = {"FOAM_DIR": _detectFoamDir(), "FOAM_VERSION": _detectFoamVersi
 
 # public API getter and setter for FOAM_SETTINGS
 def setFoamDir(dir):
-    if os.path.exists(dir + os.path.sep + "etc/bashrc") and os.path.isabs(dir):
+    if os.path.exists(os.path.join(dir, "etc", "bashrc")) and os.path.isabs(dir):
         # Overwrite using user specified installation path
         _FOAM_SETTINGS['FOAM_DIR'] = dir
-    elif (os.path.exists(getFoamDir() + os.path.sep + "etc/bashrc")):
+    elif getFoamDir() is not None and os.path.exists(os.path.join(getFoamDir(), "etc", "bashrc")):
         # Keep sourced WM_PROJECT_DIR
         _FOAM_SETTINGS['FOAM_DIR'] = getFoamDir()
     else:
         print("Warning: The installation directory is not defined. Either source the relevant 'bashrc' file or \n)")
-        print("specify the installation path in Solver. \n")
+        print("specify the installation path in preferences.\n")
 
 def setFoamVersion(ver):
     """specify OpenFOAM version by a list or tupe of integer like (3, 0, 0)
