@@ -309,7 +309,7 @@ class TaskPanelCfdFluidBoundary:
             return
         selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
         # On double click on a vertex of a solid sub is None and obj is the solid
-        print('Selection: ' + selected_object.Shape.ShapeType + '  ' + selected_object.Name + ':' + sub + " @ " + str(extra))
+        print('Selection: ' + selected_object.Shape.ShapeType + '  ' + selected_object.Name + ':' + sub + " @ " + str(selectedPoint))
         if hasattr(selected_object, "Shape") and sub:
             elt = selected_object.Shape.getElement(sub)
             if elt.ShapeType == 'Face':
@@ -413,8 +413,6 @@ class TaskPanelCfdFluidBoundary:
 
     def inputPressureDropCoeffChanged(self, value):
         self.inputCheckAndStore(value, "m/m", 'PressureDropCoeff')
-        print(value)
-        print(self.BoundarySettings['PressureDropCoeff'])
 
     def inputWireDiameterChanged(self, value):
         self.inputCheckAndStore(value, "mm", 'ScreenWireDiameter')

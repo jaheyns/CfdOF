@@ -94,7 +94,9 @@ class _TaskPanelCfdMeshGmsh:
     def update(self):
         'fills the widgets'
         self.form.if_max.setText(self.clmax.UserString)
+        self.form.if_max.setToolTip("Select 0 to use default value")
         self.form.if_min.setText(self.clmin.UserString)
+        self.form.if_min.setToolTip("Select 0 to use default value")
         index_dimension = self.form.cb_dimension.findText(self.dimension)
         self.form.cb_dimension.setCurrentIndex(index_dimension)
 

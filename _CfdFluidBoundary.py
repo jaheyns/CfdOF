@@ -56,7 +56,7 @@ class _CfdFluidBoundary(PartFeature):
         obj.BoundarySettings = {"BoundaryType": "wall",
                                 "BoundarySubtype": "fixed",
                                 "VelocityIsCartesian": True,
-                                "Ux": "0 m/s",    # Units.Quantity not JSON serialisable, so use string
+                                "Ux": "0 m/s",  # Units.Quantity not JSON serialisable, so use string
                                 "Uy": "0 m/s",
                                 "Uz": "0 m/s",
                                 "VelocityMag": "0 m/s",
@@ -66,18 +66,21 @@ class _CfdFluidBoundary(PartFeature):
                                 "SlipRatio": "0",
                                 "VolFlowRate": "0.0 m^3/s",
                                 "MassFlowRate": "0.0 kg/s",
+                                "PorousBaffleMethod": 0,
                                 "PressureDropCoeff": "0.0",
+                                "ScreenWireDiameter": "0.0 mm",
+                                "ScreenSpacing": "0.0 mm",
                                 "TurbulenceSpecification": "intensity&DissipationRate",
                                 "ThermalBoundaryType": "fixedValue"}
 
     def execute(self, obj):
-        '''Create compound part at recompute'''
+        ''' Create compound part at recompute. '''
         docName = str(obj.Document.Name)
         doc = FreeCAD.getDocument(docName)
         listOfFaces = []
         for i in range(len(obj.References)):
             ref = obj.References[i]
-            selection_object = doc.getObject(ref[0]) # Check that object is always stored in [0] and what happens if it is a compound.
+            selection_object = doc.getObject(ref[0])
             listOfFaces.append(selection_object.Shape.getElement(ref[1]))
         if len(listOfFaces)>0:
             obj.Shape = Part.makeCompound(listOfFaces)
@@ -94,7 +97,7 @@ class _CfdFluidBoundary(PartFeature):
         elif obj.BoundarySettings['BoundaryType'] == 'outlet':
             vobj.ShapeColor = (1.0, 0.0, 0.0)  # Red
         elif obj.BoundarySettings['BoundaryType'] == 'interface':
-            vobj.ShapeColor = (0.0, 0.0, 1.0)  # Blue
+            vobj.ShapeColor = (0.5, 0.0, 1.0)  # Purple
         else:
             vobj.ShapeColor = (1.0, 1.0, 1.0)  # White
 
@@ -103,3 +106,4 @@ class _CfdFluidBoundary(PartFeature):
 
     def __setstate__(self, state):
         return None
+

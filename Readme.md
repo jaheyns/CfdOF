@@ -82,9 +82,13 @@ This fork is unfortunately not available under the  FreeCAD-Addon-Installer.
 
 ##Developement
 
+It is asked that developers should only add functionality or code that is working and can be tested. Dead code, even
+portions included for possible future functionality, reduces function clarity and increases the maintenance overhead.
+
 ### Testing
 
-Unit testing is currently under development.
+Unit testing is currently under development. Where possible, it is asked that all new functionality should be included
+in the unit test framework.
 
 
 ### Style guide
@@ -121,7 +125,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 
 ## Developers
 
-Qingfeng Xia, 2015 <www.iesensor.com/HTML5pptCV>
+Qingfeng Xia, 2015 <iesensor.com/HTML5pptCV>
 Johan Heyns (CSIR, 2016) <jheyns@csir.co.za>         
 Oliver Oxtoby (CSIR, 2016) <ooxtoby@csir.co.za>      
 Alfred Bogaers (CSIR, 2016) <abogaers@csir.co.za>    

@@ -91,7 +91,7 @@ if FreeCAD.GuiUp:
                 return analysis_obj
 
 
-def getPhysicsObject(analysis_object):
+def getPhysicsModel(analysis_object):
     isPresent = False
     for i in analysis_object.Member:
         if "PhysicsModel" in i.Name:

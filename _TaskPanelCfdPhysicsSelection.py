@@ -25,7 +25,7 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.TimeFrame.setVisible(True)
         self.form.FlowFrame.setVisible(True)
         self.form.turbulenceFrame.setVisible(True)
-        self.form.thermalFrame.setVisible(True)
+        self.form.thermalFrame.setVisible(False)
         
         self.form.turbulenceChoiceFrame.setVisible(False)
         self.form.turbulenceModelFrame.setVisible(False)

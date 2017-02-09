@@ -24,28 +24,16 @@ class _TaskPanelCfdInitialiseInternalFlowField:
 
         self.form = FreeCADGui.PySideUic.loadUi(FreeCAD.getHomePath() + "Mod/Cfd/TaskPanelCfdInitialiseInternalField.ui")
 
-
-        self.form.potentialFoamMessageframe.setVisible(False)
         self.form.basicPropertiesFrame.setVisible(False)
-
-
         self.form.potentialFoamCheckBox.stateChanged.connect(self.potentialFoamClicked)
-        self.form.potentialFoamQuestion.clicked.connect(self.requestPotentialFoamHelp)
+        self.form.turbulencePropertiesFrame.setVisible(False)
 
         self.form.Ux.textChanged.connect(self.UxChanged)
         self.form.Uy.textChanged.connect(self.UyChanged)
         self.form.Uz.textChanged.connect(self.UzChanged)
         self.form.pressure.textChanged.connect(self.PChanged)
 
-        #self.form.potentialFoamCheckBox.toggle()
-
         self.populateUiBasedOnPhysics()
-
-
-
-
-
-
 
     def UxChanged(self,value):
         import Units
@@ -69,8 +57,8 @@ class _TaskPanelCfdInitialiseInternalFlowField:
 
     def fetchPhysicsObject(self):
         analysis_obj = FemGui.getActiveAnalysis()
-        from CfdTools import getPhysicsObject
-        PhysicsModel,isPresent = getPhysicsObject(analysis_obj)
+        from CfdTools import getPhysicsModel
+        PhysicsModel,isPresent = getPhysicsModel(analysis_obj)
         if not(isPresent):
             message = "Missing physics model! \n\nIt appears that the physics model has been deleted. Please re-create."
             QtGui.QMessageBox.critical(None,'Missing physics model',message)
@@ -79,16 +67,13 @@ class _TaskPanelCfdInitialiseInternalFlowField:
             doc.resetEdit()
         return PhysicsModel
 
-    def requestPotentialFoamHelp(self):
-        message = "Initialise flow field using PotentialFoam: \n\nPotentialFoam  is useful for generating initial conditions for Ux, Uy, Uz and Pressure for complex problems/geometries and generally assists convergence rates for steady state problems."
-        QtGui.QMessageBox.information(None, "Initialising flow with potentialFoam", message)
-
-
     def populateUiBasedOnPhysics(self):
+        self.form.potentialFoamCheckBox.setToolTip("Automatic initialisation of the velocity and pressure fields using "
+                                                   "an incompressible, potential or irrotational flow assumption.")
         if self.InitialVariables['PotentialFoam']:
             self.form.potentialFoamCheckBox.toggle()
         else:
-            self.form.potentialFoamMessageframe.setVisible(False)
+            # self.form.potentialFoamMessageframe.setVisible(False)
             self.form.basicPropertiesFrame.setVisible(True)
             self.form.Ux.setText(self.InitialVariables["Ux"])
             self.form.Uy.setText(self.InitialVariables["Uy"])
@@ -117,12 +102,12 @@ class _TaskPanelCfdInitialiseInternalFlowField:
 
     def potentialFoamClicked(self):
         if self.form.potentialFoamCheckBox.isChecked():
-            self.form.potentialFoamMessageframe.setVisible(True)
+            # self.form.potentialFoamMessageframe.setVisible(True)
             self.form.basicPropertiesFrame.setVisible(False)
             self.InitialVariables['PotentialFoam'] = True
         else:
             self.form.basicPropertiesFrame.setVisible(True)
-            self.form.potentialFoamMessageframe.setVisible(False)
+            # self.form.potentialFoamMessageframe.setVisible(False)
             self.InitialVariables['PotentialFoam'] = False
 
     def accept(self):

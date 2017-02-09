@@ -109,31 +109,8 @@ _decomposeParDict_template = """
 numberOfSubdomains %d;
 
 method          %s;
-
-simpleCoeffs
-{
-    n               ($numberOfSubdomains 1 1);
-    delta           0.001;
-}
-
-//scotch needs not any coeff input
-
-hierarchicalCoeffs
-{
-    n               (2 2 1);
-    delta           0.001;
-    order           xyz;
-}
-
-manualCoeffs
-{
-    dataFile        "";
-}
-
-distributed     no;
-
-roots           ( );
 """
+
 def getDecomposeParDictTemplate(numberOfSubdomains, method):
     """"""
     return _decomposeParDict_template % (numberOfSubdomains, method)
