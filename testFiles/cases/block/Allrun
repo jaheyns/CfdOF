@@ -1,0 +1,20 @@
+#!/bin/sh 
+
+# Unset and source bashrc
+source /home/johan/OpenFOAM/OpenFOAM-3.0.x/etc/config/unset.sh
+source /home/johan/OpenFOAM/OpenFOAM-3.0.x/etc/bashrc
+
+# Create symbolic links to polyMesh.org
+mkdir /tmp/case/constant/polyMesh
+ln -s /tmp/case/constant/polyMesh.org/boundary /tmp/case/constant/polyMesh
+ln -s /tmp/case/constant/polyMesh.org/faces /tmp/case/constant/polyMesh
+ln -s /tmp/case/constant/polyMesh.org/neighbour /tmp/case/constant/polyMesh
+ln -s /tmp/case/constant/polyMesh.org/owner /tmp/case/constant/polyMesh
+ln -s /tmp/case/constant/polyMesh.org/points /tmp/case/constant/polyMesh
+
+# Initialise flow
+potentialFoam -case /tmp/case 2>&1 | tee /tmp/case/log.potentialFoam
+
+# Run application
+simpleFoam -case /tmp/case 2>&1 | tee /tmp/case/log.simpleFoam
+

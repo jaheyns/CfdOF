@@ -1,5 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
+# *   Copyright (c) 2015 - Przemo Firszt <przemo@firszt.eu>                 *
 # *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
 # *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
 # *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
@@ -33,30 +34,37 @@ import CfdFluidMaterial
 import CfdMeshGmsh
 import CfdFluidBoundary
 import CfdTools
+import CfdCaseWriterFoam
 
-# import csv
 import tempfile
 import unittest
+import os
+import shutil
 
 __title__ = "CFD unit test"
 __author__ = "AB, JH, OO"
 __url__ = "http://www.freecadweb.org"
 
-""" Unit tests for the CFD WB
-Until included in Test Framework run the test in FreeCAD console
+# ***************************************************************************
+#                                                                           *
+# CFD WB unit tests                                                         *
+#                                                                           *
+# Until included in Test Framework run the test in FreeCAD console:         *
+#                                                                           *
+#   >>> import TestCfd                                                      *
+#   >>> TestCfd.runCfdUnittests()                                           *
+#                                                                           *
+# Current tests:                                                            *
+#                                                                           *
+#   * block     -   steady, incompressible flow                             *
+#                                                                           *
+# ***************************************************************************
 
-import unittest
-suite = unittest.TestSuite()
-suite.addTest(unittest.defaultTestLoader.loadTestsFromName("TestCfd"))
-r = unittest.TextTestRunner()
-r.run(suite)
-
-NOTE: Running the unit test in FreeCADCmd gives PySideUic errors.
-"""
 
 home_path = FreeCAD.getHomePath()
 temp_dir = tempfile.gettempdir()
-test_file_dir = home_path + 'Mod/Cfd/test_files/'
+test_file_dir = home_path + 'Mod/Cfd/testFiles/'
+working_dir = '/tmp/'
 
 
 def fccPrint(message):
@@ -66,6 +74,14 @@ def fccPrint(message):
 class BlockTest(unittest.TestCase):
     __doc_name = 'block'
     __part_name = 'Box'
+    __file_comparison = [["0", "p"],
+                         ["0", "U"],
+                         ["constant", "polyMesh", "boundary"],
+                         ["constant", "transportProperties"],
+                         ["constant", "turbulenceProperties"],
+                         ["system", "controlDict"],
+                         ["system", "fvSchemes"],
+                         ["system", "fvSolution"]]
 
     def setUp(self):
         """ Load document with part. """
@@ -84,6 +100,8 @@ class BlockTest(unittest.TestCase):
         self.solver_object.EndTime = 100
         self.solver_object.ConvergenceCriteria = 0.001
         self.solver_object.Parallel = False
+        self.solver_object.WorkingDir = working_dir
+        self.solver_object.InputCaseName = self.__class__.__doc_name
         self.active_doc.recompute()
 
     def createNewPhysics(self):
@@ -168,64 +186,82 @@ class BlockTest(unittest.TestCase):
         self.slip_boundary.References = [('Box', 'Face5'), ('Box', 'Face6')]
         FreeCADGui.doCommand("FreeCAD.getDocument('"+self.__class__.__doc_name+"').recompute()")
 
-    def writeInputFiles(self):
-        print ('Write input files ...')
-        doc = FreeCAD.getDocument(self.__class__.__doc_name)
+    def writeCaseFiles(self):
+        print ('Write case files ...')
+        self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam(self.analysis)
+        self.writer.write_case()
 
     def test_new_analysis(self):
         fccPrint('--------------- Start of CFD tests ---------------')
-        fccPrint('Checking CFD new analysis...')
+        fccPrint('Checking CFD {} analysis ...'.format(self.__class__.__doc_name))
         self.createNewAnalysis()
-        self.assertTrue(self.analysis, "CfdTest of new analysis failed")
+        self.assertTrue(self.analysis, "CfdTest of analysis failed")
 
-        fccPrint('Checking CFD new solver...')
+        fccPrint('Checking CFD {} solver ...'.format(self.__class__.__doc_name))
         self.createNewSolver()
-        self.assertTrue(self.solver_object, self.__class__.__doc_name + " of new solver failed")
+        self.assertTrue(self.solver_object, self.__class__.__doc_name + " of solver failed")
         self.analysis.Member += [self.solver_object]
 
-        fccPrint('Checking CFD new physics object...')
+        fccPrint('Checking CFD {} physics object ...'.format(self.__class__.__doc_name))
         self.createNewPhysics()
-        self.assertTrue(self.physics_object, "CfdTest of new physics object failed")
+        self.assertTrue(self.physics_object, "CfdTest of physics object failed")
         self.analysis.Member += [self.physics_object]
 
-        fccPrint('Checking CFD new initialise...')
+        fccPrint('Checking CFD {} initialise ...'.format(self.__class__.__doc_name))
         self.createNewInitialise()
-        self.assertTrue(self.initialise_object, "CfdTest of new initialise failed")
+        self.assertTrue(self.initialise_object, "CfdTest of initialise failed")
         self.analysis.Member += [self.initialise_object]
 
-        fccPrint('Checking CFD new fluid property...')
+        fccPrint('Checking CFD {} fluid property ...'.format(self.__class__.__doc_name))
         self.createNewFluidProperty()
-        self.assertTrue(self.material_object, "CfdTest of new fluid property failed")
+        self.assertTrue(self.material_object, "CfdTest of fluid property failed")
         self.analysis.Member += [self.material_object]
 
-        fccPrint('Checking CFD new mesh...')
+        fccPrint('Checking CFD {} mesh ...'.format(self.__class__.__doc_name))
         self.createNewMesh('mesh')
-        self.assertTrue(self.mesh_object, "CfdTest of new mesh failed")
+        self.assertTrue(self.mesh_object, "CfdTest of mesh failed")
         self.analysis.Member += [self.mesh_object]
 
-        fccPrint('Checking Cfd new velocity inlet boundary...')
+        fccPrint('Checking Cfd {} velocity inlet boundary ...'.format(self.__class__.__doc_name))
         self.createInletBoundary()
-        self.assertTrue(self.inlet_boundary, "CfdTest of new inlet boundary failed")
+        self.assertTrue(self.inlet_boundary, "CfdTest of inlet boundary failed")
         self.analysis.Member += [self.inlet_boundary]
 
-        fccPrint('Checking Cfd new velocity outlet boundary...')
+        fccPrint('Checking Cfd {} velocity outlet boundary ...'.format(self.__class__.__doc_name))
         self.createOutletBoundary()
-        self.assertTrue(self.outlet_boundary, "CfdTest of new outlet boundary failed")
+        self.assertTrue(self.outlet_boundary, "CfdTest of outlet boundary failed")
         self.analysis.Member += [self.outlet_boundary]
 
-        fccPrint('Checking Cfd new wall boundary...')
+        fccPrint('Checking Cfd {} wall boundary ...'.format(self.__class__.__doc_name))
         self.createWallBoundary()
-        self.assertTrue(self.wall_boundary, "CfdTest of new wall boundary failed")
+        self.assertTrue(self.wall_boundary, "CfdTest of wall boundary failed")
         self.analysis.Member += [self.wall_boundary]
 
-        fccPrint('Checking Cfd new slip boundary...')
+        fccPrint('Checking Cfd {} slip boundary ...'.format(self.__class__.__doc_name))
         self.createSlipBoundary()
-        self.assertTrue(self.slip_boundary, "CfdTest of new slip boundary failed")
-        # self.analysis.Member = self.analysis.Member + [self.slip_boundary]
+        self.assertTrue(self.slip_boundary, "CfdTest of slip boundary failed")
         self.analysis.Member += [self.slip_boundary]
 
-        fccPrint('Write Cfd input files...')
-        self.writeInputFiles()
+        fccPrint('Writing {} case files ...'.format(self.__class__.__doc_name))
+        self.writeCaseFiles()
+        self.assertTrue(self.writer, "CfdTest of writer failed")
+
+        ref_dir = os.path.join(test_file_dir, "cases", self.__class__.__doc_name)
+        case_dir = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
+
+        for file_ext in self.__class__.__file_comparison:
+            extension = ""
+            for entry in file_ext:
+                extension += "/" + entry
+            ref_file = ref_dir + extension
+            case_file = case_dir + extension
+
+            fccPrint('Comparing {} to {}'.format(ref_file, case_file))
+            ret = compareInpFiles(ref_file, case_file)
+            self.assertFalse(ret, "File \'{}\' test failed.\n{}".format(extension, ret))
+
+        case_dir = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
+        shutil.rmtree(case_dir)
 
         fccPrint('--------------- End of CFD tests ---------------')
 
@@ -233,3 +269,39 @@ class BlockTest(unittest.TestCase):
         FreeCAD.closeDocument(self.__class__.__doc_name)
         pass
 
+
+def compareInpFiles(file_name1, file_name2):
+    file1 = open(file_name1, 'r')
+    f1 = file1.readlines()
+    file1.close()
+    lf1 = [l for l in f1 if not (l.startswith('**   written ') or l.startswith('**   file '))]
+    lf1 = forceUnixLineEnds(lf1)
+    file2 = open(file_name2, 'r')
+    f2 = file2.readlines()
+    file2.close()
+    lf2 = [l for l in f2 if not (l.startswith('**   written ') or l.startswith('**   file '))]
+    lf2 = forceUnixLineEnds(lf2)
+    import difflib
+    diff = difflib.unified_diff(lf1, lf2, n=0)
+    result = ''
+    for l in diff:
+        result += l
+    if result:
+        result = "Comparing {} to {} failed!\n".format(file_name1, file_name2) + result
+    return result
+
+
+def forceUnixLineEnds(line_list):
+    new_line_list = []
+    for l in line_list:
+        if l.endswith("\r\n"):
+            l = l[:-2] + '\n'
+        new_line_list.append(l)
+    return new_line_list
+
+
+def runCfdUnittests():
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.defaultTestLoader.loadTestsFromName("TestCfd"))
+    r = unittest.TextTestRunner()
+    r.run(suite)

@@ -93,6 +93,7 @@ class _TaskPanelCfdSolverControl:
         QtCore.QObject.connect(self.form.pb_run_solver, QtCore.SIGNAL("clicked()"), self.runSolverProcess)
         QtCore.QObject.connect(self.form.pb_show_result, QtCore.SIGNAL("clicked()"), self.showResult)
         QtCore.QObject.connect(self.form.pb_paraview, QtCore.SIGNAL("clicked()"), self.openParaview)
+        self.form.pb_show_result.setEnabled(False)
 
         # NOTE: Depreciated QtProcess SolverProcess
         # QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("started()"), self.solverProcessStarted)
@@ -222,7 +223,7 @@ class _TaskPanelCfdSolverControl:
         #NOTE: setting solve button to inactive to ensure that two instances of the same simulation aren's started simulataneously
         self.form.pb_run_solver.setEnabled(False)
         self.form.terminateSolver.setEnabled(True)
-        self.form.pb_show_result.setEnabled(True)
+        # self.form.pb_show_result.setEnabled(False)
         self.form.pb_paraview.setEnabled(True)
         self.femConsoleMessage("Solver started")
 

@@ -5,6 +5,7 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import FreeCADGui
+import FemGui
 import CfdTools
 import os
 
@@ -43,6 +44,12 @@ class _ViewProviderCfdInitialseInternalFlowField:
     # overwrite the doubleClicked to make sure no other Material taskd (and thus no selection observer) is still active
     def doubleClicked(self, vobj):
         doc = FreeCADGui.getDocument(vobj.Object.Document)
+        if not FemGui.getActiveAnalysis():
+            analysis_obj = CfdTools.getActiveAnalysis(self.Object)
+            if analysis_obj:
+                FemGui.setActiveAnalysis(analysis_obj)
+            else:
+                FreeCAD.Console.PrintError('No Active Analysis is detected from solver object in the active Document!\n')
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:
