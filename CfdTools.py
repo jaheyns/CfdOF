@@ -231,9 +231,17 @@ def setPartVisibility(vobj, part_vis, compound_vis, mesh_vis, bound_vis):
     """ Set visibility of feature parts, compounded parts, mesh and boundaries. """
     doc_name = str(vobj.Object.Document.Name)
     doc = FreeCAD.getDocument(doc_name)
+    boolean_present = False
+    for obj in doc.Objects:
+        if ("Boolean" in obj.Name):
+            boolean_present = True
     for obj in doc.Objects:
         if obj.isDerivedFrom("Part::Feature"):
-            if not ("CfdFluidBoundary" in obj.Name):
+            if not ("CfdFluidBoundary" in obj.Name) and not boolean_present:
+                # Hide parts if a boolean fragment exists
+                FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = part_vis
+            if ("Boolean" in obj.Name):
+                # Show only boolean to prevent duplicate face selection
                 FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = part_vis
             if ("CfdFluidBoundary" in obj.Name) and not bound_vis:
                 ''' Only turn boundary visibility off, if set to true it will keep visibility as is. '''

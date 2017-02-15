@@ -105,6 +105,17 @@ class _ViewProviderCfdMeshGmsh:
             FreeCAD.Console.PrintError('Active Task Dialog found! Please close this one first!\n')
         return True
 
+    def claimChildren(self):
+        return (self.Object.MeshRegionList + self.Object.MeshGroupList)
+
+    def onDelete(self, feature, subelements):
+        try:
+            for obj in self.claimChildren():
+                obj.ViewObject.show()
+        except Exception as err:
+            FreeCAD.Console.PrintError("Error in onDelete: " + err.message)
+        return True
+
     def __getstate__(self):
         return None
 

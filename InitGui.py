@@ -52,16 +52,16 @@ class CfdWorkbench(Workbench):
 
         # classes developed in FemWorkbench
         import _CommandCfdMeshGmshFromShape
-        # import _CommandMeshNetgenFromShape
-        # import _CommandMeshRegion # Not currently in-use
-        # import _CommandPrintMeshInfo # Create a fluid specific check as the current does not contain any
-        #                              # useful info for flow (see checkMesh)
+        # import _CommandMeshNetgenFromShape  # CFD WB will only support GMSH
+        import _CommandCfdMeshRegion
+        # import _CommandPrintMeshInfo  # Create a fluid specific check as the current does not contain any
+        #                               # useful info for flow (see checkMesh)
         # import _CommandClearMesh  # Not currently in-use
 
 
         # Post Processing commands are located in FemWorkbench, implemented and imported in C++
-        cmdlst = ['Cfd_Analysis', 'Cfd_MeshGmshFromShape',
-                  #'Fem_MeshRegion', 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
+        cmdlst = ['Cfd_Analysis', 'Cfd_MeshGmshFromShape', 'Fem_MeshRegion',
+                  # 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
                   'Cfd_FluidBoundary','Cfd_PhysicsModel', 'Cfd_InitialiseInternal',
                   'Cfd_FluidMaterial','Cfd_PorousZone','Cfd_SolverControl',"Separator",
                   'Fem_PostPipelineFromResult', 'Fem_PostCreateClipFilter',
