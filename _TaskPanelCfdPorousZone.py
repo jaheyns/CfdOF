@@ -5,12 +5,20 @@ __url__ = "http://www.freecadweb.org"
 
 
 import FreeCAD
-import FreeCADGui
-from PySide import QtGui
-from PySide import QtCore
-#import Units
-import FemGui
+import os
+import sys
+import os.path
 import Part
+import CfdTools
+
+if FreeCAD.GuiUp:
+    import FreeCADGui
+    from PySide import QtCore
+    from PySide import QtCore
+    from PySide import QtGui
+    from PySide.QtCore import Qt
+    from PySide.QtGui import QApplication
+    import FemGui
 
 
 class _TaskPanelCfdPorousZone:
@@ -24,7 +32,7 @@ class _TaskPanelCfdPorousZone:
         self.partNameList = list(self.obj.partNameList)
         self.p = self.obj.porousZoneProperties
 
-        self.form = FreeCADGui.PySideUic.loadUi(FreeCAD.getHomePath() + "Mod/Cfd/TaskPanelPorousZone.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelPorousZone.ui"))
 
         self.setInitialValues()
         self.form.selectReference.clicked.connect(self.selectReference)
@@ -34,8 +42,28 @@ class _TaskPanelCfdPorousZone:
         self.form.checkPoint.clicked.connect(self.checkPoint)
         self.form.automaticSelect.clicked.connect(self.autoDefinePoint)
 
-        self.form.pushButtonDelete.setEnabled(False)
+        self.form.e1x.textEdited.connect(self.e1Changed)
+        self.form.e1y.textEdited.connect(self.e1Changed)
+        self.form.e1z.textEdited.connect(self.e1Changed)
+        self.form.e2x.textEdited.connect(self.e2Changed)
+        self.form.e2y.textEdited.connect(self.e2Changed)
+        self.form.e2z.textEdited.connect(self.e2Changed)
+        self.form.e3x.textEdited.connect(self.e3Changed)
+        self.form.e3y.textEdited.connect(self.e3Changed)
+        self.form.e3z.textEdited.connect(self.e3Changed)
+        self.form.e1x.editingFinished.connect(self.e1Done)
+        self.form.e1y.editingFinished.connect(self.e1Done)
+        self.form.e1z.editingFinished.connect(self.e1Done)
+        self.form.e2x.editingFinished.connect(self.e2Done)
+        self.form.e2y.editingFinished.connect(self.e2Done)
+        self.form.e2z.editingFinished.connect(self.e2Done)
+        self.form.e3x.editingFinished.connect(self.e3Done)
+        self.form.e3y.editingFinished.connect(self.e3Done)
+        self.form.e3z.editingFinished.connect(self.e3Done)
+        self.lastEVectorChanged = 1
+        self.lastLastEVectorChanged = 2
 
+        self.form.pushButtonDelete.setEnabled(False)
 
     def extractMainShapeFromMesh(self):
         isPresent = False
@@ -151,27 +179,30 @@ class _TaskPanelCfdPorousZone:
         return Result
 
     def setInitialValues(self):
-	for i in range(len(self.obj.partNameList)):
-	    self.form.listWidget.addItem(str(self.obj.partNameList[i]))
+        for i in range(len(self.obj.partNameList)):
+            self.form.listWidget.addItem(str(self.obj.partNameList[i]))
 
-        self.form.dx.setText("{}".format(self.p["dx"]))
-        self.form.dy.setText("{}".format(self.p["dy"]))
-        self.form.dz.setText("{}".format(self.p["dz"]))
-        self.form.fx.setText("{}".format(self.p["fx"]))
-        self.form.fy.setText("{}".format(self.p["fy"]))
-        self.form.fz.setText("{}".format(self.p["fz"]))
-        self.form.e1x.setText("{}".format(self.p["e1x"]))
-        self.form.e1y.setText("{}".format(self.p["e1y"]))
-        self.form.e1z.setText("{}".format(self.p["e1z"]))
-        self.form.e3x.setText("{}".format(self.p["e3x"]))
-        self.form.e3y.setText("{}".format(self.p["e3y"]))
-        self.form.e3z.setText("{}".format(self.p["e3z"]))
+        self.form.dx.setText("{} {}".format(self.p["dx"], "m^-2"))
+        self.form.dy.setText("{} {}".format(self.p["dy"], "m^-2"))
+        self.form.dz.setText("{} {}".format(self.p["dz"], "m^-2"))
+        self.form.fx.setText("{} {}".format(self.p["fx"], "m^-1"))
+        self.form.fy.setText("{} {}".format(self.p["fy"], "m^-1"))
+        self.form.fz.setText("{} {}".format(self.p["fz"], "m^-1"))
+        self.form.e1x.setText("{}".format(CfdTools.getOrDefault(self.p, 'e1x', 1)))
+        self.form.e1y.setText("{}".format(CfdTools.getOrDefault(self.p, 'e1y', 0)))
+        self.form.e1z.setText("{}".format(CfdTools.getOrDefault(self.p, 'e1z', 0)))
+        self.form.e2x.setText("{}".format(CfdTools.getOrDefault(self.p, 'e2x', 0)))
+        self.form.e2y.setText("{}".format(CfdTools.getOrDefault(self.p, 'e2y', 1)))
+        self.form.e2z.setText("{}".format(CfdTools.getOrDefault(self.p, 'e2z', 0)))
+        self.form.e3x.setText("{}".format(CfdTools.getOrDefault(self.p, 'e3x', 0)))
+        self.form.e3y.setText("{}".format(CfdTools.getOrDefault(self.p, 'e3y', 0)))
+        self.form.e3z.setText("{}".format(CfdTools.getOrDefault(self.p, 'e3z', 1)))
         self.form.OX.setText("{}{}".format(self.p["OX"],'m'))
         self.form.OY.setText("{}{}".format(self.p["OY"],'m'))
         self.form.OZ.setText("{}{}".format(self.p["OZ"],'m'))
         #self.form.dy.setText(self.p["dy"])
         #self.form.dz.setText(self.p["dz"])
-	
+
     def deleteFeature(self):
         shapeList = list(self.obj.shapeList)
         currentItem = self.form.listWidget.currentItem()
@@ -217,16 +248,83 @@ class _TaskPanelCfdPorousZone:
         message = "Outside point Help.\nPlease specify a point location (x,y,z) which falls outside the porous zone regions but is still within fluid flow domain to be analysed (contained within the meshed region).\n\nHelpers:\nClick Automatic: Automatically find a point\nClick Check: Checks whether a given point is valid."
         QtGui.QMessageBox.information(None, "Outside point", message)
 
+    # One of the e vector edit boxes loses focus or user presses enter
+    def e1Done(self):
+        if not (self.form.e1x.hasFocus() or self.form.e1y.hasFocus() or self.form.e1z.hasFocus()):
+            self.eDone(0)
+
+    def e2Done(self):
+        if not (self.form.e2x.hasFocus() or self.form.e2y.hasFocus() or self.form.e2z.hasFocus()):
+            self.eDone(1)
+
+    def e3Done(self):
+        if not (self.form.e3x.hasFocus() or self.form.e3y.hasFocus() or self.form.e3z.hasFocus()):
+            self.eDone(2)
+
+    # Value of one of the e vector edit boxes changed
+    def e1Changed(self):
+        self.eChanged(0)
+
+    def e2Changed(self):
+        self.eChanged(1)
+
+    def e3Changed(self):
+        self.eChanged(2)
+
+    def eChanged(self, index):
+        if index != self.lastEVectorChanged:
+            self.lastLastEVectorChanged = self.lastEVectorChanged
+            self.lastEVectorChanged = index
+
+    def eDone(self, index):
+        e = [[float(self.form.e1x.text()), float(self.form.e1y.text()), float(self.form.e1z.text())],
+             [float(self.form.e2x.text()), float(self.form.e2y.text()), float(self.form.e2z.text())],
+             [float(self.form.e3x.text()), float(self.form.e3y.text()), float(self.form.e3z.text())]]
+        import CfdTools
+        for i in range(3):
+            e[i] = CfdTools.normalise(e[i])
+
+        # Keep this one fixed. Make the other two orthogonal. The previous one edited gets to stay in its plane; the
+        # one edited longest ago just gets recomputed
+        if self.lastEVectorChanged == index:
+            prevIndex = self.lastLastEVectorChanged
+        else:
+            prevIndex = self.lastEVectorChanged
+        indexplus = (index + 1) % 3
+        indexminus = (index - 1) % 3
+        import numpy
+        if indexplus == prevIndex:  # indexminus must be the one changed longest ago
+            e[indexminus] = numpy.cross(e[index], e[indexplus])
+            e[indexplus] = numpy.cross(e[indexminus], e[index])
+        else:
+            e[indexplus] = numpy.cross(e[indexminus], e[index])
+            e[indexminus] = numpy.cross(e[index], e[indexplus])
+        e[indexplus] = CfdTools.normalise(e[indexplus])
+        e[indexminus] = CfdTools.normalise(e[indexminus])
+
+        self.form.e1x.setText(str(e[0][0]))
+        self.form.e1y.setText(str(e[0][1]))
+        self.form.e1z.setText(str(e[0][2]))
+        self.form.e2x.setText(str(e[1][0]))
+        self.form.e2y.setText(str(e[1][1]))
+        self.form.e2z.setText(str(e[1][2]))
+        self.form.e3x.setText(str(e[2][0]))
+        self.form.e3y.setText(str(e[2][1]))
+        self.form.e3z.setText(str(e[2][2]))
+
     def accept(self):
-        self.p["dx"] = float(FreeCAD.Units.Quantity(self.form.dx.text()))
-        self.p["dy"] = float(FreeCAD.Units.Quantity(self.form.dy.text()))
-        self.p["dz"] = float(FreeCAD.Units.Quantity(self.form.dz.text()))
-        self.p["fx"] = float(FreeCAD.Units.Quantity(self.form.fx.text()))
-        self.p["fy"] = float(FreeCAD.Units.Quantity(self.form.fy.text()))
-        self.p["fz"] = float(FreeCAD.Units.Quantity(self.form.fz.text()))
+        self.p["dx"] = float(FreeCAD.Units.Quantity(self.form.dx.text()).getValueAs("m^-2"))
+        self.p["dy"] = float(FreeCAD.Units.Quantity(self.form.dy.text()).getValueAs("m^-2"))
+        self.p["dz"] = float(FreeCAD.Units.Quantity(self.form.dz.text()).getValueAs("m^-2"))
+        self.p["fx"] = float(FreeCAD.Units.Quantity(self.form.fx.text()).getValueAs("m^-1"))
+        self.p["fy"] = float(FreeCAD.Units.Quantity(self.form.fy.text()).getValueAs("m^-1"))
+        self.p["fz"] = float(FreeCAD.Units.Quantity(self.form.fz.text()).getValueAs("m^-1"))
         self.p["e1x"] = float(FreeCAD.Units.Quantity(self.form.e1x.text()))
         self.p["e1y"] = float(FreeCAD.Units.Quantity(self.form.e1y.text()))
         self.p["e1z"] = float(FreeCAD.Units.Quantity(self.form.e1z.text()))
+        self.p["e2x"] = float(FreeCAD.Units.Quantity(self.form.e2x.text()))
+        self.p["e2y"] = float(FreeCAD.Units.Quantity(self.form.e2y.text()))
+        self.p["e2z"] = float(FreeCAD.Units.Quantity(self.form.e2z.text()))
         self.p["e3x"] = float(FreeCAD.Units.Quantity(self.form.e3x.text()))
         self.p["e3y"] = float(FreeCAD.Units.Quantity(self.form.e3y.text()))
         self.p["e3z"] = float(FreeCAD.Units.Quantity(self.form.e3z.text()))

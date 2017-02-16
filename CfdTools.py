@@ -300,3 +300,12 @@ def getOrDefault(dictionary, key, default):
         return dictionary[key]
     else:
         return default
+
+
+def normalise(v):
+    import numpy
+    mag = numpy.sqrt(sum(vi**2 for vi in v))
+    import sys
+    if mag < sys.float_info.min:
+        mag += sys.float_info.min
+    return [vi/mag for vi in v]
