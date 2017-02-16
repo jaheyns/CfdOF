@@ -31,20 +31,27 @@ __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
-import time
+import os
+import sys
+import os.path
 import _FemMeshGmsh
-import FreeCADGui
-from PySide import QtGui
-from PySide import QtCore
-from PySide.QtCore import Qt
-from PySide.QtGui import QApplication
+import time
+
+if FreeCAD.GuiUp:
+    import FreeCADGui
+    from PySide import QtCore
+    from PySide import QtCore
+    from PySide import QtGui
+    from PySide.QtCore import Qt
+    from PySide.QtGui import QApplication
+    import FemGui
 
 
 class _TaskPanelCfdMeshGmsh:
     '''The TaskPanel for editing References property of FemMeshGmsh objects and creation of new CFD mesh'''
     def __init__(self, obj):
         self.mesh_obj = obj
-        self.form = FreeCADGui.PySideUic.loadUi(FreeCAD.getHomePath() + "Mod/Cfd/TaskPanelCfdMeshGmsh.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMeshGmsh.ui"))
 
         self.Timer = QtCore.QTimer()
         self.Timer.start(100)  # 100 milli seconds

@@ -5,11 +5,18 @@ __url__ = "http://www.freecadweb.org"
 
 
 import FreeCAD
-import FreeCADGui
-from PySide import QtGui
-from PySide import QtCore
-#import Units
+import os
+import sys
+import os.path
 
+if FreeCAD.GuiUp:
+    import FreeCADGui
+    from PySide import QtCore
+    from PySide import QtCore
+    from PySide import QtGui
+    from PySide.QtCore import Qt
+    from PySide.QtGui import QApplication
+    import FemGui
 
 
 class _TaskPanelCfdPhysicsSelection:
@@ -20,7 +27,7 @@ class _TaskPanelCfdPhysicsSelection:
         self.obj = obj
         self.physicsModel = self.obj.PhysicsModel.copy()
 
-        self.form = FreeCADGui.PySideUic.loadUi(FreeCAD.getHomePath() + "Mod/Cfd/TaskPanelPhysics.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelPhysics.ui"))
 
         self.form.TimeFrame.setVisible(True)
         self.form.FlowFrame.setVisible(True)

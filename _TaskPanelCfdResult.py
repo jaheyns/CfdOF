@@ -24,6 +24,7 @@ __title__ = "Cfd Result Control Task Panel"
 __author__ = "Juergen Riegel, Qingfeng Xia"
 __url__ = "http://www.freecadweb.org"
 
+import os
 import os.path
 
 import FreeCAD
@@ -48,7 +49,7 @@ class _TaskPanelCfdResult:
     in importVTK?
     '''
     def __init__(self):
-        ui_path = os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdResult.ui"
+        ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdResult.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
         #self.fem_prefs = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Fem")
         #self.restore_result_settings_in_dialog = self.fem_prefs.GetBool("RestoreResultDialog", True)

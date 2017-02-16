@@ -5,12 +5,18 @@ __url__ = "http://www.freecadweb.org"
 
 
 import FreeCAD
-import FreeCADGui
-from PySide import QtGui
-from PySide import QtCore
-#import Units
-import FemGui
+import os
+import sys
+import os.path
 
+if FreeCAD.GuiUp:
+    import FreeCADGui
+    from PySide import QtCore
+    from PySide import QtCore
+    from PySide import QtGui
+    from PySide.QtCore import Qt
+    from PySide.QtGui import QApplication
+    import FemGui
 
 
 class _TaskPanelCfdInitialiseInternalFlowField:
@@ -22,7 +28,8 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.physicsModel = self.fetchPhysicsObject()
         self.InitialVariables = self.obj.InitialVariables.copy()
 
-        self.form = FreeCADGui.PySideUic.loadUi(FreeCAD.getHomePath() + "Mod/Cfd/TaskPanelCfdInitialiseInternalField.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
+                                                             "TaskPanelCfdInitialiseInternalField.ui"))
 
         self.form.basicPropertiesFrame.setVisible(False)
         self.form.potentialFoamCheckBox.stateChanged.connect(self.potentialFoamClicked)

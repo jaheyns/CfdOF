@@ -48,7 +48,8 @@ class TaskPanelCfdFluidProperties:
             is not included.
         '''
 
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.dirname(__file__)+os.path.sep+"TaskPanelCfdFluidProperties.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
+                                                             "TaskPanelCfdFluidProperties.ui"))
 
         ''' In most cases, unlike FEM, fluid flow properties are defined by the user. A small number of reference
             values are store in the fcmat database for fluids to serve as a starting point for the user. The properties

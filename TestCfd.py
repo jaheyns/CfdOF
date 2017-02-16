@@ -61,9 +61,9 @@ __url__ = "http://www.freecadweb.org"
 # ***************************************************************************
 
 
-home_path = FreeCAD.getHomePath()
+home_path = CfdTools.get_module_path()
 temp_dir = tempfile.gettempdir()
-test_file_dir = home_path + 'Mod/Cfd/testFiles/'
+test_file_dir = home_path + 'testFiles/'
 working_dir = '/tmp/'
 
 

@@ -50,7 +50,7 @@ if FreeCAD.GuiUp:
 
 class _TaskPanelCfdSolverControl:
     def __init__(self, solver_runner_obj):
-        ui_path = os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdSolverControl.ui"
+        ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdSolverControl.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
         self.fem_prefs = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Fem")
 

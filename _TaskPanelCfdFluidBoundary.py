@@ -131,7 +131,7 @@ class TaskPanelCfdFluidBoundary:
         self.BoundarySettings = self.obj.BoundarySettings.copy()
         self.faceList = list(self.obj.faceList)
 
-        ui_path = os.path.dirname(__file__) + os.path.sep + "TaskPanelCfdFluidBoundary.ui"
+        ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdFluidBoundary.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.form.comboBoundaryType.currentIndexChanged.connect(self.comboBoundaryTypeChanged)
