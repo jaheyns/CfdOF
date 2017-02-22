@@ -58,8 +58,9 @@ solvers
 
 SIMPLE
 {
-    // Non-orthogonal correctors for robustness on tet meshes
-    nNonOrthogonalCorrectors 3;
+    // Non-orthogonal correctors for robustness on tet meshes. Porous baffles require a
+    // higher number of corrections.
+    nNonOrthogonalCorrectors 5;
 
     consistent yes;
     residualControl
@@ -74,7 +75,7 @@ SIMPLE
 
 potentialFlow
 {
-    nNonOrthogonalCorrectors 10;
+    nNonOrthogonalCorrectors 8;
 
     PhiRefValue 0;
     PhiRefCell 0;

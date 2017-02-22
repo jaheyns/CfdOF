@@ -26,6 +26,7 @@
 import FreeCAD
 # add import and export file for this workbench
 
-if("BUILD_FEM_VTK" in FreeCAD.__cmake__):
-    FreeCAD.addImportType("CFD result formats (*.vtk)", "CfdResultFoamVTK")
+# NOTE: Revive if VTK is added (JH) 16/02/2017
+# if("BUILD_FEM_VTK" in FreeCAD.__cmake__):
+#     FreeCAD.addImportType("CFD result formats (*.vtk)", "CfdResultFoamVTK")
 

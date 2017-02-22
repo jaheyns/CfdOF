@@ -824,6 +824,7 @@ class BasicBuilder(object):
         """ If a boundary condition is not specified it will default to 'fixed wall'. In polyMesh/boundary
         "defaultFaces" is set to 'wall', but it is is not renamed for mesh conversion .
         """
+        print ('Setting default faces to use a slip boundary condition.')
         bc_names = listBoundaryNames(self._casePath)
         # NOTE: Code depreciated (JH) 07/02/2017
         # specified_bc_names = set([bc['name'] for bc in self._boundarySettings])
@@ -835,7 +836,7 @@ class BasicBuilder(object):
             self._initPressure_rghAsWall()
         # Thermal boundary init will be called in derived class
         for bc in bc_names:
-            _default_wall_dict = {'name': bc, 'type': 'wall', 'subtype': 'fixed'}
+            _default_wall_dict = {'name': bc, 'type': 'wall', 'subtype': 'slip'}
             # NOTE: Update code when added turbulence back to the code (JH)
             # self.setupWallTurbulence(_default_wall_dict, self._turbulenceProperties)
 
@@ -844,8 +845,7 @@ class BasicBuilder(object):
         f = ParsedParameterFile(self._casePath + "/0/U")
         for bc_name in listBoundaryNames(self._casePath):
             f["boundaryField"][bc_name] = {}
-            f["boundaryField"][bc_name]["value"] = "uniform (0 0 0)"
-            f["boundaryField"][bc_name]["type"] = "fixedValue"
+            f["boundaryField"][bc_name]["type"] = "slip"
         f.writeFile()
 
     def _writeDefaultPressureBoundary(self):

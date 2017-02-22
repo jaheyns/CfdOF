@@ -187,10 +187,16 @@
      <property name="verticalSpacing">
       <number>8</number>
      </property>
-     <item row="2" column="1">
-      <widget class="QPushButton" name="pb_show_result">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_3">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
-        <string>View VTK</string>
+        <string>Results</string>
        </property>
       </widget>
      </item>
@@ -204,8 +210,8 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_3">
+     <item row="2" column="1">
+      <widget class="QLabel" name="label_5">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -213,7 +219,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Results</string>
+        <string/>
        </property>
       </widget>
      </item>

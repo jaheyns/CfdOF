@@ -43,7 +43,7 @@ class _ViewProviderCfdMeshGmsh:
         self.ViewObject = vobj
         self.Object = vobj.Object
         self.ViewObject.ShapeColor = (0.4, 0.4, 0.4)
-        self.ViewObject.LineWidth = 2
+        # self.ViewObject.LineWidth = 2
 
     def updateData(self, obj, prop):
         return

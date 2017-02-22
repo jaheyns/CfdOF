@@ -4,32 +4,32 @@ This workbench aims to help users set up and run CFD analysis. It guides the use
 specifying the material properties, generating a mesh, assigning boundary conditions and setting the solver settings
 before running the simulation. Where possible best practices are included to improve the stability of the solvers.
 
-This software is a fork of the CFD workbench developed by [Qingfeng Xia](http://github.com/qingfengxia/Cfd) which
-rather focuses on assisting new CFD users. This fork therefor places emphasis on usability and solver stability over 
+This software is a fork of the CFD workbench developed by [Qingfeng Xia](http://github.com/qingfengxia/Cfd), but
+focuses on assisting new CFD users. It therefor places greater emphasis on usability and solver stability intead of
 functionality.
 
 ## Features
 
 ### Current:
 
-1. Incompressible, laminar flow (simpleFoam and pimpleFoam).
-2. Basic material data base.
-3. Flow initialisation with a potential solver.
-4. Tetrahedral meshing using GMSH.
-5. Post processing using paraview.
+* Incompressible, laminar flow (simpleFoam and pimpleFoam).
+* Basic material data base.
+* Flow initialisation with a potential solver.
+* Tetrahedral meshing using GMSH.
+* Post processing using paraview.
+* Porous regions and porous baffles.
 
 ### Under development:
 
-1. Porous regions and porous baffles.
-2. Multiple region meshing
-3. Unit testing
-4. Run on Windows 7-10
+* Multiple region meshing
+* Unit testing
+* Run on Windows 7-10
 
 ### Future (2017):
 
-1. Cut-cell Cartesian meshing with boundary layers.
-2. Extension to turbulent using RANS (k-w SST).
-3. Conjugate heat transfer.
+* Cut-cell Cartesian meshing with boundary layers.
+* Extension to turbulent using RANS (k-w SST).
+* Conjugate heat transfer.
 
 ### Platform supported
 
@@ -60,7 +60,7 @@ MAC
 
 - [Paraview](http://www.paraview.org/)
  
-- [GMSH](http://gmsh.info/)
+- [GMSH (2.13+)](http://gmsh.info/)
 
 
 ### Setting up Cfd workbemch
