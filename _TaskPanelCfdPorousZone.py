@@ -1,8 +1,31 @@
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
 
 __title__ = "_TaskPanelCfdPorousZone"
-__author__ = ""
+__author__ = "AB, OO, JH"
 __url__ = "http://www.freecadweb.org"
-
 
 import FreeCAD
 import os
@@ -20,9 +43,14 @@ if FreeCAD.GuiUp:
     from PySide.QtGui import QApplication
     import FemGui
 
+POROUS_CORRELATIONS = ['DarcyForchheimer', 'Jakob']
+POROUS_CORRELATION_NAMES = ["Darcy-Forchheimer coefficients", "Staggered tube bundle (Jakob)"]
+POROUS_CORRELATION_TIPS = ["Specify viscous and inertial drag tensors by giving their principal components and directions (these will be made orthogonal)",
+                           "Specify geometry of parallel tube bundle with staggered layers."]
+
 
 class _TaskPanelCfdPorousZone:
-    '''The editmode TaskPanel for InitialVariables objects'''
+    """ Task panel for porous zone objects """
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
@@ -34,13 +62,11 @@ class _TaskPanelCfdPorousZone:
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelPorousZone.ui"))
 
-        self.setInitialValues()
         self.form.selectReference.clicked.connect(self.selectReference)
         self.form.listWidget.itemClicked.connect(self.setSelection)
         self.form.pushButtonDelete.clicked.connect(self.deleteFeature)
-        self.form.helpButton.clicked.connect(self.requestHelp)
-        self.form.checkPoint.clicked.connect(self.checkPoint)
-        self.form.automaticSelect.clicked.connect(self.autoDefinePoint)
+
+        self.form.comboBoxCorrelation.currentIndexChanged.connect(self.comboBoxCorrelationChanged)
 
         self.form.e1x.textEdited.connect(self.e1Changed)
         self.form.e1y.textEdited.connect(self.e1Changed)
@@ -65,143 +91,51 @@ class _TaskPanelCfdPorousZone:
 
         self.form.pushButtonDelete.setEnabled(False)
 
-    def extractMainShapeFromMesh(self):
-        isPresent = False
-        meshObjects = []
-        members = FemGui.getActiveAnalysis().Member
-        mainShape = False
-        message = None
-        for i in members:
-            if "Mesh" in i.Name:
-                meshObjects.append(i)
-                isPresent = True
-        if len(meshObjects)>1:
-            message = "More than 1 mesh objects were found! Cannot proceed!"
-            #QtGui.QMessageBox.critical(None, "More than 1 mesh objects", message)
-            return mainShape,message
-        if isPresent == False:
-            message = "No mesh objects were found. Cannot proceed!"
-            #QtGui.QMessageBox.critical(None, "0 mesh objects found", message)
-            return mainShape,message
-        if len(self.obj.shapeList) == 0:
-            message = "No porous zone regions have been selected yet. Please select a porous region."
-            #QtGui.QMessageBox.critical(None, "No porous zones", message)
-            return mainShape,message
-        try:
-            #Netgen mesh object
-            mainShape = meshObjects[0].Shape
-        except:
-            #Gmsh mesh object
-            mainShape = meshObjects[0].Part
-        return mainShape,message
+        self.form.comboBoxCorrelation.addItems(POROUS_CORRELATION_NAMES)
 
-    def checkPoint(self):
-        import FemGui
-        mainShape,message = self.extractMainShapeFromMesh()
-        if not(mainShape):
-            QtGui.QMessageBox.critical(None, "Error", message)
-            return
+        self.setInitialValues()
 
-        px = float((FreeCAD.Units.Quantity(self.form.OX.text())).getValueAs("mm"))
-        py = float((FreeCAD.Units.Quantity(self.form.OY.text())).getValueAs("mm"))
-        pz = float((FreeCAD.Units.Quantity(self.form.OZ.text())).getValueAs("mm"))
-        point = FreeCAD.Vector(float(px),float(py),float(pz))
-
-        Result = self.checkOnePoint(mainShape,self.obj.shapeList,point)
-        if Result:
-            message = "Valid"
-        else:
-            message = "Not Valid\n"
-
-        QtGui.QMessageBox.information(None, "Point check", message)
-
-    def autoDefinePoint(self):
-        point = self.autoFindPoint()
-        if point == "criticalError":
-            return
-        elif point:
-            self.form.OX.setText("{}{}".format(str(point[0]) ,'mm'))
-            self.form.OY.setText("{}{}".format(str(point[1]),'mm'))
-            self.form.OZ.setText("{}{}".format(str(point[2]),'mm'))
-        else:
-            message = "No valid points were automatically found. Please ensure that the selected shapes are valid. If valid, please select a point manually"
-            QtGui.QMessageBox.critical(None, "Error", message)
-
-    def autoFindPoint(self):
-        porousShapes = self.obj.shapeList
-
-        mainShape,message = self.extractMainShapeFromMesh()
-        if not(mainShape):
-            QtGui.QMessageBox.critical(None, "Error", message)
-            return "criticalError"
-
-        """
-            NOTE The automatic selection algorithm is not full proof.
-            1.) First check each vertex of the main shape.
-            2.) Check each vertex of the intersecting shapes between the main shape an the porous zones 
-            2.b) Each interseting vertex is perturbed about the vertex in 6 directions
-            The first valid point is popped out
-        """
-
-        mainVertices = mainShape.Shape.Vertexes
-        for ii in range(len(mainVertices)):
-            point = mainVertices[ii].Point
-            Result = self.checkOnePoint(mainShape,porousShapes,point)
-            if Result:
-                return point
-
-        for ii in range(len(porousShapes)):
-            import Part
-            common = mainShape.Shape.common(porousShapes[ii].Shape)
-            combinedVertices = common.Vertexes
-            for jj in range(len(combinedVertices)):
-                point = combinedVertices[jj].Point
-                change = [FreeCAD.Vector(-1,0.0,0.0),FreeCAD.Vector(1,0.0,0.0),FreeCAD.Vector(0,-1.0,0.0),FreeCAD.Vector(0,1.0,0.0),FreeCAD.Vector(0.0,0.0,-1.0),FreeCAD.Vector(0.0,0.0,1.0)]
-                for kk in range(2):
-                    pointC = point + change[kk]
-                    Result = self.checkOnePoint(mainShape,porousShapes,pointC)
-                    if Result:
-                        return point
-
-
-
-    def checkOnePoint(self,mainShape,porousShapes,point):
-        Result = True
-        for ii in range(len(porousShapes)):
-            shape = porousShapes[ii].Shape
-            result = shape.isInside(point,0.001,False)
-            if result:
-                Result = False
-            #QtGui.QMessageBox.critical(None, "No porous zones", str(result))
-        if Result:
-            if not(mainShape.Shape.isInside(point,0.001,True)):
-                Result = False
-        return Result
 
     def setInitialValues(self):
         for i in range(len(self.obj.partNameList)):
             self.form.listWidget.addItem(str(self.obj.partNameList[i]))
 
-        self.form.dx.setText("{} {}".format(self.p["dx"], "m^-2"))
-        self.form.dy.setText("{} {}".format(self.p["dy"], "m^-2"))
-        self.form.dz.setText("{} {}".format(self.p["dz"], "m^-2"))
-        self.form.fx.setText("{} {}".format(self.p["fx"], "m^-1"))
-        self.form.fy.setText("{} {}".format(self.p["fy"], "m^-1"))
-        self.form.fz.setText("{} {}".format(self.p["fz"], "m^-1"))
-        self.form.e1x.setText("{}".format(CfdTools.getOrDefault(self.p, 'e1x', 1)))
-        self.form.e1y.setText("{}".format(CfdTools.getOrDefault(self.p, 'e1y', 0)))
-        self.form.e1z.setText("{}".format(CfdTools.getOrDefault(self.p, 'e1z', 0)))
-        self.form.e2x.setText("{}".format(CfdTools.getOrDefault(self.p, 'e2x', 0)))
-        self.form.e2y.setText("{}".format(CfdTools.getOrDefault(self.p, 'e2y', 1)))
-        self.form.e2z.setText("{}".format(CfdTools.getOrDefault(self.p, 'e2z', 0)))
-        self.form.e3x.setText("{}".format(CfdTools.getOrDefault(self.p, 'e3x', 0)))
-        self.form.e3y.setText("{}".format(CfdTools.getOrDefault(self.p, 'e3y', 0)))
-        self.form.e3z.setText("{}".format(CfdTools.getOrDefault(self.p, 'e3z', 1)))
-        self.form.OX.setText("{}{}".format(self.p["OX"],'m'))
-        self.form.OY.setText("{}{}".format(self.p["OY"],'m'))
-        self.form.OZ.setText("{}{}".format(self.p["OZ"],'m'))
-        #self.form.dy.setText(self.p["dy"])
-        #self.form.dz.setText(self.p["dz"])
+        try:
+            self.form.comboBoxCorrelation.setCurrentIndex(
+                POROUS_CORRELATIONS.index(CfdTools.getOrDefault(self.p, 'PorousCorrelation', POROUS_CORRELATIONS[0])))
+        except ValueError:
+            self.form.comboBoxCorrelation.setCurrentIndex(1)
+        d = CfdTools.getOrDefault(self.p, 'D', [0, 0, 0])
+        self.form.dx.setText("{}".format(d[0]))
+        self.form.dy.setText("{}".format(d[1]))
+        self.form.dz.setText("{}".format(d[2]))
+        f = CfdTools.getOrDefault(self.p, 'F', [0, 0, 0])
+        self.form.fx.setText("{}".format(f[0]))
+        self.form.fy.setText("{}".format(f[1]))
+        self.form.fz.setText("{}".format(f[2]))
+        e1 = CfdTools.getOrDefault(self.p, 'e1', [1, 0, 0])
+        self.form.e1x.setText("{}".format(e1[0]))
+        self.form.e1y.setText("{}".format(e1[1]))
+        self.form.e1z.setText("{}".format(e1[2]))
+        e2 = CfdTools.getOrDefault(self.p, 'e2', [0, 1, 0])
+        self.form.e2x.setText("{}".format(e2[0]))
+        self.form.e2y.setText("{}".format(e2[1]))
+        self.form.e2z.setText("{}".format(e2[2]))
+        e3 = CfdTools.getOrDefault(self.p, 'e3', [0, 0, 1])
+        self.form.e3x.setText("{}".format(e3[0]))
+        self.form.e3y.setText("{}".format(e3[1]))
+        self.form.e3z.setText("{}".format(e3[2]))
+        self.form.inputTubeSpacing.setText("{} mm".format(CfdTools.getOrDefault(self.p, 'TubeSpacing', 0)*1000))
+        self.form.inputOuterDiameter.setText("{} mm".format(CfdTools.getOrDefault(self.p, 'OuterDiameter', 0)*1000))
+        tubeAxis = CfdTools.getOrDefault(self.p, 'TubeAxis', [0, 0, 1])
+        self.form.inputTubeAxisX.setText("{}".format(tubeAxis[0]))
+        self.form.inputTubeAxisY.setText("{}".format(tubeAxis[1]))
+        self.form.inputTubeAxisZ.setText("{}".format(tubeAxis[2]))
+        normalAxis = CfdTools.getOrDefault(self.p, 'BundleLayerNormal', [1, 0, 0])
+        self.form.inputBundleLayerNormalX.setText("{}".format(normalAxis[0]))
+        self.form.inputBundleLayerNormalY.setText("{}".format(normalAxis[1]))
+        self.form.inputBundleLayerNormalZ.setText("{}".format(normalAxis[2]))
+        self.form.inputVelocityEstimate.setText("{} m/s".format(CfdTools.getOrDefault(self.p, 'VelocityEstimate', 0)))
 
     def deleteFeature(self):
         shapeList = list(self.obj.shapeList)
@@ -216,14 +150,10 @@ class _TaskPanelCfdPorousZone:
         FreeCADGui.Selection.clearSelection()
         self.form.pushButtonDelete.setEnabled(False)
 
-        return
-
-
-    def setSelection(self,value):
+    def setSelection(self, value):
         FreeCADGui.Selection.clearSelection()
         FreeCADGui.Selection.addSelection(self.obj.shapeList[self.form.listWidget.row(value)])
         self.form.pushButtonDelete.setEnabled(True)
-        return
 
     def selectReference(self):
         selection = FreeCADGui.Selection.getSelectionEx()
@@ -232,23 +162,25 @@ class _TaskPanelCfdPorousZone:
             Access to the actual shapes such as solids, faces, edges etc s[i].Object.Shape.Faces/Edges/Solids
         """
         shapeList = list(self.obj.shapeList)
-        for i in range(len(selection)):
-                if len(selection[i].Object.Shape.Solids)>0:
-                    if not(selection[i].Object.Name in self.partNameList):
-                        self.form.listWidget.addItem(str(selection[i].Object.Name))
-                        shapeList.append(selection[i].Object)
-                        self.partNameList.append(selection[i].Object.Name)
-
+        for sel in selection:
+                if len(sel.Object.Shape.Solids) > 0:
+                    if not(sel.Object.Name in self.partNameList):
+                        self.form.listWidget.addItem(str(sel.Object.Name))
+                        shapeList.append(sel.Object)
+                        self.partNameList.append(sel.Object.Name)
 
         self.obj.shapeList = shapeList
         FreeCADGui.doCommand("App.activeDocument().recompute()")
 
+    def comboBoxCorrelationChanged(self):
+        self.updateCorrelationUI()
 
-    def requestHelp(self):
-        message = "Outside point Help.\nPlease specify a point location (x,y,z) which falls outside the porous zone regions but is still within fluid flow domain to be analysed (contained within the meshed region).\n\nHelpers:\nClick Automatic: Automatically find a point\nClick Check: Checks whether a given point is valid."
-        QtGui.QMessageBox.information(None, "Outside point", message)
+    def updateCorrelationUI(self):
+        method = self.form.comboBoxCorrelation.currentIndex()
+        self.form.stackedWidgetCorrelation.setCurrentIndex(method)
+        self.form.comboBoxCorrelation.setToolTip(POROUS_CORRELATION_TIPS[method])
 
-    # One of the e vector edit boxes loses focus or user presses enter
+    # One of the e vector edit boxes loses focus
     def e1Done(self):
         if not (self.form.e1x.hasFocus() or self.form.e1y.hasFocus() or self.form.e1z.hasFocus()):
             self.eDone(0)
@@ -302,35 +234,48 @@ class _TaskPanelCfdPorousZone:
         e[indexplus] = CfdTools.normalise(e[indexplus])
         e[indexminus] = CfdTools.normalise(e[indexminus])
 
-        self.form.e1x.setText(str(e[0][0]))
-        self.form.e1y.setText(str(e[0][1]))
-        self.form.e1z.setText(str(e[0][2]))
-        self.form.e2x.setText(str(e[1][0]))
-        self.form.e2y.setText(str(e[1][1]))
-        self.form.e2z.setText(str(e[1][2]))
-        self.form.e3x.setText(str(e[2][0]))
-        self.form.e3y.setText(str(e[2][1]))
-        self.form.e3z.setText(str(e[2][2]))
+        self.form.e1x.setText("{:.2f}".format(e[0][0]))
+        self.form.e1y.setText("{:.2f}".format(e[0][1]))
+        self.form.e1z.setText("{:.2f}".format(e[0][2]))
+        self.form.e2x.setText("{:.2f}".format(e[1][0]))
+        self.form.e2y.setText("{:.2f}".format(e[1][1]))
+        self.form.e2z.setText("{:.2f}".format(e[1][2]))
+        self.form.e3x.setText("{:.2f}".format(e[2][0]))
+        self.form.e3y.setText("{:.2f}".format(e[2][1]))
+        self.form.e3z.setText("{:.2f}".format(e[2][2]))
 
     def accept(self):
-        self.p["dx"] = float(FreeCAD.Units.Quantity(self.form.dx.text()).getValueAs("m^-2"))
-        self.p["dy"] = float(FreeCAD.Units.Quantity(self.form.dy.text()).getValueAs("m^-2"))
-        self.p["dz"] = float(FreeCAD.Units.Quantity(self.form.dz.text()).getValueAs("m^-2"))
-        self.p["fx"] = float(FreeCAD.Units.Quantity(self.form.fx.text()).getValueAs("m^-1"))
-        self.p["fy"] = float(FreeCAD.Units.Quantity(self.form.fy.text()).getValueAs("m^-1"))
-        self.p["fz"] = float(FreeCAD.Units.Quantity(self.form.fz.text()).getValueAs("m^-1"))
-        self.p["e1x"] = float(FreeCAD.Units.Quantity(self.form.e1x.text()))
-        self.p["e1y"] = float(FreeCAD.Units.Quantity(self.form.e1y.text()))
-        self.p["e1z"] = float(FreeCAD.Units.Quantity(self.form.e1z.text()))
-        self.p["e2x"] = float(FreeCAD.Units.Quantity(self.form.e2x.text()))
-        self.p["e2y"] = float(FreeCAD.Units.Quantity(self.form.e2y.text()))
-        self.p["e2z"] = float(FreeCAD.Units.Quantity(self.form.e2z.text()))
-        self.p["e3x"] = float(FreeCAD.Units.Quantity(self.form.e3x.text()))
-        self.p["e3y"] = float(FreeCAD.Units.Quantity(self.form.e3y.text()))
-        self.p["e3z"] = float(FreeCAD.Units.Quantity(self.form.e3z.text()))
-        self.p["OX"] = float((FreeCAD.Units.Quantity(self.form.OX.text())).getValueAs("m"))
-        self.p["OY"] = float((FreeCAD.Units.Quantity(self.form.OY.text())).getValueAs("m"))
-        self.p["OZ"] = float((FreeCAD.Units.Quantity(self.form.OZ.text())).getValueAs("m"))
+        try:
+            self.p['PorousCorrelation'] = POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()]
+            self.p['D'] = [float(FreeCAD.Units.Quantity(self.form.dx.text())),
+                           float(FreeCAD.Units.Quantity(self.form.dy.text())),
+                           float(FreeCAD.Units.Quantity(self.form.dz.text()))]
+            self.p['F'] = [float(FreeCAD.Units.Quantity(self.form.fx.text())),
+                           float(FreeCAD.Units.Quantity(self.form.fy.text())),
+                           float(FreeCAD.Units.Quantity(self.form.fz.text()))]
+            self.p['e1'] = [float(FreeCAD.Units.Quantity(self.form.e1x.text())),
+                            float(FreeCAD.Units.Quantity(self.form.e1y.text())),
+                            float(FreeCAD.Units.Quantity(self.form.e1z.text()))]
+            self.p['e2'] = [float(FreeCAD.Units.Quantity(self.form.e2x.text())),
+                            float(FreeCAD.Units.Quantity(self.form.e2y.text())),
+                            float(FreeCAD.Units.Quantity(self.form.e2z.text()))]
+            self.p['e3'] = [float(FreeCAD.Units.Quantity(self.form.e3x.text())),
+                            float(FreeCAD.Units.Quantity(self.form.e3y.text())),
+                            float(FreeCAD.Units.Quantity(self.form.e3z.text()))]
+            self.p['TubeSpacing'] = float(FreeCAD.Units.Quantity(self.form.inputTubeSpacing.text()).getValueAs('m'))
+            self.p['OuterDiameter'] = float(FreeCAD.Units.Quantity(self.form.inputOuterDiameter.text()).getValueAs('m'))
+            self.p['TubeAxis'] = [float(FreeCAD.Units.Quantity(self.form.inputTubeAxisX.text())),
+                                  float(FreeCAD.Units.Quantity(self.form.inputTubeAxisY.text())),
+                                  float(FreeCAD.Units.Quantity(self.form.inputTubeAxisZ.text()))]
+            self.p['BundleLayerNormal'] = \
+                [float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalX.text())),
+                 float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalY.text())),
+                 float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalZ.text()))]
+            self.p['VelocityEstimate'] = \
+                float(FreeCAD.Units.Quantity(self.form.inputVelocityEstimate.text()).getValueAs('m/s'))
+        except ValueError:
+            FreeCAD.Console.PrintError("Unrecognised value entered\n")
+            return
         self.obj.porousZoneProperties = self.p
         self.obj.partNameList = self.partNameList
         doc = FreeCADGui.getDocument(self.obj.Document)

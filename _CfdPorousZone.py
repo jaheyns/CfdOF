@@ -1,45 +1,69 @@
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
 
 __title__ = "CFDPorousZone"
-__author__ = ""
+__author__ = "AB, OO, JH"
 __url__ = "http://www.freecadweb.org"
 
 import FreeCAD, Part, math
 from FreeCAD import Base
 from pivy import coin
 import FreeCADGui
+
+
 class PartFeature:
-	def __init__(self, obj):
-		obj.Proxy = self
+    def __init__(self, obj):
+        obj.Proxy = self
+
 
 class _CfdPorousZone(PartFeature):
-    "The CFD Physics Model"
+    """ The CFD Porous Zone Model """
+
     def __init__(self, obj):
         PartFeature.__init__(self, obj)
-        
-        #obj.addProperty("App::PropertyPythonObject","Properties")
-        #obj.addProperty("Part::PropertyPartShape","Shape")
-        
-        #obj.addProperty("App::PropertyStringList","partNameList")
-        obj.addProperty("App::PropertyPythonObject","partNameList").partNameList = []
-        obj.addProperty("App::PropertyLinkList","shapeList")
-        obj.addProperty("App::PropertyPythonObject","porousZoneProperties")
-        obj.porousZoneProperties = {"dx" :0,"dy":0,"dz":0,"fx":0,"fy":0,"fz":0,"e1x":1,"e1y":0,"e1z":0,"e3x":0,"e3y":0,"e3z":1,"OX" :0,"OY":0,"OZ":0}
-        
+
+        # obj.addProperty("App::PropertyPythonObject","Properties")
+        # obj.addProperty("Part::PropertyPartShape","Shape")
+
+        # obj.addProperty("App::PropertyStringList","partNameList")
+        obj.addProperty("App::PropertyPythonObject", "partNameList").partNameList = []
+        obj.addProperty("App::PropertyLinkList", "shapeList")
+        obj.addProperty("App::PropertyPythonObject", "porousZoneProperties")
+        obj.porousZoneProperties = {}
+
         obj.Proxy = self
         self.Type = "PorousZone"
-        
 
     def execute(self, fp):
-	listOfShapes = []
-	for i in range(len(fp.shapeList)):
+        listOfShapes = []
+        for i in range(len(fp.shapeList)):
             listOfShapes.append(fp.shapeList[i].Shape)
-	if len(listOfShapes)>0:
-	    fp.Shape = Part.makeCompound(listOfShapes)
-	else:
-	    fp.Shape = Part.Shape()
-	    
-        
-        return
+        if len(listOfShapes) > 0:
+            fp.Shape = Part.makeCompound(listOfShapes)
+        else:
+            fp.Shape = Part.Shape()
+
     def __getstate__(self):
         return None
 

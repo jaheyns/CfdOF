@@ -50,12 +50,12 @@ class CfdCaseWriterFoam:
         """
         self.analysis_obj = analysis_obj
         self.solver_obj = CfdTools.getSolver(analysis_obj)
-        self.physics_model,isPresent = CfdTools.getPhysicsModel(analysis_obj)
+        self.physics_model, isPresent = CfdTools.getPhysicsModel(analysis_obj)
         self.mesh_obj = CfdTools.getMesh(analysis_obj)
         self.material_obj = CfdTools.getMaterial(analysis_obj)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initialConditions, isPresent = CfdTools.getInitialConditions(analysis_obj)
-        self.porousZone_obj, self.porousZonePresent = CfdTools.getPorousObject(analysis_obj)
+        self.porousZone_objs, self.porousZonePresent = CfdTools.getPorousObjects(analysis_obj)
         self.mesh_generated = False
 
     def write_case(self, updating=False):
@@ -76,35 +76,34 @@ class CfdCaseWriterFoam:
         self.solverName = self.getSolverName()
 
         # Initialise case
-        self.builder = fcb.BasicBuilder(casePath = self.case_folder,
-                                        installationPath = self.installation_path,
-                                        solverSettings = CfdTools.getSolverSettings(self.solver_obj),
-                                        physicsModel = self.physics_model,
-                                        initialConditions = self.initialConditions,
-                                        templatePath = os.path.join(CfdTools.get_module_path(), "data",
-                                                                    "defaults"),
-                                        solverName = self.solverName,  # Use var in solverSet
-                                        porousZonePresent = self.porousZonePresent,
-                                        porousZone_obj = self.porousZone_obj)
+        self.builder = fcb.BasicBuilder(casePath=self.case_folder,
+                                        installationPath=self.installation_path,
+                                        solverSettings=CfdTools.getSolverSettings(self.solver_obj),
+                                        physicsModel=self.physics_model,
+                                        initialConditions=self.initialConditions,
+                                        templatePath=os.path.join(CfdTools.get_module_path(), "data", "defaults"),
+                                        solverName=self.solverName  # Use var in solverSet
+                                        )
 
         self.builder.setInstallationPath()
         self.builder.pre_build_check()
         self.builder.createCase()
 
-        self.exportPorousZoneStlSurfaces()
-        self.writeFVOptions()
-
         self.write_mesh()
 
-        self.write_material()
-        self.write_boundary_condition()
+        self.setMaterial()
+        self.setBoundaryConditions()
         # NOTE: Update code when turbulence is revived
         # self.builder.turbulenceProperties = {"name": self.solver_obj.TurbulenceModel}
 
         # NOTE: Code depreciated (JH) 06/02/2017
         # self.write_solver_control()
 
-        self.write_time_control()
+        # NOTE: Code deprecated (OO) 22/02/2017 - removed from BasicBuilder
+        #self.setTimeControl()
+
+        self.exportPorousZoneStlSurfaces()
+        self.setPorousZoneProperties()
 
         self.builder.post_build_check()
         self.builder.build()
@@ -127,7 +126,7 @@ class CfdCaseWriterFoam:
                 solver = 'simpleFoam'
         return solver
 
-    def write_time_control(self):
+    def setTimeControl(self):
         """ Time step settings """
         if self.physics_model["Time"] == "Transient":
             self.builder.timeStepSettings = {"endTime": self.solver_obj.EndTime,
@@ -158,7 +157,7 @@ class CfdCaseWriterFoam:
         scale = 0.001
         self.builder.setupMesh(unvMeshFile, scale)
 
-    def write_material(self, material=None):
+    def setMaterial(self, material=None):
         """ Compute and set the kinematic viscosity """
         if self.physics_model['Turbulence']=='Inviscid':
             kinVisc = 0.0
@@ -167,11 +166,11 @@ class CfdCaseWriterFoam:
             viscosity = viscosity.getValueAs('Pa*s')
             density = FreeCAD.Units.Quantity(self.material_obj.Material['Density'])
             density = density.getValueAs('kg/m^3')
-            kin_visc = viscosity/density
-        self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': float(kin_visc)}
+            kinVisc = viscosity/density
+        self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': float(kinVisc)}
 
 
-    def write_boundary_condition(self):
+    def setBoundaryConditions(self):
         """ Switch case to deal diff fluid boundary condition, thermal and turbulent is not yet fully tested
         """
         #caseFolder = self.solver_obj.WorkingDir + os.path.sep + self.solver_obj.InputCaseName
@@ -257,96 +256,53 @@ class CfdCaseWriterFoam:
 
     def exportPorousZoneStlSurfaces(self):
         if self.porousZonePresent:
-            for ii in range(len(self.porousZone_obj)):
+            for ii in range(len(self.porousZone_objs)):
                 import Mesh
-                for i in range(len(self.porousZone_obj[ii].shapeList)):
-                    shape = self.porousZone_obj[ii].shapeList[i].Shape
-                    path = os.path.join(self.solver_obj.WorkingDir,self.solver_obj.InputCaseName,"STLSurfaces")
+                for i in range(len(self.porousZone_objs[ii].shapeList)):
+                    shape = self.porousZone_objs[ii].shapeList[i].Shape
+                    path = os.path.join(self.solver_obj.WorkingDir,
+                                        self.solver_obj.InputCaseName,
+                                        "constant",
+                                        "triSurface")
                     if not os.path.exists(path):
                         os.makedirs(path)
-                    fname = os.path.join(self.solver_obj.WorkingDir, self.solver_obj.InputCaseName,
-                                         "STLSurfaces", self.porousZone_obj[ii]. partNameList[i]+u".stl")
+                    fname = os.path.join(path, self.porousZone_objs[ii]. partNameList[i]+u".stl")
                     shape.exportStl(fname)
-                    FreeCAD.Console.PrintMessage("succesfully wrote stl surface\n")
-            self.writeTopoSetDictFile()
+                    FreeCAD.Console.PrintMessage("Successfully wrote stl surface\n")
 
-
-    def writeTopoSetDictFile(self):
-        #NOTE: this function opens the helper file topoSetDuctStlToCellZone and fills in the necessary pieces of information
-        #This way, for compatibility with different versions of OpenFOAM, all OF version specific files can be stored in
-        #data/defuaults folder. The entries that are entered are located within {} in the specified file.
-        porousObject = self.porousZone_obj
-        fname = os.path.join(self.solver_obj.WorkingDir,self.solver_obj.InputCaseName,"system","topoSetDict")
-        fid  = open(fname,'w')
-
-        helperFile = open(os.path.join(CfdTools.get_module_path(), "data", "defaults", "helperFiles","Header"),'r')
-        helperText = helperFile.read()
-        fid.write(helperText.format("system","topoSetDict"))
-        helperFile.close()
-
-        fid.write("                                                                               \n")
-        fid.write("actions                                                                        \n")
-        fid.write("(                                                                              \n")
-        counter = 0
-        for ii in range(len(porousObject)):
-            for jj in range(len(porousObject[ii].partNameList)):
-                p = porousObject[ii].porousZoneProperties
-                counter += 1
-                helperFile = open(os.path.join(CfdTools.get_module_path(), "data",
-                                               "defaults", "helperFiles","topoSetDictStlToCellZone"),'r')
-                helperText = helperFile.read()
-                fid.write(helperText.format(porousObject[ii].partNameList[jj]+"SelectedCells",
-                                            porousObject[ii].partNameList[jj]+u".stl",
-                                            str(p["OX"]),
-                                            str(p["OY"]),
-                                            str(p["OZ"]),
-                                            "porosity"+str(counter),
-                                            porousObject[ii].partNameList[jj]+"SelectedCells"))
-                helperFile.close()
-        fid.write(");\n")
-        fid.close()
-
-    def writeFVOptions(self):
-        #NOTE: this function opens the helper file fvOptionsPorousZone and fills in the necessary pieces of information
-        #This way, for compatibility with different versions of OpenFOAM, all OF version specific files can be stored in
-        #data/defuaults folder. The entries that are entered are located within {} in the specified file.
-        if self.porousZonePresent:
-            porousObject = self.porousZone_obj
-            fname = os.path.join(self.solver_obj.WorkingDir,self.solver_obj.InputCaseName,"constant","fvOptions")
-            fid  = open(fname,'w')
-
-            helperFile = open(os.path.join(CfdTools.get_module_path(), "data", "defaults", "helperFiles","Header"),'r')
-            helperText = helperFile.read()
-            fid.write(helperText.format("constant","fvOptions"))
-            helperFile.close()
-
-            counter = 0
-            for ii in range(len(porousObject)):
-                for jj in range(len(porousObject[ii].partNameList)):
-                    p = porousObject[ii].porousZoneProperties
-                    counter += 1
-
-                    helperFile = open(os.path.join(CfdTools.get_module_path(), "data", "defaults",
-                                                   "helperFiles","fvOptionsPorousZone"),'r')
-                    helperText = helperFile.read()
-                    helperFile.close()
-                    fid.write(helperText.format("porosity"+str(counter),
-                                                "porosity"+str(counter),
-                                                str(p["dx"]),
-                                                str(p["dy"]),
-                                                str(p["dz"]),
-                                                str(p["fx"]),
-                                                str(p["fy"]),
-                                                str(p["fz"]),
-                                                str(p["e1x"]),
-                                                str(p["e1y"]),
-                                                str(p["e1z"]),
-                                                str(p["e3x"]),
-                                                str(p["e3y"]),
-                                                str(p["e3z"])))
-
-            fid.write("//************************************************************************ //  \n")
-            fid.close()
+    def setPorousZoneProperties(self):
+        porousZoneSettings = []
+        for po in self.porousZone_objs:
+            pd = {'PartNameList': po.partNameList}
+            if po.porousZoneProperties['PorousCorrelation'] == 'DarcyForchheimer':
+                pd['D'] = po.porousZoneProperties['D']
+                pd['F'] = po.porousZoneProperties['F']
+                pd['e1'] = po.porousZoneProperties['e1']
+                pd['e3'] = po.porousZoneProperties['e3']
+            elif po.porousZoneProperties['PorousCorrelation'] == 'Jakob':
+                # Calculate Darcy-Forchheimer coefficients
+                pd['e1'] = po.porousZoneProperties['BundleLayerNormal']  # OpenFOAM modifies to be orthogonal to e3
+                pd['e3'] = po.porousZoneProperties['TubeAxis']
+                spacing = po.porousZoneProperties['TubeSpacing']
+                d0 = po.porousZoneProperties['OuterDiameter']
+                u0 = po.porousZoneProperties['VelocityEstimate']
+                kinVisc = self.builder.fluidProperties['kinematicViscosity']
+                if kinVisc is None or kinVisc == 0.0:
+                    FreeCAD.Console.PrintError("Viscosity must be set for Jakob correlation.\n")
+                    raise ValueError
+                if spacing < d0:
+                    FreeCAD.Console.PrintError("Tube spacing may not be less than diameter.\n")
+                    raise ValueError
+                C = 1.0/(3.0**0.5/2*spacing)*0.5*(1.0+0.47/(spacing/d0-1)**1.06)
+                D = C/d0*(u0*d0/kinVisc)**(1.0-0.16)
+                F = C*(u0*d0/kinVisc)**(-0.16)
+                pd['D'] = [D, D, 0]  # Currently assuming zero drag parallel to tube bundle
+                pd['F'] = [F, F, 0]
+            else:
+                raise Exception("Unrecognised method for porous baffle resistance")
+            porousZoneSettings.append(pd)
+        print porousZoneSettings
+        self.builder.porousZoneSettings = porousZoneSettings
 
     # def write_solver_control(self):
     #     """ relaxRatio, fvOptions, pressure reference value, residual contnrol

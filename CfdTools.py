@@ -101,16 +101,18 @@ def getPhysicsModel(analysis_object):
         physicsModel = None  # A placeholder to be created in event that it is not present.
     return physicsModel,isPresent
 
-def getPorousObject(analysis_object):
+
+def getPorousObjects(analysis_object):
     isPresent = False
-    porousZone = []
+    porousZones = []
     for i in analysis_object.Member:
         if "PorousZone" in i.Name:
-            porousZone.append(i)
+            porousZones.append(i)
             isPresent = True
-    if not(isPresent):
-        porousZone = None #just a placeholder to be created in event that it is not present
-    return porousZone,isPresent
+    if not isPresent:
+        porousZones = None  # just a placeholder to be created in event that it is not present
+    return porousZones, isPresent
+
 
 def getInitialConditions(analysis_object):
     isPresent = False

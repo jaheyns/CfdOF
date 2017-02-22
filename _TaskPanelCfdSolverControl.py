@@ -251,7 +251,7 @@ class _TaskPanelCfdSolverControl:
         while self.solver_run_process.canReadLine():
             text += str(self.solver_run_process.readLine())
         #FreeCAD.Console.PrintMessage(text)
-        print(text)  # Avoid displaying on FreeCAD status bar
+        print text,  # Avoid displaying on FreeCAD status bar
         self.solver_runner.process_output(text)
 
     # NOTE: Depreciated QtProcess SolverProcess

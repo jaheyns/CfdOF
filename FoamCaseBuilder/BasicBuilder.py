@@ -199,18 +199,18 @@ _debug = True
 
 class BasicBuilder(object):
     """ This class to construct the OpenFOAM file structure. """
-    def __init__(self, casePath,
-                       installationPath,
-                       solverSettings,
-                       physicsModel,
-                       initialConditions,
-                       templatePath,
-                       solverName=None,
-                       fluidProperties = {'name':'air'},
-                       boundarySettings = [],
-                       internalFields = {},
-                       porousZonePresent = False,
-                       porousZone_obj = None):
+    def __init__(self,
+                 casePath,
+                 installationPath,
+                 solverSettings,
+                 physicsModel,
+                 initialConditions,
+                 templatePath,
+                 solverName=None,
+                 fluidProperties={'name':'air'},
+                 boundarySettings=[],
+                 internalFields={},
+                 porousZoneSettings=[]):
 
         if casePath[0] == "~":
             casePath = os.path.expanduser(casePath)
@@ -230,9 +230,7 @@ class BasicBuilder(object):
         self._fluidProperties = fluidProperties
         self._boundarySettings = boundarySettings
         self._internalFields = internalFields
-        self._porousZonePresent = porousZonePresent
-        self._porousZone_obj = porousZone_obj
-
+        self._porousZoneSettings = porousZoneSettings
 
     def setInstallationPath(self):
         setFoamDir(self._installationPath)
@@ -265,14 +263,16 @@ class BasicBuilder(object):
                         self._solverSettings['parallel'],
                         self._solverName,
                         self._solverSettings['parallelCores'],
-                        self._porousZonePresent,
-                        self._porousZone_obj,
+                        self._porousZoneSettings,
                         self.bafflesPresent())
 
         self.setupFluidProperties()
         self.setupTurbulenceProperties()
 
         self.setupBoundaryConditions()
+        if len(self._porousZoneSettings) > 0:
+            self.setupTopoSetDict()
+            self.setupFVOptions()
         if self.bafflesPresent():
             self.setupCreateBafflesDict()
         self.setupInternalFields()
@@ -398,7 +398,6 @@ class BasicBuilder(object):
     #     if len(vtk_files) >= 1:
     #         print("only one file name with full path is expected for the result vtk file")
     #         return vtk_files[-1]
-
 
     def createParaviewScript(self, module_path):
         """ Create python script for Paraview. """
@@ -728,7 +727,8 @@ class BasicBuilder(object):
     # NOTE: Code depreciated (JH) 08/02/2017
     # @property
     # def timeStepSettings(self):   # Get for solverSet
-    #     return self._timeStepSettings
+    #    return self._timeStepSettings
+
     # @timeStepSettings.setter
     # def timeStepSettings(self, timeStepSettings):
     #     if timeStepSettings:
@@ -882,6 +882,7 @@ class BasicBuilder(object):
     @property
     def boundaryConditions(self):
         return self._boundarySettings
+
     @boundaryConditions.setter
     def boundaryConditions(self, boundarySettings=None):
         if boundarySettings and isinstance(boundarySettings, list) and len(boundarySettings)>=1:
@@ -920,13 +921,11 @@ class BasicBuilder(object):
             self._setupPressure_rgh()
         # pointDisplacement is implemented into setupWallBoundary, setupInletBoundary, etc
 
-
     def bafflesPresent(self):
         for bcDict in self._boundarySettings:
             if bcDict['type'] == 'baffle':
                 return True
         return False
-
 
     def setupWallBoundary(self, bc_dict):
         """
@@ -1207,7 +1206,6 @@ class BasicBuilder(object):
         #     turbulenceSettings = self._turbulenceProperties
         # self.setupOutletTurbulence(bc_dict, turbulenceSettings)
 
-
     def setupFreestreamBoundary(self, bc_dict):
         """ freestream is the known velocity in far field of open space
         see: tutorials/incompressible/simpleFoam/airFoil2D/0.org/
@@ -1273,6 +1271,71 @@ class BasicBuilder(object):
                                                        {"LOCATION": "system",
                                                         "FILENAME": "createBafflesDict"}),
                                 "BAFFLES": baffles}))
+        fid.close()
+
+    @property
+    def porousZoneSettings(self):
+        return self._porousZoneSettings
+
+    @porousZoneSettings.setter
+    def porousZoneSettings(self, porousZoneSettings=[]):
+        if isinstance(porousZoneSettings, list):
+            self._porousZoneSettings = porousZoneSettings
+        else:
+            raise Exception("Porous settings must be a list.")
+
+    def setupTopoSetDict(self):
+        porousObject = self._porousZoneSettings
+        fname = os.path.join(self._casePath, "system", "topoSetDict")
+        fid = open(fname, 'w')
+
+        actions = ""
+        for po in porousObject:
+            for partName in po['PartNameList']:
+                actions += readTemplate(os.path.join(self._templatePath, "helperFiles", "topoSetDictStlToCellZone"),
+                                        {"CELLSETNAME": partName+"SelectedCells",
+                                         "STLFILE": os.path.join("constant",
+                                                                 "triSurface",
+                                                                 partName+u"Scaled.stl"),
+                                         "CELLZONENAME": partName})
+
+        fid.write(readTemplate(os.path.join(self._templatePath, "helperFiles", "topoSetDict"),
+                               {"HEADER": readTemplate(os.path.join(self._templatePath, "helperFiles", "header"),
+                                                       {"LOCATION": "system",
+                                                        "FILENAME": "topoSetDict"}),
+                                "ACTIONS": actions}))
+        fid.close()
+
+    def setupFVOptions(self):
+        porousObject = self._porousZoneSettings
+        fname = os.path.join(self._casePath, "constant", "fvOptions")
+        fid = open(fname, 'w')
+
+        sources = ""
+        for po in porousObject:
+            for partName in po['PartNameList']:
+                sources += readTemplate(os.path.join(self._templatePath, "helperFiles", "fvOptionsPorousZone"),
+                                        {"SOURCENAME": partName,
+                                         "DX": str(po['D'][0]),
+                                         "DY": str(po['D'][1]),
+                                         "DZ": str(po['D'][2]),
+                                         "FX": str(po['F'][0]),
+                                         "FY": str(po['F'][1]),
+                                         "FZ": str(po['F'][2]),
+                                         "E1X": str(po['e1'][0]),
+                                         "E1Y": str(po['e1'][1]),
+                                         "E1Z": str(po['e1'][2]),
+                                         "E3X": str(po['e3'][0]),
+                                         "E3Y": str(po['e3'][1]),
+                                         "E3Z": str(po['e3'][2]),
+                                         "CELLZONENAME": partName})
+
+        fid.write(readTemplate(os.path.join(self._templatePath, "helperFiles", "fvOptions"),
+                               {"HEADER": readTemplate(
+                                                       os.path.join(self._templatePath, "helperFiles", "header"),
+                                                       {"LOCATION": "constant",
+                                                        "FILENAME": "fvOptions"}),
+                                "SOURCES": sources}))
         fid.close()
 
     # NOTE: Update code when adding turbulence (JH)

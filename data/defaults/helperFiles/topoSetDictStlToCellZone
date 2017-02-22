@@ -1,27 +1,28 @@
-    {{
-        name    {};
+    {
+        name    #CELLSETNAME#;
         type    cellSet;
         action  new;
         source  surfaceToCell;
         sourceInfo
-        {{
-            file            "{}";
-            outsidePoints   (({} {} {}));
-            includeCut      true;
+        {
+            file            "#STLFILE#";
+            useSurfaceOrientation true;
+            outsidePoints   ();    //Ignored if useSurfaceOrientation true
+            includeCut      false; //Ignored if useSurfaceOrientation true
             includeInside   true;
             includeOutside  false;
             nearDistance    -1;
             curvature       -100;
-        }}
-    }}
+        }
+    }
 
-    {{
-        name    {};
+    {
+        name    #CELLZONENAME#;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
         sourceInfo
-        {{
-            set {};
-        }}
-    }}
+        {
+            set #CELLSETNAME#;
+        }
+    }

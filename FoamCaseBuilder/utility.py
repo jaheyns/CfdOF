@@ -421,7 +421,7 @@ def createCaseFromTemplate(output_path, source_path, backup_path=None):
 #     #foamCloneCase: Create a new case directory that includes time, system and constant directories from a source case.
 
 
-def createRunScript(case, init_potential, run_parallel, solver_name, num_proc, porousZonePresent, porousZone_obj,
+def createRunScript(case, init_potential, run_parallel, solver_name, num_proc, porousZoneSettings,
                     bafflesPresent):
     print("Create Allrun script ")
 
@@ -456,15 +456,16 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc, p
             f.write("ln -s {}/faceZones {}\n".format(meshOrg_dir, mesh_dir))
         f.write("\n")
 
-        if porousZonePresent:
+        if len(porousZoneSettings):
             f.write("# Scaling .stl files exported from FreeCAD from mm to m\n")
             counter = 0
-            for ii in range(len(porousZone_obj)):
-                for jj in range(len(porousZone_obj[ii].partNameList)):
+            for po in porousZoneSettings:
+                for partName in po['PartNameList']:
                     counter += 1
+                    fileBaseName = os.path.join(case, "constant", "triSurface", partName)
                     f.write("surfaceTransformPoints -scale '(0.001 0.001 0.001)' " +
-                            os.path.join(case,"STLSurfaces",porousZone_obj[ii].partNameList[jj]+".stl") +" " +
-                            porousZone_obj[ii].partNameList[jj]+".stl \n")
+                            fileBaseName + ".stl" + " " +
+                            fileBaseName + "Scaled.stl 2>&1 | tee log.surfaceTransformPoints\n")
             f.write("\n")
             f.write("# Set cells zones contained inside the .stl surfaces \n")
             f.write("topoSet 2>&1 | tee log.topoSet\n")

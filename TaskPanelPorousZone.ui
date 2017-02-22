@@ -6,352 +6,85 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>384</width>
-    <height>549</height>
+    <width>381</width>
+    <height>495</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="13" column="2" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="Gui::InputField" name="e1x">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>60</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="singleStep" stdset="0">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="maximum" stdset="0">
-        <double>2000000000.000000000000000</double>
-       </property>
-       <property name="unit" stdset="0">
-        <string notr="true"/>
-       </property>
-       <property name="decimals" stdset="0">
-        <number>5</number>
-       </property>
-       <property name="value" stdset="0">
-        <double>0.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Gui::InputField" name="e1y">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>60</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="singleStep" stdset="0">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="maximum" stdset="0">
-        <double>2000000000.000000000000000</double>
-       </property>
-       <property name="unit" stdset="0">
-        <string notr="true"/>
-       </property>
-       <property name="decimals" stdset="0">
-        <number>5</number>
-       </property>
-       <property name="value" stdset="0">
-        <double>0.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Gui::InputField" name="e1z">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>60</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="singleStep" stdset="0">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="maximum" stdset="0">
-        <double>2000000000.000000000000000</double>
-       </property>
-       <property name="unit" stdset="0">
-        <string notr="true"/>
-       </property>
-       <property name="decimals" stdset="0">
-        <number>5</number>
-       </property>
-       <property name="value" stdset="0">
-        <double>0.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="14" column="1">
-    <widget class="Gui::InputField" name="fy">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="singleStep" stdset="0">
-      <double>1000.000000000000000</double>
-     </property>
-     <property name="maximum" stdset="0">
-      <double>2000000000.000000000000000</double>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true"/>
-     </property>
-     <property name="decimals" stdset="0">
-      <number>5</number>
-     </property>
-     <property name="value" stdset="0">
-      <double>0.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0" rowspan="2" colspan="3">
-    <widget class="QListWidget" name="listWidget"/>
-   </item>
-   <item row="6" column="3">
-    <widget class="Gui::InputField" name="OZ">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="singleStep" stdset="0">
-      <double>2.000000000000000</double>
-     </property>
-     <property name="maximum" stdset="0">
-      <double>2000000000.000000000000000</double>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true">m</string>
-     </property>
-     <property name="decimals" stdset="0">
-      <number>5</number>
-     </property>
-     <property name="value" stdset="0">
-      <double>0.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="1">
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>Inertial (f)</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="3">
-    <widget class="QPushButton" name="selectReference">
-     <property name="text">
-      <string>Add</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="4">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Select solid body. The porous zone properties will be applied to all cells contained within the selected reference body. </string>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0" colspan="4">
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Outside Point:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="helpButton">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>3</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>5</width>
-          <height>5</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>?</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="13" column="1">
-    <widget class="Gui::InputField" name="fx">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="singleStep" stdset="0">
-      <double>1000.000000000000000</double>
-     </property>
-     <property name="maximum" stdset="0">
-      <double>2000000000.000000000000000</double>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true"/>
-     </property>
-     <property name="decimals" stdset="0">
-      <number>5</number>
-     </property>
-     <property name="value" stdset="0">
-      <double>0.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="2">
-    <widget class="QPushButton" name="automaticSelect">
-     <property name="text">
-      <string>Automatic</string>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="0" colspan="4">
-    <widget class="QLabel" name="label_3">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label">
      <property name="font">
       <font>
        <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
+     <property name="toolTip">
+      <string>Select solid body. The porous zone properties will be applied to all cells contained within the selected reference body. </string>
+     </property>
      <property name="text">
-      <string>Darcy-Forchheimer coefficients</string>
+      <string>Porous region</string>
      </property>
     </widget>
    </item>
-   <item row="8" column="0" colspan="2">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QListWidget" name="listWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>60</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="selectReference">
+         <property name="text">
+          <string>Add</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButtonDelete">
+         <property name="text">
+          <string>Delete</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QLabel" name="label_10">
      <property name="font">
       <font>
@@ -364,445 +97,819 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="2">
-    <widget class="Gui::InputField" name="OY">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="singleStep" stdset="0">
-      <double>2.000000000000000</double>
-     </property>
-     <property name="maximum" stdset="0">
-      <double>2000000000.000000000000000</double>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true">m</string>
-     </property>
-     <property name="decimals" stdset="0">
-      <number>5</number>
-     </property>
-     <property name="value" stdset="0">
-      <double>0.000000000000000</double>
-     </property>
-    </widget>
+   <item>
+    <widget class="QComboBox" name="comboBoxCorrelation"/>
    </item>
-   <item row="7" column="3">
-    <widget class="QPushButton" name="checkPoint">
-     <property name="text">
-      <string>Check</string>
+   <item>
+    <widget class="QStackedWidget" name="stackedWidgetCorrelation">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
-    </widget>
-   </item>
-   <item row="15" column="2" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="Gui::InputField" name="e3x">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="page_2">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
        </property>
-       <property name="minimumSize">
-        <size>
-         <width>60</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="singleStep" stdset="0">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="maximum" stdset="0">
-        <double>2000000000.000000000000000</double>
-       </property>
-       <property name="unit" stdset="0">
-        <string notr="true"/>
-       </property>
-       <property name="decimals" stdset="0">
-        <number>5</number>
-       </property>
-       <property name="value" stdset="0">
-        <double>0.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Gui::InputField" name="e3y">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>60</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="singleStep" stdset="0">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="maximum" stdset="0">
-        <double>2000000000.000000000000000</double>
-       </property>
-       <property name="unit" stdset="0">
-        <string notr="true"/>
-       </property>
-       <property name="decimals" stdset="0">
-        <number>5</number>
-       </property>
-       <property name="value" stdset="0">
-        <double>0.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Gui::InputField" name="e3z">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>60</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="singleStep" stdset="0">
-        <double>0.100000000000000</double>
-       </property>
-       <property name="maximum" stdset="0">
-        <double>2000000000.000000000000000</double>
-       </property>
-       <property name="unit" stdset="0">
-        <string notr="true"/>
-       </property>
-       <property name="decimals" stdset="0">
-        <number>5</number>
-       </property>
-       <property name="value" stdset="0">
-        <double>0.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="14" column="0">
-    <widget class="Gui::InputField" name="dy">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="singleStep" stdset="0">
-      <double>1000.000000000000000</double>
-     </property>
-     <property name="maximum" stdset="0">
-      <double>2000000000.000000000000000</double>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true"/>
-     </property>
-     <property name="decimals" stdset="0">
-      <number>5</number>
-     </property>
-     <property name="value" stdset="0">
-      <double>0.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="3">
-    <widget class="QPushButton" name="pushButtonDelete">
-     <property name="text">
-      <string>Delete</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Porous region</string>
-     </property>
-    </widget>
-   </item>
-   <item row="13" column="0">
-    <widget class="Gui::InputField" name="dx">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="singleStep" stdset="0">
-      <double>1000.000000000000000</double>
-     </property>
-     <property name="maximum" stdset="0">
-      <double>2000000000.000000000000000</double>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true"/>
-     </property>
-     <property name="decimals" stdset="0">
-      <number>5</number>
-     </property>
-     <property name="value" stdset="0">
-      <double>0.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="0" colspan="4">
-    <widget class="QComboBox" name="comboBox"/>
-   </item>
-   <item row="15" column="1">
-    <widget class="Gui::InputField" name="fz">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="singleStep" stdset="0">
-      <double>1000.000000000000000</double>
-     </property>
-     <property name="maximum" stdset="0">
-      <double>2000000000.000000000000000</double>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true"/>
-     </property>
-     <property name="decimals" stdset="0">
-      <number>5</number>
-     </property>
-     <property name="value" stdset="0">
-      <double>0.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="2" colspan="2">
-    <widget class="QLabel" name="label_11">
-     <property name="text">
-      <string>Axis</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
-    <widget class="Gui::InputField" name="OX">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="singleStep" stdset="0">
-      <double>2.000000000000000</double>
-     </property>
-     <property name="maximum" stdset="0">
-      <double>2000000000.000000000000000</double>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true">m</string>
-     </property>
-     <property name="decimals" stdset="0">
-      <number>5</number>
-     </property>
-     <property name="value" stdset="0">
-      <double>0.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="0">
-    <widget class="QLabel" name="label_4">
-     <property name="text">
-      <string>Viscous (D)</string>
-     </property>
-     <property name="wordWrap">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="15" column="0">
-    <widget class="Gui::InputField" name="dz">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>80</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>0</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-     <property name="singleStep" stdset="0">
-      <double>1000.000000000000000</double>
-     </property>
-     <property name="maximum" stdset="0">
-      <double>2000000000.000000000000000</double>
-     </property>
-     <property name="unit" stdset="0">
-      <string notr="true"/>
-     </property>
-     <property name="decimals" stdset="0">
-      <number>5</number>
-     </property>
-     <property name="value" stdset="0">
-      <double>0.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="14" column="2" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="Gui::InputField" name="e2x">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Gui::InputField" name="e2y">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="Gui::InputField" name="e2z">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="12" column="0">
-    <widget class="QLabel" name="label_6">
-     <property name="text">
-      <string>[1/m^2]</string>
-     </property>
-    </widget>
-   </item>
-   <item row="12" column="1">
-    <widget class="QLabel" name="label_7">
-     <property name="text">
-      <string>[1/m]</string>
-     </property>
+       <item row="3" column="1">
+        <widget class="Gui::InputField" name="fz">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="maximum" stdset="0">
+          <double>2000000000.000000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="decimals" stdset="0">
+          <number>5</number>
+         </property>
+         <property name="value" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QFrame" name="e1frame">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::VLine</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="Gui::InputField" name="e1x">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum" stdset="0">
+             <double>2000000000.000000000000000</double>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="decimals" stdset="0">
+             <number>5</number>
+            </property>
+            <property name="value" stdset="0">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="e1y">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum" stdset="0">
+             <double>2000000000.000000000000000</double>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="decimals" stdset="0">
+             <number>5</number>
+            </property>
+            <property name="value" stdset="0">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="e1z">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum" stdset="0">
+             <double>2000000000.000000000000000</double>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="decimals" stdset="0">
+             <number>5</number>
+            </property>
+            <property name="value" stdset="0">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QFrame" name="e2frame">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::VLine</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="Gui::InputField" name="e2x">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="e2y">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="e2z">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="Gui::InputField" name="fy">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="maximum" stdset="0">
+          <double>2000000000.000000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="decimals" stdset="0">
+          <number>5</number>
+         </property>
+         <property name="value" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="Gui::InputField" name="dz">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="maximum" stdset="0">
+          <double>2000000000.000000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="decimals" stdset="0">
+          <number>5</number>
+         </property>
+         <property name="value" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="Gui::InputField" name="dy">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="maximum" stdset="0">
+          <double>2000000000.000000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="decimals" stdset="0">
+          <number>5</number>
+         </property>
+         <property name="value" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="Gui::InputField" name="dx">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="maximum" stdset="0">
+          <double>2000000000.000000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="decimals" stdset="0">
+          <number>5</number>
+         </property>
+         <property name="value" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="Gui::InputField" name="fx">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="maximum" stdset="0">
+          <double>2000000000.000000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="decimals" stdset="0">
+          <number>5</number>
+         </property>
+         <property name="value" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
+        <widget class="QFrame" name="e3frame">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::VLine</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="Gui::InputField" name="e3x">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum" stdset="0">
+             <double>2000000000.000000000000000</double>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="decimals" stdset="0">
+             <number>5</number>
+            </property>
+            <property name="value" stdset="0">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="e3y">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum" stdset="0">
+             <double>2000000000.000000000000000</double>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="decimals" stdset="0">
+             <number>5</number>
+            </property>
+            <property name="value" stdset="0">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="e3z">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0</string>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="maximum" stdset="0">
+             <double>2000000000.000000000000000</double>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="decimals" stdset="0">
+             <number>5</number>
+            </property>
+            <property name="value" stdset="0">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="4">
+        <widget class="QLabel" name="label_11">
+         <property name="toolTip">
+          <string>Correspond to directions in which the velocity is scaled but not rotated by the porous medium</string>
+         </property>
+         <property name="text">
+          <string>Principal directions:</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="4">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Viscous (d) [1/m^2]:</string>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="4">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Inertial (f) [1/m]:</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="page">
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="1" column="1">
+        <widget class="Gui::InputField" name="inputTubeSpacing">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true">mm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::HLine</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="directionlayout">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="Gui::InputField" name="inputTubeAxisX">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="inputTubeAxisY">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="inputTubeAxisZ">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QFrame" name="frame_2">
+         <property name="frameShape">
+          <enum>QFrame::HLine</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizLayout">
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="Gui::InputField" name="inputBundleLayerNormalX">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="inputBundleLayerNormalY">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="inputBundleLayerNormalZ">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="label_8">
+         <property name="toolTip">
+          <string>Spacing between nearest-neighbour tubes</string>
+         </property>
+         <property name="text">
+          <string>Tube spacing:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="Gui::InputField" name="inputOuterDiameter">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true">mm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="1">
+        <widget class="Gui::InputField" name="inputVelocityEstimate">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true">m/s</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0" colspan="2">
+        <widget class="QLabel" name="label_14">
+         <property name="toolTip">
+          <string>Estimated incident (superficial) velocity used for Reynolds number adjustment of correlation.</string>
+         </property>
+         <property name="text">
+          <string>Velocity estimate:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="2">
+        <widget class="QLabel" name="label_13">
+         <property name="toolTip">
+          <string>One of the two axes normal to the tube bundle layers. Any component normal to the tube axis will be ignored.</string>
+         </property>
+         <property name="text">
+          <string>Normal to bundle layers:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Tube outer diameter:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QLabel" name="label_9">
+         <property name="toolTip">
+          <string>Longitudinal axis of the tube</string>
+         </property>
+         <property name="text">
+          <string>Tube axis:</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -815,14 +922,27 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>OX</tabstop>
-  <tabstop>OY</tabstop>
-  <tabstop>OZ</tabstop>
-  <tabstop>fx</tabstop>
   <tabstop>listWidget</tabstop>
   <tabstop>selectReference</tabstop>
   <tabstop>pushButtonDelete</tabstop>
-  <tabstop>helpButton</tabstop>
+  <tabstop>comboBoxCorrelation</tabstop>
+  <tabstop>inputOuterDiameter</tabstop>
+  <tabstop>inputTubeAxisX</tabstop>
+  <tabstop>inputTubeAxisY</tabstop>
+  <tabstop>inputTubeAxisZ</tabstop>
+  <tabstop>inputBundleLayerNormalX</tabstop>
+  <tabstop>inputBundleLayerNormalY</tabstop>
+  <tabstop>inputBundleLayerNormalZ</tabstop>
+  <tabstop>inputVelocityEstimate</tabstop>
+  <tabstop>e1x</tabstop>
+  <tabstop>e1y</tabstop>
+  <tabstop>e1z</tabstop>
+  <tabstop>e2x</tabstop>
+  <tabstop>e2y</tabstop>
+  <tabstop>e2z</tabstop>
+  <tabstop>e3x</tabstop>
+  <tabstop>e3y</tabstop>
+  <tabstop>e3z</tabstop>
  </tabstops>
  <resources/>
  <connections/>
