@@ -70,8 +70,8 @@ class CfdSolver(object):
                             "Parallel analysis on on multiple CPU cores")
             obj.addProperty("App::PropertyInteger", "ParallelCores", "Solver",
                             "Number of cores on which to run parallel analysis")
-            obj.addProperty("App::PropertyBool", "ResultObtained", "Solver",
-                            "Check if the results have been obtained.", True)  # Currently not active
+            # obj.addProperty("App::PropertyBool", "ResultObtained", "Solver",
+            #                 "Check if the results have been obtained.", True)  # Currently not active
 
             import tempfile
             if os.path.exists('/tmp/'):

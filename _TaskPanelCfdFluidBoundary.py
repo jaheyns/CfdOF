@@ -164,6 +164,8 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputSpacing.textChanged.connect(self.inputSpacingChanged)
         self.form.comboTurbulenceSpecification.currentIndexChanged.connect(self.comboTurbulenceSpecificationChanged)
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.comboThermalBoundaryTypeChanged)
+        self.form.turbulenceFrame.setVisible(False)
+        self.form.thermalFrame.setVisible(False)
 
         # Populate UI
         self.form.comboBoundaryType.addItems(BOUNDARY_TYPES)

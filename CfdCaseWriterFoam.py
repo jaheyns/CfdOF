@@ -102,8 +102,9 @@ class CfdCaseWriterFoam:
         # NOTE: Code deprecated (OO) 22/02/2017 - removed from BasicBuilder
         #self.setTimeControl()
 
-        self.exportPorousZoneStlSurfaces()
-        self.setPorousZoneProperties()
+        if not (self.porousZone_objs == None):
+            self.exportPorousZoneStlSurfaces()
+            self.setPorousZoneProperties()
 
         self.builder.post_build_check()
         self.builder.build()

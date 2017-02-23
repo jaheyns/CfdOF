@@ -216,6 +216,7 @@ class _TaskPanelCfdSolverControl:
 
         solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
         self.femConsoleMessage(cmd)
+        print (cmd)
         FreeCAD.Console.PrintMessage(solverDirectory + "\n")
         self.solver_run_process.setWorkingDirectory(solverDirectory)
         self.solver_run_process.start(cmd)
@@ -283,17 +284,18 @@ class _TaskPanelCfdSolverControl:
     #     self.Timer.stop()
     #     self.form.pb_show_result.setEnabled(True)
 
-    def showResult(self):
-        self.femConsoleMessage("Loading result sets...")
-        self.Start = time.time()
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        #import FemTools
-        #fea = FemTools.FemTools(self.analysis_object, self.solver_object)
-        #fea.reset_mesh_purge_results_checked()
-        #
-        self.solver_runner.view_result()
-        QApplication.restoreOverrideCursor()
-        self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
+    # NOTE: Code depreciated (JH) 23/02/2017
+    # def showResult(self):
+    #     self.femConsoleMessage("Loading result sets...")
+    #     self.Start = time.time()
+    #     QApplication.setOverrideCursor(Qt.WaitCursor)
+    #     #import FemTools
+    #     #fea = FemTools.FemTools(self.analysis_object, self.solver_object)
+    #     #fea.reset_mesh_purge_results_checked()
+    #     #
+    #     self.solver_runner.view_result()
+    #     QApplication.restoreOverrideCursor()
+    #     self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
 
     def openParaview(self):
         self.Start = time.time()

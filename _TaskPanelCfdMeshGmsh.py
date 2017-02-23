@@ -36,6 +36,7 @@ import sys
 import os.path
 import _FemMeshGmsh
 import time
+# import subprocess # temp, remove when updated qprocess
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -53,15 +54,23 @@ class _TaskPanelCfdMeshGmsh:
         self.mesh_obj = obj
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMeshGmsh.ui"))
 
+        self.mesh_process = QtCore.QProcess()
         self.Timer = QtCore.QTimer()
-        self.Timer.start(100)  # 100 milli seconds
+        self.Timer.start(100)  # 100 milliseconds
         self.gmsh_runs = False
         self.console_message_gmsh = ''
+        self.error_message = ''
+
+        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("finished(int)"), self.meshFinished)
 
         QtCore.QObject.connect(self.form.if_max, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.max_changed)
         QtCore.QObject.connect(self.form.if_min, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.min_changed)
         QtCore.QObject.connect(self.form.cb_dimension, QtCore.SIGNAL("activated(int)"), self.choose_dimension)
         QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.update_timer_text)
+
+        QtCore.QObject.connect(self.form.pb_run_mesh, QtCore.SIGNAL("clicked()"), self.runMeshProcess)
+        QtCore.QObject.connect(self.form.pb_stop_mesh, QtCore.SIGNAL("clicked()"), self.killMeshProcess)
+        self.form.pb_stop_mesh.setEnabled(False)
 
         self.form.cb_dimension.addItems(_FemMeshGmsh._FemMeshGmsh.known_element_dimensions)
 
@@ -71,20 +80,14 @@ class _TaskPanelCfdMeshGmsh:
         self.update()
 
     def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Apply | QtGui.QDialogButtonBox.Close)
-        # show a apply and a close button
+        return int(QtGui.QDialogButtonBox.Close)
         # def reject() is called on close button
-        # def clicked(self, button) is needed, to access the apply button
         # def accept() in no longer needed, since there is no OK button
 
     def reject(self):
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
         return True
-
-    def clicked(self, button):
-        if button == QtGui.QDialogButtonBox.Apply:
-            self.run_gmsh()
 
     def get_mesh_params(self):
         self.clmax = self.mesh_obj.CharacteristicLengthMax
@@ -99,7 +102,7 @@ class _TaskPanelCfdMeshGmsh:
         self.mesh_obj.ElementDimension = self.dimension
 
     def update(self):
-        'fills the widgets'
+        """ Fills the widgets """
         self.form.if_max.setText(self.clmax.UserString)
         self.form.if_max.setToolTip("Select 0 to use default value")
         self.form.if_min.setText(self.clmin.UserString)
@@ -108,16 +111,15 @@ class _TaskPanelCfdMeshGmsh:
         self.form.cb_dimension.setCurrentIndex(index_dimension)
 
     def console_log(self, message="", color="#000000"):
-        self.console_message_gmsh = self.console_message_gmsh + '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
-            format(time.time() - self.Start, color, message.encode('utf-8', 'replace'))
+        self.console_message_gmsh = self.console_message_gmsh \
+                                    + '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
+                                    format(time.time()
+                                    - self.Start, color, message.encode('utf-8', 'replace'))
         self.form.te_output.setText(self.console_message_gmsh)
         self.form.te_output.moveCursor(QtGui.QTextCursor.End)
 
     def update_timer_text(self):
-        # print('timer1')
         if self.gmsh_runs:
-            print('timer2')
-            # print('Time: {0:4.1f}: '.format(time.time() - self.Start))
             self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
 
     def max_changed(self, base_quantity_value):
@@ -132,8 +134,9 @@ class _TaskPanelCfdMeshGmsh:
         self.form.cb_dimension.setCurrentIndex(index)
         self.dimension = str(self.form.cb_dimension.itemText(index))  # form returns unicode
 
-    def run_gmsh(self):
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+    def runMeshProcess(self):
+        self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
+        self.form.pb_stop_mesh.setEnabled(True)
         self.Start = time.time()
         self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
         self.console_message_gmsh = ''
@@ -141,28 +144,62 @@ class _TaskPanelCfdMeshGmsh:
         self.get_active_analysis()
         self.set_mesh_params()
         import FemGmshTools
-        #gmsh_mesh = FemGmshTools.FemGmshTools(self.obj, self.analysis)
-        # Passing self.analysis results in meshing of existing bounaries, which are then duplicated on
-        # write. Not sure of the reason why it is there in the FEM workbench.
         gmsh_mesh = FemGmshTools.FemGmshTools(self.obj)
         self.console_log("Starting GMSH ...")
-        error = ''
         try:
-            error = gmsh_mesh.create_mesh()
+            print("\nStarted GMSH meshing ...\n")
+            print('  Part to mesh: Name --> '
+                  + gmsh_mesh.part_obj.Name + ',  Label --> '
+                  + gmsh_mesh.part_obj.Label + ', ShapeType --> '
+                  + gmsh_mesh.part_obj.Shape.ShapeType)
+            print('  CharacteristicLengthMax: ' + str(gmsh_mesh.clmax))
+            print('  CharacteristicLengthMin: ' + str(gmsh_mesh.clmin))
+            print('  ElementOrder: ' + gmsh_mesh.order)
+            gmsh_mesh.get_dimension()
+            gmsh_mesh.get_tmp_file_paths()
+            gmsh_mesh.get_gmsh_command()
+            gmsh_mesh.get_group_data()
+            gmsh_mesh.write_part_file()
+            gmsh_mesh.write_geo()
+            self.runGmsh(gmsh_mesh)
+            gmsh_mesh.read_and_set_new_mesh()
         except:
             import sys
             print("Unexpected error when creating mesh: ", sys.exc_info()[0])
-        if error:
-            print(error)
-            self.console_log('GMSH had warnings ...')
-            self.console_log(error, '#FF0000')
+        QApplication.restoreOverrideCursor()
+
+    def runGmsh(self, gmsh_mesh):
+        gmsh_mesh.error = False
+        try:
+            cmd = gmsh_mesh.gmsh_bin + ' - ' + gmsh_mesh.temp_file_geo
+            self.mesh_process.start(cmd)  # Initiated process, error check once finished.
+        except:
+            self.error_message = 'Error executing: {}\n'.format(gmsh_mesh.gmsh_command)
+            FreeCAD.Console.PrintError(self.error_message)
+            gmsh_mesh.error = True
+
+    def killMeshProcess(self):
+        self.console_log("Meshing manually stopped")
+        self.error_message = 'Meshing interrupted'
+        self.mesh_process.terminate()
+        self.mesh_process.waitForFinished()
+        self.form.pb_run_mesh.setEnabled(True)
+        self.form.pb_stop_mesh.setEnabled(False)
+
+    def meshFinished(self):
+        if self.error_message == '':  # Prevent overwriting kill message
+            self.error_message = str(self.mesh_process.readAllStandardError())
+        if self.error_message:
+            self.console_log('GMSH generated the following error(s): ', '#FF0000')
+            self.console_log(self.error_message, '#FF0000')
         else:
-            self.console_log('Clean run of GMSH')
-        self.console_log("GMSH done")
+            self.console_log('Meshing successful')
         self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
         self.Timer.stop()
         self.update()
-        QApplication.restoreOverrideCursor()
+        self.form.pb_run_mesh.setEnabled(True)
+        self.form.pb_stop_mesh.setEnabled(False)
+        self.error_message = ''
 
     def get_active_analysis(self):
         import FemGui
