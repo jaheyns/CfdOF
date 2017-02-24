@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>381</width>
-    <height>495</height>
+    <height>617</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,24 +15,30 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
+    <layout class="QGridLayout" name="gridLayout_4">
+     <property name="margin">
+      <number>8</number>
      </property>
-     <property name="toolTip">
-      <string>Select solid body. The porous zone properties will be applied to all cells contained within the selected reference body. </string>
+     <property name="spacing">
+      <number>8</number>
      </property>
-     <property name="text">
-      <string>Porous region</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Select solid body. The porous zone properties will be applied to all cells contained within the selected reference body. </string>
+       </property>
+       <property name="text">
+        <string>Porous region</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
       <widget class="QListWidget" name="listWidget">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -48,57 +54,57 @@
        </property>
       </widget>
      </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>0</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="selectReference">
-         <property name="text">
-          <string>Add</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButtonDelete">
-         <property name="text">
-          <string>Delete</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+    </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <property name="margin">
+      <number>8</number>
+     </property>
+     <property name="spacing">
+      <number>8</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QPushButton" name="selectReference">
+       <property name="text">
+        <string>Add solid</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="pushButtonDelete">
+       <property name="text">
+        <string>Delete</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_10">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
+    <layout class="QGridLayout" name="gridLayout_5">
+     <property name="margin">
+      <number>8</number>
      </property>
-     <property name="text">
-      <string>Porous correlation</string>
+     <property name="spacing">
+      <number>8</number>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="comboBoxCorrelation"/>
+     <item row="1" column="0">
+      <widget class="QComboBox" name="comboBoxCorrelation"/>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_10">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Porous correlation</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QStackedWidget" name="stackedWidgetCorrelation">
@@ -109,47 +115,13 @@
       <enum>QFrame::Raised</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page_2">
       <layout class="QGridLayout" name="gridLayout_2">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
-       <item row="3" column="1">
-        <widget class="Gui::InputField" name="fz">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>80</width>
-           <height>27</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="singleStep" stdset="0">
-          <double>1000.000000000000000</double>
-         </property>
-         <property name="maximum" stdset="0">
-          <double>2000000000.000000000000000</double>
-         </property>
-         <property name="unit" stdset="0">
-          <string notr="true"/>
-         </property>
-         <property name="decimals" stdset="0">
-          <number>5</number>
-         </property>
-         <property name="value" stdset="0">
-          <double>0.000000000000000</double>
-         </property>
-        </widget>
-       </item>
        <item row="5" column="1">
         <widget class="QFrame" name="e1frame">
          <property name="sizePolicy">
@@ -165,6 +137,15 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>4</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="Gui::InputField" name="e1x">
             <property name="sizePolicy">
@@ -270,6 +251,103 @@
          </layout>
         </widget>
        </item>
+       <item row="2" column="0" colspan="4">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Inertial (f) [1/m]:</string>
+         </property>
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="indent">
+          <number>6</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="Gui::InputField" name="dy">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="maximum" stdset="0">
+          <double>2000000000.000000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="decimals" stdset="0">
+          <number>5</number>
+         </property>
+         <property name="value" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="Gui::InputField" name="dx">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="maximum" stdset="0">
+          <double>2000000000.000000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="decimals" stdset="0">
+          <number>5</number>
+         </property>
+         <property name="value" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="4">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Viscous (d) [1/m^2]:</string>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="indent">
+          <number>6</number>
+         </property>
+        </widget>
+       </item>
        <item row="5" column="2">
         <widget class="QFrame" name="e2frame">
          <property name="sizePolicy">
@@ -285,6 +363,15 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>4</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="Gui::InputField" name="e2x">
             <property name="sizePolicy">
@@ -379,40 +466,6 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="3">
-        <widget class="Gui::InputField" name="fx">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>80</width>
-           <height>27</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="singleStep" stdset="0">
-          <double>1000.000000000000000</double>
-         </property>
-         <property name="maximum" stdset="0">
-          <double>2000000000.000000000000000</double>
-         </property>
-         <property name="unit" stdset="0">
-          <string notr="true"/>
-         </property>
-         <property name="decimals" stdset="0">
-          <number>5</number>
-         </property>
-         <property name="value" stdset="0">
-          <double>0.000000000000000</double>
-         </property>
-        </widget>
-       </item>
        <item row="5" column="3">
         <widget class="QFrame" name="e3frame">
          <property name="sizePolicy">
@@ -428,6 +481,15 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>4</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="Gui::InputField" name="e3x">
             <property name="sizePolicy">
@@ -544,51 +606,16 @@
          <property name="wordWrap">
           <bool>true</bool>
          </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="4">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Inertial (f) [1/m]:</string>
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="indent">
+          <number>6</number>
          </property>
         </widget>
        </item>
-       <item row="1" column="3">
-        <widget class="Gui::InputField" name="dy">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>80</width>
-           <height>27</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="singleStep" stdset="0">
-          <double>1000.000000000000000</double>
-         </property>
-         <property name="maximum" stdset="0">
-          <double>2000000000.000000000000000</double>
-         </property>
-         <property name="unit" stdset="0">
-          <string notr="true"/>
-         </property>
-         <property name="decimals" stdset="0">
-          <number>5</number>
-         </property>
-         <property name="value" stdset="0">
-          <double>0.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="Gui::InputField" name="dx">
+       <item row="3" column="1">
+        <widget class="Gui::InputField" name="fz">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -655,13 +682,37 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="0" colspan="4">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Viscous (d) [1/m^2]:</string>
+       <item row="3" column="3">
+        <widget class="Gui::InputField" name="fx">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="wordWrap">
-          <bool>false</bool>
+         <property name="minimumSize">
+          <size>
+           <width>80</width>
+           <height>27</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1000.000000000000000</double>
+         </property>
+         <property name="maximum" stdset="0">
+          <double>2000000000.000000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="decimals" stdset="0">
+          <number>5</number>
+         </property>
+         <property name="value" stdset="0">
+          <double>0.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -700,10 +751,7 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QHBoxLayout" name="directionlayout">
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
@@ -775,10 +823,7 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QHBoxLayout" name="horizLayout">
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
@@ -831,6 +876,12 @@
          <property name="text">
           <string>Tube spacing:</string>
          </property>
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="indent">
+          <number>6</number>
+         </property>
         </widget>
        </item>
        <item row="3" column="1">
@@ -879,6 +930,12 @@
          <property name="text">
           <string>Velocity estimate:</string>
          </property>
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="indent">
+          <number>6</number>
+         </property>
         </widget>
        </item>
        <item row="7" column="0" colspan="2">
@@ -889,12 +946,24 @@
          <property name="text">
           <string>Normal to bundle layers:</string>
          </property>
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="indent">
+          <number>6</number>
+         </property>
         </widget>
        </item>
        <item row="2" column="0" colspan="2">
         <widget class="QLabel" name="label_12">
          <property name="text">
           <string>Tube outer diameter:</string>
+         </property>
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="indent">
+          <number>6</number>
          </property>
         </widget>
        </item>
@@ -905,6 +974,12 @@
          </property>
          <property name="text">
           <string>Tube axis:</string>
+         </property>
+         <property name="margin">
+          <number>2</number>
+         </property>
+         <property name="indent">
+          <number>6</number>
          </property>
         </widget>
        </item>
@@ -922,10 +997,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>listWidget</tabstop>
-  <tabstop>selectReference</tabstop>
-  <tabstop>pushButtonDelete</tabstop>
-  <tabstop>comboBoxCorrelation</tabstop>
   <tabstop>inputOuterDiameter</tabstop>
   <tabstop>inputTubeAxisX</tabstop>
   <tabstop>inputTubeAxisY</tabstop>

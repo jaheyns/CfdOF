@@ -1,6 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -35,8 +38,8 @@ import os
 import sys
 import os.path
 import _FemMeshGmsh
+# import FemGmshTools
 import time
-# import subprocess # temp, remove when updated qprocess
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -60,6 +63,7 @@ class _TaskPanelCfdMeshGmsh:
         self.gmsh_runs = False
         self.console_message_gmsh = ''
         self.error_message = ''
+        self.gmsh_mesh = []
 
         QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("finished(int)"), self.meshFinished)
 
@@ -143,8 +147,9 @@ class _TaskPanelCfdMeshGmsh:
         self.gmsh_runs = True
         self.get_active_analysis()
         self.set_mesh_params()
-        import FemGmshTools
-        gmsh_mesh = FemGmshTools.FemGmshTools(self.obj)
+        import FemGmshTools  # Fresh init before remeshing
+        self.gmsh_mesh = FemGmshTools.FemGmshTools(self.obj)
+        gmsh_mesh = self.gmsh_mesh
         self.console_log("Starting GMSH ...")
         try:
             print("\nStarted GMSH meshing ...\n")
@@ -162,7 +167,6 @@ class _TaskPanelCfdMeshGmsh:
             gmsh_mesh.write_part_file()
             gmsh_mesh.write_geo()
             self.runGmsh(gmsh_mesh)
-            gmsh_mesh.read_and_set_new_mesh()
         except:
             import sys
             print("Unexpected error when creating mesh: ", sys.exc_info()[0])
@@ -187,6 +191,9 @@ class _TaskPanelCfdMeshGmsh:
         self.form.pb_stop_mesh.setEnabled(False)
 
     def meshFinished(self):
+        self.console_log("Reading mesh")
+        gmsh_mesh = self.gmsh_mesh
+        gmsh_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
         if self.error_message == '':  # Prevent overwriting kill message
             self.error_message = str(self.mesh_process.readAllStandardError())
         if self.error_message:
