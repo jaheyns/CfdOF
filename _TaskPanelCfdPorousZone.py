@@ -48,6 +48,10 @@ POROUS_CORRELATION_NAMES = ["Darcy-Forchheimer coefficients", "Staggered tube bu
 POROUS_CORRELATION_TIPS = ["Specify viscous and inertial drag tensors by giving their principal components and directions (these will be made orthogonal)",
                            "Specify geometry of parallel tube bundle with staggered layers."]
 
+ASPECT_RATIOS = ["1.0", "1.73", "1.0"]
+ASPECT_RATIO_NAMES = ["User defined", "Equilateral", "Rotated square"]
+ASPECT_RATIO_TIPS = ["", "Equilateral triangles pointing perpendicular to spacing direction", "45 degree angles; isotropic"]
+
 
 class _TaskPanelCfdPorousZone:
     """ Task panel for porous zone objects """
@@ -89,12 +93,14 @@ class _TaskPanelCfdPorousZone:
         self.lastEVectorChanged = 1
         self.lastLastEVectorChanged = 2
 
+        self.form.comboAspectRatio.currentIndexChanged.connect(self.comboAspectRatioChanged)
+
         self.form.pushButtonDelete.setEnabled(False)
 
         self.form.comboBoxCorrelation.addItems(POROUS_CORRELATION_NAMES)
+        self.form.comboAspectRatio.addItems(ASPECT_RATIO_NAMES)
 
         self.setInitialValues()
-
 
     def setInitialValues(self):
         for i in range(len(self.obj.partNameList)):
@@ -104,7 +110,7 @@ class _TaskPanelCfdPorousZone:
             self.form.comboBoxCorrelation.setCurrentIndex(
                 POROUS_CORRELATIONS.index(CfdTools.getOrDefault(self.p, 'PorousCorrelation', POROUS_CORRELATIONS[0])))
         except ValueError:
-            self.form.comboBoxCorrelation.setCurrentIndex(1)
+            self.form.comboBoxCorrelation.setCurrentIndex(0)
         d = CfdTools.getOrDefault(self.p, 'D', [0, 0, 0])
         self.form.dx.setText("{}".format(d[0]))
         self.form.dy.setText("{}".format(d[1]))
@@ -125,16 +131,17 @@ class _TaskPanelCfdPorousZone:
         self.form.e3x.setText("{}".format(e3[0]))
         self.form.e3y.setText("{}".format(e3[1]))
         self.form.e3z.setText("{}".format(e3[2]))
-        self.form.inputTubeSpacing.setText("{} mm".format(CfdTools.getOrDefault(self.p, 'TubeSpacing', 0)*1000))
         self.form.inputOuterDiameter.setText("{} mm".format(CfdTools.getOrDefault(self.p, 'OuterDiameter', 0)*1000))
         tubeAxis = CfdTools.getOrDefault(self.p, 'TubeAxis', [0, 0, 1])
         self.form.inputTubeAxisX.setText("{}".format(tubeAxis[0]))
         self.form.inputTubeAxisY.setText("{}".format(tubeAxis[1]))
         self.form.inputTubeAxisZ.setText("{}".format(tubeAxis[2]))
-        normalAxis = CfdTools.getOrDefault(self.p, 'BundleLayerNormal', [1, 0, 0])
+        self.form.inputTubeSpacing.setText("{} mm".format(CfdTools.getOrDefault(self.p, 'TubeSpacing', 0)*1000))
+        normalAxis = CfdTools.getOrDefault(self.p, 'SpacingDirection', [1, 0, 0])
         self.form.inputBundleLayerNormalX.setText("{}".format(normalAxis[0]))
         self.form.inputBundleLayerNormalY.setText("{}".format(normalAxis[1]))
         self.form.inputBundleLayerNormalZ.setText("{}".format(normalAxis[2]))
+        self.form.inputAspectRatio.setText("{}".format(CfdTools.getOrDefault(self.p, 'AspectRatio', 1.73)))
         self.form.inputVelocityEstimate.setText("{} m/s".format(CfdTools.getOrDefault(self.p, 'VelocityEstimate', 0)))
 
     def deleteFeature(self):
@@ -244,6 +251,11 @@ class _TaskPanelCfdPorousZone:
         self.form.e3y.setText("{:.2f}".format(e[2][1]))
         self.form.e3z.setText("{:.2f}".format(e[2][2]))
 
+    def comboAspectRatioChanged(self):
+        i = self.form.comboAspectRatio.currentIndex()
+        self.form.inputAspectRatio.setText(ASPECT_RATIOS[i])
+        self.form.comboAspectRatio.setToolTip(ASPECT_RATIO_TIPS[i])
+
     def accept(self):
         try:
             self.p['PorousCorrelation'] = POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()]
@@ -262,15 +274,16 @@ class _TaskPanelCfdPorousZone:
             self.p['e3'] = [float(FreeCAD.Units.Quantity(self.form.e3x.text())),
                             float(FreeCAD.Units.Quantity(self.form.e3y.text())),
                             float(FreeCAD.Units.Quantity(self.form.e3z.text()))]
-            self.p['TubeSpacing'] = float(FreeCAD.Units.Quantity(self.form.inputTubeSpacing.text()).getValueAs('m'))
             self.p['OuterDiameter'] = float(FreeCAD.Units.Quantity(self.form.inputOuterDiameter.text()).getValueAs('m'))
             self.p['TubeAxis'] = [float(FreeCAD.Units.Quantity(self.form.inputTubeAxisX.text())),
                                   float(FreeCAD.Units.Quantity(self.form.inputTubeAxisY.text())),
                                   float(FreeCAD.Units.Quantity(self.form.inputTubeAxisZ.text()))]
-            self.p['BundleLayerNormal'] = \
+            self.p['TubeSpacing'] = float(FreeCAD.Units.Quantity(self.form.inputTubeSpacing.text()).getValueAs('m'))
+            self.p['SpacingDirection'] = \
                 [float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalX.text())),
                  float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalY.text())),
                  float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalZ.text()))]
+            self.p['AspectRatio'] = float(FreeCAD.Units.Quantity(self.form.inputAspectRatio.text()))
             self.p['VelocityEstimate'] = \
                 float(FreeCAD.Units.Quantity(self.form.inputVelocityEstimate.text()).getValueAs('m/s'))
         except ValueError:

@@ -281,12 +281,15 @@ class CfdCaseWriterFoam:
                 pd['e1'] = po.porousZoneProperties['e1']
                 pd['e3'] = po.porousZoneProperties['e3']
             elif po.porousZoneProperties['PorousCorrelation'] == 'Jakob':
-                # Calculate Darcy-Forchheimer coefficients
-                pd['e1'] = po.porousZoneProperties['BundleLayerNormal']  # OpenFOAM modifies to be orthogonal to e3
+                # Calculate effective Darcy-Forchheimer coefficients
+                # This is for equilateral triangles arranged with the triangles pointing in BundleLayerNormal
+                # direction (direction of greater spacing - sqrt(3)*triangleEdgeLength)
+                pd['e1'] = po.porousZoneProperties['SpacingDirection']  # OpenFOAM modifies to be orthogonal to e3
                 pd['e3'] = po.porousZoneProperties['TubeAxis']
                 spacing = po.porousZoneProperties['TubeSpacing']
                 d0 = po.porousZoneProperties['OuterDiameter']
                 u0 = po.porousZoneProperties['VelocityEstimate']
+                aspectRatio = po.porousZoneProperties['AspectRatio']
                 kinVisc = self.builder.fluidProperties['kinematicViscosity']
                 if kinVisc is None or kinVisc == 0.0:
                     FreeCAD.Console.PrintError("Viscosity must be set for Jakob correlation.\n")
@@ -294,15 +297,18 @@ class CfdCaseWriterFoam:
                 if spacing < d0:
                     FreeCAD.Console.PrintError("Tube spacing may not be less than diameter.\n")
                     raise ValueError
-                C = 1.0/(3.0**0.5/2*spacing)*0.5*(1.0+0.47/(spacing/d0-1)**1.06)
-                D = C/d0*(u0*d0/kinVisc)**(1.0-0.16)
-                F = C*(u0*d0/kinVisc)**(-0.16)
-                pd['D'] = [D, D, 0]  # Currently assuming zero drag parallel to tube bundle
-                pd['F'] = [F, F, 0]
+                pd['D'] = [0, 0, 0]
+                pd['F'] = [0, 0, 0]
+                for (i, Sl, St) in [(0, aspectRatio*spacing, spacing), (1, spacing, aspectRatio*spacing)]:
+                    C = 1.0/St*0.5*(1.0+0.47/(Sl/d0-1)**1.06)*(1.0/(1-d0/Sl))**(2.0-0.16)
+                    D = C/d0*0.5*(u0*d0/kinVisc)**(1.0-0.16)
+                    F = C*(u0*d0/kinVisc)**(-0.16)
+                    pd['D'][i] = D
+                    pd['F'][i] = F
+                # Currently assuming zero drag parallel to tube bundle (3rd principal dirn)
             else:
                 raise Exception("Unrecognised method for porous baffle resistance")
             porousZoneSettings.append(pd)
-        print porousZoneSettings
         self.builder.porousZoneSettings = porousZoneSettings
 
     # def write_solver_control(self):

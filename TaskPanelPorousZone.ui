@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>381</width>
-    <height>617</height>
+    <height>631</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -720,7 +720,50 @@
      </widget>
      <widget class="QWidget" name="page">
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="1" column="1">
+       <item row="12" column="1">
+        <widget class="QFrame" name="frame_3">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="Gui::InputField" name="inputAspectRatio">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>27</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+            <property name="minimum" stdset="0">
+             <double>0.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboAspectRatio"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="8" column="1">
         <widget class="Gui::InputField" name="inputTubeSpacing">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -740,81 +783,77 @@
          <property name="unit" stdset="0">
           <string notr="true">mm</string>
          </property>
+         <property name="singleStep" stdset="0">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="minimum" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
         </widget>
        </item>
-       <item row="6" column="1">
-        <widget class="QFrame" name="frame">
-         <property name="frameShape">
-          <enum>QFrame::HLine</enum>
+       <item row="14" column="1">
+        <widget class="Gui::InputField" name="inputVelocityEstimate">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
          </property>
-         <layout class="QHBoxLayout" name="directionlayout">
-          <property name="margin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="Gui::InputField" name="inputTubeAxisX">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>26</height>
-             </size>
-            </property>
-            <property name="unit" stdset="0">
-             <string notr="true"/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="Gui::InputField" name="inputTubeAxisY">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>26</height>
-             </size>
-            </property>
-            <property name="unit" stdset="0">
-             <string notr="true"/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="Gui::InputField" name="inputTubeAxisZ">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>26</height>
-             </size>
-            </property>
-            <property name="unit" stdset="0">
-             <string notr="true"/>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <property name="unit" stdset="0">
+          <string notr="true">m/s</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1.000000000000000</double>
+         </property>
+         <property name="minimum" stdset="0">
+          <double>0.000000000000000</double>
+         </property>
         </widget>
        </item>
-       <item row="8" column="1">
+       <item row="13" column="0" colspan="2">
+        <widget class="QLabel" name="label_14">
+         <property name="toolTip">
+          <string>Estimated incident (superficial) velocity used for Reynolds number adjustment of correlation.</string>
+         </property>
+         <property name="text">
+          <string>Velocity estimate:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0" colspan="2">
+        <widget class="QLabel" name="label_13">
+         <property name="toolTip">
+          <string>Direction of spacing normal to layers</string>
+         </property>
+         <property name="text">
+          <string>Spacing direction:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Tube outer diameter:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QLabel" name="label_9">
+         <property name="toolTip">
+          <string>Longitudinal axis of the tube</string>
+         </property>
+         <property name="text">
+          <string>Tube axis:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="1">
         <widget class="QFrame" name="frame_2">
          <property name="frameShape">
           <enum>QFrame::HLine</enum>
@@ -837,6 +876,9 @@
             <property name="unit" stdset="0">
              <string notr="true"/>
             </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
            </widget>
           </item>
           <item>
@@ -849,6 +891,9 @@
             </property>
             <property name="unit" stdset="0">
              <string notr="true"/>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -863,25 +908,12 @@
             <property name="unit" stdset="0">
              <string notr="true"/>
             </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
            </widget>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QLabel" name="label_8">
-         <property name="toolTip">
-          <string>Spacing between nearest-neighbour tubes</string>
-         </property>
-         <property name="text">
-          <string>Tube spacing:</string>
-         </property>
-         <property name="margin">
-          <number>2</number>
-         </property>
-         <property name="indent">
-          <number>6</number>
-         </property>
         </widget>
        </item>
        <item row="3" column="1">
@@ -901,86 +933,113 @@
          <property name="unit" stdset="0">
           <string notr="true">mm</string>
          </property>
-        </widget>
-       </item>
-       <item row="10" column="1">
-        <widget class="Gui::InputField" name="inputVelocityEstimate">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+         <property name="singleStep" stdset="0">
+          <double>0.100000000000000</double>
          </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>27</height>
-          </size>
-         </property>
-         <property name="unit" stdset="0">
-          <string notr="true">m/s</string>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="0" colspan="2">
-        <widget class="QLabel" name="label_14">
-         <property name="toolTip">
-          <string>Estimated incident (superficial) velocity used for Reynolds number adjustment of correlation.</string>
-         </property>
-         <property name="text">
-          <string>Velocity estimate:</string>
-         </property>
-         <property name="margin">
-          <number>2</number>
-         </property>
-         <property name="indent">
-          <number>6</number>
+         <property name="minimum" stdset="0">
+          <double>0.000000000000000</double>
          </property>
         </widget>
        </item>
        <item row="7" column="0" colspan="2">
-        <widget class="QLabel" name="label_13">
+        <widget class="QLabel" name="label_8">
          <property name="toolTip">
-          <string>One of the two axes normal to the tube bundle layers. Any component normal to the tube axis will be ignored.</string>
+          <string>Spacing between tubes normal to layers</string>
          </property>
          <property name="text">
-          <string>Normal to bundle layers:</string>
-         </property>
-         <property name="margin">
-          <number>2</number>
-         </property>
-         <property name="indent">
-          <number>6</number>
+          <string>Tube spacing:</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QLabel" name="label_12">
+       <item row="11" column="0" colspan="2">
+        <widget class="QLabel" name="label_2">
+         <property name="toolTip">
+          <string>Multiplier used to obtain spacing perpendicular to spacing direction</string>
+         </property>
          <property name="text">
-          <string>Tube outer diameter:</string>
-         </property>
-         <property name="margin">
-          <number>2</number>
-         </property>
-         <property name="indent">
-          <number>6</number>
+          <string>Spacing aspect ratio:</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="0" colspan="2">
-        <widget class="QLabel" name="label_9">
-         <property name="toolTip">
-          <string>Longitudinal axis of the tube</string>
+       <item row="6" column="1">
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::HLine</enum>
          </property>
-         <property name="text">
-          <string>Tube axis:</string>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
          </property>
-         <property name="margin">
-          <number>2</number>
-         </property>
-         <property name="indent">
-          <number>6</number>
-         </property>
+         <layout class="QHBoxLayout" name="directionLayout">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="Gui::InputField" name="inputTubeAxisX">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="inputTubeAxisY">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Gui::InputField" name="inputTubeAxisZ">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>26</height>
+             </size>
+            </property>
+            <property name="unit" stdset="0">
+             <string notr="true"/>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -997,23 +1056,36 @@
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>listWidget</tabstop>
+  <tabstop>selectReference</tabstop>
+  <tabstop>pushButtonDelete</tabstop>
+  <tabstop>comboBoxCorrelation</tabstop>
+  <tabstop>dz</tabstop>
+  <tabstop>fz</tabstop>
+  <tabstop>e1x</tabstop>
+  <tabstop>e1y</tabstop>
+  <tabstop>e1z</tabstop>
+  <tabstop>dx</tabstop>
+  <tabstop>fy</tabstop>
+  <tabstop>e2x</tabstop>
+  <tabstop>e2y</tabstop>
+  <tabstop>e2z</tabstop>
+  <tabstop>dy</tabstop>
+  <tabstop>fx</tabstop>
+  <tabstop>e3x</tabstop>
+  <tabstop>e3y</tabstop>
+  <tabstop>e3z</tabstop>
   <tabstop>inputOuterDiameter</tabstop>
   <tabstop>inputTubeAxisX</tabstop>
   <tabstop>inputTubeAxisY</tabstop>
   <tabstop>inputTubeAxisZ</tabstop>
+  <tabstop>inputTubeSpacing</tabstop>
   <tabstop>inputBundleLayerNormalX</tabstop>
   <tabstop>inputBundleLayerNormalY</tabstop>
   <tabstop>inputBundleLayerNormalZ</tabstop>
+  <tabstop>inputAspectRatio</tabstop>
+  <tabstop>comboAspectRatio</tabstop>
   <tabstop>inputVelocityEstimate</tabstop>
-  <tabstop>e1x</tabstop>
-  <tabstop>e1y</tabstop>
-  <tabstop>e1z</tabstop>
-  <tabstop>e2x</tabstop>
-  <tabstop>e2y</tabstop>
-  <tabstop>e2z</tabstop>
-  <tabstop>e3x</tabstop>
-  <tabstop>e3y</tabstop>
-  <tabstop>e3z</tabstop>
  </tabstops>
  <resources/>
  <connections/>
