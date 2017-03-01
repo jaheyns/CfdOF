@@ -68,6 +68,7 @@ class _ViewProviderCfdFluidBoundary:
         return
 
     def onChanged(self, vobj, prop):
+        CfdTools.setCompSolid(vobj)
         return
 
     def doubleClicked(self, vobj):

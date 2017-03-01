@@ -1,7 +1,10 @@
 #***************************************************************************
 #*                                                                         *
 #*   Copyright (c) 2015 - FreeCAD Developers                               *
-#*   Author (c) 2016 - Qingfeng Xia <qingfeng xia eng.ox.ac.uk>                    *
+#*   Author (c) 2016 - Qingfeng Xia <qingfeng xia eng.ox.ac.uk>            *
+#*   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+#*   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+#*   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
 #*                                                                         *
 #*   This program is free software; you can redistribute it and/or modify  *
 #*   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -31,15 +34,11 @@ if FreeCAD.GuiUp:
 
 
 class _ViewProviderCfdAnalysis:
-    """A View Provider for the CfdAnalysis container object
-    double click to bring up CFD workbench, instead of FemWorkbench
-    """
-
+    """ A View Provider for the CfdAnalysis container object. """
     def __init__(self, vobj):
         vobj.Proxy = self
 
     def getIcon(self):
-        # return ":/icons/fem-cfd-analysis.svg"
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd_analysis.png")
         return icon_path
 
@@ -52,10 +51,11 @@ class _ViewProviderCfdAnalysis:
         return
 
     def onChanged(self, vobj, prop):
+        self.makePartTransparent(vobj)
+        CfdTools.setCompSolid(vobj)
         return
 
     def doubleClicked(self, vobj):
-        self.makePartTransparent(vobj)
         if not FemGui.getActiveAnalysis() == self.Object:
             if FreeCADGui.activeWorkbench().name() != 'CfdWorkbench':
                 FreeCADGui.activateWorkbench("CfdWorkbench")
@@ -64,7 +64,7 @@ class _ViewProviderCfdAnalysis:
         return True
 
     def makePartTransparent (self, vobj):
-        ''' Make parts transparent so that the boundary conditions and cell zones are clearly visible.'''
+        """ Make parts transparent so that the boundary conditions and cell zones are clearly visible. """
         docName = str(vobj.Object.Document.Name)
         doc = FreeCAD.getDocument(docName)
         for obj in doc.Objects:

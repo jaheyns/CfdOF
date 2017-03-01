@@ -30,8 +30,11 @@ __url__ = "http://www.freecadweb.org"
 class CfdWorkbench(Workbench):
     "CFD workbench object"
     def __init__(self):
-        #self.__class__.Icon = FreeCAD.getResourceDir() + "Mod/Cfd/Resources/icons/CfdWorkbench.svg"
-        self.__class__.Icon = FreeCAD.getResourceDir() + "Mod/Fem/Resources/icons/FemWorkbench.svg"
+        # self.__class__.Icon = FreeCAD.getResourceDir() + "Mod/Fem/Resources/icons/FemWorkbench.svg"
+        import os
+        import CfdTools
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd.png")
+        self.__class__.Icon = icon_path
         self.__class__.MenuText = "CFD"
         self.__class__.ToolTip = "CFD workbench"
 

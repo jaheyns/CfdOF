@@ -31,7 +31,7 @@ import CfdTools
 import os
 
 class _ViewProviderCfdMeshGmsh:
-    "A View Provider for the CfdMeshGmsh object"
+    """ A View Provider for the CfdMeshGmsh object """
     def __init__(self, vobj):
         vobj.Proxy = self
 
@@ -49,6 +49,7 @@ class _ViewProviderCfdMeshGmsh:
         return
 
     def onChanged(self, vobj, prop):
+        CfdTools.setCompSolid(vobj)
         return
 
     def setEdit(self, vobj, mode):
@@ -64,11 +65,9 @@ class _ViewProviderCfdMeshGmsh:
         return
 
     def doubleClicked(self, vobj):
-        # Group meshing is only active on active analysis, we should make sure the analysis the mesh belongs too is active
+        # Group meshing is only active on active analysis, should confirm the analysis the mesh belongs too is active
         gui_doc = FreeCADGui.getDocument(vobj.Object.Document)
         if not gui_doc.getInEdit():
-            # may be go the other way around and just activate the analysis the user has doubleClicked on ?!
-            # not a fast one, we need to iterate over all member of all analysis to know to which analyis the object belongs too!!!
             if FemGui.getActiveAnalysis() is not None:
                 if FemGui.getActiveAnalysis().Document is FreeCAD.ActiveDocument:
                     if self.Object in FemGui.getActiveAnalysis().Member:
@@ -89,7 +88,7 @@ class _ViewProviderCfdMeshGmsh:
                 else:
                     FreeCAD.Console.PrintError('Active Analysis is not in active Document!\n')
             else:
-                # no active analysis, we gone have a look if the obj belongs to a non active analysis,
+                # No active analysis
                 for o in gui_doc.Document.Objects:
                     if o.isDerivedFrom('Fem::FemAnalysisPython'):
                         for m in o.Member:

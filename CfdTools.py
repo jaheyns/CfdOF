@@ -1,7 +1,10 @@
 #***************************************************************************
 #*                                                                         *
 #*   Copyright (c) 2015 - FreeCAD Developers                               *
-#*   Author (c) 2015 - Qingfeng Xia <qingfeng xia eng.ox.ac.uk>                    *
+#*   Author (c) 2015 - Qingfeng Xia <qingfeng xia eng.ox.ac.uk>            *
+#*   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+#*   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+#*   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
 #*                                                                         *
 #*   This program is free software; you can redistribute it and/or modify  *
 #*   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -216,16 +219,6 @@ def get_module_path():
     else:
         return app_mod_path
 
-# NOTE: Code depreciated (JH) 27/01/2016
-# def convertQuantityToMKS(input, quantity_type, unit_system="MKS"):
-#     """ convert non MKS unit quantity to SI MKS (metre, kg, second)
-#     FreeCAD default length unit is mm, not metre, thereby, area is mm^2, pressure is MPa, etc
-#     MKS (metre, kg, second) could be selected from "Edit->Preference", "General -> Units",
-#     but not recommended since all CAD use mm as basic length unit.
-#     see:
-#     """
-#     return input
-
 
 # Set functions
 
@@ -254,6 +247,15 @@ def setPartVisibility(vobj, part_vis, compound_vis, mesh_vis, bound_vis):
             FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = mesh_vis
 
 
+def setCompSolid(vobj):
+    """ To enable correct mesh refinement boolean fragments are set to compSolid mode, """
+    doc_name = str(vobj.Object.Document.Name)
+    doc = FreeCAD.getDocument(doc_name)
+    for obj in doc.Objects:
+        if ("Boolean" in obj.Name) and not ("Mesh" in obj.Name):
+            FreeCAD.getDocument(doc_name).getObject(obj.Name).Mode = 'CompSolid'
+
+
 # UNV mesh writer
 
 def write_unv_mesh(mesh_obj, bc_group, mesh_file_name):
@@ -267,14 +269,14 @@ def write_unv_mesh(mesh_obj, bc_group, mesh_file_name):
 
 
 def _write_unv_bc_mesh(mesh_obj, bc_group, unv_mesh_file):
-    f = open(unv_mesh_file, 'a')     # Appending bc to the volume mesh, which contains node and
-                                     # element definition, ends with '-1'
-    f.write("{:6d}\n".format(-1))    # Start of a section
+    f = open(unv_mesh_file, 'a')  # Appending bc to the volume mesh, which contains node and
+                                  # element definition, ends with '-1'
+    f.write("{:6d}\n".format(-1))  # Start of a section
     f.write("{:6d}\n".format(2467))  # Group section
     for bc_id, bc_obj in enumerate(bc_group):
         _write_unv_bc_faces(mesh_obj, f, bc_id + 1, bc_obj)
-    f.write("{:6d}\n".format(-1))    # end of a section
-    f.write("{:6d}\n".format(-1))    # end of file
+    f.write("{:6d}\n".format(-1))  # end of a section
+    f.write("{:6d}\n".format(-1))  # end of file
     f.close()
 
 
