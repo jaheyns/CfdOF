@@ -37,8 +37,11 @@ import FreeCAD
 import os
 import sys
 import os.path
-import _FemMeshGmsh
-# import FemGmshTools
+import platform
+if platform.system() == 'Windows':
+    from PyObjects import _FemMeshGmsh
+else:
+    import _FemMeshGmsh
 import time
 
 if FreeCAD.GuiUp:
@@ -59,12 +62,15 @@ class _TaskPanelCfdMeshGmsh:
 
         self.mesh_process = QtCore.QProcess()
         self.Timer = QtCore.QTimer()
+        self.Start = time.time()
         self.Timer.start(100)  # 100 milliseconds
         self.gmsh_runs = False
         self.console_message_gmsh = ''
         self.error_message = ''
         self.gmsh_mesh = []
 
+        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
+        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardError()"), self.readOutput)
         QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("finished(int)"), self.meshFinished)
 
         QtCore.QObject.connect(self.form.if_max, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.max_changed)
@@ -124,7 +130,7 @@ class _TaskPanelCfdMeshGmsh:
 
     def update_timer_text(self):
         if self.gmsh_runs:
-            self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
+            self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
 
     def max_changed(self, base_quantity_value):
         self.clmax = base_quantity_value
@@ -139,10 +145,6 @@ class _TaskPanelCfdMeshGmsh:
         self.dimension = str(self.form.cb_dimension.itemText(index))  # form returns unicode
 
     def runMeshProcess(self):
-        self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
-        self.form.pb_stop_mesh.setEnabled(True)
-        self.Start = time.time()
-        self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
         self.console_message_gmsh = ''
         self.gmsh_runs = True
         self.get_active_analysis()
@@ -150,58 +152,66 @@ class _TaskPanelCfdMeshGmsh:
         import FemGmshTools  # Fresh init before remeshing
         self.gmsh_mesh = FemGmshTools.FemGmshTools(self.obj)
         gmsh_mesh = self.gmsh_mesh
+        self.Start = time.time()
         self.console_log("Starting GMSH ...")
-        try:
-            print("\nStarted GMSH meshing ...\n")
-            print('  Part to mesh: Name --> '
-                  + gmsh_mesh.part_obj.Name + ',  Label --> '
-                  + gmsh_mesh.part_obj.Label + ', ShapeType --> '
-                  + gmsh_mesh.part_obj.Shape.ShapeType)
-            print('  CharacteristicLengthMax: ' + str(gmsh_mesh.clmax))
-            print('  CharacteristicLengthMin: ' + str(gmsh_mesh.clmin))
-            print('  ElementOrder: ' + gmsh_mesh.order)
-            gmsh_mesh.get_dimension()
-            gmsh_mesh.get_tmp_file_paths()
-            gmsh_mesh.get_gmsh_command()
-            gmsh_mesh.get_group_data()
-            gmsh_mesh.write_part_file()
-            gmsh_mesh.write_geo()
-            self.runGmsh(gmsh_mesh)
-        except:
-            import sys
-            print("Unexpected error when creating mesh: ", sys.exc_info()[0])
-        QApplication.restoreOverrideCursor()
+        print("\nStarted GMSH meshing ...\n")
+        print('  Part to mesh: Name --> '
+              + gmsh_mesh.part_obj.Name + ',  Label --> '
+              + gmsh_mesh.part_obj.Label + ', ShapeType --> '
+              + gmsh_mesh.part_obj.Shape.ShapeType)
+        print('  CharacteristicLengthMax: ' + str(gmsh_mesh.clmax))
+        print('  CharacteristicLengthMin: ' + str(gmsh_mesh.clmin))
+        print('  ElementOrder: ' + gmsh_mesh.order)
+        gmsh_mesh.get_dimension()
+        gmsh_mesh.get_tmp_file_paths()
+        gmsh_mesh.get_gmsh_command()
+        gmsh_mesh.get_group_data()
+        gmsh_mesh.write_part_file()
+        gmsh_mesh.write_geo()
+        self.runGmsh(gmsh_mesh)
 
     def runGmsh(self, gmsh_mesh):
         gmsh_mesh.error = False
-        try:
-            cmd = gmsh_mesh.gmsh_bin + ' - ' + gmsh_mesh.temp_file_geo
-            self.mesh_process.start(cmd)  # Initiated process, error check once finished.
-        except:
-            self.error_message = 'Error executing: {}\n'.format(gmsh_mesh.gmsh_command)
-            FreeCAD.Console.PrintError(self.error_message)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.console_log("Executing: {} {}".format(gmsh_mesh.gmsh_bin, gmsh_mesh.temp_file_geo))
+        self.mesh_process.start(gmsh_mesh.gmsh_bin, ['-', gmsh_mesh.temp_file_geo])
+        if self.mesh_process.waitForStarted():
+            self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
+            self.form.pb_stop_mesh.setEnabled(True)
+        else:
+            self.console_log("Error starting meshing process", "#FF0000")
             gmsh_mesh.error = True
+        QApplication.restoreOverrideCursor()
 
     def killMeshProcess(self):
         self.console_log("Meshing manually stopped")
         self.error_message = 'Meshing interrupted'
-        self.mesh_process.terminate()
+        if platform.system() == 'Windows':
+            self.mesh_process.kill()
+        else:
+            self.mesh_process.terminate()
         self.mesh_process.waitForFinished()
         self.form.pb_run_mesh.setEnabled(True)
         self.form.pb_stop_mesh.setEnabled(False)
 
+    def readOutput(self):
+        while self.mesh_process.canReadLine():
+            print str(self.mesh_process.readLine()),  # Avoid displaying on FreeCAD status bar
+
+        # Print any error output to console
+        self.mesh_process.setReadChannel(QtCore.QProcess.StandardError)
+        while self.mesh_process.canReadLine():
+            err = str(self.mesh_process.readLine())
+            self.console_log(err, "#FF0000")
+            FreeCAD.Console.PrintError(err)
+        self.mesh_process.setReadChannel(QtCore.QProcess.StandardOutput)
+
     def meshFinished(self):
+        #self.readOutput()
         self.console_log("Reading mesh")
         gmsh_mesh = self.gmsh_mesh
         gmsh_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
-        if self.error_message == '':  # Prevent overwriting kill message
-            self.error_message = str(self.mesh_process.readAllStandardError())
-        if self.error_message:
-            self.console_log('GMSH generated the following error(s): ', '#FF0000')
-            self.console_log(self.error_message, '#FF0000')
-        else:
-            self.console_log('Meshing successful')
-        self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
+        self.console_log('Meshing completed')
         self.Timer.stop()
         self.update()
         self.form.pb_run_mesh.setEnabled(True)

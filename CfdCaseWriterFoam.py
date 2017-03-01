@@ -58,58 +58,71 @@ class CfdCaseWriterFoam:
         self.porousZone_objs, self.porousZonePresent = CfdTools.getPorousObjects(analysis_obj)
         self.mesh_generated = False
 
+        # Set parameter location
+        self.param_path = "User parameter:BaseApp/Preferences/Mod/Cfd/OpenFOAM"
+        # Ensure parameters exist for future editing
+        installation_path = FreeCAD.ParamGet(self.param_path).GetString("InstallationPath", "")
+        FreeCAD.ParamGet(self.param_path).SetString("InstallationPath", installation_path)
+
     def write_case(self, updating=False):
         """ Write_case() will collect case setings, and finally build a runnable case. """
         FreeCAD.Console.PrintMessage("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
         _cwd = os.curdir
+        if not os.path.exists(self.solver_obj.WorkingDir):
+            raise IOError("Path " + self.solver_obj.WorkingDir + " does not exist.")
         os.chdir(self.solver_obj.WorkingDir)  # pyFoam can not write to cwd if FreeCAD is started NOT from terminal
 
-        # Perform initialisation here rather than __init__ in case of path changes
-        self.case_folder = os.path.join(self.solver_obj.WorkingDir, self.solver_obj.InputCaseName)
-        self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
+        try:  # Make sure we restore cwd after exception here
+            # Perform initialisation here rather than __init__ in case of path changes
+            self.case_folder = os.path.join(self.solver_obj.WorkingDir, self.solver_obj.InputCaseName)
+            self.case_folder = os.path.abspath(self.case_folder)
+            self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
 
-        # Get OpenFOAM install path from parameters
-        paramPath = "User parameter:BaseApp/Preferences/Mod/Cfd/OpenFOAM"
-        self.installation_path = FreeCAD.ParamGet(paramPath).GetString("InstallationPath", "")
-        # Ensure parameter exists for future editing
-        FreeCAD.ParamGet(paramPath).SetString("InstallationPath", self.installation_path)
-        self.solverName = self.getSolverName()
+            # Get OpenFOAM install path from parameters
+            paramPath = "User parameter:BaseApp/Preferences/Mod/Cfd/OpenFOAM"
+            self.installation_path = FreeCAD.ParamGet(paramPath).GetString("InstallationPath", "")
+            # Ensure parameter exists for future editing
+            FreeCAD.ParamGet(paramPath).SetString("InstallationPath", self.installation_path)
+            self.solverName = self.getSolverName()
 
-        # Initialise case
-        self.builder = fcb.BasicBuilder(casePath=self.case_folder,
-                                        installationPath=self.installation_path,
-                                        solverSettings=CfdTools.getSolverSettings(self.solver_obj),
-                                        physicsModel=self.physics_model,
-                                        initialConditions=self.initialConditions,
-                                        templatePath=os.path.join(CfdTools.get_module_path(), "data", "defaults"),
-                                        solverName=self.solverName  # Use var in solverSet
-                                        )
+            # Initialise case
+            self.builder = fcb.BasicBuilder(casePath=self.case_folder,
+                                            installationPath=self.installation_path,
+                                            solverSettings=CfdTools.getSolverSettings(self.solver_obj),
+                                            physicsModel=self.physics_model,
+                                            initialConditions=self.initialConditions,
+                                            templatePath=os.path.join(CfdTools.get_module_path(), "data", "defaults"),
+                                            solverName=self.solverName  # Use var in solverSet
+                                            )
 
-        self.builder.setInstallationPath()
-        self.builder.pre_build_check()
-        self.builder.createCase()
+            self.builder.setInstallationPath()
+            self.builder.pre_build_check()
+            self.builder.createCase()
 
-        self.write_mesh()
+            self.write_mesh()
 
-        self.setMaterial()
-        self.setBoundaryConditions()
-        # NOTE: Update code when turbulence is revived
-        # self.builder.turbulenceProperties = {"name": self.solver_obj.TurbulenceModel}
+            self.setMaterial()
+            self.setBoundaryConditions()
+            # NOTE: Update code when turbulence is revived
+            # self.builder.turbulenceProperties = {"name": self.solver_obj.TurbulenceModel}
 
-        # NOTE: Code depreciated (JH) 06/02/2017
-        # self.write_solver_control()
+            # NOTE: Code depreciated (JH) 06/02/2017
+            # self.write_solver_control()
 
-        # NOTE: Code deprecated (OO) 22/02/2017 - removed from BasicBuilder
-        #self.setTimeControl()
+            # NOTE: Code deprecated (OO) 22/02/2017 - removed from BasicBuilder
+            #self.setTimeControl()
 
-        if not (self.porousZone_objs == None):
-            self.exportPorousZoneStlSurfaces()
-            self.setPorousZoneProperties()
+            if self.porousZone_objs is not None:
+                self.exportPorousZoneStlSurfaces()
+                self.setPorousZoneProperties()
 
-        self.builder.post_build_check()
-        self.builder.build()
-        os.chdir(_cwd)  # Restore working dir
-        FreeCAD.Console.PrintMessage("{} Sucessfully write {} case to folder \n".format(
+            self.builder.post_build_check()
+            self.builder.build()
+        except:
+            raise
+        finally:
+            os.chdir(_cwd)  # Restore working dir
+        FreeCAD.Console.PrintMessage("Sucessfully wrote {} case to folder {}\n".format(
                                                         self.solver_obj.SolverName, self.solver_obj.WorkingDir))
         return True
 
@@ -150,8 +163,7 @@ class CfdCaseWriterFoam:
 
     def write_mesh(self):
         """ Convert Netgen/GMSH created UNV file to OpenFoam """
-        caseFolder = self.solver_obj.WorkingDir + os.path.sep + self.solver_obj.InputCaseName
-        unvMeshFile = caseFolder + os.path.sep + self.solver_obj.InputCaseName + u".unv"
+        unvMeshFile = self.case_folder + os.path.sep + self.solver_obj.InputCaseName + u".unv"
         self.mesh_generated = CfdTools.write_unv_mesh(self.mesh_obj, self.bc_group, unvMeshFile)
         # FreeCAD always stores the CAD geometry in mm, while FOAM by default uses SI units. This is independent
         # of the user selected unit preferences.
@@ -169,7 +181,6 @@ class CfdCaseWriterFoam:
             density = density.getValueAs('kg/m^3')
             kinVisc = viscosity/density
         self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': float(kinVisc)}
-
 
     def setBoundaryConditions(self):
         """ Switch case to deal diff fluid boundary condition, thermal and turbulent is not yet fully tested
@@ -292,11 +303,9 @@ class CfdCaseWriterFoam:
                 aspectRatio = po.porousZoneProperties['AspectRatio']
                 kinVisc = self.builder.fluidProperties['kinematicViscosity']
                 if kinVisc is None or kinVisc == 0.0:
-                    FreeCAD.Console.PrintError("Viscosity must be set for Jakob correlation.\n")
-                    raise ValueError
+                    raise ValueError("Viscosity must be set for Jakob correlation")
                 if spacing < d0:
-                    FreeCAD.Console.PrintError("Tube spacing may not be less than diameter.\n")
-                    raise ValueError
+                    raise ValueError("Tube spacing may not be less than diameter")
                 pd['D'] = [0, 0, 0]
                 pd['F'] = [0, 0, 0]
                 for (i, Sl, St) in [(0, aspectRatio*spacing, spacing), (1, spacing, aspectRatio*spacing)]:

@@ -32,7 +32,8 @@ import FreeCAD
 
 import CfdCaseWriterFoam
 import CfdTools
-
+import FoamCaseBuilder
+import FoamCaseBuilder.utility
 
 
 class CfdRunnable(object):
@@ -74,7 +75,7 @@ class CfdRunnable(object):
 
     def edit_case(self):
         case_path = self.solver.WorkingDir + os.path.sep + self.solver.InputCaseName
-        FreeCAD.Console.PrintMessage("Please edit the case input files externally at: {}".format(case_path))
+        FreeCAD.Console.PrintMessage("Please edit the case input files externally at: {}\n".format(case_path))
         self.writer.builder.editCase()
 
 
@@ -85,16 +86,7 @@ class CfdRunnableFoam(CfdRunnable):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
         self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam(self.analysis)
 
-        self.g = Gnuplot.Gnuplot()
-        self.g('set style data lines')
-        self.g.title("Simulation residuals")
-        self.g.xlabel("Iteration")
-        self.g.ylabel("Residual")
-
-        self.g("set grid")
-        self.g("set logscale y")
-        self.g("set yrange [0.95:1.05]")
-        self.g("set xrange [0:1]")
+        self.g = None
 
         self.UxResiduals = [1]
         self.UyResiduals = [1]
@@ -108,11 +100,48 @@ class CfdRunnableFoam(CfdRunnable):
     def write_case(self):
         return self.writer.write_case()
 
-    def get_solver_cmd(self):
-        import FoamCaseBuilder.utility
-        cmd = "bash -c \"source {}/etc/bashrc && ./Allrun\"".format(FoamCaseBuilder.utility.getFoamDir())
-        FreeCAD.Console.PrintMessage("Solver run command: " + cmd + "\n")
+    def get_solver_cmd(self, case_dir):
+        # Set up gnuplot here for error checking
+
+        # Set default windows executable to gnuplot instead of older pgnuplot
+        import platform
+        if platform.system() == 'Windows':
+            Gnuplot.GnuplotOpts.gnuplot_command = 'gnuplot.exe'
+        gnuplot_cmd = Gnuplot.GnuplotOpts.gnuplot_command
+        # For blueCFD, use the supplied Gnuplot
+        if FoamCaseBuilder.utility.getFoamRuntime() == 'BlueCFD':
+            gnuplot_cmd = FoamCaseBuilder.utility.getFoamDir()
+            gnuplot_cmd = '{}\\..\\AddOns\\gnuplot\\bin\\gnuplot.exe'.format(gnuplot_cmd)
+            Gnuplot.GnuplotOpts.gnuplot_command = '"{}"'.format(gnuplot_cmd)
+        # Otherwise, the command 'gnuplot' must be in the path. Possibly make path user-settable.
+        # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
+        import distutils.spawn
+        if distutils.spawn.find_executable(gnuplot_cmd) is None:
+            raise IOError("Gnuplot executable " + gnuplot_cmd + " not found in path.")
+        self.g = Gnuplot.Gnuplot()
+        self.UxResiduals = [1]
+        self.UyResiduals = [1]
+        self.UzResiduals = [1]
+        self.pResiduals = [1]
+        self.niter = 0
+
+        self.g('set style data lines')
+        self.g.title("Simulation residuals")
+        self.g.xlabel("Iteration")
+        self.g.ylabel("Residual")
+
+        self.g("set grid")
+        self.g("set logscale y")
+        self.g("set yrange [0.95:1.05]")
+        self.g("set xrange [0:1]")
+
+        # Environment is sourced in run script, so no need to include in run command
+        cmd = FoamCaseBuilder.utility.makeRunCommand('. Allrun', case_dir, source_env=False)
+        FreeCAD.Console.PrintMessage("Solver run command: " + ' '.join(cmd) + "\n")
         return cmd
+
+    def getRunEnvironment(self):
+        return FoamCaseBuilder.utility.getRunEnvironment()
 
     def view_result(self):
         """ foamToVTK will write result into VTK data files. """
@@ -126,7 +155,6 @@ class CfdRunnableFoam(CfdRunnable):
         """ Create paraview script with case info and run paraview. """
         module_path = CfdTools.get_module_path()
         return self.writer.builder.createParaviewScript(module_path)   # Returns paraview script name
-
 
     def process_output(self, text):
         loglines = text.split('\n')
@@ -155,7 +183,7 @@ class CfdRunnableFoam(CfdRunnable):
                 self.g.plot(Gnuplot.Data(self.UxResiduals, with_='line', title="Ux", inline=1),
                             Gnuplot.Data(self.UyResiduals, with_='line', title="Uy", inline=1),
                             Gnuplot.Data(self.UzResiduals, with_='line', title="Uz", inline=1),
-                            Gnuplot.Data(self.pResiduals, with_='line', title="p"))
+                            Gnuplot.Data(self.pResiduals, with_='line', title="p", inline=1))
                 break
             except IOError as ioe:
                 import errno

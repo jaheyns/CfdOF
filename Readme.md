@@ -5,7 +5,7 @@ specifying the material properties, generating a mesh, assigning boundary condit
 before running the simulation. Where possible best practices are included to improve the stability of the solvers.
 
 This software is a fork of the CFD workbench developed by [Qingfeng Xia](http://github.com/qingfengxia/Cfd), but
-focuses on assisting new CFD users. It therefor places greater emphasis on usability and solver stability intead of
+focuses on assisting new CFD users. It therefore places greater emphasis on usability and solver stability instead of
 functionality.
 
 ## Features
@@ -18,12 +18,12 @@ functionality.
 * Tetrahedral meshing using GMSH.
 * Post processing using paraview.
 * Porous regions and porous baffles.
+* Run on Windows 7-10
 
 ### Under development:
 
 * Multiple region meshing
 * Unit testing
-* Run on Windows 7-10
 
 ### Future (2017):
 
@@ -31,7 +31,7 @@ functionality.
 * Extension to turbulent using RANS (k-w SST).
 * Conjugate heat transfer.
 
-### Platform supported
+### Platforms supported
 
 Linux: 
 
@@ -40,7 +40,8 @@ Linux:
 
 Windows:
 
-        Not yet supported. 
+        Windows 7 (tested)
+        Windows 10 (to be tested)
 
 MAC 
 
@@ -52,29 +53,29 @@ MAC
 
 ### Prerequisites
 
-- [OpenFOAM (3.0+)](http://openfoam.org/download/)
+- [OpenFOAM (version 3.0 or later)](http://openfoam.org/download/)
 
-- [PyFoam (0.6.6+)](http://pypi.python.org/pypi/PyFoam)
+- [PyFoam (version 0.6.6 or later)](http://pypi.python.org/pypi/PyFoam)
 
-- gnuplot.py or gnuplot-py
+- [Gnuplot.py (version 1.8)](http://gnuplot-py.sourceforge.net/)
 
 - [Paraview](http://www.paraview.org/)
  
-- [GMSH (2.13+)](http://gmsh.info/)
+- [GMSH (version 2.13 or later)](http://gmsh.info/)
 
 
 ### Setting up Cfd workbemch
 
 As the CFD workbench is fully developed in Python the user is not required to compile any libraries and can directly 
-copy the folder to <FreeCAD/Mod/Cfd>. 
+copy the folder to <FreeCAD-directory>/Mod/Cfd or to ~/.FreeCAD/Mod/Cfd (in Linux) or \<Application Data\>\FreeCAD\Mod\Cfd (in Windows). 
 
-From command line, clone the CFD workbench
+As an example, from command line, clone the CFD workbench
     
-    $ git clone https://github.com/jaheyns/Cfd.git`
+    $ git clone https://github.com/jaheyns/Cfd.git
         
-and create a symbolic link the local FreeCAD instalation directory. 
+and create a symbolic link to the local FreeCAD instalation directory. 
     
-    $ ln -s <path/to/Cfd)  <path/to/freecad>/Mod
+    $ ln -s <path/to/Cfd>  <path/to/freecad>/Mod/Cfd
         
 
 This fork is unfortunately not available under the  FreeCAD-Addon-Installer.
@@ -94,7 +95,7 @@ in the unit test framework.
 ### Style guide
 
 For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
-1. Use 4 spaces per indentation level (Spaces are the preferred over tabs).
+1. Use 4 spaces per indentation level (spaces are preferred over tabs).
 2. Limit all lines to a maximum of 120 characters.
 3. Break lines before binary operators.
 4. Blank lines 
@@ -110,7 +111,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
     
     - Block comment starts with a # and a single space and are indented to the same level as that code
     
-    - Use inline comments sparingly, they are on the same line as a statement and should be separated by at least two
+    - Use inline comments sparingly. They are on the same line as a statement and should be separated by at least two
  spaces from the statement. 
 
 7. Avoid trailing whitespaces

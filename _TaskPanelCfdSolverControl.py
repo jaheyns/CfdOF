@@ -1,24 +1,28 @@
-#***************************************************************************
-#*                                                                         *
-#*   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
-#*                                                                         *
-#*   This program is free software; you can redistribute it and/or modify  *
-#*   it under the terms of the GNU Lesser General Public License (LGPL)    *
-#*   as published by the Free Software Foundation; either version 2 of     *
-#*   the License, or (at your option) any later version.                   *
-#*   for detail see the LICENCE text file.                                 *
-#*                                                                         *
-#*   This program is distributed in the hope that it will be useful,       *
-#*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-#*   GNU Library General Public License for more details.                  *
-#*                                                                         *
-#*   You should have received a copy of the GNU Library General Public     *
-#*   License along with this program; if not, write to the Free Software   *
-#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
-#*   USA                                                                   *
-#*                                                                         *
-#***************************************************************************
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
+# *   Copyright (c) 2016 - Qingfeng Xia <qingfeng.xia()eng.ox.ac.uk>        *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
 
 __title__ = "Job Control Task Panel"
 __author__ = "Juergen Riegel, Qingfeng Xia"
@@ -59,22 +63,12 @@ class _TaskPanelCfdSolverControl:
         self.solver_runner = solver_runner_obj
         self.solver_object = solver_runner_obj.solver
 
-        # NOTE: SolverProcess was replaced with solver_run_process
-        # self.SolverProcess = QtCore.QProcess()
-        # self.Timer = QtCore.QTimer()
-        # self.Timer.start(3000)
-
         # update UI
         self.fem_console_message = ''
 
-        #======================================================================================================
-        #
-        # Code associated with running solver from GUI
-        #
-        #======================================================================================================
         self.solver_run_process = QtCore.QProcess()
         self.Timer = QtCore.QTimer()
-        self.Timer.start(3000)
+        self.Timer.start(100)
 
         #self.solver_run_process.readyReadStandardOutput.connect(self.stdoutReady)
         QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("finished(int)"), self.solverFinished)
@@ -83,8 +77,6 @@ class _TaskPanelCfdSolverControl:
         self.form.terminateSolver.setEnabled(False)
 
         self.open_paraview = QtCore.QProcess()
-
-        #======================================================================================================
 
         # Connect Signals and Slots
         QtCore.QObject.connect(self.form.tb_choose_working_dir, QtCore.SIGNAL("clicked()"), self.choose_working_dir)
@@ -95,14 +87,8 @@ class _TaskPanelCfdSolverControl:
         QtCore.QObject.connect(self.form.pb_paraview, QtCore.SIGNAL("clicked()"), self.openParaview)
         # self.form.pb_show_result.setEnabled(False)
 
-        # NOTE: Depreciated QtProcess SolverProcess
-        # QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("started()"), self.solverProcessStarted)
-        # QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("stateChanged(QProcess::ProcessState)"), self.solverProcessStateChanged)
-        # QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("error(QProcess::ProcessError)"), self.solverProcessError)
-        # QtCore.QObject.connect(self.SolverProcess, QtCore.SIGNAL("finished(int)"), self.solverProcessFinished)
-
-        # QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.updateText)
-        self.Start = time.time() #debug tobe removed, it is not used in this taskpanel
+        QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.updateText)
+        self.Start = time.time()
         self.update()  # update UI from FemSolverObject, like WorkingDir
 
     def femConsoleMessage(self, message="", color="#000000"):
@@ -112,8 +98,8 @@ class _TaskPanelCfdSolverControl:
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
     def updateText(self):
-        if(self.SolverProcess.state() == QtCore.QProcess.ProcessState.Running):
-            self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
+        if self.solver_run_process.state() == QtCore.QProcess.ProcessState.Running:
+            self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
 
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)
@@ -129,17 +115,14 @@ class _TaskPanelCfdSolverControl:
         return
 
     def accept(self):
-        #FreeCADGui.Control.closeDialog() # cause some bug, use resetEdit() instead
         FreeCADGui.ActiveDocument.resetEdit()
 
     def reject(self):
-        #FreeCADGui.Control.closeDialog()
         self.solver_run_process.terminate()
         self.solver_run_process.waitForFinished()
         self.open_paraview.terminate()
         self.open_paraview.waitForFinished()
         FreeCADGui.ActiveDocument.resetEdit()
-
 
     def choose_working_dir(self):
         current_wd = self.solver_object.WorkingDir
@@ -154,95 +137,85 @@ class _TaskPanelCfdSolverControl:
         self.form.le_working_dir.setText(info_obj.WorkingDir)
 
     def write_input_file_handler(self):
-        QApplication.restoreOverrideCursor()
+        self.Start = time.time()
         if self.check_prerequisites_helper():
-            # self.solver_object.SolverName == "OpenFOAM":
             self.femConsoleMessage("{} case writer is called".format(self.solver_object.SolverName))
-            """
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            try:  # protect code from exception and freezing UI by waitCursor
-                ret = self.solver_runner.write_case(self.analysis_object)
-            except: # catch *all* exceptions
-                print "Unexpected error:", sys.exc_info()[0]
+            self.form.pb_paraview.setEnabled(False)
+            try:
+                QApplication.setOverrideCursor(Qt.WaitCursor)
+                ret = self.solver_runner.write_case()
+                if ret:
+                    self.femConsoleMessage("Write {} case is completed.".format(self.solver_object.SolverName))
+                    self.form.pb_edit_inp.setEnabled(True)
+                    self.form.pb_run_solver.setEnabled(True)
+                else:
+                    self.femConsoleMessage("Write case setup file failed!", "#FF0000")
+            except Exception as e:
+                self.femConsoleMessage("Error writing case:")
+                self.femConsoleMessage(str(e))
+                raise
             finally:
                 QApplication.restoreOverrideCursor()
-            """
-            self.form.pb_paraview.setEnabled(False)
-            ret = self.solver_runner.write_case()
-            if ret:
-                self.femConsoleMessage("Write {} case is completed.".format(self.solver_object.SolverName))
-                self.form.pb_edit_inp.setEnabled(True)
-                self.form.pb_run_solver.setEnabled(True)
-            else:
-                self.femConsoleMessage("Write case setup file failed!", "#FF0000")
         else:
             self.femConsoleMessage("Case check failed!", "#FF0000")
 
     def check_prerequisites_helper(self):
-        self.Start = time.time()
-        self.femConsoleMessage("Check dependencies...")
-        self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
+        self.femConsoleMessage("Checking dependencies...")
 
         message = self.solver_runner.check_prerequisites()
         if message != "":
-            QtGui.QMessageBox.critical(None, "Missing prerequisit(s)", message)
+            self.femConsoleMessage(message, "#FF0000")
             return False
         return True
-    """
-    def start_ext_editor(self, ext_editor_path, filename):
-        if not hasattr(self, "ext_editor_process"):
-            self.ext_editor_process = QtCore.QProcess()
-        if self.ext_editor_process.state() != QtCore.QProcess.Running:
-            self.ext_editor_process.start(ext_editor_path, [filename])
-    """
 
     def editSolverInputFile(self):
         self.femConsoleMessage("Edit case input file in FreeCAD is not implemented!")
         self.solver_runner.edit_case()
 
-
     def runSolverProcess(self):
-        #Re-starting a simulation from the last time step has currently been de-actived
-        #by using an AllRun script. Therefore just re-setting the residuals here for plotting
-        self.UxResiduals = [1]
-        self.UyResiduals = [1]
-        self.UzResiduals = [1]
-        self.pResiduals = [1]
-        self.niter = 0
-
         self.Start = time.time()
         #self.femConsoleMessage("Run {} at {} with command:".format(self.solver_object.SolverName, self.solver_object.WorkingDir))
-        cmd = self.solver_runner.get_solver_cmd()
 
         solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
-        self.femConsoleMessage(cmd)
-        print (cmd)
-        FreeCAD.Console.PrintMessage(solverDirectory + "\n")
+        cmd = self.solver_runner.get_solver_cmd(solverDirectory)
+        FreeCAD.Console.PrintMessage(' '.join(cmd) + '\n')
+        self.femConsoleMessage("Starting solver command:")
+        self.femConsoleMessage(' '.join(cmd))
         self.solver_run_process.setWorkingDirectory(solverDirectory)
-        self.solver_run_process.start(cmd)
+        env = QtCore.QProcessEnvironment.systemEnvironment()
+        envVars = self.solver_runner.getRunEnvironment()
+        for key in envVars:
+            env.insert(key, envVars[key])
+        self.solver_run_process.setProcessEnvironment(env)
+        self.solver_run_process.start(cmd[0], cmd[1:])
 
-        #NOTE: setting solve button to inactive to ensure that two instances of the same simulation aren's started simulataneously
-        self.form.pb_run_solver.setEnabled(False)
-        self.form.terminateSolver.setEnabled(True)
-        # self.form.pb_show_result.setEnabled(False)
-        self.form.pb_paraview.setEnabled(True)
-        self.femConsoleMessage("Solver started")
-
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        if self.solver_run_process.waitForStarted():
+            # Setting solve button to inactive to ensure that two instances of the same simulation aren't started
+            # simultaneously
+            self.form.pb_run_solver.setEnabled(False)
+            self.form.terminateSolver.setEnabled(True)
+            # self.form.pb_show_result.setEnabled(False)
+            self.form.pb_paraview.setEnabled(True)
+            self.femConsoleMessage("Solver started")
+        else:
+            self.femConsoleMessage("Error starting solver")
         QApplication.restoreOverrideCursor()
-        # all the UI update will done after solver process finished signal
-        
 
     def killSolverProcess(self):
         self.femConsoleMessage("Solver manually stopped")
-        self.solver_run_process.terminate()
-        #NOTE: reactivating solver button
+        import platform
+        if platform.system() == "Windows":
+            self.solver_run_process.kill()  # Terminal processes don't respond to terminate() on Windows
+        else:
+            self.solver_run_process.terminate()  # Could use kill() here as well but terminate() is kinder
         self.form.pb_run_solver.setEnabled(True)
         self.form.terminateSolver.setEnabled(False)
         #FreeCAD.Console.PrintMessage("Killing OF solver instance")
 
     def solverFinished(self):
         #self.femConsoleMessage(self.solver_run_process.exitCode())
-        self.femConsoleMessage("Simulation finished!")
+        self.femConsoleMessage("Simulation finished")
         self.form.pb_run_solver.setEnabled(True)
         self.form.terminateSolver.setEnabled(False)
     
@@ -255,54 +228,33 @@ class _TaskPanelCfdSolverControl:
         print text,  # Avoid displaying on FreeCAD status bar
         self.solver_runner.process_output(text)
 
-    # NOTE: Depreciated QtProcess SolverProcess
-    # def solverProcessStarted(self):
-    #     #print("solver Started()")
-    #     #print(self.SolverProcess.state())
-    #     self.form.pb_run_solver.setText("Break Solver process")
-    #
-    # def solverProcessStateChanged(self, newState):
-    #     if (newState == QtCore.QProcess.ProcessState.Starting):
-    #         self.femConsoleMessage("Starting Solver...")
-    #     if (newState == QtCore.QProcess.ProcessState.Running):
-    #         self.femConsoleMessage("Solver is running...")
-    #     if (newState == QtCore.QProcess.ProcessState.NotRunning):
-    #         self.femConsoleMessage("Solver stopped.")
-    #
-    # def solverProcessError(self, error):
-    #     self.femConsoleMessage("Solver execute error: {}".format(error), "#FF0000")
-    #
-    # def solverProcessFinished(self, exitCode):
-    #     if not exitCode:
-    #         self.femConsoleMessage("External solver process is done!", "#00AA00")
-    #         self.printSolverProcessStdout()
-    #         self.form.pb_run_solver.setText("Re-run Solver")
-    #     else:
-    #             self.femConsoleMessage("Solver Process Finished with error code: {}".format(exitCode))
-    #     # Restore previous cwd
-    #     QtCore.QDir.setCurrent(self.cwd)
-    #     self.Timer.stop()
-    #     self.form.pb_show_result.setEnabled(True)
-
-    # NOTE: Code depreciated (JH) 23/02/2017
-    # def showResult(self):
-    #     self.femConsoleMessage("Loading result sets...")
-    #     self.Start = time.time()
-    #     QApplication.setOverrideCursor(Qt.WaitCursor)
-    #     #import FemTools
-    #     #fea = FemTools.FemTools(self.analysis_object, self.solver_object)
-    #     #fea.reset_mesh_purge_results_checked()
-    #     #
-    #     self.solver_runner.view_result()
-    #     QApplication.restoreOverrideCursor()
-    #     self.form.l_time.setText('Time: {0:4.1f}: '.format(time.time() - self.Start))
+        # Print any error output to console
+        err = ""
+        self.solver_run_process.setReadChannel(QtCore.QProcess.StandardError)
+        while self.solver_run_process.canReadLine():
+            err += str(self.solver_run_process.readLine())
+        FreeCAD.Console.PrintError(err)
+        self.solver_run_process.setReadChannel(QtCore.QProcess.StandardOutput)
 
     def openParaview(self):
         self.Start = time.time()
+        QApplication.setOverrideCursor(Qt.WaitCursor)
 
         script_name = self.solver_runner.create_paraview_script()
-        cmd = ('paraview --script={}'.format(script_name))
 
-        self.femConsoleMessage("Running "+cmd)
-        self.open_paraview.start(cmd)
+        paraview_cmd = "paraview"
+        import FoamCaseBuilder
+        # If using blueCFD, use paraview supplied
+        if FoamCaseBuilder.utility.getFoamRuntime() == 'BlueCFD':
+            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(FoamCaseBuilder.utility.getFoamDir())
+        # Otherwise, the command 'paraview' must be in the path. Possibly make path user-settable.
+        # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
+        import distutils.spawn
+        if distutils.spawn.find_executable(paraview_cmd) is None:
+            raise IOError("Paraview executable " + paraview_cmd + " not found in path.")
+
+        arg = '--script={}'.format(script_name)
+
+        self.femConsoleMessage("Running "+paraview_cmd+" "+arg)
+        self.open_paraview.start(paraview_cmd, [arg])
         QApplication.restoreOverrideCursor()

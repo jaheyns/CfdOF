@@ -25,7 +25,11 @@ __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
-import _FemMeshGmsh
+import platform
+if platform.system() == 'Windows':
+    from PyObjects import _FemMeshGmsh
+else:
+    import _FemMeshGmsh
 
 
 def makeCfdMeshGmsh(name="CFDMeshGMSH"):

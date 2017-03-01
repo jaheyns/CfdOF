@@ -31,7 +31,11 @@ __url__ = "http://www.freecadweb.org"
 #  \ingroup CFD
 
 import FreeCAD
-from FemCommands import FemCommands
+import platform
+if platform.system() == 'Windows':
+    from PyGui.FemCommands import FemCommands
+else:
+    from FemCommands import FemCommands
 import FreeCADGui
 from PySide import QtCore
 import os

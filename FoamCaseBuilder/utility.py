@@ -75,56 +75,79 @@ def _toWindowsPath(p):
     assert pp[0] == '' and pp[1] == 'mnt'
     return pp[2] + ":\\" + ('\\').join(pp[3:])
 
+
 def _fromWindowsPath(p):
     # bash on windows "C:\Path" -> /mnt/c/Path
     # cygwin can set the mount point for all windows drives under /mnt in /etc/fstab
     drive, tail = os.path.splitdrive(p)
     pp = tail.replace('\\', '/')
-    return "/mnt/" + (drive[:-1]).lower() + pp
+    if getFoamRuntime() == "BashWSL":
+        if os.path.isabs(p):
+            return "/mnt/" + (drive[:-1]).lower() + pp
+        else:
+            return pp
+    elif getFoamRuntime() == "BlueCFD":
+        if os.path.isabs(p):
+            return "/" + (drive[:-1]).lower() + pp
+        else:
+            return pp
+    else:  # Nothing needed for posix
+        return p
+
 
 def translatePath(p):
-    # remove quote at first, leave the quote protection done outside
-    pp = os.path.abspath(p)
-    if _isWindowsPath(p) and getFoamRuntime() == "BashWSL":
-        pp = _fromWindowsPath(pp)
-    return pp
-
-def runFoamCommandOnWSL(case, cmds, output_file=None):
-    """ Wait for command to complete on bash on windows 10
-    case path and output file path will be converted into ubuntu pass automatically in this function
     """
-    if not output_file:
-        if tempfile.tempdir:
-            output_file = tempfile.tempdir + os.path.sep + "tmp_output.txt"
-        else:
-            output_file = "tmp_output.txt"
-    output_file = os.path.abspath(output_file)
-    print(output_file)
-    if os.path.exists(output_file):
-        os.remove(output_file)
-    output_file_wsl = _fromWindowsPath(output_file)
-    # using double quote to protect space in file path
-    app = cmds[0]
-    if case:
-        case_path = _fromWindowsPath(os.path.abspath(case))
-        cmdline = app + ' -case "' + case_path +'" ' + ' '.join(cmds[1:])
+    Translate local path to that required for use inside Linux subsystem (e.g. mingw)
+    :param p: Local path
+    :return: Path required for Linux subsystem
+    """
+    #pp = os.path.abspath(p)
+    #if _isWindowsPath(p):
+    #    pp = _fromWindowsPath(pp)
+    #return pp
+    if platform.system() == 'Windows':
+        return _fromWindowsPath(p)
     else:
-        cmdline = app + ' ' + ' '.join(cmds[1:])
-    cmdline = """bash -c 'source ~/.bashrc && {} > {}' """.format(cmdline, output_file_wsl)
-    print("Running: ", cmdline)
+        return p
 
-    retcode = subprocess.call(cmdline)  # os.system() does not work!
-    if int(retcode):
-        print("Error: command line return with code", retcode)
-    # corret and write to file on ubuntu path
-    if os.path.exists(output_file):
-        of = open(output_file)
-        result = of.read()
-        of.close()
-        return result
-    else:
-        print("Error: can not find the output file: ",output_file)
-        return None
+
+# Deprecated OO 3/3/2017
+# def runFoamCommandOnWSL(case, cmds, output_file=None):
+#     """ Wait for command to complete on bash on windows 10
+#     case path and output file path will be converted into ubuntu pass automatically in this function
+#     """
+#     if not output_file:
+#         if tempfile.tempdir:
+#             output_file = tempfile.tempdir + os.path.sep + "tmp_output.txt"
+#         else:
+#             output_file = "tmp_output.txt"
+#     output_file = os.path.abspath(output_file)
+#     print(output_file)
+#     if os.path.exists(output_file):
+#         os.remove(output_file)
+#     output_file_wsl = _fromWindowsPath(output_file)
+#     # using double quote to protect space in file path
+#     app = cmds[0]
+#     if case:
+#         case_path = _fromWindowsPath(os.path.abspath(case))
+#         cmdline = app + ' -case "' + case_path +'" ' + ' '.join(cmds[1:])
+#     else:
+#         cmdline = app + ' ' + ' '.join(cmds[1:])
+#     cmdline = """bash -c 'source ~/.bashrc && {} > {}' """.format(cmdline, output_file_wsl)
+#     print("Running: ", cmdline)
+#
+#     retcode = subprocess.call(cmdline)  # os.system() does not work!
+#     if int(retcode):
+#         print("Error: command line return with code", retcode)
+#     # corret and write to file on ubuntu path
+#     if os.path.exists(output_file):
+#         of = open(output_file)
+#         result = of.read()
+#         of.close()
+#         return result
+#     else:
+#         print("Error: can not find the output file: ",output_file)
+#         return None
 
 ###################################################
 
@@ -133,8 +156,9 @@ def _detectFoamDir():
         Instalation path it will overwrite the aforementioned.
     '''
     if platform.system() == 'Windows':
-        case_path = None
-        foam_dir = runFoamCommandOnWSL(case_path, 'echo $WM_PROJECT_DIR')
+        #case_path = None
+        #foam_dir = runFoamCommandOnWSL(case_path, 'echo $WM_PROJECT_DIR')
+        foam_dir = None
     else:
         cmdline = ['bash', '-i', '-c', 'source ~/.bashrc && echo $WM_PROJECT_DIR']
         foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
@@ -153,7 +177,8 @@ def _detectFoamDir():
 def _detectFoamVersion():
     if platform.system() == 'Windows':
         case_path = None
-        foam_ver = runFoamCommandOnWSL(case_path, 'echo $WM_PROJECT_VERSION')
+        #foam_ver = runFoamCommandOnWSL(case_path, 'echo $WM_PROJECT_VERSION')
+        foam_ver = None
     else:
         cmdline = ['bash', '-i', '-c', 'source ~/.bashrc && echo $WM_PROJECT_VERSION']
         foam_ver = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
@@ -215,12 +240,16 @@ def getFoamVersion():
 #     else:
 #        return "OpenFOAM"
 
+
 # Bash on Ubuntu on Windows detection and path translation
 def _detectFoamRuntime():
     if platform.system() == 'Windows':
-        return "BashWSL"  # 'Cygwin'
+        #if os.path.exists(os.path.join(getFoamDir(), "..", "msys64")):
+        return 'BlueCFD'  # Not set yet...
+        #else:
+        #    return 'BashWSL'
     else:
-        return "Posix"
+        return 'Posix'
 
 # _FOAM_SETTINGS['FOAM_VARIANT'] = _detectFoamVarient()
 _FOAM_SETTINGS['FOAM_RUNTIME'] = _detectFoamRuntime()
@@ -381,116 +410,86 @@ def createCaseFromTemplate(output_path, source_path, backup_path=None):
     #     os.remove(output_path + os.path.sep +"Allclean.sh")
 
 
-# NOTE: Code depreciated (JH) 08/02/17
-# def createCaseFromScratch(output_path, solver_name):
-#     if os.path.isdir(output_path):
-#         shutil.rmtree(output_path)
-#     os.makedirs(output_path) # mkdir -p
-#     os.makedirs(output_path + os.path.sep + "system")
-#     os.makedirs(output_path + os.path.sep + "constant")
-#     os.makedirs(output_path + os.path.sep + "0")
-#     createRawFoamFile(output_path, 'system', 'controlDict', getControlDictTemplate(solver_name))
-#     createRawFoamFile(output_path, 'system', 'fvSolution', getFvSolutionTemplate())
-#     createRawFoamFile(output_path, 'system', 'fvSchemes', getFvSchemesTemplate())
-
-# NOTE: Code depreciated (JH) 08/02/17 - Duplicates of the same function call
-# def copySettingsFromExistentCase(output_path, source_path):
-#     """build case structure from string template, both folder paths must existent
-#     """
-#     shutil.copytree(source_path + os.path.sep + "system", output_path + os.path.sep + "system")
-#     source_const = os.path.join(source_path, "constant")
-#     dest_const = os.path.join(output_path, "constant")
-#     if os.path.exists(source_const):
-#         shutil.copytree(source_const, dest_const)
-#     else:
-#         if not os.path.exists(dest_const):
-#             os.makedirs(dest_const)
-#     #runFoamCommand('foamCopySettins  {} {}'.format(source_path, output_path))
-#     #foamCopySettins: Copy OpenFOAM settings from one case to another, without copying the mesh or results
-#     if os.path.exists(source_path + os.path.sep + "0"):
-#         shutil.copytree(source_path + os.path.sep + "0", output_path + os.path.sep + "0")
-#     init_dir = output_path + os.path.sep + "0"
-#     if not os.path.exists(init_dir):
-#         os.makedirs(init_dir) # mkdir -p
-#     """
-#     if os.path.isdir(output_path + os.path.sep +"0.orig") and not os.path.exists(init_dir):
-#         shutil.copytree(output_path + os.path.sep +"0.orig", init_dir)
-#     else:
-#         print("Error: template case {} has no 0 or 0.orig subfolder".format(source_path))
-#     """
-#     #foamCloneCase: Create a new case directory that includes time, system and constant directories from a source case.
-
-
 def createRunScript(case, init_potential, run_parallel, solver_name, num_proc, porousZoneSettings,
                     bafflesPresent):
     print("Create Allrun script ")
 
     fname = case + os.path.sep + "Allrun"
-    meshOrg_dir = case + os.path.sep + "constant/polyMesh.org"
-    mesh_dir = case + os.path.sep + "constant/polyMesh"
+    mesh_dir = "constant/polyMesh"
+    meshOrg_dir = "../polyMesh.org"  # Relative to mesh_dir
 
     if os.path.exists(fname):
         print("Warning: Overwrite existing Allrun script and log files.")
-        os.remove(case+"/log.potentialFoam")
-        if (run_parallel):
-            os.remove(case+"/log.decomposePar")
-        os.remove(case+"/log."+solver_name)
+        os.remove(os.path.join(case, "log.surfaceTransformPoints"))
+        os.remove(os.path.join(case, "log.topoSet"))
+        os.remove(os.path.join(case, "log.createBaffles"))
+        os.remove(os.path.join(case, "log.potentialFoam"))
+        os.remove(os.path.join(case, "log.decomposePar"))
+        os.remove(os.path.join(case, "log."+solver_name))
 
     with open(fname, 'w+') as f:
-        f.write("#!/bin/sh \n\n")
+        case = translatePath(case)
 
-        f.write("# Unset and source bashrc\n")
-        f.write("source {}/etc/config/unset.sh\n".format(getFoamDir()))
-        f.write("source {}/etc/bashrc\n\n".format(getFoamDir()))
+        f.write('#!/bin/sh \n\n')
 
-        # Mesh is stored in PolyMesh.org to ensure the mesh is preserved if the user decide to clean the case from
+        if getFoamRuntime() != "BlueCFD":  # Runs inside own environment - no need to source
+            f.write('# Unset and source bashrc\n')
+            f.write('if [ -f "{}/etc/config/unset.sh" ]; then  # for OF < 4\n'.format(translatePath(getFoamDir)))
+            f.write('   source "{}/etc/config/unset.sh"\n'.format(translatePath(getFoamDir())))
+            f.write('else\n')
+            f.write('   source "{}/etc/config.sh/unset"\n'.format(translatePath(getFoamDir())))
+            f.write('fi\n')
+            f.write('source "{}/etc/bashrc"\n\n'.format(translatePath(getFoamDir())))
+
+        # Mesh is stored in PolyMesh.org to ensure the mesh is preserved if the user decides to clean the case from
         # the terminal.
         f.write("# Create symbolic links to polyMesh.org\n")
-        f.write("mkdir {}\n".format(mesh_dir))
-        f.write("ln -s {}/boundary {}\n".format(meshOrg_dir, mesh_dir))
-        f.write("ln -s {}/faces {}\n".format(meshOrg_dir, mesh_dir))
-        f.write("ln -s {}/neighbour {}\n".format(meshOrg_dir, mesh_dir))
-        f.write("ln -s {}/owner {}\n".format(meshOrg_dir, mesh_dir))
-        f.write("ln -s {}/points {}\n".format(meshOrg_dir, mesh_dir))
+        f.write('mkdir "{}"\n'.format(mesh_dir))
+        f.write('ln -s "{}/boundary" "{}"\n'.format(meshOrg_dir, mesh_dir))
+        f.write('ln -s "{}/faces" "{}"\n'.format(meshOrg_dir, mesh_dir))
+        f.write('ln -s "{}/neighbour" "{}"\n'.format(meshOrg_dir, mesh_dir))
+        f.write('ln -s "{}/owner" "{}"\n'.format(meshOrg_dir, mesh_dir))
+        f.write('ln -s "{}/points" "{}"\n'.format(meshOrg_dir, mesh_dir))
         if bafflesPresent:
-            f.write("ln -s {}/faceZones {}\n".format(meshOrg_dir, mesh_dir))
-        f.write("\n")
+            f.write('ln -s "{}/faceZones" "{}"\n'.format(meshOrg_dir, mesh_dir))
+        f.write('\n')
 
         if len(porousZoneSettings):
-            f.write("# Scaling .stl files exported from FreeCAD from mm to m\n")
+            f.write('# Scaling .stl files exported from FreeCAD from mm to m\n')
             counter = 0
             for po in porousZoneSettings:
                 for partName in po['PartNameList']:
                     counter += 1
-                    fileBaseName = os.path.join(case, "constant", "triSurface", partName)
-                    f.write("surfaceTransformPoints -scale '(0.001 0.001 0.001)' " +
-                            fileBaseName + ".stl" + " " +
-                            fileBaseName + "Scaled.stl 2>&1 | tee log.surfaceTransformPoints\n")
-            f.write("\n")
-            f.write("# Set cells zones contained inside the .stl surfaces \n")
-            f.write("topoSet 2>&1 | tee log.topoSet\n")
-            f.write("\n")
+                    fileBaseName = 'constant/triSurface/{}'.format(partName)
+                    f.write('surfaceTransformPoints -scale "(0.001 0.001 0.001)"'
+                            + ' "{}.stl" "{}Scaled.stl" 2>&1'.format(fileBaseName, fileBaseName)
+                            + ' | tee log.surfaceTransformPoints\n')
+            f.write('\n')
+            f.write('# Set cells zones contained inside the .stl surfaces \n')
+            f.write('topoSet 2>&1 | tee log.topoSet\n')
+            f.write('\n')
 
         if bafflesPresent:
-            f.write("# Creating baffles\n")
-            f.write("createBaffles -overwrite -case "+case+" 2>&1 | tee "+case+"/log.createBaffles\n")
-            f.write("\n")
+            f.write('# Creating baffles\n')
+            f.write('createBaffles -overwrite 2>&1 | tee log.createBaffles\n')
+            f.write('\n')
 
-        if (init_potential):
-            f.write ("# Initialise flow\n")
-            f.write ("potentialFoam -case "+case+" 2>&1 | tee "+case+"/log.potentialFoam\n\n")
+        if init_potential:
+            f.write('# Initialise flow\n')
+            f.write('potentialFoam 2>&1 | tee log.potentialFoam\n\n')
 
-        if (run_parallel):
-            f.write ("# Run application in parallel\n")
-            f.write ("decomposePar 2>&1 | tee log.decomposePar\n")
-            f.write ("mpirun -np {} {} -parallel -case {} 2>&1 | tee {}/log.{}\n\n".format(str(num_proc), solver_name,
-                                                                                           case, case,solver_name))
+        if run_parallel:
+            f.write('# Run application in parallel\n')
+            f.write('decomposePar 2>&1 | tee log.decomposePar\n')
+            f.write('mpirun -np {} {} -parallel 2>&1 | tee log.{}\n\n'.format(str(num_proc),
+                    solver_name, solver_name))
         else:
-            f.write ("# Run application\n")
-            f.write ("{} -case {} 2>&1 | tee {}/log.{}\n\n".format(solver_name,case,case,solver_name))
+            f.write('# Run application\n')
+            f.write('{} 2>&1 | tee log.{}\n\n'.format(solver_name, solver_name))
 
-    cmdline = ("chmod a+x "+fname)  # Update Allrun permission, it will fail silently on windows
-    out = subprocess.check_output(['bash', '-l', '-c', cmdline], stderr=subprocess.PIPE)
+    import stat
+    s = os.stat(fname)
+    os.chmod(fname, s.st_mode or stat.S_IEXEC)  # Update Allrun permission - will fail silently on windows
 
 
 def copySettingsFromExistentCase(output_path, source_path):
@@ -546,6 +545,7 @@ _foamFileHeader_part2 = '''FoamFile
 def getFoamFileHeader(location, dictname, classname = 'dictionary'):
         return _foamFileHeader_part1 + _foamFileHeader_part2 % (classname, location, dictname)
 
+
 def createRawFoamFile(case, location, dictname, lines, classname = 'dictionary'):
     fname = case + os.path.sep + location +os.path.sep + dictname
     if os.path.exists(fname):
@@ -555,13 +555,53 @@ def createRawFoamFile(case, location, dictname, lines, classname = 'dictionary')
         f.writelines(lines)
 
 
+def makeRunCommand(cmd, dir, source_env=True):
+    """ Generate native command to run the specified Linux command in the relevant environment,
+        including changing to the specified working directory if applicable
+    """
+    if getFoamRuntime() == "BashWSL":
+        if source_env:
+            cmdline = ['bash',  '-c', 'source ~/.bashrc && cd "{}" && {}'.format(translatePath(dir), cmd)]
+        else:
+            cmdline = ['bash', '-c', 'cd "{}" && {}'.format(translatePath(dir), cmd)]
+        return cmdline
+    elif getFoamRuntime() == "BlueCFD":
+        if getFoamDir() is None:
+            raise IOError("OpenFOAM installation directory not found")
+        cmdline = ['{}\\..\\msys64\\usr\\bin\\bash'.format(getFoamDir()), '--login', '-O', 'expand_aliases', '-c',
+                   'cd "{}" && {}'.format(translatePath(dir), cmd)]
+        return cmdline
+    else:
+        if getFoamDir() is None:
+            raise IOError("OpenFOAM installation directory not found")
+        env_setup_script = "{}/etc/bashrc".format(getFoamDir())
+        if source_env:
+            cmdline = ['bash', '-c', 'source "{}" && cd "{}" && {}'.format(env_setup_script, translatePath(dir), cmd)]
+        else:
+            cmdline = ['bash', '-c', 'cd "{}" && {}'.format(env_setup_script, translatePath(dir), cmd)]
+        return cmdline
+
+
+def getRunEnvironment():
+    """ Return native environment settings necessary for running on relevant platform """
+    if getFoamRuntime() == "BashWSL":
+        return {}
+    elif getFoamRuntime() == "BlueCFD":
+        return {"MSYSTEM": "MINGW64",
+                "USERNAME": "ofuser",
+                "USER": "ofuser",
+                "HOME": "/home/ofuser"}
+    else:
+        return {}
+
+
 def runFoamApplication(cmd, case):
     """ Run OpenFOAM application and automatically generate the log.application file (Wait until finished)
         cmd  - String with the application being the first entry followied by the options.
               e.g. `transformPoints -scale "(0.001 0.001 0.001)"
         case - Case directory or path
     """
-    if (isinstance(cmd, list) or isinstance(cmd, tuple)):
+    if isinstance(cmd, list) or isinstance(cmd, tuple):
         cmds = cmd
     elif isinstance(cmd, str):
         cmds = cmd.split(' ')  # Insensitive to incorrect split like space and quote
@@ -569,25 +609,37 @@ def runFoamApplication(cmd, case):
         raise Exception("Error: Application and options must be specified as a list or tuple.")
 
     app = cmds[0]
-    logFile = "{}/log.{}".format(os.path.abspath(case), app)
+    logFile = "log.{}".format(app)
 
     if os.path.exists(logFile):
-        print("Warning: {} already exists, removed to rerun {}.".format(logFile,app))
+        print("Warning: {} already exists, removed to rerun {}.".format(logFile, app))
         os.remove(logFile)
 
-    if getFoamRuntime() == "BashWSL":
-        out = runFoamCommandOnWSL(case, cmds, logFile)
-    else:
-        cmdline = app+' -case "'+case+'" '+' '.join(cmds[1:])   # Space to separate options
-        env_setup_script = "{}/etc/bashrc".format(getFoamDir())
+    logFile = translatePath(logFile)
 
+    try:  # Catch any output before forwarding exception
+        cmdline = app + ' ' + ' '.join(cmds[1:])  # Space to separate options
         print("Running ", cmdline)
-        # cmdline += (" | tee "+logFile) # Pipe to screen and log file
-        cmdline += (" > " + logFile + " 2>&1")     # Pipe to log file
-        cmdline = ['bash', '-c', """source "{}" && {} """.format(env_setup_script, cmdline)]
-
-        out = subprocess.check_output(cmdline, cwd=case, stderr=subprocess.PIPE)
-    if _debug: print(out)
+        cmdline += (" > " + logFile + " 2>&1")  # Pipe to log file
+        cmd = makeRunCommand(cmdline, case)
+        env = {}
+        # Make a clean copy of os.environ, forcing standard strings
+        for k in os.environ:
+            env[str(k)] = str(os.environ[k])
+        env.update(getRunEnvironment())
+        # Prevent terminal window popping up in Windows
+        si = None
+        if platform.system() == 'Windows':
+            si = subprocess.STARTUPINFO()
+            si.dwFlags = subprocess.STARTF_USESHOWWINDOW
+            si.wShowWindow = subprocess.SW_HIDE
+        out = subprocess.check_output(cmd, env=env, stderr=subprocess.STDOUT, startupinfo=si)
+        if _debug:
+            print(out)
+    except subprocess.CalledProcessError as ex:
+        if _debug:
+            print(ex.output)
+        raise
 
 
 # not a good way to extract path in command line, double quote and space cause problem      
@@ -609,13 +661,13 @@ def _translateFoamCasePath(cmd):
 # Mesh manupulation
 
 def convertMesh(case, mesh_file, scale):
-    """ Convert gmsh created UNV mesh to FOAM. A scaling of 10e-3 is prescribed as the CAD is always in mm while FOAM
+    """ Convert gmsh created UNV mesh to FOAM. A scaling of 1e-3 is prescribed as the CAD is always in mm while FOAM
     uses SI units (m). """
     mesh_file = translatePath(mesh_file)
 
-    if mesh_file.find(".unv")>0:
+    if mesh_file.find(".unv") > 0:
         cmdline = ['ideasUnvToFoam', '"{}"'.format(mesh_file)]  # mesh_file path may also need translate
-        runFoamApplication(cmdline,case)
+        runFoamApplication(cmdline, case)
         changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
     # NOTE: Code depreciated (JH) 26/02/2017
     # if mesh_file[-4:] == ".geo":  # GMSH mesh
@@ -632,8 +684,10 @@ def convertMesh(case, mesh_file, scale):
     else:
         print("Error: mesh scaling ratio is must be a float or integer\n")
 
+
 def listBoundaryNames(case):
     return BoundaryDict(case).patches()
+
 
 def changeBoundaryType(case, bc_name, bc_type):
     """ Change boundary named `bc_name` to `bc_type`. """
@@ -643,6 +697,7 @@ def changeBoundaryType(case, bc_name, bc_type):
     else:
         print("Boundary `{}` not found, so type is not changed".format(bc_name))
     f.writeFile()
+
 
 def movePolyMesh(case):
     """ Move polyMesh to polyMesh.org to ensure availability if cleanCase is ran from the terminal. """
