@@ -63,13 +63,9 @@ class CfdWorkbench(Workbench):
 
 
         # Post Processing commands are located in FemWorkbench, implemented and imported in C++
-        cmdlst = ['Cfd_Analysis', 'Cfd_MeshGmshFromShape', 'Fem_MeshRegion',
-                  # 'Fem_PrintMeshInfo', 'Fem_ClearMesh',
-                  'Cfd_FluidBoundary','Cfd_PhysicsModel', 'Cfd_InitialiseInternal',
-                  'Cfd_FluidMaterial','Cfd_PorousZone','Cfd_SolverControl',"Separator",
-                  'Fem_PostPipelineFromResult', 'Fem_PostCreateClipFilter',
-                  'Fem_PostCreateScalarClipFilter', 'Fem_PostCreateCutFilter']
-
+        cmdlst = ['Cfd_Analysis','Cfd_PhysicsModel', 'Cfd_FluidMaterial', 'Cfd_InitialiseInternal',
+                  'Cfd_MeshGmshFromShape', 'Fem_MeshRegion',
+                  'Cfd_FluidBoundary', 'Cfd_PorousZone','Cfd_SolverControl']
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
         self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
