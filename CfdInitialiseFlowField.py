@@ -12,7 +12,7 @@ if FreeCAD.GuiUp:
 
 import _CfdInitialVariables
 
-def makeCfdInitialFlowField(name="InitializeInternalVariables"):
+def makeCfdInitialFlowField(name="InitialiseFields"):
     obj = FreeCAD.ActiveDocument.addObject("App::FeaturePython", name)
     _CfdInitialVariables._CfdInitialVariables(obj)
 

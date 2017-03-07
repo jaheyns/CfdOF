@@ -33,7 +33,7 @@ class _CommandCfdInitialiseInternalFlowField(FemCommands):
         isPresent = False
         members = FemGui.getActiveAnalysis().Member
         for i in members:
-            if "InitializeInternalVariables" in i.Name:
+            if "InitialiseFields" in i.Name:
                 FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
                 isPresent = True
         ##NOTE: since it is possible to delete the initialVariables object, allowing here for re-creation not present.

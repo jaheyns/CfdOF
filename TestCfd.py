@@ -119,7 +119,7 @@ class BlockTest(unittest.TestCase):
         self.active_doc.recompute()
 
     def createNewFluidProperty(self):
-        self.material_object = CfdFluidMaterial.makeCfdFluidMaterial('CfdFluidProperties')
+        self.material_object = CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')
         mat = self.material_object.Material
         mat['Name'] = 'None'
         mat['Density'] = '1.20 kg/m^3'

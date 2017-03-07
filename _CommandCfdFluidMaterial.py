@@ -49,7 +49,7 @@ class setCfdFluidPropertyCommand(FemCommands):
         for i in members:
             ''' Check for existing fluid material entity as the solver currently only support single region analysis.
             '''
-            if "CfdFluidProperties" in i.Name:
+            if "FluidProperties" in i.Name:
                 FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
                 isPresent = True
 
@@ -57,7 +57,7 @@ class setCfdFluidPropertyCommand(FemCommands):
                   present.
         '''
         if not(isPresent):
-            FreeCADGui.doCommand("CfdFluidMaterial.makeCfdFluidMaterial('CfdFluidProperties')")
+            FreeCADGui.doCommand("CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')")
 
             # CFD WB is still a member of FemGui
             FreeCADGui.doCommand("App.activeDocument()." + FemGui.getActiveAnalysis().Name +

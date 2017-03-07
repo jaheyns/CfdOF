@@ -60,7 +60,7 @@ class _CommandCfdAnalysis(FemCommands):
 
         # Add fluid properties object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdFluidMaterial")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdFluidMaterial.makeCfdFluidMaterial('CfdFluidProperties')]")
+        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')]")
 
         # Add initialisation object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdInitialiseFlowField")

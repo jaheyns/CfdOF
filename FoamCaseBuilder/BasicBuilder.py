@@ -511,7 +511,7 @@ class BasicBuilder(object):
                 print('Warning: Folder \'0\' does not exist, creating a new one.')
             os.makedirs(initFolder)
 
-        if _debug: print("Info: Initialize solver created fields (variables): ", vars)
+        if _debug: print("Info: Initialise solver created fields (variables): ", vars)
 
         for v in vars:
             fname = casePath + os.path.sep + "0" + os.path.sep + v

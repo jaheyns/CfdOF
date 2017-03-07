@@ -120,7 +120,7 @@ def getPorousObjects(analysis_object):
 def getInitialConditions(analysis_object):
     isPresent = False
     for i in analysis_object.Member:
-        if "InitializeInternalVariables" in i.Name:
+        if "InitialiseFields" in i.Name:
             InitialVariables = i.InitialVariables
             isPresent = True
     if not isPresent:
