@@ -199,11 +199,11 @@ class CfdCaseWriterFoam:
                        'subtype': bc.BoundarySettings['BoundarySubtype']}
             import Units
             if bc.BoundarySettings['VelocityIsCartesian']:
-                velocity = [Units.Quantity(bc.BoundarySettings['Ux']).getValueAs("m/s"),
-                            Units.Quantity(bc.BoundarySettings['Uy']).getValueAs("m/s"),
-                            Units.Quantity(bc.BoundarySettings['Uz']).getValueAs("m/s")]
+                velocity = [Units.Quantity(bc.BoundarySettings['Ux']).getValueAs("m/s").Value,
+                            Units.Quantity(bc.BoundarySettings['Uy']).getValueAs("m/s").Value,
+                            Units.Quantity(bc.BoundarySettings['Uz']).getValueAs("m/s").Value]
             else:
-                veloMag = Units.Quantity(bc.BoundarySettings['VelocityMag']).getValueAs("m/s")
+                veloMag = Units.Quantity(bc.BoundarySettings['VelocityMag']).getValueAs("m/s").Value
                 face = bc.BoundarySettings['DirectionFace'].split(':')
                 # See if entered face actually exists and is planar
                 try:
@@ -226,12 +226,13 @@ class CfdCaseWriterFoam:
                     raise RuntimeError
 
             bc_dict['velocity'] = velocity
-            bc_dict['pressure'] = Units.Quantity(bc.BoundarySettings['Pressure']).getValueAs("kg*m/s^2")
-            bc_dict['massFlowRate'] = Units.Quantity(bc.BoundarySettings['MassFlowRate']).getValueAs("kg/s")
-            bc_dict['volFlowRate'] = Units.Quantity(bc.BoundarySettings['VolFlowRate']).getValueAs("m^3/s")
-            bc_dict['slipRatio'] = Units.Quantity(bc.BoundarySettings['SlipRatio']).getValueAs("m/m")
+            bc_dict['pressure'] = Units.Quantity(bc.BoundarySettings['Pressure']).getValueAs("kg*m/s^2").Value
+            bc_dict['massFlowRate'] = Units.Quantity(bc.BoundarySettings['MassFlowRate']).getValueAs("kg/s").Value
+            bc_dict['volFlowRate'] = Units.Quantity(bc.BoundarySettings['VolFlowRate']).getValueAs("m^3/s").Value
+            bc_dict['slipRatio'] = Units.Quantity(bc.BoundarySettings['SlipRatio']).getValueAs("m/m").Value
             if bc.BoundarySettings['PorousBaffleMethod'] == 0:
-                bc_dict['pressureDropCoeff'] = Units.Quantity(bc.BoundarySettings['PressureDropCoeff']).getValueAs("m/m")
+                bc_dict['pressureDropCoeff'] = \
+                    Units.Quantity(bc.BoundarySettings['PressureDropCoeff']).getValueAs("m/m").Value
             elif bc.BoundarySettings['PorousBaffleMethod'] == 1:
                 wireDiam = Units.Quantity(bc.BoundarySettings['ScreenWireDiameter']).getValueAs("m").Value
                 spacing = Units.Quantity(bc.BoundarySettings['ScreenSpacing']).getValueAs("m").Value

@@ -729,22 +729,19 @@ class BasicBuilder(object):
         if not len(self._boundarySettings):
             print("Error: No boundary condition is defined, please check!")
         for bcDict in self._boundarySettings:
-            # NOTE: Code depreciated (JH) 07/02/2017
-            # if bc_dict['type'] in supported_interface_types:
-            #     self.setupInterfaceBoundary(bc_dict['type'], bc_dict['name'])
-            # else:
-            # assert bc_dict['type'] in supported_boundary_types
             if bcDict['type'] == 'inlet':
                 if bcDict['subtype'] == 'totalPressure':
                     self.setupPressureInletBoundary(bcDict)
                 else:  # massflow or uniformVelocity
                     self.setupVelocityInletBoundary(bcDict)
-            elif bcDict['type'] == 'outlet':
+            elif bcDict['type'] == 'outlet' or bcDict['subtype'] == 'totalPressureOpening':
                 self.setupOutletBoundary(bcDict)
-            elif bcDict['type'] == 'freestream':
+            elif bcDict['subtype'] == 'freestream':
                 self.setupFreestreamBoundary(bcDict)
             elif bcDict['type'] == 'wall':
                 self.setupWallBoundary(bcDict)
+            elif bcDict['type'] == 'constraint':
+                self.setupConstraintBoundary(bcDict['type'])
             elif bcDict['type'] == 'baffle':
                 self.setupBaffleBoundary(bcDict)
             else:
@@ -774,26 +771,29 @@ class BasicBuilder(object):
         f = ParsedParameterFile(self._casePath + "/0/U")
         f["boundaryField"][bc_name] = {}
         if wall_type == 'fixed' or wall_type == 'noSlip':  # noSlip equal to fixed wall
-            f["boundaryField"][bc_name]["type"] = "fixedValue"
+            # A viscous wall (zero relative velocity between fluid/solid)
+            # movingWallVelocity reduces to fixedValue if the mesh is not moving
+            f["boundaryField"][bc_name]["type"] = "movingWallVelocity"
             f["boundaryField"][bc_name]["value"] = "uniform (0 0 0)"  # initial value
+            # NOTE: Code depreciated (JH) 08/02/2017
+            # if self._solverSettings['dynamicMeshing'] and "pointDisplacement" in self._solverCreatedVariables():
+            #     df = ParsedParameterFile(self._casePath + "/0/pointDisplacement")
+            #     df["boundaryField"][bc_name] = {'type': "calculated", 'value': 'uniform (0 0 0)'}
+            #     df.writeFile()
         elif wall_type == 'rough':  # for turbulence flow only
             f["boundaryField"][bc_name]["type"] = "roughWall"
             f["boundaryField"][bc_name]["U"] = formatValue(value)
             print("Info: wall function for k, epsilon, omege nu may need set for roughwall")
         elif wall_type == 'slip':  # 100% slipping between solid and fluid
             f["boundaryField"][bc_name]["type"] = "slip"
+            # TODO: check for dynamic meshing and warn. OF does not have a movingWallSlip
         elif wall_type == 'partialSlip':  # for multiphase flow
             f["boundaryField"][bc_name]["type"] = "partialSlip"
-            f["boundaryField"][bc_name]["valueFraction"] = bc_dict['slipratio']
+            f["boundaryField"][bc_name]["valueFraction"] = bc_dict['slipRatio']
             f["boundaryField"][bc_name]["value"] = "uniform (0 0 0)"
-        elif wall_type == "moving":  # translatingWallVelocity  movingWallVelocity
-            f["boundaryField"][bc_name]["type"] = "movingWallVelocity"
+        elif wall_type == "translating":  # Specified velocity, only component tangential to wall is used
+            f["boundaryField"][bc_name]["type"] = "translatingWallVelocity"
             f["boundaryField"][bc_name]["U"] = formatValue(value)
-            # NOTE: Code depreciated (JH) 08/02/2017
-            # if self._solverSettings['dynamicMeshing'] and "pointDisplacement" in self._solverCreatedVariables():
-            #     df = ParsedParameterFile(self._casePath + "/0/pointDisplacement")
-            #     df["boundaryField"][bc_name] = {'type': "calculated", 'value': 'uniform (0 0 0)'}
-            #     df.writeFile()
         else:
             print("wall boundary: {} is not supported yet".format(wall_type))
         f.writeFile()
@@ -809,37 +809,30 @@ class BasicBuilder(object):
         #     turbulenceSettings = self._turbulenceProperties
         # self.setupWallTurbulence(bc_dict, turbulenceSettings)
 
-    def setupInterfaceBoundary(self, bc_dict):
-        # freestream is kind of like interface boundary type like wall, always uniform $internalField
-        ## empty:  2D as a special case of 3D mesh with one layer of mesh with front and back as empty
-        # symmetry: for any (non-planar) patch which uses the symmetry plane (slip) condition.
-        # "cyclicAMI" for Rotating, "cyclicAMI" slidingMesh
-        # "processor": for MPI parallel calculation, user needs not setup
+    def setupConstraintBoundary(self, bc_dict):
+        # Geometrical constraint types
         case = self._casePath
-        interface_type = bc_dict['subtype']
+        constraint_type = bc_dict['subtype']
         boundary_name = bc_dict['name']
         var_list = self._solverCreatedVariables
         for var in var_list:
             f = ParsedParameterFile(case + "/0/" + var)
-            if interface_type == "empty":
+            if constraint_type == "empty":
                 f["boundaryField"]["frontAndBack"] = {}
                 f["boundaryField"]["frontAndBack"]["type"] = "empty"
                 # axis-sym 2D case, axis line is also empty type
-            elif interface_type == "symmetryPlane" or interface_type == "symmetry":
+            elif constraint_type == "symmetryPlane" or constraint_type == "symmetry":
                 f["boundaryField"][boundary_name] = {}
-                f["boundaryField"][boundary_name]["type"] = interface_type
-            elif interface_type == "cyclic": # also named as `periodic` in ansys Fluent
+                f["boundaryField"][boundary_name]["type"] = constraint_type
+            elif constraint_type == "cyclic": # also named as `periodic` in ansys Fluent
                 f["boundaryField"][boundary_name] = {}
                 f["boundaryField"][boundary_name]["type"] = "cyclic"
                 # Todo: chack pairing of wedge and cyclic boundary
-            elif interface_type == "wedge":
+            elif constraint_type == "wedge":
                 f["boundaryField"][boundary_name] = {}
                 f["boundaryField"][boundary_name]["type"] = "wedge"  # axis-sym
-            elif interface_type == "coupled":
-                raise Exception('Boundary or patch type {} is not supported'.format(interface_type))
-                # Todo: need to pair with other analysis
             else:
-                raise Exception('Boundary or patch type {} is not supported'.format(interface_type))
+                raise Exception('Boundary or patch type {} is not supported'.format(constraint_type))
             f.writeFile()
 
     def pairCyclicBoundary(self, type, names):
@@ -872,9 +865,9 @@ class BasicBuilder(object):
                     f["boundaryField"][bc] = {'type': 'prghTotalPressure', 'p0': formatValue(bc_dict['pressure'])}
                 else:
                     f["boundaryField"][bc] = {'type': 'fixedFluxPressure', 'gradient':'uniform 0', 'value': "$internalField"}
-            elif bc_dict['type'] == 'freestream':
+            elif bc_dict['subtype'] == 'freestream':
                 f["boundaryField"][bc] = {'type': 'fixedValue', 'value': "$internalField"} #todo: check freestreamPressure
-            elif bc_dict['type'] == 'interface':
+            elif bc_dict['type'] == 'constraint':
                 f["boundaryField"][bc] = {'type': subtype}
             elif bc_dict['type'] == 'wall':
                 f["boundaryField"][bc] = {'type': 'fixedFluxPressure', 'value': 'uniform 0'}
@@ -883,7 +876,6 @@ class BasicBuilder(object):
         f.writeFile()
 
     def setupPressureInletBoundary(self, bc_dict):
-        # value is MPa in FreeCAD, but Pa is needed in OpenFOAM
         bc_name = bc_dict['name']
         inlet_type = bc_dict['subtype']
         value = bc_dict['pressure']
@@ -899,16 +891,15 @@ class BasicBuilder(object):
             if inlet_type == "totalPressure":
                 pf["boundaryField"][bc_name]["type"] = 'totalPressure'
                 pf["boundaryField"][bc_name]["p0"] = 'uniform {}'.format(value)
-                #pf["boundaryField"][bc_name]["gamma"] = 0  # for air: 1 .4
                 pf["boundaryField"][bc_name]["value"] = "$internalField"  # initial value
             else:  #
                 pf["boundaryField"][bc_name]["type"] = 'fixedValue'
                 pf["boundaryField"][bc_name]["value"] = "uniform {}".format(value)
         pf.writeFile()
 
-        # velocity intial value is default to wall, uniform 0, so it needs to change
+        # Velocity boundary defaults to wall, so it needs to change
         Uf["boundaryField"][bc_name]["type"] = "pressureInletOutletVelocity"
-        Uf["boundaryField"][bc_name]["value"] ="uniform (0 0 0)"  # initial value
+        Uf["boundaryField"][bc_name]["value"] = "uniform (0 0 0)"  # initial value
         Uf.writeFile()
 
         # NOTE: Update code when added turbulence back to the code (JH)
@@ -930,14 +921,16 @@ class BasicBuilder(object):
         Uf["boundaryField"][bc_name] = {}
         if inlet_type == "massFlowRate":
             Uf["boundaryField"][bc_name]["type"] = "flowRateInletVelocity"
-            Uf["boundaryField"][bc_name]["massFlowRate"] = bc_dict['massflowrate']  # kg/s
+            Uf["boundaryField"][bc_name]["massFlowRate"] = bc_dict['massFlowRate']  # kg/s
             Uf["boundaryField"][bc_name]["rho"] = "rho"
-            for k in set(['rho', 'density']):
-                Uf["boundaryField"][bc_name]["rhoInlet"] = self._fluidProperties[k]  # This is used if rho field is not found
+            # Set rhoInlet in case rho field is not found
+            for k in ['rho', 'density']:
+                if k in self._fluidProperties:
+                    Uf["boundaryField"][bc_name]["rhoInlet"] = self._fluidProperties[k]
             Uf["boundaryField"][bc_name]["value"] = "$internalField"
         elif inlet_type == "volumetricFlowRate":
             Uf["boundaryField"][bc_name]["type"] = "flowRateInletVelocity"
-            Uf["boundaryField"][bc_name]["volumetricFlowRate"] = bc_dict['volflowrate']  # m3/s
+            Uf["boundaryField"][bc_name]["volumetricFlowRate"] = bc_dict['volFlowRate']  # m3/s
             Uf["boundaryField"][bc_name]["value"] = "$internalField"
         elif inlet_type == "uniformVelocity":
             assert len(value) == 3  # velocity must be a tuple or list with 3 components
@@ -986,10 +979,9 @@ class BasicBuilder(object):
 
         pf = ParsedParameterFile(self._casePath + "/0/p")
         pf["boundaryField"][bc_name] = {}
-        if outlet_type == "totalPressure": # For outflow, totalPressure BC actually imposes static pressure, so this should probably be changed
+        if outlet_type == "totalPressureOpening":  # For outflow, totalPressure BC actually imposes static pressure
             pf["boundaryField"][bc_name]["type"] = 'totalPressure'
             pf["boundaryField"][bc_name]["p0"] = 'uniform {}'.format(bc_dict['pressure'])
-            pf["boundaryField"][bc_name]["gamma"] = 0  # what?  1 .4
             pf["boundaryField"][bc_name]["value"] = "$internalField"  # initial value
         elif outlet_type == "staticPressure":
             pf["boundaryField"][bc_name]["type"] = 'fixedValue'

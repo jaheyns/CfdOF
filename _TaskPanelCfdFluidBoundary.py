@@ -46,57 +46,63 @@ if FreeCAD.GuiUp:
 
 # Constants
 
-BOUNDARY_TYPES = ["wall", "inlet", "outlet", "interface", "freestream", "baffle"]
-SUBTYPES = [["fixed", "slip", "partialSlip", "moving", "rough"],
-            ["totalPressure", "uniformVelocity", "volumetricFlowRate", "massFlowRate"],
-            ["totalPressure", "staticPressure", "uniformVelocity", "outFlow"],
-            ["symmetryPlane", "cyclic", "wedge", "empty", "coupled"],
-            ["freestream"],
+BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Opening", "Constraint", "Baffle"]
+
+BOUNDARY_TYPES = ["wall", "inlet", "outlet", "open", "constraint", "baffle"]
+
+SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translating", "Rough"],
+            ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure"],
+            ["Static pressure", "Uniform velocity", "Outflow"],
+            ["Ambient pressure"],
+            ["Empty", "Symmetry plane", "Cyclic", "Wedge"],
+            ["Porous Baffle"]]
+
+SUBTYPES = [["fixed", "slip", "partialSlip", "translating", "rough"],
+            ["uniformVelocity", "volumetricFlowRate", "massFlowRate", "totalPressure"],
+            ["staticPressure", "uniformVelocity", "outFlow"],
+            ["totalPressureOpening"],
+            ["empty", "symmetryPlane", "cyclic", "wedge"],
             ["porousBaffle"]]
 
-SUBTYPES_HELPTEXT = [["Viscous wall boundary (zero velocity)",
-                      "Frictionless wall",
+SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
+                      "Frictionless wall; zero normal velocity",
                       "Blended fixed/slip",
-                      "Viscous moving wall",
+                      "Fixed velocity tangential to wall; zero normal velocity",
                       "Wall roughness function"],
-                     ["Total pressure specified, treated as static pressure for reverse flow",
-                      "Velocity specified, normal component imposed for reverse flow",
+                     ["Velocity specified; normal component imposed for reverse flow",
                       "Uniform volume flow rate specified",
-                      "Uniform mass flow rate specified"],
-                     ["Static pressure specified, treated as total pressure for reverse flow",
-                      "Static pressure specified for outflow and reverse flow",
-                      "Normal component imposed for outflow, velocity fixed for reverse flow",
+                      "Uniform mass flow rate specified",
+                      "Total pressure specified; treated as static pressure for reverse flow"],
+                     ["Static pressure specified for outflow and reverse flow",
+                      "Normal component imposed for outflow; velocity fixed for reverse flow",
                       "All fields extrapolated; use with care!"],
-                     ["Symmetry plane",
+                     ["Boundary open to surrounding with total pressure specified"],
+                     ["Front and back for single layer 2D mesh and axi-symmetric axis line",
+                      "Symmetry plane",
                       "Periodic boundary, treated as physically connected",
-                      "Axi-symmetric periodic boundary",
-                      "Front and back for single layer 2D mesh and axi-symmetric axis line",
-                      "Exchange boundary value with external program, requires manual setup"],
-                     ["Far-field conditions"],
+                      "Axi-symmetric periodic boundary"],
                      ["Permeable screen"]]
 
 # For each sub-type, whether the basic tab is enabled, the panel number to show, and (for panel 0 only) whether
 # direction reversal is checked by default
-BOUNDARY_BASICTAB = [[[False],
-                      [False],
-                      [True, 2],
-                      [True, 0, False],
-                      [True, 0, False]],
-                     [[True, 1],
-                      [True, 0, True],
-                      [True, 3],
-                      [True, 4]],
-                     [[True, 1],
-                      [True, 1],
-                      [True, 0, False],
-                      [False]],
-                     [[False],
-                      [False],
-                      [False],
-                      [False],
-                      [False]],
-                     [[True, 0, True]],
-                     [[True, 5]]]
+BOUNDARY_BASICTAB = [[[False],  # No slip
+                      [False],  # Slip
+                      [True, 2],  # Partial slip
+                      [True, 0, False],  # Translating wall
+                      [True, 0, False]],  # Rough
+                     [[True, 0, True],  # Velocity
+                      [True, 3],  # Vol flow rate
+                      [True, 4],  # Mass Flow rate
+                      [True, 1]],  # Total pressure
+                     [[True, 1],  # Static pressure
+                      [True, 0, False],  # Uniform velocity
+                      [False]],  # Outflow
+                     [[True, 1]],  # Opening
+                     [[False],  # Empty
+                      [False],  # Symmetry plane
+                      [False],  # Periodic
+                      [False]],  # Axi-symm
+                     [[True, 5]]]  # Permeable screen
 
 TURBULENCE_SPECIFICATIONS = ["intensity&DissipationRate",
                              "intensity&LengthScale",
@@ -164,7 +170,7 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputVolFlowRate.textChanged.connect(self.inputVolFlowRateChanged)
         self.form.inputMassFlowRate.textChanged.connect(self.inputMassFlowRateChanged)
         self.form.buttonGroupPorous.buttonClicked.connect(self.buttonGroupPorousClicked)
-        # Annoyingly can't find a way to set ID's from .ui file...
+        # Annoyingly can't find a way to set ID's for button group from .ui file...
         self.form.buttonGroupPorous.setId(self.form.radioButtonPorousCoeff, 0)
         self.form.buttonGroupPorous.setId(self.form.radioButtonPorousScreen, 1)
         self.form.inputPressureDropCoeff.textChanged.connect(self.inputPressureDropCoeffChanged)
@@ -176,11 +182,11 @@ class TaskPanelCfdFluidBoundary:
         self.form.thermalFrame.setVisible(False)
 
         # Populate UI
-        self.form.comboBoundaryType.addItems(BOUNDARY_TYPES)
-        self.form.comboBoundaryType.setCurrentIndex(
-            self.form.comboBoundaryType.findText(self.obj.BoundarySettings['BoundaryType']))
+        self.form.comboBoundaryType.addItems(BOUNDARY_NAMES)
+        bi = BOUNDARY_TYPES.index(CfdTools.getOrDefault(self.obj.BoundarySettings, 'BoundaryType', BOUNDARY_TYPES[0]))
+        self.form.comboBoundaryType.setCurrentIndex(bi)
         self.form.comboSubtype.setCurrentIndex(
-            self.form.comboSubtype.findText(self.obj.BoundarySettings['BoundarySubtype']))
+            SUBTYPES[bi].index(CfdTools.getOrDefault(self.obj.BoundarySettings, 'BoundarySubtype', SUBTYPES[bi][0])))
         self.rebuild_list_references()
         self.form.radioButtonCart.setChecked(self.obj.BoundarySettings['VelocityIsCartesian'])
         self.form.radioButtonMagNormal.setChecked(not self.obj.BoundarySettings['VelocityIsCartesian'])
@@ -241,9 +247,9 @@ class TaskPanelCfdFluidBoundary:
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
         self.form.comboSubtype.clear()
-        self.form.comboSubtype.addItems(SUBTYPES[index])
+        self.form.comboSubtype.addItems(SUBNAMES[index])
         self.form.comboSubtype.setCurrentIndex(0)
-        self.BoundarySettings['BoundaryType'] = self.form.comboBoundaryType.currentText()
+        self.BoundarySettings['BoundaryType'] = BOUNDARY_TYPES[self.form.comboBoundaryType.currentIndex()]
 
         """
             These are the lines of code needed to change the color of the boundary
@@ -261,7 +267,7 @@ class TaskPanelCfdFluidBoundary:
         type_index = self.form.comboBoundaryType.currentIndex()
         subtype_index = self.form.comboSubtype.currentIndex()
         self.form.labelBoundaryDescription.setText(SUBTYPES_HELPTEXT[type_index][subtype_index])
-        self.BoundarySettings['BoundarySubtype'] = self.form.comboSubtype.currentText()
+        self.BoundarySettings['BoundarySubtype'] = SUBTYPES[type_index][self.form.comboSubtype.currentIndex()]
         self.update_boundary_type_ui()
 
 

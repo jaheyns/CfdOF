@@ -82,14 +82,14 @@ class _CfdFluidBoundary(PartFeature):
             ref = obj.References[i]
             selection_object = doc.getObject(ref[0])
             listOfFaces.append(selection_object.Shape.getElement(ref[1]))
-        if len(listOfFaces)>0:
+        if len(listOfFaces) > 0:
             obj.Shape = Part.makeCompound(listOfFaces)
         else:
             obj.Shape = Part.Shape()
         self.updateBoundaryColors(obj)
         return
 
-    def updateBoundaryColors(self,obj):
+    def updateBoundaryColors(self, obj):
         vobj = obj.ViewObject
         vobj.Transparency = 20
         if obj.BoundarySettings['BoundaryType'] == 'wall':
@@ -98,7 +98,10 @@ class _CfdFluidBoundary(PartFeature):
             vobj.ShapeColor = (0.0, 0.0, 1.0)  # Blue
         elif obj.BoundarySettings['BoundaryType'] == 'outlet':
             vobj.ShapeColor = (1.0, 0.0, 0.0)  # Red
-        elif obj.BoundarySettings['BoundaryType'] == 'interface':
+        elif obj.BoundarySettings['BoundaryType'] == 'open':
+            vobj.ShapeColor = (0.0, 1.0, 1.0)  # Cyan
+        elif (obj.BoundarySettings['BoundaryType'] == 'constraint') or \
+             (obj.BoundarySettings['BoundaryType'] == 'baffle'):
             vobj.ShapeColor = (0.5, 0.0, 1.0)  # Purple
         else:
             vobj.ShapeColor = (1.0, 1.0, 1.0)  # White

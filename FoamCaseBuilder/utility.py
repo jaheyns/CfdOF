@@ -578,7 +578,7 @@ def makeRunCommand(cmd, dir, source_env=True):
         if source_env:
             cmdline = ['bash', '-c', 'source "{}" && cd "{}" && {}'.format(env_setup_script, translatePath(dir), cmd)]
         else:
-            cmdline = ['bash', '-c', 'cd "{}" && {}'.format(env_setup_script, translatePath(dir), cmd)]
+            cmdline = ['bash', '-c', 'cd "{}" && {}'.format(translatePath(dir), cmd)]
         return cmdline
 
 
