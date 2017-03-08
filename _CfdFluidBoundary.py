@@ -84,6 +84,8 @@ class _CfdFluidBoundary(PartFeature):
             listOfFaces.append(selection_object.Shape.getElement(ref[1]))
         if len(listOfFaces)>0:
             obj.Shape = Part.makeCompound(listOfFaces)
+        else:
+            obj.Shape = Part.Shape()
         self.updateBoundaryColors(obj)
         return
 

@@ -52,6 +52,7 @@ class _ViewProviderCfdFluidBoundary:
         self.Object = vobj.Object
         self.standard = coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
+        #self.ViewObject.Transparency = 95
         return
 
     def getDisplayModes(self, obj):

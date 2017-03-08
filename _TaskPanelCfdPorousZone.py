@@ -67,7 +67,7 @@ class _TaskPanelCfdPorousZone:
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelPorousZone.ui"))
 
         self.form.selectReference.clicked.connect(self.selectReference)
-        self.form.listWidget.itemClicked.connect(self.setSelection)
+        self.form.listWidget.itemPressed.connect(self.setSelection)
         self.form.pushButtonDelete.clicked.connect(self.deleteFeature)
 
         self.form.comboBoxCorrelation.currentIndexChanged.connect(self.comboBoxCorrelationChanged)
@@ -175,7 +175,6 @@ class _TaskPanelCfdPorousZone:
                         self.form.listWidget.addItem(str(sel.Object.Name))
                         shapeList.append(sel.Object)
                         self.partNameList.append(sel.Object.Name)
-
         self.obj.shapeList = shapeList
         FreeCADGui.doCommand("App.activeDocument().recompute()")
 

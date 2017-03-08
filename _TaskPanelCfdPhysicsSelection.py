@@ -55,7 +55,7 @@ class _TaskPanelCfdPhysicsSelection:
 
         #temporarily disabling features whihc are not yet supported
         self.form.radioButtonRANS.setEnabled(False)
-        #self.form.radioButtonTransient.setEnabled(False)
+        self.form.radioButtonTransient.setEnabled(False)
         self.form.radioButtonCompressible.setEnabled(False)
         self.form.radioButtonEnergy.setEnabled(False)
         self.form.radioButtonBuoyancy.setEnabled(False)
