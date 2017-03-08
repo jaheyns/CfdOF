@@ -63,6 +63,12 @@ class _TaskPanelCfdSolverControl:
         self.solver_runner = solver_runner_obj
         self.solver_object = solver_runner_obj.solver
 
+        self.writer_thread = QtCore.QThreadPool()
+        self.writer_thread.setMaxThreadCount(1)  # Only allow one concurrent case writer to be triggered
+        self.solver_runner.writer.setAutoDelete(False)  # Don't delete object once writer is run
+        self.solver_runner.writer.signals.error.connect(self.writerError)
+        self.solver_runner.writer.signals.finished.connect(self.writerFinished)
+
         # update UI
         self.fem_console_message = ''
 
@@ -98,7 +104,8 @@ class _TaskPanelCfdSolverControl:
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
     def updateText(self):
-        if self.solver_run_process.state() == QtCore.QProcess.ProcessState.Running:
+        if self.solver_run_process.state() == QtCore.QProcess.ProcessState.Running or \
+                self.writer_thread.activeThreadCount() > 0:
             self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
 
     def getStandardButtons(self):
@@ -120,7 +127,12 @@ class _TaskPanelCfdSolverControl:
     def reject(self):
         self.solver_run_process.terminate()
         self.solver_run_process.waitForFinished()
-        self.open_paraview.terminate()
+        import platform
+        if platform.system() == "Windows":
+            # This should not be necessary for a GUI application but there appears to be a bug in Windows or Qt
+            self.open_paraview.kill()
+        else:
+            self.open_paraview.terminate()
         self.open_paraview.waitForFinished()
         FreeCADGui.ActiveDocument.resetEdit()
 
@@ -141,23 +153,23 @@ class _TaskPanelCfdSolverControl:
         if self.check_prerequisites_helper():
             self.femConsoleMessage("{} case writer is called".format(self.solver_object.SolverName))
             self.form.pb_paraview.setEnabled(False)
-            try:
-                QApplication.setOverrideCursor(Qt.WaitCursor)
-                ret = self.solver_runner.write_case()
-                if ret:
-                    self.femConsoleMessage("Write {} case is completed.".format(self.solver_object.SolverName))
-                    self.form.pb_edit_inp.setEnabled(True)
-                    self.form.pb_run_solver.setEnabled(True)
-                else:
-                    self.femConsoleMessage("Write case setup file failed!", "#FF0000")
-            except Exception as e:
-                self.femConsoleMessage("Error writing case:")
-                self.femConsoleMessage(str(e))
-                raise
-            finally:
-                QApplication.restoreOverrideCursor()
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            self.writer_thread.start(self.solver_runner.writer)
         else:
-            self.femConsoleMessage("Case check failed!", "#FF0000")
+            self.femConsoleMessage("Case check failed", "#FF0000")
+
+    def writerError(self, error_msg):
+        self.femConsoleMessage("Error writing case:")
+        self.femConsoleMessage(str(error_msg))
+
+    def writerFinished(self, success):
+        if success:
+            self.femConsoleMessage("Write {} case is completed".format(self.solver_object.SolverName))
+            self.form.pb_edit_inp.setEnabled(True)
+            self.form.pb_run_solver.setEnabled(True)
+        else:
+            self.femConsoleMessage("Write case setup file failed", "#FF0000")
+        QApplication.restoreOverrideCursor()
 
     def check_prerequisites_helper(self):
         self.femConsoleMessage("Checking dependencies...")
@@ -177,6 +189,7 @@ class _TaskPanelCfdSolverControl:
         #self.femConsoleMessage("Run {} at {} with command:".format(self.solver_object.SolverName, self.solver_object.WorkingDir))
 
         solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
+        solverDirectory = os.path.abspath(solverDirectory)
         cmd = self.solver_runner.get_solver_cmd(solverDirectory)
         FreeCAD.Console.PrintMessage(' '.join(cmd) + '\n')
         self.femConsoleMessage("Starting solver command:")

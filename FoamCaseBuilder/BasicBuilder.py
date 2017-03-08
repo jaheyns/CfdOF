@@ -93,7 +93,8 @@ class BasicBuilder(object):
         # Should be repeated on rebuild after settings change
         self.updateTemplateControlDict()  # Updates the solver time step controls
         self.modifySolutionResidualTolerance()  # Updates the solver convergence tolerance for p and U fields.
-        createRunScript(self._casePath, self._initialConditions["PotentialFoam"],
+        createRunScript(self._casePath, self._templatePath,
+                        self._initialConditions["PotentialFoam"],
                         self._solverSettings['parallel'],
                         self._solverName,
                         self._solverSettings['parallelCores'],

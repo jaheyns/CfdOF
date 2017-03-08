@@ -97,9 +97,6 @@ class CfdRunnableFoam(CfdRunnable):
     def check_prerequisites(self):
         return ""
 
-    def write_case(self):
-        return self.writer.write_case()
-
     def get_solver_cmd(self, case_dir):
         # Set up gnuplot here for error checking
 

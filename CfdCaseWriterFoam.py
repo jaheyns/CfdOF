@@ -38,16 +38,26 @@ import CfdTools
 import os
 import os.path
 import FoamCaseBuilder as fcb  # independent module, not depending on FreeCAD
+from PySide import QtCore
+from PySide.QtCore import QRunnable, QObject
 
 
 # Write CFD analysis setup into OpenFOAM case
 # write_case() is the only public API
+# Derived from QRunnable in order to run in a worker thread
 
-class CfdCaseWriterFoam:
+class CfdCaseWriterSignals(QObject):
+    error = QtCore.Signal(str) # Signal in PySide, pyqtSignal in PyQt
+    finished = QtCore.Signal(bool)
+
+
+class CfdCaseWriterFoam(QRunnable):
     def __init__(self, analysis_obj):
+        super(CfdCaseWriterFoam, self).__init__()
         """ analysis_obj should contains all the information needed,
         boundaryConditionList is a list of all boundary Conditions objects(FemConstraint)
         """
+
         self.analysis_obj = analysis_obj
         self.solver_obj = CfdTools.getSolver(analysis_obj)
         self.physics_model, isPresent = CfdTools.getPhysicsModel(analysis_obj)
@@ -58,11 +68,23 @@ class CfdCaseWriterFoam:
         self.porousZone_objs, self.porousZonePresent = CfdTools.getPorousObjects(analysis_obj)
         self.mesh_generated = False
 
+        self.signals = CfdCaseWriterSignals()
+
         # Set parameter location
         self.param_path = "User parameter:BaseApp/Preferences/Mod/Cfd/OpenFOAM"
         # Ensure parameters exist for future editing
         installation_path = FreeCAD.ParamGet(self.param_path).GetString("InstallationPath", "")
         FreeCAD.ParamGet(self.param_path).SetString("InstallationPath", installation_path)
+
+    def run(self):
+        success = False
+        try:
+            success = self.write_case()
+        except Exception as e:
+            self.signals.error.emit(str(e))
+            self.signals.finished.emit(False)
+            raise
+        self.signals.finished.emit(success)
 
     def write_case(self, updating=False):
         """ Write_case() will collect case setings, and finally build a runnable case. """
@@ -123,7 +145,7 @@ class CfdCaseWriterFoam:
         finally:
             os.chdir(_cwd)  # Restore working dir
         FreeCAD.Console.PrintMessage("Sucessfully wrote {} case to folder {}\n".format(
-                                                        self.solver_obj.SolverName, self.solver_obj.WorkingDir))
+                                     self.solver_obj.SolverName, self.solver_obj.WorkingDir))
         return True
 
     # Solver
@@ -220,10 +242,7 @@ class CfdCaseWriterFoam:
                     else:
                         raise RuntimeError
                 except (SystemError, RuntimeError):
-                    from PySide import QtGui
-                    QtGui.QMessageBox.critical(None, "Face error",
-                                               bc.BoundarySettings['DirectionFace'] + " is not a valid, planar face.")
-                    raise RuntimeError
+                    raise RuntimeError(bc.BoundarySettings['DirectionFace'] + " is not a valid, planar face.")
 
             bc_dict['velocity'] = velocity
             bc_dict['pressure'] = Units.Quantity(bc.BoundarySettings['Pressure']).getValueAs("kg*m/s^2").Value
