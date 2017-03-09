@@ -94,6 +94,9 @@ class CfdRunnableFoam(CfdRunnable):
         self.pResiduals = [1]
         self.niter = 0
 
+        self.print_next_error_lines = 0
+        self.print_next_error_file = False
+
     def check_prerequisites(self):
         return ""
 
@@ -121,6 +124,8 @@ class CfdRunnableFoam(CfdRunnable):
         self.UzResiduals = [1]
         self.pResiduals = [1]
         self.niter = 0
+        self.print_next_error_lines = 0
+        self.print_next_error_file = False
 
         self.g('set style data lines')
         self.g.title("Simulation residuals")
@@ -133,7 +138,7 @@ class CfdRunnableFoam(CfdRunnable):
         self.g("set xrange [0:1]")
 
         # Environment is sourced in run script, so no need to include in run command
-        cmd = FoamCaseBuilder.utility.makeRunCommand('. Allrun', case_dir, source_env=False)
+        cmd = FoamCaseBuilder.utility.makeRunCommand('./Allrun', case_dir, source_env=False)
         FreeCAD.Console.PrintMessage("Solver run command: " + ' '.join(cmd) + "\n")
         return cmd
 
@@ -191,3 +196,31 @@ class CfdRunnableFoam(CfdRunnable):
 
         if self.niter >= 2:
             self.g("set autoscale")  # NOTE: this is just to suppress the empty yrange error when Gnuplot autoscales
+
+    def processErrorOutput(self, err):
+        """
+        Process standard error text output from solver
+        :param err: Standard error output, single or multiple lines
+        :return: A message to be printed on console, or None
+        """
+        ret = ""
+        errlines = err.split('\n')
+        for errline in errlines:
+            if len(errline) > 0:  # Ignore blanks
+                if self.print_next_error_lines > 0:
+                    ret += errline + "\n"
+                    self.print_next_error_lines -= 1
+                if self.print_next_error_file and errline.startswith("file:"):
+                    ret += errline + "\n"
+                    self.print_next_error_file = False
+                if errline.startswith("--> FOAM FATAL ERROR:"):
+                    self.print_next_error_lines = 1
+                    ret += "OpenFOAM fatal error:\n"
+                elif errline.startswith("--> FOAM FATAL IO ERROR:"):
+                    self.print_next_error_lines = 1
+                    self.print_next_error_file = True
+                    ret += "OpenFOAM IO error:\n"
+        if len(ret) > 0:
+            return ret
+        else:
+            return None

@@ -78,7 +78,8 @@ class _TaskPanelCfdSolverControl:
 
         #self.solver_run_process.readyReadStandardOutput.connect(self.stdoutReady)
         QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("finished(int)"), self.solverFinished)
-        QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.plotResiduals)
+        QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
+        QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("readyReadStandardError()"), self.readOutput)
         QtCore.QObject.connect(self.form.terminateSolver, QtCore.SIGNAL("clicked()"), self.killSolverProcess)
         self.form.terminateSolver.setEnabled(False)
 
@@ -159,8 +160,8 @@ class _TaskPanelCfdSolverControl:
             self.femConsoleMessage("Case check failed", "#FF0000")
 
     def writerError(self, error_msg):
-        self.femConsoleMessage("Error writing case:")
-        self.femConsoleMessage(str(error_msg))
+        self.femConsoleMessage("Error writing case:", "#FF0000")
+        self.femConsoleMessage(str(error_msg), "#FF0000")
 
     def writerFinished(self, success):
         if success:
@@ -181,7 +182,9 @@ class _TaskPanelCfdSolverControl:
         return True
 
     def editSolverInputFile(self):
-        self.femConsoleMessage("Edit case input file in FreeCAD is not implemented!")
+        self.Start = time.time()
+        solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
+        self.femConsoleMessage("Please edit the case input files externally at: {}\n".format(solverDirectory))
         self.solver_runner.edit_case()
 
     def runSolverProcess(self):
@@ -226,27 +229,32 @@ class _TaskPanelCfdSolverControl:
         self.form.terminateSolver.setEnabled(False)
         #FreeCAD.Console.PrintMessage("Killing OF solver instance")
 
-    def solverFinished(self):
+    def solverFinished(self, exit_code):
         #self.femConsoleMessage(self.solver_run_process.exitCode())
-        self.femConsoleMessage("Simulation finished")
+        if exit_code == 0:
+            self.femConsoleMessage("Simulation finished successfully")
+        else:
+            self.femConsoleMessage("Simulation exited with error", "#FF0000")
         self.form.pb_run_solver.setEnabled(True)
         self.form.terminateSolver.setEnabled(False)
     
-    def plotResiduals(self):
+    def readOutput(self):
         # Ensure only complete lines are passed on
         text = ""
         while self.solver_run_process.canReadLine():
             text += str(self.solver_run_process.readLine())
-        #FreeCAD.Console.PrintMessage(text)
-        print text,  # Avoid displaying on FreeCAD status bar
+        FreeCAD.Console.PrintMessage(text)
+        # print text,  # Avoid displaying on FreeCAD status bar
         self.solver_runner.process_output(text)
 
         # Print any error output to console
-        err = ""
         self.solver_run_process.setReadChannel(QtCore.QProcess.StandardError)
         while self.solver_run_process.canReadLine():
-            err += str(self.solver_run_process.readLine())
-        FreeCAD.Console.PrintError(err)
+            err = str(self.solver_run_process.readLine())
+            FreeCAD.Console.PrintError(err)
+            print_err = self.solver_runner.processErrorOutput(err)
+            if print_err is not None:
+                self.femConsoleMessage(print_err, "#FF0000")
         self.solver_run_process.setReadChannel(QtCore.QProcess.StandardOutput)
 
     def openParaview(self):

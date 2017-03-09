@@ -1,0 +1,8 @@
+# Unset and source bashrc
+if [ -f "#FOAMDIR#/etc/config/unset.sh" ]; then  # for OF < 4
+   source "#FOAMDIR#/etc/config/unset.sh" 2> /dev/null
+else
+   source "#FOAMDIR#/etc/config.sh/unset" 2> /dev/null
+fi
+source "#FOAMDIR#/etc/bashrc"
+

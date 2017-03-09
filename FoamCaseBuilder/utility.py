@@ -410,13 +410,11 @@ def createCaseFromTemplate(output_path, source_path, backup_path=None):
     #     os.remove(output_path + os.path.sep +"Allclean.sh")
 
 
-def createRunScript(case, init_potential, run_parallel, solver_name, num_proc, porousZoneSettings,
+def createRunScript(case, templatePath, init_potential, run_parallel, solver_name, num_proc, porousZoneSettings,
                     bafflesPresent):
     print("Create Allrun script ")
 
     fname = case + os.path.sep + "Allrun"
-    mesh_dir = "constant/polyMesh"
-    meshOrg_dir = "../polyMesh.org"  # Relative to mesh_dir
 
     if os.path.exists(fname):
         print("Warning: Overwrite existing Allrun script and log files.")
@@ -430,29 +428,14 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc, p
     with open(fname, 'w+') as f:
         case = translatePath(case)
 
-        f.write('#!/bin/sh \n\n')
-
+        source = ""
         if getFoamRuntime() != "BlueCFD":  # Runs inside own environment - no need to source
-            f.write('# Unset and source bashrc\n')
-            f.write('if [ -f "{}/etc/config/unset.sh" ]; then  # for OF < 4\n'.format(translatePath(getFoamDir)))
-            f.write('   source "{}/etc/config/unset.sh"\n'.format(translatePath(getFoamDir())))
-            f.write('else\n')
-            f.write('   source "{}/etc/config.sh/unset"\n'.format(translatePath(getFoamDir())))
-            f.write('fi\n')
-            f.write('source "{}/etc/bashrc"\n\n'.format(translatePath(getFoamDir())))
+            source = readTemplate(os.path.join(templatePath, "helperFiles", "AllrunSource"),
+                                  {"FOAMDIR": translatePath(getFoamDir())})
 
-        # Mesh is stored in PolyMesh.org to ensure the mesh is preserved if the user decides to clean the case from
-        # the terminal.
-        f.write("# Create symbolic links to polyMesh.org\n")
-        f.write('mkdir "{}"\n'.format(mesh_dir))
-        f.write('ln -s "{}/boundary" "{}"\n'.format(meshOrg_dir, mesh_dir))
-        f.write('ln -s "{}/faces" "{}"\n'.format(meshOrg_dir, mesh_dir))
-        f.write('ln -s "{}/neighbour" "{}"\n'.format(meshOrg_dir, mesh_dir))
-        f.write('ln -s "{}/owner" "{}"\n'.format(meshOrg_dir, mesh_dir))
-        f.write('ln -s "{}/points" "{}"\n'.format(meshOrg_dir, mesh_dir))
-        if bafflesPresent:
-            f.write('ln -s "{}/faceZones" "{}"\n'.format(meshOrg_dir, mesh_dir))
-        f.write('\n')
+        head = readTemplate(os.path.join(templatePath, "helperFiles", "AllrunPreamble"),
+                            {"SOURCE": source})
+        f.write(head)
 
         if len(porousZoneSettings):
             f.write('# Scaling .stl files exported from FreeCAD from mm to m\n')
@@ -461,35 +444,36 @@ def createRunScript(case, init_potential, run_parallel, solver_name, num_proc, p
                 for partName in po['PartNameList']:
                     counter += 1
                     fileBaseName = 'constant/triSurface/{}'.format(partName)
-                    f.write('surfaceTransformPoints -scale "(0.001 0.001 0.001)"'
-                            + ' "{}.stl" "{}Scaled.stl" 2>&1'.format(fileBaseName, fileBaseName)
-                            + ' | tee log.surfaceTransformPoints\n')
+                    f.write('runCommand surfaceTransformPoints -scale "(0.001 0.001 0.001)"'
+                            + ' "{}.stl" "{}Scaled.stl"\n'.format(fileBaseName, fileBaseName))
             f.write('\n')
-            f.write('# Set cells zones contained inside the .stl surfaces \n')
-            f.write('topoSet 2>&1 | tee log.topoSet\n')
+            f.write('# Set cell zones contained inside the .stl surfaces \n')
+            f.write('runCommand topoSet\n')
             f.write('\n')
 
         if bafflesPresent:
             f.write('# Creating baffles\n')
-            f.write('createBaffles -overwrite 2>&1 | tee log.createBaffles\n')
+            f.write('runCommand createBaffles -overwrite\n')
             f.write('\n')
 
         if init_potential:
             f.write('# Initialise flow\n')
-            f.write('potentialFoam 2>&1 | tee log.potentialFoam\n\n')
+            f.write('runCommand potentialFoam\n')
+            f.write('\n')
 
         if run_parallel:
             f.write('# Run application in parallel\n')
-            f.write('decomposePar 2>&1 | tee log.decomposePar\n')
-            f.write('mpirun -np {} {} -parallel 2>&1 | tee log.{}\n\n'.format(str(num_proc),
-                    solver_name, solver_name))
+            f.write('runCommand decomposePar -force\n')
+            f.write('runCommand mpirun -np {} {} -parallel\n'.format(str(num_proc), solver_name))
+            f.write('\n')
         else:
             f.write('# Run application\n')
-            f.write('{} 2>&1 | tee log.{}\n\n'.format(solver_name, solver_name))
+            f.write('runCommand {}\n'.format(solver_name))
+            f.write('\n')
 
     import stat
     s = os.stat(fname)
-    os.chmod(fname, s.st_mode or stat.S_IEXEC)  # Update Allrun permission - will fail silently on windows
+    os.chmod(fname, s.st_mode | stat.S_IEXEC)  # Update Allrun permission - will fail silently on windows
 
 
 def copySettingsFromExistentCase(output_path, source_path):
