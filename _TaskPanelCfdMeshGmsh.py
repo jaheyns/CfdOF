@@ -38,10 +38,7 @@ import os
 import sys
 import os.path
 import platform
-if platform.system() == 'Windows':
-    from PyObjects import _FemMeshGmsh
-else:
-    import _FemMeshGmsh
+from PyObjects import _FemMeshGmsh
 import time
 
 if FreeCAD.GuiUp:

@@ -444,7 +444,7 @@ def createRunScript(case, templatePath, init_potential, run_parallel, solver_nam
                 for partName in po['PartNameList']:
                     counter += 1
                     fileBaseName = 'constant/triSurface/{}'.format(partName)
-                    f.write('runCommand surfaceTransformPoints -scale "(0.001 0.001 0.001)"'
+                    f.write("runCommand surfaceTransformPoints -scale '(0.001 0.001 0.001)'"
                             + ' "{}.stl" "{}Scaled.stl"\n'.format(fileBaseName, fileBaseName))
             f.write('\n')
             f.write('# Set cell zones contained inside the .stl surfaces \n')

@@ -34,6 +34,10 @@ import tempfile
 import FreeCAD
 import Fem
 
+if FreeCAD.GuiUp:
+    import FreeCADGui
+    import FemGui
+
 
 # Working directory
 
@@ -313,3 +317,15 @@ def normalise(v):
     if mag < sys.float_info.min:
         mag += sys.float_info.min
     return [vi/mag for vi in v]
+
+
+# This is taken from hide_parts_constraints_show_meshes which was removed from FemCommands for some reason
+def hide_parts_show_meshes():
+    if FreeCAD.GuiUp:
+        for acnstrmesh in FemGui.getActiveAnalysis().Member:
+            if "Mesh" in acnstrmesh.TypeId:
+                aparttoshow = acnstrmesh.Name.replace("_Mesh", "")
+                for apart in FreeCAD.activeDocument().Objects:
+                    if aparttoshow == apart.Name:
+                        apart.ViewObject.Visibility = False
+                acnstrmesh.ViewObject.Visibility = True

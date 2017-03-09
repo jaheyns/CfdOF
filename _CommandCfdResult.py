@@ -26,10 +26,7 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-if platform.system() == 'Windows':
-    from PyGui.FemCommands import FemCommands
-else:
-    from FemCommands import FemCommands
+from PyGui.FemCommands import FemCommands
 import CfdTools
 
 if FreeCAD.GuiUp:
@@ -54,7 +51,7 @@ class _CommandCfdResult(FemCommands):
             QtGui.QMessageBox.critical(None, "Missing prerequisite", "No result found in active Analysis")
             return
 
-        self.hide_parts_constraints_show_meshes()
+        CfdTools.hide_parts_show_meshes()
 
         import _TaskPanelCfdResult
         taskd = _TaskPanelCfdResult._TaskPanelCfdResult()

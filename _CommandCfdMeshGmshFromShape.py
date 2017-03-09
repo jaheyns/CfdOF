@@ -26,10 +26,7 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-if platform.system() == 'Windows':
-    from PyGui.FemCommands import FemCommands
-else:
-    from FemCommands import FemCommands
+from PyGui.FemCommands import FemCommands
 import FreeCADGui
 import FemGui
 from PySide import QtCore

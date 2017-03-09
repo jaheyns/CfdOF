@@ -22,10 +22,7 @@
 
 import FreeCAD
 import platform
-if platform.system() == 'Windows':
-    from PyGui.FemCommands import FemCommands
-else:
-    from FemCommands import FemCommands
+from PyGui.FemCommands import FemCommands
 import CfdTools
 import os
 

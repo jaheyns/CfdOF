@@ -26,10 +26,7 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-if platform.system() == 'Windows':
-    from PyGui.FemCommands import FemCommands
-else:
-    from FemCommands import FemCommands
+from PyGui.FemCommands import FemCommands
 import CfdTools
 import os
 
@@ -53,7 +50,7 @@ class _CommandCfdSolverControl(FemCommands):
 
     def Activated(self):
 
-        self.hide_parts_constraints_show_meshes()
+        CfdTools.hide_parts_show_meshes()
 
         isPresent = False
         members = FemGui.getActiveAnalysis().Member
