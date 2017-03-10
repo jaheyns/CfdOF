@@ -101,10 +101,9 @@ class CfdCaseWriterFoam(QRunnable):
             self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
 
             # Get OpenFOAM install path from parameters
-            paramPath = "User parameter:BaseApp/Preferences/Mod/Cfd/OpenFOAM"
-            self.installation_path = FreeCAD.ParamGet(paramPath).GetString("InstallationPath", "")
-            # Ensure parameter exists for future editing
-            FreeCAD.ParamGet(paramPath).SetString("InstallationPath", self.installation_path)
+            param_path = self.param_path
+            self.installation_path = FreeCAD.ParamGet(self.param_path).GetString("InstallationPath", "")
+
             self.solverName = self.getSolverName()
 
             # Initialise case

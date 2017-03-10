@@ -550,6 +550,11 @@ def makeRunCommand(cmd, dir, source_env=True):
             cmdline = ['bash', '-c', 'cd "{}" && {}'.format(translatePath(dir), cmd)]
         return cmdline
     elif getFoamRuntime() == "BlueCFD":
+        # Set-up necessary for running a command - only needs doing once, but to be safe...
+        with open('{}\\..\\msys64\\home\\ofuser\\.blueCFDOrigin'.format(getFoamDir()), "w") as f:
+            f.write(getShortWindowsPath('{}\\..'.format(getFoamDir())))
+            f.close()
+
         if getFoamDir() is None:
             raise IOError("OpenFOAM installation directory not found")
         cmdline = ['{}\\..\\msys64\\usr\\bin\\bash'.format(getFoamDir()), '--login', '-O', 'expand_aliases', '-c',
@@ -831,3 +836,24 @@ def readTemplate(fileName, replaceDict=None):
 #     """GNUplot to plot convergence progress of simulation
 #     """
 #     raise NotImplementedError()
+
+
+def getShortWindowsPath(long_name):
+    """
+    Gets the short path name of a given long path.
+    http://stackoverflow.com/a/23598461/200291
+    """
+    import ctypes
+    from ctypes import wintypes
+    _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
+    _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+    _GetShortPathNameW.restype = wintypes.DWORD
+
+    output_buf_size = 0
+    while True:
+        output_buf = ctypes.create_unicode_buffer(output_buf_size)
+        needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
+        if output_buf_size >= needed:
+            return output_buf.value
+        else:
+            output_buf_size = needed
