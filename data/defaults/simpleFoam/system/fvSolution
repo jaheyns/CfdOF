@@ -62,7 +62,7 @@ SIMPLE
     // higher number of corrections.
     nNonOrthogonalCorrectors 5;
 
-    consistent yes;
+    consistent no;  // Setting this impairs stability of porous baffles
     residualControl
     {
         p 0.01;
