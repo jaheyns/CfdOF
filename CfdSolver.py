@@ -55,7 +55,7 @@ class CfdSolver(object):
             elif os.path.exists('/tmp/'):   # must exist for POSIX system
                 obj.WorkingDir = os.path.abspath('/tmp/')  # On Windows, os.path.exists tests the abs path, i.e. c:\tmp
             else:
-                obj.WorkingDir = '.' + os.pathsep
+                obj.WorkingDir = '.'
             obj.InputCaseName = 'case'
 
             obj.addProperty("App::PropertyFloat", "EndTime", "TimeStepControl",
