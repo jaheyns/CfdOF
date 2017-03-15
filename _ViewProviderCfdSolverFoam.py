@@ -78,13 +78,13 @@ class _ViewProviderCfdSolverFoam:
         
     def setEdit(self, vobj, mode):
         if FemGui.getActiveAnalysis():
-            CfdTools.setupWorkingDir(self.Object)  # WorkingDir must existent and writable
+            #CfdTools.setupWorkingDir(self.Object)  # WorkingDir must existent and writable
             from CfdRunnableFoam import CfdRunnableFoam
             foamRunnable = CfdRunnableFoam(FemGui.getActiveAnalysis(), self.Object)
             from _TaskPanelCfdSolverControl import _TaskPanelCfdSolverControl
             taskd = _TaskPanelCfdSolverControl(foamRunnable)
             taskd.obj = vobj.Object
-            
+
             FreeCADGui.Control.showDialog(taskd)
         return True
 
