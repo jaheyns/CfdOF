@@ -26,10 +26,7 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-if platform.system() == 'Windows':
-    from PyObjects import _FemMeshGmsh
-else:
-    import _FemMeshGmsh
+from PyObjects import _FemMeshGmsh
 
 
 def makeCfdMeshGmsh(name="CFDMeshGMSH"):
