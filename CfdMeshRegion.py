@@ -28,10 +28,10 @@ __url__ = "http://www.freecadweb.org"
 #  @{
 
 import FreeCAD
-import _FemMeshRegion
+from PyObjects import _FemMeshRegion
 
 
-def makeCfdMeshRegion(base_mesh, element_length=0.0, name="FEMMeshRegion"):
+def makeCfdMeshRegion(base_mesh, element_length=0.0, name="MeshRegion"):
     '''makeFemMeshRegion([length], [name]): creates a  FEM mesh region object to define properties for a regon of a FEM mesh'''
     obj = FreeCAD.ActiveDocument.addObject("Fem::FeaturePython", name)
     _FemMeshRegion._FemMeshRegion(obj)
