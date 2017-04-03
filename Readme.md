@@ -12,17 +12,13 @@ functionality.
 
 ### Current:
 
-* Incompressible, laminar flow (simpleFoam and pimpleFoam).
+* Incompressible, laminar flow (simpleFoam).
 * Basic material data base.
 * Flow initialisation with a potential solver.
-* Tetrahedral meshing using GMSH.
+* Tetrahedral meshing using GMSH including multiple region meshing using FEM workbench functionality.
 * Post processing using paraview.
 * Porous regions and porous baffles.
-* Run on Windows 7-10
-
-### Under development:
-
-* Multiple region meshing
+* Runs on Windows 7-10
 * Unit testing
 
 ### Future (2017):
@@ -33,19 +29,21 @@ functionality.
 
 ### Platforms supported
 
-Linux: 
+####Linux: 
 
-        Ubuntu 16.04 
-        Fedora 24
+Any system on which FreeCAD and the prerequisites listed below can be installed. The following have been tested:
+* Ubuntu 16.04 
+* Fedora 24
 
-Windows:
+####Windows:
 
-        Windows 7 (tested)
-        Windows 10 (to be tested)
+* Windows 7 (tested)
+* Windows 8 (not yet tested)
+* Windows 10 (tested)
 
-MAC 
+####MAC:
 
-        Not tested, but a POSIX system. Possible to install and run OpenFOAM. 
+Not tested, but a POSIX system. Possible to install and run OpenFOAM. 
       
 =============================================
   
@@ -53,7 +51,7 @@ MAC
 
 ### Prerequisites
 
-- [OpenFOAM (version 3.0 or later)](http://openfoam.org/download/)
+- [OpenFOAM (version 3.0.1 or later)](http://openfoam.org/download/)
 
 - [PyFoam (version 0.6.6 or later)](http://pypi.python.org/pypi/PyFoam)
 
@@ -64,21 +62,30 @@ MAC
 - [GMSH (version 2.13 or later)](http://gmsh.info/)
 
 
-### Setting up Cfd workbemch
+### Setting up CFD workbench
+
+#### Windows
+
+In Windows, it is suggested to download a pre-packaged version from 
+https://opensimsa.github.io/download.html
+and consult the included README file. This package comes with PyFoam and Gnuplot.py already installed into the bundled version of Python, and GMSH 
+included. The OpenFOAM installation is via the [blueCFD](http://bluecfd.github.io/Core/Downloads/) package.
+
+#### Linux
 
 As the CFD workbench is fully developed in Python the user is not required to compile any libraries and can directly 
-copy the folder to <FreeCAD-directory>/Mod/Cfd or to ~/.FreeCAD/Mod/Cfd (in Linux) or \<Application Data\>\FreeCAD\Mod\Cfd (in Windows). 
+copy the folder to <FreeCAD-directory>/Mod/CfdFoam or to ~/.FreeCAD/Mod/CfdFoam (in Linux) or \<Application Data\>\FreeCAD\Mod\CfdFoam (in Windows). 
 
-As an example, from command line, clone the CFD workbench
+As an example, from the command line, clone the CFD workbench
     
-    $ git clone https://github.com/jaheyns/Cfd.git
+    $ git clone https://github.com/jaheyns/CfdFoam.git
         
 and create a symbolic link to the local FreeCAD instalation directory. 
     
-    $ ln -s <path/to/Cfd>  <path/to/freecad>/Mod/Cfd
+    $ ln -s <path/to/CfdFoam>  <path/to/FreeCAD>/Mod/CfdFoam
         
 
-This fork is unfortunately not available under the  FreeCAD-Addon-Installer.
+This fork is unfortunately not yet available under the  FreeCAD-Addon-Installer.
 
 
 ##Developement
@@ -107,7 +114,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 5. Imports should usually be on separate lines.
 6. Comments
 
-    - Docstrings always use """triple double quotes"""
+    - Docstrings always use """triple double-quotes"""
     
     - Block comment starts with a # and a single space and are indented to the same level as that code
     
@@ -126,8 +133,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 
 ## Developers
 
-Qingfeng Xia, 2015 <iesensor.com/HTML5pptCV>
-Johan Heyns (CSIR, 2016) <jheyns@csir.co.za>         
-Oliver Oxtoby (CSIR, 2016) <ooxtoby@csir.co.za>      
+Qingfeng Xia, 2015 <iesensor.com/HTML5pptCV>  
+Johan Heyns (CSIR, 2016) <jheyns@csir.co.za>  
+Oliver Oxtoby (CSIR, 2016) <ooxtoby@csir.co.za>  
 Alfred Bogaers (CSIR, 2016) <abogaers@csir.co.za>    
-
