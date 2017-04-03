@@ -51,6 +51,8 @@ Not tested, but a POSIX system. Possible to install and run OpenFOAM.
 
 ### Prerequisites
 
+- [Latest development version of FreeCAD (0.17 prerelease; git commit 10432 or greater)](https://www.freecadweb.org/wiki/Download)
+
 - [OpenFOAM (version 3.0.1 or later)](http://openfoam.org/download/)
 
 - [PyFoam (version 0.6.6 or later)](http://pypi.python.org/pypi/PyFoam)
