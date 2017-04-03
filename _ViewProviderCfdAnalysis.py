@@ -57,8 +57,8 @@ class _ViewProviderCfdAnalysis:
 
     def doubleClicked(self, vobj):
         if not FemGui.getActiveAnalysis() == self.Object:
-            if FreeCADGui.activeWorkbench().name() != 'CfdWorkbench':
-                FreeCADGui.activateWorkbench("CfdWorkbench")
+            if FreeCADGui.activeWorkbench().name() != 'CfdFoamWorkbench':
+                FreeCADGui.activateWorkbench("CfdFoamWorkbench")
             FemGui.setActiveAnalysis(self.Object)
             return True
         return True

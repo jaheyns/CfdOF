@@ -27,15 +27,14 @@ __author__ = "Qingfeng Xia"
 __url__ = "http://www.freecadweb.org"
 
 
-class CfdWorkbench(Workbench):
-    "CFD workbench object"
+class CfdFoamWorkbench(Workbench):
+    """ CFDFoam workbench object """
     def __init__(self):
-        # self.__class__.Icon = FreeCAD.getResourceDir() + "Mod/Fem/Resources/icons/FemWorkbench.svg"
         import os
         import CfdTools
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd.png")
         self.__class__.Icon = icon_path
-        self.__class__.MenuText = "CFD"
+        self.__class__.MenuText = "CFDFoam"
         self.__class__.ToolTip = "CFD workbench"
 
     def Initialize(self):
@@ -67,12 +66,12 @@ class CfdWorkbench(Workbench):
                   'Cfd_MeshGmshFromShape', 'Fem_MeshRegion',
                   'Cfd_FluidBoundary', 'Cfd_PorousZone','Cfd_SolverControl']
 
-        self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
-        self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD")), cmdlst)
+        self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFDFoam")), cmdlst)
+        self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CFDFoam")), cmdlst)
 
         # enable QtCore translation here, todo
 
     def GetClassName(self):
         return "Gui::PythonWorkbench"
 
-FreeCADGui.addWorkbench(CfdWorkbench())
+FreeCADGui.addWorkbench(CfdFoamWorkbench())

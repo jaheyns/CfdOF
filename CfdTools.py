@@ -216,8 +216,8 @@ def get_module_path():
     the first.
     """
     import os
-    user_mod_path = os.path.join(FreeCAD.ConfigGet("UserAppData"), "Mod/Cfd")
-    app_mod_path = os.path.join(FreeCAD.ConfigGet("AppHomePath"), "Mod/Cfd")
+    user_mod_path = os.path.join(FreeCAD.ConfigGet("UserAppData"), "Mod", "CfdFoam")
+    app_mod_path = os.path.join(FreeCAD.ConfigGet("AppHomePath"), "Mod", "CfdFoam")
     if os.path.exists(user_mod_path):
         return user_mod_path
     else:

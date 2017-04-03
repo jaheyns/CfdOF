@@ -54,8 +54,8 @@ class _ViewProviderCfdSolverFoam:
         return
         
     def doubleClicked(self, vobj):
-        if FreeCADGui.activeWorkbench().name() != 'CfdWorkbench':
-            FreeCADGui.activateWorkbench("CfdWorkbench")
+        if FreeCADGui.activeWorkbench().name() != 'CfdFoamWorkbench':
+            FreeCADGui.activateWorkbench("CfdFoamWorkbench")
         doc = FreeCADGui.getDocument(vobj.Object.Document)
         # it should be possible to find the AnalysisObject although it is not a documentObjectGroup
         if not FemGui.getActiveAnalysis():

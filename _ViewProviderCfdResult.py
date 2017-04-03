@@ -50,8 +50,8 @@ class _ViewProviderCfdResult:
         return
         
     def doubleClicked(self, vobj):
-        if FreeCADGui.activeWorkbench().name() != 'CfdWorkbench':
-            FreeCADGui.activateWorkbench("CfdWorkbench")
+        if FreeCADGui.activeWorkbench().name() != 'CfdFoamWorkbench':
+            FreeCADGui.activateWorkbench("CfdFoamWorkbench")
         doc = FreeCADGui.getDocument(vobj.Object.Document)
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
