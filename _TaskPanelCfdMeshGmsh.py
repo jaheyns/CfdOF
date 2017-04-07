@@ -60,8 +60,6 @@ class _TaskPanelCfdMeshGmsh:
         self.mesh_process = QtCore.QProcess()
         self.Timer = QtCore.QTimer()
         self.Start = time.time()
-        self.Timer.start(100)  # 100 milliseconds
-        self.gmsh_runs = False
         self.console_message_gmsh = ''
         self.error_message = ''
         self.gmsh_mesh = []
@@ -92,8 +90,12 @@ class _TaskPanelCfdMeshGmsh:
         # def accept() in no longer needed, since there is no OK button
 
     def reject(self):
+        # To be safe, cancel timer in case of unexpected error in meshing
+        self.Timer.stop()
+
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
+
         return True
 
     def get_mesh_params(self):
@@ -126,8 +128,7 @@ class _TaskPanelCfdMeshGmsh:
         self.form.te_output.moveCursor(QtGui.QTextCursor.End)
 
     def update_timer_text(self):
-        if self.gmsh_runs:
-            self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
+        self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
 
     def max_changed(self, base_quantity_value):
         self.clmax = base_quantity_value
@@ -143,13 +144,13 @@ class _TaskPanelCfdMeshGmsh:
 
     def runMeshProcess(self):
         self.console_message_gmsh = ''
-        self.gmsh_runs = True
         self.get_active_analysis()
         self.set_mesh_params()
         import FemGmshTools  # Fresh init before remeshing
         self.gmsh_mesh = FemGmshTools.FemGmshTools(self.obj)
         gmsh_mesh = self.gmsh_mesh
         self.Start = time.time()
+        self.Timer.start(100)  # 100 milliseconds
         self.console_log("Starting GMSH ...")
         print("\nStarted GMSH meshing ...\n")
         print('  Part to mesh: Name --> '
@@ -207,8 +208,11 @@ class _TaskPanelCfdMeshGmsh:
         #self.readOutput()
         self.console_log("Reading mesh")
         gmsh_mesh = self.gmsh_mesh
-        gmsh_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
-        self.console_log('Meshing completed')
+        try:
+            gmsh_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
+            self.console_log('Meshing completed')
+        except RuntimeError as e:
+            self.console_log('Could not read mesh: ' + e.message())
         self.Timer.stop()
         self.update()
         self.form.pb_run_mesh.setEnabled(True)
