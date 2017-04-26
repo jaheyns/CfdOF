@@ -59,11 +59,12 @@ class CfdFoamWorkbench(Workbench):
         # import _CommandPrintMeshInfo  # Create a fluid specific check as the current does not contain any
         #                               # useful info for flow (see checkMesh)
         # import _CommandClearMesh  # Not currently in-use
+        import _CommandCfdMeshCartFromShape
 
 
         # Post Processing commands are located in FemWorkbench, implemented and imported in C++
         cmdlst = ['Cfd_Analysis','Cfd_PhysicsModel', 'Cfd_FluidMaterial', 'Cfd_InitialiseInternal',
-                  'Cfd_MeshGmshFromShape', 'Fem_MeshRegion',
+                  'Cfd_MeshGmshFromShape', 'Cfd_MeshCartFromShape', 'Fem_MeshRegion',
                   'Cfd_FluidBoundary', 'Cfd_PorousZone','Cfd_SolverControl']
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFDFoam")), cmdlst)
