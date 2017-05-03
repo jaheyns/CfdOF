@@ -146,8 +146,8 @@ class _TaskPanelCfdMeshGmsh:
         self.console_message_gmsh = ''
         self.get_active_analysis()
         self.set_mesh_params()
-        import FemGmshTools  # Fresh init before remeshing
-        self.gmsh_mesh = FemGmshTools.FemGmshTools(self.obj)
+        import CfdGmshTools  # Fresh init before remeshing
+        self.gmsh_mesh = CfdGmshTools.CfdGmshTools(self.obj)
         gmsh_mesh = self.gmsh_mesh
         self.Start = time.time()
         self.Timer.start(100)  # 100 milliseconds

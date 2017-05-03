@@ -25,13 +25,14 @@ __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
 ## @package ViewProviderCfdMeshRegion
-#  \ingroup FEM
+#  \ingroup CFD
 
 import FreeCAD
 import FreeCADGui
 from pivy import coin
 import os
 import CfdTools
+import _TaskPanelCfdMeshRegion
 
 
 class _ViewProviderCfdMeshRegion:
@@ -67,8 +68,7 @@ class _ViewProviderCfdMeshRegion:
             if o.isDerivedFrom("Fem::FemMeshObject"):
                 o.ViewObject.hide()
         # show task panel
-        from PyGui import _TaskPanelFemMeshRegion
-        taskd = _TaskPanelFemMeshRegion._TaskPanelFemMeshRegion(self.Object)
+        taskd = _TaskPanelCfdMeshRegion._TaskPanelCfdMeshRegion(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True

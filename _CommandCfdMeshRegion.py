@@ -48,7 +48,7 @@ class _CommandMeshRegion(FemCommands):
         self.is_active = 'with_gmsh_femmesh'
 
     def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Create FemMeshRegion")
+        FreeCAD.ActiveDocument.openTransaction("Create MeshRegion")
         FreeCADGui.addModule("CfdMeshRegion")
         sel = FreeCADGui.Selection.getSelection()
         if (len(sel) == 1):

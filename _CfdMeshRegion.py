@@ -20,33 +20,22 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "CfdMeshRegion"
+__title__ = "_CfdMeshRegion"
 __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
-## \addtogroup CFD
-#  @{
-
-import FreeCAD
-# from PyObjects import _FemMeshRegion
-import _CfdMeshRegion
+## @package CfdMeshRegion
+#  \ingroup CFD
 
 
-def makeCfdMeshRegion(base_mesh, relative_length=0.9, name="MeshRegion"):
-    ''' makeCfdMeshRegion([relative length], [name]):
-        Creates a  mesh region object to define properties for a regon of the mesh
-    '''
-    obj = FreeCAD.ActiveDocument.addObject("Fem::FeaturePython", name)
-    _CfdMeshRegion._CfdMeshRegion(obj)
-    obj.RelativeLength = relative_length
-    # obj.BaseMesh = base_mesh
-    # App::PropertyLinkList does not support append, we will use a temporary list to append the mesh region obj.
-    tmplist = base_mesh.MeshRegionList
-    tmplist.append(obj)
-    base_mesh.MeshRegionList = tmplist
-    if FreeCAD.GuiUp:
-        import _ViewProviderCfdMeshRegion
-        _ViewProviderCfdMeshRegion._ViewProviderCfdMeshRegion(obj.ViewObject)
-    return obj
+class _CfdMeshRegion:
+    "The CfdMeshRegion object"
+    def __init__(self, obj):
+        obj.addProperty("App::PropertyFloat", "RelativeLength", "MeshRegionProperties",
+                        "Set relative length of the elements for this region")
+        obj.addProperty("App::PropertyLinkSubList", "References", "MeshRegionShapes", "List of mesh region shapes")
+        obj.Proxy = self
+        self.Type = "CfdMeshRegion"
 
-#  @}
+    def execute(self, obj):
+        return
