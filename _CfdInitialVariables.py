@@ -6,15 +6,19 @@ __url__ = "http://www.freecadweb.org"
 
 
 class _CfdInitialVariables:
-    "The CFD Physics Model"
+    """ The field initialisation object """
     def __init__(self, obj):
-        obj.addProperty("App::PropertyPythonObject","InitialVariables")
-        #Defualt settings
-        obj.InitialVariables = {"PotentialFoam":True,
-                                "Ux": "0 m/s",
-                                "Uy":"0 m/s",
-                                "Uz":"0 m/s",
-                                "P":"0 kg*m/s^2"}
+        obj.addProperty("App::PropertyPythonObject", "InitialVariables")
+        # Default settings
+        obj.InitialVariables = {"PotentialFoam": True,
+                                "Ux": 0,
+                                "Uy": 0,
+                                "Uz": 0,
+                                "P": 0,
+                                "UseInletTurbulenceValues": False,
+                                "Inlet": "",
+                                "k": 0.01,
+                                "omega": 1}
         obj.Proxy = self
         self.Type = "InitialVariables"
 

@@ -212,7 +212,7 @@ class _TaskPanelCfdMeshGmsh:
             gmsh_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
             self.console_log('Meshing completed')
         except RuntimeError as e:
-            self.console_log('Could not read mesh: ' + e.message())
+            self.console_log('Could not read mesh: ' + e.message)
         self.Timer.stop()
         self.update()
         self.form.pb_run_mesh.setEnabled(True)

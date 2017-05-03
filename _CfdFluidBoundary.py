@@ -33,10 +33,12 @@ __url__ = "http://www.freecadweb.org"
 import FreeCAD
 import Part
 
+
 class PartFeature:
     "Part containing CfdFluidBoundary faces"
     def __init__(self, obj):
         obj.Proxy = self
+
 
 class _CfdFluidBoundary(PartFeature):
     "The CfdFluidBoundary object"
@@ -49,29 +51,34 @@ class _CfdFluidBoundary(PartFeature):
         obj.addProperty("App::PropertyPythonObject", "BoundarySettings")
 
         # obj.addProperty("App::PropertyPythonObject","partNameList").partNameList = []
-        obj.addProperty("App::PropertyLinkList","faceList")
+        obj.addProperty("App::PropertyLinkList", "faceList")
 
         # Default settings
         obj.References = []
-        obj.BoundarySettings = {"BoundaryType": "wall",
-                                "BoundarySubtype": "fixed",
-                                "VelocityIsCartesian": True,
-                                "Ux": "0 m/s",  # Units.Quantity not JSON serialisable, so use string
-                                "Uy": "0 m/s",
-                                "Uz": "0 m/s",
-                                "VelocityMag": "0 m/s",
-                                "DirectionFace": "",
-                                "ReverseNormal": False,
-                                "Pressure": "0 kg*m/s^2",
-                                "SlipRatio": "0",
-                                "VolFlowRate": "0.0 m^3/s",
-                                "MassFlowRate": "0.0 kg/s",
-                                "PorousBaffleMethod": 0,
-                                "PressureDropCoeff": "0.0",
-                                "ScreenWireDiameter": "0.0 mm",
-                                "ScreenSpacing": "0.0 mm",
-                                "TurbulenceSpecification": "intensity&DissipationRate",
-                                "ThermalBoundaryType": "fixedValue"}
+        obj.BoundarySettings = {'BoundaryType': '',
+                                'BoundarySubtype': '',
+                                'VelocityIsCartesian': True,
+                                'Ux': 0.0,
+                                'Uy': 0.0,
+                                'Uz': 0.0,
+                                'VelocityMag': 0.0,
+                                'DirectionFace': '',
+                                'ReverseNorma': False,
+                                'Pressure': 0.0,
+                                'SlipRatio': 0.0,
+                                'VolFlowRate': 0.0,
+                                'MassFlowRate': 0.0,
+                                'PorousBaffleMethod': 0,
+                                'PressureDropCoeff': 0.0,
+                                'ScreenWireDiameter': 0.0,
+                                'ScreenSpacing': 0.0,
+                                'TurbulenceInletSpecification': '',
+                                'LowRe': False,
+                                'ThermalBoundaryType': '',
+                                'TurbulentKineticEnergy': 0.01,
+                                'SpecificDissipationRate': 1,
+                                'TurbulenceIntensity': 0.1,
+                                'TurbulenceLengthScale': 0.1}
 
     def execute(self, obj):
         ''' Create compound part at recompute. '''

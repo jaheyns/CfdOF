@@ -1,6 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
+# *   Copyright (c) 2017 - Johan Heyns <jheyns@csir.co.za>                  *
+# *   Copyright (c) 2017 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
+# *   Copyright (c) 2017 - Alfred Bogaers <abogaers@csir.co.za>             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -36,45 +39,47 @@ if FreeCAD.GuiUp:
 
 
 class _CommandCfdAnalysis(FemCommands):
-    "the Cfd_Analysis command definition"
+    """ The Cfd_Analysis command definition """
     def __init__(self):
         super(_CommandCfdAnalysis, self).__init__()
-        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","cfd_analysis.png")
-        self.resources = {'Pixmap': icon_path,
-                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_Analysis", "Analysis container"),
-                          'Accel': "N, C",
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_Analysis", "Creates a analysis container with a Cfd solver")}
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd_analysis.png")
+        self.resources = \
+            {'Pixmap': icon_path,
+             'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_Analysis", "Analysis container"),
+             'Accel': "N, C",
+             'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_Analysis", "Creates an analysis container with a CFD solver")}
         self.is_active = 'with_document'
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CFD Analysis")
         FreeCADGui.addModule("FemGui")
         FreeCADGui.addModule("CfdAnalysis")
-        FreeCADGui.doCommand("CfdAnalysis.makeCfdAnalysis('CfdAnalysis')")
-        FreeCADGui.doCommand("FemGui.setActiveAnalysis(App.activeDocument().ActiveObject)")
+        FreeCADGui.doCommand("analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')")
+        FreeCADGui.doCommand("FemGui.setActiveAnalysis(analysis)")
 
         ''' Objects ordered according to expected workflow '''
 
         # Add physics object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdPhysicsSelection")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
+        FreeCADGui.doCommand("analysis.Member = analysis.Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
 
         # Add fluid properties object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdFluidMaterial")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')]")
+        FreeCADGui.doCommand(
+            "analysis.Member = analysis.Member + [CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')]")
 
         # Add initialisation object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdInitialiseFlowField")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdInitialiseFlowField.makeCfdInitialFlowField()]")
+        FreeCADGui.doCommand("analysis.Member = analysis.Member + [CfdInitialiseFlowField.makeCfdInitialFlowField()]")
 
         # Add solver object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdSolverFoam")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdSolverFoam.makeCfdSolverFoam()]")
+        FreeCADGui.doCommand("analysis.Member = analysis.Member + [CfdSolverFoam.makeCfdSolverFoam()]")
 
         sel = FreeCADGui.Selection.getSelection()
-        if (len(sel) == 1):
-            if(sel[0].isDerivedFrom("Fem::FemMeshObject")):
-                FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [App.activeDocument()." + sel[0].Name + "]")
+        if len(sel) == 1:
+            if sel[0].isDerivedFrom("Fem::FemMeshObject"):
+                FreeCADGui.doCommand("analysis.Member = analysis.Member + [App.activeDocument()." + sel[0].Name + "]")
         FreeCADGui.Selection.clearSelection()
 
 if FreeCAD.GuiUp:

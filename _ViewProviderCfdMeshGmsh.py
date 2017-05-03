@@ -82,7 +82,7 @@ class _ViewProviderCfdMeshGmsh:
                                 for m in o.Member:
                                     if m == self.Object:
                                         FemGui.setActiveAnalysis(o)
-                                        print('Analysis the Mesh belongs too was activated.')
+                                        print('Analysis the Mesh belongs to was activated.')
                                         gui_doc.setEdit(vobj.Object.Name)
                                         break
                 else:
@@ -94,11 +94,11 @@ class _ViewProviderCfdMeshGmsh:
                         for m in o.Member:
                             if m == self.Object:
                                 FemGui.setActiveAnalysis(o)
-                                print('Analysis the Mesh belongs too was activated.')
+                                print('Analysis the Mesh belongs to was activated.')
                                 gui_doc.setEdit(vobj.Object.Name)
                                 break
                 else:
-                    print('Mesh GMSH object does not belong to an analysis. Group meshing will is deactivated.')
+                    print('Mesh GMSH object does not belong to an analysis. Group meshing will be deactivated.')
                     gui_doc.setEdit(vobj.Object.Name)
         else:
             FreeCAD.Console.PrintError('Active Task Dialog found! Please close this one first!\n')

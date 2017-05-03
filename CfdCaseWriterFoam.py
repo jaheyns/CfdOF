@@ -107,8 +107,15 @@ class CfdCaseWriterFoam(QRunnable):
 
             self.solverName = self.getSolverName()
 
+            # Collect settings into single dictionary
+            settings = {'boundaries':
+                        dict((b.Label, b.BoundarySettings) for b in self.bc_group),
+                        'initialValues': self.initialConditions,
+                        'physics': self.physics_model}
+
             # Initialise case
             self.builder = fcb.BasicBuilder(casePath=self.case_folder,
+                                            settings=settings,
                                             installationPath=self.installation_path,
                                             solverSettings=CfdTools.getSolverSettings(self.solver_obj),
                                             physicsModel=self.physics_model,
@@ -243,11 +250,11 @@ class CfdCaseWriterFoam(QRunnable):
                        'subtype': bc.BoundarySettings['BoundarySubtype']}
             import Units
             if bc.BoundarySettings['VelocityIsCartesian']:
-                velocity = [Units.Quantity(bc.BoundarySettings['Ux']).getValueAs("m/s").Value,
-                            Units.Quantity(bc.BoundarySettings['Uy']).getValueAs("m/s").Value,
-                            Units.Quantity(bc.BoundarySettings['Uz']).getValueAs("m/s").Value]
+                velocity = [bc.BoundarySettings['Ux'],
+                            bc.BoundarySettings['Uy'],
+                            bc.BoundarySettings['Uz']]
             else:
-                veloMag = Units.Quantity(bc.BoundarySettings['VelocityMag']).getValueAs("m/s").Value
+                veloMag = bc.BoundarySettings['VelocityMag']
                 face = bc.BoundarySettings['DirectionFace'].split(':')
                 # See if entered face actually exists and is planar
                 try:
@@ -267,16 +274,15 @@ class CfdCaseWriterFoam(QRunnable):
                     raise RuntimeError(bc.BoundarySettings['DirectionFace'] + " is not a valid, planar face.")
 
             bc_dict['velocity'] = velocity
-            bc_dict['pressure'] = Units.Quantity(bc.BoundarySettings['Pressure']).getValueAs("kg*m/s^2").Value
-            bc_dict['massFlowRate'] = Units.Quantity(bc.BoundarySettings['MassFlowRate']).getValueAs("kg/s").Value
-            bc_dict['volFlowRate'] = Units.Quantity(bc.BoundarySettings['VolFlowRate']).getValueAs("m^3/s").Value
-            bc_dict['slipRatio'] = Units.Quantity(bc.BoundarySettings['SlipRatio']).getValueAs("m/m").Value
+            bc_dict['pressure'] = bc.BoundarySettings['Pressure']
+            bc_dict['massFlowRate'] = bc.BoundarySettings['MassFlowRate']
+            bc_dict['volFlowRate'] = bc.BoundarySettings['VolFlowRate']
+            bc_dict['slipRatio'] = bc.BoundarySettings['SlipRatio']
             if bc.BoundarySettings['PorousBaffleMethod'] == 0:
-                bc_dict['pressureDropCoeff'] = \
-                    Units.Quantity(bc.BoundarySettings['PressureDropCoeff']).getValueAs("m/m").Value
+                bc_dict['pressureDropCoeff'] = bc.BoundarySettings['PressureDropCoeff']
             elif bc.BoundarySettings['PorousBaffleMethod'] == 1:
-                wireDiam = Units.Quantity(bc.BoundarySettings['ScreenWireDiameter']).getValueAs("m").Value
-                spacing = Units.Quantity(bc.BoundarySettings['ScreenSpacing']).getValueAs("m").Value
+                wireDiam = bc.BoundarySettings['ScreenWireDiameter']
+                spacing = bc.BoundarySettings['ScreenSpacing']
                 CD = 1.0  # Drag coeff of wire (Simmons - valid for Re > ~300)
                 beta = (1-wireDiam/spacing)**2
                 bc_dict['pressureDropCoeff'] = CD*(1-beta)

@@ -46,7 +46,6 @@ class _ViewProviderCfdFluidBoundary:
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.png")
         return icon_path
 
-
     def attach(self, vobj):
         self.ViewObject = vobj
         self.Object = vobj.Object
@@ -56,7 +55,7 @@ class _ViewProviderCfdFluidBoundary:
         return
 
     def getDisplayModes(self, obj):
-        modes=[]
+        modes = []
         return modes
 
     def getDefaultDisplayMode(self):
@@ -82,8 +81,17 @@ class _ViewProviderCfdFluidBoundary:
         #return
 
     def setEdit(self, vobj, mode):
+        analysis_object = CfdTools.getParentAnalysisObject(self.Object)
+        if analysis_object is None:
+            CfdTools.cfdError("Boundary must have a parent analysis object")
+            return False
+        physics_model, is_present = CfdTools.getPhysicsModel(analysis_object)
+        if not is_present:
+            CfdTools.cfdError("Analysis object must have a physics object")
+            return False
+
         import _TaskPanelCfdFluidBoundary
-        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object)
+        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model)
         # CfdTools.setPartVisibility(vobj, True, False, False, True)  # Update to show only mesh_obj.part
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)

@@ -1,0 +1,8 @@
+RAS
+{
+    RASModel            #TURBULENCETYPE#;
+
+    turbulence          on;
+
+    printCoeffs         on;
+}

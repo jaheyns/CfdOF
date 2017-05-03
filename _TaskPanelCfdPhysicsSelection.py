@@ -1,8 +1,35 @@
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
 
-__title__ = "_TaskPanelPhysicsSelection"
-__author__ = ""
+"""
+UI for CFD PhysicsModel objects allowing selection of flow physics
+"""
+
+__title__ = "_TaskPanelCfdPhysicsSelection"
+__author__ = "AB, JH, OO"
 __url__ = "http://www.freecadweb.org"
-
 
 import FreeCAD
 import os
@@ -19,8 +46,11 @@ if FreeCAD.GuiUp:
     import FemGui
 
 
+RANS_MODELS = ["kOmegaSST"]
+
+
 class _TaskPanelCfdPhysicsSelection:
-    '''The editmode TaskPanel for PhysicsModel objects'''
+    """ The editmode TaskPanel for PhysicsModel objects """
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
@@ -41,20 +71,20 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.radioButtonSteady.toggled.connect(self.timeStateChanged)
         self.form.radioButtonTransient.toggled.connect(self.timeStateChanged)
 
-        self.form.radioButtonIncompressible.toggled.connect(self.flowChoiceChanged)
-        self.form.radioButtonCompressible.toggled.connect(self.flowChoiceChanged)
+        self.form.radioButtonIncompressible.toggled.connect(self.compressibilityChanged)
+        self.form.radioButtonCompressible.toggled.connect(self.compressibilityChanged)
 
-        self.form.turbulenceCheckBox.stateChanged.connect(self.turbulanceStateChanged)
+        self.form.turbulenceCheckBox.stateChanged.connect(self.turbulenceStateChanged)
         self.form.radioButtonRANS.toggled.connect(self.RANSChosen)
         #self.form.radioButtonLES_DES.toggled.connect(self.LESChosen)
-        self.form.radioButtonLaminar.toggled.connect(self.hideTurbulenceModel)
+        self.form.radioButtonLaminar.toggled.connect(self.laminarChosen)
+        self.form.turbulenceComboBox.currentIndexChanged.connect(self.turbulenceComboBoxChanged)
 
         self.form.thermalCheckBox.stateChanged.connect(self.thermalStateChanged)
         self.form.radioButtonEnergy.toggled.connect(self.selectThermal)
         self.form.radioButtonBuoyancy.toggled.connect(self.selectThermal)
 
-        #temporarily disabling features whihc are not yet supported
-        self.form.radioButtonRANS.setEnabled(False)
+        # Temporarily disabling features which are not yet supported
         self.form.radioButtonTransient.setEnabled(False)
         self.form.radioButtonCompressible.setEnabled(False)
         self.form.radioButtonEnergy.setEnabled(False)
@@ -62,7 +92,6 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.thermalCheckBox.setEnabled(False)
 
         self.initialiseUponReload()
-
 
     def initialiseUponReload(self):
         if self.physicsModel['Time'] == 'Steady':
@@ -103,7 +132,7 @@ class _TaskPanelCfdPhysicsSelection:
         elif self.form.radioButtonBuoyancy.isChecked():
             self.physicsModel['Thermal'] = "Buoyancy"
 
-    def flowChoiceChanged(self):
+    def compressibilityChanged(self):
         #self.form.turbulenceFrame.setVisible(True)
         #self.form.turbulenceChoiceFrame.setVisible(False)
         #self.form.turbulenceModelFrame.setVisible(False)
@@ -115,13 +144,12 @@ class _TaskPanelCfdPhysicsSelection:
         #if self.form.thermalCheckBox.isChecked():
             #self.form.thermalCheckBox.toggle()
     
-
         if self.form.radioButtonIncompressible.isChecked():
             self.physicsModel["Flow"] = 'Incompressible'
         else:
             self.physicsModel["Flow"] = 'Compressible'
 
-    def turbulanceStateChanged(self):
+    def turbulenceStateChanged(self):
         if self.form.turbulenceCheckBox.isChecked():
             self.form.turbulenceChoiceFrame.setVisible(True)
             self.form.radioButtonLaminar.toggle()
@@ -140,13 +168,12 @@ class _TaskPanelCfdPhysicsSelection:
 
     def RANSChosen(self):
         self.form.turbulenceModelFrame.setVisible(True)
-        #NOTE: strictly there might be differences between incompressible and compressible!
-        #see http://cfd.direct/openfoam/user-guide/turbulence/ for more openfoam supported models
-        Choices = ["SpalartAllmaras","kEpsilon","SSG","RNGkEpsilon","kOmega","kOmegaSSTSAS"]
+        # NOTE: strictly there might be differences between incompressible and compressible!
+        # see http://cfd.direct/openfoam/user-guide/turbulence/ for more openfoam supported models
+        # Choices = ["SpalartAllmaras","kEpsilon","SSG","RNGkEpsilon","kOmega","kOmegaSSTSAS"]
         self.form.turbulenceComboBox.clear()
-        self.form.turbulenceComboBox.addItems(Choices)
+        self.form.turbulenceComboBox.addItems(RANS_MODELS)
         self.physicsModel["Turbulence"] = "RANS"
-
 
     #def LESChosen(self):
         #self.form.turbulenceModelFrame.setVisible(True)
@@ -156,30 +183,18 @@ class _TaskPanelCfdPhysicsSelection:
         #self.form.turbulenceComboBox.clear()
         #self.form.turbulenceComboBox.addItems(Choices)
 
-
-    def hideTurbulenceModel(self):
+    def laminarChosen(self):
         self.form.turbulenceModelFrame.setVisible(False)
         self.physicsModel["Turbulence"] = "Laminar"
 
+    def turbulenceComboBoxChanged(self):
+        self.physicsModel['TurbulenceModel'] = self.form.turbulenceComboBox.currentText()
 
     def accept(self):
         self.obj.PhysicsModel = self.physicsModel
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-        #return
-
-        # print(self.material)
-        #self.remove_active_sel_server()
-        #if self.has_equal_references_shape_types():
-            #self.obj.Material = self.material
-            #self.obj.References = self.references
-            #doc = FreeCADGui.getDocument(self.obj.Document)
-            #doc.resetEdit()
-            #doc.Document.recompute()
-
     def reject(self):
-        #return
-        ##self.remove_active_sel_server()
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()

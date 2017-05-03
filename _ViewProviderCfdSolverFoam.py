@@ -59,7 +59,7 @@ class _ViewProviderCfdSolverFoam:
         doc = FreeCADGui.getDocument(vobj.Object.Document)
         # it should be possible to find the AnalysisObject although it is not a documentObjectGroup
         if not FemGui.getActiveAnalysis():
-            analysis_obj = CfdTools.getActiveAnalysis(self.Object)
+            analysis_obj = CfdTools.getParentAnalysisObject(self.Object)
             if analysis_obj:
                 FemGui.setActiveAnalysis(analysis_obj)
             else:
@@ -78,7 +78,6 @@ class _ViewProviderCfdSolverFoam:
         
     def setEdit(self, vobj, mode):
         if FemGui.getActiveAnalysis():
-            #CfdTools.setupWorkingDir(self.Object)  # WorkingDir must existent and writable
             from CfdRunnableFoam import CfdRunnableFoam
             foamRunnable = CfdRunnableFoam(FemGui.getActiveAnalysis(), self.Object)
             from _TaskPanelCfdSolverControl import _TaskPanelCfdSolverControl

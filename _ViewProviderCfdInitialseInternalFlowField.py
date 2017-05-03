@@ -30,8 +30,19 @@ class _ViewProviderCfdInitialseInternalFlowField:
         return
 
     def setEdit(self, vobj, mode):
+        analysis_object = CfdTools.getParentAnalysisObject(self.Object)
+        if analysis_object is None:
+            CfdTools.cfdError("No parent analysis object found")
+            return False
+        physics_model, is_present = CfdTools.getPhysicsModel(analysis_object)
+        if not is_present:
+            CfdTools.cfdError("Analysis object must have a physics object")
+            return False
+        boundaries = CfdTools.getCfdBoundaryGroup(analysis_object)
+
         import _TaskPanelCfdInitialiseInternalFlowField
-        taskd = _TaskPanelCfdInitialiseInternalFlowField._TaskPanelCfdInitialiseInternalFlowField(self.Object)
+        taskd = _TaskPanelCfdInitialiseInternalFlowField._TaskPanelCfdInitialiseInternalFlowField(
+            self.Object, physics_model, boundaries)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True
@@ -41,15 +52,15 @@ class _ViewProviderCfdInitialseInternalFlowField:
         FreeCADGui.Control.closeDialog()
         return
 
-    # overwrite the doubleClicked to make sure no other Material taskd (and thus no selection observer) is still active
+    # Override doubleClicked to make sure no other Material taskd (and thus no selection observer) is still active
     def doubleClicked(self, vobj):
         doc = FreeCADGui.getDocument(vobj.Object.Document)
         if not FemGui.getActiveAnalysis():
-            analysis_obj = CfdTools.getActiveAnalysis(self.Object)
+            analysis_obj = CfdTools.getParentAnalysisObject(self.Object)
             if analysis_obj:
                 FemGui.setActiveAnalysis(analysis_obj)
             else:
-                FreeCAD.Console.PrintError('No Active Analysis is detected from solver object in the active Document!\n')
+                CfdTools.cfdError('No parent analysis object detected')
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:

@@ -1,3 +1,27 @@
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
+# *   Copyright (c) 2017 - Alfred Bogaers <abogaers@csir.co.za>             *
+# *   Copyright (c) 2017 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
+# *   Copyright (c) 2017 - Johan Heyns <jheyns@csir.co.za>                  *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
 
 __title__ = "_TaskPanelCfdInitialiseInternalFlowField"
 __author__ = ""
@@ -8,6 +32,9 @@ import FreeCAD
 import os
 import sys
 import os.path
+import CfdTools
+from CfdTools import inputCheckAndStore
+import Units
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -21,18 +48,19 @@ if FreeCAD.GuiUp:
 
 class _TaskPanelCfdInitialiseInternalFlowField:
     '''The editmode TaskPanel for InitialVariables objects'''
-    def __init__(self, obj):
+    def __init__(self, obj, physics_model, boundaries):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
         self.obj = obj
-        self.physicsModel = self.fetchPhysicsObject()
+        self.physicsModel = physics_model
+        self.boundaries = boundaries
         self.InitialVariables = self.obj.InitialVariables.copy()
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
                                                              "TaskPanelCfdInitialiseInternalField.ui"))
 
         self.form.basicPropertiesFrame.setVisible(False)
-        self.form.potentialFoamCheckBox.stateChanged.connect(self.potentialFoamClicked)
+        self.form.potentialFoamCheckBox.stateChanged.connect(self.potentialFoamChanged)
         self.form.turbulencePropertiesFrame.setVisible(False)
 
         self.form.Ux.textChanged.connect(self.UxChanged)
@@ -40,64 +68,38 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.Uz.textChanged.connect(self.UzChanged)
         self.form.pressure.textChanged.connect(self.PChanged)
 
+        self.form.checkUseInletValues.stateChanged.connect(self.checkUseInletValuesChanged)
+        self.form.comboInlets.currentIndexChanged.connect(self.comboInletsChanged)
+        self.form.inputk.textChanged.connect(self.inputkChanged)
+        self.form.inputOmega.textChanged.connect(self.inputOmegaChanged)
+
         self.populateUiBasedOnPhysics()
-
-    def UxChanged(self,value):
-        import Units
-        value = Units.Quantity(value).getValueAs("m/s")
-        self.InitialVariables['Ux'] = unicode(value) + "m/s"
-
-    def UyChanged(self,value):
-        import Units
-        value = Units.Quantity(value).getValueAs("m/s")
-        self.InitialVariables['Uy'] = unicode(value) + "m/s"
-
-    def UzChanged(self,value):
-        import Units
-        value = Units.Quantity(value).getValueAs("m/s")
-        self.InitialVariables['Uz'] = unicode(value) + "m/s"
-
-    def PChanged(self,value):
-        import Units
-        value = Units.Quantity(value).getValueAs("kg*m/s^2")
-        self.InitialVariables['P'] = unicode(value) + "kg*m/s^2"
-
-    def fetchPhysicsObject(self):
-        analysis_obj = FemGui.getActiveAnalysis()
-        from CfdTools import getPhysicsModel
-        PhysicsModel,isPresent = getPhysicsModel(analysis_obj)
-        if not(isPresent):
-            message = "Missing physics model! \n\nIt appears that the physics model has been deleted. Please re-create."
-            QtGui.QMessageBox.critical(None,'Missing physics model',message)
-            #if physics model is not present exit edit mode to allow for re-creation
-            doc = FreeCADGui.getDocument(self.obj.Document)
-            doc.resetEdit()
-        return PhysicsModel
 
     def populateUiBasedOnPhysics(self):
         self.form.potentialFoamCheckBox.setToolTip("Automatic initialisation of the velocity and pressure fields using "
                                                    "an incompressible, potential or irrotational flow assumption.")
-        if self.InitialVariables['PotentialFoam']:
-            self.form.potentialFoamCheckBox.toggle()
-        else:
-            # self.form.potentialFoamMessageframe.setVisible(False)
-            self.form.basicPropertiesFrame.setVisible(True)
-            self.form.Ux.setText(self.InitialVariables["Ux"])
-            self.form.Uy.setText(self.InitialVariables["Uy"])
-            self.form.Uz.setText(self.InitialVariables["Uz"])
-            self.form.pressure.setText(self.InitialVariables["P"])
+        self.form.potentialFoamCheckBox.setChecked(self.InitialVariables.get('PotentialFoam', False))
 
-        if self.physicsModel['Turbulence'] in ['Laminar','RANS']:
-            if self.physicsModel['Turbulence'] == 'Laminar':
-                self.form.laminarFrame.setVisible(True)
-                self.form.kEpsilonFrame.setVisible(False)
-                self.form.SpalartAlmerasFrame.setVisible(False)
-            if self.physicsModel['Turbulence'] == 'RANS':
-                self.form.laminarFrame.setVisible(False)
-                self.form.kEpsilonFrame.setVisible(True)
-                self.form.SpalartAlmerasFrame.setVisible(True)
+        self.form.Ux.setText(str(self.InitialVariables.get('Ux'))+"m/s")
+        self.form.Uy.setText(str(self.InitialVariables.get('Uy'))+"m/s")
+        self.form.Uz.setText(str(self.InitialVariables.get('Uz'))+"m/s")
+        self.form.pressure.setText(str(self.InitialVariables.get('P'))+"kg*m/s^2")
+
+        if self.physicsModel['Turbulence'] in ['RANS', 'LES']:
+            self.form.turbulencePropertiesFrame.setVisible(True)
         else:
             self.form.turbulencePropertiesFrame.setVisible(False)
+
+        self.form.checkUseInletValues.setChecked(self.InitialVariables.get('UseInletTurbulenceValues', True))
+        # Add any inlets to the list
+        for b in self.boundaries:
+            if b.BoundarySettings['BoundaryType'] == 'inlet':
+                self.form.comboInlets.addItems([b.Label])
+        self.form.comboInlets.setCurrentIndex(self.form.comboInlets.findText(self.InitialVariables.get('Inlet')))
+        self.form.inputk.setText(str(self.InitialVariables.get('k'))+"m^2/s^2")
+        self.form.inputOmega.setText(str(self.InitialVariables.get('omega'))+"rad/s")
+        self.updateTurbulenceModelsUi()
+
         if self.physicsModel['Thermal'] == 'Energy':
             self.form.energyFrame.setVisible(True)
             self.form.bouyancyFrame.setVisible(False)
@@ -107,15 +109,43 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         else:
             self.form.thermalPropertiesFrame.setVisible(False)
 
-    def potentialFoamClicked(self):
-        if self.form.potentialFoamCheckBox.isChecked():
-            # self.form.potentialFoamMessageframe.setVisible(True)
-            self.form.basicPropertiesFrame.setVisible(False)
-            self.InitialVariables['PotentialFoam'] = True
-        else:
-            self.form.basicPropertiesFrame.setVisible(True)
-            # self.form.potentialFoamMessageframe.setVisible(False)
-            self.InitialVariables['PotentialFoam'] = False
+    def updateTurbulenceModelsUi(self):
+        checked = bool(self.InitialVariables.get('UseInletTurbulenceValues'))
+        self.form.comboInlets.setVisible(checked)
+        self.form.kEpsilonFrame.setVisible(False)
+        self.form.kOmegaSSTFrame.setVisible(False)
+        self.form.SpalartAlmerasFrame.setVisible(False)
+        if self.physicsModel['TurbulenceModel'] == 'kOmegaSST':
+            self.form.kOmegaSSTFrame.setVisible(not checked)
+
+    def potentialFoamChanged(self, checked):
+        self.form.basicPropertiesFrame.setVisible(not checked)
+        self.InitialVariables['PotentialFoam'] = checked
+
+    def UxChanged(self, value):
+        inputCheckAndStore(value, "m/s", self.InitialVariables, 'Ux')
+
+    def UyChanged(self, value):
+        inputCheckAndStore(value, "m/s", self.InitialVariables, 'Uy')
+
+    def UzChanged(self, value):
+        inputCheckAndStore(value, "m/s", self.InitialVariables, 'Uz')
+
+    def PChanged(self, value):
+        inputCheckAndStore(value, "kg*m/s^2", self.InitialVariables, 'P')
+
+    def checkUseInletValuesChanged(self, checked):
+        self.InitialVariables['UseInletTurbulenceValues'] = checked
+        self.updateTurbulenceModelsUi()
+
+    def comboInletsChanged(self, index):
+        self.InitialVariables['Inlet'] = self.form.comboInlets.currentText()
+
+    def inputkChanged(self, text):
+        inputCheckAndStore(text, "m^2/s^2", self.InitialVariables, 'k')
+
+    def inputOmegaChanged(self, text):
+        inputCheckAndStore(text, "rad/s", self.InitialVariables, 'omega')
 
     def accept(self):
         self.obj.InitialVariables = self.InitialVariables
@@ -123,7 +153,5 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         doc.resetEdit()
 
     def reject(self):
-        #return
-        ##self.remove_active_sel_server()
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()

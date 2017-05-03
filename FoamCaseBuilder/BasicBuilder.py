@@ -40,7 +40,7 @@ class BasicBuilder(object):
                  initialConditions,
                  templatePath,
                  solverName=None,
-                 fluidProperties={'name':'air'},
+                 fluidProperties={},
                  boundarySettings=[],
                  internalFields={},
                  porousZoneSettings=[]):
@@ -53,11 +53,6 @@ class BasicBuilder(object):
         self._physicsModel = physicsModel
         self._initialConditions = initialConditions
         self._solverName = solverName
-        # NOTE: Code depreciated (JH) 06/02/2017
-        # if solverNameExternal:
-        #     self._solverName = solverNameExternal
-        # else:
-        #     self._solverName = self.getSolverName()
         self._templatePath = templatePath
         self._solverCreatedVariables = self.getSolverCreatedVariables()
         self._fluidProperties = fluidProperties
@@ -71,12 +66,7 @@ class BasicBuilder(object):
 
     def createCase(self):
         """ Remove existing folder and create a new folder. """
-        # NOTE: Code depreciated (JH) 08/02/17 - Only building from template
-        # if self._templatePath:
         createCaseFromTemplate(self._casePath, os.path.join(self._templatePath, self._solverName))
-        # NOTE: Code depreciated (JH) 08/02/17 - Only building from template
-        # else:
-        #     createCaseFromScratch(self._casePath, self._solverName)
         self._createInitVariables()
 
     def pre_build_check(self):
@@ -87,9 +77,6 @@ class BasicBuilder(object):
                 self._solverSettings['parallelCores'] = 2
 
     def build(self):
-        #if not rebuilding:
-        #    createCaseFromTemplate(self._casePath, self._templatePath)
-
         # Should be repeated on rebuild after settings change
         self.updateTemplateControlDict()  # Updates the solver time step controls
         self.modifySolutionResidualTolerance()  # Updates the solver convergence tolerance for p and U fields.
@@ -112,19 +99,8 @@ class BasicBuilder(object):
             self.setupCreateBafflesDict()
         self.setupInternalFields()
 
-        # NOTE: Code depreciated (AB) 20/01/2017
-        # setupSolverControl currently does not do anything as all relevant solver control files are copied from a best
-        # practices directory. controlDict is already copied and runtime information is subsequently modify.
-        # if self._solverSettings['transient']:
-        #     self.setupSolverControl()
         if self._solverSettings['parallel']:
             self.setupParallelSettings()
-        # NOTE: Code depreciated (JH) 06/02/2017
-        # if self._solverSettings['buoyant']:
-        #     self.writeGravityProperties()
-        # if self._solverSettings['dynamicMeshing']:
-        #     self.setupDynamicMeshingProperties()
-        # self.setupSolverControl() # residual, relaxfactor refValue, refCell etc
 
         # Move mesh files, after being edited, to polyMesh.org
         movePolyMesh(self._casePath)
@@ -132,13 +108,6 @@ class BasicBuilder(object):
     def setupMesh(self, updated_mesh_path, scale):
         if os.path.exists(updated_mesh_path):
             convertMesh(self._casePath, updated_mesh_path, scale)
-
-    # NOTE: Code depreciated (JH) 06/02/2017
-    # def updateMesh(self, updated_mesh_path, scale):
-    #     print ('updateMesh ........ ')
-    #     casePath = self._casePath
-    #     shutil.remove(casePath + os.path.sep + "constant" + os.path.sep + 'polyMesh')
-    #     self.setupMesh(updated_mesh_path, scale)
 
     def post_build_check(self):
         """ Run post-build checks. """
@@ -150,9 +119,6 @@ class BasicBuilder(object):
         #         return "Error: 'constant/dynamicMeshDict' is not existent while dynamcMeshing opiton is selected"
         #     if not os.path.exists(case + os.path.sep + '0/pointDisplacement'):
         #         return "Error: '0/pointDisplacement' is not existent while dynamcMeshing opiton is selected"
-        # ''' NOTE: Code depreciated - 25/02/2017 (JAH) '''
-        # if self._solverSettings['porous']:
-        #     return 'Error: Porous flow need temperatuare field, use ThermalBuilder'
         if self._solverSettings['parallel']:
             if not os.path.exists(case + os.path.sep + 'constant/decomposeParDict'):
                 return "Warning: File 'constant/decomposeParDict' is not available for parallel analysis."
@@ -188,18 +154,6 @@ class BasicBuilder(object):
     #         f = ParsedParameterFile(self._casePath + os.path.sep + "0" + os.path.sep + var)
     #         print("    {}:      {}".format(var, f['internalField']))
     #
-    # NOTE: Code depreciated (JH) 06/02/2017
-    # def getSolverCmd(self):
-    #     # casePath may need translate for OpenFOAM on windows
-    #     log = "{}/log.{}".format(self._casePath, self._solverName)
-    #     case = translatePath(self._casePath)
-    #     if self._solverSettings['parallel']:
-    #         cmd = "decomposePar -case {}  && ".format(case)
-    #         nCores = multiprocessing.cpu_count()
-    #         cmd += "mpirun -np {} {} -case {} > {}".format(nCores, self._solverName, case, log)
-    #     else:
-    #         cmd = "{} -case {} > {}".format(self._solverName, case, log)
-    #     return cmd
 
     def editCase(self):
         """ Open case folder externally in file browser. """
@@ -207,7 +161,6 @@ class BasicBuilder(object):
         if platform.system() == 'MacOS':
             self._edit_process = subprocess.Popen(['open', '--', path])
         elif platform.system() == 'Linux':
-            # TODO: For whatever reason this only seems to respond when called twice on my system...how universal is this?
             self._edit_process = subprocess.Popen(['xdg-open', path])
         elif platform.system() == 'Windows':
             self._edit_process = subprocess.Popen(['explorer', path])
@@ -288,38 +241,6 @@ class BasicBuilder(object):
         else:
             print("Solver not yet supported")
         f.writeFile()
-
-    # NOTE: Code depreciated (JH) 06/02/2017
-    # def getSolverName(self):
-    #     return _getSolverName(self._solverSettings)
-    #
-    # NOTE: Code depreciated (JH) 06/02/2017
-    # def getFoamTemplate(self):
-    #     """
-    #     zipped template 'simpleFoam' works with OpenFOAM 3.0+ and 2.x
-    #     In case PyFoam can not load the case file as dict
-    #     """
-    #     solver_name = self._solverName
-    #     if self._solverSettings['turbulenceModel'] in LES_turbulence_models:
-    #         using_LES = True
-    #     else:
-    #         using_LES = False
-    #
-    #     script_path = os.path.dirname(os.path.abspath( __file__ ))
-    #     template_path = script_path + os.path.sep + solver_name + "_template_v" + str(getFoamVersion()[0]) + ".zip"
-    #     if not os.path.exists(template_path):
-    #         if solver_name in _RAS_solver_templates:
-    #             template = _RAS_solver_templates[solver_name]
-    #         elif using_LES and solver_name in _LES_turbulenceModel_templates:
-    #             template = _LES_solver_templates[solver_name]
-    #         else:
-    #             raise Exception('No tutorial template is found for solver: ' + solver_name)
-    #         if template:
-    #             return getFoamDir() + os.path.sep + template
-    #         else:
-    #             raise Exception('No tutorial template is registered for solver: ' + solver_name)
-    #     else:
-    #         return template_path # case folder zipped with version number
 
     def getSolverCreatedVariables(self):
         """ Create a list of the required solver variables. """
@@ -407,13 +328,6 @@ class BasicBuilder(object):
     @property
     def solverSettings(self):
         return self._solverSettings
-
-    # NOTE: Code depreciated (JH) 06/02/2017
-    # def setupSolverSettings(self, settings):
-    #     if settings and isinstance(value, dict):
-    #         self._solverSettings = settings
-    #         self._solverName = getSolverName(self._solverSettings)
-    #         self._solverCreatedVariables = getSolverCreatedVariables(self._solverSettings)
 
     # @property
     # def parallelSettings(self):
@@ -1245,50 +1159,23 @@ class BasicBuilder(object):
     #             print(self._turbulenceProperties)
 
     def setupTurbulenceProperties(self, turbulenceProperties=None):
-        """ ... """
-        case = self._casePath
-        turbulence_model_name = self._physicsModel["Turbulence"]
-        fname = case + "/constant/turbulenceProperties"
+        """ Populate constant/turbulenceProperties """
+        turbulence_type = self._physicsModel['Turbulence']
+        turbulence_model_name = self._physicsModel['TurbulenceModel']
+        fname = os.path.join(self._casePath, "constant", "turbulenceProperties")
+        fid = open(fname, 'w')
 
-        if not os.path.exists(fname):
-            lines = ["simulationType     laminar;"]
-            createRawFoamFile(case, "constant", "turbulenceProperties", lines)
-        f = ParsedParameterFile(case + "/constant/turbulenceProperties")
-        if turbulence_model_name == 'Laminar':
-            f['simulationType'] = "laminar"
-        # NOTE: Update code when added turb back in (JH)
-        #     if 'RAS' in f:
-        #         del f['RAS']  # clear this content
-        # elif turbulance_model_name in RAS_turbulence_models:
-        #     f['simulationType'] = "RAS"
-        #     # if getFoamVariant() == "OpenFOAM" and getFoamVersion()[0] >= 3:
-        #     if getFoamVersion()[0] >= 3:
-        #         f['RAS'] = {'RASModel': turbulance_model_name, 'turbulence': "on", 'printCoeffs': "on"}
-        #         if turbulance_model_name in kEpsilon_models and 'kEpsilonCoeffs' in self._turbulenceProperties:
-        #             f['kEpsilonCoeffs'] = self._turbulenceProperties['kEpsilonCoeffs']
-        #         # need check again, other model may need diff parameter
-        #     else:
-        #         fRAS = ParsedParameterFile(case + "/constant/RASProperties")
-        #         fRAS['RASModel'] = turbulance_model_name
-        #         fRAS['turbulence'] = "on"
-        #         fRAS['printCoeffs'] = "on"
-        #         # modify coeff is it is diff from default (coded into source code)
-        #         if turbulance_model_name == "kEpsilon" and 'kEpsilonCoeffs' in self._turbulenceProperties:
-        #             fRAS['kEpsilonCoeffs'] = self._turbulenceProperties['kEpsilonCoeffs']
-        #         fRAS.writeFile()
-        # NOTE: Code depreciated (JH) 07/02/2017
-        # elif turbulance_model_name in LES_turbulence_models:
-        #     # if getFoamVariant() == "OpenFOAM" and getFoamVersion()[0] >= 3:
-        #     if getFoamVersion()[0] >= 3:
-        #         # all LES model setup is done in file 'turbulenceProperties'
-        #         if not os.path.exists(fname):
-        #             createRawFoamFile(case, "constant", "turbulenceProperties",
-        #                                 getLeSTurbulencePropertiesTemplate(turbulance_model_name))
-        #     else:
-        #         print("Assumeing LESTurbulenceProperties is copied from template file for OpenFOAM 2.x or foam-extend")
-        else:
-            print("Turbulence model {} is not recognised or implemented".format(turbulence_model_name))
-        f.writeFile()
+        properties = ""
+        if turbulence_model_name == "RAS":
+            properties = readTemplate(os.path.join(self._templatePath, "helperFiles", "turbulencePropertiesRAS"),
+                                      {"TURBULENCETYPE": turbulence_model_name})
+        fid.write(readTemplate(os.path.join(self._templatePath, "helperFiles", "turbulenceProperties"),
+                               {"HEADER": readTemplate(os.path.join(self._templatePath, "helperFiles", "header"),
+                                                       {"LOCATION": "constant",
+                                                        "FILENAME": "turbulenceProperties"}),
+                                "TURBULENCETYPE": "RAS" if turbulence_type == "RAS" else "laminar",
+                                "TURBULENCEPROPERTIES": properties}))
+        fid.close()
 
     #
     # def listTurbulenceVarables(self):
@@ -1363,95 +1250,93 @@ class BasicBuilder(object):
     #             print("Warning: turbulent var {} is not recognised thus ignored".format(var))
     #         f.writeFile()
     #
-    # def setupInletTurbulence(self, bc_dict, turbulenceSettings):
-    #     """ modeled from case tutorials/incompressible/simpleFoam/pipeCyclic/0.org
-    #     available turbulentce spec:
-    #     - Set k and epislon explicitly.
-    #     - Set turbulence intensity and turbulence length scale.
-    #     - Set turbulence intensity and turbulent viscosity ratio
-    #     - Set turbulence intensity and hydraulic diameter
-    #     """
-    #     case = self._casePath
-    #     bc_name = bc_dict['name']
-    #     turbulence_var_list = self.listTurbulenceVarables()
-    #
-    #     if "turbulentIntensity" in turbulenceSettings:
-    #         turbulentIntensity = turbulenceSettings["intensityValue"]
-    #     else:
-    #         turbulentIntensity = 0.05  # 5% default, a reasonable guess
-    #     if "hydrauicDiameter" in turbulenceSettings:
-    #         turbulentMixingLength = 0.5 * turbulenceSettings["lengthValue"]
-    #     else:
-    #         turbulentMixingLength = 0.1  # in metre, half inlet diam/width
-    #     #print(turbulence_var_list)
-    #     for var in turbulence_var_list:
-    #         f = ParsedParameterFile(case + "/0/" + var)
-    #         f["boundaryField"][bc_name] = {}
-    #         if var == 'k' or var.find("k.") == 0: #begin with
-    #             f["boundaryField"][bc_name]["type"] = "turbulentIntensityKineticEnergyInlet"
-    #             f["boundaryField"][bc_name]["intensity"] = turbulentIntensity
-    #             f["boundaryField"][bc_name]["value"] = "$internalField"
-    #
-    #         elif var == 'epsilon' or var.find("epsilon") == 0:
-    #             f["boundaryField"][bc_name]["type"] = "turbulentMixingLengthDissipationRateInlet"
-    #             f["boundaryField"][bc_name]["mixingLength"] = turbulentMixingLength
-    #             f["boundaryField"][bc_name]["value"] = "$internalField"
-    #
-    #         elif var == 'omega' or var.find("omega") == 0:
-    #             # /opt/openfoam4/etc/templates/axisymmetricJet
-    #             f["boundaryField"][bc_name]["type"] = "turbulentMixingLengthFrequencyInlet"
-    #             f["boundaryField"][bc_name]["mixingLength"] = turbulentMixingLength
-    #             f["boundaryField"][bc_name]["value"] = "$internalField"
-    #
-    #         elif var == "alphat" or var.find("alphat") == 0:
-    #             f["boundaryField"][bc_name]["type"] = {"type": "calculated",  "value": "$internalField"}
-    #
-    #         elif  var == 'nut' or var.find("nut.") == 0:
-    #             f["boundaryField"][bc_name] = {"type": "calculated",  "value": "$internalField"}
-    #
-    #         elif var == "nuTilda" or var.find("nuTilda.") == 0:
-    #             f["boundaryField"][bc_name] = {"type": "zeroGradient"} #zeroGradient; for wall, inlet and outlet
-    #         else:
-    #             print("Warning: turbulent var {} is not recognised thus ignored".format(var))
-    #         f.writeFile()
-    #
-    # def setupOutletTurbulence(self, bc_dict, turbulenceSettings):
-    #     case = self._casePath
-    #     bc_name = bc_dict['name']
-    #     turbulence_var_list = self.listTurbulenceVarables()
-    #     for var in turbulence_var_list:
-    #         f = ParsedParameterFile(self._casePath + "/0/" + var)
-    #         f["boundaryField"][bc_name] = {}
-    #         if var == 'k' or var.find("k.") == 0: #begin with
-    #             f["boundaryField"][bc_name]["type"] = "inletOutlet"
-    #             f["boundaryField"][bc_name]["inletValue"] = "$internalField"
-    #             f["boundaryField"][bc_name]["value"] = "$internalField"
-    #
-    #         elif var == 'epsilon' or var.find("epsilon") == 0:
-    #             f["boundaryField"][bc_name]["type"] = "inletOutlet"
-    #             f["boundaryField"][bc_name]["inletValue"] = "$internalField"
-    #             f["boundaryField"][bc_name]["value"] = "$internalField"
-    #
-    #         elif var == 'omega' or var.find("omega") == 0:
-    #             f["boundaryField"][bc_name]["type"] = "inletOutlet"
-    #             f["boundaryField"][bc_name]["inletValue"] = "$internalField"
-    #             f["boundaryField"][bc_name]["value"] = "$internalField"
-    #
-    #         elif var == "alphat" or var.find("alphat") == 0:
-    #             f["boundaryField"][bc_name]["type"] = "calculated"
-    #             f["boundaryField"][bc_name]["value"] = "$internalField"
-    #
-    #         elif  var == 'nut' or var.find("nut.") == 0:
-    #             f["boundaryField"][bc_name]["type"] = "calculated"
-    #             f["boundaryField"][bc_name]["value"] = "$internalField"
-    #
-    #         elif var == "nuTilda" or var.find("nuTilda.") == 0:
-    #             f["boundaryField"][bc_name]["type"] = "zeroGradient"
-    #             #zeroGradient; same for wall, inlet and outlet
-    #         else:
-    #             print("Warning: turbulent var {} is not recognised thus ignored".format(var))
-    #         f.writeFile()
-    #
+    def setupInletTurbulence(self, bc_dict, turbulenceSettings):
+        """ Set up turbulent fields for inlet """
+        case = self._casePath
+        bc_name = bc_dict['name']
+        turbulence_var_list = self.listTurbulenceVarables()
+
+        if "turbulentIntensity" in turbulenceSettings:
+            turbulentIntensity = turbulenceSettings["intensityValue"]
+        else:
+            turbulentIntensity = 0.05  # 5% default, a reasonable guess
+        if "hydrauicDiameter" in turbulenceSettings:
+            turbulentMixingLength = 0.5 * turbulenceSettings["lengthValue"]
+        else:
+            turbulentMixingLength = 0.1  # in metre, half inlet diam/width
+        #print(turbulence_var_list)
+        for var in turbulence_var_list:
+            f = ParsedParameterFile(case + "/0/" + var)
+            f["boundaryField"][bc_name] = {}
+            if var == 'k':
+                if turbulenceSettings['TurbulenceInletSpecification'] == 'TKEAndDissipation' or \
+                   turbulenceSettings['TurbulenceInletSpecification'] == 'TKEAndDSpecDissipationRate':
+                    f["boundaryField"][bc_name]["type"] = "fixedValue"
+                    f["boundaryField"][bc_name]["intensity"] = \
+                        'uniform {}'.format(turbulenceSettings['TurbulentKineticEnergy'])
+                elif turbulenceSettings['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
+                    f["boundaryField"][bc_name]["type"] = "turbulentIntensityKineticEnergyInlet"
+                    f["boundaryField"][bc_name]["intensity"] = turbulenceSettings['TurbulenceIntensity']
+                    f["boundaryField"][bc_name]["value"] = "$internalField"
+            elif var == 'epsilon':
+                if turbulenceSettings['TurbulenceInletSpecification'] == 'TKEAndDissipation':
+                    f["boundaryField"][bc_name]["type"] = "fixedValue"
+                    f["boundaryField"][bc_name]["value"] = \
+                        'uniform {}'.format(turbulenceSettings['SpecificDissipation'])
+                elif turbulenceSettings['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
+                    f["boundaryField"][bc_name]["type"] = "turbulentMixingLengthDissipationRateInlet"
+                    f["boundaryField"][bc_name]["mixingLength"] = turbulenceSettings['TurbulenceLengthScale']
+                    f["boundaryField"][bc_name]["value"] = "$internalField"
+            elif var == 'omega':
+                if turbulenceSettings['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
+                    f["boundaryField"][bc_name]["type"] = "fixedValue"
+                    f["boundaryField"][bc_name]["value"] = \
+                        'uniform {}'.format(turbulenceSettings['SpecificDissipation'])
+                elif turbulenceSettings['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
+                    f["boundaryField"][bc_name]["type"] = "turbulentMixingLengthFrequencyInlet"
+                    f["boundaryField"][bc_name]["mixingLength"] = turbulenceSettings['TurbulenceLengthScale']
+                    f["boundaryField"][bc_name]["value"] = "$internalField"
+            elif var == 'nut':
+                f["boundaryField"][bc_name] = {"type": "calculated", "value": "$internalField"}
+            elif var == "alphat":
+                f["boundaryField"][bc_name]["type"] = {"type": "calculated",  "value": "$internalField"}
+            else:
+                print("Warning: turbulent var {} is not recognised thus ignored".format(var))
+            f.writeFile()
+
+    def setupOutletTurbulence(self, bc_dict, turbulenceSettings):
+        case = self._casePath
+        bc_name = bc_dict['name']
+        turbulence_var_list = self.listTurbulenceVarables()
+        for var in turbulence_var_list:
+            f = ParsedParameterFile(self._casePath + "/0/" + var)
+            f["boundaryField"][bc_name] = {}
+            if var == 'k':
+                f["boundaryField"][bc_name]["type"] = "inletOutlet"
+                f["boundaryField"][bc_name]["inletValue"] = "$internalField"
+                f["boundaryField"][bc_name]["value"] = "$internalField"
+
+            elif var == 'epsilon':
+                f["boundaryField"][bc_name]["type"] = "inletOutlet"
+                f["boundaryField"][bc_name]["inletValue"] = "$internalField"
+                f["boundaryField"][bc_name]["value"] = "$internalField"
+
+            elif var == 'omega':
+                f["boundaryField"][bc_name]["type"] = "inletOutlet"
+                f["boundaryField"][bc_name]["inletValue"] = "$internalField"
+                f["boundaryField"][bc_name]["value"] = "$internalField"
+            elif var == "nuTilda" or var.find("nuTilda.") == 0:
+                f["boundaryField"][bc_name]["type"] = "zeroGradient"
+            elif var == 'nut':
+                f["boundaryField"][bc_name]["type"] = "calculated"
+                f["boundaryField"][bc_name]["value"] = "$internalField"
+            elif var == "alphat":
+                f["boundaryField"][bc_name]["type"] = "calculated"
+                f["boundaryField"][bc_name]["value"] = "$internalField"
+            else:
+                print("Warning: turbulent var {} is not recognised thus ignored".format(var))
+            f.writeFile()
+
     # def setupFreestreamTurbulence(self, bc_dict, turbulenceSettings):
     #     # see: tutorials/incompressible/simpleFoam/airFoil2D/0.org/  SA model
     #     # tutorial for other RAS model?  k, omege, epsilon, nut, alphat,  "calculated"?

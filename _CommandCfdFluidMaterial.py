@@ -1,6 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
+# *   Copyright (c) 2017 - Johan Heyns <jheyns@csir.co.za>                  *
+# *   Copyright (c) 2017 - Alfred Bogaers <abogaers@csir.co.za>             *
+# *   Copyright (c) 2017 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -31,16 +34,19 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
     import FemGui
 
+
 class setCfdFluidPropertyCommand(FemCommands):
     def __init__(self):
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.png")
+        self.resources = {
+            'Pixmap': icon_path,
+            'MenuText': 'Add fluid properties',
+            'ToolTip': 'Add fluid properties'
+            }
         self.is_active = 'with_analysis'    # Only activate when analysis is active
 
     def Activated(self):
-        #selection = FreeCADGui.Selection.getSelectionEx()
-        #selectedObj = FreeCADGui.Selection.getSelection()[0]
-
         FreeCAD.Console.PrintMessage("Set fluid properties \n")
-
 
         FreeCAD.ActiveDocument.openTransaction("Set CfdFluidMaterialProperty")
         FreeCADGui.addModule("CfdFluidMaterial")
@@ -57,24 +63,13 @@ class setCfdFluidPropertyCommand(FemCommands):
         ''' NOTE: Since it is possible to delete the FluidProperties, allowing here for re-creation if it is not
                   present.
         '''
-        if not(isPresent):
+        if not isPresent:
             FreeCADGui.doCommand("CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')")
 
             # CFD WB is still a member of FemGui
             FreeCADGui.doCommand("App.activeDocument()." + FemGui.getActiveAnalysis().Name +
-                                 ".Member = App.activeDocument()." + FemGui.getActiveAnalysis().Name +
-                                 ".Member + [App.ActiveDocument.ActiveObject]")
+                                 ".Member.append(App.ActiveDocument.ActiveObject)")
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
-
-
-
-    def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","material.png")
-        return {
-            'Pixmap' : icon_path ,
-            'MenuText': 'Add fluid properties', 
-            'ToolTip': 'Add fluid properties'
-            } 
 
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_FluidMaterial', setCfdFluidPropertyCommand())

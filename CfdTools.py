@@ -31,13 +31,16 @@ import os
 import os.path  # Is this necessary if os is already imported?
 import shutil
 import tempfile
+import string
 
 import FreeCAD
 import Fem
+import Units
 
 if FreeCAD.GuiUp:
     import FreeCADGui
     import FemGui
+    from PySide import QtGui
 
 
 # Working directory
@@ -91,12 +94,13 @@ if FreeCAD.GuiUp:
                 return i
         return None
 
-    def getActiveAnalysis(fem_object):
-        """ Find the Fem analysis object to which this fem_object belongs. """
-        doc = fem_object.Document
-        for analysis_obj in doc.findObjects('Fem::FemAnalysis'):
-            if fem_object in analysis_obj.Member:
-                return analysis_obj
+    def getParentAnalysisObject(obj):
+        """ Return CfdAnalysis object to which this obj belongs in the tree """
+        for o in FreeCAD.activeDocument().Objects:
+            if o.Name.startswith("CfdAnalysis"):
+                if obj in o.Member:
+                    return o
+        return None
 
 
 def getPhysicsModel(analysis_object):
@@ -105,7 +109,7 @@ def getPhysicsModel(analysis_object):
         if "PhysicsModel" in i.Name:
             physicsModel = i.PhysicsModel
             isPresent = True
-    if not(isPresent):
+    if not isPresent:
         physicsModel = None  # A placeholder to be created in event that it is not present.
     return physicsModel, isPresent
 
@@ -322,13 +326,6 @@ def _write_unv_bc_faces(mesh_obj, f, bc_id, bc_object):
         f.write("         8{:>10d}         0         0         \n".format(facet_list[-1]))
 
 
-def getOrDefault(dictionary, key, default):
-    if key in dictionary:
-        return dictionary[key]
-    else:
-        return default
-
-
 def normalise(v):
     import numpy
     mag = numpy.sqrt(sum(vi**2 for vi in v))
@@ -336,6 +333,20 @@ def normalise(v):
     if mag < sys.float_info.min:
         mag += sys.float_info.min
     return [vi/mag for vi in v]
+
+
+def cfdError(msg):
+    """ Show message for an expected error """
+    if FreeCAD.GuiUp:
+        QtGui.QMessageBox.critical(None, "CFDFoam Workbench", msg)
+    else:
+        FreeCAD.Console.PrintError(msg + "\n")
+
+
+def inputCheckAndStore(value, units, dictionary, key):
+    """ Store the numeric part of value (string) in dictionary[key] in the given units if compatible"""
+    quantity = Units.Quantity(value).getValueAs(units)
+    dictionary[key] = quantity.Value
 
 
 # This is taken from hide_parts_constraints_show_meshes which was removed from FemCommands for some reason

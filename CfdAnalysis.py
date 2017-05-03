@@ -1,6 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
+# *   Copyright (c) 2017 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
+# *   Copyright (c) 2017 - Johan Heyns <jheyns@csir.co.za>                  *
+# *   Copyright (c) 2017 - Alfred Bogaers <abogaers@csir.co.za>             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -28,7 +31,7 @@ __url__ = "http://www.freecadweb.org"
 
 
 def makeCfdAnalysis(name):
-    '''makeCfdAnalysis(name): makes a Cfd Analysis object based on Fem::FemAnalysisPython'''
+    """ makeCfdAnalysis(name): makes a Cfd Analysis group object """
     obj = FreeCAD.ActiveDocument.addObject("Fem::FemAnalysisPython", name)
     if FreeCAD.GuiUp:
         from _ViewProviderCfdAnalysis import _ViewProviderCfdAnalysis
