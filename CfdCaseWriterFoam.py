@@ -201,18 +201,36 @@ class CfdCaseWriterFoam(QRunnable):
             # of the user selected unit preferences.
             self.setupMesh(unvMeshFile, scale = 0.001)
         elif self.mesh_obj.Proxy.Type == "CfdMeshCart":  # Cut-cell Cartesian
-            # Move Cartesian mesh files from temporary mesh directory to case directory
-            FreeCAD.Console.PrintMessage("Writing Cartesian mesh\n")
             import CfdCartTools
-            self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
-            cart_mesh = self.cart_mesh
-            cart_mesh.get_tmp_file_paths()  # Update tmp file locations
-            CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
-            CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','triSurface'))
-            shutil.copy2(cart_mesh.temp_file_meshDict, os.path.join(self.case_folder,'system'))
-            shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'Allmesh'),self.case_folder)
-            shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.cartesianMesh'),self.case_folder)
-            shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.surfaceFeatureEdges'),self.case_folder)
+            ## Move Cartesian mesh files from temporary mesh directory to case directory
+            if self.mesh_obj.MeshUtility == "cfMesh":
+                FreeCAD.Console.PrintMessage("Writing Cartesian mesh\n")
+                #import CfdCartTools
+                self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
+                cart_mesh = self.cart_mesh
+                cart_mesh.get_tmp_file_paths("cfMesh")  # Update tmp file locations
+                CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
+                CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','triSurface'))
+                shutil.copy2(cart_mesh.temp_file_meshDict, os.path.join(self.case_folder,'system'))
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'Allmesh'),self.case_folder)
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.cartesianMesh'),self.case_folder)
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.surfaceFeatureEdges'),self.case_folder)
+
+            elif self.mesh_obj.MeshUtility == "snappyHexMesh":
+                FreeCAD.Console.PrintMessage("Writing snappyHexMesh generated Cartesian mesh")
+                self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
+                cart_mesh = self.cart_mesh
+                cart_mesh.get_tmp_file_paths("snappyHexMesh")  # Update tmp file locations
+                print cart_mesh.polyMeshDir
+                CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
+                CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','triSurface'))
+                shutil.copy2(cart_mesh.temp_file_blockMeshDict, os.path.join(self.case_folder,'system'))
+                shutil.copy2(cart_mesh.temp_file_snappyMeshDict, os.path.join(self.case_folder,'system'))
+                shutil.copy2(cart_mesh.temp_file_surfaceFeatureExtractDict, os.path.join(self.case_folder,'system'))
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'Allmesh'),self.case_folder)
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.blockMesh'),self.case_folder)
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.surfaceFeatureExtract'),self.case_folder)
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.snappyHexMesh'),self.case_folder)
         else:
             raise Exception("Unrecognised mesh type")
 
@@ -424,6 +442,13 @@ class CfdCaseWriterFoam(QRunnable):
             bcType = bcDict["BoundaryType"]
             bcSubType = bcDict["BoundarySubtype"]
             patchType = CfdTools.getPatchType(bcType, bcSubType)
+            print "Boundary things"
+            print patchType
+            print bcSubType
+            print bcType
+            print bc_obj.Label
+            print bc_group
+            print bc_allocated
             settings['createPatches'][bc_obj.Label] = {
                 'PatchNamesList': bc_list,
                 'PatchType': patchType
@@ -433,6 +458,28 @@ class CfdCaseWriterFoam(QRunnable):
             # external or mesh faces.
             # if not (len(bc_list) == len(meshFaceList)):
             #     raise Exception('Mismatch between boundary faces and mesh faces')
+
+        #createPatchesFromSnappyBaffles = False
+        #if self.mesh_obj.MeshRegionList:
+            #for regionObj in self.mesh_obj.MeshRegionList:
+                #if regionObj.snappedRefine:
+                    #if regionObj.internalBaffle:
+                        #createPatchesFromSnappyBaffles = True
+
+        #if createPatchesFromSnappyBaffles:
+            #settings['createPatchesSnappyBaffles'] = {}
+            #for regionObj in self.mesh_obj.MeshRegionList:
+                #if regionObj.snappedRefine:
+                    #if regionObj.internalBaffle:
+                        #print regionObj.Name
+                        #print regionObj.References
+                        ##settings['
+                        ##print "HELLS YES WE HAVE A BAFFLE"
+                        ##baffleInfo = "faceType baffle;"
+                        ##baffleInfo += "\npatchInfo\n{\ntype patch;\n}"
+                    ##else:
+                        ##baffleInfo = "";
+
 
         # Add default faces
         flagName = False

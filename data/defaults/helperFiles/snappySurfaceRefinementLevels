@@ -1,0 +1,8 @@
+
+        #SURFACENAME#
+        {
+            // Surface-wise min and max refinement level
+            level (#LEVEL# #LEVEL#);
+            #BAFFLEINFO#
+            #FACEZONEINFO#
+        }

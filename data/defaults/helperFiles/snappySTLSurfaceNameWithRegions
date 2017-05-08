@@ -1,0 +1,10 @@
+
+    "#STLNAME#"
+    {
+        type triSurfaceMesh;
+        name #SURFACENAME#;
+        regions
+        {
+            #REGIONS#;
+        }
+    }

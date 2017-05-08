@@ -31,6 +31,47 @@ patches
     }
 
 %}
+
+%{%(createPatchesSnappyBaffles%)
+    {
+        name cyclic01;
+        patchInfo
+        {
+            type            cyclic;
+            neighbourPatch  cyclic02;
+            matchTolerance 1e-04;
+        }
+        constructFrom patches;
+        patches (FRONT);
+        hello world;
+    }
+
+    {
+        name inlet;
+        patchInfo
+        {
+            type cyclic;
+            matchTolerance 1e-04;
+            neighbourPatch outlet;
+        }
+
+        constructFrom patches;
+        patches (inlet);
+    }
+    {
+        name outlet;
+        patchInfo
+        {
+            type cyclic;
+            matchTolerance 1e-04;
+            neighbourPatch inlet;
+        }
+
+        constructFrom patches;
+        patches (outlet);
+    }
+
+%}
 );
 
 

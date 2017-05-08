@@ -58,8 +58,15 @@ class _CfdMeshRegion:
                         "MeshRegionProperties",
                         "Set the maximum first layer height")
         obj.FirstLayerHeight = 0.0
-
-        obj.addProperty("App::PropertyLinkSubList", "References", "MeshRegionShapes", "List of mesh region shapes")
+        obj.addProperty("App::PropertyBool","snappedRefine","SnappyMesherRegionProperties","Should snappy snap to the selected object or only refine")
+        obj.snappedRefine = True
+        obj.addProperty("App::PropertyInteger","snappyRefineLevel","SnappyMesherRegionProperties","Minimum and maximum refinement levels")
+        obj.snappyRefineLevel = 1
+        obj.addProperty("App::PropertyInteger","localEdgeRefine","SnappyMesherRegionProperties","Edge refinement level, based on surface feature extract")
+        obj.localEdgeRefine = 1
+        obj.addProperty("App::PropertyBool","internalBaffle","SnappyMesherRegionProperties","Create an internal baffle at the face location")
+        obj.internalBaffle = False
+        obj.addProperty("App::PropertyLinkSubList", "References", "MeshRegionProperties", "List of mesh region shapes")
         obj.Proxy = self
         self.Type = "CfdMeshRegion"
 

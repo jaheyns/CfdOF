@@ -87,6 +87,7 @@ class _TaskPanelCfdMeshCart:
         QtCore.QObject.connect(self.form.pb_paraview, QtCore.SIGNAL("clicked()"), self.openParaview)
         self.form.pb_stop_mesh.setEnabled(False)
         self.form.pb_paraview.setEnabled(False)
+        self.form.snappySpecificProperties.setVisible(False)
 
         # Limit mesh dimensions to 3D solids
         self.form.cb_dimension.addItems(_CfdMeshCart._CfdMeshCart.known_element_dimensions)
@@ -97,6 +98,7 @@ class _TaskPanelCfdMeshCart:
         self.get_active_analysis()
         self.update()
 
+
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)
         # def reject() is called on close button
@@ -104,6 +106,8 @@ class _TaskPanelCfdMeshCart:
 
     def reject(self):
         self.mesh_obj.CharacteristicLengthMax = self.clmax
+        self.set_mesh_params()
+
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
         return True
@@ -112,11 +116,21 @@ class _TaskPanelCfdMeshCart:
         self.clmax = self.mesh_obj.CharacteristicLengthMax
         self.dimension = self.mesh_obj.ElementDimension
         self.utility = self.mesh_obj.MeshUtility
+        if self.utility == "snappyHexMesh":
+            self.form.snappySpecificProperties.setVisible(True)
+        elif self.utility == "cfMesh":
+            self.form.snappySpecificProperties.setVisible(False)
+        #self.nCellsBetweenLevels = self.mesh_obj.nCellsBetweenLevels
+        #self.edgeRefineLevels = self.mesh_obj.edgeRefineLevels
 
     def set_mesh_params(self):
         self.mesh_obj.CharacteristicLengthMax = self.clmax
         self.mesh_obj.ElementDimension = self.dimension
-        self.mesh_obj.MeshUtility = self.utility
+        #self.mesh_obj.MeshUtility = self.utility
+        self.mesh_obj.MeshUtility = self.form.cb_utility.currentText()
+        print self.mesh_obj.MeshUtility
+        self.mesh_obj.nCellsBetweenLevels = self.form.nCellsBetweenLevels.value()
+        self.mesh_obj.edgeRefineLevels = self.form.edgeRefineLevels.value()
 
     def update(self):
         """ Fills the widgets """
@@ -126,6 +140,9 @@ class _TaskPanelCfdMeshCart:
         self.form.cb_dimension.setCurrentIndex(index_dimension)
         index_utility = self.form.cb_utility.findText(self.utility)
         self.form.cb_utility.setCurrentIndex(index_utility)
+
+        self.form.nCellsBetweenLevels.setValue(self.mesh_obj.nCellsBetweenLevels)
+        self.form.edgeRefineLevels.setValue(self.mesh_obj.edgeRefineLevels)
 
     def console_log(self, message="", color="#000000"):
         self.console_message_cart = self.console_message_cart \
@@ -151,8 +168,13 @@ class _TaskPanelCfdMeshCart:
     def choose_utility(self, index):
         if index < 0:
             return
-        self.form.cb_utility.setCurrentIndex(index)
-        self.utility = str(self.form.cb_utility.itemText(index))  # form returns unicode
+        #self.form.cb_utility.setCurrentIndex(index)
+        #self.utility = str(self.form.cb_utility.itemText(index))  # form returns unicode
+        self.utility = self.form.cb_utility.currentText()
+        if self.utility == "snappyHexMesh":
+            self.form.snappySpecificProperties.setVisible(True)
+        elif self.utility == "cfMesh":
+            self.form.snappySpecificProperties.setVisible(False)
 
     def runMeshProcess(self):
         self.console_message_cart = ''
@@ -174,15 +196,16 @@ class _TaskPanelCfdMeshCart:
         # print('  CharacteristicLengthMin: ' + str(cart_mesh.clmin))
         # print('  ElementOrder: ' + cart_mesh.order)
         cart_mesh.get_dimension()
-        cart_mesh.get_tmp_file_paths()
+        cart_mesh.get_tmp_file_paths(self.utility)
         cart_mesh.setupMeshCaseDir()
         cart_mesh.get_group_data()
         cart_mesh.get_region_data()
         cart_mesh.write_part_file()
-        cart_mesh.setupMeshDict()
+        cart_mesh.setupMeshDict(self.utility)
         cart_mesh.createMeshScript(run_parallel = 'false',
                                    mesher_name = 'cartesianMesh',
-                                   num_proc = 1)  # Extend in time
+                                   num_proc = 1,
+                                   cartMethod = self.utility)  # Extend in time
         self.paraviewScriptName = self.cart_mesh.createParaviewScript()
         self.runCart(cart_mesh)
 

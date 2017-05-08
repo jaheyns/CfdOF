@@ -1,0 +1,5 @@
+
+        {
+            file "#PartName#.eMesh"; 
+            level #edgeRefineLevels#;
+        }

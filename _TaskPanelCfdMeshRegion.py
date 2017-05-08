@@ -91,6 +91,7 @@ class _TaskPanelCfdMeshRegion:
         self.get_meshregion_props()
         self.mesh_obj = self.getMeshObject()
         if self.mesh_obj.Proxy.Type == 'CfdMeshCart' and self.mesh_obj.MeshUtility == 'cfMesh':
+            self.form.stackedWidget.setCurrentIndex(0)
             self.form.RefinementFrame.setVisible(True)
             self.form.FaceFrame.setVisible(False)
             toolTipMes = "Thickness or distance of the refinement region from the reference surface."
@@ -106,6 +107,11 @@ class _TaskPanelCfdMeshRegion:
             self.form.if_firstlayerheight.setToolTip(toolTipMes)
             self.form.label_firstlayerheight.setToolTip(toolTipMes)
 
+        if self.mesh_obj.Proxy.Type == 'CfdMeshCart' and self.mesh_obj.MeshUtility == 'snappyHexMesh':
+            self.form.stackedWidget.setCurrentIndex(1)
+            self.form.refineRadio.setEnabled(False)
+            self.form.FaceFrame.setVisible(False)
+
         self.update()
         self.initialiseUponReload()
 
@@ -118,6 +124,7 @@ class _TaskPanelCfdMeshRegion:
         return True
 
     def reject(self):
+        self.set_meshregion_props()
         if self.sel_server:
             FreeCADGui.Selection.removeObserver(self.sel_server)
         FreeCADGui.ActiveDocument.resetEdit()
@@ -129,6 +136,19 @@ class _TaskPanelCfdMeshRegion:
             self.form.if_numlayer.setValue(self.obj.NumberLayers)
             self.form.if_expratio.setValue(self.obj.ExpansionRatio)
             self.form.if_firstlayerheight.setText(self.obj.FirstLayerHeight.UserString)
+        if self.obj.snappedRefine:
+            self.form.snapRadio.toggle()
+        else:
+            self.form.refineRadio.toggle()
+        self.form.snappyRefineLevel.setValue(self.obj.snappyRefineLevel)
+        if self.obj.internalBaffle:
+            self.form.baffleCheckBox.toggle()
+        self.form.snappySurfaceEdgeRefinementLevel.setValue(self.obj.localEdgeRefine)
+        print "why",self.mesh_obj.MeshUtility
+        if self.mesh_obj.MeshUtility == 'snappyHexMesh':
+            self.form.stackedWidget.setCurrentIndex(1)
+        else:
+            self.form.stackedWidget.setCurrentIndex(0)
 
     def boundaryLayerStateChanged(self):
         if self.form.check_boundlayer.isChecked():
@@ -168,6 +188,17 @@ class _TaskPanelCfdMeshRegion:
         self.obj.NumberLayers = self.numlayer
         self.obj.ExpansionRatio = self.expratio
         self.obj.FirstLayerHeight = self.firstlayerheight
+        if self.form.snapRadio.isChecked() and self.mesh_obj.MeshUtility == 'snappyHexMesh':
+            self.obj.snappedRefine = True
+        else:
+            self.obj.snappedRefine = False
+        self.obj.snappyRefineLevel = self.form.snappyRefineLevel.value()
+
+        if self.form.baffleCheckBox.isChecked() and self.obj.snappedRefine == True:
+            self.obj.internalBaffle = True
+        else:
+            self.obj.internalBaffle = False
+        self.obj.localEdgeRefine = self.form.snappySurfaceEdgeRefinementLevel.value()
 
     def update(self):
         """ fills the widgets """

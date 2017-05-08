@@ -23,8 +23,8 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "Tools for the work with GMSH mesher"
-__author__ = "Bernd Hahnebach"
+__title__ = "Tools for cartesian mesh generation using snappyHexMesh and cfMesh"
+__author__ = "AB, JH, OO, Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
 ## \addtogroup FEM
@@ -95,11 +95,23 @@ class CfdCartTools():
     def get_clmax(self):
         return self.clmax
 
-    def get_tmp_file_paths(self):
+    def get_tmp_file_paths(self,typeCart):
         tmpdir = tempfile.gettempdir()
         self.meshCaseDir = os.path.join(tmpdir, 'meshCase')
         self.constantDir = os.path.join(self.meshCaseDir, 'constant')
-        self.polyMeshDir = os.path.join(self.constantDir, 'polyMesh')
+        if typeCart == "cfMesh":
+            self.polyMeshDir = os.path.join(self.constantDir, 'polyMesh')
+        elif typeCart == "snappyHexMesh":
+            """
+            surfaceTOPatch does not have an overwrite functionality therefore create a new folder at timestep.
+            However, if there is no changes to be made to the boundary then this time folder is not created.
+            Therefore doing a present check prior to sending off where the mesh directory is located.
+            """
+            polyMeshDir = os.path.join(self.meshCaseDir,'1','polyMesh')
+            if os.path.isfile(polyMeshDir):
+                self.polyMeshDir = polyMeshDir
+            else:
+                self.polyMeshDir =  os.path.join(self.constantDir, 'polyMesh')
         self.triSurfaceDir = os.path.join(self.constantDir, 'triSurface')
         self.systemDir = os.path.join(self.meshCaseDir, 'system')
 
@@ -107,6 +119,10 @@ class CfdCartTools():
 
         self.temp_file_geo = os.path.join(self.constantDir, 'triSurface', self.part_obj.Name+'_Geometry')  # Rename
         self.temp_file_meshDict = os.path.join(self.systemDir, 'meshDict')
+        self.temp_file_blockMeshDict = os.path.join(self.systemDir, 'blockMeshDict')
+        self.temp_file_snappyMeshDict = os.path.join(self.systemDir, 'snappyHexMeshDict')
+        self.temp_file_surfaceFeatureExtractDict = os.path.join(self.systemDir, 'surfaceFeatureExtractDict')
+
 
     def get_group_data(self):
         """ Mesh groups and groups of analysis member """
@@ -219,7 +235,67 @@ class CfdCartTools():
 
         shutil.copytree(os.path.join(self.templatePath, '_cfMesh', 'system'), self.systemDir)
 
-    def createMeshScript(self, run_parallel, mesher_name, num_proc):
+    def automaticInsidePointDetect(self):
+        """
+            consider updating to something more elegant
+
+            Temporary note of importance:
+            The problem with snappy appears to be that the chosen internal point must remain internal
+            after the refinement regions as well. To be safe, the distance to check is chosen
+            to be approximately the size of the background mesh. 
+        """
+        shape = self.part_obj.Shape
+        vertices = self.part_obj.Shape.Vertexes
+        stepSize = self.clmax*3.0
+
+        #stepSize = self.clmax/self.scale*1.1
+
+        #change = [FreeCAD.Vector(stepSize,stepSize,stepSize),
+                  #FreeCAD.Vector(stepSize,-stepSize,stepSize),
+                  #FreeCAD.Vector(-stepSize,stepSize,stepSize),
+                  #FreeCAD.Vector(-stepSize,-stepSize,stepSize),
+                  #FreeCAD.Vector(stepSize,stepSize,-stepSize),
+                  #FreeCAD.Vector(stepSize,-stepSize,-stepSize),
+                  #FreeCAD.Vector(-stepSize,stepSize,-stepSize),
+                  #FreeCAD.Vector(-stepSize,-stepSize,-stepSize)]
+        #for ii in range(len(vertices)):
+            ##print "vertex",ii,vertices[ii], vertices[ii].Point
+            #point = vertices[ii].Point
+            #for jj in range(8):
+                #pointCheck = point + change[jj]
+                #result = shape.isInside(pointCheck,stepSize/1.1,False)
+                #print pointCheck,result
+                #if result:
+                    #return pointCheck
+
+        boundBox = self.part_obj.Shape.BoundBox
+        errorSafetyFactor = 2.0
+        if stepSize*errorSafetyFactor >= boundBox.XLength or stepSize*errorSafetyFactor >= boundBox.YLength or stepSize*errorSafetyFactor >= boundBox.ZLength:
+            print stepSize
+            #NOTE: need to put a proper error checker in place here
+            outputSomeErrorAboutCharacteristicLengthBeingChosenBeingTooBigForDomain
+        #extraX = boundBox.XLength*0.1
+        #extraY = boundBox.YLength*0.1
+        #extraZ = boundBox.ZLength*0.1
+        x1 = boundBox.XMin
+        x2 = boundBox.XMax
+        y1 = boundBox.YMin
+        y2 = boundBox.YMax
+        z1 = boundBox.ZMin
+        z2 = boundBox.ZMax
+        import random
+        while 1:
+            x = random.uniform(x1,x2)
+            y = random.uniform(y1,y2)
+            z = random.uniform(z1,z2)
+            pointCheck = FreeCAD.Vector(x,y,z)
+            result = shape.isInside(pointCheck,stepSize,False)
+            print pointCheck,result
+            if result:
+                #broek
+                return pointCheck
+
+    def createMeshScript(self, run_parallel, mesher_name, num_proc,cartMethod):
         print("Create Allmesh script ")
 
         fname = self.meshCaseDir + os.path.sep + "Allmesh"  # Replace
@@ -240,7 +316,7 @@ class CfdCartTools():
                                 {"SOURCE": source})
             f.write(head)
 
-            if mesher_name == 'cartesianMesh':
+            if cartMethod == 'cfMesh' and mesher_name == 'cartesianMesh':
                 f.write('# Extract feature edges\n')
                 f.write('runCommand surfaceFeatureEdges -angle 60 {}_Geometry.stl {}_Geometry.fms'
                         '\n'.format(os.path.join(triSurfaceDir, self.part_obj.Name),
@@ -248,6 +324,14 @@ class CfdCartTools():
                 f.write('\n')
                 f.write('runCommand cartesianMesh\n')  # May in future extend to poly and tet mesh
                 f.write('\n')
+
+
+            elif cartMethod == 'snappyHexMesh':
+                f.write('runCommand blockMesh \n')
+                f.write('runCommand surfaceFeatureExtract \n')
+                f.write('runCommand snappyHexMesh -overwrite\n')
+                #f.write('runCommand surfaceToPatch -tol 1e-2 constant/triSurface/' + self.part_obj.Name + '_Geometry.stl \n')
+                f.write('runCommand surfaceToPatch constant/triSurface/' + self.part_obj.Name + '_Geometry.stl \n')
 
             # Create stl of FOAM mesh outside (in mm) to view the object in FreeCAD.
             f.write('runCommand surfaceMeshTriangulate mesh_outside.stl\n')
@@ -289,50 +373,186 @@ class CfdCartTools():
 
         self.mesh_obj.ShapeFaceNames = shapeFaceNames
 
-    def setupMeshDict(self):
-        fname = self.temp_file_meshDict
-        fid = open(fname, 'w')
+    def setupMeshDict(self, utility):
+        if utility == "cfMesh":
+            fname = self.temp_file_meshDict
+            fid = open(fname, 'w')
 
-        fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDict"),
-                               {"HEADER": CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "header"),
-                                                       {"LOCATION": "system",
-                                                        "FILENAME": "meshDict"}),
-                                "FMSNAME":  self.part_obj.Name + '_Geometry.fms',
-                                "CELLSIZE": self.clmax*self.scale}))
+            fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDict"),
+                                   {"HEADER": CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "header"),
+                                                           {"LOCATION": "system",
+                                                            "FILENAME": "meshDict"}),
+                                    "FMSNAME":  self.part_obj.Name + '_Geometry.fms',
+                                    "CELLSIZE": self.clmax*self.scale}))
 
-        # Refinement surface
-        if self.mesh_obj.MeshRegionList:
-            surf = ""
-            patch = ""
-            for eleml in self.ele_length_map:
-                surf += CfdTools.readTemplate(
-                    os.path.join(self.templatePath, "_helperFiles", "meshDictSurfRefineSurf"),
-                    {"REGION": eleml,
-                     "SIZE": self.ele_length_map[eleml],
-                     "FILE": '\"'+os.path.join('constant', 'triSurface', eleml + '.stl\"'),
-                     "THICK": self.ele_refinethick_map[eleml]})
+            # Refinement surface
+            if self.mesh_obj.MeshRegionList:
+                surf = ""
+                patch = ""
+                for eleml in self.ele_length_map:
+                    surf += CfdTools.readTemplate(
+                        os.path.join(self.templatePath, "_helperFiles", "meshDictSurfRefineSurf"),
+                        {"REGION": eleml,
+                         "SIZE": self.ele_length_map[eleml],
+                         "FILE": '\"'+os.path.join('constant', 'triSurface', eleml + '.stl\"'),
+                         "THICK": self.ele_refinethick_map[eleml]})
 
-                numlayer = int(1)  # Default to 1 layer
-                if self.ele_numlayer_map[eleml] > 0:
-                    numlayer = int(self.ele_numlayer_map[eleml])
-                expratio = self.ele_expratio_map[eleml]
-                # Limit expansion ratio to greater than 1.0 and less than 1.2
-                expratio = min(1.2, max(1.0, expratio))
+                    numlayer = int(1)  # Default to 1 layer
+                    if self.ele_numlayer_map[eleml] > 0:
+                        numlayer = int(self.ele_numlayer_map[eleml])
+                    expratio = self.ele_expratio_map[eleml]
+                    # Limit expansion ratio to greater than 1.0 and less than 1.2
+                    expratio = min(1.2, max(1.0, expratio))
 
-                for face in self.ele_meshpatch_map[eleml]:
-                    patch += CfdTools.readTemplate(
-                        os.path.join(self.templatePath, "_helperFiles", "meshDictPatchBoundaryLayer"),
-                        {"REGION": '\"' + face + '\"',
-                         "NLAYER": numlayer,
-                         "RATIO": expratio,
-                         "FLHEIGHT": self.ele_firstlayerheight_map[eleml]})
+                    for face in self.ele_meshpatch_map[eleml]:
+                        patch += CfdTools.readTemplate(
+                            os.path.join(self.templatePath, "_helperFiles", "meshDictPatchBoundaryLayer"),
+                            {"REGION": '\"' + face + '\"',
+                             "NLAYER": numlayer,
+                             "RATIO": expratio,
+                             "FLHEIGHT": self.ele_firstlayerheight_map[eleml]})
 
-            fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDictSurfRefine"),
-                                   {"SURFACE": surf}))
-            fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDictBoundaryLayer"),
-                                   {"BLPATCHES": patch}))
+                fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDictSurfRefine"),
+                                       {"SURFACE": surf}))
+                fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDictBoundaryLayer"),
+                                       {"BLPATCHES": patch}))
 
-        fid.close()
+            fid.close()
+
+        if utility == "snappyHexMesh":
+            boundBox = self.part_obj.Shape.BoundBox
+            extraX = boundBox.XLength*0.1
+            extraY = boundBox.YLength*0.1
+            extraZ = boundBox.ZLength*0.1
+            x1 = (boundBox.XMin - extraX)*self.scale
+            x2 = (boundBox.XMax + extraX)*self.scale
+            y1 = (boundBox.YMin - extraY)*self.scale
+            y2 = (boundBox.YMax + extraY)*self.scale
+            z1 = (boundBox.ZMin - extraZ)*self.scale
+            z2 = (boundBox.ZMax + extraZ)*self.scale
+            #nX = math.ceil(boundBox.XLength/1000.0/self.clmax)
+            #nY = math.ceil(boundBox.YLength/1000.0/self.clmax)
+            #nZ = math.ceil(boundBox.ZLength/1000.0/self.clmax)
+            nX = math.ceil(boundBox.XLength/self.clmax)
+            nY = math.ceil(boundBox.YLength/self.clmax)
+            nZ = math.ceil(boundBox.ZLength/self.clmax)
+            fname = self.temp_file_blockMeshDict
+            fid = open(fname, 'w')
+
+            fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappyBlockMeshDict"),
+                                   {"HEADER": CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "header"),
+                                                           {"LOCATION": "system",
+                                                            "FILENAME": "blockMeshDict"}),
+                                    "x1":   str(x1),
+                                    "x2":   str(x2),
+                                    "y1":   str(y1),
+                                    "y2":   str(y2),
+                                    "z1":   str(z1),
+                                    "z2":   str(z2),
+                                    "nX":   str(int(nX)),
+                                    "nY":   str(int(nY)),
+                                    "nZ":   str(int(nZ))}))
+            fid.close()
+
+            fname = self.temp_file_snappyMeshDict
+            fid = open(fname, 'w')
+
+
+            pointCheck = self.automaticInsidePointDetect()
+            insideX = pointCheck[0]/1000.0
+            insideY = pointCheck[1]/1000.0
+            insideZ = pointCheck[2]/1000.0
+
+
+            regionList = ""
+            for i in self.mesh_obj.ShapeFaceNames:
+                regionList += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySTLRegions"),
+                                     {"REGIONNAME": i})
+
+            STLGeometries = ""
+            STLRefinementSurfaces = ""
+            STLRefinementRegions = ""
+            STLGeometries += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySTLSurfaceNameWithRegions"),
+                                     {"STLNAME": self.part_obj.Name + '_Geometry.stl',
+                                      "SURFACENAME": "MainSTL",
+                                      "REGIONS": regionList})
+            STLRefinementSurfaces += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySurfaceRefinementLevels"),
+                                     {"SURFACENAME": "MainSTL",
+                                      "LEVEL": str(0),
+                                      "BAFFLEINFO": "",
+                                      "FACEZONEINFO": ""})
+            #REFINEMENTSURFACES#
+            if self.mesh_obj.MeshRegionList:
+                for regionObj in self.mesh_obj.MeshRegionList:
+                    print regionObj.snappedRefine
+                    STLGeometries += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySTLSurfaceName"),
+                                     {"STLNAME": regionObj.Name+ '.stl',
+                                      "SURFACENAME": regionObj.Name})
+                    if regionObj.snappedRefine:
+                        facezoneInfo = "faceZone "+regionObj.Name+";"
+                        if regionObj.internalBaffle:
+                            baffleInfo = "faceType baffle;"
+                            #baffleInfo += "\npatchInfo\n{\ntype patch;\n}"
+                        else:
+                            baffleInfo = "";
+                        STLRefinementSurfaces += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySurfaceRefinementLevels"),
+                                         {"SURFACENAME": regionObj.Name,
+                                          "LEVEL": str(regionObj.snappyRefineLevel),
+                                          "BAFFLEINFO": baffleInfo,
+                                          "FACEZONEINFO": facezoneInfo})
+                    else:
+                        STLRefinementRegions += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappyRefinementRegions"),
+                                         {"NAME": regionObj.Name,
+                                          "LEVEL": str(regionObj.snappyRefineLevel),
+                                          "BAFFLEINFO": ""})
+
+            #FEATUREEDGEEXTRACTION
+            featureEdge = ""
+            featureEdge += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "edgeRefinementSnappyInner"),
+                                     {"PartName":  self.part_obj.Name + '_Geometry',
+                                      "edgeRefineLevels":self.mesh_obj.edgeRefineLevels})
+            if self.mesh_obj.MeshRegionList:
+                for regionObj in self.mesh_obj.MeshRegionList:
+                    featureEdge += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "edgeRefinementSnappyInner"),
+                                     {"PartName":  regionObj.Name,
+                                      "edgeRefineLevels": regionObj.localEdgeRefine})
+
+            fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappyHexMeshDict"),
+                                   {"HEADER": CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "header"),
+                                                           {"LOCATION": "system",
+                                                            "FILENAME": "snappyHexMeshDict"}),
+                                    #"STLNAME":  self.part_obj.Name + '_GeometryScaled.stl',
+                                    "GEOMETRY":  STLGeometries,
+                                    "REFINEMENTSURFACES": STLRefinementSurfaces,
+                                    "REFINEMENTREGION": STLRefinementRegions, 
+                                    "nCellsBetweenLevels": self.mesh_obj.nCellsBetweenLevels,
+                                    "featureEdgeMesh": featureEdge,
+                                    "PartName": self.part_obj.Name + '_Geometry',
+                                    "insideX": str(insideX),
+                                    "insideY": str(insideY),
+                                    "insideZ": str(insideZ)}))
+            #broken
+            fid.close()
+
+            FeatureExtract = ""
+            FeatureExtract += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "surfaceFeatureExtractInner"),
+                                     {"STLName":  self.part_obj.Name + '_Geometry.stl',
+                                      "FeatureAngle":str(150)})
+            if self.mesh_obj.MeshRegionList:
+                for regionObj in self.mesh_obj.MeshRegionList:
+                    FeatureExtract += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "surfaceFeatureExtractInner"),
+                                     {"STLName": regionObj.Name+ '.stl',
+                                      "FeatureAngle":str(150)})
+
+            fname = self.temp_file_surfaceFeatureExtractDict
+            fid = open(fname,'w')
+            fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "surfaceFeatureExtractDict"),
+                                   {"HEADER": CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "header"),
+                                                           {"LOCATION": "system",
+                                                            "FILENAME": "surfaceFeatureExtractDict"}),
+                                   "SURFACEFEATURE": FeatureExtract}))
+            fid.close()
+
 
     def read_and_set_new_mesh(self):
         if not self.error:
