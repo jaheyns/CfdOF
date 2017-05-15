@@ -29,19 +29,19 @@ functionality.
 
 ### Platforms supported
 
-####Linux: 
+#### Linux: 
 
 Any system on which FreeCAD and the prerequisites listed below can be installed. The following have been tested:
 * Ubuntu 16.04 
 * Fedora 24
 
-####Windows:
+#### Windows:
 
 * Windows 7 (tested)
 * Windows 8 (not yet tested)
 * Windows 10 (tested)
 
-####MAC:
+#### MacOSX:
 
 Not tested, but a POSIX system. Possible to install and run OpenFOAM. 
       
