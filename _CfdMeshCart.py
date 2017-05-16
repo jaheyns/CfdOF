@@ -30,10 +30,9 @@ class _CfdMeshCart():
     """
 
     # they will be used from the task panel too, thus they need to be outside of the __init__
-    known_element_dimensions = ['From Shape', '3D']
-    # known_element_orders = ['1st', '2nd']
-    known_mesh_algorithm_2D = ['Automatic']
-    known_mesh_algorithm_3D = ['Automatic']
+    known_element_dimensions = ['3D']
+    known_mesh_algorithm_2D = ['Cartesian']
+    known_mesh_algorithm_3D = ['Cartesian']
     known_mesh_utility = ['cfMesh']
 
 
@@ -46,7 +45,10 @@ class _CfdMeshCart():
         obj.MeshRegionList = []
 
         obj.addProperty("App::PropertyLinkList", "MeshGroupList", "Base", "Mesh groups of the mesh")
-        obj.MeshRegionList = []
+        obj.MeshRegionList = []  # ???
+
+        obj.addProperty("App::PropertyStringList", "ShapeFaceNames", "Base", "Mesh face names")
+        obj.ShapeFaceNames = []
 
         obj.addProperty("App::PropertyLink", "Part", "FEM Mesh", "Part object to mesh")
         obj.Part = None
@@ -54,40 +56,24 @@ class _CfdMeshCart():
         obj.addProperty("App::PropertyLength", "CharacteristicLengthMax", "FEM GMSH Mesh Params", "Max mesh element size (0.0 = infinity)")
         obj.CharacteristicLengthMax = 0.0
 
-        obj.addProperty("App::PropertyLength", "CharacteristicLengthMin", "FEM GMSH Mesh Params", "Min mesh element size")
-        obj.CharacteristicLengthMin = 0.0
-
         obj.addProperty("App::PropertyEnumeration", "ElementDimension", "FEM GMSH Mesh Params", "Dimension of mesh elements (Auto = according ShapeType of part to mesh)")
         obj.ElementDimension = _CfdMeshCart.known_element_dimensions
-        obj.ElementDimension = 'From Shape'  # according ShapeType of Part to mesh
+        obj.ElementDimension = '3D'  # according ShapeType of Part to mesh
 
         obj.addProperty("App::PropertyEnumeration", "MeshUtility", "FEM GMSH Mesh Params", "Cut-cell Cartesian meshing utilities")
         obj.MeshUtility = _CfdMeshCart.known_mesh_utility
         obj.MeshUtility = 'cfMesh'
 
-        # obj.addProperty("App::PropertyEnumeration", "ElementOrder", "FEM GMSH Mesh Params", "Order of mesh elements")
-        # obj.ElementOrder = _CfdMeshCart.known_element_orders
-        # obj.ElementOrder = '1st'
-        #
-        # obj.addProperty("App::PropertyBool", "OptimizeStd", "FEM GMSH Mesh Params", "Optimize tetra elements")
-        # obj.OptimizeStd = True
-        #
-        # obj.addProperty("App::PropertyBool", "OptimizeNetgen", "FEM GMSH Mesh Params", "Optimize tetra elements by use of Netgen")
-        # obj.OptimizeNetgen = False
-        #
-        # obj.addProperty("App::PropertyBool", "HighOrderOptimize", "FEM GMSH Mesh Params", "Optimize hight order meshes")
-        # obj.HighOrderOptimize = False
-        #
-        # obj.addProperty("App::PropertyBool", "RecombineAll", "FEM GMSH Mesh Params", "Apply recombination algorithm to all surfaces")
-        # obj.RecombineAll = False
+        obj.addProperty("App::PropertyFloat", "STLLinearDeflection", "Base", "STL linear deflection")
+        obj.STLLinearDeflection = 0.1
 
         obj.addProperty("App::PropertyEnumeration", "Algorithm2D", "FEM GMSH Mesh Params", "mesh algorithm 2D")
         obj.Algorithm2D = _CfdMeshCart.known_mesh_algorithm_2D
-        obj.Algorithm2D = 'Automatic'  # ?
+        obj.Algorithm2D = 'Cartesian'
 
         obj.addProperty("App::PropertyEnumeration", "Algorithm3D", "FEM GMSH Mesh Params", "mesh algorithm 3D")
         obj.Algorithm3D = _CfdMeshCart.known_mesh_algorithm_3D
-        obj.Algorithm3D = 'Automatic'  # ?
+        obj.Algorithm3D = 'Cartesian'
 
     def execute(self, obj):
         return

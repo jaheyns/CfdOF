@@ -1,0 +1,12 @@
+    {
+        name #LABEL#;
+
+        patchInfo
+        {
+            type #TYPE#;
+        }
+
+        constructFrom patches;
+
+        patches ( #PATCHLIST# );
+    }

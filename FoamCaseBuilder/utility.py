@@ -437,6 +437,14 @@ def createRunScript(case, templatePath, init_potential, run_parallel, solver_nam
                             {"SOURCE": source})
         f.write(head)
 
+        # if(cfMesh and createPatch) ..................
+        createPatchFile = os.path.join(case,'system','createPatchDict')
+        if os.path.exists(createPatchFile):
+            f.write('\n')
+            f.write('# Update patch name and type\n')
+            f.write('runCommand createPatch -overwrite\n')
+            f.write('\n')
+
         if len(porousZoneSettings):
             f.write('# Scaling .stl files exported from FreeCAD from mm to m\n')
             counter = 0
@@ -652,20 +660,13 @@ def _translateFoamCasePath(cmd):
 def convertMesh(case, mesh_file, scale):
     """ Convert gmsh created UNV mesh to FOAM. A scaling of 1e-3 is prescribed as the CAD is always in mm while FOAM
     uses SI units (m). """
-    mesh_file = translatePath(mesh_file)
 
     if mesh_file.find(".unv") > 0:
-        cmdline = ['ideasUnvToFoam', '"{}"'.format(mesh_file)]  # mesh_file path may also need translate
+        mesh_file = translatePath(mesh_file)
+        cmdline = ['ideasUnvToFoam', '"{}"'.format(mesh_file)]
         runFoamApplication(cmdline, case)
-        changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
-    # NOTE: Code depreciated (JH) 26/02/2017
-    # if mesh_file[-4:] == ".geo":  # GMSH mesh
-    #     print('Error:GMSH exported *.geo mesh is not support yet')
-    # if mesh_file[-4:] == ".msh":  # ansys fluent mesh
-    #     cmdline = ['fluentMeshToFoam', '"{}"'.format(mesh_file)]  # mesh_file path may also need translate
-    #     runFoamApplication(cmdline, case)
-    #     changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary name (could be any name)
-    #     print("Info: boundary exported from named selection, started with lower case")
+        setPatchType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
+    else: raise Exception("Error: Only supporting unv mesh files.")
 
     if scale and isinstance(scale, numbers.Number):
         cmdline = ['transformPoints', '-scale', '"({} {} {})"'.format(scale, scale, scale)]
@@ -678,7 +679,7 @@ def listBoundaryNames(case):
     return BoundaryDict(case).patches()
 
 
-def changeBoundaryType(case, bc_name, bc_type):
+def setPatchType(case, bc_name, bc_type):
     """ Change boundary named `bc_name` to `bc_type`. """
     f = BoundaryDict(case)
     if bc_name in f.patches():
@@ -687,6 +688,22 @@ def changeBoundaryType(case, bc_name, bc_type):
         print("Boundary `{}` not found, so type is not changed".format(bc_name))
     f.writeFile()
 
+
+def getPatchType(bcType, bcSubType):
+    """ Get the boundary type based on selected BC condition """
+    if (bcType == 'wall'):
+        return ('wall')
+    elif (bcType == 'constraint'):
+        if (bcSubType == 'symmetryPlane'):
+            return ('symmetryPlane')
+        elif (bcSubType == 'cyclic'):
+            return ('cyclic')
+        elif (bcSubType == 'wedge'):
+            return ('wedge')
+        else:
+            return ('empty')
+    else:
+        return ('patch')
 
 def movePolyMesh(case):
     """ Move polyMesh to polyMesh.org to ensure availability if cleanCase is ran from the terminal. """

@@ -107,46 +107,6 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
-      <widget class="Gui::InputField" name="if_min">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>80</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string extracomment="Select 0 to use default value"/>
-       </property>
-       <property name="text">
-        <string>0.0</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-       <property name="singleStep" stdset="0">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="maximum" stdset="0">
-        <double>1000000000.000000000000000</double>
-       </property>
-       <property name="unit" stdset="0">
-        <string notr="true">mm</string>
-       </property>
-       <property name="decimals" stdset="0">
-        <number>2</number>
-       </property>
-       <property name="value" stdset="0">
-        <double>0.000000000000000</double>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="1">
       <widget class="QComboBox" name="cb_dimension">
        <property name="toolTip">
@@ -178,13 +138,6 @@
        </property>
        <property name="text">
         <string>Cut-cell Cartesian Parameters</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="l_min">
-       <property name="text">
-        <string>Min element size:</string>
        </property>
       </widget>
      </item>

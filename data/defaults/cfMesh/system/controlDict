@@ -47,6 +47,6 @@ writeFormat         ascii;
 
 writeInterval       1;
 
-writePrecision      12;
+writePrecision      15;
 
 // ************************************************************************* //

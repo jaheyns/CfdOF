@@ -25,7 +25,6 @@
 
 """
 After playback macro, Mesh object need to build up in taskpanel
-2D meshing is hard to converted to OpenFOAM, but possible to export UNV mesh
 """
 
 __title__ = "FoamCaseWriter"
@@ -37,9 +36,11 @@ import FreeCAD
 import CfdTools
 import os
 import os.path
+import shutil
 import FoamCaseBuilder as fcb  # independent module, not depending on FreeCAD
 from PySide import QtCore
 from PySide.QtCore import QRunnable, QObject
+from FoamCaseBuilder.utility import readTemplate
 
 
 # Write CFD analysis setup into OpenFOAM case
@@ -183,13 +184,33 @@ class CfdCaseWriterFoam(QRunnable):
     # Mesh
 
     def write_mesh(self):
-        """ Convert Netgen/GMSH created UNV file to OpenFoam """
-        unvMeshFile = self.case_folder + os.path.sep + self.solver_obj.InputCaseName + u".unv"
-        self.mesh_generated = CfdTools.write_unv_mesh(self.mesh_obj, self.bc_group, unvMeshFile)
-        # FreeCAD always stores the CAD geometry in mm, while FOAM by default uses SI units. This is independent
-        # of the user selected unit preferences.
-        scale = 0.001
-        self.builder.setupMesh(unvMeshFile, scale)
+        """ Convert or copy mesh files """
+        if 'Gmsh' in self.mesh_obj.Name:  # GMSH
+            # Convert GMSH created UNV file to OpenFoam
+            FreeCAD.Console.PrintMessage("Writing GMSH")
+            unvMeshFile = self.case_folder + os.path.sep + self.solver_obj.InputCaseName + u".unv"
+            self.mesh_generated = CfdTools.write_unv_mesh(self.mesh_obj, self.bc_group, unvMeshFile)
+            # FreeCAD always stores the CAD geometry in mm, while FOAM by default uses SI units. This is independent
+            # of the user selected unit preferences.
+            self.builder.setupMesh(unvMeshFile, scale = 0.001)
+
+        else:  # Cut-cell Cartesian
+            # Move Cartesian mesh files from temporary mesh directory to case directory
+            FreeCAD.Console.PrintMessage("Writing Cartesian mesh")
+            import CfdCartTools
+            self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
+            cart_mesh = self.cart_mesh
+            cart_mesh.get_tmp_file_paths()  # Update tmp file locations
+            CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
+            CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','triSurface'))
+            shutil.copy2(cart_mesh.temp_file_meshDict, os.path.join(self.case_folder,'system'))
+            shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'Allmesh'),self.case_folder)
+            shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.cartesianMesh'),self.case_folder)
+            shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.surfaceFeatureEdges'),self.case_folder)
+
+            # Generate createPatch to update boundary patch names
+            self.builder.setupCreatePatchDict(self.case_folder, self.bc_group, self.mesh_obj)
+
 
     def setMaterial(self, material=None):
         """ Compute and set the kinematic viscosity """

@@ -74,7 +74,7 @@ class _TaskPanelCfdMeshCart:
         QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("finished(int)"), self.meshFinished)
 
         QtCore.QObject.connect(self.form.if_max, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.max_changed)
-        QtCore.QObject.connect(self.form.if_min, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.min_changed)
+        # QtCore.QObject.connect(self.form.if_min, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.min_changed)
         QtCore.QObject.connect(self.form.cb_dimension, QtCore.SIGNAL("activated(int)"), self.choose_dimension)
         QtCore.QObject.connect(self.form.cb_utility, QtCore.SIGNAL("activated(int)"), self.choose_utility)
         QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.update_timer_text)
@@ -103,14 +103,14 @@ class _TaskPanelCfdMeshCart:
 
     def get_mesh_params(self):
         self.clmax = self.mesh_obj.CharacteristicLengthMax
-        self.clmin = self.mesh_obj.CharacteristicLengthMin
+        # self.clmin = self.mesh_obj.CharacteristicLengthMin
         # self.order = self.mesh_obj.ElementOrder
         self.dimension = self.mesh_obj.ElementDimension
         self.utility = self.mesh_obj.MeshUtility
 
     def set_mesh_params(self):
         self.mesh_obj.CharacteristicLengthMax = self.clmax
-        self.mesh_obj.CharacteristicLengthMin = self.clmin
+        # self.mesh_obj.CharacteristicLengthMin = self.clmin
         # self.mesh_obj.ElementOrder = self.order
         self.mesh_obj.ElementDimension = self.dimension
         self.mesh_obj.MeshUtility = self.utility
@@ -119,8 +119,8 @@ class _TaskPanelCfdMeshCart:
         """ Fills the widgets """
         self.form.if_max.setText(self.clmax.UserString)
         self.form.if_max.setToolTip("Select 0 to use default value")
-        self.form.if_min.setText(self.clmin.UserString)
-        self.form.if_min.setToolTip("Select 0 to use default value")
+        # self.form.if_min.setText(self.clmin.UserString)
+        # self.form.if_min.setToolTip("Select 0 to use default value")
         index_dimension = self.form.cb_dimension.findText(self.dimension)
         self.form.cb_dimension.setCurrentIndex(index_dimension)
         index_utility = self.form.cb_utility.findText(self.utility)
@@ -141,8 +141,8 @@ class _TaskPanelCfdMeshCart:
     def max_changed(self, base_quantity_value):
         self.clmax = base_quantity_value
 
-    def min_changed(self, base_quantity_value):
-        self.clmin = base_quantity_value
+    # def min_changed(self, base_quantity_value):
+    #     self.clmin = base_quantity_value
 
     def choose_dimension(self, index):
         if index < 0:
@@ -233,6 +233,7 @@ class _TaskPanelCfdMeshCart:
         cart_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
         self.console_log('Meshing completed')
         self.console_log('Tetrahedral representation of the Cartesian mesh is shown')
+        self.console_log("Warning: FEM Mesh may not display mesh accurately, please view in Paraview.\n")
         self.Timer.stop()
         self.update()
         self.form.pb_run_mesh.setEnabled(True)

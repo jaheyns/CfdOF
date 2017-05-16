@@ -49,7 +49,7 @@ class _CommandCfdMeshGmshFromShape(FemCommands):
         sel = FreeCADGui.Selection.getSelection()
         if (len(sel) == 1):
             if(sel[0].isDerivedFrom("Part::Feature")):
-                mesh_obj_name = sel[0].Name + "_Mesh"
+                mesh_obj_name = sel[0].Name + "_GmshMesh"
                 FreeCADGui.addModule("CfdMeshGmsh")
                 FreeCADGui.doCommand("CfdMeshGmsh.makeCfdMeshGmsh('" + mesh_obj_name + "')")
                 FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)

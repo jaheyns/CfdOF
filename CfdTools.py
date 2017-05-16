@@ -29,6 +29,7 @@
 from __future__ import print_function
 import os
 import os.path  # Is this necessary if os is already imported?
+import shutil
 import tempfile
 
 import FreeCAD
@@ -242,9 +243,10 @@ def setPartVisibility(vobj, part_vis, compound_vis, mesh_vis, bound_vis):
             if ("Boolean" in obj.Name):
                 # Show only boolean to prevent duplicate face selection
                 FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = part_vis
-            if ("CfdFluidBoundary" in obj.Name) and not bound_vis:
-                ''' Only turn boundary visibility off, if set to true it will keep visibility as is. '''
-                FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = bound_vis
+            # Update BC visibility to only show mesh_obj part
+            # if ("CfdFluidBoundary" in obj.Name) and not bound_vis:
+            #     ''' Only turn boundary visibility off, if set to true it will keep visibility as is. '''
+            #     FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = bound_vis
             if ("Compound" in obj.Name) or ("Fusion" in obj.Name):
                 FreeCAD.getDocument(doc_name).getObject(obj.Name).ViewObject.Visibility = compound_vis
         if obj.isDerivedFrom("Fem::FemMeshObject"):
@@ -329,3 +331,14 @@ def hide_parts_show_meshes():
                     if aparttoshow == apart.Name:
                         apart.ViewObject.Visibility = False
                 acnstrmesh.ViewObject.Visibility = True
+
+
+def copyFilesRec(src, dst, symlinks=False, ignore=None):
+    """ Recursively copy files from src dir to dst dir """
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if not os.path.isdir(s):
+            shutil.copy2(s, d)

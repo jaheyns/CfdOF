@@ -84,7 +84,7 @@ class _ViewProviderCfdFluidBoundary:
     def setEdit(self, vobj, mode):
         import _TaskPanelCfdFluidBoundary
         taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object)
-        CfdTools.setPartVisibility(vobj, True, False, False, True)
+        # CfdTools.setPartVisibility(vobj, True, False, False, True)  # Update to show only mesh_obj.part
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True

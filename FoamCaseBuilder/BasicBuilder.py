@@ -655,8 +655,8 @@ class BasicBuilder(object):
     # Boundary conditions
 
     def writeDefaultBoundaryConditions(self):
-        """ If a boundary condition is not specified it will default to 'fixed wall'. In polyMesh/boundary
-        "defaultFaces" is set to 'wall', but it is is not renamed for mesh conversion .
+        """ If a boundary condition is not specified it will default to 'slip wall'. In polyMesh/boundary
+        "defaultFaces" is set to 'wall'.
         """
         print ('Setting default faces to use a slip boundary condition.')
         bc_names = listBoundaryNames(self._casePath)
@@ -675,7 +675,7 @@ class BasicBuilder(object):
             # self.setupWallTurbulence(_default_wall_dict, self._turbulenceProperties)
 
     def _writeDefaultVelocityBoundary(self):
-        """ Default velocity boundary to fixed wall. """
+        """ Default velocity boundary to slip wall. """
         f = ParsedParameterFile(self._casePath + "/0/U")
         for bc_name in listBoundaryNames(self._casePath):
             f["boundaryField"][bc_name] = {}
@@ -683,13 +683,11 @@ class BasicBuilder(object):
         f.writeFile()
 
     def _writeDefaultPressureBoundary(self):
-        """ Default pressure boundary to fixed wall. """
+        """ Default pressure boundary to slip wall. """
         f = ParsedParameterFile(self._casePath + "/0/p")
         if 'p_rgh' in self._solverCreatedVariables:
             self._initPressure_rghAsWall()
             for bc_name in listBoundaryNames(self._casePath):
-                # NOTE: Code depreciated (JH) 06/02/2017
-                # f["boundaryField"][bc_name]={"type": "calculated", "value": "$internalField"}
                 f["boundaryField"][bc_name]["type"] = "zeroGradient"
         else:
             for bc_name in listBoundaryNames(self._casePath):
@@ -742,7 +740,7 @@ class BasicBuilder(object):
             elif bcDict['type'] == 'wall':
                 self.setupWallBoundary(bcDict)
             elif bcDict['type'] == 'constraint':
-                self.setupConstraintBoundary(bcDict['type'])
+                self.setupConstraintBoundary(bcDict)
             elif bcDict['type'] == 'baffle':
                 self.setupBaffleBoundary(bcDict)
             else:
@@ -810,6 +808,7 @@ class BasicBuilder(object):
         #     turbulenceSettings = self._turbulenceProperties
         # self.setupWallTurbulence(bc_dict, turbulenceSettings)
 
+    # NOTE: Check implementation and remove 'cyclic' and 'wedge' (see trello note)
     def setupConstraintBoundary(self, bc_dict):
         # Geometrical constraint types
         case = self._casePath
@@ -828,7 +827,7 @@ class BasicBuilder(object):
             elif constraint_type == "cyclic": # also named as `periodic` in ansys Fluent
                 f["boundaryField"][boundary_name] = {}
                 f["boundaryField"][boundary_name]["type"] = "cyclic"
-                # Todo: chack pairing of wedge and cyclic boundary
+                # Todo: check pairing of wedge and cyclic boundary
             elif constraint_type == "wedge":
                 f["boundaryField"][boundary_name] = {}
                 f["boundaryField"][boundary_name]["type"] = "wedge"  # axis-sym
@@ -1131,6 +1130,66 @@ class BasicBuilder(object):
                                                         "FILENAME": "topoSetDict"}),
                                 "ACTIONS": actions}))
         fid.close()
+
+    def setupCreatePatchDict(self, case_folder, bc_group, mobj):
+        print ('Populating createPatchDict to update BC names')
+        fname = os.path.join(case_folder, "system", "createPatchDict")
+        fid = open(fname, 'w')
+        patch = ""
+
+        bc_allocated = []
+        for bc_id, bc_obj in enumerate(bc_group):
+            bc_list = []
+            meshFaceList = mobj.Part.Shape.Faces
+            for (i, mf) in enumerate(meshFaceList):
+                bcFacesList = bc_obj.Shape.Faces
+                for bf in bcFacesList:
+                    if (bf.CenterOfMass == mf.CenterOfMass):
+                        bc_list.append(mobj.ShapeFaceNames[i])
+                        if mobj.ShapeFaceNames[i] in bc_allocated:
+                            print ('Error: {} has been assigned twice'.format(mobj.ShapeFaceNames[i]))
+                        else:
+                            bc_allocated.append(mobj.ShapeFaceNames[i])
+
+            bc_list_str = ""
+            for bc in bc_list:
+                bc_list_str += " " + bc
+
+            bcDict = bc_obj.BoundarySettings
+            bcType = bcDict["BoundaryType"]
+            bcSubType = bcDict["BoundarySubtype"]
+            patchType = getPatchType(bcType, bcSubType)
+
+            patch += readTemplate(
+                os.path.join(self._templatePath, "helperFiles", "createPatchDictPatch"),
+                {"LABEL": bc_obj.Label,
+                 "TYPE": patchType,
+                 "PATCHLIST": bc_list_str})
+
+            if not (len(bc_list) == len(meshFaceList)):
+                print('Error: Miss-match between boundary faces and mesh faces')
+
+        # Add default faces
+        flagName = False
+        bc_list_str = ""
+        for name in mobj.ShapeFaceNames:
+            if not name in bc_allocated:
+                bc_list_str += " " + name
+                flagName = True
+        if (flagName):
+            patch += readTemplate(
+                os.path.join(self._templatePath, "helperFiles", "createPatchDictPatch"),
+                {"LABEL": 'defaultFaces',
+                 "TYPE": 'patch',
+                 "PATCHLIST": bc_list_str})
+
+        fid.write(readTemplate(os.path.join(self._templatePath, "helperFiles", "createPatchDict"),
+                               {"HEADER": readTemplate(os.path.join(self._templatePath, "helperFiles", "header"),
+                                                       {"LOCATION": "system",
+                                                        "FILENAME": "createPatchDict"}),
+                                "PATCH": patch}))
+        fid.close()
+
 
     def setupFVOptions(self):
         porousObject = self._porousZoneSettings
