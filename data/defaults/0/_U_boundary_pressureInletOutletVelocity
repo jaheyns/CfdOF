@@ -1,0 +1,5 @@
+    %(0%)
+    {
+        type        pressureInletOutletVelocity;
+        value       $internalField;
+    }

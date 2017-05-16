@@ -35,6 +35,7 @@ import FreeCAD
 import os
 import sys
 import os.path
+import CfdTools
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -110,6 +111,8 @@ class _TaskPanelCfdPhysicsSelection:
         elif self.physicsModel['Turbulence'] == 'RANS':
             self.form.turbulenceCheckBox.toggle()
             self.form.radioButtonRANS.toggle()
+        ti = CfdTools.indexOrDefault(RANS_MODELS, self.physicsModel.get('TurbulenceType'), 0)
+        self.form.turbulenceComboBox.setCurrentIndex(ti)
 
         if self.physicsModel['Thermal'] == "Energy":
             self.form.thermalCheckBox.toggle()

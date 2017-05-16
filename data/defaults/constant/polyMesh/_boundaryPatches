@@ -1,0 +1,28 @@
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+    %(0%)
+    {
+        type        wall;
+    }
+%:constraint
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:symmetry
+    %(0%)
+    {
+        type        symmetry;
+    }
+%:cyclic
+    %(0%)
+    {
+        type        cyclic;
+    }
+%}
+%:default
+    %(0%)
+    {
+        type        patch;
+    }
+%}
+
+%}

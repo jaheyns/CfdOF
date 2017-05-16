@@ -12,7 +12,7 @@ class _CfdPhysicsModel:
         # Default settings
         obj.PhysicsModel = {"Time": "Steady",
                             "Flow": "Incompressible",
-                            "Turbulence": "Laminar",
+                            "Turbulence": "Laminar",  # Inviscid, Laminar, RANS
                             "Thermal": None,
                             "TurbulenceModel": None}
         obj.Proxy = self

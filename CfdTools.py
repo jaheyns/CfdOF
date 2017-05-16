@@ -345,9 +345,22 @@ def cfdError(msg):
 
 def inputCheckAndStore(value, units, dictionary, key):
     """ Store the numeric part of value (string) in dictionary[key] in the given units if compatible"""
-    quantity = Units.Quantity(value).getValueAs(units)
-    dictionary[key] = quantity.Value
+    # While the user is typing there will be parsing errors. Don't confuse the user by printing these -
+    # the validation icon will show an error.
+    try:
+        quantity = Units.Quantity(value).getValueAs(units)
+    except ValueError:
+        pass
+    else:
+        dictionary[key] = quantity.Value
 
+
+def indexOrDefault(list, findItem, defaultIndex):
+    """ Look for findItem in list, and return defaultIndex if not found """
+    try:
+        return list.index(findItem)
+    except ValueError:
+        return defaultIndex
 
 # This is taken from hide_parts_constraints_show_meshes which was removed from FemCommands for some reason
 def hide_parts_show_meshes():

@@ -1,0 +1,79 @@
+%{%(physics/Turbulence%)
+%:RANS
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      k;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform %(initialValues/k%);
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:fixed translating partialSlip rough
+%{%(boundaries/%(0%)/LowRe%)
+%:False
+    %(0%)
+    {
+        type        kqRWallFunction;
+        value       $internalField;
+    }
+%:True
+    %(0%)
+    {
+        type        kLowReWallFunction;
+        value       $internalField;
+    }
+%}
+%:slip
+%[0/_boundary_zeroGradient%]
+%}
+%:inlet
+%{%(boundaries/%(0%)/TurbulenceInletSpecification%)
+%:TKEAndSpecDissipationRate
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/TurbulentKineticEnergy%);
+    }
+%:intensityAndLengthScale
+    %(0%)
+    {
+        type        turbulentIntensityKineticEnergyInlet;
+        intensity   %(boundaries/%(0%)/TurbulenceIntensity%);
+        value       $internalField;
+    }
+%}
+%:outlet
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  $internalField;
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
+%}
+
+%}
+%{defaultFaces
+%[0/_boundary_zeroGradient%]
+%}
+
+}
+
+// ************************************************************************* //
+%}

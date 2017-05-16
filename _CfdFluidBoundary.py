@@ -63,7 +63,7 @@ class _CfdFluidBoundary(PartFeature):
                                 'Uz': 0.0,
                                 'VelocityMag': 0.0,
                                 'DirectionFace': '',
-                                'ReverseNorma': False,
+                                'ReverseNormal': False,
                                 'Pressure': 0.0,
                                 'SlipRatio': 0.0,
                                 'VolFlowRate': 0.0,

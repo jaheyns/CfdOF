@@ -1,0 +1,80 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      p;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform %(initialValues/Pressure%);
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%[0/_boundary_zeroGradient%]
+%:inlet
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:totalPressure
+    %(0%)
+    {
+        type        totalPressure;
+        p0          uniform %(boundaries/%(0%)/Pressure%);
+        value       $internalField;
+    }
+%:default
+%[0/_boundary_zeroGradient%]
+%}
+%:outlet
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:staticPressure
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/Pressure%);
+    }
+%:default
+%[0/_boundary_zeroGradient%]
+%}
+%:open
+    %(0%)
+    {
+        type        totalPressure;
+        p0          uniform %(boundaries/%(0%)/Pressure%);
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%{%(boundaries/%(0%)/BoundarySubtype%)
+:porousBaffle
+// It is not strictly necessary to do master and slave, as one can use the baffle group to refer
+// to both. However, we create both to keep paraview happy.
+%{%(0%)_master %(0%)_slave
+    %(0%)
+    {
+        type        porousBafflePressure;
+        patchType   cyclic;
+        length      1.0;
+        I           %(boundaries/%(1%)/pressureDropCoeff%);
+        D           0;
+        value       $internalField;
+    }
+%}
+%}
+%}
+
+%}
+%{defaultFaces
+%[0/_boundary_zeroGradient%]
+%}
+
+}
+
+// ************************************************************************* //

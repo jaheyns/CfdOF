@@ -1,0 +1,14 @@
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:symmetry
+    %(0%)
+    {
+        type        symmetry;
+        value       $internalField;
+    }
+%:cyclic
+    %(0%)
+    {
+        type        cyclic;
+        value       $internalField;
+    }
+%}

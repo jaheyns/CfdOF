@@ -665,8 +665,12 @@ def convertMesh(case, mesh_file, scale):
         mesh_file = translatePath(mesh_file)
         cmdline = ['ideasUnvToFoam', '"{}"'.format(mesh_file)]
         runFoamApplication(cmdline, case)
-        setPatchType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
-    else: raise Exception("Error: Only supporting unv mesh files.")
+        # changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
+        # Set in the correct patch types
+        cmdline = ['changeDictionary']
+        runFoamApplication(cmdline, case)
+    else:
+        raise Exception("Error: Only supporting unv mesh files.")
 
     if scale and isinstance(scale, numbers.Number):
         cmdline = ['transformPoints', '-scale', '"({} {} {})"'.format(scale, scale, scale)]
@@ -681,12 +685,13 @@ def listBoundaryNames(case):
 
 def setPatchType(case, bc_name, bc_type):
     """ Change boundary named `bc_name` to `bc_type`. """
-    f = BoundaryDict(case)
-    if bc_name in f.patches():
-        f[bc_name]['type'] = bc_type
-    else:
-        print("Boundary `{}` not found, so type is not changed".format(bc_name))
-    f.writeFile()
+    # Removed - OO - 16 May 2017
+    #f = BoundaryDict(case)
+    #if bc_name in f.patches():
+    #    f[bc_name]['type'] = bc_type
+    #else:
+    #    print("Boundary `{}` not found, so type is not changed".format(bc_name))
+    #f.writeFile()
 
 
 def getPatchType(bcType, bcSubType):

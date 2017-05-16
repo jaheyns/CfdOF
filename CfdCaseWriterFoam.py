@@ -41,6 +41,7 @@ import FoamCaseBuilder as fcb  # independent module, not depending on FreeCAD
 from PySide import QtCore
 from PySide.QtCore import QRunnable, QObject
 from FoamCaseBuilder.utility import readTemplate
+import Units
 
 
 # Write CFD analysis setup into OpenFOAM case
@@ -48,7 +49,7 @@ from FoamCaseBuilder.utility import readTemplate
 # Derived from QRunnable in order to run in a worker thread
 
 class CfdCaseWriterSignals(QObject):
-    error = QtCore.Signal(str) # Signal in PySide, pyqtSignal in PyQt
+    error = QtCore.Signal(str)  # Signal in PySide, pyqtSignal in PyQt
     finished = QtCore.Signal(bool)
 
 
@@ -102,16 +103,23 @@ class CfdCaseWriterFoam(QRunnable):
             self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
 
             # Get OpenFOAM install path from parameters
-            param_path = self.param_path
             self.installation_path = FreeCAD.ParamGet(self.param_path).GetString("InstallationPath", "")
 
             self.solverName = self.getSolverName()
 
             # Collect settings into single dictionary
-            settings = {'boundaries':
-                        dict((b.Label, b.BoundarySettings) for b in self.bc_group),
+            # self.material_obj stores everything as a string for compatibility with FreeCAD material objects.
+            # Convert to SI numbers
+            material_properties = {}
+            material_properties['Density'] = \
+                Units.Quantity(self.material_obj.Material['Density']).getValueAs("kg/m^3").Value
+            material_properties['DynamicViscosity'] = \
+                Units.Quantity(self.material_obj.Material['DynamicViscosity']).getValueAs("kg/m/s").Value
+            settings = {'physics': self.physics_model,
+                        'fluidProperties': material_properties,
                         'initialValues': self.initialConditions,
-                        'physics': self.physics_model}
+                        'boundaries': dict((b.Label, b.BoundarySettings) for b in self.bc_group)
+                        }
 
             # Initialise case
             self.builder = fcb.BasicBuilder(casePath=self.case_folder,
@@ -126,20 +134,12 @@ class CfdCaseWriterFoam(QRunnable):
 
             self.builder.setInstallationPath()
             self.builder.pre_build_check()
+            self.setMaterial()
+            self.setBoundaryConditions()
+            self.processInitialConditions()
             self.builder.createCase()
 
             self.write_mesh()
-
-            self.setMaterial()
-            self.setBoundaryConditions()
-            # NOTE: Update code when turbulence is revived
-            # self.builder.turbulenceProperties = {"name": self.solver_obj.TurbulenceModel}
-
-            # NOTE: Code depreciated (JH) 06/02/2017
-            # self.write_solver_control()
-
-            # NOTE: Code deprecated (OO) 22/02/2017 - removed from BasicBuilder
-            #self.setTimeControl()
 
             if self.porousZone_objs is not None:
                 self.exportPorousZoneStlSurfaces()
@@ -147,6 +147,7 @@ class CfdCaseWriterFoam(QRunnable):
 
             self.builder.post_build_check()
             self.builder.build()
+
         except:
             raise
         finally:
@@ -177,15 +178,11 @@ class CfdCaseWriterFoam(QRunnable):
                                              "writeInterval": self.solver_obj.WriteInterval}
 
     def extractInternalField(self):
-        Ux = FreeCAD.Units.Quantity(self.initialConditions['Ux'])
-        Ux = Ux.getValueAs('m/s')
-        Uy = FreeCAD.Units.Quantity(self.initialConditions['Uy'])
-        Uy = Uy.getValueAs('m/s')
-        Uz = FreeCAD.Units.Quantity(self.initialConditions['Uz'])
-        Uz = Uz.getValueAs('m/s')
-        P = FreeCAD.Units.Quantity(self.initialConditions['P'])
-        P = P.getValueAs('kg*m/s^2')
-        internalFields = {'p': float(P), 'U': (float(Ux), float(Uy), float(Uz))}
+        Ux = self.initialConditions['Ux']
+        Uy = self.initialConditions['Uy']
+        Uz = self.initialConditions['Uz']
+        P = self.initialConditions['P']
+        internalFields = {'p': P, 'U': (Ux, Uy, Uz)}
         return internalFields
 
     # Mesh
@@ -220,7 +217,6 @@ class CfdCaseWriterFoam(QRunnable):
         else:
             raise Exception("Unrecognised mesh type")
 
-
     def setMaterial(self, material=None):
         """ Compute and set the kinematic viscosity """
         if self.physics_model['Turbulence']=='Inviscid':
@@ -234,26 +230,12 @@ class CfdCaseWriterFoam(QRunnable):
         self.builder.fluidProperties = {'name': 'oneLiquid', 'kinematicViscosity': float(kinVisc)}
 
     def setBoundaryConditions(self):
-        """ Switch case to deal diff fluid boundary condition, thermal and turbulent is not yet fully tested
-        """
-        #caseFolder = self.solver_obj.WorkingDir + os.path.sep + self.solver_obj.InputCaseName
-        bc_settings = []
+        """ Compute any quantities required before case build """
         for bc in self.bc_group:
-            #FreeCAD.Console.PrintMessage("write boundary condition: {}\n".format(bc.Label))
-
             import _CfdFluidBoundary
             assert(isinstance(bc.Proxy, _CfdFluidBoundary._CfdFluidBoundary))
 
-            # Interface between CfdFluidBoundary (not, in principle, OpenFOAM-specific) and FoamCaseBuilder
-            bc_dict = {'name': bc.Label,
-                       'type': bc.BoundarySettings['BoundaryType'],
-                       'subtype': bc.BoundarySettings['BoundarySubtype']}
-            import Units
-            if bc.BoundarySettings['VelocityIsCartesian']:
-                velocity = [bc.BoundarySettings['Ux'],
-                            bc.BoundarySettings['Uy'],
-                            bc.BoundarySettings['Uz']]
-            else:
+            if not bc.BoundarySettings['VelocityIsCartesian']:
                 veloMag = bc.BoundarySettings['VelocityMag']
                 face = bc.BoundarySettings['DirectionFace'].split(':')
                 # See if entered face actually exists and is planar
@@ -266,6 +248,9 @@ class CfdCaseWriterFoam(QRunnable):
                             if bc.BoundarySettings['ReverseNormal']:
                                n = [-ni for ni in n]
                             velocity = [ni*veloMag for ni in n]
+                            bc.BoundarySettings['Ux'] = velocity[0]
+                            bc.BoundarySettings['Uy'] = velocity[1]
+                            bc.BoundarySettings['Uz'] = velocity[2]
                         else:
                             raise RuntimeError
                     else:
@@ -273,44 +258,62 @@ class CfdCaseWriterFoam(QRunnable):
                 except (SystemError, RuntimeError):
                     raise RuntimeError(bc.BoundarySettings['DirectionFace'] + " is not a valid, planar face.")
 
-            bc_dict['velocity'] = velocity
-            bc_dict['pressure'] = bc.BoundarySettings['Pressure']
-            bc_dict['massFlowRate'] = bc.BoundarySettings['MassFlowRate']
-            bc_dict['volFlowRate'] = bc.BoundarySettings['VolFlowRate']
-            bc_dict['slipRatio'] = bc.BoundarySettings['SlipRatio']
-            if bc.BoundarySettings['PorousBaffleMethod'] == 0:
-                bc_dict['pressureDropCoeff'] = bc.BoundarySettings['PressureDropCoeff']
-            elif bc.BoundarySettings['PorousBaffleMethod'] == 1:
+            if bc.BoundarySettings['PorousBaffleMethod'] == 1:
                 wireDiam = bc.BoundarySettings['ScreenWireDiameter']
                 spacing = bc.BoundarySettings['ScreenSpacing']
                 CD = 1.0  # Drag coeff of wire (Simmons - valid for Re > ~300)
                 beta = (1-wireDiam/spacing)**2
-                bc_dict['pressureDropCoeff'] = CD*(1-beta)
-            else:
-                raise Exception("Unrecognised method for porous baffle resistance")
+                bc.BoundarySettings['PressureDropCoeff'] = CD*(1-beta)
 
-            # NOTE: Code depreciated 20/01/2017 (AB)
-            # Temporarily disabling turbulent and heat transfer boundary conditon application
-            # This functionality has not yet been added and has been removed from the CFDSolver object
-            # Turbulence properties have been relocated to physics object
-            # if self.solver_obj.HeatTransfering:
-            #     bc_dict['thermalSettings'] = {"subtype": bc.ThermalBoundaryType,
-            #                                     "temperature": bc.TemperatureValue,
-            #                                     "heatFlux": bc.HeatFluxValue,
-            #                                     "HTC": bc.HTCoeffValue}
-            # bc_dict['turbulenceSettings'] = {'name': self.solver_obj.TurbulenceModel}
-            # # ["Intensity&DissipationRate","Intensity&LengthScale","Intensity&ViscosityRatio", "Intensity&HydraulicDiameter"]
-            # if self.solver_obj.TurbulenceModel not in set(["laminar", "invisid", "DNS"]):
-            #     bc_dict['turbulenceSettings'] = {"name": self.solver_obj.TurbulenceModel,
-            #                                     "specification": bc.TurbulenceSpecification,
-            #                                     "intensityValue": bc.TurbulentIntensityValue,
-            #                                     "lengthValue": bc.TurbulentLengthValue
-            #                                     }
-            bc_settings.append(bc_dict)
+    def processInitialConditions(self):
+        """ Do any required computations before case build. Boundary conditions must be processed first. """
+        if self.physics_model['TurbulenceModel'] is not None:
+            if self.initialConditions['UseInletTurbulenceValues']:
+                inlet_bc = None
+                first_inlet = None
+                ninlets = 0
+                for bc in self.bc_group:
+                    if bc.BoundarySettings['BoundaryType'] == "inlet":
+                        ninlets = ninlets + 1
+                        # Save first inlet in case match not found
+                        if ninlets == 1:
+                            first_inlet = bc
+                        if self.initialConditions['Inlet'] == bc.Label:
+                            inlet_bc = bc
+                            break
+                if inlet_bc is None:
+                    if self.initialConditions['Inlet']:
+                        if ninlets == 1:
+                            inlet_bc = first_inlet
+                        else:
+                            raise Exception("Inlet {} not found to copy turbulence initial conditions from."
+                                            .format(self.initialConditions['Inlet']))
+                    else:
+                        inlet_bc = first_inlet
+                if inlet_bc is None:
+                    raise Exception("No inlets found to copy turbulence initial conditions from.")
 
-        #self.builder.internalFields = {'p': 0.0, 'U': (0, 0, 0)}
-        self.builder.internalFields = self.extractInternalField()
-        self.builder.boundaryConditions = bc_settings
+                if inlet_bc.BoundarySettings['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
+                    self.initialConditions['k'] = inlet_bc.BoundarySettings['TurbulentKineticEnergy']
+                    self.initialConditions['omega'] = inlet_bc.BoundarySettings['SpecificDissipationRate']
+                elif inlet_bc.BoundarySettings['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
+                    if inlet_bc.BoundarySettings['BoundarySubtype'] == 'uniformVelocity':
+                        Uin = (inlet_bc.BoundarySettings['Ux'] ** 2 +
+                               inlet_bc.BoundarySettings['Ux'] ** 2 +
+                               inlet_bc.BoundarySettings['Ux'] ** 2) ** 0.5
+                        I = inlet_bc.BoundarySettings['TurbulenceIntensity']
+                        k = 3 / 2 * (Uin * I) ** 2
+                        Cmu = 0.09  # Standard turb model parameter
+                        l = inlet_bc.BoundarySettings['TurbulenceLengthScale']
+                        omega = k ** 0.5 / (Cmu ** 0.25 * l)
+                        self.initialConditions['k'] = k
+                        self.initialConditions['omega'] = omega
+                    else:
+                        raise Exception(
+                            "Inlet type currently unsupported for copying turbulence initial conditions.")
+                else:
+                    raise Exception(
+                        "Turbulence inlet specification currently unsupported for copying turbulence initial conditions")
 
     # Porous
 

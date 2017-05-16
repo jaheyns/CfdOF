@@ -83,7 +83,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.Ux.setText(str(self.InitialVariables.get('Ux'))+"m/s")
         self.form.Uy.setText(str(self.InitialVariables.get('Uy'))+"m/s")
         self.form.Uz.setText(str(self.InitialVariables.get('Uz'))+"m/s")
-        self.form.pressure.setText(str(self.InitialVariables.get('P'))+"kg*m/s^2")
+        self.form.pressure.setText(str(self.InitialVariables.get('Pressure'))+"kg*m/s^2")
 
         if self.physicsModel['Turbulence'] in ['RANS', 'LES']:
             self.form.turbulencePropertiesFrame.setVisible(True)
@@ -111,7 +111,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
 
     def updateTurbulenceModelsUi(self):
         checked = bool(self.InitialVariables.get('UseInletTurbulenceValues'))
-        self.form.comboInlets.setVisible(checked)
+        self.form.comboInlets.setVisible(checked and self.form.comboInlets.count() > 1)
         self.form.kEpsilonFrame.setVisible(False)
         self.form.kOmegaSSTFrame.setVisible(False)
         self.form.SpalartAlmerasFrame.setVisible(False)
@@ -132,7 +132,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         inputCheckAndStore(value, "m/s", self.InitialVariables, 'Uz')
 
     def PChanged(self, value):
-        inputCheckAndStore(value, "kg*m/s^2", self.InitialVariables, 'P')
+        inputCheckAndStore(value, "kg*m/s^2", self.InitialVariables, 'Pressure')
 
     def checkUseInletValuesChanged(self, checked):
         self.InitialVariables['UseInletTurbulenceValues'] = checked

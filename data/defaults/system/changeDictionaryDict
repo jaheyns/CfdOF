@@ -1,0 +1,24 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+boundary
+{
+%[constant/polyMesh/_boundaryPatches%]
+
+    defaultFaces
+    {
+        type        wall;
+        nFaces      0;
+        startFace   0;
+    }
+
+}
+
+// ************************************************************************* //

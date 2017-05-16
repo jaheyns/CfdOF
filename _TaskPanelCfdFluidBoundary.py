@@ -33,7 +33,7 @@ import os
 import sys
 import os.path
 import CfdTools
-from CfdTools import inputCheckAndStore
+from CfdTools import inputCheckAndStore, indexOrDefault
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -55,14 +55,14 @@ SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translatin
             ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure"],
             ["Static pressure", "Uniform velocity", "Outflow"],
             ["Ambient pressure"],
-            ["Symmetry plane", "Cyclic"],
+            ["Symmetry", "Cyclic"],
             ["Porous Baffle"]]
 
 SUBTYPES = [["fixed", "slip", "partialSlip", "translating", "rough"],
             ["uniformVelocity", "volumetricFlowRate", "massFlowRate", "totalPressure"],
             ["staticPressure", "uniformVelocity", "outFlow"],
             ["totalPressureOpening"],
-            ["symmetryPlane", "cyclic"],
+            ["symmetry", "cyclic"],
             ["porousBaffle"]]
 
 SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
@@ -78,7 +78,7 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                       "Normal component imposed for outflow; velocity fixed for reverse flow",
                       "All fields extrapolated; use with care!"],
                      ["Boundary open to surrounding with total pressure specified"],
-                     ["Symmetry plane",
+                     ["Symmetry of flow quantities about boundary face",
                       "Periodic boundary, treated as physically connected"],
                      ["Permeable screen"]]
 
@@ -203,9 +203,9 @@ class TaskPanelCfdFluidBoundary:
     def setInitialValues(self):
         """ Populate UI """
         self.form.comboBoundaryType.addItems(BOUNDARY_NAMES)
-        bi = BOUNDARY_TYPES.index(self.BoundarySettingsOrig.get('BoundaryType', BOUNDARY_TYPES[0]))
+        bi = indexOrDefault(BOUNDARY_TYPES, self.BoundarySettingsOrig.get('BoundaryType'), 0)
         self.form.comboBoundaryType.setCurrentIndex(bi)
-        si = SUBTYPES[bi].index(self.BoundarySettingsOrig.get('BoundarySubtype', SUBTYPES[bi][0]))
+        si = indexOrDefault(SUBTYPES[bi], self.BoundarySettingsOrig.get('BoundarySubtype'), 0)
         self.form.comboSubtype.setCurrentIndex(si)
         self.rebuild_list_references()
 
@@ -234,16 +234,14 @@ class TaskPanelCfdFluidBoundary:
 
         if self.turbModel is not None:
             self.form.comboTurbulenceSpecification.addItems(TURBULENT_INLET_SPEC[self.turbModel][0])
-            ti = TURBULENT_INLET_SPEC[self.turbModel][1].index(
-                self.BoundarySettingsOrig.get('TurbulenceInletSpecification',
-                                              TURBULENT_INLET_SPEC[self.turbModel][1][0]))
+            ti = indexOrDefault(TURBULENT_INLET_SPEC[self.turbModel][1],
+                                self.BoundarySettingsOrig.get('TurbulenceInletSpecification'), 0)
             self.form.comboTurbulenceSpecification.setCurrentIndex(ti)
 
         self.form.checkLowRe.setChecked(self.BoundarySettings.get('LowRe', False))
 
         self.form.comboThermalBoundaryType.addItems(THERMAL_BOUNDARY_NAMES)
-        thi = THERMAL_BOUNDARY_TYPES.index(self.BoundarySettings.get('ThermalBoundaryType',
-                                           THERMAL_BOUNDARY_TYPES[0]))
+        thi = indexOrDefault(THERMAL_BOUNDARY_TYPES, self.BoundarySettings.get('ThermalBoundaryType'), 0)
         self.form.comboThermalBoundaryType.setCurrentIndex(thi)
         self.form.inputKineticEnergy.setText(str(self.BoundarySettings.get('TurbulentKineticEnergy'))+"m^2/s^2")
         self.form.inputSpecificDissipationRate.setText(
