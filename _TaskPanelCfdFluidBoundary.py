@@ -42,6 +42,7 @@ if FreeCAD.GuiUp:
     from PySide import QtGui
     from PySide.QtCore import Qt
     from PySide.QtGui import QApplication
+    from PySide import QtUiTools
     import FemGui
 
 # Constants
@@ -180,6 +181,13 @@ class TaskPanelCfdFluidBoundary:
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.comboThermalBoundaryTypeChanged)
         self.form.turbulenceFrame.setVisible(False)
         self.form.thermalFrame.setVisible(False)
+        self.form.faceList.clicked.connect(self.faceListSelection)
+        self.form.closeListOfFaces.clicked.connect(self.closeFaceList)
+        self.form.shapeComboBox.currentIndexChanged.connect(self.faceListShapeChosen)
+        self.form.faceListWidget.itemSelectionChanged.connect(self.faceHighlightChange)
+        self.form.addFaceListFace.clicked.connect(self.addFaceListFace)
+        self.form.shapeComboBox.setToolTip("Choose a solid object from the drop down list and select one or more of the faces associated with the chosen solid.")
+
 
         # Populate UI
         self.form.comboBoundaryType.addItems(BOUNDARY_NAMES)
@@ -355,6 +363,7 @@ class TaskPanelCfdFluidBoundary:
             if elt.ShapeType == 'Face':
                 selection = (selected_object.Name, sub)
                 if self.selecting_references:
+                    print "in next one"
                     if selection not in self.obj.References:
                         #self.obj.References.append(selection)
                         tempList.append(selection)
@@ -526,3 +535,62 @@ class TaskPanelCfdFluidBoundary:
         FreeCADGui.doCommand("FreeCAD.getDocument('"+doc_name+"').recompute()")
         doc.resetEdit()
         return True
+
+
+    def faceListSelection(self):
+        self.form.stackedWidget.setCurrentIndex(1)
+        analysis_obj = FemGui.getActiveAnalysis()
+        self.solidsNames = ['None']
+        self.solidsLabels = ['None']
+        for i in FreeCADGui.ActiveDocument.Document.Objects:
+            if "Shape" in i.PropertiesList:
+                if len(i.Shape.Solids)>0:
+                    self.solidsNames.append(i.Name)
+                    self.solidsLabels.append(i.Label)
+                    #FreeCADGui.hideObject(i)
+        self.form.shapeComboBox.clear()
+        #self.form.shapeComboBox.insertItems(1,self.solidsNames)
+        self.form.shapeComboBox.insertItems(1,self.solidsLabels)
+
+
+    def closeFaceList(self):
+        self.form.stackedWidget.setCurrentIndex(0)
+        #self.obj.ViewObject.show()
+
+    def faceListShapeChosen(self):
+        ind = self.form.shapeComboBox.currentIndex()
+        objectName = self.solidsNames[ind]
+        self.shapeObj = FreeCADGui.ActiveDocument.Document.getObject(objectName)
+        self.hideObjects()
+        self.form.faceListWidget.clear()
+        if objectName != 'None':
+            FreeCADGui.showObject(self.shapeObj)
+            self.listOfShapeFaces = self.shapeObj.Shape.Faces
+            for i in range(len(self.listOfShapeFaces)):
+                self.form.faceListWidget.insertItem(i,"Face"+str(i))
+
+    def hideObjects(self):
+        for i in FreeCADGui.ActiveDocument.Document.Objects:
+            if "Shape" in i.PropertiesList:
+                FreeCADGui.hideObject(i)
+        self.obj.ViewObject.show()
+
+    def faceHighlightChange(self):
+        ind = self.form.faceListWidget.currentRow()
+        FreeCADGui.Selection.clearSelection()
+        FreeCADGui.Selection.addSelection(self.shapeObj,'Face'+str(ind+1))
+
+
+    def addFaceListFace(self):
+        #print self.form.faceListWidget.currentItem()," : ",self.form.faceListWidget.currentRow()
+        if self.form.faceListWidget.count()>0 and self.form.faceListWidget.currentRow()!=-1:
+            print True
+            ind = self.form.shapeComboBox.currentIndex()
+            objectName = self.solidsNames[ind]
+            ind = self.form.faceListWidget.currentRow()
+            self.selecting_references = True
+            self.addSelection(self.obj.Document.Name, objectName, 'Face'+str(ind+1))
+            self.selecting_references = False
+
+        #self.obj.ViewObject.show()
+        #self.addSelection(sel.DocumentName, sel.ObjectName, sub)
