@@ -55,7 +55,7 @@ if FreeCAD.GuiUp:
 
 
 class _TaskPanelCfdMeshCart:
-    '''The TaskPanel for editing References property of CfdMeshCart objects and creation of new CFD mesh'''
+    """ The TaskPanel for editing References property of CfdMeshCart objects and creation of new CFD mesh """
     def __init__(self, obj):
         self.mesh_obj = obj
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMeshCart.ui"))
@@ -83,7 +83,8 @@ class _TaskPanelCfdMeshCart:
         QtCore.QObject.connect(self.form.pb_stop_mesh, QtCore.SIGNAL("clicked()"), self.killMeshProcess)
         self.form.pb_stop_mesh.setEnabled(False)
 
-        self.form.cb_dimension.addItems(_CfdMeshCart._CfdMeshCart.known_element_dimensions)  # Limit mesh dimensions to 3D solids
+        # Limit mesh dimensions to 3D solids
+        self.form.cb_dimension.addItems(_CfdMeshCart._CfdMeshCart.known_element_dimensions)
         self.form.cb_utility.addItems(_CfdMeshCart._CfdMeshCart.known_mesh_utility)
 
         self.get_mesh_params()
@@ -103,8 +104,6 @@ class _TaskPanelCfdMeshCart:
 
     def get_mesh_params(self):
         self.clmax = self.mesh_obj.CharacteristicLengthMax
-        # self.clmin = self.mesh_obj.CharacteristicLengthMin
-        # self.order = self.mesh_obj.ElementOrder
         self.dimension = self.mesh_obj.ElementDimension
         self.utility = self.mesh_obj.MeshUtility
 
@@ -176,8 +175,9 @@ class _TaskPanelCfdMeshCart:
         # print('  ElementOrder: ' + cart_mesh.order)
         cart_mesh.get_dimension()
         cart_mesh.get_tmp_file_paths()
-        cart_mesh.get_group_data()
         cart_mesh.setupMeshCaseDir()
+        cart_mesh.get_group_data()
+        cart_mesh.get_region_data()
         cart_mesh.write_part_file()
         cart_mesh.setupMeshDict()
         cart_mesh.createMeshScript(run_parallel = 'false',

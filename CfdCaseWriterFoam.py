@@ -185,7 +185,7 @@ class CfdCaseWriterFoam(QRunnable):
 
     def write_mesh(self):
         """ Convert or copy mesh files """
-        if 'Gmsh' in self.mesh_obj.Name:  # GMSH
+        if self.mesh_obj.Proxy.Type == "FemMeshGmsh":  # GMSH
             # Convert GMSH created UNV file to OpenFoam
             FreeCAD.Console.PrintMessage("Writing GMSH")
             unvMeshFile = self.case_folder + os.path.sep + self.solver_obj.InputCaseName + u".unv"
@@ -194,7 +194,7 @@ class CfdCaseWriterFoam(QRunnable):
             # of the user selected unit preferences.
             self.builder.setupMesh(unvMeshFile, scale = 0.001)
 
-        else:  # Cut-cell Cartesian
+        elif self.mesh_obj.Proxy.Type == "CfdMeshCart":  # Cut-cell Cartesian
             # Move Cartesian mesh files from temporary mesh directory to case directory
             FreeCAD.Console.PrintMessage("Writing Cartesian mesh")
             import CfdCartTools
@@ -210,6 +210,8 @@ class CfdCaseWriterFoam(QRunnable):
 
             # Generate createPatch to update boundary patch names
             self.builder.setupCreatePatchDict(self.case_folder, self.bc_group, self.mesh_obj)
+        else:
+            raise Exception("Unrecognised mesh type")
 
 
     def setMaterial(self, material=None):

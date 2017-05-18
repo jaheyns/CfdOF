@@ -1144,7 +1144,9 @@ class BasicBuilder(object):
             for (i, mf) in enumerate(meshFaceList):
                 bcFacesList = bc_obj.Shape.Faces
                 for bf in bcFacesList:
-                    if (bf.CenterOfMass == mf.CenterOfMass):
+                    import FemMeshTools
+                    isSameGeo = FemMeshTools.is_same_geometry(bf, mf)
+                    if isSameGeo:
                         bc_list.append(mobj.ShapeFaceNames[i])
                         if mobj.ShapeFaceNames[i] in bc_allocated:
                             print ('Error: {} has been assigned twice'.format(mobj.ShapeFaceNames[i]))

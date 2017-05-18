@@ -45,15 +45,17 @@ class _CommandMeshRegion(FemCommands):
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Fem_MeshRegion", "Mesh region"),
                           'Accel': "M, R",
                           'ToolTip': QtCore.QT_TRANSLATE_NOOP("Fem_MeshRegion", "Creates a mesh region")}
-        self.is_active = 'with_gmsh_femmesh'
+        self.is_active = 'with_femmesh'
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create MeshRegion")
         FreeCADGui.addModule("CfdMeshRegion")
         sel = FreeCADGui.Selection.getSelection()
-        if (len(sel) == 1):
+        if len(sel) == 1:
             sobj = sel[0]
-            if len(sel) == 1 and hasattr(sobj, "Proxy") and sobj.Proxy.Type == "FemMeshGmsh":
+            if len(sel) == 1 \
+                    and hasattr(sobj, "Proxy") \
+                    and (sobj.Proxy.Type == "FemMeshGmsh" or sobj.Proxy.Type == "CfdMeshCart"):
                 FreeCADGui.doCommand("CfdMeshRegion.makeCfdMeshRegion(App.ActiveDocument." + sobj.Name + ")")
 
         FreeCADGui.Selection.clearSelection()

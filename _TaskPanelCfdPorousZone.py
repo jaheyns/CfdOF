@@ -58,7 +58,6 @@ class _TaskPanelCfdPorousZone:
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
-        #obj.addProperty("Part::PropertyPartShape","Shape","Something")
         self.obj = obj
         self.shapeListOrig = list(self.obj.shapeList)
         self.partNameList = list(self.obj.partNameList)
@@ -170,11 +169,11 @@ class _TaskPanelCfdPorousZone:
         """
         shapeList = list(self.obj.shapeList)
         for sel in selection:
-                if len(sel.Object.Shape.Solids) > 0:
-                    if not(sel.Object.Name in self.partNameList):
-                        self.form.listWidget.addItem(str(sel.Object.Name))
-                        shapeList.append(sel.Object)
-                        self.partNameList.append(sel.Object.Name)
+            if len(sel.Object.Shape.Solids) > 0:
+                if not(sel.Object.Name in self.partNameList):
+                    self.form.listWidget.addItem(str(sel.Object.Name))
+                    shapeList.append(sel.Object)
+                    self.partNameList.append(sel.Object.Name)
         self.obj.shapeList = shapeList
         FreeCADGui.doCommand("App.activeDocument().recompute()")
 

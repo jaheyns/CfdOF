@@ -1,6 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -32,9 +35,9 @@ import FreeCAD
 import _CfdMeshRegion
 
 
-def makeCfdMeshRegion(base_mesh, relative_length=0.9, name="MeshRegion"):
+def makeCfdMeshRegion(base_mesh, relative_length=1.0, name="MeshRegion"):
     ''' makeCfdMeshRegion([relative length], [name]):
-        Creates a  mesh region object to define properties for a regon of the mesh
+        Creates a  mesh region object to define properties for a region of the mesh
     '''
     obj = FreeCAD.ActiveDocument.addObject("Fem::FeaturePython", name)
     _CfdMeshRegion._CfdMeshRegion(obj)

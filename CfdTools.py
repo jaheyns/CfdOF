@@ -1,7 +1,7 @@
 #***************************************************************************
 #*                                                                         *
 #*   Copyright (c) 2015 - FreeCAD Developers                               *
-#*   Author (c) 2015 - Qingfeng Xia <qingfeng xia eng.ox.ac.uk>            *
+#*   Copyright (c) 2015 - Qingfeng Xia <qingfeng xia eng.ox.ac.uk>         *
 #*   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
 #*   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
 #*   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
@@ -107,7 +107,24 @@ def getPhysicsModel(analysis_object):
             isPresent = True
     if not(isPresent):
         physicsModel = None  # A placeholder to be created in event that it is not present.
-    return physicsModel,isPresent
+    return physicsModel, isPresent
+
+
+def getMeshObject(analysis_object):
+    isPresent = False
+    meshObj = []
+    for i in analysis_object.Member:
+        if hasattr(i, "Proxy") \
+                and hasattr(i.Proxy, "Type") \
+                and (i.Proxy.Type == "FemMeshGmsh" or i.Proxy.Type == "CfdMeshCart"):
+            if isPresent:
+                FreeCAD.Console.PrintError("Analysis contain more than one mesh object.")
+            else:
+                meshObj.append(i)
+                isPresent = True
+    if not isPresent:
+        meshObj = None  # just a placeholder to be created in event that it is not present
+    return meshObj[0], isPresent
 
 
 def getPorousObjects(analysis_object):

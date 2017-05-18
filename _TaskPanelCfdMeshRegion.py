@@ -1,6 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -29,6 +32,7 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import FreeCADGui
+import FemGui
 from PySide import QtGui
 from PySide import QtCore
 import os
@@ -41,19 +45,69 @@ class _TaskPanelCfdMeshRegion:
         self.sel_server = None
         self.obj = obj
         self.selection_mode_solid = False
-        self.selection_mode_std_print_message = "Select Faces, Edges and Vertices by single click on them to add them to the list."
-        self.selection_mode_solid_print_message = "Select Solids by single click on a Face or Edge which belongs to the Solid, to add the Solid to the list."
+        self.selection_mode_std_print_message = "Select Faces, Edges and Vertices by single click " \
+                                                "on them to add them to the list."
+        self.selection_mode_solid_print_message = "Select Solids by single click on a Face or Edge which belongs " \
+                                                  "to the Solid, to add the Solid to the list."
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMeshRegion.ui"))
-        QtCore.QObject.connect(self.form.if_rellen, QtCore.SIGNAL("valueChanged(double)"), self.rellen_changed)
-        QtCore.QObject.connect(self.form.rb_standard, QtCore.SIGNAL("toggled(bool)"), self.choose_selection_mode_standard)
-        QtCore.QObject.connect(self.form.rb_solid, QtCore.SIGNAL("toggled(bool)"), self.choose_selection_mode_solid)
-        QtCore.QObject.connect(self.form.pushButton_Reference, QtCore.SIGNAL("clicked()"), self.add_references)
+        QtCore.QObject.connect(self.form.if_rellen,
+                               QtCore.SIGNAL("valueChanged(double)"),
+                               self.rellen_changed)
+        QtCore.QObject.connect(self.form.rb_standard,
+                               QtCore.SIGNAL("toggled(bool)"),
+                               self.choose_selection_mode_standard)
+        QtCore.QObject.connect(self.form.rb_solid,
+                               QtCore.SIGNAL("toggled(bool)"),
+                               self.choose_selection_mode_solid)
+        QtCore.QObject.connect(self.form.pushButton_Reference,
+                               QtCore.SIGNAL("clicked()"),
+                               self.add_references)
         self.form.list_References.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.form.list_References.connect(self.form.list_References, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.references_list_right_clicked)
+        self.form.list_References.connect(self.form.list_References,
+                                          QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
+                                          self.references_list_right_clicked)
 
+        QtCore.QObject.connect(self.form.if_refinethick,
+                               QtCore.SIGNAL("valueChanged(Base::Quantity)"),
+                               self.refinethick_changed)
+        QtCore.QObject.connect(self.form.if_numlayer,
+                               QtCore.SIGNAL("valueChanged(int)"),
+                               self.numlayer_changed)
+        QtCore.QObject.connect(self.form.if_expratio,
+                               QtCore.SIGNAL("valueChanged(double)"),
+                               self.expratio_changed)
+        QtCore.QObject.connect(self.form.if_firstlayerheight,
+                               QtCore.SIGNAL("valueChanged(Base::Quantity)"),
+                               self.firstlayerheight_changed)
+
+        self.form.RefinementFrame.setVisible(False)
+        self.form.BoundLayerFrame.setVisible(False)
+        self.form.check_boundlayer.stateChanged.connect(self.boundaryLayerStateChanged)
+
+        toolTipMes = "Cell size relative to base cell size."
+        self.form.if_rellen.setToolTip(toolTipMes)
+        self.form.label_rellen.setToolTip(toolTipMes)
         self.get_meshregion_props()
+        self.mesh_obj = self.getMeshObject()
+        if self.mesh_obj.Proxy.Type == 'CfdMeshCart' and self.mesh_obj.MeshUtility == 'cfMesh':
+            self.form.RefinementFrame.setVisible(True)
+            self.form.FaceFrame.setVisible(False)
+            toolTipMes = "Thickness or distance of the refinement region from the reference surface."
+            self.form.if_refinethick.setToolTip(toolTipMes)
+            self.form.label_refinethick.setToolTip(toolTipMes)
+            toolTipMes = "Number of boundary layers if the reference surface is an external or mesh patch."
+            self.form.if_numlayer.setToolTip(toolTipMes)
+            self.form.label_numlayer.setToolTip(toolTipMes)
+            toolTipMes = "Expansion ratio of boundary layers (limited to be greater than 1.0 and smaller than 1.2)."
+            self.form.if_expratio.setToolTip(toolTipMes)
+            self.form.label_expratio.setToolTip(toolTipMes)
+            toolTipMes = "Maximum first cell height (optional value and neglected if set to 0.0)."
+            self.form.if_firstlayerheight.setToolTip(toolTipMes)
+            self.form.label_firstlayerheight.setToolTip(toolTipMes)
+
         self.update()
+        self.initialiseUponReload()
 
     def accept(self):
         self.set_meshregion_props()
@@ -69,8 +123,39 @@ class _TaskPanelCfdMeshRegion:
         FreeCADGui.ActiveDocument.resetEdit()
         return True
 
+    def initialiseUponReload(self):
+        if self.numlayer > 1:  # Only reload when there are more than one layer
+            self.form.check_boundlayer.toggle()
+            self.form.if_numlayer.setValue(self.obj.NumberLayers)
+            self.form.if_expratio.setValue(self.obj.ExpansionRatio)
+            self.form.if_firstlayerheight.setText(self.obj.FirstLayerHeight.UserString)
+
+    def boundaryLayerStateChanged(self):
+        if self.form.check_boundlayer.isChecked():
+            self.form.BoundLayerFrame.setVisible(True)
+        else:
+            self.form.BoundLayerFrame.setVisible(False)
+            self.form.if_numlayer.setValue(int(1))
+            self.form.if_expratio.setValue(1.0)
+            self.form.if_firstlayerheight.setText("0.0 mm")
+
+    def getMeshObject(self):
+        analysis_obj = FemGui.getActiveAnalysis()
+        from CfdTools import getMeshObject
+        mesh_obj, isPresent = getMeshObject(analysis_obj)
+        if not (isPresent):
+            message = "Missing mesh object! \n\nIt appears that the mesh object is not available, please re-create."
+            QtGui.QMessageBox.critical(None, 'Missing mesh object', message)
+            doc = FreeCADGui.getDocument(self.obj.Document)
+            doc.resetEdit()
+        return mesh_obj
+
     def get_meshregion_props(self):
         self.rellen = self.obj.RelativeLength
+        self.refinethick = self.obj.RefinementThickness
+        self.numlayer = self.obj.NumberLayers
+        self.expratio = self.obj.ExpansionRatio
+        self.firstlayerheight = self.obj.FirstLayerHeight
         self.references = []
         if self.obj.References:
             self.tuplereferences = self.obj.References
@@ -79,14 +164,31 @@ class _TaskPanelCfdMeshRegion:
     def set_meshregion_props(self):
         self.obj.References = self.references
         self.obj.RelativeLength = self.rellen
+        self.obj.RefinementThickness = self.refinethick
+        self.obj.NumberLayers = self.numlayer
+        self.obj.ExpansionRatio = self.expratio
+        self.obj.FirstLayerHeight = self.firstlayerheight
 
     def update(self):
-        'fills the widgets'
-        self.form.if_rellen.setText("{}".format(self.obj.RelativeLength))
+        """ fills the widgets """
+        self.form.if_rellen.setValue(self.obj.RelativeLength)
+        self.form.if_refinethick.setText(self.obj.RefinementThickness.UserString)
         self.rebuild_list_References()
 
     def rellen_changed(self, value):
         self.rellen = value
+
+    def refinethick_changed(self, value):
+        self.refinethick = value
+
+    def numlayer_changed(self, value):
+        self.numlayer = value
+
+    def expratio_changed(self, value):
+        self.expratio = value
+
+    def firstlayerheight_changed(self, value):
+        self.firstlayerheight = value
 
     def choose_selection_mode_standard(self, state):
         self.selection_mode_solid = not state
@@ -167,14 +269,18 @@ class _TaskPanelCfdMeshRegion:
                                 found_edge = True
                 if solid_to_add:
                     selection = (selection[0], 'Solid' + solid_to_add)
-                    print('selection element changed to Solid: ', selection[0].Shape.ShapeType, '  ', selection[0].Name, '  ', selection[1])
+                    print('selection element changed to Solid: ',
+                          selection[0].Shape.ShapeType, '  ',
+                          selection[0].Name, '  ',
+                          selection[1])
                 else:
                     return
             if selection not in self.references:
                 self.references.append(selection)
                 self.rebuild_list_References()
             else:
-                FreeCAD.Console.PrintMessage(selection[0].Name + ' --> ' + selection[1] + ' is in reference list already!\n')
+                FreeCAD.Console.PrintMessage(selection[0].Name + ' --> ' + selection[1]
+                                             + ' is in reference list already!\n')
 
     def rebuild_list_References(self):
         self.form.list_References.clear()

@@ -1,6 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -29,10 +32,33 @@ __url__ = "http://www.freecadweb.org"
 
 
 class _CfdMeshRegion:
-    "The CfdMeshRegion object"
+    """The CfdMeshRegion object"""
     def __init__(self, obj):
-        obj.addProperty("App::PropertyFloat", "RelativeLength", "MeshRegionProperties",
+        obj.addProperty("App::PropertyFloat",
+                        "RelativeLength",
+                        "MeshRegionProperties",
                         "Set relative length of the elements for this region")
+        obj.addProperty("App::PropertyLength",
+                        "RefinementThickness",
+                        "MeshRegionProperties",
+                        "Set refinement region thickness")
+        obj.RefinementThickness = 0.0
+        obj.addProperty("App::PropertyInteger",
+                        "NumberLayers",
+                        "MeshRegionProperties",
+                        "Set number of boundary layers")
+        obj.NumberLayers = 0
+        obj.addProperty("App::PropertyFloat",
+                        "ExpansionRatio",
+                        "MeshRegionProperties",
+                        "Set expansion ratio within boundary layers")
+        obj.ExpansionRatio = 0.0
+        obj.addProperty("App::PropertyLength",
+                        "FirstLayerHeight",
+                        "MeshRegionProperties",
+                        "Set the maximum first layer height")
+        obj.FirstLayerHeight = 0.0
+
         obj.addProperty("App::PropertyLinkSubList", "References", "MeshRegionShapes", "List of mesh region shapes")
         obj.Proxy = self
         self.Type = "CfdMeshRegion"
