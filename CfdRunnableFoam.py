@@ -76,7 +76,7 @@ class CfdRunnable(object):
         self.edit_process = None
 
     def check_prerequisites(self):
-        return ""
+        return "" #CfdTools.check_prerequisites()
 
     def edit_case(self):
         """ Open case folder externally in file browser. """
