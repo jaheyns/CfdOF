@@ -115,7 +115,7 @@
       <enum>QFrame::Raised</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page_2">
       <layout class="QGridLayout" name="gridLayout_2">
@@ -265,7 +265,7 @@
         </widget>
        </item>
        <item row="1" column="3">
-        <widget class="Gui::InputField" name="dy">
+        <widget class="Gui::InputField" name="dz">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -299,7 +299,7 @@
         </widget>
        </item>
        <item row="1" column="2">
-        <widget class="Gui::InputField" name="dx">
+        <widget class="Gui::InputField" name="dy">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -615,7 +615,7 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="Gui::InputField" name="fz">
+        <widget class="Gui::InputField" name="fx">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -649,7 +649,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="Gui::InputField" name="dz">
+        <widget class="Gui::InputField" name="dx">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -683,7 +683,7 @@
         </widget>
        </item>
        <item row="3" column="3">
-        <widget class="Gui::InputField" name="fx">
+        <widget class="Gui::InputField" name="fz">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -1060,20 +1060,20 @@
   <tabstop>selectReference</tabstop>
   <tabstop>pushButtonDelete</tabstop>
   <tabstop>comboBoxCorrelation</tabstop>
+  <tabstop>dx</tabstop>
+  <tabstop>dy</tabstop>
   <tabstop>dz</tabstop>
+  <tabstop>fx</tabstop>
+  <tabstop>fy</tabstop>
   <tabstop>fz</tabstop>
   <tabstop>e1x</tabstop>
-  <tabstop>e1y</tabstop>
-  <tabstop>e1z</tabstop>
-  <tabstop>dx</tabstop>
-  <tabstop>fy</tabstop>
   <tabstop>e2x</tabstop>
-  <tabstop>e2y</tabstop>
-  <tabstop>e2z</tabstop>
-  <tabstop>dy</tabstop>
-  <tabstop>fx</tabstop>
   <tabstop>e3x</tabstop>
+  <tabstop>e1y</tabstop>
+  <tabstop>e2y</tabstop>
   <tabstop>e3y</tabstop>
+  <tabstop>e1z</tabstop>
+  <tabstop>e2z</tabstop>
   <tabstop>e3z</tabstop>
   <tabstop>inputOuterDiameter</tabstop>
   <tabstop>inputTubeAxisX</tabstop>

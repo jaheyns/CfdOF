@@ -319,7 +319,10 @@ class CfdCaseWriterFoam(QRunnable):
                     if not os.path.exists(path):
                         os.makedirs(path)
                     fname = os.path.join(path, self.porousZone_objs[ii]. partNameList[i]+u".stl")
-                    shape.exportStl(fname)
+                    import MeshPart
+                    #meshStl = MeshPart.meshFromShape(shape, LinearDeflection = self.mesh_obj.STLLinearDeflection)
+                    meshStl = MeshPart.meshFromShape(shape, LinearDeflection = 0.1)
+                    meshStl.write(fname)
                     FreeCAD.Console.PrintMessage("Successfully wrote stl surface\n")
 
     def setPorousZoneProperties(self):
