@@ -178,14 +178,14 @@ class CfdCartTools():
                                             f.write("  endloop\n")
                                             f.write(" endfacet\n")
 
-                                            # Similarity search for patch used in boundary layer meshing
-                                            meshFaceList = self.mesh_obj.Part.Shape.Faces
-                                            self.ele_meshpatch_map[mr_obj.Name] = mr_obj.Name  # Temporary place holder
-                                            for (i, mf) in enumerate(meshFaceList):
-                                                import FemMeshTools
-                                                isSameGeo = FemMeshTools.is_same_geometry(elt, mf)
-                                                if isSameGeo:  # Only one matching face
-                                                    self.ele_meshpatch_map[mr_obj.Name] = self.mesh_obj.ShapeFaceNames[i]
+                                        # Similarity search for patch used in boundary layer meshing
+                                        meshFaceList = self.mesh_obj.Part.Shape.Faces
+                                        self.ele_meshpatch_map[mr_obj.Name] = mr_obj.Name  # Temporary place holder
+                                        for (i, mf) in enumerate(meshFaceList):
+                                            import FemMeshTools
+                                            isSameGeo = FemMeshTools.is_same_geometry(elt, mf)
+                                            if isSameGeo:  # Only one matching face
+                                                self.ele_meshpatch_map[mr_obj.Name] = self.mesh_obj.ShapeFaceNames[i]
 
                                     else:
                                         FreeCAD.Console.PrintError(
