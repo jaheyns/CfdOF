@@ -1,0 +1,7 @@
+#HEADER#
+
+surfaceFile "#FMSNAME#";
+
+maxCellSize       #CELLSIZE#;
+boundaryCellSize  #CELLSIZE#;
+

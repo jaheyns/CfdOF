@@ -1,0 +1,55 @@
+%{%(porousZonesPresent%)
+%:True
+%{%(solver/solverName%)
+%:porousSimpleFoam
+%:default
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(porousZones%)
+%{%(porousZones/%(0%)/PartNameList%)
+%(0%)
+{
+    type            explicitPorositySource;
+    active          yes;
+
+    explicitPorositySourceCoeffs
+    {
+        selectionMode   cellZone;
+        cellZone        %(0%);
+
+        type            DarcyForchheimer;
+
+        DarcyForchheimerCoeffs
+        {
+            d   d [0 -2 0 0 0 0 0] (%(porousZones/%(1%)/D%));
+            f   f [0 -1 0 0 0 0 0] (%(porousZones/%(1%)/F%));
+
+            coordinateSystem
+            {
+                type    cartesian;
+                origin  (0 0 0);
+                coordinateRotation
+                {
+                    type    axesRotation;
+                    e1      (%(porousZones/%(1%)/e1%));
+                    e3      (%(porousZones/%(1%)/e3%));
+                }
+            }
+        }
+    }
+}
+
+%}
+%}
+
+//************************************************************************ //
+%}
+%}

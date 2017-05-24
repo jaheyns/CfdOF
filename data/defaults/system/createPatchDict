@@ -1,0 +1,38 @@
+%{%(meshType%)
+%:CfdCartMesh
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      createPatchDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+pointSync false;
+
+// Patches to create.
+patches
+(
+
+%{%(createPatches%)
+    {
+        name %(0%);
+
+        patchInfo
+        {
+            type %(createPatches/%(0%)/PatchType%);
+        }
+
+        constructFrom patches;
+
+        patches ( %(createPatches/%(0%)/PatchNamesList%) );
+    }
+
+%}
+);
+
+
+// ************************************************************************* //
+%}

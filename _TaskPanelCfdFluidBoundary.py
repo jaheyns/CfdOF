@@ -55,14 +55,14 @@ SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translatin
             ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure"],
             ["Static pressure", "Uniform velocity", "Outflow"],
             ["Ambient pressure"],
-            ["Symmetry", "Cyclic"],
+            ["Symmetry"],
             ["Porous Baffle"]]
 
 SUBTYPES = [["fixed", "slip", "partialSlip", "translating", "rough"],
             ["uniformVelocity", "volumetricFlowRate", "massFlowRate", "totalPressure"],
             ["staticPressure", "uniformVelocity", "outFlow"],
             ["totalPressureOpening"],
-            ["symmetry", "cyclic"],
+            ["symmetry"],
             ["porousBaffle"]]
 
 SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
@@ -78,29 +78,26 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                       "Normal component imposed for outflow; velocity fixed for reverse flow",
                       "All fields extrapolated; use with care!"],
                      ["Boundary open to surrounding with total pressure specified"],
-                     ["Symmetry of flow quantities about boundary face",
-                      "Periodic boundary, treated as physically connected"],
+                     ["Symmetry of flow quantities about boundary face"],
                      ["Permeable screen"]]
 
 # For each sub-type, whether the basic tab is enabled, the panel number to show (ignored if false), whether
-# direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
-# whether wall function panel is shown
-BOUNDARY_UI = [[[False, 0, False, False, True],  # No slip
-                [False, 0, False, False, False],  # Slip
-                [True, 2, False, False, True],  # Partial slip
-                [True, 0, False, False, True],  # Translating wall
-                [True, 0, False, False, True]],  # Rough
-               [[True, 0, True, True, False],  # Velocity
-                [True, 3, False, True, False],  # Vol flow rate
-                [True, 4, False, True, False],  # Mass Flow rate
-                [True, 1, False, True, False]],  # Total pressure
-               [[True, 1, False, False, False],  # Static pressure
-                [True, 0, False, False, False],  # Uniform velocity
-                [False, 0, False, False, False]],  # Outflow
-               [[True, 1, False, True, False]],  # Opening
-               [[False, 0, False, False, False],  # Symmetry plane
-                [False, 0, False, False, False]],  # Periodic
-               [[True, 5, False, False, False]]]  # Permeable screen
+# direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown
+BOUNDARY_UI = [[[False, 0, False, False],  # No slip
+                [False, 0, False, False],  # Slip
+                [True, 2, False, False],  # Partial slip
+                [True, 0, False, False],  # Translating wall
+                [True, 0, False, False]],  # Rough
+               [[True, 0, True, True],  # Velocity
+                [True, 3, False, True],  # Vol flow rate
+                [True, 4, False, True],  # Mass Flow rate
+                [True, 1, False, True]],  # Total pressure
+               [[True, 1, False, False],  # Static pressure
+                [True, 0, False, False],  # Uniform velocity
+                [False, 0, False, False]],  # Outflow
+               [[True, 1, False, True]],  # Opening
+               [[False, 0, False, False]],  # Symmetry plane
+               [[True, 5, False, False]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows
 TURBULENT_INLET_SPEC = {"kOmegaSST":
@@ -186,8 +183,6 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputIntensity.textChanged.connect(self.inputIntensityChanged)
         self.form.inputLengthScale.textChanged.connect(self.inputLengthScaleChanged)
 
-        self.form.checkLowRe.toggled.connect(self.checkLowReToggled)
-
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.comboThermalBoundaryTypeChanged)
         self.form.thermalFrame.setVisible(physics_model["Thermal"] is not None)
 
@@ -237,8 +232,6 @@ class TaskPanelCfdFluidBoundary:
             ti = indexOrDefault(TURBULENT_INLET_SPEC[self.turbModel][1],
                                 self.BoundarySettingsOrig.get('TurbulenceInletSpecification'), 0)
             self.form.comboTurbulenceSpecification.setCurrentIndex(ti)
-
-        self.form.checkLowRe.setChecked(self.BoundarySettings.get('LowRe', False))
 
         self.form.comboThermalBoundaryType.addItems(THERMAL_BOUNDARY_NAMES)
         thi = indexOrDefault(THERMAL_BOUNDARY_TYPES, self.BoundarySettings.get('ThermalBoundaryType'), 0)
@@ -297,7 +290,7 @@ class TaskPanelCfdFluidBoundary:
         tab_enabled = BOUNDARY_UI[type_index][subtype_index][0]
         self.form.basicFrame.setVisible(tab_enabled)
         for paneli in range(self.form.layoutBasicValues.count()):
-            if isinstance(self.form.layoutBasicValues.itemAt(paneli), QtGui.QWidgetItem):  # Segfaults otherwise...
+            if isinstance(self.form.layoutBasicValues.itemAt(paneli), QtGui.QWidgetItem):
                 self.form.layoutBasicValues.itemAt(paneli).widget().setVisible(False)
         if tab_enabled:
             panel_number = BOUNDARY_UI[type_index][subtype_index][1]
@@ -308,9 +301,7 @@ class TaskPanelCfdFluidBoundary:
                 if self.form.lineDirection.text() == "":
                     self.form.checkReverse.setChecked(reverse)
         turb_enabled = BOUNDARY_UI[type_index][subtype_index][3]
-        wallfunc_enabled = BOUNDARY_UI[type_index][subtype_index][4]
         self.form.turbulenceFrame.setVisible(turb_enabled and self.turbModel is not None)
-        self.form.wallFuncFrame.setVisible(wallfunc_enabled and self.turbModel is not None)
 
     def buttonAddFaceClicked(self):
         self.selecting_direction = False
@@ -508,9 +499,6 @@ class TaskPanelCfdFluidBoundary:
                 item = self.form.layoutTurbulenceValues.itemAt(rowi, role)
                 if isinstance(item, QtGui.QWidgetItem):
                     item.widget().setVisible(rowi in panel_numbers)
-
-    def checkLowReToggled(self, checked):
-        self.BoundarySettings['LowRe'] = checked
 
     def comboThermalBoundaryTypeChanged(self, index):
         self.form.labelThermalDescription.setText(THERMAL_HELPTEXT[index])

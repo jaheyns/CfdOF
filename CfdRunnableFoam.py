@@ -1,24 +1,27 @@
-#***************************************************************************
-#*                                                                         *
-#*   Copyright (c) 2015 - Qingfeng Xia <qingfeng.xia()eng.ox.ac.uk> *
-#*                                                                         *
-#*   This program is free software; you can redistribute it and/or modify  *
-#*   it under the terms of the GNU Lesser General Public License (LGPL)    *
-#*   as published by the Free Software Foundation; either version 2 of     *
-#*   the License, or (at your option) any later version.                   *
-#*   for detail see the LICENCE text file.                                 *
-#*                                                                         *
-#*   This program is distributed in the hope that it will be useful,       *
-#*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-#*   GNU Library General Public License for more details.                  *
-#*                                                                         *
-#*   You should have received a copy of the GNU Library General Public     *
-#*   License along with this program; if not, write to the Free Software   *
-#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
-#*   USA                                                                   *
-#*                                                                         *
-#***************************************************************************
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2015 - Qingfeng Xia <qingfeng.xia()eng.ox.ac.uk>        *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
 
 __title__ = "Classes for New CFD solver"
 __author__ = "Qingfeng Xia"
@@ -32,8 +35,8 @@ import FreeCAD
 
 import CfdCaseWriterFoam
 import CfdTools
-import FoamCaseBuilder
-import FoamCaseBuilder.utility
+import platform
+import subprocess
 
 
 class CfdRunnable(object):
@@ -70,13 +73,21 @@ class CfdRunnable(object):
         else:
             raise Exception('FEM: No active analysis found!')
 
+        self.edit_process = None
+
     def check_prerequisites(self):
         return ""
 
     def edit_case(self):
+        """ Open case folder externally in file browser. """
         case_path = self.solver.WorkingDir + os.path.sep + self.solver.InputCaseName
         FreeCAD.Console.PrintMessage("Please edit the case input files externally at: {}\n".format(case_path))
-        self.writer.builder.editCase()
+        if platform.system() == 'MacOS':
+            self.edit_process = subprocess.Popen(['open', '--', case_path])
+        elif platform.system() == 'Linux':
+            self.edit_process = subprocess.Popen(['xdg-open', case_path])
+        elif platform.system() == 'Windows':
+            self.edit_process = subprocess.Popen(['explorer', case_path])
 
 
 #  Concrete Class for CfdRunnable for OpenFOAM
@@ -86,7 +97,22 @@ class CfdRunnableFoam(CfdRunnable):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
         self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam(self.analysis)
 
-        self.g = None
+        # Set default windows executable to gnuplot instead of older pgnuplot
+        import platform
+        if platform.system() == 'Windows':
+            Gnuplot.GnuplotOpts.gnuplot_command = 'gnuplot.exe'
+        gnuplot_cmd = Gnuplot.GnuplotOpts.gnuplot_command
+        # For blueCFD, use the supplied Gnuplot
+        if CfdTools.getFoamRuntime() == 'BlueCFD':
+            gnuplot_cmd = CfdTools.getFoamDir()
+            gnuplot_cmd = '{}\\..\\AddOns\\gnuplot\\bin\\gnuplot.exe'.format(gnuplot_cmd)
+            Gnuplot.GnuplotOpts.gnuplot_command = '"{}"'.format(gnuplot_cmd)
+        # Otherwise, the command 'gnuplot' must be in the path. Possibly make path user-settable.
+        # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
+        import distutils.spawn
+        if distutils.spawn.find_executable(gnuplot_cmd) is None:
+            raise IOError("Gnuplot executable " + gnuplot_cmd + " not found in path.")
+        self.g = Gnuplot.Gnuplot()
 
         self.UxResiduals = [1]
         self.UyResiduals = [1]
@@ -101,24 +127,6 @@ class CfdRunnableFoam(CfdRunnable):
         return ""
 
     def get_solver_cmd(self, case_dir):
-        # Set up gnuplot here for error checking
-
-        # Set default windows executable to gnuplot instead of older pgnuplot
-        import platform
-        if platform.system() == 'Windows':
-            Gnuplot.GnuplotOpts.gnuplot_command = 'gnuplot.exe'
-        gnuplot_cmd = Gnuplot.GnuplotOpts.gnuplot_command
-        # For blueCFD, use the supplied Gnuplot
-        if FoamCaseBuilder.utility.getFoamRuntime() == 'BlueCFD':
-            gnuplot_cmd = FoamCaseBuilder.utility.getFoamDir()
-            gnuplot_cmd = '{}\\..\\AddOns\\gnuplot\\bin\\gnuplot.exe'.format(gnuplot_cmd)
-            Gnuplot.GnuplotOpts.gnuplot_command = '"{}"'.format(gnuplot_cmd)
-        # Otherwise, the command 'gnuplot' must be in the path. Possibly make path user-settable.
-        # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
-        import distutils.spawn
-        if distutils.spawn.find_executable(gnuplot_cmd) is None:
-            raise IOError("Gnuplot executable " + gnuplot_cmd + " not found in path.")
-        self.g = Gnuplot.Gnuplot()
         self.UxResiduals = [1]
         self.UyResiduals = [1]
         self.UzResiduals = [1]
@@ -138,25 +146,16 @@ class CfdRunnableFoam(CfdRunnable):
         self.g("set xrange [0:1]")
 
         # Environment is sourced in run script, so no need to include in run command
-        cmd = FoamCaseBuilder.utility.makeRunCommand('./Allrun', case_dir, source_env=False)
+        cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
         FreeCAD.Console.PrintMessage("Solver run command: " + ' '.join(cmd) + "\n")
         return cmd
 
     def getRunEnvironment(self):
-        return FoamCaseBuilder.utility.getRunEnvironment()
+        return CfdTools.getRunEnvironment()
 
-    def view_result(self):
-        """ foamToVTK will write result into VTK data files. """
-        print ('Not working ...')
-        # result = self.writer.builder.exportResult()
-        # #result = "/home/qingfeng/Documents/TestCase/VTK/TestCase_345.vtk"  # test passed
-        # from CfdResultFoamVTK import importCfdResult
-        # importCfdResult(result, self.analysis)
-
-    def create_paraview_script(self):
-        """ Create paraview script with case info and run paraview. """
-        module_path = CfdTools.get_module_path()
-        return self.writer.builder.createParaviewScript(module_path)   # Returns paraview script name
+    def getParaviewScript(self):
+        # Already created when case created - just return script name
+        return os.path.join(self.writer.case_folder, "pvScript.py")
 
     def process_output(self, text):
         loglines = text.split('\n')

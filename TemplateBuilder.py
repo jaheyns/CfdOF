@@ -44,9 +44,7 @@ class TemplateBuilder(object):
         self.settings = settings
         self.template_path = template_path
 
-        # Go through 0, constant, system dirs in template dir and build case
-        for d in ["0", "constant", "system"]:
-            self.buildDir(d)
+        self.buildDir('.')
 
     def buildDir(self, rel_dir):
         """ Recursively build files in dir (relative to case base) """
@@ -98,6 +96,8 @@ class TemplateBuilder(object):
             contents = self.process(contents, rel_file, params)
         except BracketError as err:
             raise ValueError("Bracket matching error in {}: {}".format(rel_file, err.message))
+        except Exception as err:
+            raise Exception("Error building file {}: {}".format(rel_file, err.message))
         return contents
 
     def findAtCurrentLevel(self, string, find_string, start):

@@ -50,7 +50,20 @@ class _CfdPorousZone(PartFeature):
         obj.addProperty("App::PropertyPythonObject", "partNameList").partNameList = []
         obj.addProperty("App::PropertyLinkList", "shapeList")
         obj.addProperty("App::PropertyPythonObject", "porousZoneProperties")
-        obj.porousZoneProperties = {}
+        obj.porousZoneProperties = {
+            'PorousCorrelation': 'DarcyForchheimer',
+            'D': [0, 0, 0],
+            'F': [0, 0, 0],
+            'e1': [1, 0, 0],
+            'e2': [0, 1, 0],
+            'e3': [0, 0, 1],
+            'OuterDiameter': 0.0,
+            'TubeAxis': [0, 0, 1],
+            'TubeSpacing': 0.0,
+            'SpacingDirection': [1, 0, 0],
+            'AspectRatio': 1.73,
+            'VelocityEstimate': 0.0
+        }
 
         obj.Proxy = self
         self.Type = "PorousZone"

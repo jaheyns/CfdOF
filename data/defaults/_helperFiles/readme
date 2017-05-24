@@ -1,0 +1,3 @@
+Helper files are fragments of OpenFOAM setup files which are combined at run time to construct the case.
+This way, all OpenFOAM version specific files can be stored in data/defaults folder, and different formats can be
+maintained for different OpenFOAM versions. #TAG# placeholders are replaced with required information at run time.

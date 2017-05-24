@@ -33,6 +33,7 @@ import sys
 import os.path
 import Part
 import CfdTools
+from CfdTools import indexOrDefault
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -105,43 +106,40 @@ class _TaskPanelCfdPorousZone:
         for i in range(len(self.obj.partNameList)):
             self.form.listWidget.addItem(str(self.obj.partNameList[i]))
 
-        try:
-            self.form.comboBoxCorrelation.setCurrentIndex(
-                POROUS_CORRELATIONS.index(CfdTools.getOrDefault(self.p, 'PorousCorrelation', POROUS_CORRELATIONS[0])))
-        except ValueError:
-            self.form.comboBoxCorrelation.setCurrentIndex(0)
-        d = CfdTools.getOrDefault(self.p, 'D', [0, 0, 0])
+        ci = indexOrDefault(POROUS_CORRELATIONS, self.p.get('PorousCorrelation'), 0)
+        self.form.comboBoxCorrelation.setCurrentIndex(ci)
+        d = self.p.get('D')
         self.form.dx.setText("{}".format(d[0]))
         self.form.dy.setText("{}".format(d[1]))
         self.form.dz.setText("{}".format(d[2]))
-        f = CfdTools.getOrDefault(self.p, 'F', [0, 0, 0])
+        f = self.p.get('F')
         self.form.fx.setText("{}".format(f[0]))
         self.form.fy.setText("{}".format(f[1]))
         self.form.fz.setText("{}".format(f[2]))
-        e1 = CfdTools.getOrDefault(self.p, 'e1', [1, 0, 0])
+        e1 = self.p.get('e1')
         self.form.e1x.setText("{}".format(e1[0]))
         self.form.e1y.setText("{}".format(e1[1]))
         self.form.e1z.setText("{}".format(e1[2]))
-        e2 = CfdTools.getOrDefault(self.p, 'e2', [0, 1, 0])
+        e2 = self.p.get('e2')
         self.form.e2x.setText("{}".format(e2[0]))
         self.form.e2y.setText("{}".format(e2[1]))
         self.form.e2z.setText("{}".format(e2[2]))
-        e3 = CfdTools.getOrDefault(self.p, 'e3', [0, 0, 1])
+        e3 = self.p.get('e3')
         self.form.e3x.setText("{}".format(e3[0]))
         self.form.e3y.setText("{}".format(e3[1]))
         self.form.e3z.setText("{}".format(e3[2]))
-        self.form.inputOuterDiameter.setText("{} mm".format(CfdTools.getOrDefault(self.p, 'OuterDiameter', 0)*1000))
-        tubeAxis = CfdTools.getOrDefault(self.p, 'TubeAxis', [0, 0, 1])
+        self.form.inputOuterDiameter.setText("{} mm".format(self.p.get('OuterDiameter')*1000))
+        tubeAxis = self.p.get('TubeAxis')
         self.form.inputTubeAxisX.setText("{}".format(tubeAxis[0]))
         self.form.inputTubeAxisY.setText("{}".format(tubeAxis[1]))
         self.form.inputTubeAxisZ.setText("{}".format(tubeAxis[2]))
-        self.form.inputTubeSpacing.setText("{} mm".format(CfdTools.getOrDefault(self.p, 'TubeSpacing', 0)*1000))
-        normalAxis = CfdTools.getOrDefault(self.p, 'SpacingDirection', [1, 0, 0])
+        self.form.inputTubeSpacing.setText("{} mm".format(self.p.get('TubeSpacing')*1000))
+        normalAxis = self.p.get('SpacingDirection')
         self.form.inputBundleLayerNormalX.setText("{}".format(normalAxis[0]))
         self.form.inputBundleLayerNormalY.setText("{}".format(normalAxis[1]))
         self.form.inputBundleLayerNormalZ.setText("{}".format(normalAxis[2]))
-        self.form.inputAspectRatio.setText("{}".format(CfdTools.getOrDefault(self.p, 'AspectRatio', 1.73)))
-        self.form.inputVelocityEstimate.setText("{} m/s".format(CfdTools.getOrDefault(self.p, 'VelocityEstimate', 0)))
+        self.form.inputAspectRatio.setText("{}".format(self.p.get('AspectRatio')))
+        self.form.inputVelocityEstimate.setText("{} m/s".format(self.p.get('VelocityEstimate')))
 
     def deleteFeature(self):
         shapeList = list(self.obj.shapeList)

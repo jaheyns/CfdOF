@@ -1,0 +1,119 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(physics/Time%)
+%:Steady
+
+ddtSchemes
+{
+    default         steadyState;
+}
+
+gradSchemes
+{
+    // Limit gradient to improve stability when bad cells encountered 
+    // (0 = no limiting; 1 = do not exceed surrounding cells)
+    default         cellLimited Gauss linear 0.95;
+    grad(p)         leastSquares linear;
+}
+
+divSchemes
+{
+    default         none;
+    // Use second-order accurate convection
+    // Bounded schemes for steady-state solution
+    div(phi,U)      bounded Gauss linearUpwindV grad(U);
+    div(phi,k)      bounded Gauss linearUpwind grad(k);
+    div(phi,epsilon)  bounded Gauss linearUpwind grad(epsilon);
+    div(R)          Gauss linear;
+    div(phi,R)      bounded Gauss linearUpwind grad(R);
+    div(phi,omega)  bounded Gauss linearUpwind grad(omega);
+    div(phi,nuTilda) bounded Gauss linearUpwind grad(nuTilda);
+    div(phi,v2)     bounded Gauss linearUpwind grad(v2);
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    // Limited explicit correction to the surface normal gradient,
+    // for stability in highly non-orthogonal cells.
+    // (0 = uncorrected, fully implicit; 1 = full correction)
+    default         Gauss linear limited 0.3;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    // Limited explicit correction to the surface normal gradient,
+    // for stability in highly non-orthogonal cells.
+    // (0 = uncorrected, fully implicit; 1 = full correction)
+    default         limited 0.3;
+}
+
+%:Transient
+
+ddtSchemes
+{
+    default         Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    grad(p)         Gauss linear;
+    grad(U)         Gauss linear;
+}
+
+divSchemes
+{
+    // Use second-order accurate convection
+    // Bounded schemes for steady-state solution
+    div(phi,U)      Gauss linearUpwindV grad(U);
+    div(phi,k)      Gauss linearUpwind grad(k);
+    div(phi,epsilon)  Gauss linearUpwind grad(epsilon);
+    div(R)          Gauss linear;
+    div(phi,R)      Gauss linearUpwind grad(R);
+    div(phi,omega)  Gauss linearUpwind grad(omega);
+    div(phi,nuTilda) Gauss linearUpwind grad(nuTilda);
+    div(phi,v2)     Gauss linearUpwind grad(v2);
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    // Limited explicit correction to the surface normal gradient,
+    // for stability in highly non-orthogonal cells.
+    // (0 = uncorrected, fully implicit; 1 = full correction)
+    default         Gauss linear limited 0.3;
+}
+
+interpolationSchemes
+{
+    default         linear;
+    interpolate(U)  linear;
+}
+
+snGradSchemes
+{
+    default         limited 0.3;
+}
+
+%}
+wallDist
+{
+    method meshWave;
+}
+
+
+// ************************************************************************* //

@@ -22,20 +22,11 @@ boundaryField
 %:wall
 %{%(boundaries/%(0%)/BoundarySubtype%)
 %:fixed translating partialSlip rough
-%{%(boundaries/%(0%)/LowRe%)
-%:False
     %(0%)
     {
         type        kqRWallFunction;
         value       $internalField;
     }
-%:True
-    %(0%)
-    {
-        type        kLowReWallFunction;
-        value       $internalField;
-    }
-%}
 %:slip
 %[0/_boundary_zeroGradient%]
 %}

@@ -1,0 +1,25 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(physics/Turbulence%)
+%:RANS
+simulationType RAS;
+
+RAS
+{
+    RASModel            %(physics/TurbulenceModel%);
+
+    turbulence          on;
+
+    printCoeffs         on;
+}
+%:default
+simulationType laminar;
+%}

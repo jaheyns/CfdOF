@@ -1,0 +1,64 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     %(solver/solverName%);
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         %(solver/endTime%);
+
+%{%(physics/Time%)
+%:Steady
+deltaT          %(solver/timeStep%);
+
+writeControl    timeStep;
+
+writeInterval   %(solver/writeInterval%);
+
+purgeWrite      0;
+
+%:Transient
+deltaT          %(solver/timeStep%);
+
+writeControl    adjustableRunTime;
+
+writeInterval   %(solver/writeInterval%);
+
+purgeWrite      0;
+
+adjustTimeStep  yes;
+
+maxCo           5;
+
+%}
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+libs
+(
+    // Needed for availability of porous baffle boundary in potentialFoam
+    "libturbulenceModels.so"
+);
+
+// ************************************************************************* //

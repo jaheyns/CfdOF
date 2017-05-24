@@ -32,6 +32,9 @@ import os.path  # Is this necessary if os is already imported?
 import shutil
 import tempfile
 import string
+import numbers
+import platform
+import subprocess
 
 import FreeCAD
 import Fem
@@ -117,17 +120,21 @@ def getPhysicsModel(analysis_object):
 def getMeshObject(analysis_object):
     isPresent = False
     meshObj = []
-    for i in analysis_object.Member:
+    if analysis_object:
+        members = analysis_object.Member
+    else:
+        members = FreeCAD.activeDocument().Objects
+    for i in members:
         if hasattr(i, "Proxy") \
                 and hasattr(i.Proxy, "Type") \
                 and (i.Proxy.Type == "FemMeshGmsh" or i.Proxy.Type == "CfdMeshCart"):
             if isPresent:
-                FreeCAD.Console.PrintError("Analysis contain more than one mesh object.")
+                FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
             else:
                 meshObj.append(i)
                 isPresent = True
     if not isPresent:
-        meshObj = None  # just a placeholder to be created in event that it is not present
+        meshObj = [None]  # just a placeholder to be created in event that it is not present
     return meshObj[0], isPresent
 
 
@@ -383,3 +390,265 @@ def copyFilesRec(src, dst, symlinks=False, ignore=None):
         d = os.path.join(dst, item)
         if not os.path.isdir(s):
             shutil.copy2(s, d)
+
+
+def getPatchType(bcType, bcSubType):
+    """ Get the boundary type based on selected BC condition """
+    if bcType == 'wall':
+        return 'wall'
+    elif bcType == 'constraint':
+        if bcSubType == 'symmetry':
+            return 'symmetry'
+        elif bcSubType == 'cyclic':
+            return 'cyclic'
+        elif bcSubType == 'wedge':
+            return 'wedge'
+        elif bcSubType == 'empty':
+            return 'empty'
+        else:
+            return 'patch'
+    else:
+        return 'patch'
+
+
+def movePolyMesh(case):
+    """ Move polyMesh to polyMesh.org to ensure availability if cleanCase is ran from the terminal. """
+    meshOrg_dir = case + os.path.sep + "constant/polyMesh.org"
+    mesh_dir = case + os.path.sep + "constant/polyMesh"
+    if os.path.isdir(meshOrg_dir):
+        shutil.rmtree(meshOrg_dir)
+    shutil.copytree(mesh_dir, meshOrg_dir)
+    shutil.rmtree(mesh_dir)
+
+
+def getPreferencesLocation():
+    # Set parameter location
+    return "User parameter:BaseApp/Preferences/Mod/Cfd/OpenFOAM"
+
+
+def setFoamDir(installation_path):
+    prefs = getPreferencesLocation()
+    # Set OpenFOAM install path in parameters
+    FreeCAD.ParamGet(prefs).SetString("InstallationPath", installation_path)
+
+
+def getFoamDir():
+    prefs = getPreferencesLocation()
+    # Get OpenFOAM install path from parameters
+    installation_path = FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
+    # Ensure parameters exist for future editing
+    setFoamDir(installation_path)
+
+    # If not specified, try to detect from shell environment settings
+    if not installation_path:
+        installation_path = detectFoamDir()
+
+    if not os.path.isabs(installation_path) or \
+       not os.path.exists(os.path.join(installation_path, "etc", "bashrc")):
+        raise IOError("The directory {} is not a valid OpenFOAM installation".format(installation_path))
+    else:
+        setFoamDir(installation_path)
+
+    return installation_path
+
+
+def getFoamRuntime():
+    if platform.system() == 'Windows':
+        #if os.path.exists(os.path.join(getFoamDir(), "..", "msys64")):
+        return 'BlueCFD'  # Not set yet...
+        #else:
+        #    return 'BashWSL'
+    else:
+        return 'Posix'
+
+
+def detectFoamDir():
+    """ See if WM_PROJECT_DIR is available in the bash environment """
+    if platform.system() == 'Windows':
+        foam_dir = None
+    else:
+        cmdline = ['bash', '-l', '-c', 'echo $WM_PROJECT_DIR']
+        foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
+    # Python 3 compatible, check_output() return type byte
+    foam_dir = str(foam_dir)
+    if len(foam_dir)>1:                 # If env var is not defined, python 3 returns `b'\n'` and python 2`\n`
+        if foam_dir[:2] == "b'":
+            foam_dir = foam_dir[2:-3]   # Python3: Strip 'b' from front and EOL char
+        else:
+            foam_dir = foam_dir.strip()  # Python2: Strip EOL char
+        return foam_dir
+    else:
+        ''' A warning message is generated when the installation path is also not available. '''
+        return None
+
+
+def translatePath(p):
+    """ Transform path to the perspective of the Linux subsystem in which OpenFOAM is run (e.g. mingw) """
+    if platform.system() == 'Windows':
+        return fromWindowsPath(p)
+    else:
+        return p
+
+
+def fromWindowsPath(p):
+    # bash on windows "C:\Path" -> /mnt/c/Path
+    # cygwin can set the mount point for all windows drives under /mnt in /etc/fstab
+    drive, tail = os.path.splitdrive(p)
+    pp = tail.replace('\\', '/')
+    if getFoamRuntime() == "BashWSL":
+        if os.path.isabs(p):
+            return "/mnt/" + (drive[:-1]).lower() + pp
+        else:
+            return pp
+    elif getFoamRuntime() == "BlueCFD":
+        if os.path.isabs(p):
+            return "/" + (drive[:-1]).lower() + pp
+        else:
+            return pp
+    else:  # Nothing needed for posix
+        return p
+
+
+def getShortWindowsPath(long_name):
+    """
+    Gets the short path name of a given long path.
+    http://stackoverflow.com/a/23598461/200291
+    """
+    import ctypes
+    from ctypes import wintypes
+    _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
+    _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+    _GetShortPathNameW.restype = wintypes.DWORD
+
+    output_buf_size = 0
+    while True:
+        output_buf = ctypes.create_unicode_buffer(output_buf_size)
+        needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
+        if output_buf_size >= needed:
+            return output_buf.value
+        else:
+            output_buf_size = needed
+
+
+def getRunEnvironment():
+    """ Return native environment settings necessary for running on relevant platform """
+    if getFoamRuntime() == "BashWSL":
+        return {}
+    elif getFoamRuntime() == "BlueCFD":
+        return {"MSYSTEM": "MINGW64",
+                "USERNAME": "ofuser",
+                "USER": "ofuser",
+                "HOME": "/home/ofuser"}
+    else:
+        return {}
+
+
+def makeRunCommand(cmd, dir, source_env=True):
+    """ Generate native command to run the specified Linux command in the relevant environment,
+        including changing to the specified working directory if applicable
+    """
+    installation_path = getFoamDir()
+    if getFoamRuntime() == "BashWSL":
+        if source_env:
+            cmdline = ['bash', '-c', 'source ~/.bashrc && cd "{}" && {}'.format(translatePath(dir), cmd)]
+        else:
+            cmdline = ['bash', '-c', 'cd "{}" && {}'.format(translatePath(dir), cmd)]
+        return cmdline
+    elif getFoamRuntime() == "BlueCFD":
+        # Set-up necessary for running a command - only needs doing once, but to be safe...
+        with open('{}\\..\\msys64\\home\\ofuser\\.blueCFDOrigin'.format(installation_path), "w") as f:
+            f.write(getShortWindowsPath('{}\\..'.format(installation_path)))
+            f.close()
+
+        if installation_path is None:
+            raise IOError("OpenFOAM installation directory not found")
+        cmdline = ['{}\\..\\msys64\\usr\\bin\\bash'.format(installation_path), '--login', '-O', 'expand_aliases', '-c',
+                   'cd "{}" && {}'.format(translatePath(dir), cmd)]
+        return cmdline
+    else:
+        if installation_path is None:
+            raise IOError("OpenFOAM installation directory not found")
+        env_setup_script = "{}/etc/bashrc".format(installation_path)
+        if source_env:
+            cmdline = ['bash', '-c',
+                       'source "{}" && cd "{}" && {}'.format(env_setup_script, translatePath(dir), cmd)]
+        else:
+            cmdline = ['bash', '-c', 'cd "{}" && {}'.format(translatePath(dir), cmd)]
+        return cmdline
+
+
+def runFoamApplication(cmd, case):
+    """ Run OpenFOAM application and automatically generate the log.application file (Wait until finished)
+        cmd  - String with the application being the first entry followied by the options.
+              e.g. `transformPoints -scale "(0.001 0.001 0.001)"
+        case - Case directory or path
+    """
+    if isinstance(cmd, list) or isinstance(cmd, tuple):
+        cmds = cmd
+    elif isinstance(cmd, str):
+        cmds = cmd.split(' ')  # Insensitive to incorrect split like space and quote
+    else:
+        raise Exception("Error: Application and options must be specified as a list or tuple.")
+
+    app = cmds[0]
+    logFile = "log.{}".format(app)
+
+    if os.path.exists(logFile):
+        print("Warning: {} already exists, removed to rerun {}.".format(logFile, app))
+        os.remove(logFile)
+
+    logFile = translatePath(logFile)
+
+    try:  # Catch any output before forwarding exception
+        cmdline = app + ' ' + ' '.join(cmds[1:])  # Space to separate options
+        print("Running ", cmdline)
+        cmdline += (" > " + logFile + " 2>&1")  # Pipe to log file
+        cmd = makeRunCommand(cmdline, case)
+        env = {}
+        # Make a clean copy of os.environ, forcing standard strings
+        for k in os.environ:
+            env[str(k)] = str(os.environ[k])
+        env.update(getRunEnvironment())
+        # Prevent terminal window popping up in Windows
+        si = None
+        if platform.system() == 'Windows':
+            si = subprocess.STARTUPINFO()
+            si.dwFlags = subprocess.STARTF_USESHOWWINDOW
+            si.wShowWindow = subprocess.SW_HIDE
+        out = subprocess.check_output(cmd, env=env, stderr=subprocess.STDOUT, startupinfo=si)
+        print(out)
+    except subprocess.CalledProcessError as ex:
+        print(ex.output)
+        raise
+
+
+def convertMesh(case, mesh_file, scale):
+    """ Convert gmsh created UNV mesh to FOAM. A scaling of 1e-3 is prescribed as the CAD is always in mm while FOAM
+    uses SI units (m). """
+
+    if mesh_file.find(".unv") > 0:
+        mesh_file = translatePath(mesh_file)
+        cmdline = ['ideasUnvToFoam', '"{}"'.format(mesh_file)]
+        runFoamApplication(cmdline, case)
+        # changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
+        # Set in the correct patch types
+        cmdline = ['changeDictionary']
+        runFoamApplication(cmdline, case)
+    else:
+        raise Exception("Error: Only supporting unv mesh files.")
+
+    if scale and isinstance(scale, numbers.Number):
+        cmdline = ['transformPoints', '-scale', '"({} {} {})"'.format(scale, scale, scale)]
+        runFoamApplication(cmdline, case)
+    else:
+        print("Error: mesh scaling ratio is must be a float or integer\n")
+
+
+def readTemplate(fileName, replaceDict=None):
+    helperFile = open(fileName, 'r')
+    helperText = helperFile.read()
+    for key in replaceDict:
+        helperText = helperText.replace("#"+key+"#", "{}".format(replaceDict[key]))
+    helperFile.close()
+    return helperText
+

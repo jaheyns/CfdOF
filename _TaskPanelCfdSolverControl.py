@@ -56,7 +56,6 @@ class _TaskPanelCfdSolverControl:
     def __init__(self, solver_runner_obj):
         ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdSolverControl.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
-        self.fem_prefs = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/Mod/Fem")
 
         self.analysis_object = FemGui.getActiveAnalysis()
 
@@ -130,7 +129,7 @@ class _TaskPanelCfdSolverControl:
         self.solver_run_process.waitForFinished()
         import platform
         if platform.system() == "Windows":
-            # This should not be necessary for a GUI application but there appears to be a bug in Windows or Qt
+            # Hard kill should not be necessary for a GUI application but there appears to be a bug in Windows or Qt
             self.open_paraview.kill()
         else:
             self.open_paraview.terminate()
@@ -209,6 +208,7 @@ class _TaskPanelCfdSolverControl:
         if self.solver_run_process.waitForStarted():
             # Setting solve button to inactive to ensure that two instances of the same simulation aren't started
             # simultaneously
+            self.form.pb_write_inp.setEnabled(False)
             self.form.pb_run_solver.setEnabled(False)
             self.form.terminateSolver.setEnabled(True)
             # self.form.pb_show_result.setEnabled(False)
@@ -225,6 +225,7 @@ class _TaskPanelCfdSolverControl:
             self.solver_run_process.kill()  # Terminal processes don't respond to terminate() on Windows
         else:
             self.solver_run_process.terminate()  # Could use kill() here as well but terminate() is kinder
+        self.form.pb_write_inp.setEnabled(True)
         self.form.pb_run_solver.setEnabled(True)
         self.form.terminateSolver.setEnabled(False)
         #FreeCAD.Console.PrintMessage("Killing OF solver instance")
@@ -235,6 +236,7 @@ class _TaskPanelCfdSolverControl:
             self.femConsoleMessage("Simulation finished successfully")
         else:
             self.femConsoleMessage("Simulation exited with error", "#FF0000")
+        self.form.pb_write_inp.setEnabled(True)
         self.form.pb_run_solver.setEnabled(True)
         self.form.terminateSolver.setEnabled(False)
     
@@ -261,13 +263,12 @@ class _TaskPanelCfdSolverControl:
         self.Start = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        script_name = self.solver_runner.create_paraview_script()
+        script_name = self.solver_runner.getParaviewScript()
 
         paraview_cmd = "paraview"
-        import FoamCaseBuilder
         # If using blueCFD, use paraview supplied
-        if FoamCaseBuilder.utility.getFoamRuntime() == 'BlueCFD':
-            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(FoamCaseBuilder.utility.getFoamDir())
+        if CfdTools.getFoamRuntime() == 'BlueCFD':
+            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(CfdTools.getFoamDir())
         # Otherwise, the command 'paraview' must be in the path. Possibly make path user-settable.
         # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
         import distutils.spawn
@@ -278,4 +279,8 @@ class _TaskPanelCfdSolverControl:
 
         self.femConsoleMessage("Running "+paraview_cmd+" "+arg)
         self.open_paraview.start(paraview_cmd, [arg])
+        if self.open_paraview.waitForStarted():
+            self.femConsoleMessage("Paraview started")
+        else:
+            self.femConsoleMessage("Error starting paraview")
         QApplication.restoreOverrideCursor()

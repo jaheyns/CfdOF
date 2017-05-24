@@ -120,7 +120,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
 
     def potentialFoamChanged(self, checked):
         self.form.basicPropertiesFrame.setVisible(not checked)
-        self.InitialVariables['PotentialFoam'] = checked
+        self.InitialVariables['PotentialFoam'] = bool(checked)
 
     def UxChanged(self, value):
         inputCheckAndStore(value, "m/s", self.InitialVariables, 'Ux')

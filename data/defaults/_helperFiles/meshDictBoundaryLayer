@@ -1,0 +1,20 @@
+
+boundaryLayers
+{
+
+    patchBoundaryLayers
+    {
+#BLPATCHES#
+    }
+
+    optimiseLayer 1;
+
+    optimisationParameters
+    {
+        nSmoothNormals 3;
+        maxNumIterations 5;
+        featureSizeFactor 0.4;
+        reCalculateNormals 1;
+        relThicknessTol 0.1;
+    }
+}

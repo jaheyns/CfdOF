@@ -1,0 +1,6 @@
+        #REGION#
+        {
+            nLayers #NLAYER#;
+            thicknessRatio #RATIO#;
+            maxFirstLayerThickness #FLHEIGHT#;
+        }

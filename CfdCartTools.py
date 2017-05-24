@@ -40,8 +40,6 @@ import shutil
 import CfdTools
 import math
 import MeshPart
-import FoamCaseBuilder.utility
-from FoamCaseBuilder.utility import readTemplate
 
 class CfdCartTools():
     def __init__(self, cart_mesh_obj, analysis=None):
@@ -217,7 +215,7 @@ class CfdCartTools():
         os.makedirs(self.constantDir)
         os.makedirs(self.triSurfaceDir)
 
-        shutil.copytree(os.path.join(self.templatePath, 'cfMesh', 'system'), self.systemDir)
+        shutil.copytree(os.path.join(self.templatePath, '_cfMesh', 'system'), self.systemDir)
 
     def createMeshScript(self, run_parallel, mesher_name, num_proc):
         print("Create Allmesh script ")
@@ -232,11 +230,11 @@ class CfdCartTools():
         with open(fname, 'w+') as f:
             source = ""
             triSurfaceDir = os.path.join('constant', 'triSurface')
-            if FoamCaseBuilder.utility.getFoamRuntime() != "BlueCFD":  # Runs inside own environment - no need to source
-                source = readTemplate(os.path.join(self.templatePath, "helperFiles", "AllrunSource"),
-                                      {"FOAMDIR": FoamCaseBuilder.utility.translatePath(FoamCaseBuilder.utility.getFoamDir())})
+            if CfdTools.getFoamRuntime() != "BlueCFD":  # Runs inside own environment - no need to source
+                source = CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "AllrunSource"),
+                                      {"FOAMDIR": CfdTools.translatePath(CfdTools.getFoamDir())})
 
-            head = readTemplate(os.path.join(self.templatePath, "helperFiles", "AllmeshPreamble"),
+            head = CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "AllmeshPreamble"),
                                 {"SOURCE": source})
             f.write(head)
 
@@ -293,8 +291,8 @@ class CfdCartTools():
         fname = self.temp_file_meshDict
         fid = open(fname, 'w')
 
-        fid.write(readTemplate(os.path.join(self.templatePath, "helperFiles", "meshDict"),
-                               {"HEADER": readTemplate(os.path.join(self.templatePath, "helperFiles", "header"),
+        fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDict"),
+                               {"HEADER": CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "header"),
                                                        {"LOCATION": "system",
                                                         "FILENAME": "meshDict"}),
                                 "FMSNAME":  self.part_obj.Name + '_Geometry.fms',
@@ -305,8 +303,8 @@ class CfdCartTools():
             surf = ""
             patch = ""
             for eleml in self.ele_length_map:
-                surf += readTemplate(
-                    os.path.join(self.templatePath, "helperFiles", "meshDictSurfRefineSurf"),
+                surf += CfdTools.readTemplate(
+                    os.path.join(self.templatePath, "_helperFiles", "meshDictSurfRefineSurf"),
                     {"REGION": eleml,
                      "SIZE": self.ele_length_map[eleml],
                      "FILE": '\"'+os.path.join('constant', 'triSurface', eleml + '.stl\"'),
@@ -319,16 +317,16 @@ class CfdCartTools():
                 # Limit expansion ratio to greater than 1.0 and less than 1.2
                 expratio = min(1.2, max(1.0, expratio))
 
-                patch += readTemplate(
-                    os.path.join(self.templatePath, "helperFiles", "meshDictPatchBoundaryLayer"),
+                patch += CfdTools.readTemplate(
+                    os.path.join(self.templatePath, "_helperFiles", "meshDictPatchBoundaryLayer"),
                     {"REGION": '\"' + self.ele_meshpatch_map[eleml] + '\"',
                      "NLAYER": numlayer,
                      "RATIO": expratio,
                      "FLHEIGHT": self.ele_firstlayerheight_map[eleml]})
 
-            fid.write(readTemplate(os.path.join(self.templatePath, "helperFiles", "meshDictSurfRefine"),
+            fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDictSurfRefine"),
                                    {"SURFACE": surf}))
-            fid.write(readTemplate(os.path.join(self.templatePath, "helperFiles", "meshDictBoundaryLayer"),
+            fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDictBoundaryLayer"),
                                    {"BLPATCHES": patch}))
 
         fid.close()
@@ -359,7 +357,7 @@ class CfdCartTools():
         case_type = "Reconstructed Case"
 
         fid = open(fname, 'w')
-        fid.write(readTemplate(os.path.join(self.templatePath, "paraview", "pvScriptMesh"),
+        fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_paraview", "pvScriptMesh"),
                                {"PATHPF": os.path.join(self.meshCaseDir, "p.foam"),
                                 "CTYPE": case_type}))
 

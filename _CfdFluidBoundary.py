@@ -73,7 +73,6 @@ class _CfdFluidBoundary(PartFeature):
                                 'ScreenWireDiameter': 0.0,
                                 'ScreenSpacing': 0.0,
                                 'TurbulenceInletSpecification': '',
-                                'LowRe': False,
                                 'ThermalBoundaryType': '',
                                 'TurbulentKineticEnergy': 0.01,
                                 'SpecificDissipationRate': 1,

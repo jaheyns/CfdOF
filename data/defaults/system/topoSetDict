@@ -1,0 +1,52 @@
+%{%(porousZonesPresent%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+
+%{%(porousZones%)
+%{%(porousZones/%(0%)/PartNameList%)
+    {
+        name    %(0%)SelectedSurface;
+        type    cellSet;
+        action  new;
+        source  surfaceToCell;
+        sourceInfo
+        {
+            file            "constant/triSurface/%(0%)Scaled.stl";
+            useSurfaceOrientation true;
+            outsidePoints   ();    //Ignored if useSurfaceOrientation true
+            includeCut      false; //Ignored if useSurfaceOrientation true
+            includeInside   true;
+            includeOutside  false;
+            nearDistance    -1;
+            curvature       -100;
+        }
+    }
+
+    {
+        name    %(0%);
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set %(0%)SelectedSurface;
+        }
+    }
+
+%}
+%}
+);
+
+// ************************************************************************* //
+%}

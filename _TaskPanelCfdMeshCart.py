@@ -41,8 +41,8 @@ import platform
 # from PyObjects import _FemMeshGmsh
 import _CfdMeshCart
 import time
-import FoamCaseBuilder.utility
 import tempfile
+import CfdTools
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -197,7 +197,7 @@ class _TaskPanelCfdMeshCart:
 
         tmpdir = tempfile.gettempdir()
         meshCaseDir = os.path.join(tmpdir, 'meshCase')
-        cmd = FoamCaseBuilder.utility.makeRunCommand('./Allmesh', meshCaseDir, source_env=False)
+        cmd = CfdTools.makeRunCommand('./Allmesh', meshCaseDir, source_env=False)
         FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
         self.mesh_process.start(cmd[0], cmd[1:])
         if self.mesh_process.waitForStarted():

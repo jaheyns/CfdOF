@@ -22,20 +22,11 @@ boundaryField
 %:wall
 %{%(boundaries/%(0%)/BoundarySubtype%)
 %:fixed translating partialSlip
-%{%(boundaries/%(0%)/LowRe%)
-%:False
     %(0%)
     {
         type        nutkWallFunction;
         value       uniform 0;
     }
-%:True
-    %(0%)
-    {
-        type        nutLowReWallFunction;
-        value       uniform 0;
-    }
-%}
 %:slip
 %[0/_boundary_zeroGradient%]
 %:rough

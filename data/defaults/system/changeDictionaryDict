@@ -12,11 +12,9 @@ boundary
 {
 %[constant/polyMesh/_boundaryPatches%]
 
-    defaultFaces
+    "defaultFaces"
     {
         type        wall;
-        nFaces      0;
-        startFace   0;
     }
 
 }
