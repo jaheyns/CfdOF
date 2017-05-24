@@ -349,4 +349,22 @@ class CfdCartTools():
         else:
             print('No mesh was created.')
 
+    def createParaviewScript(self):
+        """ Create python script for Paraview to view mesh. """
+        fname = os.path.join(self.meshCaseDir, "pvScript.py")
+        if os.path.exists(fname):
+            print("Warning: Overwrite existing pvScript.py script")
+
+        # Only supporting reconstructed meshes
+        case_type = "Reconstructed Case"
+
+        fid = open(fname, 'w')
+        fid.write(readTemplate(os.path.join(self.templatePath, "paraview", "pvScriptMesh"),
+                               {"PATHPF": os.path.join(self.meshCaseDir, "p.foam"),
+                                "CTYPE": case_type}))
+
+        fid.close()
+
+        return fname
+
 ##  @}

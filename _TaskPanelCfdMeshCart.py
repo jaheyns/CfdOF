@@ -68,6 +68,7 @@ class _TaskPanelCfdMeshCart:
         self.console_message_cart = ''
         self.error_message = ''
         self.cart_mesh = []
+        self.paraviewScriptName = ""
 
         QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
         QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardError()"), self.readOutput)
@@ -79,9 +80,13 @@ class _TaskPanelCfdMeshCart:
         QtCore.QObject.connect(self.form.cb_utility, QtCore.SIGNAL("activated(int)"), self.choose_utility)
         QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.update_timer_text)
 
+        self.open_paraview = QtCore.QProcess()
+
         QtCore.QObject.connect(self.form.pb_run_mesh, QtCore.SIGNAL("clicked()"), self.runMeshProcess)
         QtCore.QObject.connect(self.form.pb_stop_mesh, QtCore.SIGNAL("clicked()"), self.killMeshProcess)
+        QtCore.QObject.connect(self.form.pb_paraview, QtCore.SIGNAL("clicked()"), self.openParaview)
         self.form.pb_stop_mesh.setEnabled(False)
+        self.form.pb_paraview.setEnabled(False)
 
         # Limit mesh dimensions to 3D solids
         self.form.cb_dimension.addItems(_CfdMeshCart._CfdMeshCart.known_element_dimensions)
@@ -183,6 +188,7 @@ class _TaskPanelCfdMeshCart:
         cart_mesh.createMeshScript(run_parallel = 'false',
                                    mesher_name = 'cartesianMesh',
                                    num_proc = 1)  # Extend in time
+        self.paraviewScriptName = self.cart_mesh.createParaviewScript()
         self.runCart(cart_mesh)
 
     def runCart(self, cart_mesh):
@@ -197,6 +203,7 @@ class _TaskPanelCfdMeshCart:
         if self.mesh_process.waitForStarted():
             self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
             self.form.pb_stop_mesh.setEnabled(True)
+            self.form.pb_paraview.setEnabled(False)
         else:
             self.console_log("Error starting meshing process", "#FF0000")
             cart_mesh.error = True
@@ -212,6 +219,7 @@ class _TaskPanelCfdMeshCart:
         self.mesh_process.waitForFinished()
         self.form.pb_run_mesh.setEnabled(True)
         self.form.pb_stop_mesh.setEnabled(False)
+        self.form.pb_paraview.setEnabled(False)
         self.Timer.stop()
 
     def readOutput(self):
@@ -238,6 +246,7 @@ class _TaskPanelCfdMeshCart:
         self.update()
         self.form.pb_run_mesh.setEnabled(True)
         self.form.pb_stop_mesh.setEnabled(False)
+        self.form.pb_paraview.setEnabled(True)
         self.error_message = ''
 
     def get_active_analysis(self):
@@ -254,3 +263,24 @@ class _TaskPanelCfdMeshCart:
         else:
             # print('No active analyis, means no group meshing')
             self.analysis = None  # no group meshing
+
+    def openParaview(self):
+        self.Start = time.time()
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+
+        paraview_cmd = "paraview"
+        import FoamCaseBuilder
+        # If using blueCFD, use paraview supplied
+        if FoamCaseBuilder.utility.getFoamRuntime() == 'BlueCFD':
+            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(FoamCaseBuilder.utility.getFoamDir())
+        # Otherwise, the command 'paraview' must be in the path. Possibly make path user-settable.
+        # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
+        import distutils.spawn
+        if distutils.spawn.find_executable(paraview_cmd) is None:
+            raise IOError("Paraview executable " + paraview_cmd + " not found in path.")
+
+        arg = '--script={}'.format(self.paraviewScriptName)
+
+        self.console_log("Running " + paraview_cmd + " " +arg)
+        self.open_paraview.start(paraview_cmd, [arg])
+        QApplication.restoreOverrideCursor()
