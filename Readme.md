@@ -51,17 +51,12 @@ Not tested, but a POSIX system. Possible to install and run OpenFOAM.
 
 ### Prerequisites
 
-- [Latest development version of FreeCAD (0.17 prerelease; git commit 10432 or greater)](https://www.freecadweb.org/wiki/Download)
-
-- [OpenFOAM (version 3.0.1 or later)](http://openfoam.org/download/)
-
-- [PyFoam (version 0.6.6 or later)](http://pypi.python.org/pypi/PyFoam)
-
-- [Gnuplot.py (version 1.8)](http://gnuplot-py.sourceforge.net/)
-
-- [Paraview](http://www.paraview.org/)
- 
-- [GMSH (version 2.13 or later)](http://gmsh.info/)
+- [Latest development version of FreeCAD (0.17 prerelease; git commit 10432 or greater)](https://www.freecadweb.org/wiki/Download)  
+- [OpenFOAM (version 3.0.1 or later)](http://openfoam.org/download/)  
+- [PyFoam (version 0.6.6 or later)](http://pypi.python.org/pypi/PyFoam)  
+- [Gnuplot.py (version 1.8)](http://gnuplot-py.sourceforge.net/)  
+- [Paraview](http://www.paraview.org/)  
+- [GMSH (version 2.13 or later)](http://gmsh.info/)  
 
 
 ### Setting up CFD workbench
@@ -90,7 +85,13 @@ and create a symbolic link to the local FreeCAD instalation directory.
 This fork is unfortunately not yet available under the  FreeCAD-Addon-Installer.
 
 
-##Developement
+## Feedback
+
+### Submitting Bugs
+
+Please discuss issues on the [CFDFoam dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=21576).
+
+## Developement
 
 It is asked that developers should only add functionality or code that is working and can be tested. Dead code, even
 portions included for possible future functionality, reduces function clarity and increases the maintenance overhead.
