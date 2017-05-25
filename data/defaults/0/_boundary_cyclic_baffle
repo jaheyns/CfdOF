@@ -1,8 +1,6 @@
-// It is not strictly necessary to do master and slave, as one can use the baffle group to refer
-// to both. However, we create both to keep paraview happy.
-%{%(0%)_master %(0%)_slave
-    %(0%)
-    {
-        type        cyclic;
-    }
-%}
+    %{%(0%)_master %(0%)_slave
+        %(0%)
+        {
+            type        cyclic;
+        }
+    %}

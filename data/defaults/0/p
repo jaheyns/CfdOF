@@ -53,16 +53,14 @@ boundaryField
 %[0/_boundary_constraint%]
 %:baffle
 %{%(boundaries/%(0%)/BoundarySubtype%)
-:porousBaffle
-// It is not strictly necessary to do master and slave, as one can use the baffle group to refer
-// to both. However, we create both to keep paraview happy.
+%:porousBaffle
 %{%(0%)_master %(0%)_slave
     %(0%)
     {
         type        porousBafflePressure;
         patchType   cyclic;
         length      1.0;
-        I           %(boundaries/%(1%)/pressureDropCoeff%);
+        I           %(boundaries/%(1%)/PressureDropCoeff%);
         D           0;
         value       $internalField;
     }

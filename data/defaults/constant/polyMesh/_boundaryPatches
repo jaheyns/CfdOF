@@ -18,6 +18,8 @@
         type        cyclic;
     }
 %}
+%:baffle
+    // Baffle "%(0%)" is created with createBaffles
 %:default
     %(0%)
     {
