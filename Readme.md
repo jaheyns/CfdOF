@@ -8,6 +8,8 @@ This software is a fork of the CFD workbench developed by [Qingfeng Xia](http://
 focuses on assisting new CFD users. It therefore places greater emphasis on usability and solver stability instead of
 functionality.
 
+![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
+
 ## Features
 
 ### Current:
