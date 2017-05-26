@@ -4,9 +4,8 @@ This workbench aims to help users set up and run CFD analysis. It guides the use
 specifying the material properties, generating a mesh, assigning boundary conditions and setting the solver settings
 before running the simulation. Where possible best practices are included to improve the stability of the solvers.
 
-This software is a fork of the CFD workbench developed by [Qingfeng Xia](http://github.com/qingfengxia/Cfd), but
-focuses on assisting new CFD users. It therefore places greater emphasis on usability and solver stability instead of
-functionality.
+This fork of the CFD workbench focuses on assisting new CFD users and, therefore, places greater emphasis on usability 
+and providing stable solver settings.
 
 ![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
 
@@ -22,11 +21,12 @@ functionality.
 * Porous regions and porous baffles.
 * Runs on Windows 7-10
 * Unit testing
+* Cut-cell Cartesian meshing with boundary layers.
+* Extension to turbulent using RANS (k-w SST).
+* New case builder using a modular template structure
 
 ### Future (2017):
 
-* Cut-cell Cartesian meshing with boundary layers.
-* Extension to turbulent using RANS (k-w SST).
 * Conjugate heat transfer.
 
 ### Platforms supported
@@ -60,6 +60,7 @@ Not tested, but a POSIX system. Possible to install and run OpenFOAM.
 - [Paraview](http://www.paraview.org/)  
 - [GMSH (version 2.13 or later)](http://gmsh.info/)  
 
+- [cfMesh (version 1.1.2)](https://sourceforge.net/projects/cfmesh/files/)
 
 ### Setting up CFD workbench
 
@@ -138,7 +139,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 
 ## Developers
 
-Qingfeng Xia, 2015 <iesensor.com/HTML5pptCV>  
-Johan Heyns (CSIR, 2016) <jheyns@csir.co.za>  
 Oliver Oxtoby (CSIR, 2016) <ooxtoby@csir.co.za>  
+Johan Heyns (CSIR, 2016) <jheyns@csir.co.za>  
 Alfred Bogaers (CSIR, 2016) <abogaers@csir.co.za>    
+Qingfeng Xia, 2015

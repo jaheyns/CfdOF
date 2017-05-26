@@ -1,5 +1,5 @@
 %{%(meshType%)
-%:CfdCartMesh
+%:CfdMeshCart
 %[_header%]
 FoamFile
 {

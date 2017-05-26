@@ -1,0 +1,7 @@
+# Unset and source bashrc
+if [ -f "%(system/TranslatedFoamPath%)/etc/config/unset.sh" ]; then  # for OF < 4
+   source "%(system/TranslatedFoamPath%)/etc/config/unset.sh" 2> /dev/null
+else
+   source "%(system/TranslatedFoamPath%)/etc/config.sh/unset" 2> /dev/null
+fi
+source "%(system/TranslatedFoamPath%)/etc/bashrc"

@@ -61,8 +61,6 @@ class CfdCartTools():
             clBoundBox = math.sqrt(shape.BoundBox.XLength**2 + shape.BoundBox.YLength**2 + shape.BoundBox.ZLength**2)
             self.clmax = 0.02*clBoundBox
 
-        self.clmax *= self.scale  # Scale characteristic length to meter (saved in mm)
-
         self.dimension = self.mesh_obj.ElementDimension
 
         # Algorithm2D
@@ -94,6 +92,9 @@ class CfdCartTools():
             self.dimension = '3'
         print('  ElementDimension: ' + self.dimension)
 
+    def get_clmax(self):
+        return self.clmax
+
     def get_tmp_file_paths(self):
         tmpdir = tempfile.gettempdir()
         self.meshCaseDir = os.path.join(tmpdir, 'meshCase')
@@ -119,7 +120,8 @@ class CfdCartTools():
         self.ele_firstlayerheight_map = {}  # { 'mrNameString' : first layer height }
         self.ele_numlayer_map = {}  # { 'mrNameString' : number of layers }
         self.ele_expratio_map = {}  # { 'mrNameString' : expansion ratio }
-        self.ele_meshpatch_map = {}  # { 'mrNameString' : mesh patch }
+        from collections import defaultdict
+        self.ele_meshpatch_map = defaultdict(list)
         if not self.mesh_obj.MeshRegionList:
             print ('  No mesh regions.')
         else:
@@ -144,7 +146,7 @@ class CfdCartTools():
                                 "The meshregion: " + mr_obj.Name +
                                 " should not use a relative length smaller than 0.01.\n")
 
-                        self.ele_length_map[mr_obj.Name] = mr_rellen * self.clmax
+                        self.ele_length_map[mr_obj.Name] = mr_rellen * self.clmax * self.scale
                         self.ele_refinethick_map[mr_obj.Name] = self.scale*Units.Quantity(mr_obj.RefinementThickness).Value
                         self.ele_numlayer_map[mr_obj.Name] = mr_obj.NumberLayers
                         self.ele_expratio_map[mr_obj.Name] = mr_obj.ExpansionRatio
@@ -178,12 +180,12 @@ class CfdCartTools():
 
                                         # Similarity search for patch used in boundary layer meshing
                                         meshFaceList = self.mesh_obj.Part.Shape.Faces
-                                        self.ele_meshpatch_map[mr_obj.Name] = mr_obj.Name  # Temporary place holder
                                         for (i, mf) in enumerate(meshFaceList):
                                             import FemMeshTools
                                             isSameGeo = FemMeshTools.is_same_geometry(elt, mf)
                                             if isSameGeo:  # Only one matching face
-                                                self.ele_meshpatch_map[mr_obj.Name] = self.mesh_obj.ShapeFaceNames[i]
+                                                sfN = self.mesh_obj.ShapeFaceNames[i]
+                                                self.ele_meshpatch_map[mr_obj.Name].append(sfN)
 
                                     else:
                                         FreeCAD.Console.PrintError(
@@ -205,7 +207,7 @@ class CfdCartTools():
         # print('  {}'.format(self.ele_refinethick_map))
         # print('  {}'.format(self.ele_numlayer_map))
         # print('  {}'.format(self.ele_expratio_map))
-        # print('  {}'.format(self.ele_meshpatch_map))
+        print('  {}'.format(self.ele_meshpatch_map))
 
     def setupMeshCaseDir(self):
         """ Temporary mesh case directory """
@@ -230,7 +232,7 @@ class CfdCartTools():
         with open(fname, 'w+') as f:
             source = ""
             triSurfaceDir = os.path.join('constant', 'triSurface')
-            if CfdTools.getFoamRuntime() != "BlueCFD":  # Runs inside own environment - no need to source
+            if CfdTools.getFoamRuntime() == "BlueCFD":  # Runs inside own environment - no need to source
                 source = CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "AllrunSource"),
                                       {"FOAMDIR": CfdTools.translatePath(CfdTools.getFoamDir())})
 
@@ -296,7 +298,7 @@ class CfdCartTools():
                                                        {"LOCATION": "system",
                                                         "FILENAME": "meshDict"}),
                                 "FMSNAME":  self.part_obj.Name + '_Geometry.fms',
-                                "CELLSIZE": self.clmax}))
+                                "CELLSIZE": self.clmax*self.scale}))
 
         # Refinement surface
         if self.mesh_obj.MeshRegionList:
@@ -317,12 +319,13 @@ class CfdCartTools():
                 # Limit expansion ratio to greater than 1.0 and less than 1.2
                 expratio = min(1.2, max(1.0, expratio))
 
-                patch += CfdTools.readTemplate(
-                    os.path.join(self.templatePath, "_helperFiles", "meshDictPatchBoundaryLayer"),
-                    {"REGION": '\"' + self.ele_meshpatch_map[eleml] + '\"',
-                     "NLAYER": numlayer,
-                     "RATIO": expratio,
-                     "FLHEIGHT": self.ele_firstlayerheight_map[eleml]})
+                for face in self.ele_meshpatch_map[eleml]:
+                    patch += CfdTools.readTemplate(
+                        os.path.join(self.templatePath, "_helperFiles", "meshDictPatchBoundaryLayer"),
+                        {"REGION": '\"' + face + '\"',
+                         "NLAYER": numlayer,
+                         "RATIO": expratio,
+                         "FLHEIGHT": self.ele_firstlayerheight_map[eleml]})
 
             fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "meshDictSurfRefine"),
                                    {"SURFACE": surf}))

@@ -103,6 +103,7 @@ class _TaskPanelCfdMeshCart:
         # def accept() in no longer needed, since there is no OK button
 
     def reject(self):
+        self.mesh_obj.CharacteristicLengthMax = self.clmax
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
         return True
@@ -114,8 +115,6 @@ class _TaskPanelCfdMeshCart:
 
     def set_mesh_params(self):
         self.mesh_obj.CharacteristicLengthMax = self.clmax
-        # self.mesh_obj.CharacteristicLengthMin = self.clmin
-        # self.mesh_obj.ElementOrder = self.order
         self.mesh_obj.ElementDimension = self.dimension
         self.mesh_obj.MeshUtility = self.utility
 
@@ -123,8 +122,6 @@ class _TaskPanelCfdMeshCart:
         """ Fills the widgets """
         self.form.if_max.setText(self.clmax.UserString)
         self.form.if_max.setToolTip("Select 0 to use default value")
-        # self.form.if_min.setText(self.clmin.UserString)
-        # self.form.if_min.setToolTip("Select 0 to use default value")
         index_dimension = self.form.cb_dimension.findText(self.dimension)
         self.form.cb_dimension.setCurrentIndex(index_dimension)
         index_utility = self.form.cb_utility.findText(self.utility)
@@ -144,9 +141,6 @@ class _TaskPanelCfdMeshCart:
 
     def max_changed(self, base_quantity_value):
         self.clmax = base_quantity_value
-
-    # def min_changed(self, base_quantity_value):
-    #     self.clmin = base_quantity_value
 
     def choose_dimension(self, index):
         if index < 0:
@@ -168,6 +162,7 @@ class _TaskPanelCfdMeshCart:
         import CfdCartTools  # Fresh init before remeshing
         self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
         cart_mesh = self.cart_mesh
+        self.form.if_max.setText(str(cart_mesh.get_clmax()))
         self.Start = time.time()
         self.console_log("Starting cut-cell Cartesian meshing ...")
         print("\nStarting cut-cell Cartesian meshing ...\n")

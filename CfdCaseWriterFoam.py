@@ -124,6 +124,9 @@ class CfdCaseWriterFoam(QRunnable):
                 self.exportPorousZoneStlSurfaces()
                 self.processPorousZoneProperties()
 
+            if self.mesh_obj.Proxy.Type == "CfdMeshCart":  # Cut-cell Cartesian
+                self.setupPatchNames()
+
             TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
 
             self.writeMesh()
@@ -197,7 +200,6 @@ class CfdCaseWriterFoam(QRunnable):
             # FreeCAD always stores the CAD geometry in mm, while FOAM by default uses SI units. This is independent
             # of the user selected unit preferences.
             self.setupMesh(unvMeshFile, scale = 0.001)
-
         elif self.mesh_obj.Proxy.Type == "CfdMeshCart":  # Cut-cell Cartesian
             # Move Cartesian mesh files from temporary mesh directory to case directory
             FreeCAD.Console.PrintMessage("Writing Cartesian mesh")
@@ -211,8 +213,6 @@ class CfdCaseWriterFoam(QRunnable):
             shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'Allmesh'),self.case_folder)
             shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.cartesianMesh'),self.case_folder)
             shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.surfaceFeatureEdges'),self.case_folder)
-
-            self.setupPatchNames()
         else:
             raise Exception("Unrecognised mesh type")
 
@@ -427,8 +427,10 @@ class CfdCaseWriterFoam(QRunnable):
                 'PatchType': patchType
             }
 
-            if not (len(bc_list) == len(meshFaceList)):
-                raise Exception('Mismatch between boundary faces and mesh faces')
+            # In almost all cases the number of faces associated with a bc is going to be less than the number of
+            # external or mesh faces.
+            # if not (len(bc_list) == len(meshFaceList)):
+            #     raise Exception('Mismatch between boundary faces and mesh faces')
 
         # Add default faces
         flagName = False
