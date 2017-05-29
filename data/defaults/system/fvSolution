@@ -137,7 +137,14 @@ relaxationFactors
     equations
     {
         U               0.6;
-        ".*"            0.6;
+%{%(physics/Turbulence%)
+%:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST
+        k               0.5;
+        omega           0.5;
+%}
+%}
     }
     fields
     {
