@@ -52,14 +52,14 @@ BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Opening", "Constraint", "Baffle"]
 BOUNDARY_TYPES = ["wall", "inlet", "outlet", "open", "constraint", "baffle"]
 
 SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translating", "Rough"],
-            ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure"],
+            ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure"],
             ["Static pressure", "Uniform velocity", "Outflow"],
             ["Ambient pressure"],
             ["Symmetry"],
             ["Porous Baffle"]]
 
 SUBTYPES = [["fixed", "slip", "partialSlip", "translating", "rough"],
-            ["uniformVelocity", "volumetricFlowRate", "massFlowRate", "totalPressure"],
+            ["uniformVelocity", "volumetricFlowRate", "massFlowRate", "totalPressure", "staticPressure"],
             ["staticPressure", "uniformVelocity", "outFlow"],
             ["totalPressureOpening"],
             ["symmetry"],
@@ -73,7 +73,8 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                      ["Velocity specified; normal component imposed for reverse flow",
                       "Uniform volume flow rate specified",
                       "Uniform mass flow rate specified",
-                      "Total pressure specified; treated as static pressure for reverse flow"],
+                      "Total pressure specified; treated as static pressure for reverse flow",
+                      "Static pressure specified"],
                      ["Static pressure specified for outflow and reverse flow",
                       "Normal component imposed for outflow; velocity fixed for reverse flow",
                       "All fields extrapolated; use with care!"],
@@ -91,7 +92,8 @@ BOUNDARY_UI = [[[False, 0, False, False],  # No slip
                [[True, 0, True, True],  # Velocity
                 [True, 3, False, True],  # Vol flow rate
                 [True, 4, False, True],  # Mass Flow rate
-                [True, 1, False, True]],  # Total pressure
+                [True, 1, False, True],  # Total pressure
+                [True, 1, False, True]],  # Static pressure
                [[True, 1, False, False],  # Static pressure
                 [True, 0, False, False],  # Uniform velocity
                 [False, 0, False, False]],  # Outflow

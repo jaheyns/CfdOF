@@ -28,6 +28,12 @@ boundaryField
         p0          uniform %(boundaries/%(0%)/Pressure%);
         value       $internalField;
     }
+%:staticPressure
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/Pressure%);
+    }
 %:default
 %[0/_boundary_zeroGradient%]
 %}

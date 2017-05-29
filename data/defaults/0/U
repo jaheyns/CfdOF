@@ -82,6 +82,8 @@ boundaryField
     }
 %:totalPressure
 %[0/_U_boundary_pressureInletOutletVelocity%]
+%:staticPressure
+%[0/_U_boundary_pressureInletOutletVelocity%]
 %}
 %:outlet
 %{%(boundaries/%(0%)/BoundarySubtype%)
