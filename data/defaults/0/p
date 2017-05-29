@@ -10,7 +10,7 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform %(initialValues/Pressure%);
+internalField   uniform %(initialValues/KinematicPressure%);
 
 boundaryField
 {
@@ -32,7 +32,7 @@ boundaryField
     %(0%)
     {
         type        fixedValue;
-        value       uniform %(boundaries/%(0%)/Pressure%);
+        value       uniform %(boundaries/%(0%)/KinematicPressure%);
     }
 %:default
 %[0/_boundary_zeroGradient%]
@@ -43,7 +43,7 @@ boundaryField
     %(0%)
     {
         type        fixedValue;
-        value       uniform %(boundaries/%(0%)/Pressure%);
+        value       uniform %(boundaries/%(0%)/KinematicPressure%);
     }
 %:default
 %[0/_boundary_zeroGradient%]

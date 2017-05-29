@@ -261,6 +261,7 @@ class CfdCaseWriterFoam(QRunnable):
                         raise RuntimeError
                 except (SystemError, RuntimeError):
                     raise RuntimeError(bc['DirectionFace'] + " is not a valid, planar face.")
+            bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties']['Density']
 
             if bc['PorousBaffleMethod'] == 1:
                 wireDiam = bc['ScreenWireDiameter']
@@ -273,6 +274,7 @@ class CfdCaseWriterFoam(QRunnable):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
         settings = self.settings
         initial_values = settings['initialValues']
+        initial_values['KinematicPressure'] = initial_values['Pressure'] / settings['fluidProperties']['Density']
         physics = settings['physics']
         if physics['TurbulenceModel'] is not None:
             if initial_values['UseInletTurbulenceValues']:

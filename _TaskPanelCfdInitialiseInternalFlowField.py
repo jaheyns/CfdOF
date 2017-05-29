@@ -78,7 +78,9 @@ class _TaskPanelCfdInitialiseInternalFlowField:
     def populateUiBasedOnPhysics(self):
         self.form.potentialFoamCheckBox.setToolTip("Automatic initialisation of the velocity and pressure fields using "
                                                    "an incompressible, potential or irrotational flow assumption.")
-        self.form.potentialFoamCheckBox.setChecked(self.InitialVariables.get('PotentialFoam', False))
+        checked = self.InitialVariables.get('PotentialFoam', False)
+        self.form.potentialFoamCheckBox.setChecked(checked)
+        self.form.basicPropertiesFrame.setVisible(not checked)
 
         self.form.Ux.setText(str(self.InitialVariables.get('Ux'))+"m/s")
         self.form.Uy.setText(str(self.InitialVariables.get('Uy'))+"m/s")
