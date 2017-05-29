@@ -264,10 +264,9 @@ class _TaskPanelCfdMeshCart:
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
         paraview_cmd = "paraview"
-        import FoamCaseBuilder
         # If using blueCFD, use paraview supplied
-        if FoamCaseBuilder.utility.getFoamRuntime() == 'BlueCFD':
-            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(FoamCaseBuilder.utility.getFoamDir())
+        if CfdTools.getFoamRuntime() == 'BlueCFD':
+            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(CfdTools.getFoamDir())
         # Otherwise, the command 'paraview' must be in the path. Possibly make path user-settable.
         # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
         import distutils.spawn

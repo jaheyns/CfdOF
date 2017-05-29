@@ -202,7 +202,7 @@ class CfdCaseWriterFoam(QRunnable):
             self.setupMesh(unvMeshFile, scale = 0.001)
         elif self.mesh_obj.Proxy.Type == "CfdMeshCart":  # Cut-cell Cartesian
             # Move Cartesian mesh files from temporary mesh directory to case directory
-            FreeCAD.Console.PrintMessage("Writing Cartesian mesh")
+            FreeCAD.Console.PrintMessage("Writing Cartesian mesh\n")
             import CfdCartTools
             self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
             cart_mesh = self.cart_mesh
