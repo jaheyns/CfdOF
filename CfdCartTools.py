@@ -232,7 +232,7 @@ class CfdCartTools():
         with open(fname, 'w+') as f:
             source = ""
             triSurfaceDir = os.path.join('constant', 'triSurface')
-            if CfdTools.getFoamRuntime() == "BlueCFD":  # Runs inside own environment - no need to source
+            if not CfdTools.getFoamRuntime() == "BlueCFD":  # Runs inside own environment - no need to source
                 source = CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "AllrunSource"),
                                       {"FOAMDIR": CfdTools.translatePath(CfdTools.getFoamDir())})
 
