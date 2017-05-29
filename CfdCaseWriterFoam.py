@@ -365,8 +365,8 @@ class CfdCaseWriterFoam(QRunnable):
                 d0 = po.porousZoneProperties['OuterDiameter']
                 u0 = po.porousZoneProperties['VelocityEstimate']
                 aspectRatio = po.porousZoneProperties['AspectRatio']
-                kinVisc = self.builder.fluidProperties['kinematicViscosity']
-                if kinVisc is None or kinVisc == 0.0:
+                kinVisc = self.settings['fluidProperties']['KinematicViscosity']
+                if kinVisc == 0.0:
                     raise ValueError("Viscosity must be set for Jakob correlation")
                 if spacing < d0:
                     raise ValueError("Tube spacing may not be less than diameter")
