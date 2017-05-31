@@ -43,32 +43,25 @@ class setCfdFluidPropertyCommand(FemCommands):
             'MenuText': 'Add fluid properties',
             'ToolTip': 'Add fluid properties'
             }
-        self.is_active = 'with_analysis'    # Only activate when analysis is active
+        self.is_active = 'with_analysis'  # Only activate when analysis is active
 
     def Activated(self):
         FreeCAD.Console.PrintMessage("Set fluid properties \n")
-
         FreeCAD.ActiveDocument.openTransaction("Set CfdFluidMaterialProperty")
-        FreeCADGui.addModule("CfdFluidMaterial")
 
         isPresent = False
         members = FemGui.getActiveAnalysis().Member
         for i in members:
-            ''' Check for existing fluid material entity as the solver currently only support single region analysis.
-            '''
+            # Check for existing fluid material entity as the solver currently only support single region analysis.
             if "FluidProperties" in i.Name:
                 FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
                 isPresent = True
 
-        ''' NOTE: Since it is possible to delete the FluidProperties, allowing here for re-creation if it is not
-                  present.
-        '''
+        # Allow to re-create if deleted
         if not isPresent:
-            FreeCADGui.doCommand("CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')")
-
-            # CFD WB is still a member of FemGui
-            FreeCADGui.doCommand("App.activeDocument()." + FemGui.getActiveAnalysis().Name +
-                                 ".Member.append(App.ActiveDocument.ActiveObject)")
+            FreeCADGui.addModule("CfdFluidMaterial")
+            FreeCADGui.doCommand(
+                "analysis.Member = analysis.Member + [CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')]")
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 
 if FreeCAD.GuiUp:

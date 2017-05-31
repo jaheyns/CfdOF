@@ -28,27 +28,18 @@ class _CommandCfdPhysicsSelection(FemCommands):
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Choose appropriate physics model")
-        FreeCADGui.addModule("CfdPhysicsSelection")
-
         isPresent = False
         members = FemGui.getActiveAnalysis().Member
         for i in members:
-            ''' Physics model is currently created upon creation of CfdAnalysis. Therefore rather than creating a new
-                physicsmodel when command is activated, the one that is already present is selected. The name is
-                searched for because there can still be multiple entities when multiple analyses are created.
-                Member.Name is not changed when the label in the GUI is changed. Changing the name in the Gui affects
-                the Member.Label
-            '''
             if "PhysicsModel" in i.Name:
                 FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
                 isPresent = True
 
-        ''' NOTE: Since it is possible to delete the PhysicsModel, allowing here for re-creation if a physics model
-                  is not present.
-        '''
+        # Allow to re-create if deleted
         if not(isPresent):
-            FreeCADGui.addModule("FemGui")
-            FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
+            FreeCADGui.addModule("CfdPhysicsSelection")
+            FreeCADGui.doCommand(
+                "analysis.Member = analysis.Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 
 if FreeCAD.GuiUp:

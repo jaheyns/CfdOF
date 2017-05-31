@@ -64,21 +64,6 @@ solvers
         $k;
         relTol          0;
     }
-
-    nuTilda
-    {
-       solver          smoothSolver;
-       smoother        GaussSeidel;
-       nSweeps         2;
-       tolerance       1e-08;
-       relTol          0.1;
-    }
-
-    nuTildaFinal
-    {
-        $nuTilda;
-        relTol          0;
-    }
 }
 
 SIMPLE

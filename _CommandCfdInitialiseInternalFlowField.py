@@ -60,12 +60,13 @@ class _CommandCfdInitialiseInternalFlowField(FemCommands):
             if "InitialiseFields" in i.Name:
                 FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
                 isPresent = True
-        # NOTE: since it is possible to delete the initialVariables object, allowing here for re-creation not present.
+
+        # Allow to re-create if deleted
         if not isPresent:
             FreeCADGui.addModule("CfdInitialiseFlowField")
             FreeCADGui.addModule("FemGui")
             FreeCADGui.doCommand(
-                "FemGui.getActiveAnalysis().Member.append(CfdInitialiseFlowField.makeCfdInitialFlowField())")
+                "analysis.Member = analysis.Member + [CfdInitialiseFlowField.makeCfdInitialFlowField()]")
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 
 if FreeCAD.GuiUp:

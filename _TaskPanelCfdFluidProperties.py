@@ -97,8 +97,6 @@ class TaskPanelCfdFluidProperties:
             visc_with_new_unit = float(visc.getValueAs(new_unit))
             self.form.fViscosity.setText("{} {}".format(visc_with_new_unit,new_unit))
 
-
-
     def DensityChanged(self,value):
         import Units
         density = Units.Quantity(value).getValueAs("kg/m^3")
@@ -114,17 +112,6 @@ class TaskPanelCfdFluidProperties:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
         doc.Document.recompute()
-
-    ''' NOTE: Code depreciate 27/01/2017 (JAH)
-        Defaults now set in CfdMaterial
-    '''
-    # def check_material_keys(self):
-    #     ''' Default values if properties is initiated for the first time '''
-    #     print ("set default mat prop")
-    #     if 'Density' not in self.material:
-    #         self.material['Density'] = '0 kg/m^3'
-    #     if 'DynamicViscosity' not in self.material:
-    #         self.material['DynamicViscosity'] = '0 kg/m/s'
 
     def reject(self):
         #self.remove_active_sel_server()
