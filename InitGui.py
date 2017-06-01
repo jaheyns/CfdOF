@@ -163,10 +163,10 @@ class CfdFoamWorkbench(Workbench):
                 print(" gmsh is not installed")
         if (len(gmshversion) > 1):
             versionlist = gmshversion.split(".")
-            if (float(versionlist[0] + "." + versionlist[1]) < 2.13):
+            if ((int(versionlist[0]) < 2) or ((int(versionlist[0]==2) and (int(versionlist[1])<13)):
                 message += "gmesh version is older than minimum required (2.13)\n"
-            if (term_print):
-                print("gmsh version is older than minimum required (2.13)")
+                if (term_print):
+                    print("gmsh version is older than minimum required (2.13)")
 
         if (term_print):
             print(" completed cfd dependency check")
