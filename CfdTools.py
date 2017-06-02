@@ -377,6 +377,7 @@ def normalise(v):
 
 def cfdError(msg):
     """ Show message for an expected error """
+    QtGui.QApplication.restoreOverrideCursor()
     if FreeCAD.GuiUp:
         QtGui.QMessageBox.critical(None, "CFDFoam Workbench", msg)
     else:
