@@ -80,7 +80,6 @@ class _ViewProviderCfdPorousZone:
         import _TaskPanelCfdPorousZone
         taskd = _TaskPanelCfdPorousZone._TaskPanelCfdPorousZone(self.Object)
         taskd.obj = vobj.Object
-        # CfdTools.setPartVisibility(vobj, True, False, False, True)
         FreeCADGui.Control.showDialog(taskd)
         return True
 

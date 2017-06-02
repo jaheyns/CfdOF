@@ -76,8 +76,8 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.populateUiBasedOnPhysics()
 
     def populateUiBasedOnPhysics(self):
-        self.form.potentialFoamCheckBox.setToolTip("Automatic initialisation of the velocity and pressure fields using "
-                                                   "an incompressible, potential or irrotational flow assumption.")
+        self.form.potentialFoamCheckBox.setToolTip("Initialise the velocity field using an incompressible, potential "
+                                                   "or irrotational flow assumption.")
         checked = self.InitialVariables.get('PotentialFoam', False)
         self.form.potentialFoamCheckBox.setChecked(checked)
         self.form.basicPropertiesFrame.setVisible(not checked)
@@ -153,6 +153,19 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.obj.InitialVariables = self.InitialVariables
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
+
+        FreeCADGui.doCommand("\n# Values are converted to SI units and stored (eg. m/s)")
+        FreeCADGui.doCommand("init = FreeCAD.ActiveDocument.{}.InitialVariables".format(self.obj.Name))
+        FreeCADGui.doCommand("init['PotentialFoam'] = {}".format(self.InitialVariables['PotentialFoam']))
+        FreeCADGui.doCommand("init['Ux'] = {}".format(self.InitialVariables['Ux']))
+        FreeCADGui.doCommand("init['Uy'] = {}".format(self.InitialVariables['Uy']))
+        FreeCADGui.doCommand("init['Uz'] = {}".format(self.InitialVariables['Uz']))
+        FreeCADGui.doCommand("init['Pressure'] = {}".format(self.InitialVariables['Pressure']))
+        FreeCADGui.doCommand("init['UseInletTurbulenceValues'] "
+                             "= {}".format(self.InitialVariables['UseInletTurbulenceValues']))
+        FreeCADGui.doCommand("init['omega'] = {}".format(self.InitialVariables['omega']))
+        FreeCADGui.doCommand("init['k'] = {}".format(self.InitialVariables['k']))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.InitialVariables = init".format(self.obj.Name))
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

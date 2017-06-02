@@ -33,36 +33,39 @@ from PySide import QtCore
 import CfdTools
 import os
 
+
 class _CommandCfdMeshCartFromShape(FemCommands):
     # the Cfd_MeshCartFromShape command definition
     def __init__(self):
         super(_CommandCfdMeshCartFromShape, self).__init__()
-        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","mesh_c.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_c.png")
         self.resources = {'Pixmap': icon_path,
-                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshCartFromShape", "Cut-cell Cartesian mesh from shape"),
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshCartFromShape", "Create a Cut-cell Cartesian mesh from a shape")}
+                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshCartFromShape",
+                                                               "Cut-cell Cartesian mesh from shape"),
+                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshCartFromShape",
+                                                              "Create a Cut-cell Cartesian mesh from a shape")}
         self.is_active = 'with_part_feature'
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create cut-cell Cartesian mesh")
         FreeCADGui.addModule("FemGui")
         analysis_obj = FemGui.getActiveAnalysis()
-        meshObj= CfdTools.getMesh(analysis_obj)
+        meshObj = CfdTools.getMesh(analysis_obj)
         if not meshObj:
             sel = FreeCADGui.Selection.getSelection()
-            if (len(sel) == 1):
-                if(sel[0].isDerivedFrom("Part::Feature")):
+            if len(sel) == 1:
+                if sel[0].isDerivedFrom("Part::Feature"):
                     mesh_obj_name = sel[0].Name + "_CartesianMesh"
                     FreeCADGui.addModule("CfdMeshCart")
                     FreeCADGui.doCommand("CfdMeshCart.makeCfdMeshCart('" + mesh_obj_name + "')")
                     FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
                     if FemGui.getActiveAnalysis():
                         FreeCADGui.addModule("FemGui")
-                        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [App.ActiveDocument.ActiveObject]")
-                    FreeCADGui.doCommand("Gui.ActiveDocument.setEdit(App.ActiveDocument.ActiveObject.Name)")
+                        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + "
+                                             "[App.ActiveDocument.ActiveObject]")
+                    FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
         else:
             print "ERROR: You cannot have more than one mesh object"
         FreeCADGui.Selection.clearSelection()
-
 
 FreeCADGui.addCommand('Cfd_MeshCartFromShape', _CommandCfdMeshCartFromShape())

@@ -92,7 +92,11 @@ class _ViewProviderCfdFluidBoundary:
 
         import _TaskPanelCfdFluidBoundary
         taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model)
-        # CfdTools.setPartVisibility(vobj, True, False, False, True)  # Update to show only mesh_obj.part
+        for obj in FreeCAD.ActiveDocument.Objects:
+            if obj.isDerivedFrom("Fem::FemMeshObject"):
+                obj.ViewObject.hide()
+                obj.Part.ViewObject.show()
+        self.Object.ViewObject.show()
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True

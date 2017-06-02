@@ -143,6 +143,10 @@ class _TaskPanelCfdMeshGmsh:
         self.dimension = str(self.form.cb_dimension.itemText(index))  # form returns unicode
 
     def runMeshProcess(self):
+        FreeCADGui.doCommand("\nFreeCAD.ActiveDocument.{}.CharacteristicLengthMax "
+                             "= '{}'".format(self.mesh_obj.Name, self.clmax))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.CharacteristicLengthMin "
+                             "= '{}'".format(self.mesh_obj.Name, self.clmin))
         self.console_message_gmsh = ''
         self.get_active_analysis()
         self.set_mesh_params()

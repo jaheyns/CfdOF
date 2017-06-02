@@ -129,6 +129,26 @@ class _TaskPanelCfdMeshRegion:
             FreeCADGui.Selection.removeObserver(self.sel_server)
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
+        # Macro script
+        FreeCADGui.doCommand("\nFreeCAD.ActiveDocument.{}.RelativeLength "
+                             "= {}".format(self.obj.Name, self.rellen))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.RefinementThickness "
+                             "= '{}'".format(self.obj.Name, self.refinethick))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.NumberLayers "
+                             "= {}".format(self.obj.Name, self.numlayer))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.ExpansionRatio "
+                             "= {}".format(self.obj.Name, self.expratio))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.FirstLayerHeight "
+                             "= '{}'".format(self.obj.Name, self.firstlayerheight))
+        list = []
+        for ref in self.obj.References:
+            for elem in ref[1]:
+                list.append((ref[0], elem))
+        FreeCADGui.doCommand("referenceList = []")
+        for ref in list:
+            FreeCADGui.doCommand("part = FreeCAD.ActiveDocument.getObject('{}')".format(ref[0].Name))
+            FreeCADGui.doCommand("referenceList.append((part,'{}'))".format(ref[1]))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References = referenceList".format(self.obj.Name))
         return True
 
     def reject(self):

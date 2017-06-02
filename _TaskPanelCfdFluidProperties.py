@@ -44,18 +44,17 @@ class TaskPanelCfdFluidProperties:
         self.obj = obj
         self.material = self.obj.Material
 
-        ''' Initial version of the flow solver only support single region analysis and therefore selection_mode_solid
-            is not included.
-        '''
+        # Initial version of the flow solver only support single region analysis and therefore selection_mode_solid
+        # is not included.
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
                                                              "TaskPanelCfdFluidProperties.ui"))
 
-        ''' In most cases, unlike FEM, fluid flow properties are defined by the user. A small number of reference
-            values are store in the fcmat database for fluids to serve as a starting point for the user. The properties
-            are therefore always initialised to "None" with the previous quantities reloaded in the input fields,
-            instead of trying match to a database entry as in FEM.
-        '''
+        # In most cases, unlike FEM, fluid flow properties are defined by the user. A small number of reference
+        # values are store in the fcmat database for fluids to serve as a starting point for the user. The properties
+        # are therefore always initialised to "None" with the previous quantities reloaded in the input fields,
+        # instead of trying match to a database entry as in FEM.
+
         self.import_materials()
         index = self.form.PredefinedMaterialLibraryComboBox.findText('None')
         self.form.PredefinedMaterialLibraryComboBox.setCurrentIndex(index)
@@ -64,17 +63,13 @@ class TaskPanelCfdFluidProperties:
                                QtCore.SIGNAL("currentIndexChanged(int)"),
                                self.selectPredefine)
 
-        ''' NOTE Using different connect here because we would like access to the full text, where
-            QtCore.QObject.connect, does not recognize textChanged signal.  We do so to allow the units to be pulled
-            along with the values to ensure unit consistency, unlike FEM where units are assumed upon change/save.
-        '''
+        # NOTE: Using different connect here because we would like access to the full text, where
+        # QtCore.QObject.connect, does not recognize textChanged signal.  We do so to allow the units to be pulled
+        # along with the values to ensure unit consistency, unlike FEM where units are assumed upon change/save.
+
         self.form.fDens.textChanged.connect(self.DensityChanged)
         self.form.fViscosity.textChanged.connect(self.ViscosityChanged)
 
-        ''' NOTE: Code depreciate 27/01/2017 (JAH)
-            Defaults now set in CfdMaterial
-        '''
-        # self.check_material_keys()
         self.setTextFields(self.material)
 
     def selectPredefine(self):
@@ -112,6 +107,13 @@ class TaskPanelCfdFluidProperties:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
         doc.Document.recompute()
+
+        # Unlike the other dictionaries, 'Material' still stores values along with their units as str due to
+        # the structure of the database
+        FreeCADGui.doCommand("\nmat = FreeCAD.ActiveDocument." + self.obj.Name + ".Material")
+        FreeCADGui.doCommand("mat['Density'] = '{}'".format(self.material['Density']))
+        FreeCADGui.doCommand("mat['DynamicViscosity'] = '{}'".format(self.material['DynamicViscosity']))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument." + self.obj.Name + ".Material = mat")
 
     def reject(self):
         #self.remove_active_sel_server()

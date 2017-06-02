@@ -90,8 +90,6 @@ class CfdRunnable(object):
             self.edit_process = subprocess.Popen(['explorer', case_path])
 
 
-#  Concrete Class for CfdRunnable for OpenFOAM
-#  implemented write_case() and solver_case(), not yet for load_result()
 class CfdRunnableFoam(CfdRunnable):
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnableFoam, self).__init__(analysis, solver)

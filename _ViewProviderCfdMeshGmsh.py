@@ -53,7 +53,11 @@ class _ViewProviderCfdMeshGmsh:
         return
 
     def setEdit(self, vobj, mode):
-        CfdTools.setPartVisibility(vobj, False, False, True, True)
+        for obj in FreeCAD.ActiveDocument.Objects:
+            if obj.isDerivedFrom("Part::Feature"):
+                obj.ViewObject.hide()
+            if obj.isDerivedFrom("Fem::FemMeshObject"):
+                obj.ViewObject.show()
         import _TaskPanelCfdMeshGmsh
         taskd = _TaskPanelCfdMeshGmsh._TaskPanelCfdMeshGmsh(self.Object)
         taskd.obj = vobj.Object

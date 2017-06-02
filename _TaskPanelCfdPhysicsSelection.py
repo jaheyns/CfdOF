@@ -171,20 +171,9 @@ class _TaskPanelCfdPhysicsSelection:
 
     def RANSChosen(self):
         self.form.turbulenceModelFrame.setVisible(True)
-        # NOTE: strictly there might be differences between incompressible and compressible!
-        # see http://cfd.direct/openfoam/user-guide/turbulence/ for more openfoam supported models
-        # Choices = ["SpalartAllmaras","kEpsilon","SSG","RNGkEpsilon","kOmega","kOmegaSSTSAS"]
         self.form.turbulenceComboBox.clear()
         self.form.turbulenceComboBox.addItems(RANS_MODELS)
         self.physicsModel["Turbulence"] = "RANS"
-
-    #def LESChosen(self):
-        #self.form.turbulenceModelFrame.setVisible(True)
-        ##NOTE: strictly there might be differences between incompressible and compressible!
-        ##see http://cfd.direct/openfoam/user-guide/turbulence/ for more openfoam supported models
-        #Choices = ["Smagorinsky","kEqn","dynamicKEqn"]
-        #self.form.turbulenceComboBox.clear()
-        #self.form.turbulenceComboBox.addItems(Choices)
 
     def laminarChosen(self):
         self.form.turbulenceModelFrame.setVisible(False)
@@ -197,6 +186,14 @@ class _TaskPanelCfdPhysicsSelection:
         self.obj.PhysicsModel = self.physicsModel
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
+
+        FreeCADGui.doCommand("\nphys = FreeCAD.ActiveDocument.{}.PhysicsModel".format(self.obj.Name))
+        FreeCADGui.doCommand("phys['Time'] = '{}'".format(self.physicsModel['Time']))
+        FreeCADGui.doCommand("phys['Flow'] = '{}'".format(self.physicsModel['Flow']))
+        FreeCADGui.doCommand("phys['Turbulence'] = '{}'".format(self.physicsModel['Turbulence']))
+        FreeCADGui.doCommand("phys['TurbulenceModel'] = '{}'".format(self.physicsModel['TurbulenceModel']))
+        FreeCADGui.doCommand("phys['Thermal'] = {}".format(self.physicsModel['Thermal']))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.PhysicsModel = phys".format(self.obj.Name))
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

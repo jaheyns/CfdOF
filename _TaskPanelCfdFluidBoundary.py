@@ -186,7 +186,8 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputLengthScale.textChanged.connect(self.inputLengthScaleChanged)
 
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.comboThermalBoundaryTypeChanged)
-        self.form.thermalFrame.setVisible(physics_model["Thermal"] is not None)
+        # self.form.thermalFrame.setVisible(physics_model["Thermal"] is not None)
+        self.form.thermalFrame.setVisible(False)
 
         self.form.faceList.clicked.connect(self.faceListSelection)
         self.form.closeListOfFaces.clicked.connect(self.closeFaceList)
@@ -277,7 +278,7 @@ class TaskPanelCfdFluidBoundary:
         # Change the color of the boundary condition as the selection is made
         self.obj.BoundarySettings = self.BoundarySettings.copy()
         doc_name = str(self.obj.Document.Name)
-        FreeCADGui.doCommand("FreeCAD.getDocument('"+doc_name+"').recompute()")
+        FreeCAD.getDocument(doc_name).recompute()
 
     def comboSubtypeChanged(self):
         type_index = self.form.comboBoundaryType.currentIndex()
@@ -322,7 +323,7 @@ class TaskPanelCfdFluidBoundary:
             self.form.labelHelpText.setText("")
             FreeCADGui.Selection.removeObserver(self)
         doc_name = str(self.obj.Document.Name)
-        FreeCADGui.doCommand("FreeCAD.getDocument('"+doc_name+"').recompute()")  # Create compound part
+        FreeCAD.getDocument(doc_name).recompute()
         self.update_selectionbuttons_ui()
 
     def buttonRemoveFaceClicked(self):
@@ -337,7 +338,7 @@ class TaskPanelCfdFluidBoundary:
         self.obj.References = tempList
         self.rebuild_list_references()
         doc_name = str(self.obj.Document.Name)
-        FreeCADGui.doCommand("FreeCAD.getDocument('"+doc_name+"').recompute()")
+        FreeCAD.getDocument(doc_name).recompute()
         FreeCADGui.Selection.clearSelection()
 
     def update_selectionbuttons_ui(self):
@@ -408,7 +409,7 @@ class TaskPanelCfdFluidBoundary:
         self.update_selectionbuttons_ui()
 
         doc_name = str(self.obj.Document.Name)
-        FreeCADGui.doCommand("FreeCAD.getDocument('"+doc_name+"').recompute()")
+        FreeCAD.getDocument(doc_name).recompute()
 
     def rebuild_list_references(self):
         self.form.listReferences.clear()
@@ -519,13 +520,79 @@ class TaskPanelCfdFluidBoundary:
                     item.widget().setVisible(rowi-2 in panel_numbers)
 
     def accept(self):
+        if "CfdFluidBoundary" in self.obj.Label:
+            self.obj.Label = self.obj.BoundarySettings['BoundaryType']
         if self.selecting_references or self.selecting_direction:
             FreeCADGui.Selection.removeObserver(self)
         self.obj.BoundarySettings = self.BoundarySettings.copy()
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
-        FreeCADGui.doCommand("FreeCAD.getDocument('"+doc_name+"').recompute()")
+        FreeCAD.getDocument(doc_name).recompute()
         doc.resetEdit()
+
+        FreeCADGui.doCommand("\n# Values are converted to SI units and stored (eg. m/s)")
+        FreeCADGui.doCommand("bc = FreeCAD.ActiveDocument.{}.BoundarySettings".format(self.obj.Name))
+        # Type
+        FreeCADGui.doCommand("bc['BoundaryType'] "
+                             "= '{}'".format(self.BoundarySettings['BoundaryType']))
+        FreeCADGui.doCommand("bc['BoundarySubtype'] "
+                             "= '{}'".format(self.BoundarySettings['BoundarySubtype']))
+        FreeCADGui.doCommand("bc['ThermalBoundaryType'] "
+                             "= '{}'".format(self.BoundarySettings['ThermalBoundaryType']))
+        # Velocity
+        FreeCADGui.doCommand("bc['VelocityIsCartesian'] "
+                             "= {}".format(self.BoundarySettings['VelocityIsCartesian']))
+        FreeCADGui.doCommand("bc['Ux'] "
+                             "= {}".format(self.BoundarySettings['Ux']))
+        FreeCADGui.doCommand("bc['Uy'] "
+                             "= {}".format(self.BoundarySettings['Uy']))
+        FreeCADGui.doCommand("bc['Uz'] "
+                             "= {}".format(self.BoundarySettings['Uz']))
+        FreeCADGui.doCommand("bc['VelocityMag'] "
+                             "= {}".format(self.BoundarySettings['VelocityMag']))
+        FreeCADGui.doCommand("bc['DirectionFace'] "
+                             "= '{}'".format(self.BoundarySettings['DirectionFace']))
+        FreeCADGui.doCommand("bc['ReverseNormal'] "
+                             "= {}".format(self.BoundarySettings['ReverseNormal']))
+        FreeCADGui.doCommand("bc['MassFlowRate'] "
+                             "= {}".format(self.BoundarySettings['MassFlowRate']))
+        FreeCADGui.doCommand("bc['VolFlowRate'] "
+                             "= {}".format(self.BoundarySettings['VolFlowRate']))
+        # Presure
+        FreeCADGui.doCommand("bc['Pressure'] "
+                             "= {}".format(self.BoundarySettings['Pressure']))
+        # Wall
+        FreeCADGui.doCommand("bc['SlipRatio'] "
+                             "= {}".format(self.BoundarySettings['SlipRatio']))
+        # Turbulence
+        FreeCADGui.doCommand("bc['TurbulenceInletSpecification'] "
+                             "= '{}'".format(self.BoundarySettings['TurbulenceInletSpecification']))
+        FreeCADGui.doCommand("bc['TurbulentKineticEnergy'] "
+                             "= {}".format(self.BoundarySettings['TurbulentKineticEnergy']))
+        FreeCADGui.doCommand("bc['SpecificDissipationRate'] "
+                             "= {}".format(self.BoundarySettings['SpecificDissipationRate']))
+        FreeCADGui.doCommand("bc['TurbulenceIntensity'] "
+                             "= {}".format(self.BoundarySettings['TurbulenceIntensity']))
+        FreeCADGui.doCommand("bc['TurbulenceLengthScale'] "
+                             "= {}".format(self.BoundarySettings['TurbulenceLengthScale']))
+        # Porous
+        FreeCADGui.doCommand("bc['PressureDropCoeff'] "
+                             "= {}".format(self.BoundarySettings['PressureDropCoeff']))
+        FreeCADGui.doCommand("bc['ScreenWireDiameter'] "
+                             "= {}".format(self.BoundarySettings['ScreenWireDiameter']))
+        FreeCADGui.doCommand("bc['ScreenSpacing'] "
+                             "= {}".format(self.BoundarySettings['ScreenSpacing']))
+        FreeCADGui.doCommand("bc['PorousBaffleMethod'] "
+                             "= {}".format(self.BoundarySettings['PorousBaffleMethod']))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundarySettings = bc".format(self.obj.Name))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Label = '{}'".format(self.obj.Name, self.obj.Label))
+        faces = []
+        for ref in self.obj.References:
+            faces.append(ref)
+        self.obj.References = []
+        for f in faces:
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References.append({})".format(self.obj.Name, f))
+        FreeCADGui.doCommand("FreeCAD.getDocument('{}').recompute()".format(doc_name))
 
     def reject(self):
         self.obj.References = self.ReferencesOrig
@@ -534,7 +601,7 @@ class TaskPanelCfdFluidBoundary:
             FreeCADGui.Selection.removeObserver(self)
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
-        FreeCADGui.doCommand("FreeCAD.getDocument('"+doc_name+"').recompute()")
+        FreeCAD.getDocument(doc_name).recompute()
         doc.resetEdit()
         return True
 

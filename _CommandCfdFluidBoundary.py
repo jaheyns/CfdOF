@@ -52,8 +52,7 @@ class _CommandCfdFluidBoundary(FemCommands):
         FreeCADGui.addModule("FemGui")
         FreeCADGui.addModule("CfdFluidBoundary")
         FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdFluidBoundary.makeCfdFluidBoundary()]")
-
-        FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
+        FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
     def GetResources(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.png")

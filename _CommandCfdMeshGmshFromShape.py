@@ -25,7 +25,6 @@ __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
-import platform
 from PyGui.FemCommands import FemCommands
 import FreeCADGui
 import FemGui
@@ -33,33 +32,37 @@ from PySide import QtCore
 import CfdTools
 import os
 
+
 class _CommandCfdMeshGmshFromShape(FemCommands):
     # the Cfd_MeshGmshFromShape command definition
     def __init__(self):
         super(_CommandCfdMeshGmshFromShape, self).__init__()
-        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","mesh_g.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_g.png")
         self.resources = {'Pixmap': icon_path,
-                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape", "CFD mesh from shape by GMSH"),
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape", "Create a CFD mesh from a shape by GMSH mesher")}
+                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape",
+                                                               "CFD mesh from shape by GMSH"),
+                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape",
+                                                              "Create a CFD mesh from a shape by GMSH mesher")}
         self.is_active = 'with_part_feature'
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CFD mesh by GMSH")
         FreeCADGui.addModule("FemGui")
         analysis_obj = FemGui.getActiveAnalysis()
-        meshObj= CfdTools.getMesh(analysis_obj)
+        meshObj = CfdTools.getMesh(analysis_obj)
         if not meshObj:
             sel = FreeCADGui.Selection.getSelection()
-            if (len(sel) == 1):
-                if(sel[0].isDerivedFrom("Part::Feature")):
+            if len(sel) == 1:
+                if sel[0].isDerivedFrom("Part::Feature"):
                     mesh_obj_name = sel[0].Name + "_GmshMesh"
                     FreeCADGui.addModule("CfdMeshGmsh")
                     FreeCADGui.doCommand("CfdMeshGmsh.makeCfdMeshGmsh('" + mesh_obj_name + "')")
                     FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
                     if FemGui.getActiveAnalysis():
                         FreeCADGui.addModule("FemGui")
-                        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [App.ActiveDocument.ActiveObject]")
-                    FreeCADGui.doCommand("Gui.ActiveDocument.setEdit(App.ActiveDocument.ActiveObject.Name)")
+                        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member "
+                                             "+ [App.ActiveDocument.ActiveObject]")
+                    FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
         else:
             print "ERROR: You cannot have more than one mesh object"
         FreeCADGui.Selection.clearSelection()

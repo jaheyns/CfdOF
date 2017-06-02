@@ -40,7 +40,7 @@ class _CommandCfdPhysicsSelection(FemCommands):
             FreeCADGui.addModule("CfdPhysicsSelection")
             FreeCADGui.doCommand(
                 "analysis.Member = analysis.Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
-            FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
+            FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_PhysicsModel', _CommandCfdPhysicsSelection())

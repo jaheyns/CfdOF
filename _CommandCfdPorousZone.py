@@ -55,7 +55,7 @@ class _CommandCfdPorousZone(FemCommands):
         FreeCADGui.addModule("FemGui")
         FreeCADGui.addModule("CfdPorousZone")
         FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdPorousZone.makeCfdPorousZone()]")
-        FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
-        
+        FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
+
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_PorousZone', _CommandCfdPorousZone())

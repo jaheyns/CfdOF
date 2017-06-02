@@ -67,7 +67,7 @@ class _CommandCfdInitialiseInternalFlowField(FemCommands):
             FreeCADGui.addModule("FemGui")
             FreeCADGui.doCommand(
                 "analysis.Member = analysis.Member + [CfdInitialiseFlowField.makeCfdInitialFlowField()]")
-            FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
+            FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_InitialiseInternal', _CommandCfdInitialiseInternalFlowField())

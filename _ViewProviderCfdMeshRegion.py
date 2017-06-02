@@ -63,11 +63,10 @@ class _ViewProviderCfdMeshRegion:
         return
 
     def setEdit(self, vobj, mode=0):
-        # hide all meshes
-        for o in FreeCAD.ActiveDocument.Objects:
-            if o.isDerivedFrom("Fem::FemMeshObject"):
-                o.ViewObject.hide()
-        # show task panel
+        for obj in FreeCAD.ActiveDocument.Objects:
+            if obj.isDerivedFrom("Fem::FemMeshObject"):
+                obj.ViewObject.hide()
+                obj.Part.ViewObject.show()
         taskd = _TaskPanelCfdMeshRegion._TaskPanelCfdMeshRegion(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)

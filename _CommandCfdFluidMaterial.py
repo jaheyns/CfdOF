@@ -62,7 +62,7 @@ class setCfdFluidPropertyCommand(FemCommands):
             FreeCADGui.addModule("CfdFluidMaterial")
             FreeCADGui.doCommand(
                 "analysis.Member = analysis.Member + [CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')]")
-            FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
+            FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_FluidMaterial', setCfdFluidPropertyCommand())

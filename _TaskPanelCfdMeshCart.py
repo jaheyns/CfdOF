@@ -179,6 +179,11 @@ class _TaskPanelCfdMeshCart:
             self.form.snappySpecificProperties.setVisible(False)
 
     def runMeshProcess(self):
+        FreeCADGui.doCommand("\nFreeCAD.ActiveDocument.{}.CharacteristicLengthMax "
+                             "= '{}'".format(self.mesh_obj.Name, self.clmax))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.MeshUtility "
+                             "= '{}'".format(self.mesh_obj.Name, self.utility))
+
         self.console_message_cart = ''
         self.cart_runs = True
         self.get_active_analysis()

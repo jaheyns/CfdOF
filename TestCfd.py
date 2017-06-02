@@ -137,7 +137,8 @@ class BlockTest(unittest.TestCase):
         obj = doc.getObject(mesh_name)
         vobj = obj.ViewObject
         obj.Part = doc.getObject(self.__class__.__part_name)
-        CfdTools.setPartVisibility(vobj, False, False, True, True)
+        if obj.isDerivedFrom("Fem::FemMeshObject"):
+            obj.ViewObject.show()
         obj.CharacteristicLengthMax = "80 mm"
         obj.ElementOrder = "1st"
         import _TaskPanelCfdMeshGmsh
@@ -162,7 +163,6 @@ class BlockTest(unittest.TestCase):
         import _TaskPanelCfdFluidBoundary
         physics_model, is_present = CfdTools.getPhysicsModel(self.analysis)
         taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model)
-        # CfdTools.setPartVisibility(vobj, True, False, False, True)
         taskd.obj = vobj.Object
         taskd.selecting_references = True
         taskd.addSelection(doc.Name, doc.getObject(self.__class__.__part_name).Name, 'Face1')

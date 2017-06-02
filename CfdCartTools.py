@@ -82,6 +82,12 @@ class CfdCartTools():
             FreeCAD.Console.PrintError("Currently, only Cartesian is supported.\n")
             self.algorithm3D = '1'
 
+        shapeFaceNames = self.mesh_obj.ShapeFaceNames
+        for (i, f) in enumerate(self.part_obj.Shape.Faces):
+            faceName = ("face{}".format(i))
+            shapeFaceNames.append(faceName)
+        self.mesh_obj.ShapeFaceNames = shapeFaceNames
+
     def get_dimension(self):
         # Dimension
         # 3D cfMesh and snappyHexMesh, while in future cfMesh may support 2D
@@ -95,14 +101,14 @@ class CfdCartTools():
     def get_clmax(self):
         return self.clmax
 
-    def get_tmp_file_paths(self,typeCart):
+    def get_tmp_file_paths(self, typeCart):
         tmpdir = tempfile.gettempdir()
         self.meshCaseDir = os.path.join(tmpdir, 'meshCase')
         self.constantDir = os.path.join(self.meshCaseDir, 'constant')
         if typeCart == "cfMesh":
             self.polyMeshDir = os.path.join(self.constantDir, 'polyMesh')
         elif typeCart == "snappyHexMesh":
-            #surfaceTOPatch does not have an overwrite functionality. It therefore will always create a new time step 
+            # surfaceTOPatch does not have an overwrite functionality. It therefore will always create a new time step
             # folder. However, if there is no changes to be made to the boundary then this time folder is not created.
             polyMeshDir = os.path.join(self.meshCaseDir,'1','polyMesh')
             if os.path.isfile(polyMeshDir):
@@ -119,7 +125,6 @@ class CfdCartTools():
         self.temp_file_blockMeshDict = os.path.join(self.systemDir, 'blockMeshDict')
         self.temp_file_snappyMeshDict = os.path.join(self.systemDir, 'snappyHexMeshDict')
         self.temp_file_surfaceFeatureExtractDict = os.path.join(self.systemDir, 'surfaceFeatureExtractDict')
-
 
     def get_group_data(self):
         """ Mesh groups and groups of analysis member """
@@ -146,7 +151,6 @@ class CfdCartTools():
             for mr_obj in self.mesh_obj.MeshRegionList:
                 if mr_obj.RelativeLength:
                     if mr_obj.References:
-
                         # Store parameters per region
                         mr_rellen = mr_obj.RelativeLength
                         if mr_rellen > 1.0:
@@ -179,27 +183,25 @@ class CfdCartTools():
 
                         mr_obj.Name
                         snappyTemp = []
-                        subTemp = []
-                        print mr_obj.References
                         subC = -1
                         for sub in mr_obj.References:
                             subC+=1
                             # print(sub[0])  # Part the elements belongs to
                             elems_list = []
-                            print sub[0].Name
                             elemC = -1
                             for elems in sub[1]:
                                 elemC += 1
-                                print elems
                                 # print(elems)  # elems --> element
                                 if not elems in elems_list:
                                     elt = sub[0].Shape.getElement(elems)
                                     if elt.ShapeType == 'Face':
                                         facemesh = MeshPart.meshFromShape(elt,
                                                                   LinearDeflection=self.mesh_obj.STLLinearDeflection)
+                                        # Write separate stls allowing for individual baffle definition
                                         if self.mesh_obj.MeshUtility == "snappyHexMesh":
-                                            f = open(os.path.join(self.triSurfaceDir,\
-                                                mr_obj.Name+sub[0].Name+elems+ '.stl'), 'w')
+                                            f = open(os.path.join(self.triSurfaceDir,
+                                                                  mr_obj.Name+sub[0].Name+elems+ '.stl'),
+                                                     'w')
                                             snappyTemp.append(mr_obj.Name+sub[0].Name+elems)
                                         f.write("solid {}\n".format(mr_obj.Name+"Sub"+str(subC)+"Elem"+str(elemC)))
                                         for face in facemesh.Facets:
@@ -245,7 +247,6 @@ class CfdCartTools():
                         "The meshregion: " + mr_obj.Name + " is not used to create the mesh because the "
                         "CharacteristicLength is 0.0 mm.\n")
         print('  {}'.format(self.ele_length_map))
-        print('  {}'.format(self.ele_meshpatch_map))
 
     def setupMeshCaseDir(self):
         """ Temporary mesh case directory """
@@ -260,41 +261,39 @@ class CfdCartTools():
     def automaticInsidePointDetect(self):
         #consider updating to something more elegant
 
-        #Temporary note of importance:
-        #The problem with snappy appears to be that the chosen internal point must remain internal
-        #after the refinement regions as well. To be safe, the distance to check is chosen
-        #to be approximately the size of the background mesh. 
+        # NOTE: The problem with snappy appears to be that the chosen internal point must remain internal
+        # after the refinement regions as well. To be safe, the distance to check is chosen
+        # to be approximately the size of the background mesh.
 
         shape = self.part_obj.Shape
-        vertices = self.part_obj.Shape.Vertexes
+        # vertices = self.part_obj.Shape.Vertexes
         stepSize = self.clmax*3.0
 
-        #stepSize = self.clmax/self.scale*1.1
-        #change = [FreeCAD.Vector(stepSize,stepSize,stepSize),
-                  #FreeCAD.Vector(stepSize,-stepSize,stepSize),
-                  #FreeCAD.Vector(-stepSize,stepSize,stepSize),
-                  #FreeCAD.Vector(-stepSize,-stepSize,stepSize),
-                  #FreeCAD.Vector(stepSize,stepSize,-stepSize),
-                  #FreeCAD.Vector(stepSize,-stepSize,-stepSize),
-                  #FreeCAD.Vector(-stepSize,stepSize,-stepSize),
-                  #FreeCAD.Vector(-stepSize,-stepSize,-stepSize)]
-        #for ii in range(len(vertices)):
-            ##print "vertex",ii,vertices[ii], vertices[ii].Point
-            #point = vertices[ii].Point
-            #for jj in range(8):
-                #pointCheck = point + change[jj]
-                #result = shape.isInside(pointCheck,stepSize/1.1,False)
-                #print pointCheck,result
-                #if result:
-                    #return pointCheck
+        # stepSize = self.clmax/self.scale*1.1
+        # change = [FreeCAD.Vector(stepSize,stepSize,stepSize),
+        #           FreeCAD.Vector(stepSize,-stepSize,stepSize),
+        #           FreeCAD.Vector(-stepSize,stepSize,stepSize),
+        #           FreeCAD.Vector(-stepSize,-stepSize,stepSize),
+        #           FreeCAD.Vector(stepSize,stepSize,-stepSize),
+        #           FreeCAD.Vector(stepSize,-stepSize,-stepSize),
+        #           FreeCAD.Vector(-stepSize,stepSize,-stepSize),
+        #           FreeCAD.Vector(-stepSize,-stepSize,-stepSize)]
+        # for ii in range(len(vertices)):
+        #     #print "vertex",ii,vertices[ii], vertices[ii].Point
+        #     point = vertices[ii].Point
+        #     for jj in range(8):
+        #         pointCheck = point + change[jj]
+        #         result = shape.isInside(pointCheck,stepSize/1.1,False)
+        #         print pointCheck,result
+        #         if result:
+        #             return pointCheck
 
         boundBox = self.part_obj.Shape.BoundBox
         errorSafetyFactor = 2.0
-        if stepSize*errorSafetyFactor >= boundBox.XLength or stepSize*errorSafetyFactor >= boundBox.YLength or \
-            stepSize*errorSafetyFactor >= boundBox.ZLength:
-            print stepSize
-            #NOTE: need to put a proper error checker in place here
-            someErrorNeededHereToSayCurrentChoiceInCharacteristicLengthIsTooLarge
+        if (stepSize*errorSafetyFactor >= boundBox.XLength or
+                        stepSize*errorSafetyFactor >= boundBox.YLength or
+                        stepSize*errorSafetyFactor >= boundBox.ZLength):
+            CfdTools.cfdError("Current choice in characteristic length of {} is too large.".format(stepSize))
         x1 = boundBox.XMin
         x2 = boundBox.XMax
         y1 = boundBox.YMin
@@ -340,9 +339,8 @@ class CfdCartTools():
                         '\n'.format(os.path.join(triSurfaceDir, self.part_obj.Name),
                                     self.part_obj.Name))
                 f.write('\n')
-                f.write('runCommand cartesianMesh\n')  # May in future extend to poly and tet mesh
+                f.write('runCommand cartesianMesh\n')
                 f.write('\n')
-
 
             elif cartMethod == 'snappyHexMesh':
                 f.write('runCommand blockMesh \n')
@@ -366,12 +364,9 @@ class CfdCartTools():
         if ("Boolean" in self.part_obj.Name) and self.mesh_obj.MeshUtility:
             FreeCAD.Console.PrintError('cfMesh and snappyHexMesh does not accept boolean segments.')
 
-        #shapeFaceNames = self.mesh_obj.ShapeFaceNames
-        shapeFaceNames = []
         fullMeshFile = open(self.temp_file_geo+'.stl', 'w')
         for (i, objFaces) in enumerate(self.part_obj.Shape.Faces):
             faceName = ("face{}".format(i))
-            shapeFaceNames.append(faceName)
             meshStl = MeshPart.meshFromShape(objFaces, LinearDeflection = self.mesh_obj.STLLinearDeflection)
             fullMeshFile.write("solid {}\n".format(faceName))
             for face in meshStl.Facets:
@@ -388,8 +383,6 @@ class CfdCartTools():
                 fullMeshFile.write(" endfacet\n")
             fullMeshFile.write("endsolid {}\n".format(faceName))
         fullMeshFile.close()
-
-        self.mesh_obj.ShapeFaceNames = shapeFaceNames
 
     def setupMeshDict(self, utility):
         if utility == "cfMesh":
@@ -482,7 +475,6 @@ class CfdCartTools():
             insideY = pointCheck[1]/1000.0
             insideZ = pointCheck[2]/1000.0
 
-
             regionList = ""
             for i in self.mesh_obj.ShapeFaceNames:
                 regionList += CfdTools.readTemplate(os.path.join(self.templatePath,  "_helperFiles","snappy",\
@@ -556,7 +548,7 @@ class CfdCartTools():
                                                             "FILENAME": "snappyHexMeshDict"}),
                                     "GEOMETRY":  STLGeometries,
                                     "REFINEMENTSURFACES": STLRefinementSurfaces,
-                                    "REFINEMENTREGION": STLRefinementRegions, 
+                                    "REFINEMENTREGION": STLRefinementRegions,
                                     "nCellsBetweenLevels": self.mesh_obj.nCellsBetweenLevels,
                                     "featureEdgeMesh": featureEdge,
                                     "PartName": self.part_obj.Name + '_Geometry',
@@ -580,7 +572,6 @@ class CfdCartTools():
                                                             "FILENAME": "surfaceFeatureExtractDict"}),
                                    "SURFACEFEATURE": FeatureExtract}))
             fid.close()
-
 
     def read_and_set_new_mesh(self):
         if not self.error:
