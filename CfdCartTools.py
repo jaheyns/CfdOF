@@ -102,11 +102,9 @@ class CfdCartTools():
         if typeCart == "cfMesh":
             self.polyMeshDir = os.path.join(self.constantDir, 'polyMesh')
         elif typeCart == "snappyHexMesh":
-            """
-            surfaceTOPatch does not have an overwrite functionality therefore create a new folder at timestep.
-            However, if there is no changes to be made to the boundary then this time folder is not created.
-            Therefore doing a present check prior to sending off where the mesh directory is located.
-            """
+            #surfaceTOPatch does not have an overwrite functionality therefore create a new folder at timestep.
+            #However, if there is no changes to be made to the boundary then this time folder is not created.
+            #Therefore doing a present check prior to sending off where the mesh directory is located.
             polyMeshDir = os.path.join(self.meshCaseDir,'1','polyMesh')
             if os.path.isfile(polyMeshDir):
                 self.polyMeshDir = polyMeshDir
@@ -136,6 +134,10 @@ class CfdCartTools():
         self.ele_firstlayerheight_map = {}  # { 'mrNameString' : first layer height }
         self.ele_numlayer_map = {}  # { 'mrNameString' : number of layers }
         self.ele_expratio_map = {}  # { 'mrNameString' : expansion ratio }
+        #self.snappyRegionSTLNames = []
+        #self.snappyRegionSubLink = {}
+        #self.snappyRegionElemLin = {}
+        self.snappyMeshRegions = {}
         from collections import defaultdict
         self.ele_meshpatch_map = defaultdict(list)
         if not self.mesh_obj.MeshRegionList:
@@ -169,19 +171,40 @@ class CfdCartTools():
                         self.ele_firstlayerheight_map[mr_obj.Name] = self.scale*Units.Quantity(mr_obj.FirstLayerHeight).Value
 
                         # STL containing the faces in the reference list
-                        f = open(os.path.join(self.triSurfaceDir, mr_obj.Name + '.stl'), 'w')
-                        f.write("solid {}\n".format(mr_obj.Name))
+                        # For long and many reasons related to snappy and baffles we cannot
+                        # use multi-region .stl for creating baffles. Therefore exporting each
+                        # mesh region face as an independent .stl surface. To not confuse cfMesh behaviour
+                        # leaving cfMesh as is.
+                        if self.mesh_obj.MeshUtility == "cfMesh":
+                            f = open(os.path.join(self.triSurfaceDir, mr_obj.Name + '.stl'), 'w')
+                            #f.write("solid {}\n".format(mr_obj.Name))
 
+                        mr_obj.Name
+                        snappyTemp = []
+                        subTemp = []
+                        print mr_obj.References
+                        subC = -1
                         for sub in mr_obj.References:
+                            subC+=1
                             # print(sub[0])  # Part the elements belongs to
                             elems_list = []
+                            print sub[0].Name
+                            elemC = -1
                             for elems in sub[1]:
+                                elemC += 1
+                                print elems
                                 # print(elems)  # elems --> element
                                 if not elems in elems_list:
                                     elt = sub[0].Shape.getElement(elems)
                                     if elt.ShapeType == 'Face':
                                         facemesh = MeshPart.meshFromShape(elt,
                                                                           LinearDeflection=self.mesh_obj.STLLinearDeflection)
+                                        if self.mesh_obj.MeshUtility == "snappyHexMesh":
+                                            #f = open(os.path.join(self.triSurfaceDir, mr_obj.Name+"Sub"+str(subC)+"Elem"+str(elemC) + '.stl'), 'w')
+                                            f = open(os.path.join(self.triSurfaceDir, mr_obj.Name+sub[0].Name+elems+ '.stl'), 'w')
+                                            #snappyTemp.append(mr_obj.Name+"Sub"+str(subC)+"Elem"+str(elemC))
+                                            snappyTemp.append(mr_obj.Name+sub[0].Name+elems)
+                                        f.write("solid {}\n".format(mr_obj.Name+"Sub"+str(subC)+"Elem"+str(elemC)))
                                         for face in facemesh.Facets:
                                             f.write(" facet normal 0 0 0\n")
                                             f.write("  outer loop\n")
@@ -193,6 +216,7 @@ class CfdCartTools():
                                                 f.write("\n")
                                             f.write("  endloop\n")
                                             f.write(" endfacet\n")
+                                        f.write("solid {}\n".format(mr_obj.Name+"Sub"+str(subC)+"Elem"+str(elemC)))
 
                                         # Similarity search for patch used in boundary layer meshing
                                         meshFaceList = self.mesh_obj.Part.Shape.Faces
@@ -202,15 +226,19 @@ class CfdCartTools():
                                             if isSameGeo:  # Only one matching face
                                                 sfN = self.mesh_obj.ShapeFaceNames[i]
                                                 self.ele_meshpatch_map[mr_obj.Name].append(sfN)
-
+                                        if self.mesh_obj.MeshUtility == "snappyHexMesh":
+                                            f.close()
                                     else:
                                         FreeCAD.Console.PrintError(
                                             "Cartesian meshes only support surface refinement.\n")
                                 else:
                                     FreeCAD.Console.PrintError(
                                         "The element {} has already been added.\n")
-                        f.write("endsolid {}\n".format(mr_obj.Name))
-                        f.close()
+                        #f.write("endsolid {}\n".format(mr_obj.Name))
+                        if self.mesh_obj.MeshUtility == "cfMesh":
+                            f.close()
+                        if self.mesh_obj.MeshUtility == "snappyHexMesh":
+                            self.snappyMeshRegions[mr_obj.Name] = snappyTemp
                     else:
                         FreeCAD.Console.PrintError(
                             "The meshregion: " + mr_obj.Name + " is not used to create the mesh because "
@@ -224,6 +252,14 @@ class CfdCartTools():
         # print('  {}'.format(self.ele_numlayer_map))
         # print('  {}'.format(self.ele_expratio_map))
         print('  {}'.format(self.ele_meshpatch_map))
+        if self.mesh_obj.MeshUtility == "snappyHexMesh":
+            #self.mesh_obj.snappyRegionInfo["snappyRegionSTLNames"] = self.snappyRegionSTLNames
+            #self.mesh_obj.snappyRegionInfo["snappyRegionSubLink"] = self.snappyRegionSubLink
+            #self.mesh_obj.snappyRegionInfo["snappyRegionElemLin"] = self.snappyRegionElemLin
+            self.mesh_obj.snappyRegionInfo = self.snappyMeshRegions
+
+        print self.mesh_obj.snappyRegionInfo
+        #broken12
 
     def setupMeshCaseDir(self):
         """ Temporary mesh case directory """
@@ -236,14 +272,13 @@ class CfdCartTools():
         shutil.copytree(os.path.join(self.templatePath, '_cfMesh', 'system'), self.systemDir)
 
     def automaticInsidePointDetect(self):
-        """
-            consider updating to something more elegant
+        #consider updating to something more elegant
 
-            Temporary note of importance:
-            The problem with snappy appears to be that the chosen internal point must remain internal
-            after the refinement regions as well. To be safe, the distance to check is chosen
-            to be approximately the size of the background mesh. 
-        """
+        #Temporary note of importance:
+        #The problem with snappy appears to be that the chosen internal point must remain internal
+        #after the refinement regions as well. To be safe, the distance to check is chosen
+        #to be approximately the size of the background mesh. 
+
         shape = self.part_obj.Shape
         vertices = self.part_obj.Shape.Vertexes
         stepSize = self.clmax*3.0
@@ -273,7 +308,7 @@ class CfdCartTools():
         if stepSize*errorSafetyFactor >= boundBox.XLength or stepSize*errorSafetyFactor >= boundBox.YLength or stepSize*errorSafetyFactor >= boundBox.ZLength:
             print stepSize
             #NOTE: need to put a proper error checker in place here
-            outputSomeErrorAboutCharacteristicLengthBeingChosenBeingTooBigForDomain
+            someErrorNeededHereToSayCurrentChoiceInCharacteristicLengthIsTooLarge
         #extraX = boundBox.XLength*0.1
         #extraY = boundBox.YLength*0.1
         #extraZ = boundBox.ZLength*0.1
@@ -430,9 +465,6 @@ class CfdCartTools():
             y2 = (boundBox.YMax + extraY)*self.scale
             z1 = (boundBox.ZMin - extraZ)*self.scale
             z2 = (boundBox.ZMax + extraZ)*self.scale
-            #nX = math.ceil(boundBox.XLength/1000.0/self.clmax)
-            #nY = math.ceil(boundBox.YLength/1000.0/self.clmax)
-            #nZ = math.ceil(boundBox.ZLength/1000.0/self.clmax)
             nX = math.ceil(boundBox.XLength/self.clmax)
             nY = math.ceil(boundBox.YLength/self.clmax)
             nZ = math.ceil(boundBox.ZLength/self.clmax)
@@ -472,6 +504,8 @@ class CfdCartTools():
             STLGeometries = ""
             STLRefinementSurfaces = ""
             STLRefinementRegions = ""
+            featureEdge = ""
+            FeatureExtract = ""
             STLGeometries += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySTLSurfaceNameWithRegions"),
                                      {"STLNAME": self.part_obj.Name + '_Geometry.stl',
                                       "SURFACENAME": "MainSTL",
@@ -483,39 +517,44 @@ class CfdCartTools():
                                       "FACEZONEINFO": ""})
             #REFINEMENTSURFACES#
             if self.mesh_obj.MeshRegionList:
+                #print self.snappyRegionSTLNames
+                #print self.snappyRegionSubLink
+                #print self.snappyRegionElemLin
                 for regionObj in self.mesh_obj.MeshRegionList:
-                    print regionObj.snappedRefine
-                    STLGeometries += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySTLSurfaceName"),
-                                     {"STLNAME": regionObj.Name+ '.stl',
-                                      "SURFACENAME": regionObj.Name})
-                    if regionObj.snappedRefine:
-                        facezoneInfo = "faceZone "+regionObj.Name+";"
-                        if regionObj.internalBaffle:
-                            baffleInfo = "faceType baffle;"
-                            #baffleInfo += "\npatchInfo\n{\ntype patch;\n}"
-                        else:
-                            baffleInfo = "";
-                        STLRefinementSurfaces += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySurfaceRefinementLevels"),
-                                         {"SURFACENAME": regionObj.Name,
-                                          "LEVEL": str(regionObj.snappyRefineLevel),
-                                          "BAFFLEINFO": baffleInfo,
-                                          "FACEZONEINFO": facezoneInfo})
-                    else:
-                        STLRefinementRegions += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappyRefinementRegions"),
-                                         {"NAME": regionObj.Name,
-                                          "LEVEL": str(regionObj.snappyRefineLevel),
-                                          "BAFFLEINFO": ""})
+                    for stlSurface in self.snappyMeshRegions[regionObj.Name]:
+                        STLGeometries += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySTLSurfaceName"),
+                                         {"STLNAME": stlSurface+ '.stl',
+                                          "SURFACENAME": stlSurface})
 
-            #FEATUREEDGEEXTRACTION
-            featureEdge = ""
+                        if regionObj.snappedRefine:
+                            facezoneInfo = "faceZone "+stlSurface+";"
+                            if regionObj.internalBaffle:
+                                baffleInfo = "faceType baffle;"
+                                #baffleInfo += "\npatchInfo\n{\ntype patch;\n}"
+                            else:
+                                baffleInfo = "";
+                            STLRefinementSurfaces += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappySurfaceRefinementLevels"),
+                                             {"SURFACENAME": stlSurface,
+                                              "LEVEL": str(regionObj.snappyRefineLevel),
+                                              "BAFFLEINFO": baffleInfo,
+                                              "FACEZONEINFO": facezoneInfo})
+                        else:
+                            STLRefinementRegions += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappyRefinementRegions"),
+                                             {"NAME": stlSurface,
+                                              "LEVEL": str(regionObj.snappyRefineLevel),
+                                              "BAFFLEINFO": ""})
+                    featureEdge += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "edgeRefinementSnappyInner"),
+                                     {"PartName":  stlSurface,
+                                      "edgeRefineLevels": regionObj.localEdgeRefine})
+
+                    FeatureExtract += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "surfaceFeatureExtractInner"),
+                                     {"STLName": stlSurface+ '.stl',
+                                      "FeatureAngle":str(150)})
+
+            ##FEATUREEDGEEXTRACTION
             featureEdge += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "edgeRefinementSnappyInner"),
                                      {"PartName":  self.part_obj.Name + '_Geometry',
                                       "edgeRefineLevels":self.mesh_obj.edgeRefineLevels})
-            if self.mesh_obj.MeshRegionList:
-                for regionObj in self.mesh_obj.MeshRegionList:
-                    featureEdge += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "edgeRefinementSnappyInner"),
-                                     {"PartName":  regionObj.Name,
-                                      "edgeRefineLevels": regionObj.localEdgeRefine})
 
             fid.write(CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "snappyHexMeshDict"),
                                    {"HEADER": CfdTools.readTemplate(os.path.join(self.templatePath, "_helperFiles", "header"),
@@ -531,17 +570,10 @@ class CfdCartTools():
                                     "insideX": str(insideX),
                                     "insideY": str(insideY),
                                     "insideZ": str(insideZ)}))
-            #broken
             fid.close()
 
-            FeatureExtract = ""
             FeatureExtract += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "surfaceFeatureExtractInner"),
                                      {"STLName":  self.part_obj.Name + '_Geometry.stl',
-                                      "FeatureAngle":str(150)})
-            if self.mesh_obj.MeshRegionList:
-                for regionObj in self.mesh_obj.MeshRegionList:
-                    FeatureExtract += CfdTools.readTemplate(os.path.join(self.templatePath, "helperFiles", "surfaceFeatureExtractInner"),
-                                     {"STLName": regionObj.Name+ '.stl',
                                       "FeatureAngle":str(150)})
 
             fname = self.temp_file_surfaceFeatureExtractDict

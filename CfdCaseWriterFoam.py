@@ -442,13 +442,6 @@ class CfdCaseWriterFoam(QRunnable):
             bcType = bcDict["BoundaryType"]
             bcSubType = bcDict["BoundarySubtype"]
             patchType = CfdTools.getPatchType(bcType, bcSubType)
-            print "Boundary things"
-            print patchType
-            print bcSubType
-            print bcType
-            print bc_obj.Label
-            print bc_group
-            print bc_allocated
             settings['createPatches'][bc_obj.Label] = {
                 'PatchNamesList': bc_list,
                 'PatchType': patchType
@@ -459,26 +452,52 @@ class CfdCaseWriterFoam(QRunnable):
             # if not (len(bc_list) == len(meshFaceList)):
             #     raise Exception('Mismatch between boundary faces and mesh faces')
 
-        #createPatchesFromSnappyBaffles = False
-        #if self.mesh_obj.MeshRegionList:
-            #for regionObj in self.mesh_obj.MeshRegionList:
+        createPatchesFromSnappyBaffles = False
+        if self.mesh_obj.MeshRegionList:
+            for regionObj in self.mesh_obj.MeshRegionList:
                 #if regionObj.snappedRefine:
-                    #if regionObj.internalBaffle:
-                        #createPatchesFromSnappyBaffles = True
+                    if regionObj.internalBaffle:
+                        createPatchesFromSnappyBaffles = True
 
-        #if createPatchesFromSnappyBaffles:
-            #settings['createPatchesSnappyBaffles'] = {}
-            #for regionObj in self.mesh_obj.MeshRegionList:
-                #if regionObj.snappedRefine:
-                    #if regionObj.internalBaffle:
-                        #print regionObj.Name
-                        #print regionObj.References
-                        ##settings['
-                        ##print "HELLS YES WE HAVE A BAFFLE"
-                        ##baffleInfo = "faceType baffle;"
-                        ##baffleInfo += "\npatchInfo\n{\ntype patch;\n}"
-                    ##else:
-                        ##baffleInfo = "";
+
+        if createPatchesFromSnappyBaffles:
+            settings['createPatchesSnappyBaffles'] = {}
+
+
+        #NOTE Still need to include an error checker in the event that 
+        # an internal baffle is created using snappy but is not linked up
+        # with a baffle boundary condition (as in there is no baffle boundary condition which 
+        # corresponds. Currently snappy will throw a contextually
+        # confusing error. The primary difficulty with such a checker is that
+        # it is possible to define a boundary face as a baffle, which will be overriden
+        # by the actual boundary name and therefore won't exist anymore. So it will require a slightly
+        # involved checker and geometrical checking
+        for bc_id, bc_obj in enumerate(bc_group):
+            bcDict = bc_obj.BoundarySettings
+            bcType = bcDict["BoundaryType"]
+            if bcType == "baffle":
+                tempBaffleList = []
+                tempBaffleListSlave = []
+                if self.mesh_obj.MeshRegionList:
+                    for regionObj in self.mesh_obj.MeshRegionList:
+                        print regionObj.Name
+                        if regionObj.internalBaffle:
+                            for sub in regionObj.References:
+                                print sub[0].Name
+                                for elems in sub[1]:
+                                    elt = sub[0].Shape.getElement(elems)
+                                    if elt.ShapeType == 'Face':
+                                        #isSameGeo = FemMeshTools.is_same_geometry(bf, mf)
+                                        bcFacesList = bc_obj.Shape.Faces
+                                        for bf in bcFacesList:
+                                            import FemMeshTools
+                                            isSameGeo = FemMeshTools.is_same_geometry(bf, elt)
+                                            if isSameGeo:
+                                                tempBaffleList.append(regionObj.Name+sub[0].Name+elems)
+                                                tempBaffleListSlave.append(regionObj.Name+sub[0].Name+elems+"_slave")
+                settings['createPatchesSnappyBaffles'][bc_obj.Label] = {"PatchNamesList" : tempBaffleList,
+                                                                        "PatchNamesListSlave" : tempBaffleListSlave}
+
 
 
         # Add default faces

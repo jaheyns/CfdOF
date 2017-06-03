@@ -30,18 +30,11 @@ class _CfdMeshCart():
     """
 
     # they will be used from the task panel too, thus they need to be outside of the __init__
-#<<<<<<< HEAD
     known_element_dimensions = ['3D']
     known_mesh_algorithm_2D = ['Cartesian']
     known_mesh_algorithm_3D = ['Cartesian']
     known_mesh_utility = ['cfMesh','snappyHexMesh']
-#=======
-    #known_element_dimensions = ['From Shape', '3D']
-    ## known_element_orders = ['1st', '2nd']
-    #known_mesh_algorithm_2D = ['Automatic']
-    #known_mesh_algorithm_3D = ['Automatic']
-    #known_mesh_utility = ['cfMesh','snappyHexMesh']
-#>>>>>>> f9ca5ad... CFD: Preliminary snappyHexMesh functionality
+
 
 
     def __init__(self, obj):
@@ -51,6 +44,10 @@ class _CfdMeshCart():
 
         obj.addProperty("App::PropertyLinkList", "MeshRegionList", "Base", "Mesh regions of the mesh")
         obj.MeshRegionList = []
+
+        obj.addProperty("App::PropertyPythonObject", "snappyRegionInfo")
+        #obj.addProperty("App::PropertyLinkList", "snappyRegionInfo")
+        obj.snappyRegionInfo = {}
 
         obj.addProperty("App::PropertyLinkList", "MeshGroupList", "Base", "Mesh groups of the mesh")
         obj.MeshRegionList = []  # ???

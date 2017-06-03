@@ -188,13 +188,13 @@ class _TaskPanelCfdMeshRegion:
         self.obj.NumberLayers = self.numlayer
         self.obj.ExpansionRatio = self.expratio
         self.obj.FirstLayerHeight = self.firstlayerheight
-        if self.form.snapRadio.isChecked() and self.mesh_obj.MeshUtility == 'snappyHexMesh':
+        if self.form.snapRadio.isChecked():
             self.obj.snappedRefine = True
         else:
             self.obj.snappedRefine = False
         self.obj.snappyRefineLevel = self.form.snappyRefineLevel.value()
 
-        if self.form.baffleCheckBox.isChecked() and self.obj.snappedRefine == True:
+        if self.form.baffleCheckBox.isChecked() and self.mesh_obj.MeshUtility == 'snappyHexMesh':
             self.obj.internalBaffle = True
         else:
             self.obj.internalBaffle = False

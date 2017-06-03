@@ -33,42 +33,30 @@ patches
 %}
 
 %{%(createPatchesSnappyBaffles%)
-    {
-        name cyclic01;
-        patchInfo
-        {
-            type            cyclic;
-            neighbourPatch  cyclic02;
-            matchTolerance 1e-04;
-        }
-        constructFrom patches;
-        patches (FRONT);
-        hello world;
-    }
 
     {
-        name inlet;
+        name %(0%)_master;
         patchInfo
         {
             type cyclic;
             matchTolerance 1e-04;
-            neighbourPatch outlet;
+            neighbourPatch %(0%)_slave;
         }
 
         constructFrom patches;
-        patches (inlet);
+        patches (%(createPatchesSnappyBaffles/%(0%)/PatchNamesList%));
     }
     {
-        name outlet;
+        name %(0%)_slave;
         patchInfo
         {
             type cyclic;
             matchTolerance 1e-04;
-            neighbourPatch inlet;
+            neighbourPatch %(0%)_master;
         }
 
         constructFrom patches;
-        patches (outlet);
+        patches ( %(createPatchesSnappyBaffles/%(0%)/PatchNamesListSlave%) );
     }
 
 %}
