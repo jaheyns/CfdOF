@@ -91,7 +91,8 @@ class _TaskPanelCfdMeshRegion:
         self.get_meshregion_props()
         self.mesh_obj = self.getMeshObject()
         if self.mesh_obj.Proxy.Type == 'CfdMeshCart' and self.mesh_obj.MeshUtility == 'cfMesh':
-            self.form.stackedWidget.setCurrentIndex(0)
+            self.form.cfFrame.setVisible(True)
+            self.form.snappyFrame.setVisible(False)
             self.form.RefinementFrame.setVisible(True)
             self.form.FaceFrame.setVisible(False)
             toolTipMes = "Thickness or distance of the refinement region from the reference surface."
@@ -108,9 +109,16 @@ class _TaskPanelCfdMeshRegion:
             self.form.label_firstlayerheight.setToolTip(toolTipMes)
 
         if self.mesh_obj.Proxy.Type == 'CfdMeshCart' and self.mesh_obj.MeshUtility == 'snappyHexMesh':
-            self.form.stackedWidget.setCurrentIndex(1)
+            self.form.cfFrame.setVisible(False)
+            self.form.snappyFrame.setVisible(True)
             self.form.refineRadio.setEnabled(False)
             self.form.FaceFrame.setVisible(False)
+            self.form.snapRadio.setToolTip("Refine along the chosen surfaces. Internal faces will be snapped to.")
+            self.form.snappyRefineLevel.setToolTip("The selected faces will be refined this many times relative to the"\
+                "characterisitc length.")
+            self.form.snappySurfaceEdgeRefinementLevel.setToolTip("Refine all edges belonging to chosen surfaces.")
+            self.form.baffleCheckBox.setToolTip("Must be set to define an internal face with 0 thickness (for linking" \
+                "to baffle boundary condition.)")
 
         self.update()
         self.initialiseUponReload()
@@ -146,9 +154,11 @@ class _TaskPanelCfdMeshRegion:
         self.form.snappySurfaceEdgeRefinementLevel.setValue(self.obj.localEdgeRefine)
         print "why",self.mesh_obj.MeshUtility
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
-            self.form.stackedWidget.setCurrentIndex(1)
+            self.form.cfFrame.setVisible(False)
+            self.form.snappyFrame.setVisible(True)
         else:
-            self.form.stackedWidget.setCurrentIndex(0)
+            self.form.cfFrame.setVisible(True)
+            self.form.snappyFrame.setVisible(False)
 
     def boundaryLayerStateChanged(self):
         if self.form.check_boundlayer.isChecked():

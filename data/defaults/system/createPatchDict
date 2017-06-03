@@ -32,6 +32,9 @@ patches
 
 %}
 
+
+%{%(createPatchesFromSnappyBaffles%)
+%:True
 %{%(createPatchesSnappyBaffles%)
 
     {
@@ -59,6 +62,7 @@ patches
         patches ( %(createPatchesSnappyBaffles/%(0%)/PatchNamesListSlave%) );
     }
 
+%}
 %}
 );
 

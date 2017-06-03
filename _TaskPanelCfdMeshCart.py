@@ -143,6 +143,8 @@ class _TaskPanelCfdMeshCart:
 
         self.form.nCellsBetweenLevels.setValue(self.mesh_obj.nCellsBetweenLevels)
         self.form.edgeRefineLevels.setValue(self.mesh_obj.edgeRefineLevels)
+        self.form.nCellsBetweenLevels.setToolTip("The number of cells between each of level of refinement.")
+        self.form.edgeRefineLevels.setToolTip("Specify the number of refinement levels for all edges.")
 
     def console_log(self, message="", color="#000000"):
         self.console_message_cart = self.console_message_cart \

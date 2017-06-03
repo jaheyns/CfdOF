@@ -45,9 +45,6 @@ class _CfdMeshCart():
         obj.addProperty("App::PropertyLinkList", "MeshRegionList", "Base", "Mesh regions of the mesh")
         obj.MeshRegionList = []
 
-        obj.addProperty("App::PropertyPythonObject", "snappyRegionInfo")
-        #obj.addProperty("App::PropertyLinkList", "snappyRegionInfo")
-        obj.snappyRegionInfo = {}
 
         obj.addProperty("App::PropertyLinkList", "MeshGroupList", "Base", "Mesh groups of the mesh")
         obj.MeshRegionList = []  # ???

@@ -46,18 +46,22 @@ class _CommandCfdMeshGmshFromShape(FemCommands):
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CFD mesh by GMSH")
         FreeCADGui.addModule("FemGui")
-        sel = FreeCADGui.Selection.getSelection()
-        if (len(sel) == 1):
-            if(sel[0].isDerivedFrom("Part::Feature")):
-                mesh_obj_name = sel[0].Name + "_GmshMesh"
-                FreeCADGui.addModule("CfdMeshGmsh")
-                FreeCADGui.doCommand("CfdMeshGmsh.makeCfdMeshGmsh('" + mesh_obj_name + "')")
-                FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
-                if FemGui.getActiveAnalysis():
-                    FreeCADGui.addModule("FemGui")
-                    FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [App.ActiveDocument.ActiveObject]")
-                FreeCADGui.doCommand("Gui.ActiveDocument.setEdit(App.ActiveDocument.ActiveObject.Name)")
-
+        analysis_obj = FemGui.getActiveAnalysis()
+        meshObj= CfdTools.getMesh(analysis_obj)
+        if not meshObj:
+            sel = FreeCADGui.Selection.getSelection()
+            if (len(sel) == 1):
+                if(sel[0].isDerivedFrom("Part::Feature")):
+                    mesh_obj_name = sel[0].Name + "_GmshMesh"
+                    FreeCADGui.addModule("CfdMeshGmsh")
+                    FreeCADGui.doCommand("CfdMeshGmsh.makeCfdMeshGmsh('" + mesh_obj_name + "')")
+                    FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
+                    if FemGui.getActiveAnalysis():
+                        FreeCADGui.addModule("FemGui")
+                        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [App.ActiveDocument.ActiveObject]")
+                    FreeCADGui.doCommand("Gui.ActiveDocument.setEdit(App.ActiveDocument.ActiveObject.Name)")
+        else:
+            print "ERROR: You cannot have more than one mesh object"
         FreeCADGui.Selection.clearSelection()
 
 
