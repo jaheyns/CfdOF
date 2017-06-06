@@ -1,34 +1,34 @@
-#***************************************************************************
-#*                                                                         *
-#*   Copyright (c) 2015 - FreeCAD Developers                               *
-#*   Copyright (c) 2015 - Qingfeng Xia <qingfeng xia eng.ox.ac.uk>         *
-#*   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
-#*   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
-#*   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
-#*                                                                         *
-#*   This program is free software; you can redistribute it and/or modify  *
-#*   it under the terms of the GNU Lesser General Public License (LGPL)    *
-#*   as published by the Free Software Foundation; either version 2 of     *
-#*   the License, or (at your option) any later version.                   *
-#*   for detail see the LICENCE text file.                                 *
-#*                                                                         *
-#*   This program is distributed in the hope that it will be useful,       *
-#*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-#*   GNU Library General Public License for more details.                  *
-#*                                                                         *
-#*   You should have received a copy of the GNU Library General Public     *
-#*   License along with this program; if not, write to the Free Software   *
-#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
-#*   USA                                                                   *
-#*                                                                         *
-#***************************************************************************
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2015 - FreeCAD Developers                               *
+# *   Copyright (c) 2015 - Qingfeng Xia <qingfeng xia eng.ox.ac.uk>         *
+# *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
 
 # Utility functions like mesh exporting, shared by any CFD solver
 
 from __future__ import print_function
 import os
-import os.path  # Is this necessary if os is already imported?
+import os.path
 import shutil
 import tempfile
 import string
@@ -274,16 +274,11 @@ def getResult(analysis_object):
 
 def get_module_path():
     """ Returns the current Cfd module path.
-    Check if the module is installed in the app's module directory or the user's app data folder. The second overrides
-    the first.
+    Determines where this file is running from, so works regardless of whether
+    the module is installed in the app's module directory or the user's app data folder.
+    (The second overrides the first.)
     """
-    import os
-    user_mod_path = os.path.join(FreeCAD.ConfigGet("UserAppData"), "Mod", "CfdFoam")
-    app_mod_path = os.path.join(FreeCAD.ConfigGet("AppHomePath"), "Mod", "CfdFoam")
-    if os.path.exists(user_mod_path):
-        return user_mod_path
-    else:
-        return app_mod_path
+    return os.path.dirname(__file__)
 
 
 # Set functions
