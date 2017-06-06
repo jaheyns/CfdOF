@@ -48,8 +48,11 @@ if FreeCAD.GuiUp:
     from PySide import QtGui
     from PySide import QtCore
 
+# Some standard install locations that are searched if an install directory is not specified
 FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2016\\OpenFOAM-4.x"],
-                     "Linux": ["/opt/openfoam4", "/opt/openfoam-dev", "~/OpenFOAM/OpenFOAM-4.x"]
+                     "Linux": ["/opt/openfoam4", "/opt/openfoam-dev",
+                               "~/OpenFOAM/OpenFOAM-4.x", "~/OpenFOAM/OpenFOAM-4.0", "~/OpenFOAM/OpenFOAM-4.1",
+                               "~/OpenFOAM/OpenFOAM-dev"]
                      }
 
 """
@@ -448,6 +451,10 @@ def getFoamDir():
     # Ensure parameters exist for future editing
     setFoamDir(installation_path)
 
+    if installation_path and \
+       (not os.path.isabs(installation_path) or not os.path.exists(os.path.join(installation_path, "etc", "bashrc"))):
+        raise IOError("The directory {} is not a valid OpenFOAM installation".format(installation_path))
+
     # If not specified, try to detect from shell environment settings and defaults
     if not installation_path:
         installation_path = detectFoamDir()
@@ -466,10 +473,9 @@ def getFoamRuntime():
 
 
 def detectFoamDir():
-    """ See if WM_PROJECT_DIR is available in the bash environment """
-    if platform.system() == 'Windows':
-        foam_dir = None
-    else:
+    """ Try to guess Foam install dir from WM_PROJECT_DIR or, failing that, various defaults """
+    foam_dir = None
+    if platform.system() == "Linux":
         cmdline = ['bash', '-l', '-c', 'echo $WM_PROJECT_DIR']
         foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
         # Python 3 compatible, check_output() return type byte
@@ -502,21 +508,49 @@ def translatePath(p):
         return p
 
 
+def reverseTranslatePath(p):
+    """ Transform path from the perspective of the OpenFOAM subsystem to the host system """
+    if platform.system() == 'Windows':
+        return toWindowsPath(p)
+    else:
+        return p
+
+
 def fromWindowsPath(p):
-    # bash on windows "C:\Path" -> /mnt/c/Path
-    # cygwin can set the mount point for all windows drives under /mnt in /etc/fstab
     drive, tail = os.path.splitdrive(p)
     pp = tail.replace('\\', '/')
     if getFoamRuntime() == "BashWSL":
+        # bash on windows: C:\Path -> /mnt/c/Path
         if os.path.isabs(p):
             return "/mnt/" + (drive[:-1]).lower() + pp
         else:
             return pp
     elif getFoamRuntime() == "BlueCFD":
+        # Under blueCFD (mingw): c:\path -> /c/path
         if os.path.isabs(p):
             return "/" + (drive[:-1]).lower() + pp
         else:
             return pp
+    else:  # Nothing needed for posix
+        return p
+
+
+def toWindowsPath(p):
+    pp = p.split('/')
+    if getFoamRuntime() == "BashWSL":
+        # bash on windows: /mnt/c/Path -> C:\Path
+        if p.startswith('/mnt/'):
+            return pp[2].toupper() + ':\\' + '\\'.join(pp[3:])
+        else:
+            return p.replace('/', '\\')
+    elif getFoamRuntime() == "BlueCFD":
+        # Under blueCFD (mingw): /c/path -> c:\path; /home/ofuser/blueCFD -> <blueCFDDir>
+        if p.startswith('/home/ofuser/blueCFD'):
+            return getFoamDir() + '\\' + '..' + '\\' + '\\'.join(pp[4:])
+        elif p.startswith('/'):
+            return pp[1].upper() + ':\\' + '\\'.join(pp[2:])
+        else:
+            return p.replace('/', '\\')
     else:  # Nothing needed for posix
         return p
 
@@ -560,11 +594,19 @@ def makeRunCommand(cmd, dir, source_env=True):
         including changing to the specified working directory if applicable
     """
     installation_path = getFoamDir()
+    if installation_path is None:
+        raise IOError("OpenFOAM installation directory not found")
+
+    source = ""
+    if source_env:
+        env_setup_script = "{}/etc/bashrc".format(installation_path)
+        source = 'source "{}" && '.format(env_setup_script)
+    cd = ""
+    if dir:
+        cd = 'cd "{}" && '.format(translatePath(dir))
+
     if getFoamRuntime() == "BashWSL":
-        if source_env:
-            cmdline = ['bash', '-c', 'source ~/.bashrc && cd "{}" && {}'.format(translatePath(dir), cmd)]
-        else:
-            cmdline = ['bash', '-c', 'cd "{}" && {}'.format(translatePath(dir), cmd)]
+        cmdline = ['bash', '-c', source + cd + cmd]
         return cmdline
     elif getFoamRuntime() == "BlueCFD":
         # Set-up necessary for running a command - only needs doing once, but to be safe...
@@ -573,22 +615,13 @@ def makeRunCommand(cmd, dir, source_env=True):
             f.write(short_bluecfd_path)
             f.close()
 
-        if installation_path is None:
-            raise IOError("OpenFOAM installation directory not found")
         # Note: Prefixing bash call with the *short* path can prevent errors due to spaces in paths
         # when running linux tools - specifically when building
         cmdline = ['{}\\msys64\\usr\\bin\\bash'.format(short_bluecfd_path), '--login', '-O', 'expand_aliases', '-c',
-                   'cd "{}" && {}'.format(translatePath(dir), cmd)]
+                   cd + cmd]
         return cmdline
     else:
-        if installation_path is None:
-            raise IOError("OpenFOAM installation directory not found")
-        env_setup_script = "{}/etc/bashrc".format(installation_path)
-        if source_env:
-            cmdline = ['bash', '-c',
-                       'source "{}" && cd "{}" && {}'.format(env_setup_script, translatePath(dir), cmd)]
-        else:
-            cmdline = ['bash', '-c', 'cd "{}" && {}'.format(translatePath(dir), cmd)]
+        cmdline = ['bash', '-c', source + cd + cmd]
         return cmdline
 
 
@@ -637,7 +670,7 @@ def startFoamApplication(cmd, case, finishedHook=None, stdoutHook=None, stderrHo
     else:
         raise Exception("Error: Application and options must be specified as a list or tuple.")
 
-    app = cmds[0]
+    app = cmds[0].rsplit('/', 1)[-1]
     logFile = "log.{}".format(app)
 
     cmdline = ' '.join(cmds)  # Space to separate options
