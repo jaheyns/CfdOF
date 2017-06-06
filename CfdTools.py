@@ -479,7 +479,7 @@ def detectFoamDir():
         foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
     # Python 3 compatible, check_output() return type byte
     foam_dir = str(foam_dir)
-    if len(foam_dir)>1:                 # If env var is not defined, python 3 returns `b'\n'` and python 2`\n`
+    if len(foam_dir) > 1:               # If env var is not defined, python 3 returns `b'\n'` and python 2`\n`
         if foam_dir[:2] == "b'":
             foam_dir = foam_dir[2:-3]   # Python3: Strip 'b' from front and EOL char
         else:
@@ -564,13 +564,16 @@ def makeRunCommand(cmd, dir, source_env=True):
         return cmdline
     elif getFoamRuntime() == "BlueCFD":
         # Set-up necessary for running a command - only needs doing once, but to be safe...
+        short_bluecfd_path = getShortWindowsPath('{}\\..'.format(installation_path))
         with open('{}\\..\\msys64\\home\\ofuser\\.blueCFDOrigin'.format(installation_path), "w") as f:
-            f.write(getShortWindowsPath('{}\\..'.format(installation_path)))
+            f.write(short_bluecfd_path)
             f.close()
 
         if installation_path is None:
             raise IOError("OpenFOAM installation directory not found")
-        cmdline = ['{}\\..\\msys64\\usr\\bin\\bash'.format(installation_path), '--login', '-O', 'expand_aliases', '-c',
+        # Note: Prefixing bash call with the *short* path can prevent errors due to spaces in paths
+        # when running linux tools - specifically when building
+        cmdline = ['{}\\msys64\\usr\\bin\\bash'.format(short_bluecfd_path), '--login', '-O', 'expand_aliases', '-c',
                    'cd "{}" && {}'.format(translatePath(dir), cmd)]
         return cmdline
     else:

@@ -222,7 +222,11 @@ class _TaskPanelCfdSolverControl:
         self.femConsoleMessage("Solver manually stopped")
         import platform
         if platform.system() == "Windows":
-            self.solver_run_process.kill()  # Terminal processes don't respond to terminate() on Windows
+            # Terminal processes don't respond to QProcess.terminate() on Windows,
+            # and QProcess.kill() leaves the mpi process orphaned.
+            #import signal
+            #os.kill(self.solver_run_process.pid(), signal.CTRL_C_EVENT)
+            self.solver_run_process.kill()
         else:
             self.solver_run_process.terminate()  # Could use kill() here as well but terminate() is kinder
         self.form.pb_write_inp.setEnabled(True)

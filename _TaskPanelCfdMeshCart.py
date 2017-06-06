@@ -62,9 +62,6 @@ class _TaskPanelCfdMeshCart:
 
         self.mesh_process = QtCore.QProcess()
         self.Timer = QtCore.QTimer()
-        self.Start = time.time()
-        self.Timer.start(100)  # 100 milliseconds
-        self.cart_runs = False
         self.console_message_cart = ''
         self.error_message = ''
         self.cart_mesh = []
@@ -155,8 +152,7 @@ class _TaskPanelCfdMeshCart:
         self.form.te_output.moveCursor(QtGui.QTextCursor.End)
 
     def update_timer_text(self):
-        if self.cart_runs:
-            self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
+        self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
 
     def max_changed(self, base_quantity_value):
         self.clmax = base_quantity_value
@@ -185,7 +181,6 @@ class _TaskPanelCfdMeshCart:
                              "= '{}'".format(self.mesh_obj.Name, self.utility))
 
         self.console_message_cart = ''
-        self.cart_runs = True
         self.get_active_analysis()
         self.set_mesh_params()
         import CfdCartTools  # Fresh init before remeshing
@@ -193,6 +188,7 @@ class _TaskPanelCfdMeshCart:
         cart_mesh = self.cart_mesh
         self.form.if_max.setText(str(cart_mesh.get_clmax()))
         self.Start = time.time()
+        self.Timer.start()
         self.console_log("Starting cut-cell Cartesian meshing ...")
         print("\nStarting cut-cell Cartesian meshing ...\n")
         print('  Part to mesh: Name --> '
@@ -209,10 +205,10 @@ class _TaskPanelCfdMeshCart:
         cart_mesh.get_region_data()
         cart_mesh.write_part_file()
         cart_mesh.setupMeshDict(self.utility)
-        cart_mesh.createMeshScript(run_parallel = 'false',
-                                   mesher_name = 'cartesianMesh',
-                                   num_proc = 1,
-                                   cartMethod = self.utility)  # Extend in time
+        cart_mesh.createMeshScript(run_parallel='false',
+                                   mesher_name='cartesianMesh',
+                                   num_proc=1,
+                                   cartMethod=self.utility)  # Extend in time
         self.paraviewScriptName = self.cart_mesh.createParaviewScript()
         self.runCart(cart_mesh)
 
@@ -224,6 +220,11 @@ class _TaskPanelCfdMeshCart:
         meshCaseDir = os.path.join(tmpdir, 'meshCase')
         cmd = CfdTools.makeRunCommand('./Allmesh', meshCaseDir, source_env=False)
         FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
+        env = QtCore.QProcessEnvironment.systemEnvironment()
+        env_vars = CfdTools.getRunEnvironment()
+        for key in env_vars:
+            env.insert(key, env_vars[key])
+        self.mesh_process.setProcessEnvironment(env)
         self.mesh_process.start(cmd[0], cmd[1:])
         if self.mesh_process.waitForStarted():
             self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
@@ -259,19 +260,25 @@ class _TaskPanelCfdMeshCart:
             FreeCAD.Console.PrintError(err)
         self.mesh_process.setReadChannel(QtCore.QProcess.StandardOutput)
 
-    def meshFinished(self):
+    def meshFinished(self, exit_code):
         self.readOutput()
-        self.console_log("Reading mesh")
-        cart_mesh = self.cart_mesh
-        cart_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
-        self.console_log('Meshing completed')
-        self.console_log('Tetrahedral representation of the Cartesian mesh is shown')
-        self.console_log("Warning: FEM Mesh may not display mesh accurately, please view in Paraview.\n")
+        if exit_code == 0:
+            self.console_log("Reading mesh")
+            cart_mesh = self.cart_mesh
+            cart_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
+            self.console_log('Meshing completed')
+            self.console_log('Tetrahedral representation of the Cartesian mesh is shown')
+            self.console_log("Warning: FEM Mesh may not display mesh accurately, please view in Paraview.\n")
+            self.form.pb_run_mesh.setEnabled(True)
+            self.form.pb_stop_mesh.setEnabled(False)
+            self.form.pb_paraview.setEnabled(True)
+        else:
+            self.console_log("Meshing exited with error", "#FF0000")
+            self.form.pb_run_mesh.setEnabled(True)
+            self.form.pb_stop_mesh.setEnabled(False)
+            self.form.pb_paraview.setEnabled(False)
         self.Timer.stop()
         self.update()
-        self.form.pb_run_mesh.setEnabled(True)
-        self.form.pb_stop_mesh.setEnabled(False)
-        self.form.pb_paraview.setEnabled(True)
         self.error_message = ''
 
     def get_active_analysis(self):

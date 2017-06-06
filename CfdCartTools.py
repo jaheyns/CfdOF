@@ -335,7 +335,7 @@ class CfdCartTools():
 
             if cartMethod == 'cfMesh' and mesher_name == 'cartesianMesh':
                 f.write('# Extract feature edges\n')
-                f.write('runCommand surfaceFeatureEdges -angle 60 {}_Geometry.stl {}_Geometry.fms'
+                f.write('runCommand surfaceFeatureEdges -angle 60 "{}_Geometry.stl" "{}_Geometry.fms"'
                         '\n'.format(os.path.join(triSurfaceDir, self.part_obj.Name),
                                     self.part_obj.Name))
                 f.write('\n')
@@ -579,11 +579,13 @@ class CfdCartTools():
             # fem_mesh = Fem.read(os.path.join(self.meshCaseDir,'mesh_outside.stl'))
             # This is a temp work around to remove multiple solids, but is not very efficient
             import Mesh
-            mesh = Mesh.Mesh(os.path.join(self.meshCaseDir, 'mesh_outside.stl'))
-            mesh.write(os.path.join(self.meshCaseDir, 'mesh_outside.ast'))
-            os.rename(os.path.join(self.meshCaseDir, 'mesh_outside.ast'),
-                      os.path.join(self.meshCaseDir, 'mesh_outside.stl'))
-            fem_mesh = Fem.read(os.path.join(self.meshCaseDir, 'mesh_outside.stl'))
+            stl = os.path.join(self.meshCaseDir, 'mesh_outside.stl')
+            ast = os.path.join(self.meshCaseDir, 'mesh_outside.ast')
+            mesh = Mesh.Mesh(stl)
+            mesh.write(ast)
+            os.remove(stl)
+            os.rename(ast, stl)
+            fem_mesh = Fem.read(stl)
             self.mesh_obj.FemMesh = fem_mesh
             print('  The Part should have a new mesh!')
         else:
