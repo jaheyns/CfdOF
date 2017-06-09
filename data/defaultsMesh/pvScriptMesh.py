@@ -4,8 +4,8 @@ from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
 
 # create a new OpenFOAMReader
-pfoam = OpenFOAMReader(FileName=r'#PATHPF#')
-pfoam.CaseType = '#CTYPE#'
+pfoam = OpenFOAMReader(FileName=r'%(MeshPath%)/p.foam')
+pfoam.CaseType = 'Reconstructed Case'
 pfoam.Decomposepolyhedra = 0
 
 # get active view

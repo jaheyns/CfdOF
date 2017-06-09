@@ -60,20 +60,15 @@ class CfdFoamWorkbench(Workbench):
         import _CommandCfdFluidBoundary
         import _CommandCfdPorousZone
         import _CommandCfdInitialisationZone
-        #import _CommandCfdResult  # error in import vtk6 in python, this function is implemented in File->Open Instead
         import _CommandCfdFluidMaterial
 
-        # classes developed in FemWorkbench
         import _CommandCfdMeshGmshFromShape
-        # import _CommandMeshNetgenFromShape  # CFD WB will only support GMSH
         import _CommandCfdMeshRegion
         # import _CommandPrintMeshInfo  # Create a fluid specific check as the current does not contain any
         #                               # useful info for flow (see checkMesh)
-        # import _CommandClearMesh  # Not currently in-use
         import _CommandCfdMeshCartFromShape
 
 
-        # Post Processing commands are located in FemWorkbench, implemented and imported in C++
         cmdlst = ['Cfd_Analysis','Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal', 'Cfd_MeshGmshFromShape',
                   'Cfd_MeshCartFromShape', 'Fem_MeshRegion',
@@ -87,6 +82,5 @@ class CfdFoamWorkbench(Workbench):
 
     def GetClassName(self):
         return "Gui::PythonWorkbench"
-
 
 FreeCADGui.addWorkbench(CfdFoamWorkbench())

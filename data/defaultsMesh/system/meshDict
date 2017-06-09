@@ -1,0 +1,65 @@
+%{%(MeshUtility%)
+%:cfMesh
+%[_header%]
+FoamFile
+{
+    version     4.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      meshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+surfaceFile       "%(Name%)_Geometry.fms";
+
+maxCellSize       %(CfSettings/ClMax%);
+boundaryCellSize  %(CfSettings/ClMax%);
+
+%{%(MeshRegionPresent%)
+%:True
+surfaceMeshRefinement
+{
+%{%(CfSettings/MeshRegions%)
+    %(0%)
+    {
+        cellSize  %(CfSettings/MeshRegions/%(0%)/RelativeLength%);
+        surfaceFile "constant/triSurface/%(0%).stl";
+        refinementThickness %(CfSettings/MeshRegions/%(0%)/RefinementThickness%);
+    }
+%}
+}
+
+%{%(CfSettings/BoundaryLayerPresent%)
+%:True
+boundaryLayers
+{
+    patchBoundaryLayers
+    {
+%{%(CfSettings/BoundaryLayers%)
+        "%(0%)"
+        {
+            nLayers %(CfSettings/BoundaryLayers/%(0%)/NumberLayers%);
+            thicknessRatio %(CfSettings/BoundaryLayers/%(0%)/ExpansionRatio%);
+            maxFirstLayerThickness %(CfSettings/BoundaryLayers/%(0%)/FirstLayerHeight%);
+        }
+%}
+    }
+
+    optimiseLayer 1;
+
+    optimisationParameters
+    {
+        nSmoothNormals 3;
+        maxNumIterations 5;
+        featureSizeFactor 0.4;
+        reCalculateNormals 1;
+        relThicknessTol 0.1;
+    }
+}
+%}
+
+%}
+
+// ************************************************************************* //
+%}

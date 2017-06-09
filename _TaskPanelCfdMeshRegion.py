@@ -68,60 +68,53 @@ class _TaskPanelCfdMeshRegion:
                                           QtCore.SIGNAL("customContextMenuRequested(QPoint)"),
                                           self.references_list_right_clicked)
 
-        QtCore.QObject.connect(self.form.if_refinethick,
-                               QtCore.SIGNAL("valueChanged(Base::Quantity)"),
+        QtCore.QObject.connect(self.form.if_refinethick, QtCore.SIGNAL("valueChanged(Base::Quantity)"),
                                self.refinethick_changed)
-        QtCore.QObject.connect(self.form.if_numlayer,
-                               QtCore.SIGNAL("valueChanged(int)"),
+        QtCore.QObject.connect(self.form.if_numlayer, QtCore.SIGNAL("valueChanged(int)"),
                                self.numlayer_changed)
-        QtCore.QObject.connect(self.form.if_expratio,
-                               QtCore.SIGNAL("valueChanged(double)"),
+        QtCore.QObject.connect(self.form.if_expratio, QtCore.SIGNAL("valueChanged(double)"),
                                self.expratio_changed)
-        QtCore.QObject.connect(self.form.if_firstlayerheight,
-                               QtCore.SIGNAL("valueChanged(Base::Quantity)"),
+        QtCore.QObject.connect(self.form.if_firstlayerheight, QtCore.SIGNAL("valueChanged(Base::Quantity)"),
                                self.firstlayerheight_changed)
 
-        self.form.RefinementFrame.setVisible(False)
-        self.form.BoundLayerFrame.setVisible(False)
-        self.form.check_boundlayer.stateChanged.connect(self.boundaryLayerStateChanged)
+        QtCore.QObject.connect(self.form.if_refinelevel, QtCore.SIGNAL("valueChanged(int)"),
+                               self.refinelevel_changed)
+        QtCore.QObject.connect(self.form.if_edgerefinement, QtCore.SIGNAL("valueChanged(int)"),
+                               self.edgerefinement_changed)
 
-        toolTipMes = "Cell size relative to base cell size."
-        self.form.if_rellen.setToolTip(toolTipMes)
-        self.form.label_rellen.setToolTip(toolTipMes)
+        self.form.refinement_frame.setVisible(False)
+        self.form.boundlayer_frame.setVisible(False)
+        self.form.check_boundlayer.stateChanged.connect(self.boundary_layer_state_changed)
+
+        tool_tip_mes = "Cell size relative to base cell size."
+        self.form.if_rellen.setToolTip(tool_tip_mes)
+        self.form.label_rellen.setToolTip(tool_tip_mes)
         self.get_meshregion_props()
         self.mesh_obj = self.getMeshObject()
         if self.mesh_obj.Proxy.Type == 'CfdMeshCart' and self.mesh_obj.MeshUtility == 'cfMesh':
-            self.form.cfFrame.setVisible(True)
-            self.form.snappyFrame.setVisible(False)
-            self.form.RefinementFrame.setVisible(True)
-            self.form.FaceFrame.setVisible(False)
-            toolTipMes = "Thickness or distance of the refinement region from the reference surface."
-            self.form.if_refinethick.setToolTip(toolTipMes)
-            self.form.label_refinethick.setToolTip(toolTipMes)
-            toolTipMes = "Number of boundary layers if the reference surface is an external or mesh patch."
-            self.form.if_numlayer.setToolTip(toolTipMes)
-            self.form.label_numlayer.setToolTip(toolTipMes)
-            toolTipMes = "Expansion ratio of boundary layers (limited to be greater than 1.0 and smaller than 1.2)."
-            self.form.if_expratio.setToolTip(toolTipMes)
-            self.form.label_expratio.setToolTip(toolTipMes)
-            toolTipMes = "Maximum first cell height (optional value and neglected if set to 0.0)."
-            self.form.if_firstlayerheight.setToolTip(toolTipMes)
-            self.form.label_firstlayerheight.setToolTip(toolTipMes)
+            self.form.cf_frame.setVisible(True)
+            self.form.snappy_frame.setVisible(False)
+            self.form.refinement_frame.setVisible(True)
+            self.form.face_frame.setVisible(False)
 
         if self.mesh_obj.Proxy.Type == 'CfdMeshCart' and self.mesh_obj.MeshUtility == 'snappyHexMesh':
-            self.form.cfFrame.setVisible(False)
-            self.form.snappyFrame.setVisible(True)
-            self.form.refineRadio.setEnabled(False)
-            self.form.FaceFrame.setVisible(False)
-            self.form.snapRadio.setToolTip("Refine along the chosen surfaces. Internal faces will be snapped to.")
-            self.form.snappyRefineLevel.setToolTip("The selected faces will be refined this many times relative to the"\
-                "characterisitc length.")
-            self.form.snappySurfaceEdgeRefinementLevel.setToolTip("Refine all edges belonging to chosen surfaces.")
-            self.form.baffleCheckBox.setToolTip("Must be set to define an internal face with 0 thickness (for linking" \
-                "to baffle boundary condition.)")
+            self.form.cf_frame.setVisible(False)
+            self.form.snappy_frame.setVisible(True)
+            self.form.face_frame.setVisible(False)
+
+        self.form.if_refinethick.setToolTip("Thickness or distance of the refinement region from the reference "
+                                            "surface.")
+        self.form.if_numlayer.setToolTip("Number of boundary layers if the reference surface is an external or "
+                                         "mesh patch.")
+        self.form.if_expratio.setToolTip("Expansion ratio of boundary layers (limited to be greater than 1.0 and "
+                                         "smaller than 1.2).")
+        self.form.if_firstlayerheight.setToolTip("Maximum first cell height (optional value and neglected if set "
+                                                 "to 0.0).")
+        self.form.if_refinelevel.setToolTip("Number of refinement levels relative to the base cell size")
+        self.form.if_edgerefinement.setToolTip("Number of edge or feature refinement levels.")
+        self.form.baffle_check.setToolTip("Create a zero thickness baffle.")
 
         self.update()
-        self.initialiseUponReload()
 
     def accept(self):
         self.set_meshregion_props()
@@ -140,12 +133,18 @@ class _TaskPanelCfdMeshRegion:
                              "= {}".format(self.obj.Name, self.expratio))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.FirstLayerHeight "
                              "= '{}'".format(self.obj.Name, self.firstlayerheight))
-        list = []
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.RefinementLevel "
+                             "= {}".format(self.obj.Name, self.refinelevel))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.RegionEdgeRefinement "
+                             "= {}".format(self.obj.Name, self.edgerefinement))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Baffle "
+                             "= {}".format(self.obj.Name, self.obj.Baffle))
+        ref_list = []
         for ref in self.obj.References:
             for elem in ref[1]:
-                list.append((ref[0], elem))
+                ref_list.append((ref[0], elem))
         FreeCADGui.doCommand("referenceList = []")
-        for ref in list:
+        for ref in ref_list:
             FreeCADGui.doCommand("part = FreeCAD.ActiveDocument.getObject('{}')".format(ref[0].Name))
             FreeCADGui.doCommand("referenceList.append((part,'{}'))".format(ref[1]))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References = referenceList".format(self.obj.Name))
@@ -179,11 +178,11 @@ class _TaskPanelCfdMeshRegion:
             self.form.cfFrame.setVisible(True)
             self.form.snappyFrame.setVisible(False)
 
-    def boundaryLayerStateChanged(self):
+    def boundary_layer_state_changed(self):
         if self.form.check_boundlayer.isChecked():
-            self.form.BoundLayerFrame.setVisible(True)
+            self.form.boundlayer_frame.setVisible(True)
         else:
-            self.form.BoundLayerFrame.setVisible(False)
+            self.form.boundlayer_frame.setVisible(False)
             self.form.if_numlayer.setValue(int(1))
             self.form.if_expratio.setValue(1.0)
             self.form.if_firstlayerheight.setText("0.0 mm")
@@ -191,8 +190,8 @@ class _TaskPanelCfdMeshRegion:
     def getMeshObject(self):
         analysis_obj = FemGui.getActiveAnalysis()
         from CfdTools import getMeshObject
-        mesh_obj, isPresent = getMeshObject(analysis_obj)
-        if not (isPresent):
+        mesh_obj, is_present = getMeshObject(analysis_obj)
+        if not is_present:
             message = "Missing mesh object! \n\nIt appears that the mesh object is not available, please re-create."
             QtGui.QMessageBox.critical(None, 'Missing mesh object', message)
             doc = FreeCADGui.getDocument(self.obj.Document)
@@ -205,6 +204,8 @@ class _TaskPanelCfdMeshRegion:
         self.numlayer = self.obj.NumberLayers
         self.expratio = self.obj.ExpansionRatio
         self.firstlayerheight = self.obj.FirstLayerHeight
+        self.refinelevel = self.obj.RefinementLevel
+        self.edgerefinement = self.obj.RegionEdgeRefinement
         self.references = []
         if self.obj.References:
             self.tuplereferences = self.obj.References
@@ -217,23 +218,35 @@ class _TaskPanelCfdMeshRegion:
         self.obj.NumberLayers = self.numlayer
         self.obj.ExpansionRatio = self.expratio
         self.obj.FirstLayerHeight = self.firstlayerheight
-        if self.form.snapRadio.isChecked():
-            self.obj.snappedRefine = True
+        self.obj.RefinementLevel = self.refinelevel
+        self.obj.RegionEdgeRefinement = self.edgerefinement
+        if self.form.baffle_check.isChecked() and self.mesh_obj.MeshUtility == 'snappyHexMesh':
+            self.obj.Baffle = True
         else:
-            self.obj.snappedRefine = False
-        self.obj.snappyRefineLevel = self.form.snappyRefineLevel.value()
-
-        if self.form.baffleCheckBox.isChecked() and self.mesh_obj.MeshUtility == 'snappyHexMesh':
-            self.obj.internalBaffle = True
-        else:
-            self.obj.internalBaffle = False
-        self.obj.localEdgeRefine = self.form.snappySurfaceEdgeRefinementLevel.value()
+            self.obj.Baffle = False
 
     def update(self):
         """ fills the widgets """
         self.form.if_rellen.setValue(self.obj.RelativeLength)
         self.form.if_refinethick.setText(self.obj.RefinementThickness.UserString)
         self.rebuild_list_References()
+        if self.numlayer > 1:  # Only reload when there are more than one layer
+            self.form.check_boundlayer.toggle()
+            self.form.if_numlayer.setValue(self.obj.NumberLayers)
+            self.form.if_expratio.setValue(self.obj.ExpansionRatio)
+            self.form.if_firstlayerheight.setText(self.obj.FirstLayerHeight.UserString)
+
+        self.form.if_refinelevel.setValue(self.obj.RefinementLevel)
+        self.form.if_edgerefinement.setValue(self.obj.RegionEdgeRefinement)
+        if self.obj.Baffle:
+            self.form.baffle_check.toggle()
+
+        if self.mesh_obj.MeshUtility == 'snappyHexMesh':
+            self.form.cf_frame.setVisible(False)
+            self.form.snappy_frame.setVisible(True)
+        else:
+            self.form.cf_frame.setVisible(True)
+            self.form.snappy_frame.setVisible(False)
 
     def rellen_changed(self, value):
         self.rellen = value
@@ -249,6 +262,12 @@ class _TaskPanelCfdMeshRegion:
 
     def firstlayerheight_changed(self, value):
         self.firstlayerheight = value
+
+    def refinelevel_changed(self, value):
+        self.refinelevel = value
+
+    def edgerefinement_changed(self, value):
+        self.edgerefinement = value
 
     def choose_selection_mode_standard(self, state):
         self.selection_mode_solid = not state
@@ -278,10 +297,10 @@ class _TaskPanelCfdMeshRegion:
     def remove_reference(self):
         if not self.references:
             return
-        currentItemName = str(self.form.list_References.currentItem().text())
+        current_item_name = str(self.form.list_References.currentItem().text())
         for ref in self.references:
             refname_to_compare_listentry = ref[0].Name + ':' + ref[1]
-            if refname_to_compare_listentry == currentItemName:
+            if refname_to_compare_listentry == current_item_name:
                 self.references.remove(ref)
         self.rebuild_list_References()
 

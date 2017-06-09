@@ -1,0 +1,17 @@
+%{%(MeshUtility%)
+%:snappyHexMesh
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      meshQualityDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Include defaults parameters from master dictionary
+#includeEtc "caseDicts/meshQualityDict"
+
+// ************************************************************************* //
+%}

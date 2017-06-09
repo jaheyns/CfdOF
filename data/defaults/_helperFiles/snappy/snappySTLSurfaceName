@@ -1,6 +1,0 @@
-
-    "#STLNAME#"
-    {
-        type triSurfaceMesh;
-        name #SURFACENAME#;
-    }

@@ -1,6 +1,0 @@
-
-        #NAME#
-        {
-            mode distance;
-            levels ((1E15 #LEVEL#));
-        }

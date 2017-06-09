@@ -1,6 +1,0 @@
-    #REGION#
-    {
-        cellSize  #SIZE#;
-        surfaceFile #FILE#;
-        refinementThickness #THICK#;
-    }

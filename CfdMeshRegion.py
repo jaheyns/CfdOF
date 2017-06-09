@@ -35,13 +35,12 @@ import FreeCAD
 import _CfdMeshRegion
 
 
-def makeCfdMeshRegion(base_mesh, relative_length=1.0, name="MeshRegion"):
-    ''' makeCfdMeshRegion([relative length], [name]):
+def makeCfdMeshRegion(base_mesh, name="MeshRegion"):
+    ''' makeCfdMeshRegion([name]):
         Creates a  mesh region object to define properties for a region of the mesh
     '''
     obj = FreeCAD.ActiveDocument.addObject("Fem::FeaturePython", name)
     _CfdMeshRegion._CfdMeshRegion(obj)
-    obj.RelativeLength = relative_length
     # obj.BaseMesh = base_mesh
     # App::PropertyLinkList does not support append, we will use a temporary list to append the mesh region obj.
     tmplist = base_mesh.MeshRegionList

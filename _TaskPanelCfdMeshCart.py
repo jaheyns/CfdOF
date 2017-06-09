@@ -43,6 +43,7 @@ import _CfdMeshCart
 import time
 import tempfile
 import CfdTools
+from CfdTools import inputCheckAndStore
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -67,12 +68,20 @@ class _TaskPanelCfdMeshCart:
         self.cart_mesh = []
         self.paraviewScriptName = ""
 
-        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
-        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardError()"), self.readOutput)
-        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("finished(int)"), self.meshFinished)
+        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.read_output)
+        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardError()"), self.read_output)
+        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("finished(int)"), self.mesh_finished)
 
         QtCore.QObject.connect(self.form.if_max, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.max_changed)
-        # QtCore.QObject.connect(self.form.if_min, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.min_changed)
+        QtCore.QObject.connect(self.form.if_pointInMeshX, QtCore.SIGNAL("valueChanged(Base::Quantity)"),
+                               self.pointInMeshX_changed)
+        QtCore.QObject.connect(self.form.if_pointInMeshY, QtCore.SIGNAL("valueChanged(Base::Quantity)"),
+                               self.pointInMeshY_changed)
+        QtCore.QObject.connect(self.form.if_pointInMeshZ, QtCore.SIGNAL("valueChanged(Base::Quantity)"),
+                               self.pointInMeshZ_changed)
+        QtCore.QObject.connect(self.form.if_cellsbetweenlevels, QtCore.SIGNAL("valueChanged(int)"),
+                               self.cellsbetweenlevels_changed)
+        QtCore.QObject.connect(self.form.if_edgerefine, QtCore.SIGNAL("valueChanged(int)"), self.edgerefine_changed)
         QtCore.QObject.connect(self.form.cb_dimension, QtCore.SIGNAL("activated(int)"), self.choose_dimension)
         QtCore.QObject.connect(self.form.cb_utility, QtCore.SIGNAL("activated(int)"), self.choose_utility)
         QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.update_timer_text)
@@ -82,6 +91,7 @@ class _TaskPanelCfdMeshCart:
         QtCore.QObject.connect(self.form.pb_run_mesh, QtCore.SIGNAL("clicked()"), self.runMeshProcess)
         QtCore.QObject.connect(self.form.pb_stop_mesh, QtCore.SIGNAL("clicked()"), self.killMeshProcess)
         QtCore.QObject.connect(self.form.pb_paraview, QtCore.SIGNAL("clicked()"), self.openParaview)
+        QtCore.QObject.connect(self.form.pb_searchPointInMesh, QtCore.SIGNAL("clicked()"), self.searchPointInMesh)
         self.form.pb_stop_mesh.setEnabled(False)
         self.form.pb_paraview.setEnabled(False)
         self.form.snappySpecificProperties.setVisible(False)
@@ -90,11 +100,19 @@ class _TaskPanelCfdMeshCart:
         self.form.cb_dimension.addItems(_CfdMeshCart._CfdMeshCart.known_element_dimensions)
         self.form.cb_utility.addItems(_CfdMeshCart._CfdMeshCart.known_mesh_utility)
 
+        self.form.if_max.setToolTip("Select 0 to use default value")
+        self.form.pb_searchPointInMesh.setToolTip("Specify below a point vector inside of the mesh or press 'Search' "
+                                                  "to try and automatically find a point")
+        self.form.if_cellsbetweenlevels.setToolTip("Number of cells between each of level of refinement.")
+        self.form.if_edgerefine.setToolTip("Number of refinement levels for all edges.")
+
+        tmpdir = tempfile.gettempdir()
+        self.meshCaseDir = os.path.join(tmpdir, 'meshCase')
+
         self.get_mesh_params()
-        self.order = '1st'  # Force first order for CFD mesh
+        self.order = '1st'  # Default to first order for CFD mesh
         self.get_active_analysis()
         self.update()
-
 
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)
@@ -103,6 +121,9 @@ class _TaskPanelCfdMeshCart:
 
     def reject(self):
         self.mesh_obj.CharacteristicLengthMax = self.clmax
+        self.mesh_obj.PointInMesh = self.PointInMesh
+        self.mesh_obj.CellsBetweenLevels = self.cellsbetweenlevels
+        self.mesh_obj.EdgeRefinement = self.edgerefine
         self.set_mesh_params()
 
         FreeCADGui.ActiveDocument.resetEdit()
@@ -111,37 +132,37 @@ class _TaskPanelCfdMeshCart:
 
     def get_mesh_params(self):
         self.clmax = self.mesh_obj.CharacteristicLengthMax
+        self.PointInMesh = self.mesh_obj.PointInMesh.copy()
+        self.cellsbetweenlevels = self.mesh_obj.CellsBetweenLevels
+        self.edgerefine = self.mesh_obj.EdgeRefinement
         self.dimension = self.mesh_obj.ElementDimension
         self.utility = self.mesh_obj.MeshUtility
         if self.utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
         elif self.utility == "cfMesh":
             self.form.snappySpecificProperties.setVisible(False)
-        #self.nCellsBetweenLevels = self.mesh_obj.nCellsBetweenLevels
-        #self.edgeRefineLevels = self.mesh_obj.edgeRefineLevels
 
     def set_mesh_params(self):
         self.mesh_obj.CharacteristicLengthMax = self.clmax
+        self.mesh_obj.PointInMesh = self.PointInMesh
+        self.mesh_obj.CellsBetweenLevels = self.cellsbetweenlevels
+        self.mesh_obj.EdgeRefinement = self.edgerefine
         self.mesh_obj.ElementDimension = self.dimension
-        #self.mesh_obj.MeshUtility = self.utility
         self.mesh_obj.MeshUtility = self.form.cb_utility.currentText()
-        print self.mesh_obj.MeshUtility
-        self.mesh_obj.nCellsBetweenLevels = self.form.nCellsBetweenLevels.value()
-        self.mesh_obj.edgeRefineLevels = self.form.edgeRefineLevels.value()
 
     def update(self):
         """ Fills the widgets """
         self.form.if_max.setText(self.clmax.UserString)
-        self.form.if_max.setToolTip("Select 0 to use default value")
+        self.form.if_pointInMeshX.setText(str(self.PointInMesh.get('x')) + "mm")
+        self.form.if_pointInMeshY.setText(str(self.PointInMesh.get('y')) + "mm")
+        self.form.if_pointInMeshZ.setText(str(self.PointInMesh.get('z')) + "mm")
+        self.form.if_cellsbetweenlevels.setValue(self.cellsbetweenlevels)
+        self.form.if_edgerefine.setValue(self.edgerefine)
+
         index_dimension = self.form.cb_dimension.findText(self.dimension)
         self.form.cb_dimension.setCurrentIndex(index_dimension)
         index_utility = self.form.cb_utility.findText(self.utility)
         self.form.cb_utility.setCurrentIndex(index_utility)
-
-        self.form.nCellsBetweenLevels.setValue(self.mesh_obj.nCellsBetweenLevels)
-        self.form.edgeRefineLevels.setValue(self.mesh_obj.edgeRefineLevels)
-        self.form.nCellsBetweenLevels.setToolTip("The number of cells between each of level of refinement.")
-        self.form.edgeRefineLevels.setToolTip("Specify the number of refinement levels for all edges.")
 
     def console_log(self, message="", color="#000000"):
         self.console_message_cart = self.console_message_cart \
@@ -157,6 +178,21 @@ class _TaskPanelCfdMeshCart:
     def max_changed(self, base_quantity_value):
         self.clmax = base_quantity_value
 
+    def pointInMeshX_changed(self, base_quantity_value):
+        inputCheckAndStore(base_quantity_value, "mm", self.PointInMesh, 'x')
+
+    def pointInMeshY_changed(self, base_quantity_value):
+        inputCheckAndStore(base_quantity_value, "mm", self.PointInMesh, 'y')
+
+    def pointInMeshZ_changed(self, base_quantity_value):
+        inputCheckAndStore(base_quantity_value, "mm", self.PointInMesh, 'z')
+
+    def cellsbetweenlevels_changed(self, base_quantity_value):
+        self.cellsbetweenlevels = base_quantity_value
+
+    def edgerefine_changed(self, base_quantity_value):
+        self.edgerefine = base_quantity_value
+
     def choose_dimension(self, index):
         if index < 0:
             return
@@ -166,8 +202,6 @@ class _TaskPanelCfdMeshCart:
     def choose_utility(self, index):
         if index < 0:
             return
-        #self.form.cb_utility.setCurrentIndex(index)
-        #self.utility = str(self.form.cb_utility.itemText(index))  # form returns unicode
         self.utility = self.form.cb_utility.currentText()
         if self.utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
@@ -179,11 +213,48 @@ class _TaskPanelCfdMeshCart:
                              "= '{}'".format(self.mesh_obj.Name, self.clmax))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.MeshUtility "
                              "= '{}'".format(self.mesh_obj.Name, self.utility))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.CellsBetweenLevels "
+                             "= {}".format(self.mesh_obj.Name, self.cellsbetweenlevels))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.EdgeRefinement "
+                             "= {}".format(self.mesh_obj.Name, self.edgerefine))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.PointInMesh "
+                             "= {}".format(self.mesh_obj.Name, self.PointInMesh))
 
         self.console_message_cart = ''
         self.Start = time.time()
         self.Timer.start()
         self.console_log("Starting cut-cell Cartesian meshing ...")
+        # try:
+        #     self.get_active_analysis()
+        #     self.set_mesh_params()
+        #     import CfdCartTools  # Fresh init before remeshing
+        #     self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
+        #     cart_mesh = self.cart_mesh
+        #     self.form.if_max.setText(str(cart_mesh.get_clmax()))
+        #     print("\nStarting cut-cell Cartesian meshing ...\n")
+        #     print('  Part to mesh: Name --> '
+        #           + cart_mesh.part_obj.Name + ',  Label --> '
+        #           + cart_mesh.part_obj.Label + ', ShapeType --> '
+        #           + cart_mesh.part_obj.Shape.ShapeType)
+        #     print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
+        #     # print('  CharacteristicLengthMin: ' + str(cart_mesh.clmin))
+        #     # print('  ElementOrder: ' + cart_mesh.order)
+        #     cart_mesh.get_dimension()
+        #     cart_mesh.get_tmp_file_paths(self.utility)
+        #     cart_mesh.setupMeshCaseDir()
+        #     cart_mesh.get_group_data()
+        #     cart_mesh.get_region_data()
+        #     cart_mesh.write_part_file()
+        #     cart_mesh.setupMeshDict(self.utility)
+        #     cart_mesh.createMeshScript(run_parallel='false',
+        #                                mesher_name='cartesianMesh',
+        #                                num_proc=1,
+        #                                cartMethod=self.utility)  # Extend in time
+        #     self.paraviewScriptName = self.cart_mesh.createParaviewScript()
+        #     self.runCart(cart_mesh)
+        # except Exception as ex:
+        #     self.console_log("Error: " + ex.message, '#FF0000')
+        #     self.Timer.stop()
         try:
             self.get_active_analysis()
             self.set_mesh_params()
@@ -197,20 +268,16 @@ class _TaskPanelCfdMeshCart:
                   + cart_mesh.part_obj.Label + ', ShapeType --> '
                   + cart_mesh.part_obj.Shape.ShapeType)
             print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
-            # print('  CharacteristicLengthMin: ' + str(cart_mesh.clmin))
-            # print('  ElementOrder: ' + cart_mesh.order)
             cart_mesh.get_dimension()
-            cart_mesh.get_tmp_file_paths(self.utility)
-            cart_mesh.setupMeshCaseDir()
+            # cart_mesh.get_tmp_file_paths(self.utility)
+            cart_mesh.get_tmp_file_paths()
+            cart_mesh.setup_mesh_case_dir()
             cart_mesh.get_group_data()
-            cart_mesh.get_region_data()
+            cart_mesh.get_region_data()  # Writes region stls so need file structure
+            cart_mesh.write_mesh_case()
+            self.console_log("Writing the STL files of the part surfaces ...")
             cart_mesh.write_part_file()
-            cart_mesh.setupMeshDict(self.utility)
-            cart_mesh.createMeshScript(run_parallel='false',
-                                       mesher_name='cartesianMesh',
-                                       num_proc=1,
-                                       cartMethod=self.utility)  # Extend in time
-            self.paraviewScriptName = self.cart_mesh.createParaviewScript()
+            self.console_log("Running {} ...".format(self.utility))
             self.runCart(cart_mesh)
         except Exception as ex:
             self.console_log("Error: " + ex.message, '#FF0000')
@@ -221,9 +288,7 @@ class _TaskPanelCfdMeshCart:
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
         try:
-            tmpdir = tempfile.gettempdir()
-            meshCaseDir = os.path.join(tmpdir, 'meshCase')
-            cmd = CfdTools.makeRunCommand('./Allmesh', meshCaseDir, source_env=False)
+            cmd = CfdTools.makeRunCommand('./Allmesh', self.meshCaseDir, source_env=False)
             FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
             env = QtCore.QProcessEnvironment.systemEnvironment()
             env_vars = CfdTools.getRunEnvironment()
@@ -254,7 +319,7 @@ class _TaskPanelCfdMeshCart:
         self.form.pb_paraview.setEnabled(False)
         self.Timer.stop()
 
-    def readOutput(self):
+    def read_output(self):
         while self.mesh_process.canReadLine():
             print str(self.mesh_process.readLine()),  # Avoid displaying on FreeCAD status bar
 
@@ -283,6 +348,7 @@ class _TaskPanelCfdMeshCart:
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(False)
+
         self.Timer.stop()
         self.update()
         self.error_message = ''
@@ -316,8 +382,19 @@ class _TaskPanelCfdMeshCart:
         if distutils.spawn.find_executable(paraview_cmd) is None:
             raise IOError("Paraview executable " + paraview_cmd + " not found in path.")
 
+        self.paraviewScriptName = os.path.join(self.meshCaseDir, 'pvScriptMesh.py')
         arg = '--script={}'.format(self.paraviewScriptName)
 
         self.console_log("Running " + paraview_cmd + " " +arg)
         self.open_paraview.start(paraview_cmd, [arg])
         QApplication.restoreOverrideCursor()
+
+    def searchPointInMesh(self):
+        print ("Searching for an internal vector point ...")
+        import CfdCartTools  # Fresh init before remeshing
+        self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
+        pointCheck = self.cart_mesh.automatic_inside_point_detect()
+        iMPx, iMPy, iMPz = pointCheck
+        self.form.if_pointInMeshX.setText(str(iMPx) + "mm")
+        self.form.if_pointInMeshY.setText(str(iMPy) + "mm")
+        self.form.if_pointInMeshZ.setText(str(iMPz) + "mm")

@@ -45,41 +45,55 @@ class _CfdMeshCart():
         obj.addProperty("App::PropertyLinkList", "MeshRegionList", "Base", "Mesh regions of the mesh")
         obj.MeshRegionList = []
 
-
         obj.addProperty("App::PropertyLinkList", "MeshGroupList", "Base", "Mesh groups of the mesh")
-        obj.MeshRegionList = []  # ???
+        obj.MeshGroupList = []
 
         obj.addProperty("App::PropertyStringList", "ShapeFaceNames", "Base", "Mesh face names")
         obj.ShapeFaceNames = []
 
-        obj.addProperty("App::PropertyLink", "Part", "FEM Mesh", "Part object to mesh")
-        obj.Part = None
-
-        obj.addProperty("App::PropertyLength", "CharacteristicLengthMax", "FEM GMSH Mesh Params", "Max mesh element size (0.0 = infinity)")
-        obj.CharacteristicLengthMax = 0.0
-
-        obj.addProperty("App::PropertyEnumeration", "ElementDimension", "FEM GMSH Mesh Params", "Dimension of mesh elements (Auto = according ShapeType of part to mesh)")
-        obj.ElementDimension = _CfdMeshCart.known_element_dimensions
-        obj.ElementDimension = '3D'  # according ShapeType of Part to mesh
-
-        obj.addProperty("App::PropertyEnumeration", "MeshUtility", "FEM GMSH Mesh Params", "Cut-cell Cartesian meshing utilities")
-        obj.MeshUtility = _CfdMeshCart.known_mesh_utility
-        obj.MeshUtility = 'cfMesh'
-
         obj.addProperty("App::PropertyFloat", "STLLinearDeflection", "Base", "STL linear deflection")
         obj.STLLinearDeflection = 0.1
 
-        obj.addProperty("App::PropertyInteger","nCellsBetweenLevels","snappyHexMeshGlobalProperties","Number of cells between each level of refinement")
-        obj.nCellsBetweenLevels = 1
+        obj.addProperty("App::PropertyInteger", "NumberCores", "Base", "Number of parallel cores "
+                                                                       "(only applicaple when using sHM) ")
+        obj.NumberCores = 1
 
-        obj.addProperty("App::PropertyInteger","edgeRefineLevels","snappyHexMeshGlobalProperties","All edge features will automatically be refined by this much")
-        obj.edgeRefineLevels = 0
+        obj.addProperty("App::PropertyLink", "Part", "Mesh Parameters", "Part object to mesh")
+        obj.Part = None
 
-        obj.addProperty("App::PropertyEnumeration", "Algorithm2D", "FEM GMSH Mesh Params", "mesh algorithm 2D")
+        obj.addProperty("App::PropertyEnumeration", "MeshUtility", "Mesh Parameters",
+                        "Cut-cell Cartesian meshing utilities")
+        obj.MeshUtility = _CfdMeshCart.known_mesh_utility
+        obj.MeshUtility = 'cfMesh'
+
+        obj.addProperty("App::PropertyLength", "CharacteristicLengthMax", "Mesh Parameters",
+                        "Max mesh element size (0.0 = infinity)")
+        obj.CharacteristicLengthMax = 0.0
+
+        obj.addProperty("App::PropertyPythonObject", "PointInMesh", "Mesh Parameters",
+                        "Location vector inside the region to be meshed (must not coincide with a cell face)")
+        obj.PointInMesh = {"x": 0.0,
+                           "y": 0.0,
+                           "z": 0.0}
+
+        obj.addProperty("App::PropertyInteger", "CellsBetweenLevels", "Mesh Parameters",
+                        "Number of cells between each level of refinement")
+        obj.CellsBetweenLevels = 3
+
+        obj.addProperty("App::PropertyInteger", "EdgeRefinement", "Mesh Parameters",
+                        "Edge or feature refinement level")
+        obj.EdgeRefinement = 0
+
+        obj.addProperty("App::PropertyEnumeration", "ElementDimension", "Mesh Parameters",
+                        "Dimension of mesh elements (Default 3D)")
+        obj.ElementDimension = _CfdMeshCart.known_element_dimensions
+        obj.ElementDimension = '3D'  # Initially CFD will only support 3D
+
+        obj.addProperty("App::PropertyEnumeration", "Algorithm2D", "Mesh Parameters", "2D mesh algorithm")
         obj.Algorithm2D = _CfdMeshCart.known_mesh_algorithm_2D
         obj.Algorithm2D = 'Cartesian'
 
-        obj.addProperty("App::PropertyEnumeration", "Algorithm3D", "FEM GMSH Mesh Params", "mesh algorithm 3D")
+        obj.addProperty("App::PropertyEnumeration", "Algorithm3D", "Mesh Parameters", "3D mesh algorithm")
         obj.Algorithm3D = _CfdMeshCart.known_mesh_algorithm_3D
         obj.Algorithm3D = 'Cartesian'
 

@@ -223,10 +223,13 @@ class CfdCaseWriterFoam(QRunnable):
                 #import CfdCartTools
                 self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
                 cart_mesh = self.cart_mesh
-                cart_mesh.get_tmp_file_paths("cfMesh")  # Update tmp file locations
-                CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
-                CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','triSurface'))
-                shutil.copy2(cart_mesh.temp_file_meshDict, os.path.join(self.case_folder,'system'))
+                # cart_mesh.get_tmp_file_paths("cfMesh")  # Update tmp file locations
+                cart_mesh.get_tmp_file_paths()  # Update tmp file locations
+                CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder, 'constant', 'polyMesh'))
+                CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder, 'constant', 'triSurface'))
+                # shutil.copy2(cart_mesh.temp_file_meshDict, os.path.join(self.case_folder,'system'))
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'system', 'meshDict'),
+                             os.path.join(self.case_folder,'system'))
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'Allmesh'),self.case_folder)
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.cartesianMesh'),self.case_folder)
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.surfaceFeatureEdges'),self.case_folder)
@@ -235,16 +238,23 @@ class CfdCaseWriterFoam(QRunnable):
                 FreeCAD.Console.PrintMessage("Writing snappyHexMesh generated Cartesian mesh")
                 self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
                 cart_mesh = self.cart_mesh
-                cart_mesh.get_tmp_file_paths("snappyHexMesh")  # Update tmp file locations
+                # cart_mesh.get_tmp_file_paths("snappyHexMesh")  # Update tmp file locations
+                cart_mesh.get_tmp_file_paths()  # Update tmp file locations
                 CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
                 CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','triSurface'))
-                shutil.copy2(cart_mesh.temp_file_blockMeshDict, os.path.join(self.case_folder,'system'))
-                shutil.copy2(cart_mesh.temp_file_snappyMeshDict, os.path.join(self.case_folder,'system'))
-                shutil.copy2(cart_mesh.temp_file_surfaceFeatureExtractDict, os.path.join(self.case_folder,'system'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'Allmesh'),self.case_folder)
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.blockMesh'),self.case_folder)
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.surfaceFeatureExtract'),self.case_folder)
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.snappyHexMesh'),self.case_folder)
+                # shutil.copy2(cart_mesh.temp_file_blockMeshDict, os.path.join(self.case_folder,'system'))
+                # shutil.copy2(cart_mesh.temp_file_snappyMeshDict, os.path.join(self.case_folder,'system'))
+                # shutil.copy2(cart_mesh.temp_file_surfaceFeatureExtractDict, os.path.join(self.case_folder,'system'))
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'system', 'blockMeshDict'),
+                             os.path.join(self.case_folder,'system'))
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'system', 'snappyHexMeshDict'),
+                             os.path.join(self.case_folder,'system'))
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'system', 'surfaceFeatureExtractDict'),
+                             os.path.join(self.case_folder,'system'))
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'Allmesh'), self.case_folder)
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.blockMesh'), self.case_folder)
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.surfaceFeatureExtract'), self.case_folder)
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.snappyHexMesh'), self.case_folder)
         else:
             raise Exception("Unrecognised mesh type")
 
@@ -501,6 +511,13 @@ class CfdCaseWriterFoam(QRunnable):
                 'PatchNamesList': tuple(bc_list),  # Tuple used so that case writer outputs as an array
                 'PatchType': patchType
             }
+            # if bcType != "baffle":
+            #     bcSubType = bcDict["BoundarySubtype"]
+            #     patchType = CfdTools.getPatchType(bcType, bcSubType)
+            #     settings['createPatches'][bc_obj.Label] = {
+            #         'PatchNamesList': bc_list,
+            #         'PatchType': patchType
+            #     }
 
             # In almost all cases the number of faces associated with a bc is going to be less than the number of
             # external or mesh faces.
@@ -509,9 +526,8 @@ class CfdCaseWriterFoam(QRunnable):
 
         if self.mesh_obj.MeshRegionList:
             for regionObj in self.mesh_obj.MeshRegionList:
-                #if regionObj.snappedRefine:
-                    if regionObj.internalBaffle:
-                        settings['createPatchesFromSnappyBaffles'] = True
+                if regionObj.Baffle:
+                    settings['createPatchesFromSnappyBaffles'] = True
 
 
         if settings['createPatchesFromSnappyBaffles']:
@@ -529,12 +545,12 @@ class CfdCaseWriterFoam(QRunnable):
                 if bcType == "baffle":
                     tempBaffleList = []
                     tempBaffleListSlave = []
-                    if self.mesh_obj.MeshRegionList:
+                    if self.mesh_obj.MeshRegionList:  # Can this if statement not be lumped with previous?
                         for regionObj in self.mesh_obj.MeshRegionList:
-                            print regionObj.Name
-                            if regionObj.internalBaffle:
+                            # print regionObj.Name
+                            if regionObj.Baffle:
                                 for sub in regionObj.References:
-                                    print sub[0].Name
+                                    # print sub[0].Name
                                     for elems in sub[1]:
                                         elt = sub[0].Shape.getElement(elems)
                                         if elt.ShapeType == 'Face':
@@ -548,8 +564,6 @@ class CfdCaseWriterFoam(QRunnable):
                                                     tempBaffleListSlave.append(regionObj.Name+sub[0].Name+elems+"_slave")
                     settings['createPatchesSnappyBaffles'][bc_obj.Label] = {"PatchNamesList" : tuple(tempBaffleList),
                                                                             "PatchNamesListSlave" : tuple(tempBaffleListSlave)}
-
-
 
         # Add default faces
         flagName = False

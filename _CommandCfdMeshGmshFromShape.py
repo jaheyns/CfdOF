@@ -40,9 +40,9 @@ class _CommandCfdMeshGmshFromShape(FemCommands):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_g.png")
         self.resources = {'Pixmap': icon_path,
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape",
-                                                               "CFD mesh from shape by GMSH"),
+                                                               "Tetrahedral meshing using GMSH"),
                           'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape",
-                                                              "Create a CFD mesh from a shape by GMSH mesher")}
+                                                              "Create a tetrahedral mesh using GMSH")}
         self.is_active = 'with_part_feature'
 
     def Activated(self):

@@ -19,9 +19,11 @@ before running the simulation. Where possible best practices are included to imp
 * Porous regions and porous baffles.
 * Runs on Windows 7-10
 * Unit testing
-* Cut-cell Cartesian meshing with boundary layers.
+* Cut-cell Cartesian meshing with boundary layers (cfMesh).
+* Cut-cell Cartesian meshing with porous media (snappyHexMesh).
 * Extension to turbulent using RANS (k-w SST).
 * New case builder using a modular template structure
+* Macro scripting
 
 ### Future (2017):
 
@@ -168,7 +170,8 @@ Please discuss issues on the [CFDFoam dedicated FreeCAD forum thread](https://fo
 ## Developement
 
 It is asked that developers should only add functionality or code that is working and can be tested. Dead code, even
-portions included for possible future functionality, reduces function clarity and increases the maintenance overhead.
+portions included for possible future functionality, reduces function clarity and increases the maintenance overhead. 
+Our philosophy is 'Do the basics well' and therefore robust operation takes precedence over extended functionality.
 
 ### Testing
 
@@ -204,14 +207,18 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
     - ClassNames (Camel)
     - variable_names_without_capitals (Underscore)
     - CONSTANTS_USE_CAPITALS (Uppercase)
-    - functionsWithoutCapitals (Camel instead of underscore to ensure consistency with FreeCAD)
+    - functions_without_capitals (underscore, preferred as it follows PEP8)
+    - functionsWithoutCapitals (Camel instead of underscore is accepted as it is widely used within FreeCAD)
     - __class_attribute (Double leading underscore)
 
 
-## Developers
+## Lead developers
 
 Oliver Oxtoby (CSIR, 2016-2017) <ooxtoby@csir.co.za>  
 Johan Heyns (CSIR, 2016-2017) <jheyns@csir.co.za>  
 Alfred Bogaers (CSIR, 2016-2017) <abogaers@csir.co.za>    
-Qingfeng Xia (2015)
-Klaus Sembritzki (2017)
+
+We would like to thank the following people for their contributions:
+
+Qingfeng Xia (2015) - Original framework;
+Klaus Sembritzki (2017) - Multiphase

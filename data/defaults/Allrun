@@ -63,13 +63,11 @@ runCommand setFields
 %:True
 # Creating baffles
 runCommand createBaffles -overwrite
-
 %}
 %{%(initialValues/PotentialFoam%)
 %:True
 # Initialise flow
 runCommand potentialFoam
-
 %}
 %{%(solver/parallel%)
 %:True

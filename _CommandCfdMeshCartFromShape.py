@@ -41,9 +41,9 @@ class _CommandCfdMeshCartFromShape(FemCommands):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_c.png")
         self.resources = {'Pixmap': icon_path,
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshCartFromShape",
-                                                               "Cut-cell Cartesian mesh from shape"),
+                                                               "Cut-cell Cartesian mesh"),
                           'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshCartFromShape",
-                                                              "Create a Cut-cell Cartesian mesh from a shape")}
+                                                              "Create a Cut-cell Cartesian mesh using cfMesh or sHM")}
         self.is_active = 'with_part_feature'
 
     def Activated(self):
