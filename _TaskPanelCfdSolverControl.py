@@ -38,6 +38,7 @@ import sys
 import os.path
 import time
 import subprocess
+from CfdConsoleProcess import CfdConsoleProcess
 
 import FreeCAD
 from FemTools import FemTools
@@ -69,17 +70,15 @@ class _TaskPanelCfdSolverControl:
         self.solver_runner.writer.signals.finished.connect(self.writerFinished)
 
         # update UI
-        self.fem_console_message = ''
+        self.console_message = ''
 
-        self.solver_run_process = QtCore.QProcess()
+        self.solver_run_process = CfdConsoleProcess(finishedHook=self.solverFinished,
+                                                    stdoutHook=self.gotOutputLines,
+                                                    stderrHook=self.gotErrorLines)
         self.Timer = QtCore.QTimer()
         self.Timer.start(100)
 
-        #self.solver_run_process.readyReadStandardOutput.connect(self.stdoutReady)
-        QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("finished(int)"), self.solverFinished)
-        QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.readOutput)
-        QtCore.QObject.connect(self.solver_run_process, QtCore.SIGNAL("readyReadStandardError()"), self.readOutput)
-        QtCore.QObject.connect(self.form.terminateSolver, QtCore.SIGNAL("clicked()"), self.killSolverProcess)
+        self.form.terminateSolver.clicked.connect(self.killSolverProcess)
         self.form.terminateSolver.setEnabled(False)
 
         self.open_paraview = QtCore.QProcess()
@@ -97,13 +96,15 @@ class _TaskPanelCfdSolverControl:
         self.Start = time.time()
         self.update()  # update UI from FemSolverObject, like WorkingDir
 
-    def femConsoleMessage(self, message="", color="#000000"):
-        self.fem_console_message = self.fem_console_message + '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
-            format(time.time() - self.Start, color, message.encode('utf-8', 'replace'))
-        self.form.textEdit_Output.setText(self.fem_console_message)
+    def consoleMessage(self, message="", color="#000000"):
+        self.console_message = self.console_message + \
+                               '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
+                               format(time.time() - self.Start, color, message.encode('utf-8', 'replace'))
+        self.form.textEdit_Output.setText(self.console_message)
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
     def updateText(self):
+        pass
         if self.solver_run_process.state() == QtCore.QProcess.ProcessState.Running or \
                 self.writer_thread.activeThreadCount() > 0:
             self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
@@ -112,7 +113,6 @@ class _TaskPanelCfdSolverControl:
         return int(QtGui.QDialogButtonBox.Close)
 
     def update(self):
-        'fills the widgets with solver properties, and it must exist and writable'
         if CfdTools.checkWorkingDir(self.solver_object.WorkingDir):
             self.form.le_working_dir.setText(self.solver_object.WorkingDir)
         else:
@@ -151,117 +151,86 @@ class _TaskPanelCfdSolverControl:
     def write_input_file_handler(self):
         self.Start = time.time()
         if self.check_prerequisites_helper():
-            self.femConsoleMessage("{} case writer is called".format(self.solver_object.SolverName))
+            self.consoleMessage("{} case writer is called".format(self.solver_object.SolverName))
             self.form.pb_paraview.setEnabled(False)
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.writer_thread.start(self.solver_runner.writer)
         else:
-            self.femConsoleMessage("Case check failed", "#FF0000")
+            self.consoleMessage("Case check failed", "#FF0000")
 
     def writerError(self, error_msg):
-        self.femConsoleMessage("Error writing case:", "#FF0000")
-        self.femConsoleMessage(str(error_msg), "#FF0000")
+        self.consoleMessage("Error writing case:", "#FF0000")
+        self.consoleMessage(str(error_msg), "#FF0000")
 
     def writerFinished(self, success):
         if success:
-            self.femConsoleMessage("Write {} case is completed".format(self.solver_object.SolverName))
+            self.consoleMessage("Write {} case is completed".format(self.solver_object.SolverName))
             self.form.pb_edit_inp.setEnabled(True)
             self.form.pb_run_solver.setEnabled(True)
         else:
-            self.femConsoleMessage("Write case setup file failed", "#FF0000")
+            self.consoleMessage("Write case setup file failed", "#FF0000")
         QApplication.restoreOverrideCursor()
 
     def check_prerequisites_helper(self):
-        self.femConsoleMessage("Checking dependencies...")
+        self.consoleMessage("Checking dependencies...")
 
         message = self.solver_runner.check_prerequisites()
         if message != "":
-            self.femConsoleMessage(message, "#FF0000")
+            self.consoleMessage(message, "#FF0000")
             return False
         return True
 
     def editSolverInputFile(self):
         self.Start = time.time()
         solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
-        self.femConsoleMessage("Please edit the case input files externally at: {}\n".format(solverDirectory))
+        self.consoleMessage("Please edit the case input files externally at: {}\n".format(solverDirectory))
         self.solver_runner.edit_case()
 
     def runSolverProcess(self):
         self.Start = time.time()
-        #self.femConsoleMessage("Run {} at {} with command:".format(self.solver_object.SolverName, self.solver_object.WorkingDir))
 
         solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
         solverDirectory = os.path.abspath(solverDirectory)
         cmd = self.solver_runner.get_solver_cmd(solverDirectory)
         FreeCAD.Console.PrintMessage(' '.join(cmd) + '\n')
-        self.femConsoleMessage("Starting solver command:")
-        self.femConsoleMessage(' '.join(cmd))
-        self.solver_run_process.setWorkingDirectory(solverDirectory)
-        env = QtCore.QProcessEnvironment.systemEnvironment()
+        self.consoleMessage("Starting solver command:")
+        self.consoleMessage(' '.join(cmd))
         envVars = self.solver_runner.getRunEnvironment()
-        for key in envVars:
-            env.insert(key, envVars[key])
-        self.solver_run_process.setProcessEnvironment(env)
-        self.solver_run_process.start(cmd[0], cmd[1:])
-
         QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.solver_run_process.start(cmd, env_vars=envVars)
         if self.solver_run_process.waitForStarted():
             # Setting solve button to inactive to ensure that two instances of the same simulation aren't started
             # simultaneously
             self.form.pb_write_inp.setEnabled(False)
             self.form.pb_run_solver.setEnabled(False)
             self.form.terminateSolver.setEnabled(True)
-            # self.form.pb_show_result.setEnabled(False)
             self.form.pb_paraview.setEnabled(True)
-            self.femConsoleMessage("Solver started")
+            self.consoleMessage("Solver started")
         else:
-            self.femConsoleMessage("Error starting solver")
+            self.consoleMessage("Error starting solver")
         QApplication.restoreOverrideCursor()
 
     def killSolverProcess(self):
-        self.femConsoleMessage("Solver manually stopped")
-        import platform
-        if platform.system() == "Windows":
-            # Terminal processes don't respond to QProcess.terminate() on Windows,
-            # and QProcess.kill() leaves the mpi process orphaned.
-            #import signal
-            #os.kill(self.solver_run_process.pid(), signal.CTRL_C_EVENT)
-            self.solver_run_process.kill()
-        else:
-            self.solver_run_process.terminate()  # Could use kill() here as well but terminate() is kinder
-        self.form.pb_write_inp.setEnabled(True)
-        self.form.pb_run_solver.setEnabled(True)
-        self.form.terminateSolver.setEnabled(False)
-        #FreeCAD.Console.PrintMessage("Killing OF solver instance")
+        self.consoleMessage("Solver manually stopped")
+        self.solver_run_process.terminate()
+        # Note: solverFinished will still be called
 
     def solverFinished(self, exit_code):
-        #self.femConsoleMessage(self.solver_run_process.exitCode())
         if exit_code == 0:
-            self.femConsoleMessage("Simulation finished successfully")
+            self.consoleMessage("Simulation finished successfully")
         else:
-            self.femConsoleMessage("Simulation exited with error", "#FF0000")
+            self.consoleMessage("Simulation exited with error", "#FF0000")
         self.form.pb_write_inp.setEnabled(True)
         self.form.pb_run_solver.setEnabled(True)
         self.form.terminateSolver.setEnabled(False)
-    
-    def readOutput(self):
-        # Ensure only complete lines are passed on
-        text = ""
-        while self.solver_run_process.canReadLine():
-            text += str(self.solver_run_process.readLine())
-        FreeCAD.Console.PrintMessage(text)
-        # print text,  # Avoid displaying on FreeCAD status bar
-        self.solver_runner.process_output(text)
 
-        # Print any error output to console
-        self.solver_run_process.setReadChannel(QtCore.QProcess.StandardError)
-        while self.solver_run_process.canReadLine():
-            err = str(self.solver_run_process.readLine())
-            FreeCAD.Console.PrintError(err)
-            print_err = self.solver_runner.processErrorOutput(err)
-            if print_err is not None:
-                self.femConsoleMessage(print_err, "#FF0000")
-        self.solver_run_process.setReadChannel(QtCore.QProcess.StandardOutput)
+    def gotOutputLines(self, lines):
+        self.solver_runner.process_output(lines)
+
+    def gotErrorLines(self, lines):
+        print_err = self.solver_runner.processErrorOutput(lines)
+        if print_err is not None:
+            self.consoleMessage(print_err, "#FF0000")
 
     def openParaview(self):
         self.Start = time.time()
@@ -281,10 +250,10 @@ class _TaskPanelCfdSolverControl:
 
         arg = '--script={}'.format(script_name)
 
-        self.femConsoleMessage("Running "+paraview_cmd+" "+arg)
+        self.consoleMessage("Running "+paraview_cmd+" "+arg)
         self.open_paraview.start(paraview_cmd, [arg])
         if self.open_paraview.waitForStarted():
-            self.femConsoleMessage("Paraview started")
+            self.consoleMessage("Paraview started")
         else:
-            self.femConsoleMessage("Error starting paraview")
+            self.consoleMessage("Error starting paraview")
         QApplication.restoreOverrideCursor()
