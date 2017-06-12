@@ -210,10 +210,13 @@ class CfdRunnableFoam(CfdRunnable):
                 if self.print_next_error_file and "file:" in errline:
                     ret += errline + "\n"
                     self.print_next_error_file = False
-                if "FOAM FATAL ERROR" in errline:
+                words = errline.split(' ', 1)  # Split off first field for parallel
+                FATAL = "--> FOAM FATAL ERROR"
+                FATALIO = "--> FOAM FATAL IO ERROR"
+                if errline.startswith(FATAL) or (len(words) > 1 and words[1].startswith(FATAL)):
                     self.print_next_error_lines = 1
                     ret += "OpenFOAM fatal error:\n"
-                elif "FOAM FATAL IO ERROR" in errline:
+                elif errline.startswith(FATALIO) or (len(words) > 1 and words[1].startswith(FATALIO)):
                     self.print_next_error_lines = 1
                     self.print_next_error_file = True
                     ret += "OpenFOAM IO error:\n"

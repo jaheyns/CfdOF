@@ -35,6 +35,7 @@ import string
 import numbers
 import platform
 import subprocess
+import CfdConsoleProcess
 
 import FreeCAD
 import Fem
@@ -45,6 +46,11 @@ if FreeCAD.GuiUp:
     import FreeCADGui
     import FemGui
     from PySide import QtGui
+    from PySide import QtCore
+
+FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2016\\OpenFOAM-4.x"],
+                     "Linux": ["/opt/openfoam4", "/opt/openfoam-dev", "~/OpenFOAM/OpenFOAM-4.x"]
+                     }
 
 """
 def checkCfdPrerequisites():
@@ -442,15 +448,9 @@ def getFoamDir():
     # Ensure parameters exist for future editing
     setFoamDir(installation_path)
 
-    # If not specified, try to detect from shell environment settings
+    # If not specified, try to detect from shell environment settings and defaults
     if not installation_path:
         installation_path = detectFoamDir()
-
-    if not os.path.isabs(installation_path) or \
-       not os.path.exists(os.path.join(installation_path, "etc", "bashrc")):
-        raise IOError("The directory {} is not a valid OpenFOAM installation".format(installation_path))
-    else:
-        setFoamDir(installation_path)
 
     return installation_path
 
@@ -472,17 +472,26 @@ def detectFoamDir():
     else:
         cmdline = ['bash', '-l', '-c', 'echo $WM_PROJECT_DIR']
         foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
-    # Python 3 compatible, check_output() return type byte
-    foam_dir = str(foam_dir)
-    if len(foam_dir) > 1:               # If env var is not defined, python 3 returns `b'\n'` and python 2`\n`
-        if foam_dir[:2] == "b'":
-            foam_dir = foam_dir[2:-3]   # Python3: Strip 'b' from front and EOL char
+        # Python 3 compatible, check_output() return type byte
+        foam_dir = str(foam_dir)
+        if len(foam_dir) > 1:               # If env var is not defined, python 3 returns `b'\n'` and python 2`\n`
+            if foam_dir[:2] == "b'":
+                foam_dir = foam_dir[2:-3]   # Python3: Strip 'b' from front and EOL char
+            else:
+                foam_dir = foam_dir.strip()  # Python2: Strip EOL char
         else:
-            foam_dir = foam_dir.strip()  # Python2: Strip EOL char
-        return foam_dir
-    else:
-        ''' A warning message is generated when the installation path is also not available. '''
-        return None
+            foam_dir = None
+        if foam_dir and not os.path.exists(os.path.join(foam_dir, "etc", "bashrc")):
+            foam_dir = None
+
+    if not foam_dir:
+        for d in FOAM_DIR_DEFAULTS[platform.system()]:
+            foam_dir = os.path.expanduser(d)
+            if foam_dir and not os.path.exists(os.path.join(foam_dir, "etc", "bashrc")):
+                foam_dir = None
+            else:
+                break
+    return foam_dir
 
 
 def translatePath(p):
@@ -583,11 +592,43 @@ def makeRunCommand(cmd, dir, source_env=True):
         return cmdline
 
 
-def runFoamApplication(cmd, case):
-    """ Run OpenFOAM application and automatically generate the log.application file (Wait until finished)
-        cmd  - String with the application being the first entry followied by the options.
-              e.g. `transformPoints -scale "(0.001 0.001 0.001)"
+def runFoamCommand(cmdline, case=None):
+    """ Run a command in the OpenFOAM environment and wait until finished. Return output.
+        Also print output as we go.
+        cmdline - The command line to run as a string
+              e.g. transformPoints -scale "(0.001 0.001 0.001)"
         case - Case directory or path
+    """
+    proc = CfdFoamProcess()
+    exit_code = proc.run(cmdline, case)
+    # Reproduce behaviour of failed subprocess run
+    if exit_code:
+        raise subprocess.CalledProcessError(exit_code, cmdline)
+    return proc.output
+
+
+class CfdFoamProcess:
+    def __init__(self):
+        self.process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=self.readOutput, stderrHook=self.readOutput)
+        self.output = ""
+
+    def run(self, cmdline, case=None):
+        print("Running ", cmdline)
+        self.process.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
+        if not self.process.waitForFinished():
+            raise Exception("Unable to run command " + cmdline)
+        return self.process.exitCode()
+
+    def readOutput(self, output):
+        self.output += output
+
+
+def startFoamApplication(cmd, case, finishedHook=None, stdoutHook=None, stderrHook=None):
+    """ Run OpenFOAM application and automatically generate the log.application file.
+        Returns a CfdConsoleProcess object after launching
+        cmd  - List or string with the application being the first entry followed by the options.
+              e.g. ['transformPoints', '-scale', '"(0.001 0.001 0.001)"']
+        case - Case path
     """
     if isinstance(cmd, list) or isinstance(cmd, tuple):
         cmds = cmd
@@ -599,33 +640,26 @@ def runFoamApplication(cmd, case):
     app = cmds[0]
     logFile = "log.{}".format(app)
 
-    if os.path.exists(logFile):
-        print("Warning: {} already exists, removed to rerun {}.".format(logFile, app))
-        os.remove(logFile)
+    cmdline = ' '.join(cmds)  # Space to separate options
+    # Pipe to log file and terminal
+    cmdline += " 1> >(tee -a " + logFile + ") 2> >(tee -a " + logFile + " >&2)"
+    # Tee appends to the log file, so we must remove first. Can't do directly since
+    # paths may be specified using variables only available in foam runtime environment.
+    cmdline = "{{ rm {}; {}; }}".format(logFile, cmdline)
 
-    logFile = translatePath(logFile)
+    proc = CfdConsoleProcess.CfdConsoleProcess(finishedHook=finishedHook, stdoutHook=stdoutHook, stderrHook=stderrHook)
+    print("Running ", ' '.join(cmds), " -> ", logFile)
+    proc.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
+    if not proc.waitForStarted():
+        raise Exception("Unable to start command " + cmdline)
+    return proc
 
-    try:  # Catch any output before forwarding exception
-        cmdline = app + ' ' + ' '.join(cmds[1:])  # Space to separate options
-        print("Running ", cmdline)
-        cmdline += (" > " + logFile + " 2>&1")  # Pipe to log file
-        cmd = makeRunCommand(cmdline, case)
-        env = {}
-        # Make a clean copy of os.environ, forcing standard strings
-        for k in os.environ:
-            env[str(k)] = str(os.environ[k])
-        env.update(getRunEnvironment())
-        # Prevent terminal window popping up in Windows
-        si = None
-        if platform.system() == 'Windows':
-            si = subprocess.STARTUPINFO()
-            si.dwFlags = subprocess.STARTF_USESHOWWINDOW
-            si.wShowWindow = subprocess.SW_HIDE
-        out = subprocess.check_output(cmd, env=env, stderr=subprocess.STDOUT, startupinfo=si)
-        print(out)
-    except subprocess.CalledProcessError as ex:
-        print(ex.output)
-        raise
+
+def runFoamApplication(cmd, case):
+    """ Same as startFoamApplication, but waits until complete. Returns exit code. """
+    proc = startFoamApplication(cmd, case)
+    proc.waitForFinished()
+    return proc.exitCode()
 
 
 def convertMesh(case, mesh_file, scale):
@@ -657,3 +691,128 @@ def readTemplate(fileName, replaceDict=None):
         helperText = helperText.replace("#"+key+"#", "{}".format(replaceDict[key]))
     helperFile.close()
     return helperText
+
+
+def checkCfdDependencies(term_print=True):
+        import os
+        import subprocess
+        import platform
+
+        message = ""
+        FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
+
+        # Check FreeCAD version
+        if term_print:
+            print("Checking FreeCAD version")
+        ver = FreeCAD.Version()
+        gitver = int(ver[2].split()[0])
+        if int(ver[0]) == 0 and (int(ver[1]) < 17 or (int(ver[1]) == 17 and gitver < 11209)):
+            fc_msg = "FreeCAD version ({}.{}.{}) must be at least 0.17.11209".format(
+                int(ver[0]), int(ver[1]), gitver)
+            if term_print:
+                print(fc_msg)
+            message += fc_msg + '\n'
+
+        # check openfoam
+        if term_print:
+            print("Checking for OpenFOAM:")
+        try:
+            foam_dir = getFoamDir()
+        except IOError as e:
+            ofmsg = "Could not find OpenFOAM installation: " + e.message
+            if term_print:
+                print(ofmsg)
+            message += ofmsg + '\n'
+        else:
+            if not foam_dir:
+                ofmsg = "OpenFOAM installation path not set and OpenFOAM environment neither pre-loaded before " + \
+                        "running FreeCAD nor detected in standard locations"
+                if term_print:
+                    print(ofmsg)
+                message += ofmsg + '\n'
+            else:
+                try:
+                    foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")
+                except Exception as e:
+                    runmsg = "OpenFOAM installation found, but unable to run command: " + e.message
+                    message += runmsg + '\n'
+                    if term_print:
+                        print(runmsg)
+                else:
+                    foam_ver = foam_ver.rstrip().split('\n')[-1]
+                    if int(foam_ver.split('.')[0]) < 4:
+                        vermsg = "OpenFOAM version " + foam_ver + " pre-loaded is outdated: " \
+                                   + "The CFD workbench requires at least OpenFOAM 4.0"
+                        message += vermsg + "\n"
+                        if term_print:
+                            print(vermsg)
+                    else:
+                        # Check for cfMesh
+                        try:
+                            runFoamCommand("cartesianMesh -help")
+                        except subprocess.CalledProcessError:
+                            cfmesh_msg = "cfMesh not found"
+                            message += cfmesh_msg + '\n'
+                            if term_print:
+                                print(cfmesh_msg)
+
+        # check for gnuplot python module
+        if term_print:
+            print("Checking for gnuplot:")
+        try:
+            import Gnuplot
+        except ImportError:
+            gnuplotpy_msg = "gnuplot python module not installed"
+            message += gnuplotpy_msg + '\n'
+            if term_print:
+                print(gnuplotpy_msg)
+
+        gnuplot_cmd = "gnuplot"
+        # For blueCFD, use the supplied Gnuplot
+        if getFoamRuntime() == 'BlueCFD':
+            gnuplot_cmd = '{}\\..\\AddOns\\gnuplot\\bin\\gnuplot.exe'.format(getFoamDir())
+        # Otherwise, the command must be in the path - test to see if it exists
+        import distutils.spawn
+        if distutils.spawn.find_executable(gnuplot_cmd) is None:
+            gnuplot_msg = "Gnuplot executable " + gnuplot_cmd + " not found in path."
+            message += gnuplot_msg + '\n'
+            if term_print:
+                print(gnuplot_msg)
+
+        if term_print:
+            print("Checking for gmsh:")
+        # check that gmsh version 2.13 or greater is installed
+        gmshversion = ""
+        try:
+            gmshversion = subprocess.check_output(["gmsh", "-version"], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError:
+            gmsh_msg = "gmsh is not installed"
+            message += gmsh_msg + '\n'
+            if term_print:
+                print(gmsh_msg)
+        if len(gmshversion) > 1:
+            # Only the last line contains gmsh version number
+            gmshversion = gmshversion.rstrip().split()
+            gmshversion = gmshversion[-1]
+            versionlist = gmshversion.split(".")
+            if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
+                gmsh_ver_msg = "gmsh version is older than minimum required (2.13)"
+                message += gmsh_ver_msg + '\n'
+                if term_print:
+                    print(gmsh_ver_msg)
+
+        paraview_cmd = "paraview"
+        # If using blueCFD, use paraview supplied
+        if getFoamRuntime() == 'BlueCFD':
+            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
+        # Otherwise, the command 'paraview' must be in the path - test to see if it exists
+        import distutils.spawn
+        if distutils.spawn.find_executable(paraview_cmd) is None:
+            pv_msg = "Paraview executable " + paraview_cmd + " not found in path."
+            message += pv_msg + '\n'
+            if term_print:
+                print(pv_msg)
+
+        if term_print:
+            print("Completed CFD dependency check")
+        return message
