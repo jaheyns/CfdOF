@@ -69,6 +69,8 @@ class _ViewProviderCfdMeshCart:
         return
 
     def doubleClicked(self, vobj):
+        if FreeCADGui.activeWorkbench().name() != 'CfdFoamWorkbench':
+            FreeCADGui.activateWorkbench("CfdFoamWorkbench")
         # Group meshing is only active on active analysis, should confirm the analysis the mesh belongs too is active
         gui_doc = FreeCADGui.getDocument(vobj.Object.Document)
         if not gui_doc.getInEdit():

@@ -181,59 +181,65 @@ class _TaskPanelCfdMeshCart:
                              "= '{}'".format(self.mesh_obj.Name, self.utility))
 
         self.console_message_cart = ''
-        self.get_active_analysis()
-        self.set_mesh_params()
-        import CfdCartTools  # Fresh init before remeshing
-        self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
-        cart_mesh = self.cart_mesh
-        self.form.if_max.setText(str(cart_mesh.get_clmax()))
         self.Start = time.time()
         self.Timer.start()
         self.console_log("Starting cut-cell Cartesian meshing ...")
-        print("\nStarting cut-cell Cartesian meshing ...\n")
-        print('  Part to mesh: Name --> '
-              + cart_mesh.part_obj.Name + ',  Label --> '
-              + cart_mesh.part_obj.Label + ', ShapeType --> '
-              + cart_mesh.part_obj.Shape.ShapeType)
-        print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
-        # print('  CharacteristicLengthMin: ' + str(cart_mesh.clmin))
-        # print('  ElementOrder: ' + cart_mesh.order)
-        cart_mesh.get_dimension()
-        cart_mesh.get_tmp_file_paths(self.utility)
-        cart_mesh.setupMeshCaseDir()
-        cart_mesh.get_group_data()
-        cart_mesh.get_region_data()
-        cart_mesh.write_part_file()
-        cart_mesh.setupMeshDict(self.utility)
-        cart_mesh.createMeshScript(run_parallel='false',
-                                   mesher_name='cartesianMesh',
-                                   num_proc=1,
-                                   cartMethod=self.utility)  # Extend in time
-        self.paraviewScriptName = self.cart_mesh.createParaviewScript()
-        self.runCart(cart_mesh)
+        try:
+            self.get_active_analysis()
+            self.set_mesh_params()
+            import CfdCartTools  # Fresh init before remeshing
+            self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
+            cart_mesh = self.cart_mesh
+            self.form.if_max.setText(str(cart_mesh.get_clmax()))
+            print("\nStarting cut-cell Cartesian meshing ...\n")
+            print('  Part to mesh: Name --> '
+                  + cart_mesh.part_obj.Name + ',  Label --> '
+                  + cart_mesh.part_obj.Label + ', ShapeType --> '
+                  + cart_mesh.part_obj.Shape.ShapeType)
+            print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
+            # print('  CharacteristicLengthMin: ' + str(cart_mesh.clmin))
+            # print('  ElementOrder: ' + cart_mesh.order)
+            cart_mesh.get_dimension()
+            cart_mesh.get_tmp_file_paths(self.utility)
+            cart_mesh.setupMeshCaseDir()
+            cart_mesh.get_group_data()
+            cart_mesh.get_region_data()
+            cart_mesh.write_part_file()
+            cart_mesh.setupMeshDict(self.utility)
+            cart_mesh.createMeshScript(run_parallel='false',
+                                       mesher_name='cartesianMesh',
+                                       num_proc=1,
+                                       cartMethod=self.utility)  # Extend in time
+            self.paraviewScriptName = self.cart_mesh.createParaviewScript()
+            self.runCart(cart_mesh)
+        except Exception as ex:
+            self.console_log("Error: " + ex.message, '#FF0000')
+            self.Timer.stop()
 
     def runCart(self, cart_mesh):
         cart_mesh.error = False
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        tmpdir = tempfile.gettempdir()
-        meshCaseDir = os.path.join(tmpdir, 'meshCase')
-        cmd = CfdTools.makeRunCommand('./Allmesh', meshCaseDir, source_env=False)
-        FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
-        env = QtCore.QProcessEnvironment.systemEnvironment()
-        env_vars = CfdTools.getRunEnvironment()
-        for key in env_vars:
-            env.insert(key, env_vars[key])
-        self.mesh_process.setProcessEnvironment(env)
-        self.mesh_process.start(cmd[0], cmd[1:])
-        if self.mesh_process.waitForStarted():
-            self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
-            self.form.pb_stop_mesh.setEnabled(True)
-            self.form.pb_paraview.setEnabled(False)
-        else:
-            self.console_log("Error starting meshing process", "#FF0000")
-            cart_mesh.error = True
-        QApplication.restoreOverrideCursor()
+        try:
+            tmpdir = tempfile.gettempdir()
+            meshCaseDir = os.path.join(tmpdir, 'meshCase')
+            cmd = CfdTools.makeRunCommand('./Allmesh', meshCaseDir, source_env=False)
+            FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
+            env = QtCore.QProcessEnvironment.systemEnvironment()
+            env_vars = CfdTools.getRunEnvironment()
+            for key in env_vars:
+                env.insert(key, env_vars[key])
+            self.mesh_process.setProcessEnvironment(env)
+            self.mesh_process.start(cmd[0], cmd[1:])
+            if self.mesh_process.waitForStarted():
+                self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
+                self.form.pb_stop_mesh.setEnabled(True)
+                self.form.pb_paraview.setEnabled(False)
+            else:
+                self.console_log("Error starting meshing process", "#FF0000")
+                cart_mesh.error = True
+        finally:
+            QApplication.restoreOverrideCursor()
 
     def killMeshProcess(self):
         self.console_log("Meshing manually stopped")

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>CFD Mesh by GMSH </string>
+   <string>CFD Cartesian Mesh</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
