@@ -118,7 +118,7 @@ class CfdPreferencePage:
         self.foam_dir = text
 
     def chooseFoamDir(self):
-        d = QtGui.QFileDialog.getExistingDirectory(None, 'Choose OpenFOAM directory', self.foam_dir)
+        d = QtGui.QFileDialog().getExistingDirectory(None, 'Choose OpenFOAM directory', self.foam_dir)
         if d and os.access(d, os.W_OK):
             self.foam_dir = d
         self.form.le_foam_dir.setText(self.foam_dir)

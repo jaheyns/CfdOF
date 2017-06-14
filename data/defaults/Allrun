@@ -72,7 +72,7 @@ runCommand potentialFoam
 %:True
 # Run application in parallel
 runCommand decomposePar -force
-runCommand mpirun -np %(solver/parallelCores%) %(solver/solverName%) -parallel
+runCommand mpirun -n %(solver/parallelCores%) %(solver/solverName%) -parallel
 %:False
 # Run application
 runCommand %(solver/solverName%)

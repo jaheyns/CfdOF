@@ -90,7 +90,8 @@ class TaskPanelCfdFluidProperties:
             new_unit = "kg/s/m"
             visc = FreeCAD.Units.Quantity(matmap['DynamicViscosity'])
             visc_with_new_unit = float(visc.getValueAs(new_unit))
-            self.form.fViscosity.setText("{} {}".format(visc_with_new_unit,new_unit))
+            print(self.form.fViscosity.setProperty("quantity", self.form.fViscosity.property("quantity")))
+            #self.form.fViscosity.setText("{} {}".format(visc_with_new_unit,new_unit))
 
     def DensityChanged(self,value):
         import Units
