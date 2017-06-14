@@ -50,7 +50,10 @@ class _CommandCfdMeshCartFromShape(FemCommands):
         FreeCAD.ActiveDocument.openTransaction("Create cut-cell Cartesian mesh")
         FreeCADGui.addModule("FemGui")
         analysis_obj = FemGui.getActiveAnalysis()
-        meshObj = CfdTools.getMesh(analysis_obj)
+        if analysis_obj:
+            meshObj = CfdTools.getMesh(analysis_obj)
+        else:
+            meshObj = None
         if not meshObj:
             sel = FreeCADGui.Selection.getSelection()
             if len(sel) == 1:
