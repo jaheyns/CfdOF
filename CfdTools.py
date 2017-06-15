@@ -684,7 +684,7 @@ def startFoamApplication(cmd, case, finishedHook=None, stdoutHook=None, stderrHo
     print("Running ", ' '.join(cmds), " -> ", logFile)
     proc.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
     if not proc.waitForStarted():
-        raise Exception("Unable to start command " + cmdline)
+        raise Exception("Unable to start command " + ' '.join(cmds))
     return proc
 
 

@@ -59,6 +59,7 @@ class CfdConsoleProcess:
             cmd = [os.path.join(FreeCAD.getHomePath(), "bin", "python.exe"),
                    '-u',  # Prevent python from buffering stdout
                    os.path.join(os.path.dirname(__file__), "WindowsRunWrapper.py")] + cmd
+        print("Raw command: ", cmd)
         self.process.start(cmd[0], cmd[1:])
 
     def terminate(self):

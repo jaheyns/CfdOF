@@ -276,16 +276,18 @@ class CfdPreferencePageThread(QThread):
 
         self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
         self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
+
         try:
             import urllib
-            urllib.urlretrieve(CFMESH_URL,
-                               os.path.join(self.user_dir, CFMESH_FILE_BASE+CFMESH_FILE_EXT),
-                               self.downloadStatus)
+            (filename, header) = urllib.urlretrieve(CFMESH_URL,
+                                                    reporthook=self.downloadStatus)
         except Exception as ex:
             raise Exception("Error downloading cfMesh: {}".format(str(ex)))
 
         self.signals.status.emit("Extracting cfMesh...")
-        CfdTools.runFoamCommand("tar -xzf "+CFMESH_FILE_BASE+CFMESH_FILE_EXT, "$WM_PROJECT_USER_DIR")
+        CfdTools.runFoamCommand(
+            '{{ mkdir -p "$WM_PROJECT_USER_DIR"; cd "$WM_PROJECT_USER_DIR"; tar -xzf "{}"; }}'.
+            format(CfdTools.translatePath(filename)))
 
     def downloadStatus(self, blocks, block_size, total_size):
         self.signals.downloadProgress.emit(blocks*block_size, total_size)
