@@ -30,7 +30,7 @@ python=
 pylibs=
 
 ; add 3rd party optional python libs
-optionalpylibs=Gnuplot
+optionalpylibs=
 
 ; add 3rd party applications
 3rdparty=

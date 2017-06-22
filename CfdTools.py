@@ -807,29 +807,6 @@ def checkCfdDependencies(term_print=True):
                             if term_print:
                                 print(cfmesh_msg)
 
-        # check for gnuplot python module
-        if term_print:
-            print("Checking for gnuplot:")
-        try:
-            import Gnuplot
-        except ImportError:
-            gnuplotpy_msg = "gnuplot python module not installed"
-            message += gnuplotpy_msg + '\n'
-            if term_print:
-                print(gnuplotpy_msg)
-
-        gnuplot_cmd = "gnuplot"
-        # For blueCFD, use the supplied Gnuplot
-        if getFoamRuntime() == 'BlueCFD':
-            gnuplot_cmd = '{}\\..\\AddOns\\gnuplot\\bin\\gnuplot.exe'.format(getFoamDir())
-        # Otherwise, the command must be in the path - test to see if it exists
-        import distutils.spawn
-        if distutils.spawn.find_executable(gnuplot_cmd) is None:
-            gnuplot_msg = "Gnuplot executable " + gnuplot_cmd + " not found in path."
-            message += gnuplot_msg + '\n'
-            if term_print:
-                print(gnuplot_msg)
-
         if term_print:
             print("Checking for gmsh:")
         # check that gmsh version 2.13 or greater is installed

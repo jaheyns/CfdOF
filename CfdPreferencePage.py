@@ -49,8 +49,6 @@ if FreeCAD.GuiUp:
 
 BLUECFD_URL = \
     "https://github.com/blueCFD/Core/releases/download/blueCFD-Core-2016-2/blueCFD-Core-2016-2-win64-setup.exe"
-GNUPLOTPY_URL = "https://sourceforge.net/projects/gnuplot-py/files/Gnuplot-py/1.8/gnuplot-py-1.8.zip/download"
-GNUPLOTPY_FILE_BASE = "gnuplot-py-1.8"
 CFMESH_URL = "https://sourceforge.net/projects/cfmesh/files/v1.1.2/cfMesh-v1.1.2.tgz/download"
 CFMESH_FILE_BASE = "cfMesh-v1.1.2"
 CFMESH_FILE_EXT = ".tar.gz"
@@ -58,8 +56,7 @@ CFMESH_FILE_EXT = ".tar.gz"
 # Tasks for the worker thread
 DEPENDENCY_CHECK = 1
 DOWNLOAD_BLUECFD = 2
-DOWNLOAD_GNUPLOTPY = 3
-DOWNLOAD_CFMESH = 4
+DOWNLOAD_CFMESH = 3
 
 
 class CfdPreferencePage:
@@ -71,7 +68,6 @@ class CfdPreferencePage:
         self.form.le_foam_dir.textChanged.connect(self.foamDirChanged)
         self.form.pb_run_dependency_checker.clicked.connect(self.runDependencyChecker)
         self.form.pb_download_install_blueCFD.clicked.connect(self.downloadInstallBlueCFD)
-        self.form.pb_download_install_Gnuplotpy.clicked.connect(self.downloadInstallGnuplotpy)
         self.form.pb_download_install_cfMesh.clicked.connect(self.downloadInstallCfMesh)
 
         self.thread = CfdPreferencePageThread()
@@ -131,10 +127,6 @@ class CfdPreferencePage:
         self.thread.task = DOWNLOAD_BLUECFD
         self.startThread()
 
-    def downloadInstallGnuplotpy(self):
-        self.thread.task = DOWNLOAD_GNUPLOTPY
-        self.startThread()
-
     def downloadInstallCfMesh(self):
         self.thread.task = DOWNLOAD_CFMESH
         self.startThread()
@@ -154,23 +146,6 @@ class CfdPreferencePage:
     def threadFinished(self, status):
         if self.thread.task == DEPENDENCY_CHECK:
             QApplication.restoreOverrideCursor()
-
-        elif self.thread.task == DOWNLOAD_GNUPLOTPY:
-            self.consoleMessage("Attempting to install Gnuplot-py package:")
-
-            if platform.system() == 'Windows':
-                python_exe = os.path.join(FreeCAD.getHomePath(), 'bin', 'python.exe')
-            else:
-                python_exe = 'python'
-            cmd = [python_exe, '-u', 'setup.py', 'install']
-
-            working_dir = os.path.join(tempfile.gettempdir(), GNUPLOTPY_FILE_BASE)
-            self.install_process = CfdConsoleProcess.CfdConsoleProcess(finishedHook=self.installFinished)
-            print("Running {} in {}".format(' '.join(cmd), working_dir))
-
-            self.install_process.start(cmd, working_dir=working_dir)
-            if not self.install_process.waitForStarted():
-                self.consoleMessage("Unable to run command " + ' '.join(cmd), '#FF0000')
 
         elif self.thread.task == DOWNLOAD_CFMESH:
             if status:
@@ -226,8 +201,6 @@ class CfdPreferencePageThread(QThread):
                 self.dependencyCheck()
             elif self.task == DOWNLOAD_BLUECFD:
                 self.downloadBlueCFD()
-            elif self.task == DOWNLOAD_GNUPLOTPY:
-                self.downloadGnuplotpy()
             elif self.task == DOWNLOAD_CFMESH:
                 self.downloadCfMesh()
         except Exception as e:
@@ -257,18 +230,6 @@ class CfdPreferencePageThread(QThread):
             self.signals.status.emit("blueCFD-Core installer launched - please complete the installation")
         else:
             raise Exception("Failed to launch blueCFD-Core installer")
-
-    def downloadGnuplotpy(self):
-        self.signals.status.emit("Downloading Gnuplot-py, please wait...")
-        try:
-            import urllib
-            (filename, headers) = urllib.urlretrieve(GNUPLOTPY_URL, reporthook=self.downloadStatus)
-        except Exception as ex:
-            raise Exception("Error downloading Gnuplot-py: {}".format(str(ex)))
-
-        self.signals.status.emit("Extracting {} in {}".format(filename, tempfile.gettempdir()))
-        with zipfile.ZipFile(filename, 'r') as z:
-            z.extractall(tempfile.gettempdir())
 
     def downloadCfMesh(self):
         self.signals.status.emit("Downloading cfMesh, please wait...")

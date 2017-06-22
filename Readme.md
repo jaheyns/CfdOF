@@ -58,8 +58,6 @@ which can be automatically installed (see below for instructions).
 
 - [Latest development version of FreeCAD (0.17 prerelease; requires git commit 12539 or later)](https://www.freecadweb.org/wiki/Download)  
 - [OpenFOAM (version 4.x tested; other versions may work. However cfMesh currently does not support version 5.x)](http://openfoam.org/download/)  
-- [Gnuplot.py (version 1.8)](http://gnuplot-py.sourceforge.net/)  
-- [Gnuplot](http://www.gnuplot.info/)  
 - [Paraview](http://www.paraview.org/)  
 - [GMSH (version 2.13 or later)](http://gmsh.info/)  
 - [cfMesh (version 1.1.2)](https://sourceforge.net/projects/cfmesh/files/)
@@ -89,7 +87,7 @@ In the FreeCAD window, select Edit | Preferences ... and
 choose "CFD". 
 
 The OpenFOAM installation is via the [blueCFD-Core](http://bluecfd.github.io/Core/Downloads/) package (version 2016-2),
-with which Gnuplot and Paraview come bundled. This can be installed
+with which Paraview comes bundled. This can be installed
 manually using the above link, or by clicking the relevant
 button in the Preferences panel described above.
 
@@ -98,11 +96,10 @@ panel to \<blueCFD install directory\>\OpenFOAM-4.x
  (It will be automatically detected in the default install
 location.)
 
-Likewise the Gnuplot-py module can be installed from the 
-Preferences panel, as well as cfMesh.
-cfMesh is automatically built from source inside the OpenFOAM
-environment if installed from the Preferences panel. Note
-that this is a lengthy process.
+Likewise, cfMesh can be installed from the 
+Preferences panel. cfMesh is automatically built from source 
+inside the OpenFOAM environment if installed from the 
+Preferences panel. Note that this is a lengthy process.
 
 Choosing the "Check dependencies" option will verify that all 
 prerequisites have been successfully installed.
@@ -132,7 +129,6 @@ choose "CFD".
 
 Manual installation is however required for 
 [OpenFOAM](http://openfoam.org/download/),
-[Gnuplot](http://www.gnuplot.info/),
 [Paraview](http://www.paraview.org/) and
 [GMSH](http://gmsh.info/), which should be
 installed using your distribution's package manager
@@ -143,9 +139,8 @@ panel - typical install locations are /home/user/OpenFOAM/OpenFOAM-4.x
 or /opt/openfoam4 (It will be automatically detected in common default install
 locations.)
 
-The Gnuplot-py package can be installed into Python
-using the Preferences panel described above, as well
-as cfMesh which will be downloaded and built from the source
+cfMesh can be installed using the Preferences panel described above,
+and will be downloaded and built from the source
 code inside your OpenFOAM installation if you have
 not already done so yourself. Note that this is a lengthy process.
 
@@ -160,6 +155,7 @@ prerequisites have been successfully installed.
 Please discuss issues on the [CFDOF dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=24147).
 
 For previous discussions see [CFD WB forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=21576).
+
 ## Developement
 
 It is asked that developers should only add functionality or code that is working and can be tested. Dead code, even
