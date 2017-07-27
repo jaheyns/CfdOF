@@ -430,8 +430,7 @@ class CfdCaseWriterFoam(QRunnable):
             for (i, mf) in enumerate(meshFaceList):
                 bcFacesList = bc_obj.Shape.Faces
                 for bf in bcFacesList:
-                    import FemMeshTools
-                    isSameGeo = FemMeshTools.is_same_geometry(bf, mf)
+                    isSameGeo = CfdTools.isSameGeometry(bf, mf)
                     if isSameGeo:
                         bc_list.append(mobj.ShapeFaceNames[i])
                         if mobj.ShapeFaceNames[i] in bc_allocated:

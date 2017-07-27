@@ -849,3 +849,41 @@ def checkCfdDependencies(term_print=True):
         if term_print:
             print("Completed CFD dependency check")
         return message
+
+
+def isSameGeometry(shape1, shape2):
+    """ Copy of FemMeshTools.is_same_geometry, with a bug fix """
+    # the vertexes and the CenterOfMass are compared
+    # it is a hack, but I do not know any better !
+    # check of Volume and Area before starting with the vertices could be added
+    # BoundBox is possible too, but is BB calcualtions robust?!
+    # print(shape1)
+    # print(shape2)
+    same_Vertexes = 0
+    if len(shape1.Vertexes) == len(shape2.Vertexes) and len(shape1.Vertexes) > 1:
+        # compare CenterOfMass
+        if shape1.CenterOfMass != shape2.CenterOfMass:
+            return False
+        else:
+            # compare the Vertexes
+            for vs1 in shape1.Vertexes:
+                for vs2 in shape2.Vertexes:
+                    if vs1.X == vs2.X and vs1.Y == vs2.Y and vs1.Z == vs2.Z:
+                        same_Vertexes += 1
+                        # Bugfix: was 'continue' - caused false-negative with repeated vertices
+                        break
+            # print(same_Vertexes)
+            if same_Vertexes == len(shape1.Vertexes):
+                return True
+            else:
+                return False
+    if len(shape1.Vertexes) == len(shape2.Vertexes) and len(shape1.Vertexes) == 1:
+        vs1 = shape1.Vertexes[0]
+        vs2 = shape2.Vertexes[0]
+        if vs1.X == vs2.X and vs1.Y == vs2.Y and vs1.Z == vs2.Z:
+            return True
+        else:
+            return False
+    else:
+        return False
+
