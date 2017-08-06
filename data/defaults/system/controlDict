@@ -53,6 +53,11 @@ timeFormat      general;
 
 timePrecision   6;
 
+%{%(alphaZonesPresent%)
+%:True
+maxAlphaCo      1;
+%}
+
 runTimeModifiable true;
 
 libs

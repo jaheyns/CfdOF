@@ -1,18 +1,18 @@
 %{%(alphaZonesPresent%)
-%:False
+%:True
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      p;
+    object      p_rgh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform %(initialValues/KinematicPressure%);
+internalField   uniform %(initialValues/Pressure%);
 
 boundaryField
 {
@@ -20,7 +20,7 @@ boundaryField
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
 %:wall
-%[0/_boundary_zeroGradient%]
+%[0/_boundary_fixedFluxPressure%]
 %:inlet
 %{%(boundaries/%(0%)/BoundarySubtype%)
 %:totalPressure
@@ -34,10 +34,10 @@ boundaryField
     %(0%)
     {
         type        fixedValue;
-        value       uniform %(boundaries/%(0%)/KinematicPressure%);
+        value       uniform %(boundaries/%(0%)/Pressure%);
     }
 %:default
-%[0/_boundary_zeroGradient%]
+%[0/_boundary_fixedFluxPressure%]
 %}
 %:outlet
 %{%(boundaries/%(0%)/BoundarySubtype%)
@@ -45,10 +45,10 @@ boundaryField
     %(0%)
     {
         type        fixedValue;
-        value       uniform %(boundaries/%(0%)/KinematicPressure%);
+        value       uniform %(boundaries/%(0%)/Pressure%);
     }
 %:default
-%[0/_boundary_zeroGradient%]
+%[0/_boundary_fixedFluxPressure%]
 %}
 %:open
     %(0%)
@@ -78,7 +78,7 @@ boundaryField
 
 %}
 %{defaultFaces
-%[0/_boundary_zeroGradient%]
+%[0/_boundary_fixedFluxPressure%]
 %}
 
 }
