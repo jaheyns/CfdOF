@@ -73,7 +73,10 @@ class _ViewProviderCfdPorousZone:
         return
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "porous.png")
+        if "PorousZone" in self.Object.Name:
+            icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "porous.png")
+        else:
+            icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.png")
         return icon_path
 
     def setEdit(self, vobj, mode):

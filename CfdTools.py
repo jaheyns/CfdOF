@@ -192,6 +192,14 @@ def getPorousObjects(analysis_object):
     return porousZones, isPresent
 
 
+def getAlphaObjects(analysis_object):
+    return [i for i in analysis_object.Member if "AlphaZone" in i.Name]
+
+
+def getZoneObjects(analysis_object):
+    return [i for i in analysis_object.Member if "Zone" in i.Name]
+
+
 def getInitialConditions(analysis_object):
     isPresent = False
     for i in analysis_object.Member:
@@ -203,10 +211,9 @@ def getInitialConditions(analysis_object):
     return InitialVariables, isPresent
 
 
-def getMaterial(analysis_object):
-    for i in analysis_object.Member:
-        if i.isDerivedFrom('App::MaterialObjectPython'):
-            return i
+def getMaterials(analysis_object):
+    return [i for i in analysis_object.Member
+            if i.isDerivedFrom('App::MaterialObjectPython')]
 
 
 def getSolver(analysis_object):

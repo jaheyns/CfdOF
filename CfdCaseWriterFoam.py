@@ -63,13 +63,22 @@ class CfdCaseWriterFoam(QRunnable):
         self.solver_obj = CfdTools.getSolver(analysis_obj)
         self.physics_model, isPresent = CfdTools.getPhysicsModel(analysis_obj)
         self.mesh_obj = CfdTools.getMesh(analysis_obj)
-        self.material_obj = CfdTools.getMaterial(analysis_obj)
+        self.material_objs = CfdTools.getMaterials(analysis_obj)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions, isPresent = CfdTools.getInitialConditions(analysis_obj)
         self.porousZone_objs, self.porousZonePresent = CfdTools.getPorousObjects(analysis_obj)
+        self.alphaZone_objs = CfdTools.getAlphaObjects(analysis_obj)
+        self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
         self.mesh_generated = False
 
         self.signals = CfdCaseWriterSignals()
+
+        if len(self.alphaZone_objs) > 0:
+            self.physics_model['Time'] = 'Transient'
+            # TODO: remove this code and add GUI support for transient simulations
+            self.solver_obj.TimeStep = 0.001
+            self.solver_obj.WriteInterval = 0.05
+            self.solver_obj.EndTime = 1
 
     def run(self):
         success = False
@@ -108,6 +117,11 @@ class CfdCaseWriterFoam(QRunnable):
                 'bafflesPresent': self.bafflesPresent(),
                 'porousZones': {},
                 'porousZonesPresent': False,
+                'alphaZones': [o.Label for o in self.alphaZone_objs],
+                'alphaZonesPresent': len(self.alphaZone_objs) > 0,
+                'multiphaseZonesPresent': len(self.alphaZone_objs) > 1,
+                'zones': {o.Label: {'PartNameList': o.partNameList} for o in self.zone_objs},
+                'zonesPresent': len(self.zone_objs) > 0,
                 'meshType': self.mesh_obj.Proxy.Type,
                 'solver': solverSettingsDict,
                 'system': {}
@@ -120,8 +134,8 @@ class CfdCaseWriterFoam(QRunnable):
             self.processInitialConditions()
             self.clearCase()
 
+            self.exportZoneStlSurfaces()
             if self.porousZone_objs is not None:
-                self.exportPorousZoneStlSurfaces()
                 self.processPorousZoneProperties()
 
             self.settings['createPatchesFromSnappyBaffles'] = False
@@ -129,6 +143,14 @@ class CfdCaseWriterFoam(QRunnable):
                 self.setupPatchNames()
 
             TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
+            if len(self.alphaZone_objs) > 0:
+                with open(os.path.join(self.case_folder, '0', 'alpha.fluid')) as f:
+                    alpha_fluid = f.read()
+                for obj in self.alphaZone_objs:
+                    with open(os.path.join(self.case_folder, '0', obj.Label), 'w') as f:
+                        f.write(alpha_fluid.replace('alpha.fluid',
+                                                         obj.Label))
+            os.unlink(os.path.join(self.case_folder, '0', 'alpha.fluid'))
 
             self.writeMesh()
 
@@ -155,6 +177,10 @@ class CfdCaseWriterFoam(QRunnable):
         """ Solver name is selected based on selected physics. This should only be extended as additional physics are
         included. """
         solver = None
+        if len(self.alphaZone_objs) == 1:
+            return 'interFoam'
+        elif len(self.alphaZone_objs) > 1:
+            return 'multiphaseInterFoam'
         if self.physics_model['Flow'] == 'Incompressible' and (self.physics_model['Thermal'] is None):
             if self.physics_model['Time'] == 'Transient':
                 solver = 'pimpleFoam'
@@ -243,15 +269,18 @@ class CfdCaseWriterFoam(QRunnable):
         # self.material_obj stores everything as a string for compatibility with FreeCAD material objects.
         # Convert to SI numbers
         settings = self.settings
-        settings['fluidProperties']['Density'] = \
-            Units.Quantity(self.material_obj.Material['Density']).getValueAs("kg/m^3").Value
-        settings['fluidProperties']['DynamicViscosity'] = \
-            Units.Quantity(self.material_obj.Material['DynamicViscosity']).getValueAs("kg/m/s").Value
-        if self.physics_model['Turbulence'] == 'Inviscid':
-            kinVisc = 0.0
-        else:
-            kinVisc = settings['fluidProperties']['DynamicViscosity']/settings['fluidProperties']['Density'];
-        settings['fluidProperties']['KinematicViscosity'] = kinVisc
+        for material_obj in self.material_objs:
+            mp = {}
+            mp['Density'] = \
+                Units.Quantity(material_obj.Material['Density']).getValueAs("kg/m^3").Value
+            mp['DynamicViscosity'] = \
+                Units.Quantity(material_obj.Material['DynamicViscosity']).getValueAs("kg/m/s").Value
+            if self.physics_model['Turbulence'] == 'Inviscid':
+                kinVisc = 0.0
+            else:
+                kinVisc = mp['DynamicViscosity']/mp['Density'];
+            mp['KinematicViscosity'] = kinVisc
+            settings['fluidProperties'][material_obj.Label] = mp
 
     def processBoundaryConditions(self):
         """ Compute any quantities required before case build """
@@ -280,7 +309,8 @@ class CfdCaseWriterFoam(QRunnable):
                         raise RuntimeError
                 except (SystemError, RuntimeError):
                     raise RuntimeError(bc['DirectionFace'] + " is not a valid, planar face.")
-            bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties']['Density']
+            if not settings['alphaZonesPresent']:
+                bc['KinematicPressure'] = bc['Pressure']/next(iter(settings['fluidProperties'].values()))['Density']
 
             if bc['PorousBaffleMethod'] == 1:
                 wireDiam = bc['ScreenWireDiameter']
@@ -293,7 +323,8 @@ class CfdCaseWriterFoam(QRunnable):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
         settings = self.settings
         initial_values = settings['initialValues']
-        initial_values['KinematicPressure'] = initial_values['Pressure'] / settings['fluidProperties']['Density']
+        if not settings['alphaZonesPresent']:
+            initial_values['KinematicPressure'] = initial_values['Pressure'] / next(iter(settings['fluidProperties'].values()))['Density']
         physics = settings['physics']
         if physics['TurbulenceModel'] is not None:
             if initial_values['UseInletTurbulenceValues']:
@@ -346,24 +377,23 @@ class CfdCaseWriterFoam(QRunnable):
 
     # Porous
 
-    def exportPorousZoneStlSurfaces(self):
-        if self.porousZonePresent:
-            for ii in range(len(self.porousZone_objs)):
-                import Mesh
-                for i in range(len(self.porousZone_objs[ii].shapeList)):
-                    shape = self.porousZone_objs[ii].shapeList[i].Shape
-                    path = os.path.join(self.solver_obj.WorkingDir,
-                                        self.solver_obj.InputCaseName,
-                                        "constant",
-                                        "triSurface")
-                    if not os.path.exists(path):
-                        os.makedirs(path)
-                    fname = os.path.join(path, self.porousZone_objs[ii]. partNameList[i]+u".stl")
-                    import MeshPart
-                    #meshStl = MeshPart.meshFromShape(shape, LinearDeflection = self.mesh_obj.STLLinearDeflection)
-                    meshStl = MeshPart.meshFromShape(shape, LinearDeflection = 0.1)
-                    meshStl.write(fname)
-                    FreeCAD.Console.PrintMessage("Successfully wrote stl surface\n")
+    def exportZoneStlSurfaces(self):
+        for zo in self.zone_objs:
+            import Mesh
+            for i in range(len(zo.shapeList)):
+                shape = zo.shapeList[i].Shape
+                path = os.path.join(self.solver_obj.WorkingDir,
+                                    self.solver_obj.InputCaseName,
+                                    "constant",
+                                    "triSurface")
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                fname = os.path.join(path, zo.partNameList[i]+u".stl")
+                import MeshPart
+                #meshStl = MeshPart.meshFromShape(shape, LinearDeflection = self.mesh_obj.STLLinearDeflection)
+                meshStl = MeshPart.meshFromShape(shape, LinearDeflection = 0.1)
+                meshStl.write(fname)
+                FreeCAD.Console.PrintMessage("Successfully wrote stl surface\n")
 
     def processPorousZoneProperties(self):
         settings = self.settings

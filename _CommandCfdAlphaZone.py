@@ -22,64 +22,41 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "CFDPorousZone"
-__author__ = "AB, OO, JH"
+__title__ = "Command to generate a alpha zone"
+__author__ = ""
 __url__ = "http://www.freecadweb.org"
 
-import FreeCAD, Part, math
-from FreeCAD import Base
-from pivy import coin
-import FreeCADGui
+import FreeCAD
+import platform
+from PyGui.FemCommands import FemCommands
+import FemGui
+import CfdTools
+import os
+
+if FreeCAD.GuiUp:
+    import FreeCADGui
+    from PySide import QtCore
 
 
-class PartFeature:
-    def __init__(self, obj):
-        obj.Proxy = self
+class _CommandCfdAlphaZone(FemCommands):
+    """ The Cfd alpha zone command definition """
+    def __init__(self):
+        super(_CommandCfdAlphaZone, self).__init__()
+        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","alpha.png")
+        self.resources = {'Pixmap': icon_path,
+                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_AlphaZone", "Alpha zone"),
+                          'Accel': "",
+                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_AlphaZone", "Select and create a alpha zone")}
+        self.is_active = 'with_analysis'
+
+    def Activated(self):
+        FreeCAD.ActiveDocument.openTransaction("Select and create a alpha zone")
+
+        FreeCADGui.addModule("FemGui")
+        FreeCADGui.addModule("CfdPorousZone")
+        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdPorousZone.makeCfdPorousZone('AlphaZone')]")
+        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member[-1].Label = 'alpha.fluid'")
+        FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-class _CfdPorousZone(PartFeature):
-    """ The CFD Porous Zone Model """
-
-    def __init__(self, obj):
-        PartFeature.__init__(self, obj)
-
-        # obj.addProperty("App::PropertyPythonObject","Properties")
-        # obj.addProperty("Part::PropertyPartShape","Shape")
-
-        # obj.addProperty("App::PropertyStringList","partNameList")
-        obj.addProperty("App::PropertyPythonObject", "partNameList").partNameList = []
-        obj.addProperty("App::PropertyLinkList", "shapeList")
-        if "PorousZone" in obj.Name:
-            obj.addProperty("App::PropertyPythonObject", "porousZoneProperties")
-            obj.porousZoneProperties = {
-                'PorousCorrelation': 'DarcyForchheimer',
-                'D': [0, 0, 0],
-                'F': [0, 0, 0],
-                'e1': [1, 0, 0],
-                'e2': [0, 1, 0],
-                'e3': [0, 0, 1],
-                'OuterDiameter': 0.0,
-                'TubeAxis': [0, 0, 1],
-                'TubeSpacing': 0.0,
-                'SpacingDirection': [1, 0, 0],
-                'AspectRatio': 1.73,
-                'VelocityEstimate': 0.0
-            }
-
-        obj.Proxy = self
-        self.Type = "PorousZone"
-
-    def execute(self, fp):
-        listOfShapes = []
-        for i in range(len(fp.shapeList)):
-            listOfShapes.append(fp.shapeList[i].Shape)
-        if len(listOfShapes) > 0:
-            fp.Shape = Part.makeCompound(listOfShapes)
-        else:
-            fp.Shape = Part.Shape()
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
+FreeCADGui.addCommand('Cfd_AlphaZone', _CommandCfdAlphaZone())

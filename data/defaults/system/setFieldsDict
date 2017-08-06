@@ -1,0 +1,36 @@
+%{%(alphaZonesPresent%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defaultFieldValues
+(
+%{%(alphaZones%)
+    volScalarFieldValue %(0%) 0
+%}
+);
+
+regions
+(
+%{%(alphaZones%)
+%{%(zones/%(0%)/PartNameList%)
+    cellToCell
+    {
+        set "%(0%)";
+        fieldValues
+        (
+            volScalarFieldValue %(1%) 1
+        );
+    }
+%}
+%}
+);
+%}

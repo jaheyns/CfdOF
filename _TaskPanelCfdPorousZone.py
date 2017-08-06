@@ -62,7 +62,6 @@ class _TaskPanelCfdPorousZone:
         self.obj = obj
         self.shapeListOrig = list(self.obj.shapeList)
         self.partNameList = list(self.obj.partNameList)
-        self.p = self.obj.porousZoneProperties
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelPorousZone.ui"))
 
@@ -70,35 +69,40 @@ class _TaskPanelCfdPorousZone:
         self.form.listWidget.itemPressed.connect(self.setSelection)
         self.form.pushButtonDelete.clicked.connect(self.deleteFeature)
 
-        self.form.comboBoxCorrelation.currentIndexChanged.connect(self.comboBoxCorrelationChanged)
+        if "PorousZone" in self.obj.Name:
+            self.p = self.obj.porousZoneProperties
 
-        self.form.e1x.textEdited.connect(self.e1Changed)
-        self.form.e1y.textEdited.connect(self.e1Changed)
-        self.form.e1z.textEdited.connect(self.e1Changed)
-        self.form.e2x.textEdited.connect(self.e2Changed)
-        self.form.e2y.textEdited.connect(self.e2Changed)
-        self.form.e2z.textEdited.connect(self.e2Changed)
-        self.form.e3x.textEdited.connect(self.e3Changed)
-        self.form.e3y.textEdited.connect(self.e3Changed)
-        self.form.e3z.textEdited.connect(self.e3Changed)
-        self.form.e1x.editingFinished.connect(self.e1Done)
-        self.form.e1y.editingFinished.connect(self.e1Done)
-        self.form.e1z.editingFinished.connect(self.e1Done)
-        self.form.e2x.editingFinished.connect(self.e2Done)
-        self.form.e2y.editingFinished.connect(self.e2Done)
-        self.form.e2z.editingFinished.connect(self.e2Done)
-        self.form.e3x.editingFinished.connect(self.e3Done)
-        self.form.e3y.editingFinished.connect(self.e3Done)
-        self.form.e3z.editingFinished.connect(self.e3Done)
-        self.lastEVectorChanged = 1
-        self.lastLastEVectorChanged = 2
+            self.form.comboBoxCorrelation.currentIndexChanged.connect(self.comboBoxCorrelationChanged)
 
-        self.form.comboAspectRatio.currentIndexChanged.connect(self.comboAspectRatioChanged)
+            self.form.e1x.textEdited.connect(self.e1Changed)
+            self.form.e1y.textEdited.connect(self.e1Changed)
+            self.form.e1z.textEdited.connect(self.e1Changed)
+            self.form.e2x.textEdited.connect(self.e2Changed)
+            self.form.e2y.textEdited.connect(self.e2Changed)
+            self.form.e2z.textEdited.connect(self.e2Changed)
+            self.form.e3x.textEdited.connect(self.e3Changed)
+            self.form.e3y.textEdited.connect(self.e3Changed)
+            self.form.e3z.textEdited.connect(self.e3Changed)
+            self.form.e1x.editingFinished.connect(self.e1Done)
+            self.form.e1y.editingFinished.connect(self.e1Done)
+            self.form.e1z.editingFinished.connect(self.e1Done)
+            self.form.e2x.editingFinished.connect(self.e2Done)
+            self.form.e2y.editingFinished.connect(self.e2Done)
+            self.form.e2z.editingFinished.connect(self.e2Done)
+            self.form.e3x.editingFinished.connect(self.e3Done)
+            self.form.e3y.editingFinished.connect(self.e3Done)
+            self.form.e3z.editingFinished.connect(self.e3Done)
+            self.lastEVectorChanged = 1
+            self.lastLastEVectorChanged = 2
 
-        self.form.pushButtonDelete.setEnabled(False)
+            self.form.comboAspectRatio.currentIndexChanged.connect(self.comboAspectRatioChanged)
 
-        self.form.comboBoxCorrelation.addItems(POROUS_CORRELATION_NAMES)
-        self.form.comboAspectRatio.addItems(ASPECT_RATIO_NAMES)
+            self.form.pushButtonDelete.setEnabled(False)
+
+            self.form.comboBoxCorrelation.addItems(POROUS_CORRELATION_NAMES)
+            self.form.comboAspectRatio.addItems(ASPECT_RATIO_NAMES)
+        else:
+            self.form.porousFrame.setVisible(False)
 
         self.setInitialValues()
 
@@ -106,40 +110,41 @@ class _TaskPanelCfdPorousZone:
         for i in range(len(self.obj.partNameList)):
             self.form.listWidget.addItem(str(self.obj.partNameList[i]))
 
-        ci = indexOrDefault(POROUS_CORRELATIONS, self.p.get('PorousCorrelation'), 0)
-        self.form.comboBoxCorrelation.setCurrentIndex(ci)
-        d = self.p.get('D')
-        self.form.dx.setText("{}".format(d[0]))
-        self.form.dy.setText("{}".format(d[1]))
-        self.form.dz.setText("{}".format(d[2]))
-        f = self.p.get('F')
-        self.form.fx.setText("{}".format(f[0]))
-        self.form.fy.setText("{}".format(f[1]))
-        self.form.fz.setText("{}".format(f[2]))
-        e1 = self.p.get('e1')
-        self.form.e1x.setText("{}".format(e1[0]))
-        self.form.e1y.setText("{}".format(e1[1]))
-        self.form.e1z.setText("{}".format(e1[2]))
-        e2 = self.p.get('e2')
-        self.form.e2x.setText("{}".format(e2[0]))
-        self.form.e2y.setText("{}".format(e2[1]))
-        self.form.e2z.setText("{}".format(e2[2]))
-        e3 = self.p.get('e3')
-        self.form.e3x.setText("{}".format(e3[0]))
-        self.form.e3y.setText("{}".format(e3[1]))
-        self.form.e3z.setText("{}".format(e3[2]))
-        self.form.inputOuterDiameter.setText("{} mm".format(self.p.get('OuterDiameter')*1000))
-        tubeAxis = self.p.get('TubeAxis')
-        self.form.inputTubeAxisX.setText("{}".format(tubeAxis[0]))
-        self.form.inputTubeAxisY.setText("{}".format(tubeAxis[1]))
-        self.form.inputTubeAxisZ.setText("{}".format(tubeAxis[2]))
-        self.form.inputTubeSpacing.setText("{} mm".format(self.p.get('TubeSpacing')*1000))
-        normalAxis = self.p.get('SpacingDirection')
-        self.form.inputBundleLayerNormalX.setText("{}".format(normalAxis[0]))
-        self.form.inputBundleLayerNormalY.setText("{}".format(normalAxis[1]))
-        self.form.inputBundleLayerNormalZ.setText("{}".format(normalAxis[2]))
-        self.form.inputAspectRatio.setText("{}".format(self.p.get('AspectRatio')))
-        self.form.inputVelocityEstimate.setText("{} m/s".format(self.p.get('VelocityEstimate')))
+        if "PorousZone" in self.obj.Name:
+            ci = indexOrDefault(POROUS_CORRELATIONS, self.p.get('PorousCorrelation'), 0)
+            self.form.comboBoxCorrelation.setCurrentIndex(ci)
+            d = self.p.get('D')
+            self.form.dx.setText("{}".format(d[0]))
+            self.form.dy.setText("{}".format(d[1]))
+            self.form.dz.setText("{}".format(d[2]))
+            f = self.p.get('F')
+            self.form.fx.setText("{}".format(f[0]))
+            self.form.fy.setText("{}".format(f[1]))
+            self.form.fz.setText("{}".format(f[2]))
+            e1 = self.p.get('e1')
+            self.form.e1x.setText("{}".format(e1[0]))
+            self.form.e1y.setText("{}".format(e1[1]))
+            self.form.e1z.setText("{}".format(e1[2]))
+            e2 = self.p.get('e2')
+            self.form.e2x.setText("{}".format(e2[0]))
+            self.form.e2y.setText("{}".format(e2[1]))
+            self.form.e2z.setText("{}".format(e2[2]))
+            e3 = self.p.get('e3')
+            self.form.e3x.setText("{}".format(e3[0]))
+            self.form.e3y.setText("{}".format(e3[1]))
+            self.form.e3z.setText("{}".format(e3[2]))
+            self.form.inputOuterDiameter.setText("{} mm".format(self.p.get('OuterDiameter')*1000))
+            tubeAxis = self.p.get('TubeAxis')
+            self.form.inputTubeAxisX.setText("{}".format(tubeAxis[0]))
+            self.form.inputTubeAxisY.setText("{}".format(tubeAxis[1]))
+            self.form.inputTubeAxisZ.setText("{}".format(tubeAxis[2]))
+            self.form.inputTubeSpacing.setText("{} mm".format(self.p.get('TubeSpacing')*1000))
+            normalAxis = self.p.get('SpacingDirection')
+            self.form.inputBundleLayerNormalX.setText("{}".format(normalAxis[0]))
+            self.form.inputBundleLayerNormalY.setText("{}".format(normalAxis[1]))
+            self.form.inputBundleLayerNormalZ.setText("{}".format(normalAxis[2]))
+            self.form.inputAspectRatio.setText("{}".format(self.p.get('AspectRatio')))
+            self.form.inputVelocityEstimate.setText("{} m/s".format(self.p.get('VelocityEstimate')))
 
     def deleteFeature(self):
         shapeList = list(self.obj.shapeList)
@@ -253,39 +258,40 @@ class _TaskPanelCfdPorousZone:
         self.form.comboAspectRatio.setToolTip(ASPECT_RATIO_TIPS[i])
 
     def accept(self):
-        try:
-            self.p['PorousCorrelation'] = POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()]
-            self.p['D'] = [float(FreeCAD.Units.Quantity(self.form.dx.text())),
-                           float(FreeCAD.Units.Quantity(self.form.dy.text())),
-                           float(FreeCAD.Units.Quantity(self.form.dz.text()))]
-            self.p['F'] = [float(FreeCAD.Units.Quantity(self.form.fx.text())),
-                           float(FreeCAD.Units.Quantity(self.form.fy.text())),
-                           float(FreeCAD.Units.Quantity(self.form.fz.text()))]
-            self.p['e1'] = [float(FreeCAD.Units.Quantity(self.form.e1x.text())),
-                            float(FreeCAD.Units.Quantity(self.form.e1y.text())),
-                            float(FreeCAD.Units.Quantity(self.form.e1z.text()))]
-            self.p['e2'] = [float(FreeCAD.Units.Quantity(self.form.e2x.text())),
-                            float(FreeCAD.Units.Quantity(self.form.e2y.text())),
-                            float(FreeCAD.Units.Quantity(self.form.e2z.text()))]
-            self.p['e3'] = [float(FreeCAD.Units.Quantity(self.form.e3x.text())),
-                            float(FreeCAD.Units.Quantity(self.form.e3y.text())),
-                            float(FreeCAD.Units.Quantity(self.form.e3z.text()))]
-            self.p['OuterDiameter'] = float(FreeCAD.Units.Quantity(self.form.inputOuterDiameter.text()).getValueAs('m'))
-            self.p['TubeAxis'] = [float(FreeCAD.Units.Quantity(self.form.inputTubeAxisX.text())),
-                                  float(FreeCAD.Units.Quantity(self.form.inputTubeAxisY.text())),
-                                  float(FreeCAD.Units.Quantity(self.form.inputTubeAxisZ.text()))]
-            self.p['TubeSpacing'] = float(FreeCAD.Units.Quantity(self.form.inputTubeSpacing.text()).getValueAs('m'))
-            self.p['SpacingDirection'] = \
-                [float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalX.text())),
-                 float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalY.text())),
-                 float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalZ.text()))]
-            self.p['AspectRatio'] = float(FreeCAD.Units.Quantity(self.form.inputAspectRatio.text()))
-            self.p['VelocityEstimate'] = \
-                float(FreeCAD.Units.Quantity(self.form.inputVelocityEstimate.text()).getValueAs('m/s'))
-        except ValueError:
-            FreeCAD.Console.PrintError("Unrecognised value entered\n")
-            return
-        self.obj.porousZoneProperties = self.p
+        if "PorousZone" in self.obj.Name:
+            try:
+                self.p['PorousCorrelation'] = POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()]
+                self.p['D'] = [float(FreeCAD.Units.Quantity(self.form.dx.text())),
+                            float(FreeCAD.Units.Quantity(self.form.dy.text())),
+                            float(FreeCAD.Units.Quantity(self.form.dz.text()))]
+                self.p['F'] = [float(FreeCAD.Units.Quantity(self.form.fx.text())),
+                            float(FreeCAD.Units.Quantity(self.form.fy.text())),
+                            float(FreeCAD.Units.Quantity(self.form.fz.text()))]
+                self.p['e1'] = [float(FreeCAD.Units.Quantity(self.form.e1x.text())),
+                                float(FreeCAD.Units.Quantity(self.form.e1y.text())),
+                                float(FreeCAD.Units.Quantity(self.form.e1z.text()))]
+                self.p['e2'] = [float(FreeCAD.Units.Quantity(self.form.e2x.text())),
+                                float(FreeCAD.Units.Quantity(self.form.e2y.text())),
+                                float(FreeCAD.Units.Quantity(self.form.e2z.text()))]
+                self.p['e3'] = [float(FreeCAD.Units.Quantity(self.form.e3x.text())),
+                                float(FreeCAD.Units.Quantity(self.form.e3y.text())),
+                                float(FreeCAD.Units.Quantity(self.form.e3z.text()))]
+                self.p['OuterDiameter'] = float(FreeCAD.Units.Quantity(self.form.inputOuterDiameter.text()).getValueAs('m'))
+                self.p['TubeAxis'] = [float(FreeCAD.Units.Quantity(self.form.inputTubeAxisX.text())),
+                                    float(FreeCAD.Units.Quantity(self.form.inputTubeAxisY.text())),
+                                    float(FreeCAD.Units.Quantity(self.form.inputTubeAxisZ.text()))]
+                self.p['TubeSpacing'] = float(FreeCAD.Units.Quantity(self.form.inputTubeSpacing.text()).getValueAs('m'))
+                self.p['SpacingDirection'] = \
+                    [float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalX.text())),
+                    float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalY.text())),
+                    float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalZ.text()))]
+                self.p['AspectRatio'] = float(FreeCAD.Units.Quantity(self.form.inputAspectRatio.text()))
+                self.p['VelocityEstimate'] = \
+                    float(FreeCAD.Units.Quantity(self.form.inputVelocityEstimate.text()).getValueAs('m/s'))
+            except ValueError:
+                FreeCAD.Console.PrintError("Unrecognised value entered\n")
+                return
+            self.obj.porousZoneProperties = self.p
         self.obj.partNameList = self.partNameList
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
