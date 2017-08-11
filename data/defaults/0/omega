@@ -30,13 +30,14 @@ boundaryField
 %:slip
 %[0/_boundary_zeroGradient%]
 %}
-%:inlet
+%:inlet open
 %{%(boundaries/%(0%)/TurbulenceInletSpecification%)
 %:TKEAndSpecDissipationRate
     %(0%)
     {
-        type        fixedValue;
-        value       uniform %(boundaries/%(0%)/SpecificDissipationRate%);
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/SpecificDissipationRate%);
+        value       $internalField;
     }
 %:intensityAndLengthScale
     %(0%)
