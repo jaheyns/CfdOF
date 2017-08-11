@@ -1,4 +1,4 @@
-%{%(porousZonesPresent%)
+%{%(zonesPresent%)
 %:True
 %[_header%]
 FoamFile
@@ -13,8 +13,8 @@ FoamFile
 actions
 (
 
-%{%(porousZones%)
-%{%(porousZones/%(0%)/PartNameList%)
+%{%(zones%)
+%{%(zones/%(0%)/PartNameList%)
     {
         name    %(0%)SelectedSurface;
         type    cellSet;

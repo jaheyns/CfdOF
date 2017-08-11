@@ -49,20 +49,11 @@ class setCfdFluidPropertyCommand(FemCommands):
         FreeCAD.Console.PrintMessage("Set fluid properties \n")
         FreeCAD.ActiveDocument.openTransaction("Set CfdFluidMaterialProperty")
 
-        isPresent = False
-        members = FemGui.getActiveAnalysis().Member
-        for i in members:
-            # Check for existing fluid material entity as the solver currently only support single region analysis.
-            if "FluidProperties" in i.Name:
-                FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
-                isPresent = True
-
-        # Allow to re-create if deleted
-        if not isPresent:
-            FreeCADGui.addModule("CfdFluidMaterial")
-            FreeCADGui.doCommand(
-                "analysis.Member = analysis.Member + [CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')]")
-            FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
+        FreeCADGui.addModule("FemGui")
+        FreeCADGui.addModule("CfdFluidMaterial")
+        FreeCADGui.doCommand(
+            "FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')]")
+        FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_FluidMaterial', setCfdFluidPropertyCommand())

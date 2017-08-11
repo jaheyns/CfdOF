@@ -40,18 +40,23 @@ fi
 runCommand createPatch -overwrite
 %}
 
-%{%(porousZonesPresent%)
+%{%(zonesPresent%)
 %:True
 # Scaling .stl files exported from FreeCAD from mm to m
-%{%(porousZones%)
-%{%(porousZones/%(0%)/PartNameList%)
+%{%(zones%)
+%{%(zones/%(0%)/PartNameList%)
 runCommand surfaceTransformPoints -scale "(0.001 0.001 0.001)" "constant/triSurface/%(0%).stl" "constant/triSurface/%(0%)Scaled.stl"
+%}
+%}
 
 # Set cell zones contained inside the .stl surfaces
 runCommand topoSet
+%}
 
-%}
-%}
+%{%(alphaZonesPresent%)
+%:True
+# Set internal fields according to setFieldsDict
+runCommand setFields
 %}
 
 %{%(bafflesPresent%)
