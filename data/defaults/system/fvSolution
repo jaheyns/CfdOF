@@ -10,47 +10,7 @@ FoamFile
 
 solvers
 {
-%{%(alphaZonesPresent%)
-%:True
-    "alpha.*"
-    {
-        nAlphaCorr      2;
-        nAlphaSubCycles 1;
-        cAlpha          1;
-
-        MULESCorr       yes;
-        nLimiterIter    3;
-
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       1e-8;
-        relTol          0;
-    }
-
-    pcorr
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-5;
-        relTol          0;
-    }
-
-    p_rgh
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-07;
-        relTol          0.05;
-    }
-
-
-    p_rghFinal
-    {
-        $p_rgh;
-        relTol          0;
-    }
-%}
-    p
+    "(p|p_rgh)"
     {
         solver           GAMG;
         tolerance        1e-7;
@@ -64,7 +24,7 @@ solvers
         mergeLevels      1;
     }
 
-    pFinal
+    "(pFinal|p_rghFinal|pcorr)"
     {
         $p;
         relTol          0;
@@ -104,8 +64,29 @@ solvers
         $k;
         relTol          0;
     }
+
+%{%(solver/solverName%)
+%:interFoam multiphaseInterFoam
+    "alpha.*"
+    {
+        nAlphaCorr      2;
+        nAlphaSubCycles 1;
+        cAlpha          1;
+
+        MULESCorr       yes;
+        nLimiterIter    3;
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0;
+    }
+
+%}
 }
 
+%{%(physics/Time%)
+%:Steady
 SIMPLE
 {
     // Non-orthogonal correctors for robustness on tet meshes. Porous baffles require a
@@ -123,11 +104,19 @@ SIMPLE
     pRefCell    0;
 }
 
+%:Transient
 PIMPLE
 {
+%{%(solver/solverName%)
+%:interFoam multiphaseInterFoam
+    nOuterCorrectors 3;
+    nNonOrthogonalCorrectors 2;
+    nCorrectors         2;
+%:default
     nOuterCorrectors 10;
     nNonOrthogonalCorrectors 2;
     nCorrectors         2;
+%}
     residualControl
     {
         U
@@ -145,6 +134,7 @@ PIMPLE
     pRefCell    0;
 }
 
+%}
 potentialFlow
 {
     nNonOrthogonalCorrectors 8;
@@ -153,12 +143,12 @@ potentialFlow
     PhiRefCell 0;
 }
 
-%{%(physics/Time%)
-%:Steady
 relaxationFactors
 {
     // Conservative settings to solve reliably on bad
     // meshes
+%{%(physics/Time%)
+%:Steady
     equations
     {
         U               0.6;
@@ -175,9 +165,29 @@ relaxationFactors
     {
         p               0.3;
     }
+%:Transient
+    equations
+    {
+        U               0.6;
+        UFinal          1;
+%{%(physics/Turbulence%)
+%:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST
+        k               0.5;
+        kFinal          1;
+        omega           0.5;
+        omegaFinal      1;
+%}
+%}
+    }
+    fields
+    {
+        p               0.3;
+    }
+%}
 }
 
-%}
 cache
 {
     grad(U);

@@ -172,7 +172,6 @@ class _TaskPanelCfdMeshRegion:
         if self.obj.internalBaffle:
             self.form.baffleCheckBox.toggle()
         self.form.snappySurfaceEdgeRefinementLevel.setValue(self.obj.localEdgeRefine)
-        print "why",self.mesh_obj.MeshUtility
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
             self.form.cfFrame.setVisible(False)
             self.form.snappyFrame.setVisible(True)

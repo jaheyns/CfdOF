@@ -39,10 +39,11 @@ class _ViewProviderCfdInitialseInternalFlowField:
             CfdTools.cfdError("Analysis object must have a physics object")
             return False
         boundaries = CfdTools.getCfdBoundaryGroup(analysis_object)
+        material_objs = CfdTools.getMaterials(analysis_object)
 
         import _TaskPanelCfdInitialiseInternalFlowField
         taskd = _TaskPanelCfdInitialiseInternalFlowField._TaskPanelCfdInitialiseInternalFlowField(
-            self.Object, physics_model, boundaries)
+            self.Object, physics_model, boundaries, material_objs)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True

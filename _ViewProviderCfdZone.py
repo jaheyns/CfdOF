@@ -31,13 +31,13 @@ import os
 # import pivy
 # from pivy import coin
 
-__title__ = "_ViewProviderCfdPorousZone"
+__title__ = "_ViewProviderCfdZone"
 __author__ = ""
 __url__ = "http://www.freecadweb.org"
 
 
-class _ViewProviderCfdPorousZone:
-    """ A View Provider for the Porous Zone object. """
+class _ViewProviderCfdZone:
+    """ A View Provider for Zone objects. """
     def __init__(self, vobj):
         """ Set this object to the proxy object of the actual view provider """
         vobj.Proxy = self
@@ -73,15 +73,15 @@ class _ViewProviderCfdPorousZone:
         return
 
     def getIcon(self):
-        if "PorousZone" in self.Object.Name:
+        if self.Object.Name.startswith('PorousZone'):
             icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "porous.png")
         else:
             icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.png")
         return icon_path
 
     def setEdit(self, vobj, mode):
-        import _TaskPanelCfdPorousZone
-        taskd = _TaskPanelCfdPorousZone._TaskPanelCfdPorousZone(self.Object)
+        import _TaskPanelCfdZone
+        taskd = _TaskPanelCfdZone._TaskPanelCfdZone(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True

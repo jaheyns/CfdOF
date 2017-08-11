@@ -22,7 +22,7 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "CFDPorousZone"
+__title__ = "CFDZone"
 __author__ = "AB, OO, JH"
 __url__ = "http://www.freecadweb.org"
 
@@ -37,8 +37,8 @@ class PartFeature:
         obj.Proxy = self
 
 
-class _CfdPorousZone(PartFeature):
-    """ The CFD Porous Zone Model """
+class _CfdZone(PartFeature):
+    """ The CFD Zone Model """
 
     def __init__(self, obj):
         PartFeature.__init__(self, obj)
@@ -49,7 +49,7 @@ class _CfdPorousZone(PartFeature):
         # obj.addProperty("App::PropertyStringList","partNameList")
         obj.addProperty("App::PropertyPythonObject", "partNameList").partNameList = []
         obj.addProperty("App::PropertyLinkList", "shapeList")
-        if "PorousZone" in obj.Name:
+        if obj.Name.startswith('PorousZone'):
             obj.addProperty("App::PropertyPythonObject", "porousZoneProperties")
             obj.porousZoneProperties = {
                 'PorousCorrelation': 'DarcyForchheimer',
@@ -65,9 +65,12 @@ class _CfdPorousZone(PartFeature):
                 'AspectRatio': 1.73,
                 'VelocityEstimate': 0.0
             }
+        elif obj.Name.startswith('InitialisationZone'):
+            obj.addProperty("App::PropertyPythonObject", "initialisationZoneProperties")
+            obj.initialisationZoneProperties = {}
 
         obj.Proxy = self
-        self.Type = "PorousZone"
+        self.Type = 'Zone'
 
     def execute(self, fp):
         listOfShapes = []

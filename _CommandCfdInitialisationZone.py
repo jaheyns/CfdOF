@@ -22,7 +22,7 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "Command to generate a porous zone"
+__title__ = "Command to generate an initialisation zone"
 __author__ = ""
 __url__ = "http://www.freecadweb.org"
 
@@ -38,25 +38,27 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 
 
-class _CommandCfdPorousZone(FemCommands):
-    """ The Cfd porous zone command definition """
+class _CommandCfdInitialisationZone(FemCommands):
+    """ The Cfd initialisation zone command definition """
     def __init__(self):
-        super(_CommandCfdPorousZone, self).__init__()
-        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","porous.png")
+        super(_CommandCfdInitialisationZone, self).__init__()
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.png")
         self.resources = {'Pixmap': icon_path,
-                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_PorousZone", "Porous zone"),
+                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_InitialisationZone", "Initialisation zone"),
                           'Accel': "",
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_PorousZone", "Select and create a porous zone")}
+                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_InitialisationZone",
+                                                              "Select and create an initialisation zone")}
         self.is_active = 'with_analysis'
 
     def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Select and create a porous zone")
+        FreeCAD.ActiveDocument.openTransaction("Select and create an initialisation zone")
 
         FreeCADGui.addModule("FemGui")
         FreeCADGui.addModule("CfdZone")
         FreeCADGui.doCommand(
-            "FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdZone.makeCfdPorousZone()]")
+            "FemGui.getActiveAnalysis().Member = "
+            "FemGui.getActiveAnalysis().Member + [CfdZone.makeCfdInitialisationZone()]")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_PorousZone', _CommandCfdPorousZone())
+
+FreeCADGui.addCommand('Cfd_InitialisationZone', _CommandCfdInitialisationZone())

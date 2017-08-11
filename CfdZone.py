@@ -1,8 +1,8 @@
 # ***************************************************************************
 # *                                                                         *
+# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
 # *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
 # *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
-# *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -22,41 +22,38 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "Command to generate a alpha zone"
+__title__ = "Classes to create zones"
 __author__ = ""
 __url__ = "http://www.freecadweb.org"
 
-import FreeCAD
-import platform
-from PyGui.FemCommands import FemCommands
-import FemGui
-import CfdTools
-import os
+import os.path
 
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+    from PySide import QtCore, QtGui
+
+import _CfdZone
+import Part
 
 
-class _CommandCfdAlphaZone(FemCommands):
-    """ The Cfd alpha zone command definition """
-    def __init__(self):
-        super(_CommandCfdAlphaZone, self).__init__()
-        icon_path = os.path.join(CfdTools.get_module_path(),"Gui","Resources","icons","alpha.png")
-        self.resources = {'Pixmap': icon_path,
-                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_AlphaZone", "Alpha zone"),
-                          'Accel': "",
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_AlphaZone", "Select and create a alpha zone")}
-        self.is_active = 'with_analysis'
+def makeCfdPorousZone(name='PorousZone'):
+    obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
+    _CfdZone._CfdZone(obj)
 
-    def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Select and create a alpha zone")
-
-        FreeCADGui.addModule("FemGui")
-        FreeCADGui.addModule("CfdPorousZone")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdPorousZone.makeCfdPorousZone('AlphaZone')]")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member[-1].Label = 'alpha.fluid'")
-        FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
+    if FreeCAD.GuiUp:
+        from _ViewProviderCfdZone import _ViewProviderCfdZone
+        _ViewProviderCfdZone(obj.ViewObject)
+    
+    return obj
 
 
-FreeCADGui.addCommand('Cfd_AlphaZone', _CommandCfdAlphaZone())
+def makeCfdInitialisationZone(name='InitialisationZone'):
+    obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
+    _CfdZone._CfdZone(obj)
+
+    if FreeCAD.GuiUp:
+        from _ViewProviderCfdZone import _ViewProviderCfdZone
+        _ViewProviderCfdZone(obj.ViewObject)
+
+    return obj

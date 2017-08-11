@@ -180,24 +180,16 @@ def getMeshObject(analysis_object):
     return meshObj[0], isPresent
 
 
-def getPorousObjects(analysis_object):
-    isPresent = False
-    porousZones = []
-    for i in analysis_object.Member:
-        if "PorousZone" in i.Name:
-            porousZones.append(i)
-            isPresent = True
-    if not isPresent:
-        porousZones = None  # just a placeholder to be created in event that it is not present
-    return porousZones, isPresent
+def getPorousZoneObjects(analysis_object):
+    return [i for i in analysis_object.Member if i.Name.startswith('PorousZone')]
 
 
-def getAlphaObjects(analysis_object):
-    return [i for i in analysis_object.Member if "AlphaZone" in i.Name]
+def getInitialisationZoneObjects(analysis_object):
+    return [i for i in analysis_object.Member if i.Name.startswith('InitialisationZone')]
 
 
 def getZoneObjects(analysis_object):
-    return [i for i in analysis_object.Member if "Zone" in i.Name]
+    return [i for i in analysis_object.Member if 'Zone' in i.Name]
 
 
 def getInitialConditions(analysis_object):

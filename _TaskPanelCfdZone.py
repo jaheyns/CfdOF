@@ -34,6 +34,7 @@ import os.path
 import Part
 import CfdTools
 from CfdTools import indexOrDefault
+from CfdTools import inputCheckAndStore
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -54,8 +55,8 @@ ASPECT_RATIO_NAMES = ["User defined", "Equilateral", "Rotated square"]
 ASPECT_RATIO_TIPS = ["", "Equilateral triangles pointing perpendicular to spacing direction", "45 degree angles; isotropic"]
 
 
-class _TaskPanelCfdPorousZone:
-    """ Task panel for porous zone objects """
+class _TaskPanelCfdZone:
+    """ Task panel for zone objects """
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
@@ -63,14 +64,15 @@ class _TaskPanelCfdPorousZone:
         self.shapeListOrig = list(self.obj.shapeList)
         self.partNameList = list(self.obj.partNameList)
 
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelPorousZone.ui"))
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdZone.ui"))
 
         self.form.selectReference.clicked.connect(self.selectReference)
         self.form.listWidget.itemPressed.connect(self.setSelection)
         self.form.pushButtonDelete.clicked.connect(self.deleteFeature)
 
-        if "PorousZone" in self.obj.Name:
-            self.p = self.obj.porousZoneProperties
+        if self.obj.Name.startswith('PorousZone'):
+            self.p = dict(self.obj.porousZoneProperties)
+            self.form.stackedWidgetZoneType.setCurrentIndex(0)
 
             self.form.comboBoxCorrelation.currentIndexChanged.connect(self.comboBoxCorrelationChanged)
 
@@ -101,8 +103,26 @@ class _TaskPanelCfdPorousZone:
 
             self.form.comboBoxCorrelation.addItems(POROUS_CORRELATION_NAMES)
             self.form.comboAspectRatio.addItems(ASPECT_RATIO_NAMES)
-        else:
-            self.form.porousFrame.setVisible(False)
+
+        elif self.obj.Name.startswith('InitialisationZone'):
+            self.p = dict(self.obj.initialisationZoneProperties)
+            self.form.stackedWidgetZoneType.setCurrentIndex(1)
+
+            self.form.comboFluid.currentIndexChanged.connect(self.comboFluidChanged)
+            self.form.checkAlpha.stateChanged.connect(self.checkAlphaChanged)
+            self.form.checkVelocity.stateChanged.connect(self.checkVelocityChanged)
+            self.form.checkPressure.stateChanged.connect(self.checkPressureChanged)
+            self.form.inputVolumeFraction.textChanged.connect(self.inputVolumeFractionChanged)
+            self.form.inputUx.textChanged.connect(self.inputUxChanged)
+            self.form.inputUy.textChanged.connect(self.inputUyChanged)
+            self.form.inputUz.textChanged.connect(self.inputUzChanged)
+            self.form.inputPressure.textChanged.connect(self.inputPressureChanged)
+
+            material_objs = CfdTools.getMaterials(CfdTools.getParentAnalysisObject(obj))
+            self.form.frameVolumeFraction.setVisible(len(material_objs) > 1)
+            if len(material_objs) > 1:
+                fluid_names = [m.Label for m in material_objs]
+                self.form.comboFluid.addItems(fluid_names[:-1])
 
         self.setInitialValues()
 
@@ -110,7 +130,7 @@ class _TaskPanelCfdPorousZone:
         for i in range(len(self.obj.partNameList)):
             self.form.listWidget.addItem(str(self.obj.partNameList[i]))
 
-        if "PorousZone" in self.obj.Name:
+        if self.obj.Name.startswith('PorousZone'):
             ci = indexOrDefault(POROUS_CORRELATIONS, self.p.get('PorousCorrelation'), 0)
             self.form.comboBoxCorrelation.setCurrentIndex(ci)
             d = self.p.get('D')
@@ -145,6 +165,22 @@ class _TaskPanelCfdPorousZone:
             self.form.inputBundleLayerNormalZ.setText("{}".format(normalAxis[2]))
             self.form.inputAspectRatio.setText("{}".format(self.p.get('AspectRatio')))
             self.form.inputVelocityEstimate.setText("{} m/s".format(self.p.get('VelocityEstimate')))
+
+        elif self.obj.Name.startswith('InitialisationZone'):
+            if 'Ux' in self.p:
+                self.form.inputUx.setText("{} m/s".format(self.p.get('Ux')))
+                self.form.inputUy.setText("{} m/s".format(self.p.get('Uy')))
+                self.form.inputUz.setText("{} m/s".format(self.p.get('Uz')))
+                self.form.checkVelocity.setChecked(True)
+            if 'Pressure' in self.p:
+                self.form.inputPressure.setText("{} kg*m/s^2".format(self.p.get('Pressure')))
+                self.form.checkPressure.setChecked(True)
+            if 'alphas' in self.p:
+                self.form.checkAlpha.setChecked(True)
+            # Simulate initial signals to get into correct state
+            self.checkVelocityChanged(self.form.checkVelocity.isChecked())
+            self.checkPressureChanged(self.form.checkPressure.isChecked())
+            self.checkAlphaChanged(self.form.checkAlpha.isChecked())
 
     def deleteFeature(self):
         shapeList = list(self.obj.shapeList)
@@ -257,16 +293,71 @@ class _TaskPanelCfdPorousZone:
         self.form.inputAspectRatio.setText(ASPECT_RATIOS[i])
         self.form.comboAspectRatio.setToolTip(ASPECT_RATIO_TIPS[i])
 
+    def checkAlphaChanged(self, checked):
+        self.form.inputVolumeFraction.setEnabled(checked != 0)
+        self.form.comboFluid.setEnabled(checked != 0)
+        if not checked:
+            self.p.pop('alphas', None)  # Delete if present
+        else:
+            if 'alphas' not in self.p:
+                self.p['alphas'] = {}
+            self.comboFluidChanged()
+
+    def comboFluidChanged(self):
+        alphaName = self.form.comboFluid.currentText()
+        if 'alphas' in self.p:
+            if alphaName in self.p['alphas']:
+                self.form.inputVolumeFraction.setText("{}".format(self.p['alphas'].get(alphaName, 0.0)))
+
+    def checkVelocityChanged(self, checked):
+        self.form.inputUx.setEnabled(checked != 0)
+        self.form.inputUy.setEnabled(checked != 0)
+        self.form.inputUz.setEnabled(checked != 0)
+        if not checked:
+            self.p.pop('Ux', None)
+            self.p.pop('Uy', None)
+            self.p.pop('Uz', None)
+        else:
+            # Store current text box values
+            self.inputUxChanged(self.form.inputUx.text())
+            self.inputUyChanged(self.form.inputUy.text())
+            self.inputUzChanged(self.form.inputUz.text())
+
+    def checkPressureChanged(self, checked):
+        self.form.inputPressure.setEnabled(checked != 0)
+        if not checked:
+            self.p.pop('Pressure', None)
+        else:
+            # Store current text box value
+            self.inputPressureChanged(self.form.inputPressure.text())
+
+    def inputVolumeFractionChanged(self, text):
+        alphaName = self.form.comboFluid.currentText()
+        if 'alphas' in self.p:
+            inputCheckAndStore(text, "m/m", self.p['alphas'], alphaName)
+
+    def inputUxChanged(self, text):
+        inputCheckAndStore(text, "m/s", self.p, 'Ux')
+
+    def inputUyChanged(self, text):
+        inputCheckAndStore(text, "m/s", self.p, 'Uy')
+
+    def inputUzChanged(self, text):
+        inputCheckAndStore(text, "m/s", self.p, 'Uz')
+
+    def inputPressureChanged(self, text):
+        inputCheckAndStore(text, "kg*m/s^2", self.p, 'Pressure')
+
     def accept(self):
-        if "PorousZone" in self.obj.Name:
+        if self.obj.Name.startswith('PorousZone'):
             try:
                 self.p['PorousCorrelation'] = POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()]
                 self.p['D'] = [float(FreeCAD.Units.Quantity(self.form.dx.text())),
-                            float(FreeCAD.Units.Quantity(self.form.dy.text())),
-                            float(FreeCAD.Units.Quantity(self.form.dz.text()))]
+                               float(FreeCAD.Units.Quantity(self.form.dy.text())),
+                               float(FreeCAD.Units.Quantity(self.form.dz.text()))]
                 self.p['F'] = [float(FreeCAD.Units.Quantity(self.form.fx.text())),
-                            float(FreeCAD.Units.Quantity(self.form.fy.text())),
-                            float(FreeCAD.Units.Quantity(self.form.fz.text()))]
+                               float(FreeCAD.Units.Quantity(self.form.fy.text())),
+                               float(FreeCAD.Units.Quantity(self.form.fz.text()))]
                 self.p['e1'] = [float(FreeCAD.Units.Quantity(self.form.e1x.text())),
                                 float(FreeCAD.Units.Quantity(self.form.e1y.text())),
                                 float(FreeCAD.Units.Quantity(self.form.e1z.text()))]
@@ -276,15 +367,16 @@ class _TaskPanelCfdPorousZone:
                 self.p['e3'] = [float(FreeCAD.Units.Quantity(self.form.e3x.text())),
                                 float(FreeCAD.Units.Quantity(self.form.e3y.text())),
                                 float(FreeCAD.Units.Quantity(self.form.e3z.text()))]
-                self.p['OuterDiameter'] = float(FreeCAD.Units.Quantity(self.form.inputOuterDiameter.text()).getValueAs('m'))
+                self.p['OuterDiameter'] = \
+                    float(FreeCAD.Units.Quantity(self.form.inputOuterDiameter.text()).getValueAs('m'))
                 self.p['TubeAxis'] = [float(FreeCAD.Units.Quantity(self.form.inputTubeAxisX.text())),
-                                    float(FreeCAD.Units.Quantity(self.form.inputTubeAxisY.text())),
-                                    float(FreeCAD.Units.Quantity(self.form.inputTubeAxisZ.text()))]
+                                      float(FreeCAD.Units.Quantity(self.form.inputTubeAxisY.text())),
+                                      float(FreeCAD.Units.Quantity(self.form.inputTubeAxisZ.text()))]
                 self.p['TubeSpacing'] = float(FreeCAD.Units.Quantity(self.form.inputTubeSpacing.text()).getValueAs('m'))
                 self.p['SpacingDirection'] = \
                     [float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalX.text())),
-                    float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalY.text())),
-                    float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalZ.text()))]
+                     float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalY.text())),
+                     float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalZ.text()))]
                 self.p['AspectRatio'] = float(FreeCAD.Units.Quantity(self.form.inputAspectRatio.text()))
                 self.p['VelocityEstimate'] = \
                     float(FreeCAD.Units.Quantity(self.form.inputVelocityEstimate.text()).getValueAs('m/s'))
@@ -292,6 +384,10 @@ class _TaskPanelCfdPorousZone:
                 FreeCAD.Console.PrintError("Unrecognised value entered\n")
                 return
             self.obj.porousZoneProperties = self.p
+
+        elif self.obj.Name.startswith('InitialisationZone'):
+            self.obj.initialisationZoneProperties = self.p
+
         self.obj.partNameList = self.partNameList
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()

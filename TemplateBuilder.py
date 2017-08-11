@@ -59,19 +59,22 @@ class TemplateBuilder(object):
                     contents = self.buildFile(rel_file, [])
                     # Do not write a blank file - provides a way for optional creation of files
                     if len(contents):
-                        # Make sure directory tree exists
-                        path = os.path.join(self.case_path, os.path.dirname(rel_file))
-                        try:
-                            os.makedirs(path)
-                        except OSError as exc:
-                            import errno
-                            if exc.errno == errno.EEXIST and os.path.isdir(path):
-                                pass
-                            else:
-                                raise
-                        # Write file
-                        with open(os.path.join(self.case_path, rel_file), 'w') as ofid:
-                            ofid.write(contents)
+                        self.writeToFile(rel_file, contents)
+
+    def writeToFile(self, rel_file, contents):
+        # Make sure directory tree exists
+        path = os.path.join(self.case_path, os.path.dirname(rel_file))
+        try:
+            os.makedirs(path)
+        except OSError as exc:
+            import errno
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
+        # Write file
+        with open(os.path.join(self.case_path, rel_file), 'w') as ofid:
+            ofid.write(contents)
 
     def buildFile(self, rel_file, params):
         """ Open the specified template file, make replacements, and return as a string """
@@ -96,8 +99,11 @@ class TemplateBuilder(object):
             contents = self.process(contents, rel_file, params)
         except BracketError as err:
             raise ValueError("Bracket matching error in {}: {}".format(rel_file, err.message))
+        except ValueError as err:
+            raise ValueError("Error in {}: {}".format(rel_file, err.message))
         except Exception as err:
-            raise Exception("Error building file {}: {}".format(rel_file, err.message))
+            print("Unexpected error building file {}: {}".format(rel_file, err.message))
+            raise
         return contents
 
     def findAtCurrentLevel(self, string, find_string, start):
@@ -182,7 +188,7 @@ class TemplateBuilder(object):
         """ Process brace substitutions. Format:
         %{val1 [val2]\n
         content
-        %}\n
+        %} [output-file]\n
         pushes values onto the parameter stack, one by one and repeats content for each """
         while True:
             start = contents.find("%{")
@@ -199,12 +205,27 @@ class TemplateBuilder(object):
             keys = self.process(keys, curr_file, params)
             keys = keys.split(' ')
             replace = replace[delim+1:]
+            # Extract trailing filename parameter if any
+            trailing_nl = self.findAtCurrentLevel(contents, '\n', end+2)
+            filename_param = None
+            if trailing_nl is not None:
+                filename_param = contents[end+2:trailing_nl].strip()
             # Loop the content passing values
             replacement = ""
             for v in keys:
-                replacement += self.process(replace, curr_file, [v] + params)
+                filename = None
+                if filename_param:
+                    # Process filename with parameter
+                    filename = self.process(filename_param, curr_file, [v] + params)
+                    if not filename:
+                        raise ValueError("File name parameter " + filename_param + "evaluates to nothing")
+                processed = self.process(replace, filename if filename else curr_file, [v] + params)
+                if filename:
+                    self.writeToFile(filename, processed)
+                else:
+                    replacement += processed
             replace = replacement
-            afterEnd = (end+3 if contents[end+2:end+3] == '\n' else end+2)
+            afterEnd = (trailing_nl+1 if trailing_nl else end+2)
             contents = contents[:start] + replace + contents[afterEnd:]
         return contents
 
@@ -226,7 +247,10 @@ class TemplateBuilder(object):
             # Special case - if key is a number, treat as positional parameter
             match = re.match("[0-9]+", key)
             if match and match.span() == (0, len(key)):
-                replace = str(params[int(key)])
+                try:
+                    replace = str(params[int(key)])
+                except IndexError:
+                    raise ValueError("Index " + key + " of stack variables is out of range")
             # Otherwise, navigate the settings dict for the key
             else:
                 keys = key.split('/')
@@ -234,18 +258,32 @@ class TemplateBuilder(object):
                 for k in keys:
                     # Special key to list contents
                     if k == "LIST":
-                        print("Possible keys:")
-                        print(dic.keys())
-                    if k in dic:
+                        print("Contents:")
+                        print(dic)
+                    if isinstance(dic, dict) and (k in dic):
                         dic = dic[k]
+                    elif isinstance(dic, list):
+                        # Lists must be indexed with an integer
+                        match = re.match("[0-9]+", k)
+                        if match and match.span() == (0, len(k)):
+                            dic = dic[int(k)]
+                        else:
+                            dic = "None"
                     else:
                         # Not found. Replace with "None"
                         dic = "None"
-                if isinstance(dic, dict) or isinstance(dic, list):
-                    # Dictionary type. Loop, printing keys
+                if isinstance(dic, dict) or isinstance(dic, tuple):
+                    # Dictionary type - print keys
+                    # Tuple type - print values
                     replacement = ""
                     for k in dic:
                         replacement += str(k) + " "
+                    replace = replacement[:-1]  # Trim trailing space
+                elif isinstance(dic, list):
+                    # List type - print indices
+                    replacement = ""
+                    for i in range(len(dic)):
+                        replacement += str(i) + " "
                     replace = replacement[:-1]  # Trim trailing space
                 else:
                     replace = str(dic)

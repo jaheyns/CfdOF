@@ -1,5 +1,5 @@
-%{%(alphaZonesPresent%)
-%:True
+%{%(solver/solverName%)
+%:interFoam multiphaseInterFoam
 %[_header%]
 FoamFile
 {
@@ -20,7 +20,7 @@ boundaryField
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
 %:wall
-%[0/_boundary_zeroGradient%]
+%[0/_boundary_fixedFluxPressure%]
 %:inlet
 %{%(boundaries/%(0%)/BoundarySubtype%)
 %:totalPressure
@@ -37,7 +37,7 @@ boundaryField
         value       uniform %(boundaries/%(0%)/Pressure%);
     }
 %:default
-%[0/_boundary_zeroGradient%]
+%[0/_boundary_fixedFluxPressure%]
 %}
 %:outlet
 %{%(boundaries/%(0%)/BoundarySubtype%)
@@ -48,7 +48,7 @@ boundaryField
         value       uniform %(boundaries/%(0%)/Pressure%);
     }
 %:default
-%[0/_boundary_zeroGradient%]
+%[0/_boundary_fixedFluxPressure%]
 %}
 %:open
     %(0%)
@@ -78,7 +78,7 @@ boundaryField
 
 %}
 %{defaultFaces
-%[0/_boundary_zeroGradient%]
+%[0/_boundary_fixedFluxPressure%]
 %}
 
 }

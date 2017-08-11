@@ -10,7 +10,8 @@ before running the simulation. Where possible best practices are included to imp
 
 ### Current:
 
-* Incompressible, laminar flow (simpleFoam).
+* Incompressible, laminar flow (simpleFoam, pimpleFoam).
+* Basic multiphase capability (interFoam, multiphaseInterFoam)
 * Basic material data base.
 * Flow initialisation with a potential solver.
 * Tetrahedral meshing using GMSH including multiple region meshing using FEM workbench functionality.
@@ -212,4 +213,5 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 Oliver Oxtoby (CSIR, 2016-2017) <ooxtoby@csir.co.za>  
 Johan Heyns (CSIR, 2016-2017) <jheyns@csir.co.za>  
 Alfred Bogaers (CSIR, 2016-2017) <abogaers@csir.co.za>    
-Qingfeng Xia, 2015
+Qingfeng Xia (2015)
+Klaus Sembritzki (2017)

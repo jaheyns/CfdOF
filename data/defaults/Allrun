@@ -19,8 +19,8 @@ else
    source "%(system/TranslatedFoamPath%)/etc/config.sh/unset" 2> /dev/null
 fi
 source "%(system/TranslatedFoamPath%)/etc/bashrc"
-%}
 
+%}
 # Create symbolic links to polyMesh.org
 if [ ! -d constant/polyMesh ]; then
     mkdir constant/polyMesh
@@ -38,41 +38,39 @@ fi
 %:CfdMeshCart
 # Update patch name and type
 runCommand createPatch -overwrite
-%}
 
+%}
 %{%(zonesPresent%)
 %:True
 # Scaling .stl files exported from FreeCAD from mm to m
 %{%(zones%)
 %{%(zones/%(0%)/PartNameList%)
 runCommand surfaceTransformPoints -scale "(0.001 0.001 0.001)" "constant/triSurface/%(0%).stl" "constant/triSurface/%(0%)Scaled.stl"
-%}
-%}
 
+%}
+%}
 # Set cell zones contained inside the .stl surfaces
 runCommand topoSet
-%}
 
-%{%(alphaZonesPresent%)
+%}
+%{%(initialisationZonesPresent%)
 %:True
 # Set internal fields according to setFieldsDict
 runCommand setFields
-%}
 
+%}
 %{%(bafflesPresent%)
 %:True
 # Creating baffles
 runCommand createBaffles -overwrite
 
 %}
-
 %{%(initialValues/PotentialFoam%)
 %:True
 # Initialise flow
 runCommand potentialFoam
 
 %}
-
 %{%(solver/parallel%)
 %:True
 # Run application in parallel

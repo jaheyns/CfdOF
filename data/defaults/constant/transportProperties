@@ -8,20 +8,34 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-%{%(alphaZonesPresent%)
-%:False
+%{%(solver/solverName%)
+%:simpleFoam pimpleFoam
 transportModel  Newtonian;
 
-%{%(fluidProperties%)
-nu              [0 2 -1 0 0 0 0] %(fluidProperties/%(0%)/KinematicViscosity%);
-%}
-%:True
-%{%(multiphaseZonesPresent%)
-%:True
+nu              [0 2 -1 0 0 0 0] %(fluidProperties/0/KinematicViscosity%);
+%:interFoam
 phases
 (
 %{%(fluidProperties%)
-     %(0%)
+%(fluidProperties/%(0%)/Name%)
+%}
+);
+
+%{%(fluidProperties%)
+%(fluidProperties/%(0%)/Name%)
+{
+    transportModel  Newtonian;
+    nu              [0 2 -1 0 0 0 0] %(fluidProperties/%(0%)/KinematicViscosity%);
+    rho             [1 -3 0 0 0 0 0] %(fluidProperties/%(0%)/Density%);
+}
+
+%}
+sigma           [1 0 -2 0 0 0 0] 0.0; //TODO
+%:multiphaseInterFoam
+phases
+(
+%{%(fluidProperties%)
+     %(fluidProperties/%(0%)/Name%)
      {
          transportModel Newtonian;
          nu [0 2 -1 0 0 0 0] %(fluidProperties/%(0%)/KinematicViscosity%);
@@ -35,29 +49,10 @@ sigmas
 (
 %{%(fluidProperties%)
 %{%(fluidProperties%)
-    (%(0%) %(1%)) 0.07
+    (%(fluidProperties/%(0%)/Name%) %(fluidProperties/%(1%)/Name%)) 0.0  //TODO
 %}
 %}
 );
-
-%:False
-phases (
-%{%(fluidProperties%)
-%(0%)
-%}
-);
-
-%{%(fluidProperties%)
-%(0%)
-{
-    transportModel  Newtonian;
-    nu              [0 2 -1 0 0 0 0] %(fluidProperties/%(0%)/KinematicViscosity%);
-    rho             [1 -3 0 0 0 0 0] %(fluidProperties/%(0%)/Density%);
-}
-
-%}
-sigma           [1 0 -2 0 0 0 0] 0.07;
-%}
 %}
 
 // ************************************************************************* //

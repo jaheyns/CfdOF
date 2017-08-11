@@ -42,6 +42,11 @@ adjustTimeStep  yes;
 maxCo           5;
 
 %}
+%{%(solver/solverName%)
+$:interFoam multiphaseInterFoam
+maxAlphaCo      1;
+
+%}
 
 writeFormat     ascii;
 
@@ -53,8 +58,8 @@ timeFormat      general;
 
 timePrecision   6;
 
-%{%(alphaZonesPresent%)
-%:True
+%{%(solver/solverName%)
+%:interFoam multiphaseInterFoam
 maxAlphaCo      1;
 %}
 

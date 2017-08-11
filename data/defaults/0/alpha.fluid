@@ -1,22 +1,47 @@
+%{%(solver/solverName%)
+%:interFoam multiphaseInterFoam
+%{%(initialValues/alphas%)
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      alpha.fluid;
+    object      alpha.%(0%);
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform 0;
+internalField   uniform %(initialValues/alphas/%(0%)%);
 
 boundaryField
 {
+
 %{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%[0/_boundary_zeroGradient%]
+%:inlet outlet open
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  $internalField; //TODO: specify alpha inlet values - for now just uses initial field value
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
+%}
+
+%}
+%{defaultFaces
 %[0/_boundary_zeroGradient%]
 %}
+
 }
 
 // ************************************************************************* //
+%} 0/alpha.%(0%)
+%}

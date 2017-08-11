@@ -77,7 +77,10 @@ boundaryField
         type            flowRateInletVelocity;
         massFlowRate    %(boundaries/%(0%)/MassFlowRate%);
         rho             rho;
-        rhoInlet        %(fluidProperties/Density%);
+%{%(solver/solverName%)
+%:simpleFoam pimpleFoam
+        rhoInlet        %(fluidProperties/0/Density%);
+%}
         value           $internalField;
     }
 %:totalPressure

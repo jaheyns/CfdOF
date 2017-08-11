@@ -66,19 +66,12 @@ class CfdCaseWriterFoam(QRunnable):
         self.material_objs = CfdTools.getMaterials(analysis_obj)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions, isPresent = CfdTools.getInitialConditions(analysis_obj)
-        self.porousZone_objs, self.porousZonePresent = CfdTools.getPorousObjects(analysis_obj)
-        self.alphaZone_objs = CfdTools.getAlphaObjects(analysis_obj)
+        self.porousZone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
+        self.initialisationZone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
         self.mesh_generated = False
 
         self.signals = CfdCaseWriterSignals()
-
-        if len(self.alphaZone_objs) > 0:
-            self.physics_model['Time'] = 'Transient'
-            # TODO: remove this code and add GUI support for transient simulations
-            self.solver_obj.TimeStep = 0.001
-            self.solver_obj.WriteInterval = 0.05
-            self.solver_obj.EndTime = 1
 
     def run(self):
         success = False
@@ -111,16 +104,15 @@ class CfdCaseWriterFoam(QRunnable):
             # Collect settings into single dictionary
             self.settings = {
                 'physics': self.physics_model,
-                'fluidProperties': {},
+                'fluidProperties': [],  # Order is important, so use a list
                 'initialValues': self.initial_conditions,
                 'boundaries': dict((b.Label, b.BoundarySettings) for b in self.bc_group),
                 'bafflesPresent': self.bafflesPresent(),
                 'porousZones': {},
                 'porousZonesPresent': False,
-                'alphaZones': [o.Label for o in self.alphaZone_objs],
-                'alphaZonesPresent': len(self.alphaZone_objs) > 0,
-                'multiphaseZonesPresent': len(self.alphaZone_objs) > 1,
-                'zones': {o.Label: {'PartNameList': o.partNameList} for o in self.zone_objs},
+                'initialisationZones': {o.Label: o.initialisationZoneProperties for o in self.initialisationZone_objs},
+                'initialisationZonesPresent': len(self.initialisationZone_objs) > 0,
+                'zones': {o.Label: {'PartNameList': tuple(o.partNameList)} for o in self.zone_objs},
                 'zonesPresent': len(self.zone_objs) > 0,
                 'meshType': self.mesh_obj.Proxy.Type,
                 'solver': solverSettingsDict,
@@ -135,23 +127,15 @@ class CfdCaseWriterFoam(QRunnable):
             self.clearCase()
 
             self.exportZoneStlSurfaces()
-            if self.porousZone_objs is not None:
+            if self.porousZone_objs:
                 self.processPorousZoneProperties()
+            self.processInitialisationZoneProperties()
 
             self.settings['createPatchesFromSnappyBaffles'] = False
             if self.mesh_obj.Proxy.Type == "CfdMeshCart":  # Cut-cell Cartesian
                 self.setupPatchNames()
 
             TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
-            if len(self.alphaZone_objs) > 0:
-                with open(os.path.join(self.case_folder, '0', 'alpha.fluid')) as f:
-                    alpha_fluid = f.read()
-                for obj in self.alphaZone_objs:
-                    with open(os.path.join(self.case_folder, '0', obj.Label), 'w') as f:
-                        f.write(alpha_fluid.replace('alpha.fluid',
-                                                         obj.Label))
-            os.unlink(os.path.join(self.case_folder, '0', 'alpha.fluid'))
-
             self.writeMesh()
 
             # Update Allrun permission - will fail silently on Windows
@@ -171,24 +155,28 @@ class CfdCaseWriterFoam(QRunnable):
                                      self.solver_obj.SolverName, self.solver_obj.WorkingDir))
         return True
 
-    # Solver
-
     def getSolverName(self):
         """ Solver name is selected based on selected physics. This should only be extended as additional physics are
         included. """
         solver = None
-        if len(self.alphaZone_objs) == 1:
-            return 'interFoam'
-        elif len(self.alphaZone_objs) > 1:
-            return 'multiphaseInterFoam'
-        if self.physics_model['Flow'] == 'Incompressible' and (self.physics_model['Thermal'] is None):
-            if self.physics_model['Time'] == 'Transient':
-                solver = 'pimpleFoam'
-            else:
-                if self.porousZonePresent or self.porousBafflesPresent():
-                    solver = 'porousSimpleFoam'
+        if self.physics_model['Flow'] == 'Incompressible':
+            if self.physics_model['Thermal'] is None:
+                if self.physics_model['Time'] == 'Transient':
+                    if len(self.material_objs) == 1:
+                        solver = 'pimpleFoam'
+                    elif len(self.material_objs) == 2:
+                        solver = 'interFoam'
+                    elif len(self.material_objs) > 2:
+                        solver = 'multiphaseInterFoam'
                 else:
-                    solver = 'simpleFoam'
+                    if len(self.material_objs) == 1:
+                        if (self.porousZone_objs is not None) or self.porousBafflesPresent():
+                            solver = 'porousSimpleFoam'
+                        else:
+                            solver = 'simpleFoam'
+        if solver is None:
+            raise RuntimeError("No solver is supported to handle the selected physics with {} phases.".format(
+                len(self.material_objs)))
         return solver
 
     def processSolverSettings(self):
@@ -248,7 +236,6 @@ class CfdCaseWriterFoam(QRunnable):
                 self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
                 cart_mesh = self.cart_mesh
                 cart_mesh.get_tmp_file_paths("snappyHexMesh")  # Update tmp file locations
-                print cart_mesh.polyMeshDir
                 CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
                 CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','triSurface'))
                 shutil.copy2(cart_mesh.temp_file_blockMeshDict, os.path.join(self.case_folder,'system'))
@@ -271,16 +258,16 @@ class CfdCaseWriterFoam(QRunnable):
         settings = self.settings
         for material_obj in self.material_objs:
             mp = {}
+            mp['Name'] = material_obj.Label
             mp['Density'] = \
                 Units.Quantity(material_obj.Material['Density']).getValueAs("kg/m^3").Value
-            mp['DynamicViscosity'] = \
-                Units.Quantity(material_obj.Material['DynamicViscosity']).getValueAs("kg/m/s").Value
             if self.physics_model['Turbulence'] == 'Inviscid':
-                kinVisc = 0.0
+                mp['DynamicViscosity'] = 0.0
             else:
-                kinVisc = mp['DynamicViscosity']/mp['Density'];
-            mp['KinematicViscosity'] = kinVisc
-            settings['fluidProperties'][material_obj.Label] = mp
+                mp['DynamicViscosity'] = \
+                    Units.Quantity(material_obj.Material['DynamicViscosity']).getValueAs("kg/m/s").Value
+            mp['KinematicViscosity'] = mp['DynamicViscosity']/mp['Density']
+            settings['fluidProperties'].append(mp)
 
     def processBoundaryConditions(self):
         """ Compute any quantities required before case build """
@@ -309,8 +296,8 @@ class CfdCaseWriterFoam(QRunnable):
                         raise RuntimeError
                 except (SystemError, RuntimeError):
                     raise RuntimeError(bc['DirectionFace'] + " is not a valid, planar face.")
-            if not settings['alphaZonesPresent']:
-                bc['KinematicPressure'] = bc['Pressure']/next(iter(settings['fluidProperties'].values()))['Density']
+            if settings['solver']['solverName'] in ['simpleFoam', 'pimpleFoam']:
+                bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
             if bc['PorousBaffleMethod'] == 1:
                 wireDiam = bc['ScreenWireDiameter']
@@ -323,8 +310,25 @@ class CfdCaseWriterFoam(QRunnable):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
         settings = self.settings
         initial_values = settings['initialValues']
-        if not settings['alphaZonesPresent']:
-            initial_values['KinematicPressure'] = initial_values['Pressure'] / next(iter(settings['fluidProperties'].values()))['Density']
+        if settings['solver']['solverName'] in ['simpleFoam', 'pimpleFoam']:
+            mat_prop = settings['fluidProperties'][0]
+            initial_values['KinematicPressure'] = initial_values['Pressure'] / mat_prop['Density']
+        if settings['solver']['solverName'] in ['interFoam', 'multiphaseInterFoam']:
+            # Make sure the first n-1 alpha values exist, and write the n-th one
+            # consistently for multiphaseInterFoam
+            sum_alpha = 0.0
+            if 'alphas' not in initial_values:
+                initial_values['alphas'] = {}
+            for i, m in enumerate(settings['fluidProperties']):
+                alpha_name = m['Name']
+                if i == len(settings['fluidProperties'])-1 and \
+                   settings['solver']['solverName'] == 'multiphaseInterFoam':
+                    initial_values['alphas'][alpha_name] = 1.0-sum_alpha
+                else:
+                    alpha = initial_values['alphas'].get(alpha_name, 0.0)
+                    initial_values['alphas'][alpha_name] = alpha
+                    sum_alpha += alpha
+
         physics = settings['physics']
         if physics['TurbulenceModel'] is not None:
             if initial_values['UseInletTurbulenceValues']:
@@ -375,7 +379,7 @@ class CfdCaseWriterFoam(QRunnable):
                     raise Exception(
                         "Turbulence inlet specification currently unsupported for copying turbulence initial conditions")
 
-    # Porous
+    # Zones
 
     def exportZoneStlSurfaces(self):
         for zo in self.zone_objs:
@@ -400,7 +404,7 @@ class CfdCaseWriterFoam(QRunnable):
         settings['porousZonesPresent'] = True
         porousZoneSettings = settings['porousZones']
         for po in self.porousZone_objs:
-            pd = {'PartNameList': po.partNameList}
+            pd = {'PartNameList': tuple(po.partNameList)}
             if po.porousZoneProperties['PorousCorrelation'] == 'DarcyForchheimer':
                 pd['D'] = po.porousZoneProperties['D']
                 pd['F'] = po.porousZoneProperties['F']
@@ -433,6 +437,25 @@ class CfdCaseWriterFoam(QRunnable):
             else:
                 raise Exception("Unrecognised method for porous baffle resistance")
             porousZoneSettings[po.Label] = pd
+
+    def processInitialisationZoneProperties(self):
+        settings = self.settings
+        if settings['solver']['solverName'] in ['interFoam', 'multiphaseInterFoam']:
+            # Make sure the first n-1 alpha values exist, and write the n-th one
+            # consistently for multiphaseInterFoam
+            for zone_name in settings['initialisationZones']:
+                z = settings['initialisationZones'][zone_name]
+                sum_alpha = 0.0
+                if 'alphas' in z:
+                    for i, m in enumerate(settings['fluidProperties']):
+                        alpha_name = m['Name']
+                        if i == len(settings['fluidProperties'])-1 and \
+                           settings['solver']['solverName'] == 'multiphaseInterFoam':
+                            z['alphas'][alpha_name] = 1.0-sum_alpha
+                        else:
+                            alpha = z['alphas'].get(alpha_name, 0.0)
+                            z['alphas'][alpha_name] = alpha
+                            sum_alpha += alpha
 
     def bafflesPresent(self):
         for b in self.bc_group:
@@ -473,7 +496,7 @@ class CfdCaseWriterFoam(QRunnable):
             bcSubType = bcDict["BoundarySubtype"]
             patchType = CfdTools.getPatchType(bcType, bcSubType)
             settings['createPatches'][bc_obj.Label] = {
-                'PatchNamesList': bc_list,
+                'PatchNamesList': tuple(bc_list),  # Tuple used so that case writer outputs as an array
                 'PatchType': patchType
             }
 
@@ -521,8 +544,8 @@ class CfdCaseWriterFoam(QRunnable):
                                                 if isSameGeo:
                                                     tempBaffleList.append(regionObj.Name+sub[0].Name+elems)
                                                     tempBaffleListSlave.append(regionObj.Name+sub[0].Name+elems+"_slave")
-                    settings['createPatchesSnappyBaffles'][bc_obj.Label] = {"PatchNamesList" : tempBaffleList,
-                                                                            "PatchNamesListSlave" : tempBaffleListSlave}
+                    settings['createPatchesSnappyBaffles'][bc_obj.Label] = {"PatchNamesList" : tuple(tempBaffleList),
+                                                                            "PatchNamesListSlave" : tuple(tempBaffleListSlave)}
 
 
 
@@ -535,6 +558,6 @@ class CfdCaseWriterFoam(QRunnable):
                 flagName = True
         if flagName:
             settings['createPatches']['defaultFaces'] = {
-                'PatchNamesList': def_bc_list,
+                'PatchNamesList': tuple(def_bc_list),
                 'PatchType': "patch"
             }

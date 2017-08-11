@@ -86,7 +86,6 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.radioButtonBuoyancy.toggled.connect(self.selectThermal)
 
         # Temporarily disabling features which are not yet supported
-        self.form.radioButtonTransient.setEnabled(False)
         self.form.radioButtonCompressible.setEnabled(False)
         self.form.radioButtonEnergy.setEnabled(False)
         self.form.radioButtonBuoyancy.setEnabled(False)
@@ -183,6 +182,10 @@ class _TaskPanelCfdPhysicsSelection:
         self.physicsModel['TurbulenceModel'] = self.form.turbulenceComboBox.currentText()
 
     def accept(self):
+        changed_transient = False
+        if self.obj.PhysicsModel['Time'] != self.physicsModel['Time']:
+            changed_transient = True
+
         self.obj.PhysicsModel = self.physicsModel
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
@@ -194,6 +197,25 @@ class _TaskPanelCfdPhysicsSelection:
         FreeCADGui.doCommand("phys['TurbulenceModel'] = '{}'".format(self.physicsModel['TurbulenceModel']))
         FreeCADGui.doCommand("phys['Thermal'] = {}".format(self.physicsModel['Thermal']))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.PhysicsModel = phys".format(self.obj.Name))
+
+        if changed_transient:
+            # TODO
+            # For now, init the solver object's time values to sensible defaults for steady or transient
+            # The user can then edit further
+            a = CfdTools.getParentAnalysisObject(self.obj)
+            if a:
+                sol = CfdTools.getSolver(a)
+                if sol:
+                    FreeCADGui.doCommand("\nsol = FreeCAD.ActiveDocument.{}".format(sol.Name))
+                    if self.obj.PhysicsModel['Time'] == 'Steady':
+                        FreeCADGui.doCommand("sol.EndTime = 1000\n"
+                                             "sol.TimeStep = 1\n"
+                                             "sol.WriteInterval = 100\n")
+                    else:
+                        FreeCADGui.doCommand("sol.EndTime = 1\n"
+                                             "sol.TimeStep = 0.001\n"
+                                             "sol.WriteInterval = 0.1\n")
+
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

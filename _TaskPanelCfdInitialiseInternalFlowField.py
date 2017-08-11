@@ -48,12 +48,13 @@ if FreeCAD.GuiUp:
 
 class _TaskPanelCfdInitialiseInternalFlowField:
     '''The editmode TaskPanel for InitialVariables objects'''
-    def __init__(self, obj, physics_model, boundaries):
+    def __init__(self, obj, physics_model, boundaries, material_objs):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
         self.obj = obj
         self.physicsModel = physics_model
         self.boundaries = boundaries
+        self.material_objs = material_objs
         self.InitialVariables = self.obj.InitialVariables.copy()
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
@@ -67,6 +68,9 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.Uy.textChanged.connect(self.UyChanged)
         self.form.Uz.textChanged.connect(self.UzChanged)
         self.form.pressure.textChanged.connect(self.PChanged)
+
+        self.form.comboFluid.currentIndexChanged.connect(self.comboFluidChanged)
+        self.form.inputVolumeFraction.textChanged.connect(self.inputVolumeFractionChanged)
 
         self.form.checkUseInletValues.stateChanged.connect(self.checkUseInletValuesChanged)
         self.form.comboInlets.currentIndexChanged.connect(self.comboInletsChanged)
@@ -86,6 +90,18 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.Uy.setText(str(self.InitialVariables.get('Uy'))+"m/s")
         self.form.Uz.setText(str(self.InitialVariables.get('Uz'))+"m/s")
         self.form.pressure.setText(str(self.InitialVariables.get('Pressure'))+"kg*m/s^2")
+
+        # Add volume fraction fields
+        if len(self.material_objs) > 1:
+            self.form.volumeFractionsFrame.setVisible(True)
+            mat_names = []
+            for m in self.material_objs:
+                mat_names.append(m.Label)
+            self.form.comboFluid.clear()
+            self.form.comboFluid.addItems(mat_names[:-1])
+        else:
+            self.form.volumeFractionsFrame.setVisible(False)
+            self.form.comboFluid.clear()
 
         if self.physicsModel['Turbulence'] in ['RANS', 'LES']:
             self.form.turbulencePropertiesFrame.setVisible(True)
@@ -136,6 +152,17 @@ class _TaskPanelCfdInitialiseInternalFlowField:
     def PChanged(self, value):
         inputCheckAndStore(value, "kg*m/s^2", self.InitialVariables, 'Pressure')
 
+    def getMaterialName(self, index):
+        return self.material_objs[index].Label
+
+    def comboFluidChanged(self, index):
+        if 'alphas' not in self.InitialVariables:
+            self.InitialVariables['alphas'] = {}
+        self.form.inputVolumeFraction.setText(str(self.InitialVariables['alphas'].get(self.getMaterialName(index), 0.0)))
+
+    def inputVolumeFractionChanged(self, value):
+        inputCheckAndStore(value, "m/m", self.InitialVariables['alphas'], self.form.comboFluid.currentText())
+
     def checkUseInletValuesChanged(self, checked):
         self.InitialVariables['UseInletTurbulenceValues'] = checked
         self.updateTurbulenceModelsUi()
@@ -161,6 +188,11 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         FreeCADGui.doCommand("init['Uy'] = {}".format(self.InitialVariables['Uy']))
         FreeCADGui.doCommand("init['Uz'] = {}".format(self.InitialVariables['Uz']))
         FreeCADGui.doCommand("init['Pressure'] = {}".format(self.InitialVariables['Pressure']))
+        if len(self.material_objs) > 1:
+            for i in range(len(self.material_objs)-1):
+                alphaName = self.getMaterialName(i)
+                FreeCADGui.doCommand("init['alphas']['{}'] = {}".format(
+                    alphaName, self.InitialVariables['alphas'].get(alphaName, 0.0)))
         FreeCADGui.doCommand("init['UseInletTurbulenceValues'] "
                              "= {}".format(self.InitialVariables['UseInletTurbulenceValues']))
         FreeCADGui.doCommand("init['omega'] = {}".format(self.InitialVariables['omega']))

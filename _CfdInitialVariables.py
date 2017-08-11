@@ -41,7 +41,8 @@ class _CfdInitialVariables:
                                 "UseInletTurbulenceValues": False,
                                 "Inlet": "",
                                 "k": 0.01,
-                                "omega": 1}
+                                "omega": 1,
+                                "alphas": {}}
         obj.Proxy = self
         self.Type = "InitialVariables"
 
