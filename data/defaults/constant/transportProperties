@@ -9,7 +9,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 %{%(solver/solverName%)
-%:simpleFoam pimpleFoam
+%:simpleFoam porousSimpleFoam pimpleFoam
 transportModel  Newtonian;
 
 nu              [0 2 -1 0 0 0 0] %(fluidProperties/0/KinematicViscosity%);

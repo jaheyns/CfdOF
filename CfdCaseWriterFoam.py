@@ -170,7 +170,7 @@ class CfdCaseWriterFoam(QRunnable):
                         solver = 'multiphaseInterFoam'
                 else:
                     if len(self.material_objs) == 1:
-                        if (self.porousZone_objs is not None) or self.porousBafflesPresent():
+                        if self.porousZone_objs or self.porousBafflesPresent():
                             solver = 'porousSimpleFoam'
                         else:
                             solver = 'simpleFoam'
@@ -296,7 +296,7 @@ class CfdCaseWriterFoam(QRunnable):
                         raise RuntimeError
                 except (SystemError, RuntimeError):
                     raise RuntimeError(bc['DirectionFace'] + " is not a valid, planar face.")
-            if settings['solver']['solverName'] in ['simpleFoam', 'pimpleFoam']:
+            if settings['solver']['solverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
                 bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
             if bc['PorousBaffleMethod'] == 1:
@@ -310,7 +310,7 @@ class CfdCaseWriterFoam(QRunnable):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
         settings = self.settings
         initial_values = settings['initialValues']
-        if settings['solver']['solverName'] in ['simpleFoam', 'pimpleFoam']:
+        if settings['solver']['solverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
             mat_prop = settings['fluidProperties'][0]
             initial_values['KinematicPressure'] = initial_values['Pressure'] / mat_prop['Density']
         if settings['solver']['solverName'] in ['interFoam', 'multiphaseInterFoam']:
@@ -406,16 +406,16 @@ class CfdCaseWriterFoam(QRunnable):
         for po in self.porousZone_objs:
             pd = {'PartNameList': tuple(po.partNameList)}
             if po.porousZoneProperties['PorousCorrelation'] == 'DarcyForchheimer':
-                pd['D'] = po.porousZoneProperties['D']
-                pd['F'] = po.porousZoneProperties['F']
-                pd['e1'] = po.porousZoneProperties['e1']
-                pd['e3'] = po.porousZoneProperties['e3']
+                pd['D'] = tuple(po.porousZoneProperties['D'])
+                pd['F'] = tuple(po.porousZoneProperties['F'])
+                pd['e1'] = tuple(po.porousZoneProperties['e1'])
+                pd['e3'] = tuple(po.porousZoneProperties['e3'])
             elif po.porousZoneProperties['PorousCorrelation'] == 'Jakob':
                 # Calculate effective Darcy-Forchheimer coefficients
                 # This is for equilateral triangles arranged with the triangles pointing in BundleLayerNormal
                 # direction (direction of greater spacing - sqrt(3)*triangleEdgeLength)
-                pd['e1'] = po.porousZoneProperties['SpacingDirection']  # OpenFOAM modifies to be orthogonal to e3
-                pd['e3'] = po.porousZoneProperties['TubeAxis']
+                pd['e1'] = tuple(po.porousZoneProperties['SpacingDirection'])  # OpenFOAM modifies to be orthog to e3
+                pd['e3'] = tuple(po.porousZoneProperties['TubeAxis'])
                 spacing = po.porousZoneProperties['TubeSpacing']
                 d0 = po.porousZoneProperties['OuterDiameter']
                 u0 = po.porousZoneProperties['VelocityEstimate']
@@ -425,14 +425,16 @@ class CfdCaseWriterFoam(QRunnable):
                     raise ValueError("Viscosity must be set for Jakob correlation")
                 if spacing < d0:
                     raise ValueError("Tube spacing may not be less than diameter")
-                pd['D'] = [0, 0, 0]
-                pd['F'] = [0, 0, 0]
+                D = [0, 0, 0]
+                F = [0, 0, 0]
                 for (i, Sl, St) in [(0, aspectRatio*spacing, spacing), (1, spacing, aspectRatio*spacing)]:
                     C = 1.0/St*0.5*(1.0+0.47/(Sl/d0-1)**1.06)*(1.0/(1-d0/Sl))**(2.0-0.16)
                     D = C/d0*0.5*(u0*d0/kinVisc)**(1.0-0.16)
                     F = C*(u0*d0/kinVisc)**(-0.16)
-                    pd['D'][i] = D
-                    pd['F'][i] = F
+                    D[i] = D
+                    F[i] = F
+                pd['D'] = tuple(D)
+                pd['F'] = tuple(F)
                 # Currently assuming zero drag parallel to tube bundle (3rd principal dirn)
             else:
                 raise Exception("Unrecognised method for porous baffle resistance")

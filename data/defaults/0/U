@@ -78,7 +78,7 @@ boundaryField
         massFlowRate    %(boundaries/%(0%)/MassFlowRate%);
         rho             rho;
 %{%(solver/solverName%)
-%:simpleFoam pimpleFoam
+%:simpleFoam porousSimpleFoam pimpleFoam
         rhoInlet        %(fluidProperties/0/Density%);
 %}
         value           $internalField;

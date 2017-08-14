@@ -35,7 +35,7 @@ regions
 %{%(solver/solverName%)
 %:interFoam multiphaseInterFoam
             volScalarFieldValue p_rgh %(initialisationZones/%(2%)/Pressure%)
-%:simpleFoam pimpleFoam
+%:simpleFoam porousSimpleFoam pimpleFoam
             volScalarFieldValue p %(initialisationZones/%(2%)/KinematicPressure%)
 %:default
             volScalarFieldValue p %(initialisationZones/%(2%)/Pressure%)
