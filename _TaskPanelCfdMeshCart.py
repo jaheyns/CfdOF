@@ -331,8 +331,8 @@ class _TaskPanelCfdMeshCart:
             FreeCAD.Console.PrintError(err)
         self.mesh_process.setReadChannel(QtCore.QProcess.StandardOutput)
 
-    def meshFinished(self, exit_code):
-        self.readOutput()
+    def mesh_finished(self, exit_code):
+        self.read_output()
         if exit_code == 0:
             self.console_log("Reading mesh")
             cart_mesh = self.cart_mesh

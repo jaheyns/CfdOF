@@ -146,12 +146,9 @@ class CfdCartTools():
         """ Mesh regions """
         cf_settings = self.cf_settings
         cf_settings['MeshRegions'] = {}
-        cf_settings = self.cf_settings
         cf_settings['BoundaryLayers'] = {}
         snappy_settings = self.snappy_settings
         snappy_settings['MeshRegions'] = {}
-
-        self.boundary_layer_present = False  # NOTE: check if still needed
 
         from collections import defaultdict
         self.ele_meshpatch_map = defaultdict(list)
@@ -249,7 +246,7 @@ class CfdCartTools():
                             snappy_mesh_region_list.append(mr_obj.Name)
 
                         snappy_settings['MeshRegions'][mr_obj.Name] = {
-                            'RegionName': snappy_mesh_region_list,
+                            'RegionName': tuple(snappy_mesh_region_list),
                             'RefinementLevel': mr_obj.RefinementLevel,
                             'EdgeRefinementLevel': mr_obj.RegionEdgeRefinement,
                             'Baffle': mr_obj.Baffle
@@ -384,7 +381,7 @@ class CfdCartTools():
             shape_face_names_list = []
             for i in self.mesh_obj.ShapeFaceNames:
                 shape_face_names_list.append(i)
-            snappy_settings['ShapeFaceNames'] = shape_face_names_list
+            snappy_settings['ShapeFaceNames'] = tuple(shape_face_names_list)
             snappy_settings['EdgeRefinementLevel'] = self.mesh_obj.EdgeRefinement
             snappy_settings['PointInMesh'] = {
                 "x": inside_x,
