@@ -56,7 +56,7 @@ Not tested, but a POSIX system. Possible to install and run OpenFOAM.
 The CFD workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
-- [Latest development version of FreeCAD (0.17 prerelease; git commit 11209 or later)](https://www.freecadweb.org/wiki/Download)  
+- [Latest development version of FreeCAD (0.17 prerelease; requires git commit 11832 or later)](https://www.freecadweb.org/wiki/Download)  
 - [OpenFOAM (version 4.0 or later)](http://openfoam.org/download/)  
 - [Gnuplot.py (version 1.8)](http://gnuplot-py.sourceforge.net/)  
 - [Gnuplot](http://www.gnuplot.info/)  

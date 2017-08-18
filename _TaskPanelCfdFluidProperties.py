@@ -27,6 +27,7 @@ import FreeCAD
 import os
 import sys
 import os.path
+import Units
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -51,7 +52,7 @@ class TaskPanelCfdFluidProperties:
                                                              "TaskPanelCfdFluidProperties.ui"))
 
         # In most cases, unlike FEM, fluid flow properties are defined by the user. A small number of reference
-        # values are store in the fcmat database for fluids to serve as a starting point for the user. The properties
+        # values are stored in the fcmat database for fluids to serve as a starting point for the user. The properties
         # are therefore always initialised to "None" with the previous quantities reloaded in the input fields,
         # instead of trying match to a database entry as in FEM.
 
@@ -59,16 +60,10 @@ class TaskPanelCfdFluidProperties:
         index = self.form.PredefinedMaterialLibraryComboBox.findText('None')
         self.form.PredefinedMaterialLibraryComboBox.setCurrentIndex(index)
 
-        QtCore.QObject.connect(self.form.PredefinedMaterialLibraryComboBox,
-                               QtCore.SIGNAL("currentIndexChanged(int)"),
-                               self.selectPredefine)
+        self.form.PredefinedMaterialLibraryComboBox.currentIndexChanged.connect(self.selectPredefine)
 
-        # NOTE: Using different connect here because we would like access to the full text, where
-        # QtCore.QObject.connect, does not recognize textChanged signal.  We do so to allow the units to be pulled
-        # along with the values to ensure unit consistency, unlike FEM where units are assumed upon change/save.
-
-        self.form.fDens.textChanged.connect(self.DensityChanged)
-        self.form.fViscosity.textChanged.connect(self.ViscosityChanged)
+        self.form.fDens.valueChanged.connect(self.densityChanged)
+        self.form.fViscosity.valueChanged.connect(self.viscosityChanged)
 
         self.setTextFields(self.material)
 
@@ -81,26 +76,15 @@ class TaskPanelCfdFluidProperties:
 
     def setTextFields(self,matmap):
         if 'Density' in matmap:
-            density_new_unit = "kg/m^3"
-            density = FreeCAD.Units.Quantity(matmap['Density'])
-            density_with_new_unit = density.getValueAs(density_new_unit)
-            self.form.fDens.setText("{} {}".format(density_with_new_unit, density_new_unit))
-
+            self.form.fDens.setProperty('quantityString', matmap['Density'])
         if "DynamicViscosity" in matmap:
-            new_unit = "kg/s/m"
-            visc = FreeCAD.Units.Quantity(matmap['DynamicViscosity'])
-            visc_with_new_unit = float(visc.getValueAs(new_unit))
-            self.form.fViscosity.setText("{} {}".format(visc_with_new_unit,new_unit))
+            self.form.fViscosity.setProperty('quantityString', matmap['DynamicViscosity'])
 
-    def DensityChanged(self,value):
-        import Units
-        density = Units.Quantity(value).getValueAs("kg/m^3")
-        self.material['Density'] = unicode(density) + "kg/m^3"
+    def densityChanged(self, quantity):
+        self.material['Density'] = str(quantity)
 
-    def ViscosityChanged(self,value):
-        import Units
-        viscosity = Units.Quantity(value).getValueAs("kg/m/s")
-        self.material['DynamicViscosity'] = unicode(viscosity) + "kg/m/s"
+    def viscosityChanged(self, quantity):
+        self.material['DynamicViscosity'] = str(quantity)
 
     def accept(self):
         self.obj.Material = self.material

@@ -362,7 +362,7 @@ def cfdError(msg):
 
 
 def inputCheckAndStore(value, units, dictionary, key):
-    """ Store the numeric part of value (string) in dictionary[key] in the given units if compatible"""
+    """ Store the numeric part of value (string or value) in dictionary[key] in the given units if compatible"""
     # While the user is typing there will be parsing errors. Don't confuse the user by printing these -
     # the validation icon will show an error.
     try:
@@ -738,8 +738,8 @@ def checkCfdDependencies(term_print=True):
             print("Checking FreeCAD version")
         ver = FreeCAD.Version()
         gitver = int(ver[2].split()[0])
-        if int(ver[0]) == 0 and (int(ver[1]) < 17 or (int(ver[1]) == 17 and gitver < 11209)):
-            fc_msg = "FreeCAD version ({}.{}.{}) must be at least 0.17.11209".format(
+        if int(ver[0]) == 0 and (int(ver[1]) < 17 or (int(ver[1]) == 17 and gitver < 11832)):
+            fc_msg = "FreeCAD version ({}.{}.{}) must be at least 0.17.11832".format(
                 int(ver[0]), int(ver[1]), gitver)
             if term_print:
                 print(fc_msg)

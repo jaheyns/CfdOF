@@ -289,12 +289,6 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>20</height>
-               </size>
-              </property>
               <property name="text">
                <string>0</string>
               </property>
@@ -310,11 +304,8 @@
               <property name="unit" stdset="0">
                <string notr="true"/>
               </property>
-              <property name="decimals" stdset="0">
-               <number>5</number>
-              </property>
-              <property name="value" stdset="0">
-               <double>0.000000000000000</double>
+              <property name="format" stdset="0">
+               <number>g</number>
               </property>
              </widget>
             </item>
@@ -333,12 +324,6 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>20</height>
-               </size>
-              </property>
               <property name="text">
                <string>0</string>
               </property>
@@ -354,11 +339,8 @@
               <property name="unit" stdset="0">
                <string notr="true">mm</string>
               </property>
-              <property name="decimals" stdset="0">
-               <number>5</number>
-              </property>
-              <property name="value" stdset="0">
-               <double>0.000000000000000</double>
+              <property name="format" stdset="0">
+               <number>g</number>
               </property>
              </widget>
             </item>
@@ -377,12 +359,6 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>20</height>
-               </size>
-              </property>
               <property name="text">
                <string>0</string>
               </property>
@@ -398,11 +374,8 @@
               <property name="unit" stdset="0">
                <string notr="true">m^2/s^2</string>
               </property>
-              <property name="decimals" stdset="0">
-               <number>5</number>
-              </property>
-              <property name="value" stdset="0">
-               <double>0.000000000000000</double>
+              <property name="format" stdset="0">
+               <number>g</number>
               </property>
              </widget>
             </item>
@@ -421,12 +394,6 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>80</width>
-                <height>20</height>
-               </size>
-              </property>
               <property name="text">
                <string>0</string>
               </property>
@@ -442,11 +409,8 @@
               <property name="unit" stdset="0">
                <string notr="true">rad/s</string>
               </property>
-              <property name="decimals" stdset="0">
-               <number>5</number>
-              </property>
-              <property name="value" stdset="0">
-               <double>0.000000000000000</double>
+              <property name="format" stdset="0">
+               <number>g</number>
               </property>
              </widget>
             </item>
@@ -573,12 +537,6 @@
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
-                    <property name="minimumSize">
-                     <size>
-                      <width>80</width>
-                      <height>20</height>
-                     </size>
-                    </property>
                     <property name="text">
                      <string>0</string>
                     </property>
@@ -591,11 +549,8 @@
                     <property name="unit" stdset="0">
                      <string notr="true">m/s</string>
                     </property>
-                    <property name="decimals" stdset="0">
-                     <number>5</number>
-                    </property>
-                    <property name="value" stdset="0">
-                     <double>0.000000000000000</double>
+                    <property name="format" stdset="0">
+                     <number>g</number>
                     </property>
                    </widget>
                   </item>
@@ -614,12 +569,6 @@
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
-                    <property name="minimumSize">
-                     <size>
-                      <width>80</width>
-                      <height>20</height>
-                     </size>
-                    </property>
                     <property name="text">
                      <string>0</string>
                     </property>
@@ -632,11 +581,8 @@
                     <property name="unit" stdset="0">
                      <string notr="true">m/s</string>
                     </property>
-                    <property name="decimals" stdset="0">
-                     <number>5</number>
-                    </property>
-                    <property name="value" stdset="0">
-                     <double>0.000000000000000</double>
+                    <property name="format" stdset="0">
+                     <number>g</number>
                     </property>
                    </widget>
                   </item>
@@ -655,12 +601,6 @@
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
-                    <property name="minimumSize">
-                     <size>
-                      <width>80</width>
-                      <height>20</height>
-                     </size>
-                    </property>
                     <property name="text">
                      <string>0</string>
                     </property>
@@ -673,11 +613,8 @@
                     <property name="unit" stdset="0">
                      <string notr="true">m/s</string>
                     </property>
-                    <property name="decimals" stdset="0">
-                     <number>5</number>
-                    </property>
-                    <property name="value" stdset="0">
-                     <double>0.000000000000000</double>
+                    <property name="format" stdset="0">
+                     <number>g</number>
                     </property>
                    </widget>
                   </item>
@@ -726,12 +663,6 @@
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
-                    <property name="minimumSize">
-                     <size>
-                      <width>80</width>
-                      <height>20</height>
-                     </size>
-                    </property>
                     <property name="text">
                      <string>0</string>
                     </property>
@@ -747,11 +678,8 @@
                     <property name="unit" stdset="0">
                      <string notr="true">m/s</string>
                     </property>
-                    <property name="decimals" stdset="0">
-                     <number>5</number>
-                    </property>
-                    <property name="value" stdset="0">
-                     <double>0.000000000000000</double>
+                    <property name="format" stdset="0">
+                     <number>g</number>
                     </property>
                    </widget>
                   </item>
@@ -856,12 +784,6 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>80</width>
-                   <height>20</height>
-                  </size>
-                 </property>
                  <property name="text">
                   <string>0</string>
                  </property>
@@ -872,13 +794,10 @@
                   <double>2.000000000000000</double>
                  </property>
                  <property name="unit" stdset="0">
-                  <string notr="true">kg*m/s^2</string>
+                  <string notr="true">kg/m/s^2</string>
                  </property>
-                 <property name="decimals" stdset="0">
-                  <number>5</number>
-                 </property>
-                 <property name="value" stdset="0">
-                  <double>0.000000000000000</double>
+                 <property name="format" stdset="0">
+                  <number>g</number>
                  </property>
                 </widget>
                </item>
@@ -921,12 +840,6 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>80</width>
-                   <height>20</height>
-                  </size>
-                 </property>
                  <property name="text">
                   <string>0</string>
                  </property>
@@ -945,11 +858,8 @@
                  <property name="unit" stdset="0">
                   <string notr="true"/>
                  </property>
-                 <property name="decimals" stdset="0">
-                  <number>5</number>
-                 </property>
-                 <property name="value" stdset="0">
-                  <double>0.000000000000000</double>
+                 <property name="format" stdset="0">
+                  <number>g</number>
                  </property>
                 </widget>
                </item>
@@ -992,12 +902,6 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>80</width>
-                   <height>20</height>
-                  </size>
-                 </property>
                  <property name="text">
                   <string>0</string>
                  </property>
@@ -1010,11 +914,8 @@
                  <property name="unit" stdset="0">
                   <string notr="true">m^3/s</string>
                  </property>
-                 <property name="decimals" stdset="0">
-                  <number>5</number>
-                 </property>
-                 <property name="value" stdset="0">
-                  <double>0.000000000000000</double>
+                 <property name="format" stdset="0">
+                  <number>g</number>
                  </property>
                 </widget>
                </item>
@@ -1057,12 +958,6 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>80</width>
-                   <height>20</height>
-                  </size>
-                 </property>
                  <property name="text">
                   <string>0</string>
                  </property>
@@ -1075,11 +970,8 @@
                  <property name="unit" stdset="0">
                   <string notr="true">kg/s</string>
                  </property>
-                 <property name="decimals" stdset="0">
-                  <number>5</number>
-                 </property>
-                 <property name="value" stdset="0">
-                  <double>0.000000000000000</double>
+                 <property name="format" stdset="0">
+                  <number>g</number>
                  </property>
                 </widget>
                </item>
@@ -1159,12 +1051,6 @@
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>20</height>
-                      </size>
-                     </property>
                      <property name="text">
                       <string>0</string>
                      </property>
@@ -1180,11 +1066,8 @@
                      <property name="unit" stdset="0">
                       <string notr="true"/>
                      </property>
-                     <property name="decimals" stdset="0">
-                      <number>5</number>
-                     </property>
-                     <property name="value" stdset="0">
-                      <double>0.000000000000000</double>
+                     <property name="format" stdset="0">
+                      <number>g</number>
                      </property>
                     </widget>
                    </item>
@@ -1210,12 +1093,6 @@
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>20</height>
-                      </size>
-                     </property>
                      <property name="text">
                       <string>0</string>
                      </property>
@@ -1231,11 +1108,8 @@
                      <property name="unit" stdset="0">
                       <string notr="true">mm</string>
                      </property>
-                     <property name="decimals" stdset="0">
-                      <number>5</number>
-                     </property>
-                     <property name="value" stdset="0">
-                      <double>0.000000000000000</double>
+                     <property name="format" stdset="0">
+                      <number>g</number>
                      </property>
                     </widget>
                    </item>
@@ -1257,12 +1131,6 @@
                        <verstretch>0</verstretch>
                       </sizepolicy>
                      </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>80</width>
-                       <height>20</height>
-                      </size>
-                     </property>
                      <property name="text">
                       <string>0</string>
                      </property>
@@ -1278,11 +1146,8 @@
                      <property name="unit" stdset="0">
                       <string notr="true">mm</string>
                      </property>
-                     <property name="decimals" stdset="0">
-                      <number>5</number>
-                     </property>
-                     <property name="value" stdset="0">
-                      <double>0.000000000000000</double>
+                     <property name="format" stdset="0">
+                      <number>g</number>
                      </property>
                     </widget>
                    </item>

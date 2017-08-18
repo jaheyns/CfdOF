@@ -159,31 +159,31 @@ class TaskPanelCfdFluidBoundary:
         self.form.buttonRemoveFace.clicked.connect(self.buttonRemoveFaceClicked)
         self.form.radioButtonCart.toggled.connect(self.radioButtonVelocityToggled)
         self.form.radioButtonMagNormal.toggled.connect(self.radioButtonVelocityToggled)
-        self.form.inputCartX.textChanged.connect(self.inputCartXChanged)
-        self.form.inputCartY.textChanged.connect(self.inputCartYChanged)
-        self.form.inputCartZ.textChanged.connect(self.inputCartZChanged)
-        self.form.inputVelocityMag.textChanged.connect(self.inputVelocityMagChanged)
+        self.form.inputCartX.valueChanged.connect(self.inputCartXChanged)
+        self.form.inputCartY.valueChanged.connect(self.inputCartYChanged)
+        self.form.inputCartZ.valueChanged.connect(self.inputCartZChanged)
+        self.form.inputVelocityMag.valueChanged.connect(self.inputVelocityMagChanged)
         self.form.lineDirection.textChanged.connect(self.lineDirectionChanged)
         self.form.buttonDirection.clicked.connect(self.buttonDirectionClicked)
         self.form.buttonDirection.setCheckable(True)
         self.form.checkReverse.toggled.connect(self.checkReverseToggled)
-        self.form.inputPressure.textChanged.connect(self.inputPressureChanged)
-        self.form.inputSlipRatio.textChanged.connect(self.inputSlipRatioChanged)
-        self.form.inputVolFlowRate.textChanged.connect(self.inputVolFlowRateChanged)
-        self.form.inputMassFlowRate.textChanged.connect(self.inputMassFlowRateChanged)
+        self.form.inputPressure.valueChanged.connect(self.inputPressureChanged)
+        self.form.inputSlipRatio.valueChanged.connect(self.inputSlipRatioChanged)
+        self.form.inputVolFlowRate.valueChanged.connect(self.inputVolFlowRateChanged)
+        self.form.inputMassFlowRate.valueChanged.connect(self.inputMassFlowRateChanged)
         self.form.buttonGroupPorous.buttonClicked.connect(self.buttonGroupPorousClicked)
         # Annoyingly can't find a way to set ID's for button group from .ui file...
         self.form.buttonGroupPorous.setId(self.form.radioButtonPorousCoeff, 0)
         self.form.buttonGroupPorous.setId(self.form.radioButtonPorousScreen, 1)
-        self.form.inputPressureDropCoeff.textChanged.connect(self.inputPressureDropCoeffChanged)
-        self.form.inputWireDiameter.textChanged.connect(self.inputWireDiameterChanged)
-        self.form.inputSpacing.textChanged.connect(self.inputSpacingChanged)
+        self.form.inputPressureDropCoeff.valueChanged.connect(self.inputPressureDropCoeffChanged)
+        self.form.inputWireDiameter.valueChanged.connect(self.inputWireDiameterChanged)
+        self.form.inputSpacing.valueChanged.connect(self.inputSpacingChanged)
 
         self.form.comboTurbulenceSpecification.currentIndexChanged.connect(self.comboTurbulenceSpecificationChanged)
-        self.form.inputKineticEnergy.textChanged.connect(self.inputKineticEnergyChanged)
-        self.form.inputSpecificDissipationRate.textChanged.connect(self.inputSpecificDissipationRateChanged)
-        self.form.inputIntensity.textChanged.connect(self.inputIntensityChanged)
-        self.form.inputLengthScale.textChanged.connect(self.inputLengthScaleChanged)
+        self.form.inputKineticEnergy.valueChanged.connect(self.inputKineticEnergyChanged)
+        self.form.inputSpecificDissipationRate.valueChanged.connect(self.inputSpecificDissipationRateChanged)
+        self.form.inputIntensity.valueChanged.connect(self.inputIntensityChanged)
+        self.form.inputLengthScale.valueChanged.connect(self.inputLengthScaleChanged)
 
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.comboThermalBoundaryTypeChanged)
         # self.form.thermalFrame.setVisible(physics_model["Thermal"] is not None)
@@ -210,25 +210,25 @@ class TaskPanelCfdFluidBoundary:
         cart = self.BoundarySettings.get('VelocityIsCartesian', False)
         self.form.radioButtonCart.setChecked(cart)
         self.form.radioButtonMagNormal.setChecked(not cart)
-        self.form.inputCartX.setText(str(self.BoundarySettings.get('Ux'))+"m/s")
-        self.form.inputCartY.setText(str(self.BoundarySettings.get('Uy'))+"m/s")
-        self.form.inputCartZ.setText(str(self.BoundarySettings.get('Uz'))+"m/s")
-        self.form.inputVelocityMag.setText(str(self.BoundarySettings.get('VelocityMag'))+"m/s")
+        self.form.inputCartX.setProperty('quantityString', str(self.BoundarySettings.get('Ux'))+"m/s")
+        self.form.inputCartY.setProperty('quantityString', str(self.BoundarySettings.get('Uy'))+"m/s")
+        self.form.inputCartZ.setProperty('quantityString', str(self.BoundarySettings.get('Uz'))+"m/s")
+        self.form.inputVelocityMag.setProperty('quantityString', str(self.BoundarySettings.get('VelocityMag'))+"m/s")
         self.form.lineDirection.setText(self.BoundarySettings.get('DirectionFace'))
         self.form.checkReverse.setChecked(bool(self.BoundarySettings.get('ReverseNormal')))
-        self.form.inputPressure.setText(str(self.BoundarySettings.get('Pressure'))+"kg*m/s^2")
-        self.form.inputSlipRatio.setText(str(self.BoundarySettings.get('SlipRatio')))
-        self.form.inputVolFlowRate.setText(str(self.BoundarySettings.get('VolFlowRate'))+"m^3/s")
-        self.form.inputMassFlowRate.setText(str(self.BoundarySettings.get('MassFlowRate'))+"kg/s")
+        self.form.inputPressure.setProperty('quantityString', str(self.BoundarySettings.get('Pressure'))+"kg/m/s^2")
+        self.form.inputSlipRatio.setProperty('quantityString', str(self.BoundarySettings.get('SlipRatio')))
+        self.form.inputVolFlowRate.setProperty('quantityString', str(self.BoundarySettings.get('VolFlowRate'))+"m^3/s")
+        self.form.inputMassFlowRate.setProperty('quantityString', str(self.BoundarySettings.get('MassFlowRate'))+"kg/s")
 
         buttonId = self.BoundarySettings.get('PorousBaffleMethod', 0)
         selButton = self.form.buttonGroupPorous.button(buttonId)
         if selButton is not None:
             selButton.setChecked(True)
             self.buttonGroupPorousClicked(selButton)  # Signal is not generated on setChecked above
-        self.form.inputPressureDropCoeff.setText(str(self.BoundarySettings.get('PressureDropCoeff')))
-        self.form.inputWireDiameter.setText(str(self.BoundarySettings.get('ScreenWireDiameter'))+"m")
-        self.form.inputSpacing.setText(str(self.BoundarySettings.get('ScreenSpacing'))+"m")
+        self.form.inputPressureDropCoeff.setProperty('quantityString', str(self.BoundarySettings.get('PressureDropCoeff')))
+        self.form.inputWireDiameter.setProperty('quantityString', str(self.BoundarySettings.get('ScreenWireDiameter'))+"m")
+        self.form.inputSpacing.setProperty('quantityString', str(self.BoundarySettings.get('ScreenSpacing'))+"m")
 
         if self.turbModel is not None:
             self.form.comboTurbulenceSpecification.addItems(TURBULENT_INLET_SPEC[self.turbModel][0])
@@ -239,11 +239,11 @@ class TaskPanelCfdFluidBoundary:
         self.form.comboThermalBoundaryType.addItems(THERMAL_BOUNDARY_NAMES)
         thi = indexOrDefault(THERMAL_BOUNDARY_TYPES, self.BoundarySettings.get('ThermalBoundaryType'), 0)
         self.form.comboThermalBoundaryType.setCurrentIndex(thi)
-        self.form.inputKineticEnergy.setText(str(self.BoundarySettings.get('TurbulentKineticEnergy'))+"m^2/s^2")
-        self.form.inputSpecificDissipationRate.setText(
+        self.form.inputKineticEnergy.setProperty('quantityString', str(self.BoundarySettings.get('TurbulentKineticEnergy'))+"m^2/s^2")
+        self.form.inputSpecificDissipationRate.setProperty('quantityString',
             str(self.BoundarySettings.get('SpecificDissipationRate'))+"rad/s")
-        self.form.inputIntensity.setText(str(self.BoundarySettings.get('TurbulenceIntensity')))
-        self.form.inputLengthScale.setText(str(self.BoundarySettings.get('TurbulenceLengthScale'))+"m")
+        self.form.inputIntensity.setProperty('quantityString', str(self.BoundarySettings.get('TurbulenceIntensity')))
+        self.form.inputLengthScale.setProperty('quantityString', str(self.BoundarySettings.get('TurbulenceLengthScale'))+"m")
 
         # First time, add any currently selected faces to list
         if len(self.obj.References) == 0:
@@ -389,7 +389,6 @@ class TaskPanelCfdFluidBoundary:
             if elt.ShapeType == 'Face':
                 selection = (selected_object.Name, sub)
                 if self.selecting_references:
-                    print "in next one"
                     if selection not in self.obj.References:
                         tempList.append(selection)
                         # If the user hasn't picked anything for direction the selected face is used as default.
@@ -450,7 +449,7 @@ class TaskPanelCfdFluidBoundary:
         self.BoundarySettings['ReverseNormal'] = checked
 
     def inputPressureChanged(self, value):
-        inputCheckAndStore(value, "kg*m/s^2", self.BoundarySettings, 'Pressure')
+        inputCheckAndStore(value, "kg/m/s^2", self.BoundarySettings, 'Pressure')
 
     def inputSlipRatioChanged(self, value):
         inputCheckAndStore(value, "m/m", self.BoundarySettings, 'SlipRatio')
@@ -650,7 +649,6 @@ class TaskPanelCfdFluidBoundary:
     def addFaceListFace(self):
         #print self.form.faceListWidget.currentItem()," : ",self.form.faceListWidget.currentRow()
         if self.form.faceListWidget.count()>0 and self.form.faceListWidget.currentRow()!=-1:
-            print True
             ind = self.form.shapeComboBox.currentIndex()
             objectName = self.solidsNames[ind]
             ind = self.form.faceListWidget.currentRow()

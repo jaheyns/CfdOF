@@ -64,18 +64,18 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.potentialFoamCheckBox.stateChanged.connect(self.potentialFoamChanged)
         self.form.turbulencePropertiesFrame.setVisible(False)
 
-        self.form.Ux.textChanged.connect(self.UxChanged)
-        self.form.Uy.textChanged.connect(self.UyChanged)
-        self.form.Uz.textChanged.connect(self.UzChanged)
-        self.form.pressure.textChanged.connect(self.PChanged)
+        self.form.Ux.valueChanged.connect(self.UxChanged)
+        self.form.Uy.valueChanged.connect(self.UyChanged)
+        self.form.Uz.valueChanged.connect(self.UzChanged)
+        self.form.pressure.valueChanged.connect(self.PChanged)
 
         self.form.comboFluid.currentIndexChanged.connect(self.comboFluidChanged)
-        self.form.inputVolumeFraction.textChanged.connect(self.inputVolumeFractionChanged)
+        self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
 
         self.form.checkUseInletValues.stateChanged.connect(self.checkUseInletValuesChanged)
         self.form.comboInlets.currentIndexChanged.connect(self.comboInletsChanged)
-        self.form.inputk.textChanged.connect(self.inputkChanged)
-        self.form.inputOmega.textChanged.connect(self.inputOmegaChanged)
+        self.form.inputk.valueChanged.connect(self.inputkChanged)
+        self.form.inputOmega.valueChanged.connect(self.inputOmegaChanged)
 
         self.populateUiBasedOnPhysics()
 
@@ -86,10 +86,10 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.potentialFoamCheckBox.setChecked(checked)
         self.form.basicPropertiesFrame.setVisible(not checked)
 
-        self.form.Ux.setText(str(self.InitialVariables.get('Ux'))+"m/s")
-        self.form.Uy.setText(str(self.InitialVariables.get('Uy'))+"m/s")
-        self.form.Uz.setText(str(self.InitialVariables.get('Uz'))+"m/s")
-        self.form.pressure.setText(str(self.InitialVariables.get('Pressure'))+"kg*m/s^2")
+        self.form.Ux.setProperty('quantityString', str(self.InitialVariables.get('Ux'))+" m/s")
+        self.form.Uy.setProperty('quantityString', str(self.InitialVariables.get('Uy'))+"m/s")
+        self.form.Uz.setProperty('quantityString', str(self.InitialVariables.get('Uz'))+"m/s")
+        self.form.pressure.setProperty('quantityString', str(self.InitialVariables.get('Pressure'))+"kg/m/s^2")
 
         # Add volume fraction fields
         if len(self.material_objs) > 1:
@@ -114,8 +114,8 @@ class _TaskPanelCfdInitialiseInternalFlowField:
             if b.BoundarySettings['BoundaryType'] == 'inlet':
                 self.form.comboInlets.addItems([b.Label])
         self.form.comboInlets.setCurrentIndex(self.form.comboInlets.findText(self.InitialVariables.get('Inlet')))
-        self.form.inputk.setText(str(self.InitialVariables.get('k'))+"m^2/s^2")
-        self.form.inputOmega.setText(str(self.InitialVariables.get('omega'))+"rad/s")
+        self.form.inputk.setProperty('quantityString', str(self.InitialVariables.get('k'))+"m^2/s^2")
+        self.form.inputOmega.setProperty('quantityString', str(self.InitialVariables.get('omega'))+"rad/s")
         self.updateTurbulenceModelsUi()
 
         if self.physicsModel['Thermal'] == 'Energy':
@@ -150,7 +150,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         inputCheckAndStore(value, "m/s", self.InitialVariables, 'Uz')
 
     def PChanged(self, value):
-        inputCheckAndStore(value, "kg*m/s^2", self.InitialVariables, 'Pressure')
+        inputCheckAndStore(value, "kg/m/s^2", self.InitialVariables, 'Pressure')
 
     def getMaterialName(self, index):
         return self.material_objs[index].Label
@@ -158,7 +158,8 @@ class _TaskPanelCfdInitialiseInternalFlowField:
     def comboFluidChanged(self, index):
         if 'alphas' not in self.InitialVariables:
             self.InitialVariables['alphas'] = {}
-        self.form.inputVolumeFraction.setText(str(self.InitialVariables['alphas'].get(self.getMaterialName(index), 0.0)))
+        self.form.inputVolumeFraction.setProperty(
+            'quantityString', str(self.InitialVariables['alphas'].get(self.getMaterialName(index), 0.0)))
 
     def inputVolumeFractionChanged(self, value):
         inputCheckAndStore(value, "m/m", self.InitialVariables['alphas'], self.form.comboFluid.currentText())

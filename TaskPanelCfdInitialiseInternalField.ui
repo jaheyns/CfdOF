@@ -90,19 +90,13 @@
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
           <property name="singleStep" stdset="0">
-           <double>2.000000000000000</double>
-          </property>
-          <property name="maximum" stdset="0">
-           <double>2000000000.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="unit" stdset="0">
            <string notr="true">m/s</string>
           </property>
-          <property name="decimals" stdset="0">
-           <number>5</number>
-          </property>
-          <property name="value" stdset="0">
-           <double>0.000000000000000</double>
+          <property name="format" stdset="0">
+           <string>g</string>
           </property>
          </widget>
         </item>
@@ -142,19 +136,13 @@
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
           <property name="singleStep" stdset="0">
-           <double>2.000000000000000</double>
-          </property>
-          <property name="maximum" stdset="0">
-           <double>2000000000.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="unit" stdset="0">
            <string notr="true">m/s</string>
           </property>
-          <property name="decimals" stdset="0">
-           <number>5</number>
-          </property>
-          <property name="value" stdset="0">
-           <double>0.000000000000000</double>
+          <property name="format" stdset="0">
+           <string>g</string>
           </property>
          </widget>
         </item>
@@ -180,19 +168,13 @@
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
           <property name="singleStep" stdset="0">
-           <double>2.000000000000000</double>
-          </property>
-          <property name="maximum" stdset="0">
-           <double>2000000000.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="unit" stdset="0">
            <string notr="true">m/s</string>
           </property>
-          <property name="decimals" stdset="0">
-           <number>5</number>
-          </property>
-          <property name="value" stdset="0">
-           <double>0.000000000000000</double>
+          <property name="format" stdset="0">
+           <string>g</string>
           </property>
          </widget>
         </item>
@@ -217,13 +199,10 @@
            <double>2000000000.000000000000000</double>
           </property>
           <property name="unit" stdset="0">
-           <string notr="true">kg*m/s^2</string>
+           <string notr="true">kg/m/s^2</string>
           </property>
-          <property name="decimals" stdset="0">
-           <number>5</number>
-          </property>
-          <property name="value" stdset="0">
-           <double>0.000000000000000</double>
+          <property name="format" stdset="0">
+           <string>g</string>
           </property>
          </widget>
         </item>
@@ -287,11 +266,8 @@
            <property name="unit" stdset="0">
             <string notr="true">m^2/s^2</string>
            </property>
-           <property name="decimals" stdset="0">
-            <number>5</number>
-           </property>
-           <property name="value" stdset="0">
-            <double>0.000000000000000</double>
+           <property name="format" stdset="0">
+            <string>g</string>
            </property>
           </widget>
          </item>
@@ -325,11 +301,8 @@
            <property name="unit" stdset="0">
             <string notr="true">rad/s</string>
            </property>
-           <property name="decimals" stdset="0">
-            <number>5</number>
-           </property>
-           <property name="value" stdset="0">
-            <double>0.000000000000000</double>
+           <property name="format" stdset="0">
+            <string>g</string>
            </property>
           </widget>
          </item>
@@ -383,7 +356,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_11">
            <property name="text">
-            <string>Spalart Almeras properties here</string>
+            <string>Spalart-Allmaras properties here</string>
            </property>
           </widget>
          </item>
@@ -529,10 +502,10 @@
          <double>1.000000000000000</double>
         </property>
         <property name="unit" stdset="0">
-         <string notr="true">m/m</string>
+         <string notr="true"></string>
         </property>
-        <property name="value" stdset="0">
-         <double>0.000000000000000</double>
+        <property name="format" stdset="0">
+         <string>g</string>
         </property>
        </widget>
       </item>

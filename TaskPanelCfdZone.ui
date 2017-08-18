@@ -179,17 +179,11 @@
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
                 </property>
-                <property name="maximum" stdset="0">
-                 <double>2000000000.000000000000000</double>
-                </property>
                 <property name="unit" stdset="0">
                  <string notr="true"/>
                 </property>
-                <property name="decimals" stdset="0">
-                 <number>5</number>
-                </property>
-                <property name="value" stdset="0">
-                 <double>0.000000000000000</double>
+                <property name="format" stdset="0">
+                 <number>g</number>
                 </property>
                </widget>
               </item>
@@ -207,17 +201,11 @@
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
                 </property>
-                <property name="maximum" stdset="0">
-                 <double>2000000000.000000000000000</double>
-                </property>
                 <property name="unit" stdset="0">
                  <string notr="true"/>
                 </property>
-                <property name="decimals" stdset="0">
-                 <number>5</number>
-                </property>
-                <property name="value" stdset="0">
-                 <double>0.000000000000000</double>
+                <property name="format" stdset="0">
+                 <number>g</number>
                 </property>
                </widget>
               </item>
@@ -235,17 +223,11 @@
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
                 </property>
-                <property name="maximum" stdset="0">
-                 <double>2000000000.000000000000000</double>
-                </property>
                 <property name="unit" stdset="0">
                  <string notr="true"/>
                 </property>
-                <property name="decimals" stdset="0">
-                 <number>5</number>
-                </property>
-                <property name="value" stdset="0">
-                 <double>0.000000000000000</double>
+                <property name="format" stdset="0">
+                 <number>g</number>
                 </property>
                </widget>
               </item>
@@ -255,7 +237,7 @@
            <item row="2" column="0" colspan="4">
             <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>Inertial (f) [1/m]:</string>
+              <string>Inertial (f):</string>
              </property>
              <property name="margin">
               <number>2</number>
@@ -279,17 +261,11 @@
              <property name="singleStep" stdset="0">
               <double>1000.000000000000000</double>
              </property>
-             <property name="maximum" stdset="0">
-              <double>2000000000.000000000000000</double>
-             </property>
              <property name="unit" stdset="0">
-              <string notr="true"/>
+              <string notr="true">m^-2</string>
              </property>
-             <property name="decimals" stdset="0">
-              <number>5</number>
-             </property>
-             <property name="value" stdset="0">
-              <double>0.000000000000000</double>
+             <property name="format" stdset="0">
+              <number>g</number>
              </property>
             </widget>
            </item>
@@ -307,24 +283,18 @@
              <property name="singleStep" stdset="0">
               <double>1000.000000000000000</double>
              </property>
-             <property name="maximum" stdset="0">
-              <double>2000000000.000000000000000</double>
-             </property>
              <property name="unit" stdset="0">
-              <string notr="true"/>
+              <string notr="true">m^-2</string>
              </property>
-             <property name="decimals" stdset="0">
-              <number>5</number>
-             </property>
-             <property name="value" stdset="0">
-              <double>0.000000000000000</double>
+             <property name="format" stdset="0">
+              <number>g</number>
              </property>
             </widget>
            </item>
            <item row="0" column="0" colspan="4">
             <widget class="QLabel" name="label_4">
              <property name="text">
-              <string>Viscous (d) [1/m^2]:</string>
+              <string>Viscous (d):</string>
              </property>
              <property name="wordWrap">
               <bool>false</bool>
@@ -372,6 +342,9 @@
                 <property name="text">
                  <string>0</string>
                 </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
+                </property>
                </widget>
               </item>
               <item>
@@ -385,6 +358,9 @@
                 <property name="text">
                  <string>0</string>
                 </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
+                </property>
                </widget>
               </item>
               <item>
@@ -397,6 +373,9 @@
                 </property>
                 <property name="text">
                  <string>0</string>
+                </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
                 </property>
                </widget>
               </item>
@@ -417,17 +396,11 @@
              <property name="singleStep" stdset="0">
               <double>1000.000000000000000</double>
              </property>
-             <property name="maximum" stdset="0">
-              <double>2000000000.000000000000000</double>
-             </property>
              <property name="unit" stdset="0">
-              <string notr="true"/>
+              <string notr="true">m^-1</string>
              </property>
-             <property name="decimals" stdset="0">
-              <number>5</number>
-             </property>
-             <property name="value" stdset="0">
-              <double>0.000000000000000</double>
+             <property name="format" stdset="0">
+              <number>g</number>
              </property>
             </widget>
            </item>
@@ -469,17 +442,11 @@
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
                 </property>
-                <property name="maximum" stdset="0">
-                 <double>2000000000.000000000000000</double>
-                </property>
                 <property name="unit" stdset="0">
                  <string notr="true"/>
                 </property>
-                <property name="decimals" stdset="0">
-                 <number>5</number>
-                </property>
-                <property name="value" stdset="0">
-                 <double>0.000000000000000</double>
+                <property name="format" stdset="0">
+                 <number>g</number>
                 </property>
                </widget>
               </item>
@@ -503,11 +470,8 @@
                 <property name="unit" stdset="0">
                  <string notr="true"/>
                 </property>
-                <property name="decimals" stdset="0">
-                 <number>5</number>
-                </property>
-                <property name="value" stdset="0">
-                 <double>0.000000000000000</double>
+                <property name="format" stdset="0">
+                 <number>g</number>
                 </property>
                </widget>
               </item>
@@ -525,17 +489,11 @@
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
                 </property>
-                <property name="maximum" stdset="0">
-                 <double>2000000000.000000000000000</double>
-                </property>
                 <property name="unit" stdset="0">
                  <string notr="true"/>
                 </property>
-                <property name="decimals" stdset="0">
-                 <number>5</number>
-                </property>
-                <property name="value" stdset="0">
-                 <double>0.000000000000000</double>
+                <property name="format" stdset="0">
+                 <number>g</number>
                 </property>
                </widget>
               </item>
@@ -575,17 +533,11 @@
              <property name="singleStep" stdset="0">
               <double>1000.000000000000000</double>
              </property>
-             <property name="maximum" stdset="0">
-              <double>2000000000.000000000000000</double>
-             </property>
              <property name="unit" stdset="0">
-              <string notr="true"/>
+              <string notr="true">m^-1</string>
              </property>
-             <property name="decimals" stdset="0">
-              <number>5</number>
-             </property>
-             <property name="value" stdset="0">
-              <double>0.000000000000000</double>
+             <property name="format" stdset="0">
+              <number>g</number>
              </property>
             </widget>
            </item>
@@ -603,17 +555,11 @@
              <property name="singleStep" stdset="0">
               <double>1000.000000000000000</double>
              </property>
-             <property name="maximum" stdset="0">
-              <double>2000000000.000000000000000</double>
-             </property>
              <property name="unit" stdset="0">
-              <string notr="true"/>
+              <string notr="true">m^-2</string>
              </property>
-             <property name="decimals" stdset="0">
-              <number>5</number>
-             </property>
-             <property name="value" stdset="0">
-              <double>0.000000000000000</double>
+             <property name="format" stdset="0">
+              <number>g</number>
              </property>
             </widget>
            </item>
@@ -631,17 +577,11 @@
              <property name="singleStep" stdset="0">
               <double>1000.000000000000000</double>
              </property>
-             <property name="maximum" stdset="0">
-              <double>2000000000.000000000000000</double>
-             </property>
              <property name="unit" stdset="0">
-              <string notr="true"/>
+              <string notr="true">m^-1</string>
              </property>
-             <property name="decimals" stdset="0">
-              <number>5</number>
-             </property>
-             <property name="value" stdset="0">
-              <double>0.000000000000000</double>
+             <property name="format" stdset="0">
+              <number>g</number>
              </property>
             </widget>
            </item>
@@ -678,6 +618,9 @@
                 <property name="minimum" stdset="0">
                  <double>0.000000000000000</double>
                 </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
+                </property>
                </widget>
               </item>
               <item>
@@ -706,6 +649,9 @@
              <property name="minimum" stdset="0">
               <double>0.000000000000000</double>
              </property>
+             <property name="format" stdset="0">
+              <number>g</number>
+             </property>
             </widget>
            </item>
            <item row="14" column="1">
@@ -724,6 +670,9 @@
              </property>
              <property name="minimum" stdset="0">
               <double>0.000000000000000</double>
+             </property>
+             <property name="format" stdset="0">
+              <number>g</number>
              </property>
             </widget>
            </item>
@@ -784,6 +733,9 @@
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
                 </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
+                </property>
                </widget>
               </item>
               <item>
@@ -794,6 +746,9 @@
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
                 </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
+                </property>
                </widget>
               </item>
               <item>
@@ -803,6 +758,9 @@
                 </property>
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
+                </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
                 </property>
                </widget>
               </item>
@@ -825,6 +783,9 @@
              </property>
              <property name="minimum" stdset="0">
               <double>0.000000000000000</double>
+             </property>
+             <property name="format" stdset="0">
+              <number>g</number>
              </property>
             </widget>
            </item>
@@ -874,6 +835,9 @@
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
                 </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
+                </property>
                </widget>
               </item>
               <item>
@@ -890,6 +854,9 @@
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
                 </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
+                </property>
                </widget>
               </item>
               <item>
@@ -905,6 +872,9 @@
                 </property>
                 <property name="singleStep" stdset="0">
                  <double>0.100000000000000</double>
+                </property>
+                <property name="format" stdset="0">
+                 <number>g</number>
                 </property>
                </widget>
               </item>
@@ -937,6 +907,9 @@
          <property name="singleStep" stdset="0">
           <double>1.000000000000000</double>
          </property>
+         <property name="format" stdset="0">
+          <number>g</number>
+         </property>
         </widget>
        </item>
        <item row="2" column="1">
@@ -947,6 +920,9 @@
          <property name="singleStep" stdset="0">
           <double>1.000000000000000</double>
          </property>
+         <property name="format" stdset="0">
+          <number>g</number>
+         </property>
         </widget>
        </item>
        <item row="3" column="1">
@@ -956,6 +932,9 @@
          </property>
          <property name="singleStep" stdset="0">
           <double>1.000000000000000</double>
+         </property>
+         <property name="format" stdset="0">
+          <number>g</number>
          </property>
         </widget>
        </item>
@@ -969,10 +948,13 @@
        <item row="4" column="1">
         <widget class="Gui::InputField" name="inputPressure">
          <property name="unit" stdset="0">
-          <string notr="true">kg*m/s^2</string>
+          <string notr="true">kg/m/s^2</string>
          </property>
          <property name="singleStep" stdset="0">
           <double>100.000000000000000</double>
+         </property>
+         <property name="format" stdset="0">
+          <number>g</number>
          </property>
         </widget>
        </item>
@@ -1020,6 +1002,9 @@
             </property>
             <property name="maximum" stdset="0">
              <double>1.000000000000000</double>
+            </property>
+            <property name="format" stdset="0">
+             <number>g</number>
             </property>
            </widget>
           </item>

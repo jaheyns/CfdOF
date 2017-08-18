@@ -112,11 +112,11 @@ class _TaskPanelCfdZone:
             self.form.checkAlpha.stateChanged.connect(self.checkAlphaChanged)
             self.form.checkVelocity.stateChanged.connect(self.checkVelocityChanged)
             self.form.checkPressure.stateChanged.connect(self.checkPressureChanged)
-            self.form.inputVolumeFraction.textChanged.connect(self.inputVolumeFractionChanged)
-            self.form.inputUx.textChanged.connect(self.inputUxChanged)
-            self.form.inputUy.textChanged.connect(self.inputUyChanged)
-            self.form.inputUz.textChanged.connect(self.inputUzChanged)
-            self.form.inputPressure.textChanged.connect(self.inputPressureChanged)
+            self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
+            self.form.inputUx.valueChanged.connect(self.inputUxChanged)
+            self.form.inputUy.valueChanged.connect(self.inputUyChanged)
+            self.form.inputUz.valueChanged.connect(self.inputUzChanged)
+            self.form.inputPressure.valueChanged.connect(self.inputPressureChanged)
 
             material_objs = CfdTools.getMaterials(CfdTools.getParentAnalysisObject(obj))
             self.form.frameVolumeFraction.setVisible(len(material_objs) > 1)
@@ -134,46 +134,46 @@ class _TaskPanelCfdZone:
             ci = indexOrDefault(POROUS_CORRELATIONS, self.p.get('PorousCorrelation'), 0)
             self.form.comboBoxCorrelation.setCurrentIndex(ci)
             d = self.p.get('D')
-            self.form.dx.setText("{}".format(d[0]))
-            self.form.dy.setText("{}".format(d[1]))
-            self.form.dz.setText("{}".format(d[2]))
+            self.form.dx.setProperty('quantityString', " m^-2".format(d[0]))
+            self.form.dy.setProperty('quantityString', " m^-2".format(d[1]))
+            self.form.dz.setProperty('quantityString', " m^-2".format(d[2]))
             f = self.p.get('F')
-            self.form.fx.setText("{}".format(f[0]))
-            self.form.fy.setText("{}".format(f[1]))
-            self.form.fz.setText("{}".format(f[2]))
+            self.form.fx.setProperty('quantityString', " m^-1".format(f[0]))
+            self.form.fy.setProperty('quantityString', " m^-1".format(f[1]))
+            self.form.fz.setProperty('quantityString', " m^-1".format(f[2]))
             e1 = self.p.get('e1')
-            self.form.e1x.setText("{}".format(e1[0]))
-            self.form.e1y.setText("{}".format(e1[1]))
-            self.form.e1z.setText("{}".format(e1[2]))
+            self.form.e1x.setProperty('quantityString', str(e1[0]))
+            self.form.e1y.setProperty('quantityString', str(e1[1]))
+            self.form.e1z.setProperty('quantityString', str(e1[2]))
             e2 = self.p.get('e2')
-            self.form.e2x.setText("{}".format(e2[0]))
-            self.form.e2y.setText("{}".format(e2[1]))
-            self.form.e2z.setText("{}".format(e2[2]))
+            self.form.e2x.setProperty('quantityString', str(e2[0]))
+            self.form.e2y.setProperty('quantityString', str(e2[1]))
+            self.form.e2z.setProperty('quantityString', str(e2[2]))
             e3 = self.p.get('e3')
-            self.form.e3x.setText("{}".format(e3[0]))
-            self.form.e3y.setText("{}".format(e3[1]))
-            self.form.e3z.setText("{}".format(e3[2]))
-            self.form.inputOuterDiameter.setText("{} mm".format(self.p.get('OuterDiameter')*1000))
+            self.form.e3x.setProperty('quantityString', str(e3[0]))
+            self.form.e3y.setProperty('quantityString', str(e3[1]))
+            self.form.e3z.setProperty('quantityString', str(e3[2]))
+            self.form.inputOuterDiameter.setProperty('quantityString', "{} m".format(self.p.get('OuterDiameter')))
             tubeAxis = self.p.get('TubeAxis')
-            self.form.inputTubeAxisX.setText("{}".format(tubeAxis[0]))
-            self.form.inputTubeAxisY.setText("{}".format(tubeAxis[1]))
-            self.form.inputTubeAxisZ.setText("{}".format(tubeAxis[2]))
-            self.form.inputTubeSpacing.setText("{} mm".format(self.p.get('TubeSpacing')*1000))
+            self.form.inputTubeAxisX.setProperty('quantityString', str(tubeAxis[0]))
+            self.form.inputTubeAxisY.setProperty('quantityString', str(tubeAxis[1]))
+            self.form.inputTubeAxisZ.setProperty('quantityString', str(tubeAxis[2]))
+            self.form.inputTubeSpacing.setProperty('quantityString', "{} m".format(self.p.get('TubeSpacing')))
             normalAxis = self.p.get('SpacingDirection')
-            self.form.inputBundleLayerNormalX.setText("{}".format(normalAxis[0]))
-            self.form.inputBundleLayerNormalY.setText("{}".format(normalAxis[1]))
-            self.form.inputBundleLayerNormalZ.setText("{}".format(normalAxis[2]))
-            self.form.inputAspectRatio.setText("{}".format(self.p.get('AspectRatio')))
-            self.form.inputVelocityEstimate.setText("{} m/s".format(self.p.get('VelocityEstimate')))
+            self.form.inputBundleLayerNormalX.setProperty('quantityString', str(normalAxis[0]))
+            self.form.inputBundleLayerNormalY.setProperty('quantityString', str(normalAxis[1]))
+            self.form.inputBundleLayerNormalZ.setProperty('quantityString', str(normalAxis[2]))
+            self.form.inputAspectRatio.setProperty('quantityString', str(self.p.get('AspectRatio')))
+            self.form.inputVelocityEstimate.setProperty('quantityString', "{} m/s".format(self.p.get('VelocityEstimate')))
 
         elif self.obj.Name.startswith('InitialisationZone'):
             if 'Ux' in self.p:
-                self.form.inputUx.setText("{} m/s".format(self.p.get('Ux')))
-                self.form.inputUy.setText("{} m/s".format(self.p.get('Uy')))
-                self.form.inputUz.setText("{} m/s".format(self.p.get('Uz')))
+                self.form.inputUx.setProperty('quantityString', "{} m/s".format(self.p.get('Ux')))
+                self.form.inputUy.setProperty('quantityString', "{} m/s".format(self.p.get('Uy')))
+                self.form.inputUz.setProperty('quantityString', "{} m/s".format(self.p.get('Uz')))
                 self.form.checkVelocity.setChecked(True)
             if 'Pressure' in self.p:
-                self.form.inputPressure.setText("{} kg*m/s^2".format(self.p.get('Pressure')))
+                self.form.inputPressure.setProperty('quantityString', "{} kg/m/s^2".format(self.p.get('Pressure')))
                 self.form.checkPressure.setChecked(True)
             if 'alphas' in self.p:
                 self.form.checkAlpha.setChecked(True)
@@ -253,9 +253,15 @@ class _TaskPanelCfdZone:
             self.lastEVectorChanged = index
 
     def eDone(self, index):
-        e = [[float(self.form.e1x.text()), float(self.form.e1y.text()), float(self.form.e1z.text())],
-             [float(self.form.e2x.text()), float(self.form.e2y.text()), float(self.form.e2z.text())],
-             [float(self.form.e3x.text()), float(self.form.e3y.text()), float(self.form.e3z.text())]]
+        e = [[self.form.e1x.property('quantity').getValueAs('1').Value,
+              self.form.e1y.property('quantity').getValueAs('1').Value,
+              self.form.e1z.property('quantity').getValueAs('1').Value],
+             [self.form.e2x.property('quantity').getValueAs('1').Value,
+              self.form.e2y.property('quantity').getValueAs('1').Value,
+              self.form.e2z.property('quantity').getValueAs('1').Value],
+             [self.form.e3x.property('quantity').getValueAs('1').Value,
+              self.form.e3y.property('quantity').getValueAs('1').Value,
+              self.form.e3z.property('quantity').getValueAs('1').Value]]
         import CfdTools
         for i in range(3):
             e[i] = CfdTools.normalise(e[i])
@@ -278,19 +284,19 @@ class _TaskPanelCfdZone:
         e[indexplus] = CfdTools.normalise(e[indexplus])
         e[indexminus] = CfdTools.normalise(e[indexminus])
 
-        self.form.e1x.setText("{:.2f}".format(e[0][0]))
-        self.form.e1y.setText("{:.2f}".format(e[0][1]))
-        self.form.e1z.setText("{:.2f}".format(e[0][2]))
-        self.form.e2x.setText("{:.2f}".format(e[1][0]))
-        self.form.e2y.setText("{:.2f}".format(e[1][1]))
-        self.form.e2z.setText("{:.2f}".format(e[1][2]))
-        self.form.e3x.setText("{:.2f}".format(e[2][0]))
-        self.form.e3y.setText("{:.2f}".format(e[2][1]))
-        self.form.e3z.setText("{:.2f}".format(e[2][2]))
+        self.form.e1x.setProperty('quantityString', str(e[0][0]))
+        self.form.e1y.setProperty('quantityString', str(e[0][1]))
+        self.form.e1z.setProperty('quantityString', str(e[0][2]))
+        self.form.e2x.setProperty('quantityString', str(e[1][0]))
+        self.form.e2y.setProperty('quantityString', str(e[1][1]))
+        self.form.e2z.setProperty('quantityString', str(e[1][2]))
+        self.form.e3x.setProperty('quantityString', str(e[2][0]))
+        self.form.e3y.setProperty('quantityString', str(e[2][1]))
+        self.form.e3z.setProperty('quantityString', str(e[2][2]))
 
     def comboAspectRatioChanged(self):
         i = self.form.comboAspectRatio.currentIndex()
-        self.form.inputAspectRatio.setText(ASPECT_RATIOS[i])
+        self.form.inputAspectRatio.setProperty('quantityString', ASPECT_RATIOS[i])
         self.form.comboAspectRatio.setToolTip(ASPECT_RATIO_TIPS[i])
 
     def checkAlphaChanged(self, checked):
@@ -307,7 +313,7 @@ class _TaskPanelCfdZone:
         alphaName = self.form.comboFluid.currentText()
         if 'alphas' in self.p:
             if alphaName in self.p['alphas']:
-                self.form.inputVolumeFraction.setText("{}".format(self.p['alphas'].get(alphaName, 0.0)))
+                self.form.inputVolumeFraction.setProperty('quantityString', str(self.p['alphas'].get(alphaName, 0.0)))
 
     def checkVelocityChanged(self, checked):
         self.form.inputUx.setEnabled(checked != 0)
@@ -346,40 +352,40 @@ class _TaskPanelCfdZone:
         inputCheckAndStore(text, "m/s", self.p, 'Uz')
 
     def inputPressureChanged(self, text):
-        inputCheckAndStore(text, "kg*m/s^2", self.p, 'Pressure')
+        inputCheckAndStore(text, "kg/m/s^2", self.p, 'Pressure')
 
     def accept(self):
         if self.obj.Name.startswith('PorousZone'):
             try:
                 self.p['PorousCorrelation'] = POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()]
-                self.p['D'] = [float(FreeCAD.Units.Quantity(self.form.dx.text())),
-                               float(FreeCAD.Units.Quantity(self.form.dy.text())),
-                               float(FreeCAD.Units.Quantity(self.form.dz.text()))]
-                self.p['F'] = [float(FreeCAD.Units.Quantity(self.form.fx.text())),
-                               float(FreeCAD.Units.Quantity(self.form.fy.text())),
-                               float(FreeCAD.Units.Quantity(self.form.fz.text()))]
-                self.p['e1'] = [float(FreeCAD.Units.Quantity(self.form.e1x.text())),
-                                float(FreeCAD.Units.Quantity(self.form.e1y.text())),
-                                float(FreeCAD.Units.Quantity(self.form.e1z.text()))]
-                self.p['e2'] = [float(FreeCAD.Units.Quantity(self.form.e2x.text())),
-                                float(FreeCAD.Units.Quantity(self.form.e2y.text())),
-                                float(FreeCAD.Units.Quantity(self.form.e2z.text()))]
-                self.p['e3'] = [float(FreeCAD.Units.Quantity(self.form.e3x.text())),
-                                float(FreeCAD.Units.Quantity(self.form.e3y.text())),
-                                float(FreeCAD.Units.Quantity(self.form.e3z.text()))]
+                self.p['D'] = [self.form.dx.property('quantity').getValueAs("m^-2").Value,
+                               self.form.dy.property('quantity').getValueAs("m^-2").Value,
+                               self.form.dz.property('quantity').getValueAs("m^-2").Value]
+                self.p['F'] = [self.form.fx.property('quantity').getValueAs("m^-1").Value,
+                               self.form.fy.property('quantity').getValueAs("m^-1").Value,
+                               self.form.fz.property('quantity').getValueAs("m^-1").Value]
+                self.p['e1'] = [self.form.e1x.property('quantity').getValueAs("1").Value,
+                                self.form.e1y.property('quantity').getValueAs("1").Value,
+                                self.form.e1z.property('quantity').getValueAs("1").Value]
+                self.p['e2'] = [self.form.e2x.property('quantity').getValueAs("1").Value,
+                                self.form.e2y.property('quantity').getValueAs("1").Value,
+                                self.form.e2z.property('quantity').getValueAs("1").Value]
+                self.p['e3'] = [self.form.e3x.property('quantity').getValueAs("1").Value,
+                                self.form.e3y.property('quantity').getValueAs("1").Value,
+                                self.form.e3z.property('quantity').getValueAs("1").Value]
                 self.p['OuterDiameter'] = \
-                    float(FreeCAD.Units.Quantity(self.form.inputOuterDiameter.text()).getValueAs('m'))
-                self.p['TubeAxis'] = [float(FreeCAD.Units.Quantity(self.form.inputTubeAxisX.text())),
-                                      float(FreeCAD.Units.Quantity(self.form.inputTubeAxisY.text())),
-                                      float(FreeCAD.Units.Quantity(self.form.inputTubeAxisZ.text()))]
-                self.p['TubeSpacing'] = float(FreeCAD.Units.Quantity(self.form.inputTubeSpacing.text()).getValueAs('m'))
+                    self.form.inputOuterDiameter.property('quantity').getValueAs('m').Value
+                self.p['TubeAxis'] = [self.form.inputTubeAxisX.property('quantity').getValueAs("m/m").Value,
+                                      self.form.inputTubeAxisY.property('quantity').getValueAs("m/m").Value,
+                                      self.form.inputTubeAxisZ.property('quantity').getValueAs("m/m").Value]
+                self.p['TubeSpacing'] = self.form.inputTubeSpacing.property('quantity').getValueAs('m').Value
                 self.p['SpacingDirection'] = \
-                    [float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalX.text())),
-                     float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalY.text())),
-                     float(FreeCAD.Units.Quantity(self.form.inputBundleLayerNormalZ.text()))]
-                self.p['AspectRatio'] = float(FreeCAD.Units.Quantity(self.form.inputAspectRatio.text()))
+                    [self.form.inputBundleLayerNormalX.property('quantity').getValueAs("1").Value,
+                     self.form.inputBundleLayerNormalY.property('quantity').getValueAs("1").Value,
+                     self.form.inputBundleLayerNormalZ.property('quantity').getValueAs("1").Value]
+                self.p['AspectRatio'] = self.form.inputAspectRatio.property('quantity').getValueAs("1").Value
                 self.p['VelocityEstimate'] = \
-                    float(FreeCAD.Units.Quantity(self.form.inputVelocityEstimate.text()).getValueAs('m/s'))
+                    self.form.inputVelocityEstimate.property('quantity').getValueAs('m/s').Value
             except ValueError:
                 FreeCAD.Console.PrintError("Unrecognised value entered\n")
                 return
