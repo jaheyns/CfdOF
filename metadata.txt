@@ -1,0 +1,41 @@
+; Metadata template for FreeCAD addons obtained from:
+; https://gist.github.com/luzpaz/5e12362f0771eec9e6e82ef0e4d1ba56
+
+[general]
+name=CFD-OF
+email=
+author=
+FreeCADMinimumVersion=0.17.11832
+description=Computational Fluid Dynamics (CFD) analysis using OpenFOAM
+about=Simple workflow to get started with CFD analysis.
+      Supports incompressible laminar and turbulent flow, basic multiphase flow,
+      and cut-cell cartesian meshing
+version=
+; tracker can either link to a bugtracker or a forum thread link
+tracker=
+repository=https://github.com/jaheyns/CfdOF
+license=GPL
+
+; end of mandatory metadata
+
+; start of dependency section
+
+[dependencies]
+workbenches=FEM
+
+; specific python version we need to work with?
+python=
+
+; add 3rd party python libs
+pylibs=
+
+; add 3rd party optional python libs
+optionalpylibs=gnuplot-py
+
+; add 3rd party applications
+3rdparty=
+
+; add dependencies of other FC addons
+FCaddon=
+
+; end of dependency section
