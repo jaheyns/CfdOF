@@ -29,14 +29,14 @@ __author__ = "qingfeng xia"
 __url__ = "http://www.freecadweb.org"
 
 
-class CfdFoamWorkbench(Workbench):
-    """ cfdfoam workbench object """
+class CfdOFWorkbench(Workbench):
+    """ CfdOF workbench object """
     def __init__(self):
         import os
         import CfdTools
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd.png")
         self.__class__.Icon = icon_path
-        self.__class__.MenuText = "CFDFoam"
+        self.__class__.MenuText = "CFD-OF"
         self.__class__.ToolTip = "CFD workbench"
 
         from PySide import QtCore
@@ -75,12 +75,12 @@ class CfdFoamWorkbench(Workbench):
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
                   'Cfd_SolverControl']
 
-        self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFDFoam")), cmdlst)
-        self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CFDFoam")), cmdlst)
+        self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD-OF")), cmdlst)
+        self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CFD-OF")), cmdlst)
 
         # enable QtCore translation here, todo
 
     def GetClassName(self):
         return "Gui::PythonWorkbench"
 
-FreeCADGui.addWorkbench(CfdFoamWorkbench())
+FreeCADGui.addWorkbench(CfdOFWorkbench())

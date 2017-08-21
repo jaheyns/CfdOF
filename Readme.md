@@ -2,7 +2,7 @@
 
 This workbench aims to help users set up and run CFD analysis. It guides the user in selecting the relevant physics, 
 specifying the material properties, generating a mesh, assigning boundary conditions and setting the solver settings
-before running the simulation. Where possible best practices are included to improve the stability of the solvers.
+before running the simulation. Where possible, best practices are included to improve the stability of the solvers.
 
 ![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
 
@@ -79,10 +79,10 @@ already installed. For installation of additional dependencies, see below.
 Alternatively, a recent FreeCAD build can be obtained from
 https://github.com/FreeCAD/FreeCAD/releases and the latest
 CFD workbench downloaded from 
-https://github.com/jaheyns/CfdFoam\.
+https://github.com/jaheyns/CfdOF\.
 After extracting the FreeCAD archive to a directory <FreeCAD-directory>, the CFD workbench can be extracted
-to the folder <FreeCAD-directory>\Mod\CfdFoam or to 
-\<Application Data\>\FreeCAD\Mod\CfdFoam. 
+to the folder <FreeCAD-directory>\Mod\CfdOF or to 
+\<Application Data\>\FreeCAD\Mod\CfdOF. 
 
 ##### Dependency installation
 
@@ -120,15 +120,15 @@ https://github.com/FreeCAD/FreeCAD\.
 
 As the CFD workbench is fully developed in Python the user is not required to 
 compile any libraries in order to use it, and can directly 
-copy the folder to <FreeCAD-directory>/Mod/CfdFoam or to ~/.FreeCAD/Mod/CfdFoam
+copy the folder to <FreeCAD-directory>/Mod/CfdOF or to ~/.FreeCAD/Mod/CfdOF
 
 As an example, from the command line, use git to clone the CFD workbench
     
-    $ git clone https://github.com/jaheyns/CfdFoam.git
+    $ git clone https://github.com/jaheyns/CfdOF.git
         
-and create a symbolic link to the local FreeCAD instalation directory. 
+and create a symbolic link to the local FreeCAD installation directory. 
     
-    $ ln -s <path/to/CfdFoam>  <path/to/FreeCAD>/Mod/CfdFoam
+    $ ln -s <path/to/CfdOF>  <path/to/FreeCAD>/Mod/CfdOF
         
 This workbench is unfortunately not yet available under the  FreeCAD-Addon-Installer.
 
@@ -165,7 +165,7 @@ prerequisites have been successfully installed.
 
 ### Submitting Bugs
 
-Please discuss issues on the [CFDFoam dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=21576).
+Please discuss issues on the [CfdOF dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=21576).
 
 ## Developement
 
