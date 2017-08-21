@@ -1,6 +1,6 @@
-# Computional fluid dynamics (CFD) workbench for FreeCAD
+# Computational fluid dynamics (CFD) workbench for FreeCAD
 
-This workbench aims to help users set up and run CFD analysis. It guides the user in selecting the relevant physics, 
+This workbench aims to help users set up and run CFD analyses. It guides the user in selecting the relevant physics, 
 specifying the material properties, generating a mesh, assigning boundary conditions and setting the solver settings
 before running the simulation. Where possible, best practices are included to improve the stability of the solvers.
 
