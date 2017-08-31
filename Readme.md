@@ -79,7 +79,7 @@ already installed. For installation of additional dependencies, see below.
 Alternatively, a recent FreeCAD build can be obtained from
 https://github.com/FreeCAD/FreeCAD/releases and the latest
 CFD workbench downloaded from 
-https://github.com/jaheyns/CfdOF\.
+https://github.com/jaheyns/CfdOF .
 After extracting the FreeCAD archive to a directory <FreeCAD-directory>, the CFD workbench can be extracted
 to the folder <FreeCAD-directory>\Mod\CfdOF or to 
 \<Application Data\>\FreeCAD\Mod\CfdOF. 
@@ -116,7 +116,7 @@ The latest development version of FreeCAD can be obtained from
 the [Ubuntu daily build](https://www.freecadweb.org/wiki/Download#Ubuntu_Daily_PPA_Packages)
 packages. Alternatively, it can be built from the source code
 at 
-https://github.com/FreeCAD/FreeCAD\.
+https://github.com/FreeCAD/FreeCAD .
 
 As the CFD workbench is fully developed in Python the user is not required to 
 compile any libraries in order to use it, and can directly 
