@@ -407,6 +407,7 @@ class CfdCartTools():
             self.settings = {
                 'Name': self.part_obj.Name,
                 'MeshPath': self.meshCaseDir,
+                'FoamRuntime': CfdTools.getFoamRuntime(),
                 'TranslatedFoamPath': CfdTools.translatePath(CfdTools.getFoamDir()),
                 'MeshUtility': self.mesh_obj.MeshUtility,
                 'MeshRegionPresent': mesh_region_present,

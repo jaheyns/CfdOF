@@ -9,7 +9,7 @@ runCommand()
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
-%{%(system/FoamRuntime%)
+%{%(FoamRuntime%)
 %:BlueCFD
 %:default
 # Unset and source bashrc
