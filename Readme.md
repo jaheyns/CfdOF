@@ -165,8 +165,9 @@ prerequisites have been successfully installed.
 
 ### Submitting Bugs
 
-Please discuss issues on the [CfdOF dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=21576).
+Please discuss issues on the [CFDFoam dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=24147).
 
+For previous discussions see [CFD WB forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=21576).
 ## Developement
 
 It is asked that developers should only add functionality or code that is working and can be tested. Dead code, even
