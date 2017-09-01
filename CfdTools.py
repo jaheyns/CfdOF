@@ -373,6 +373,17 @@ def inputCheckAndStore(value, units, dictionary, key):
         dictionary[key] = quantity.Value
 
 
+def setInputFieldQuantity(inputField, quantity):
+    """ Set the quantity (quantity object or unlocalised string) into the inputField correctly """
+    # Must set in the correctly localised value as the user would enter it.
+    # A bit painful because the python locale settings seem to be based on language,
+    # not input settings as the FreeCAD settings are. So can't use that; hence
+    # this rather roundabout way involving the UserString of Quantity
+    q = Units.Quantity(quantity)
+    # Avoid any truncation
+    q.Format = (12, 'e')
+    inputField.setProperty("quantityString", q.UserString)
+
 def indexOrDefault(list, findItem, defaultIndex):
     """ Look for findItem in list, and return defaultIndex if not found """
     try:

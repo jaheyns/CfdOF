@@ -33,8 +33,7 @@ import sys
 import os.path
 import Part
 import CfdTools
-from CfdTools import indexOrDefault
-from CfdTools import inputCheckAndStore
+from CfdTools import inputCheckAndStore, setInputFieldQuantity, indexOrDefault
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -134,46 +133,46 @@ class _TaskPanelCfdZone:
             ci = indexOrDefault(POROUS_CORRELATIONS, self.p.get('PorousCorrelation'), 0)
             self.form.comboBoxCorrelation.setCurrentIndex(ci)
             d = self.p.get('D')
-            self.form.dx.setProperty('quantityString', " m^-2".format(d[0]))
-            self.form.dy.setProperty('quantityString', " m^-2".format(d[1]))
-            self.form.dz.setProperty('quantityString', " m^-2".format(d[2]))
+            setInputFieldQuantity(self.form.dx, " m^-2".format(d[0]))
+            setInputFieldQuantity(self.form.dy, " m^-2".format(d[1]))
+            setInputFieldQuantity(self.form.dz, " m^-2".format(d[2]))
             f = self.p.get('F')
-            self.form.fx.setProperty('quantityString', " m^-1".format(f[0]))
-            self.form.fy.setProperty('quantityString', " m^-1".format(f[1]))
-            self.form.fz.setProperty('quantityString', " m^-1".format(f[2]))
+            setInputFieldQuantity(self.form.fx, " m^-1".format(f[0]))
+            setInputFieldQuantity(self.form.fy, " m^-1".format(f[1]))
+            setInputFieldQuantity(self.form.fz, " m^-1".format(f[2]))
             e1 = self.p.get('e1')
-            self.form.e1x.setProperty('quantityString', str(e1[0]))
-            self.form.e1y.setProperty('quantityString', str(e1[1]))
-            self.form.e1z.setProperty('quantityString', str(e1[2]))
+            setInputFieldQuantity(self.form.e1x, str(e1[0]))
+            setInputFieldQuantity(self.form.e1y, str(e1[1]))
+            setInputFieldQuantity(self.form.e1z, str(e1[2]))
             e2 = self.p.get('e2')
-            self.form.e2x.setProperty('quantityString', str(e2[0]))
-            self.form.e2y.setProperty('quantityString', str(e2[1]))
-            self.form.e2z.setProperty('quantityString', str(e2[2]))
+            setInputFieldQuantity(self.form.e2x, str(e2[0]))
+            setInputFieldQuantity(self.form.e2y, str(e2[1]))
+            setInputFieldQuantity(self.form.e2z, str(e2[2]))
             e3 = self.p.get('e3')
-            self.form.e3x.setProperty('quantityString', str(e3[0]))
-            self.form.e3y.setProperty('quantityString', str(e3[1]))
-            self.form.e3z.setProperty('quantityString', str(e3[2]))
-            self.form.inputOuterDiameter.setProperty('quantityString', "{} m".format(self.p.get('OuterDiameter')))
+            setInputFieldQuantity(self.form.e3x, str(e3[0]))
+            setInputFieldQuantity(self.form.e3y, str(e3[1]))
+            setInputFieldQuantity(self.form.e3z, str(e3[2]))
+            setInputFieldQuantity(self.form.inputOuterDiameter, "{} m".format(self.p.get('OuterDiameter')))
             tubeAxis = self.p.get('TubeAxis')
-            self.form.inputTubeAxisX.setProperty('quantityString', str(tubeAxis[0]))
-            self.form.inputTubeAxisY.setProperty('quantityString', str(tubeAxis[1]))
-            self.form.inputTubeAxisZ.setProperty('quantityString', str(tubeAxis[2]))
-            self.form.inputTubeSpacing.setProperty('quantityString', "{} m".format(self.p.get('TubeSpacing')))
+            setInputFieldQuantity(self.form.inputTubeAxisX, str(tubeAxis[0]))
+            setInputFieldQuantity(self.form.inputTubeAxisY, str(tubeAxis[1]))
+            setInputFieldQuantity(self.form.inputTubeAxisZ, str(tubeAxis[2]))
+            setInputFieldQuantity(self.form.inputTubeSpacing, "{} m".format(self.p.get('TubeSpacing')))
             normalAxis = self.p.get('SpacingDirection')
-            self.form.inputBundleLayerNormalX.setProperty('quantityString', str(normalAxis[0]))
-            self.form.inputBundleLayerNormalY.setProperty('quantityString', str(normalAxis[1]))
-            self.form.inputBundleLayerNormalZ.setProperty('quantityString', str(normalAxis[2]))
-            self.form.inputAspectRatio.setProperty('quantityString', str(self.p.get('AspectRatio')))
-            self.form.inputVelocityEstimate.setProperty('quantityString', "{} m/s".format(self.p.get('VelocityEstimate')))
+            setInputFieldQuantity(self.form.inputBundleLayerNormalX, str(normalAxis[0]))
+            setInputFieldQuantity(self.form.inputBundleLayerNormalY, str(normalAxis[1]))
+            setInputFieldQuantity(self.form.inputBundleLayerNormalZ, str(normalAxis[2]))
+            setInputFieldQuantity(self.form.inputAspectRatio, str(self.p.get('AspectRatio')))
+            setInputFieldQuantity(self.form.inputVelocityEstimate, "{} m/s".format(self.p.get('VelocityEstimate')))
 
         elif self.obj.Name.startswith('InitialisationZone'):
             if 'Ux' in self.p:
-                self.form.inputUx.setProperty('quantityString', "{} m/s".format(self.p.get('Ux')))
-                self.form.inputUy.setProperty('quantityString', "{} m/s".format(self.p.get('Uy')))
-                self.form.inputUz.setProperty('quantityString', "{} m/s".format(self.p.get('Uz')))
+                setInputFieldQuantity(self.form.inputUx, "{} m/s".format(self.p.get('Ux')))
+                setInputFieldQuantity(self.form.inputUy, "{} m/s".format(self.p.get('Uy')))
+                setInputFieldQuantity(self.form.inputUz, "{} m/s".format(self.p.get('Uz')))
                 self.form.checkVelocity.setChecked(True)
             if 'Pressure' in self.p:
-                self.form.inputPressure.setProperty('quantityString', "{} kg/m/s^2".format(self.p.get('Pressure')))
+                setInputFieldQuantity(self.form.inputPressure, "{} kg/m/s^2".format(self.p.get('Pressure')))
                 self.form.checkPressure.setChecked(True)
             if 'alphas' in self.p:
                 self.form.checkAlpha.setChecked(True)
@@ -284,19 +283,19 @@ class _TaskPanelCfdZone:
         e[indexplus] = CfdTools.normalise(e[indexplus])
         e[indexminus] = CfdTools.normalise(e[indexminus])
 
-        self.form.e1x.setProperty('quantityString', str(e[0][0]))
-        self.form.e1y.setProperty('quantityString', str(e[0][1]))
-        self.form.e1z.setProperty('quantityString', str(e[0][2]))
-        self.form.e2x.setProperty('quantityString', str(e[1][0]))
-        self.form.e2y.setProperty('quantityString', str(e[1][1]))
-        self.form.e2z.setProperty('quantityString', str(e[1][2]))
-        self.form.e3x.setProperty('quantityString', str(e[2][0]))
-        self.form.e3y.setProperty('quantityString', str(e[2][1]))
-        self.form.e3z.setProperty('quantityString', str(e[2][2]))
+        setInputFieldQuantity(self.form.e1x, str(e[0][0]))
+        setInputFieldQuantity(self.form.e1y, str(e[0][1]))
+        setInputFieldQuantity(self.form.e1z, str(e[0][2]))
+        setInputFieldQuantity(self.form.e2x, str(e[1][0]))
+        setInputFieldQuantity(self.form.e2y, str(e[1][1]))
+        setInputFieldQuantity(self.form.e2z, str(e[1][2]))
+        setInputFieldQuantity(self.form.e3x, str(e[2][0]))
+        setInputFieldQuantity(self.form.e3y, str(e[2][1]))
+        setInputFieldQuantity(self.form.e3z, str(e[2][2]))
 
     def comboAspectRatioChanged(self):
         i = self.form.comboAspectRatio.currentIndex()
-        self.form.inputAspectRatio.setProperty('quantityString', ASPECT_RATIOS[i])
+        setInputFieldQuantity(self.form.inputAspectRatio, ASPECT_RATIOS[i])
         self.form.comboAspectRatio.setToolTip(ASPECT_RATIO_TIPS[i])
 
     def checkAlphaChanged(self, checked):
@@ -313,7 +312,7 @@ class _TaskPanelCfdZone:
         alphaName = self.form.comboFluid.currentText()
         if 'alphas' in self.p:
             if alphaName in self.p['alphas']:
-                self.form.inputVolumeFraction.setProperty('quantityString', str(self.p['alphas'].get(alphaName, 0.0)))
+                setInputFieldQuantity(self.form.inputVolumeFraction, str(self.p['alphas'].get(alphaName, 0.0)))
 
     def checkVelocityChanged(self, checked):
         self.form.inputUx.setEnabled(checked != 0)

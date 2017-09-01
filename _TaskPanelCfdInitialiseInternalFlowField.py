@@ -33,7 +33,7 @@ import os
 import sys
 import os.path
 import CfdTools
-from CfdTools import inputCheckAndStore
+from CfdTools import inputCheckAndStore, setInputFieldQuantity
 import Units
 
 if FreeCAD.GuiUp:
@@ -86,10 +86,10 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.potentialFoamCheckBox.setChecked(checked)
         self.form.basicPropertiesFrame.setVisible(not checked)
 
-        self.form.Ux.setProperty('quantityString', str(self.InitialVariables.get('Ux'))+" m/s")
-        self.form.Uy.setProperty('quantityString', str(self.InitialVariables.get('Uy'))+"m/s")
-        self.form.Uz.setProperty('quantityString', str(self.InitialVariables.get('Uz'))+"m/s")
-        self.form.pressure.setProperty('quantityString', str(self.InitialVariables.get('Pressure'))+"kg/m/s^2")
+        setInputFieldQuantity(self.form.Ux, str(self.InitialVariables.get('Ux'))+"m/s")
+        setInputFieldQuantity(self.form.Uy, str(self.InitialVariables.get('Uy'))+"m/s")
+        setInputFieldQuantity(self.form.Uz, str(self.InitialVariables.get('Uz'))+"m/s")
+        setInputFieldQuantity(self.form.pressure, str(self.InitialVariables.get('Pressure'))+"kg/m/s^2")
 
         # Add volume fraction fields
         if len(self.material_objs) > 1:
@@ -114,8 +114,8 @@ class _TaskPanelCfdInitialiseInternalFlowField:
             if b.BoundarySettings['BoundaryType'] == 'inlet':
                 self.form.comboInlets.addItems([b.Label])
         self.form.comboInlets.setCurrentIndex(self.form.comboInlets.findText(self.InitialVariables.get('Inlet')))
-        self.form.inputk.setProperty('quantityString', str(self.InitialVariables.get('k'))+"m^2/s^2")
-        self.form.inputOmega.setProperty('quantityString', str(self.InitialVariables.get('omega'))+"rad/s")
+        setInputFieldQuantity(self.form.inputk, str(self.InitialVariables.get('k'))+"m^2/s^2")
+        setInputFieldQuantity(self.form.inputOmega, str(self.InitialVariables.get('omega'))+"rad/s")
         self.updateTurbulenceModelsUi()
 
         if self.physicsModel['Thermal'] == 'Energy':
@@ -158,8 +158,8 @@ class _TaskPanelCfdInitialiseInternalFlowField:
     def comboFluidChanged(self, index):
         if 'alphas' not in self.InitialVariables:
             self.InitialVariables['alphas'] = {}
-        self.form.inputVolumeFraction.setProperty(
-            'quantityString', str(self.InitialVariables['alphas'].get(self.getMaterialName(index), 0.0)))
+        setInputFieldQuantity(self.form.inputVolumeFraction,
+                              str(self.InitialVariables['alphas'].get(self.getMaterialName(index), 0.0)))
 
     def inputVolumeFractionChanged(self, value):
         inputCheckAndStore(value, "m/m", self.InitialVariables['alphas'], self.form.comboFluid.currentText())

@@ -33,7 +33,7 @@ import os
 import sys
 import os.path
 import CfdTools
-from CfdTools import inputCheckAndStore, indexOrDefault
+from CfdTools import inputCheckAndStore, setInputFieldQuantity, indexOrDefault
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -210,25 +210,25 @@ class TaskPanelCfdFluidBoundary:
         cart = self.BoundarySettings.get('VelocityIsCartesian', False)
         self.form.radioButtonCart.setChecked(cart)
         self.form.radioButtonMagNormal.setChecked(not cart)
-        self.form.inputCartX.setProperty('quantityString', str(self.BoundarySettings.get('Ux'))+"m/s")
-        self.form.inputCartY.setProperty('quantityString', str(self.BoundarySettings.get('Uy'))+"m/s")
-        self.form.inputCartZ.setProperty('quantityString', str(self.BoundarySettings.get('Uz'))+"m/s")
-        self.form.inputVelocityMag.setProperty('quantityString', str(self.BoundarySettings.get('VelocityMag'))+"m/s")
+        setInputFieldQuantity(self.form.inputCartX, str(self.BoundarySettings.get('Ux'))+"m/s")
+        setInputFieldQuantity(self.form.inputCartY, str(self.BoundarySettings.get('Uy'))+"m/s")
+        setInputFieldQuantity(self.form.inputCartZ, str(self.BoundarySettings.get('Uz'))+"m/s")
+        setInputFieldQuantity(self.form.inputVelocityMag, str(self.BoundarySettings.get('VelocityMag'))+"m/s")
         self.form.lineDirection.setText(self.BoundarySettings.get('DirectionFace'))
         self.form.checkReverse.setChecked(bool(self.BoundarySettings.get('ReverseNormal')))
-        self.form.inputPressure.setProperty('quantityString', str(self.BoundarySettings.get('Pressure'))+"kg/m/s^2")
-        self.form.inputSlipRatio.setProperty('quantityString', str(self.BoundarySettings.get('SlipRatio')))
-        self.form.inputVolFlowRate.setProperty('quantityString', str(self.BoundarySettings.get('VolFlowRate'))+"m^3/s")
-        self.form.inputMassFlowRate.setProperty('quantityString', str(self.BoundarySettings.get('MassFlowRate'))+"kg/s")
+        setInputFieldQuantity(self.form.inputPressure, str(self.BoundarySettings.get('Pressure'))+"kg/m/s^2")
+        setInputFieldQuantity(self.form.inputSlipRatio, str(self.BoundarySettings.get('SlipRatio')))
+        setInputFieldQuantity(self.form.inputVolFlowRate, str(self.BoundarySettings.get('VolFlowRate'))+"m^3/s")
+        setInputFieldQuantity(self.form.inputMassFlowRate, str(self.BoundarySettings.get('MassFlowRate'))+"kg/s")
 
         buttonId = self.BoundarySettings.get('PorousBaffleMethod', 0)
         selButton = self.form.buttonGroupPorous.button(buttonId)
         if selButton is not None:
             selButton.setChecked(True)
             self.buttonGroupPorousClicked(selButton)  # Signal is not generated on setChecked above
-        self.form.inputPressureDropCoeff.setProperty('quantityString', str(self.BoundarySettings.get('PressureDropCoeff')))
-        self.form.inputWireDiameter.setProperty('quantityString', str(self.BoundarySettings.get('ScreenWireDiameter'))+"m")
-        self.form.inputSpacing.setProperty('quantityString', str(self.BoundarySettings.get('ScreenSpacing'))+"m")
+        setInputFieldQuantity(self.form.inputPressureDropCoeff, str(self.BoundarySettings.get('PressureDropCoeff')))
+        setInputFieldQuantity(self.form.inputWireDiameter, str(self.BoundarySettings.get('ScreenWireDiameter'))+"m")
+        setInputFieldQuantity(self.form.inputSpacing, str(self.BoundarySettings.get('ScreenSpacing'))+"m")
 
         if self.turbModel is not None:
             self.form.comboTurbulenceSpecification.addItems(TURBULENT_INLET_SPEC[self.turbModel][0])
@@ -239,11 +239,12 @@ class TaskPanelCfdFluidBoundary:
         self.form.comboThermalBoundaryType.addItems(THERMAL_BOUNDARY_NAMES)
         thi = indexOrDefault(THERMAL_BOUNDARY_TYPES, self.BoundarySettings.get('ThermalBoundaryType'), 0)
         self.form.comboThermalBoundaryType.setCurrentIndex(thi)
-        self.form.inputKineticEnergy.setProperty('quantityString', str(self.BoundarySettings.get('TurbulentKineticEnergy'))+"m^2/s^2")
-        self.form.inputSpecificDissipationRate.setProperty('quantityString',
-            str(self.BoundarySettings.get('SpecificDissipationRate'))+"rad/s")
-        self.form.inputIntensity.setProperty('quantityString', str(self.BoundarySettings.get('TurbulenceIntensity')))
-        self.form.inputLengthScale.setProperty('quantityString', str(self.BoundarySettings.get('TurbulenceLengthScale'))+"m")
+        setInputFieldQuantity(self.form.inputKineticEnergy,
+                              str(self.BoundarySettings.get('TurbulentKineticEnergy'))+"m^2/s^2")
+        setInputFieldQuantity(self.form.inputSpecificDissipationRate,
+                              str(self.BoundarySettings.get('SpecificDissipationRate'))+"rad/s")
+        setInputFieldQuantity(self.form.inputIntensity, str(self.BoundarySettings.get('TurbulenceIntensity')))
+        setInputFieldQuantity(self.form.inputLengthScale, str(self.BoundarySettings.get('TurbulenceLengthScale'))+"m")
 
         # First time, add any currently selected faces to list
         if len(self.obj.References) == 0:

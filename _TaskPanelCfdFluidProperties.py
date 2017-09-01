@@ -28,6 +28,7 @@ import os
 import sys
 import os.path
 import Units
+from CfdTools import setInputFieldQuantity
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -76,9 +77,9 @@ class TaskPanelCfdFluidProperties:
 
     def setTextFields(self,matmap):
         if 'Density' in matmap:
-            self.form.fDens.setProperty('quantityString', matmap['Density'])
+            setInputFieldQuantity(self.form.fDens, matmap['Density'])
         if "DynamicViscosity" in matmap:
-            self.form.fViscosity.setProperty('quantityString', matmap['DynamicViscosity'])
+            setInputFieldQuantity(self.form.fViscosity, matmap['DynamicViscosity'])
 
     def densityChanged(self, quantity):
         self.material['Density'] = str(quantity)
