@@ -21,7 +21,7 @@ before running the simulation. Where possible, best practices are included to im
 * Unit testing
 * Cut-cell Cartesian meshing with boundary layers (cfMesh).
 * Cut-cell Cartesian meshing with porous media (snappyHexMesh).
-* Extension to turbulent using RANS (k-w SST).
+* Extension to turbulent flow using RANS (k-w SST).
 * New case builder using a modular template structure
 * Macro scripting
 
@@ -68,21 +68,28 @@ which can be automatically installed (see below for instructions).
 
 #### Windows
 
-##### Option 1: Packaged version
-In Windows, it is suggested to download a pre-packaged version from 
-https://opensimsa.github.io/download.html
-and consult the included README file. 
+##### Option 1: Installation into FreeCAD
+
+The latest FreeCAD build of the 0.17 prerelease code can be obtained from
+https://github.com/FreeCAD/FreeCAD/releases and the latest
+CFD workbench can be installed into it using the Addon manager:
+
+* After extracting the FreeCAD archive to a directory <FreeCAD-directory>,
+run FreeCAD in place (<FreeCAD-directory\bin\FreeCAD.exe). 
+* Select Tools | Addon manager ...
+* Select CfdOF in the list of workbenches, and click "Install/update"
+* Restart FreeCAD
+* For installation of dependencies, see below.
+
+Note: The CFD workbench can be updated at any time through the Addon manager.
+
+##### Option 2: Packaged version
+Alternatively, in Windows, a pre-packaged version can be downloaded from 
+https://opensimsa.github.io/download.html . Please consult the included README file
+for installation instructions. 
 This package comes with the latest stable release of the CFD workbench and most dependencies
 already installed. For installation of additional dependencies, see below.
 
-##### Option 2: Installation into FreeCAD
-Alternatively, a recent FreeCAD build can be obtained from
-https://github.com/FreeCAD/FreeCAD/releases and the latest
-CFD workbench downloaded from 
-https://github.com/jaheyns/CfdOF .
-After extracting the FreeCAD archive to a directory <FreeCAD-directory>, the CFD workbench can be extracted
-to the folder <FreeCAD-directory>\Mod\CfdOF or to 
-\<Application Data\>\FreeCAD\Mod\CfdOF. 
 
 ##### Dependency installation
 
@@ -102,7 +109,7 @@ panel to \<blueCFD install directory\>\OpenFOAM-4.x
 location.)
 
 Likewise the Gnuplot-py module can be installed from the Preferences
-panel (not necessary if using Option 1), as well as cfMesh.
+panel (not necessary if using Option 2), as well as cfMesh.
 cfMesh is automatically built from source inside the OpenFOAM
 environment if installed from the Preferences panel. Note
 that this is a lengthy process.
@@ -115,29 +122,24 @@ prerequisites have been successfully installed.
 The latest development version of FreeCAD can be obtained from 
 the [Ubuntu daily build](https://www.freecadweb.org/wiki/Download#Ubuntu_Daily_PPA_Packages)
 packages. Alternatively, it can be built from the source code
-at 
-https://github.com/FreeCAD/FreeCAD .
+at https://github.com/FreeCAD/FreeCAD .
 
-As the CFD workbench is fully developed in Python the user is not required to 
-compile any libraries in order to use it, and can directly 
-copy the folder to <FreeCAD-directory>/Mod/CfdOF or to ~/.FreeCAD/Mod/CfdOF
+The latest CFD workbench can be installed into FreeCAD using the Addon manager:
 
-As an example, from the command line, use git to clone the CFD workbench
-    
-    $ git clone https://github.com/jaheyns/CfdOF.git
-        
-and create a symbolic link to the local FreeCAD installation directory. 
-    
-    $ ln -s <path/to/CfdOF>  <path/to/FreeCAD>/Mod/CfdOF
-        
-This workbench is unfortunately not yet available under the  FreeCAD-Addon-Installer.
+* Run FreeCAD 
+* Select Tools | Addon manager ...
+* Select CfdOF in the list of workbenches, and click "Install/update"
+* Restart FreeCAD
+* For installation of dependencies, see below.
+
 
 ##### Dependency installation
 
 Dependencies can be checked and some of them installed
 conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
-choose "CFD". 
+choose "CFD".
+
 Manual installation is however required for 
 [OpenFOAM](http://openfoam.org/download/),
 [Gnuplot](http://www.gnuplot.info/),
@@ -165,7 +167,7 @@ prerequisites have been successfully installed.
 
 ### Submitting Bugs
 
-Please discuss issues on the [CFDFoam dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=24147).
+Please discuss issues on the [CFDOF dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=24147).
 
 For previous discussions see [CFD WB forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=21576).
 ## Developement
