@@ -21,7 +21,7 @@ license=GPL
 ; start of dependency section
 
 [dependencies]
-workbenches=FEM
+workbenches=FemWorkbench
 
 ; specific python version we need to work with?
 python=
