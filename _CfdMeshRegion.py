@@ -34,6 +34,11 @@ __url__ = "http://www.freecadweb.org"
 class _CfdMeshRegion:
     """The CfdMeshRegion object"""
     def __init__(self, obj):
+        # GMSH related properties
+        obj.addProperty("App::PropertyFloat", "RelativeLength", "GMSH",
+                        "Set relative length of the elements for this region")
+        obj.RelativeLength = 0.75
+
         # cfMesh related properties
         obj.addProperty("App::PropertyFloat", "RelativeLength", "cfMesh",
                         "Set relative length of the elements for this region")
