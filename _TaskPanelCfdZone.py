@@ -62,6 +62,8 @@ class _TaskPanelCfdZone:
         self.obj = obj
         self.shapeListOrig = list(self.obj.shapeList)
         self.partNameList = list(self.obj.partNameList)
+        self.partNameListOrig = list(self.obj.partNameList)
+
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdZone.ui"))
 
@@ -201,10 +203,8 @@ class _TaskPanelCfdZone:
 
     def selectReference(self):
         selection = FreeCADGui.Selection.getSelectionEx()
-        """
-            NOTE: to access the subElement (eg face which was selected) it would be selection[i].Object.SubElementNames
-            Access to the actual shapes such as solids, faces, edges etc s[i].Object.Shape.Faces/Edges/Solids
-        """
+        #NOTE: to access the subElement (eg face which was selected) it would be selection[i].Object.SubElementNames
+        #Access to the actual shapes such as solids, faces, edges etc s[i].Object.Shape.Faces/Edges/Solids
         shapeList = list(self.obj.shapeList)
         for sel in selection:
             if len(sel.Object.Shape.Solids) > 0:
@@ -356,49 +356,49 @@ class _TaskPanelCfdZone:
     def accept(self):
         if self.obj.Name.startswith('PorousZone'):
             try:
-                self.p['PorousCorrelation'] = POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()]
-                self.p['D'] = [self.form.dx.property('quantity').getValueAs("m^-2").Value,
-                               self.form.dy.property('quantity').getValueAs("m^-2").Value,
-                               self.form.dz.property('quantity').getValueAs("m^-2").Value]
-                self.p['F'] = [self.form.fx.property('quantity').getValueAs("m^-1").Value,
-                               self.form.fy.property('quantity').getValueAs("m^-1").Value,
-                               self.form.fz.property('quantity').getValueAs("m^-1").Value]
-                self.p['e1'] = [self.form.e1x.property('quantity').getValueAs("1").Value,
-                                self.form.e1y.property('quantity').getValueAs("1").Value,
-                                self.form.e1z.property('quantity').getValueAs("1").Value]
-                self.p['e2'] = [self.form.e2x.property('quantity').getValueAs("1").Value,
-                                self.form.e2y.property('quantity').getValueAs("1").Value,
-                                self.form.e2z.property('quantity').getValueAs("1").Value]
-                self.p['e3'] = [self.form.e3x.property('quantity').getValueAs("1").Value,
-                                self.form.e3y.property('quantity').getValueAs("1").Value,
-                                self.form.e3z.property('quantity').getValueAs("1").Value]
-                self.p['OuterDiameter'] = \
-                    self.form.inputOuterDiameter.property('quantity').getValueAs('m').Value
-                self.p['TubeAxis'] = [self.form.inputTubeAxisX.property('quantity').getValueAs("m/m").Value,
-                                      self.form.inputTubeAxisY.property('quantity').getValueAs("m/m").Value,
-                                      self.form.inputTubeAxisZ.property('quantity').getValueAs("m/m").Value]
-                self.p['TubeSpacing'] = self.form.inputTubeSpacing.property('quantity').getValueAs('m').Value
-                self.p['SpacingDirection'] = \
-                    [self.form.inputBundleLayerNormalX.property('quantity').getValueAs("1").Value,
-                     self.form.inputBundleLayerNormalY.property('quantity').getValueAs("1").Value,
-                     self.form.inputBundleLayerNormalZ.property('quantity').getValueAs("1").Value]
-                self.p['AspectRatio'] = self.form.inputAspectRatio.property('quantity').getValueAs("1").Value
-                self.p['VelocityEstimate'] = \
-                    self.form.inputVelocityEstimate.property('quantity').getValueAs('m/s').Value
+                FreeCADGui.doCommand("p = FreeCAD.ActiveDocument.{}.porousZoneProperties".format(self.obj.Name))
+                FreeCADGui.doCommand("p['PorousCorrelation'] = '{}'".format( POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()]))
+                FreeCADGui.doCommand("p['D'] = [{},{},{}]".format( self.form.dx.property('quantity').getValueAs("m^-2").Value,
+                                                                   self.form.dy.property('quantity').getValueAs("m^-2").Value,
+                                                                   self.form.dz.property('quantity').getValueAs("m^-2").Value))
+                FreeCADGui.doCommand("p['F'] = [{},{},{}]".format( self.form.fx.property('quantity').getValueAs("m^-1").Value,
+                                                                   self.form.fy.property('quantity').getValueAs("m^-1").Value,
+                                                                   self.form.fz.property('quantity').getValueAs("m^-1").Value))
+                FreeCADGui.doCommand("p['e1'] = [{},{},{}]".format( self.form.e1x.property('quantity').getValueAs("1").Value,
+                                                                    self.form.e1y.property('quantity').getValueAs("1").Value,
+                                                                    self.form.e1z.property('quantity').getValueAs("1").Value))
+                FreeCADGui.doCommand("p['e2'] = [{},{},{}]".format(self.form.e2x.property('quantity').getValueAs("1").Value,
+                                                                    self.form.e2y.property('quantity').getValueAs("1").Value,
+                                                                    self.form.e2z.property('quantity').getValueAs("1").Value))
+                FreeCADGui.doCommand("p['e3'] = [{},{},{}]".format(self.form.e3x.property('quantity').getValueAs("1").Value,
+                                                                    self.form.e3y.property('quantity').getValueAs("1").Value,
+                                                                    self.form.e3z.property('quantity').getValueAs("1").Value))
+                FreeCADGui.doCommand("p['OuterDiameter'] = {}".format(self.form.inputOuterDiameter.property('quantity').getValueAs('m').Value))
+                FreeCADGui.doCommand("p['TubeAxis'] = [{},{},{}]".format(self.form.inputTubeAxisX.property('quantity').getValueAs("m/m").Value,
+                                                                      self.form.inputTubeAxisY.property('quantity').getValueAs("m/m").Value,
+                                                                      self.form.inputTubeAxisZ.property('quantity').getValueAs("m/m").Value))
+                FreeCADGui.doCommand("p['TubeSpacing'] = {}".format(self.form.inputTubeSpacing.property('quantity').getValueAs('m').Value))
+                FreeCADGui.doCommand("p['SpacingDirection'] = [{},{},{}]".format(self.form.inputBundleLayerNormalX.property('quantity').getValueAs("1").Value,
+                                                                                     self.form.inputBundleLayerNormalY.property('quantity').getValueAs("1").Value,
+                                                                                     self.form.inputBundleLayerNormalZ.property('quantity').getValueAs("1").Value))
+                FreeCADGui.doCommand("p['AspectRatio'] = {}".format( self.form.inputAspectRatio.property('quantity').getValueAs("1").Value))
+                FreeCADGui.doCommand("p['VelocityEstimate'] = {}".format(self.form.inputVelocityEstimate.property('quantity').getValueAs('m/s').Value))
+
             except ValueError:
                 FreeCAD.Console.PrintError("Unrecognised value entered\n")
                 return
-            self.obj.porousZoneProperties = self.p
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.porousZoneProperties = p".format(self.obj.Name))
 
         elif self.obj.Name.startswith('InitialisationZone'):
             self.obj.initialisationZoneProperties = self.p
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.partNameList = {}".format(self.obj.Name, self.partNameList))
 
-        self.obj.partNameList = self.partNameList
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
     def reject(self):
         self.obj.shapeList = self.shapeListOrig
+        self.obj.partNameList = self.partNameListOrig
         FreeCADGui.doCommand("App.activeDocument().recompute()")
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()

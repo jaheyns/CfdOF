@@ -394,8 +394,8 @@ class CfdCaseWriterFoam(QRunnable):
     def exportZoneStlSurfaces(self):
         for zo in self.zone_objs:
             import Mesh
-            for i in range(len(zo.shapeList)):
-                shape = zo.shapeList[i].Shape
+            for i in range(len(zo.partNameList)):
+                #shape = zo.shapeList[i].Shape
                 path = os.path.join(self.solver_obj.WorkingDir,
                                     self.solver_obj.InputCaseName,
                                     "constant",
@@ -404,6 +404,8 @@ class CfdCaseWriterFoam(QRunnable):
                     os.makedirs(path)
                 fname = os.path.join(path, zo.partNameList[i]+u".stl")
                 import MeshPart
+                sel_obj = self.analysis_obj.Document.getObject(zo.partNameList[i])
+                shape = sel_obj.Shape
                 #meshStl = MeshPart.meshFromShape(shape, LinearDeflection = self.mesh_obj.STLLinearDeflection)
                 meshStl = MeshPart.meshFromShape(shape, LinearDeflection = 0.1)
                 meshStl.write(fname)
