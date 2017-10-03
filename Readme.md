@@ -68,8 +68,6 @@ which can be automatically installed (see below for instructions).
 
 #### Windows
 
-##### Option 1: Installation into FreeCAD
-
 The latest FreeCAD build of the 0.17 prerelease code can be obtained from
 https://github.com/FreeCAD/FreeCAD/releases and the latest
 CFD workbench can be installed into it using the Addon manager:
@@ -83,17 +81,9 @@ run FreeCAD in place (<FreeCAD-directory\bin\FreeCAD.exe).
 
 Note: The CFD workbench can be updated at any time through the Addon manager.
 
-##### Option 2: Packaged version
-Alternatively, in Windows, a pre-packaged version can be downloaded from 
-https://opensimsa.github.io/download.html . Please consult the included README file
-for installation instructions. 
-This package comes with the latest stable release of the CFD workbench and most dependencies
-already installed. For installation of additional dependencies, see below.
-
-
 ##### Dependency installation
 
-Whichever option is used, dependencies can be checked and installed
+Dependencies can be checked and installed
 conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CFD". 
@@ -108,8 +98,8 @@ panel to \<blueCFD install directory\>\OpenFOAM-4.x
  (It will be automatically detected in the default install
 location.)
 
-Likewise the Gnuplot-py module can be installed from the Preferences
-panel (not necessary if using Option 2), as well as cfMesh.
+Likewise the Gnuplot-py module can be installed from the 
+Preferences panel, as well as cfMesh.
 cfMesh is automatically built from source inside the OpenFOAM
 environment if installed from the Preferences panel. Note
 that this is a lengthy process.
