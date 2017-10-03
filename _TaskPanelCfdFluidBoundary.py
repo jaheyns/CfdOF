@@ -83,23 +83,24 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                      ["Permeable screen"]]
 
 # For each sub-type, whether the basic tab is enabled, the panel number to show (ignored if false), whether
-# direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown
-BOUNDARY_UI = [[[False, 0, False, False],  # No slip
-                [False, 0, False, False],  # Slip
-                [True, 2, False, False],  # Partial slip
-                [True, 0, False, False],  # Translating wall
-                [True, 0, False, False]],  # Rough
-               [[True, 0, True, True],  # Velocity
-                [True, 3, False, True],  # Vol flow rate
-                [True, 4, False, True],  # Mass Flow rate
-                [True, 1, False, True],  # Total pressure
-                [True, 1, False, True]],  # Static pressure
-               [[True, 1, False, False],  # Static pressure
-                [True, 0, False, False],  # Uniform velocity
-                [False, 0, False, False]],  # Outflow
-               [[True, 1, False, True]],  # Opening
-               [[False, 0, False, False]],  # Symmetry plane
-               [[True, 5, False, False]]]  # Permeable screen
+# direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
+# whether volume fraction panel is shown
+BOUNDARY_UI = [[[False, 0, False, False, False],  # No slip
+                [False, 0, False, False, False],  # Slip
+                [True, 2, False, False, False],  # Partial slip
+                [True, 0, False, False, False],  # Translating wall
+                [True, 0, False, False, False]],  # Rough
+               [[True, 0, True, True, True],  # Velocity
+                [True, 3, False, True, True],  # Vol flow rate
+                [True, 4, False, True, True],  # Mass Flow rate
+                [True, 1, False, True, True],  # Total pressure
+                [True, 1, False, True, True]],  # Static pressure
+               [[True, 1, False, False, True],  # Static pressure
+                [True, 0, False, False, True],  # Uniform velocity
+                [False, 0, False, False, False]],  # Outflow
+               [[True, 1, False, True, True]],  # Opening
+               [[False, 0, False, False, False]],  # Symmetry plane
+               [[True, 5, False, False, False]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows
 TURBULENT_INLET_SPEC = {"kOmegaSST":
@@ -131,7 +132,7 @@ BOUNDARY_THERMALTAB = [[0], [], [1], [0, 1], [2], []]
 
 class TaskPanelCfdFluidBoundary:
     """ Taskpanel for adding fluid boundary """
-    def __init__(self, obj, physics_model):
+    def __init__(self, obj, physics_model, material_objs):
         self.selecting_references = False
         self.selecting_direction = False
         self.obj = obj
@@ -139,6 +140,7 @@ class TaskPanelCfdFluidBoundary:
         self.turbModel = (physics_model['TurbulenceModel']
                           if physics_model['Turbulence'] == 'RANS' or physics_model['Turbulence'] == 'LES'
                           else None)
+        self.material_objs = material_objs
 
         self.References = list(self.obj.References)
         self.BoundarySettings = self.obj.BoundarySettings.copy()
@@ -184,6 +186,9 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputSpecificDissipationRate.valueChanged.connect(self.inputSpecificDissipationRateChanged)
         self.form.inputIntensity.valueChanged.connect(self.inputIntensityChanged)
         self.form.inputLengthScale.valueChanged.connect(self.inputLengthScaleChanged)
+
+        self.form.comboFluid.currentIndexChanged.connect(self.comboFluidChanged)
+        self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
 
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.comboThermalBoundaryTypeChanged)
         # self.form.thermalFrame.setVisible(physics_model["Thermal"] is not None)
@@ -235,6 +240,16 @@ class TaskPanelCfdFluidBoundary:
             ti = indexOrDefault(TURBULENT_INLET_SPEC[self.turbModel][1],
                                 self.BoundarySettingsOrig.get('TurbulenceInletSpecification'), 0)
             self.form.comboTurbulenceSpecification.setCurrentIndex(ti)
+
+        # Add volume fraction fields
+        if len(self.material_objs) > 1:
+            mat_names = []
+            for m in self.material_objs:
+                mat_names.append(m.Label)
+            self.form.comboFluid.clear()
+            self.form.comboFluid.addItems(mat_names[:-1])
+        else:
+            self.form.comboFluid.clear()
 
         self.form.comboThermalBoundaryType.addItems(THERMAL_BOUNDARY_NAMES)
         thi = indexOrDefault(THERMAL_BOUNDARY_TYPES, self.BoundarySettings.get('ThermalBoundaryType'), 0)
@@ -306,6 +321,8 @@ class TaskPanelCfdFluidBoundary:
                     self.form.checkReverse.setChecked(reverse)
         turb_enabled = BOUNDARY_UI[type_index][subtype_index][3]
         self.form.turbulenceFrame.setVisible(turb_enabled and self.turbModel is not None)
+        alpha_enabled = BOUNDARY_UI[type_index][subtype_index][4]
+        self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)
 
     def buttonAddFaceClicked(self):
         self.selecting_direction = False
@@ -503,6 +520,18 @@ class TaskPanelCfdFluidBoundary:
                 if isinstance(item, QtGui.QWidgetItem):
                     item.widget().setVisible(rowi in panel_numbers)
 
+    def getMaterialName(self, index):
+        return self.material_objs[index].Label
+
+    def comboFluidChanged(self, index):
+        if 'alphas' not in self.BoundarySettings:
+            self.BoundarySettings['alphas'] = {}
+        setInputFieldQuantity(self.form.inputVolumeFraction,
+                              str(self.BoundarySettings['alphas'].get(self.getMaterialName(index), 0.0)))
+
+    def inputVolumeFractionChanged(self, value):
+        inputCheckAndStore(value, "m/m", self.BoundarySettings['alphas'], self.form.comboFluid.currentText())
+
     def comboThermalBoundaryTypeChanged(self, index):
         self.form.labelThermalDescription.setText(THERMAL_HELPTEXT[index])
         self.BoundarySettings['ThermalBoundaryType'] = THERMAL_BOUNDARY_TYPES[index]
@@ -575,6 +604,13 @@ class TaskPanelCfdFluidBoundary:
                              "= {}".format(self.BoundarySettings['TurbulenceIntensity']))
         FreeCADGui.doCommand("bc['TurbulenceLengthScale'] "
                              "= {}".format(self.BoundarySettings['TurbulenceLengthScale']))
+        # Volume fraction
+        if len(self.material_objs) > 1:
+            for i in range(len(self.material_objs)-1):
+                alphaName = self.getMaterialName(i)
+                FreeCADGui.doCommand("bc['alphas']['{}'] = {}".format(
+                    alphaName, self.BoundarySettings['alphas'].get(alphaName, 0.0)))
+
         # Porous
         FreeCADGui.doCommand("bc['PressureDropCoeff'] "
                              "= {}".format(self.BoundarySettings['PressureDropCoeff']))

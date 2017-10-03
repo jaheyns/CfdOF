@@ -77,7 +77,8 @@ class _CfdFluidBoundary(PartFeature):
                                 'TurbulentKineticEnergy': 0.01,
                                 'SpecificDissipationRate': 1,
                                 'TurbulenceIntensity': 0.1,
-                                'TurbulenceLengthScale': 0.1}
+                                'TurbulenceLengthScale': 0.1,
+                                'alphas': {}}
 
     def execute(self, obj):
         ''' Create compound part at recompute. '''

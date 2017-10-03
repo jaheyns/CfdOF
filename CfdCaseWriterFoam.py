@@ -256,7 +256,7 @@ class CfdCaseWriterFoam(QRunnable):
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.surfaceFeatureExtract'), self.case_folder)
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.snappyHexMesh'), self.case_folder)
         else:
-            raise Exception("Unrecognised mesh type")
+            raise RuntimeError("Unrecognised mesh type")
 
     def setupMesh(self, updated_mesh_path, scale):
         if os.path.exists(updated_mesh_path):
@@ -315,6 +315,22 @@ class CfdCaseWriterFoam(QRunnable):
                 CD = 1.0  # Drag coeff of wire (Simmons - valid for Re > ~300)
                 beta = (1-wireDiam/spacing)**2
                 bc['PressureDropCoeff'] = CD*(1-beta)
+
+            if settings['solver']['solverName'] in ['interFoam', 'multiphaseInterFoam']:
+                # Make sure the first n-1 alpha values exist, and write the n-th one
+                # consistently for multiphaseInterFoam
+                sum_alpha = 0.0
+                if 'alphas' not in bc:
+                    bc['alphas'] = {}
+                for i, m in enumerate(settings['fluidProperties']):
+                    alpha_name = m['Name']
+                    if i == len(settings['fluidProperties']) - 1 and \
+                                    settings['solver']['solverName'] == 'multiphaseInterFoam':
+                        bc['alphas'][alpha_name] = 1.0 - sum_alpha
+                    else:
+                        alpha = bc['alphas'].get(alpha_name, 0.0)
+                        bc['alphas'][alpha_name] = alpha
+                        sum_alpha += alpha
 
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
@@ -383,10 +399,10 @@ class CfdCaseWriterFoam(QRunnable):
                         initial_values['k'] = k
                         initial_values['omega'] = omega
                     else:
-                        raise Exception(
+                        raise RuntimeError(
                             "Inlet type currently unsupported for copying turbulence initial conditions.")
                 else:
-                    raise Exception(
+                    raise RuntimeError(
                         "Turbulence inlet specification currently unsupported for copying turbulence initial conditions")
 
     # Zones
@@ -449,7 +465,7 @@ class CfdCaseWriterFoam(QRunnable):
                 pd['F'] = tuple(F)
                 # Currently assuming zero drag parallel to tube bundle (3rd principal dirn)
             else:
-                raise Exception("Unrecognised method for porous baffle resistance")
+                raise RuntimeError("Unrecognised method for porous baffle resistance")
             porousZoneSettings[po.Label] = pd
 
     def processInitialisationZoneProperties(self):
@@ -486,6 +502,9 @@ class CfdCaseWriterFoam(QRunnable):
 
     def setupPatchNames(self):
         print ('Populating createPatchDict to update BC names')
+        import CfdCartTools
+        # Init in case not meshed yet
+        CfdCartTools.CfdCartTools(self.mesh_obj)
         settings = self.settings
         settings['createPatches'] = {}
         bc_group = self.bc_group

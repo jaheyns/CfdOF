@@ -89,9 +89,10 @@ class _ViewProviderCfdFluidBoundary:
         if not is_present:
             CfdTools.cfdError("Analysis object must have a physics object")
             return False
+        material_objs = CfdTools.getMaterials(analysis_object)
 
         import _TaskPanelCfdFluidBoundary
-        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model)
+        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
         for obj in FreeCAD.ActiveDocument.Objects:
             if obj.isDerivedFrom("Fem::FemMeshObject"):
                 obj.ViewObject.hide()

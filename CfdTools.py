@@ -35,12 +35,12 @@ import string
 import numbers
 import platform
 import subprocess
-import CfdConsoleProcess
+import sys
 
 import FreeCAD
 import Fem
 import Units
-import subprocess
+import CfdConsoleProcess
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -861,6 +861,13 @@ def checkCfdDependencies(term_print=True):
         return message
 
 
+def floatEqual(a, b):
+    """ Test whether a and b are equal within an absolute and relative tolerance """
+    reltol = 10*sys.float_info.epsilon
+    abstol = 1e-12  # Seems to be necessary on file read/write
+    return abs(a-b) < abstol or abs(a - b) <= reltol*max(abs(a), abs(b))
+
+
 def isSameGeometry(shape1, shape2):
     """ Copy of FemMeshTools.is_same_geometry, with a bug fix """
     # the vertexes and the CenterOfMass are compared
@@ -872,17 +879,19 @@ def isSameGeometry(shape1, shape2):
     same_Vertexes = 0
     if len(shape1.Vertexes) == len(shape2.Vertexes) and len(shape1.Vertexes) > 1:
         # compare CenterOfMass
-        if shape1.CenterOfMass != shape2.CenterOfMass:
+        # Bugfix: Precision seems to be lost on load/save
+        if not floatEqual(shape1.CenterOfMass[0], shape2.CenterOfMass[0]) or \
+                not floatEqual(shape1.CenterOfMass[1], shape2.CenterOfMass[1]) or \
+                not floatEqual(shape1.CenterOfMass[2], shape2.CenterOfMass[2]):
             return False
         else:
             # compare the Vertexes
             for vs1 in shape1.Vertexes:
                 for vs2 in shape2.Vertexes:
-                    if vs1.X == vs2.X and vs1.Y == vs2.Y and vs1.Z == vs2.Z:
+                    if floatEqual(vs1.X, vs2.X) and floatEqual(vs1.Y, vs2.Y) and floatEqual(vs1.Z, vs2.Z):
                         same_Vertexes += 1
                         # Bugfix: was 'continue' - caused false-negative with repeated vertices
                         break
-            # print(same_Vertexes)
             if same_Vertexes == len(shape1.Vertexes):
                 return True
             else:
@@ -890,7 +899,7 @@ def isSameGeometry(shape1, shape2):
     if len(shape1.Vertexes) == len(shape2.Vertexes) and len(shape1.Vertexes) == 1:
         vs1 = shape1.Vertexes[0]
         vs2 = shape2.Vertexes[0]
-        if vs1.X == vs2.X and vs1.Y == vs2.Y and vs1.Z == vs2.Z:
+        if floatEqual(vs1.X, vs1.Y) and floatEqual(vs1.Y, vs2.Y) and floatEqual(vs1.Z, vs2.Z):
             return True
         else:
             return False
