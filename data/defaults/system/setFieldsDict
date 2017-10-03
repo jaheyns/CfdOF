@@ -51,6 +51,37 @@ regions
         );
     }
 
+    cellToFace
+    {
+        set "%(0%)";
+        option all;
+        fieldValues
+        (
+%{%(initialisationZones/%(1%)%)
+%{%(0%)
+%:Ux
+            volVectorFieldValue U ( %(initialisationZones/%(2%)/Ux%) %(initialisationZones/%(2%)/Uy%) %(initialisationZones/%(2%)/Uz%) )
+%:Uy
+%:Uz
+%:Pressure
+%{%(solver/solverName%)
+%:interFoam multiphaseInterFoam
+            volScalarFieldValue p_rgh %(initialisationZones/%(2%)/Pressure%)
+%:simpleFoam porousSimpleFoam pimpleFoam
+            volScalarFieldValue p %(initialisationZones/%(2%)/KinematicPressure%)
+%:default
+            volScalarFieldValue p %(initialisationZones/%(2%)/Pressure%)
+%}
+%:alphas
+%{%(initialisationZones/%(2%)/alphas%)
+            volScalarFieldValue alpha.%(0%) %(initialisationZones/%(3%)/alphas/%(0%)%)
+%}
+%:default
+            volScalarFieldValue %(0%) %(initialisationZones/%(2%)/%(0%)%)
+%}
+%}
+        );
+    }
 %}
 %}
 );
