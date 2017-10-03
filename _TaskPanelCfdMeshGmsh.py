@@ -40,6 +40,7 @@ import os.path
 import platform
 from PyObjects import _FemMeshGmsh
 import time
+from CfdTools import inputCheckAndStore, setInputFieldQuantity
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -112,9 +113,9 @@ class _TaskPanelCfdMeshGmsh:
 
     def update(self):
         """ Fills the widgets """
-        self.form.if_max.setText(self.clmax.UserString)
+        setInputFieldQuantity(self.form.if_max, self.clmax)
         self.form.if_max.setToolTip("Select 0 to use default value")
-        self.form.if_min.setText(self.clmin.UserString)
+        setInputFieldQuantity(self.form.if_min, self.clmin)
         self.form.if_min.setToolTip("Select 0 to use default value")
         index_dimension = self.form.cb_dimension.findText(self.dimension)
         self.form.cb_dimension.setCurrentIndex(index_dimension)

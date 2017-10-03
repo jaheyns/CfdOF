@@ -70,9 +70,10 @@ class _ViewProviderCfdAnalysis:
         for obj in doc.Objects:
             if obj.isDerivedFrom("Part::Feature") and not("CfdFluidBoundary" in obj.Name):
                 FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Transparency = 70
-                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.LineWidth = 1
-                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.LineColor = (0.5,0.5,0.5)
-                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.PointColor = (0.5,0.5,0.5)
+                if obj.isDerivedFrom("PartDesign::Feature"):
+                    FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.LineWidth = 1
+                    FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.LineColor = (0.5,0.5,0.5)
+                    FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.PointColor = (0.5,0.5,0.5)
             if obj.isDerivedFrom("Part::Feature") and ("Compound" in obj.Name):
                 FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = False
 

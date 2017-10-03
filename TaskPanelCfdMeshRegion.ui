@@ -237,12 +237,6 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>80</width>
-                  <height>25</height>
-                 </size>
-                </property>
                 <property name="toolTip">
                  <string extracomment="Select 0 to use default value"/>
                 </property>
@@ -261,11 +255,8 @@
                 <property name="unit" stdset="0">
                  <string notr="true">mm</string>
                 </property>
-                <property name="decimals" stdset="0">
-                 <number>2</number>
-                </property>
-                <property name="value" stdset="0">
-                 <double>0.000000000000000</double>
+                <property name="format" stdset="0">
+                 <string>g</string>
                 </property>
                </widget>
               </item>
@@ -298,12 +289,6 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="minimumSize">
-              <size>
-               <width>80</width>
-               <height>25</height>
-              </size>
-             </property>
              <property name="toolTip">
               <string extracomment="Select 0 to use default value"/>
              </property>
@@ -322,11 +307,8 @@
              <property name="unit" stdset="0">
               <string notr="true">mm</string>
              </property>
-             <property name="decimals" stdset="0">
-              <number>2</number>
-             </property>
-             <property name="value" stdset="0">
-              <double>0.000000000000000</double>
+             <property name="format" stdset="0">
+              <string>2</string>
              </property>
             </widget>
            </item>

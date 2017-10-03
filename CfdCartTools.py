@@ -55,11 +55,11 @@ class CfdCartTools():
         self.scale = 0.001  # Scale mm to m
 
         # Default to 2 % of bounding box characteristic length
-        self.clmax = Units.Quantity(self.mesh_obj.CharacteristicLengthMax).Value
-        if self.clmax == 0.0:
+        self.clmax = Units.Quantity(self.mesh_obj.CharacteristicLengthMax)
+        if self.clmax.Value == 0.0:
             shape = self.part_obj.Shape
             cl_bound_box = math.sqrt(shape.BoundBox.XLength**2 + shape.BoundBox.YLength**2 + shape.BoundBox.ZLength**2)
-            self.clmax = 0.02*cl_bound_box
+            self.clmax = Units.Quantity(str(0.02*cl_bound_box)+'mm')  # Always in internal format, i.e. mm
 
         self.dimension = self.mesh_obj.ElementDimension
 

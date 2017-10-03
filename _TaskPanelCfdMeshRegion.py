@@ -36,6 +36,7 @@ import FemGui
 from PySide import QtGui
 from PySide import QtCore
 import os
+from CfdTools import inputCheckAndStore, setInputFieldQuantity
 
 
 class _TaskPanelCfdMeshRegion:
@@ -175,12 +176,12 @@ class _TaskPanelCfdMeshRegion:
             self.form.if_gmsh_rellen.setValue(self.obj.RelativeLength)
         elif self.mesh_obj.Proxy.Type == 'CfdMeshCart':
             self.form.if_rellen.setValue(self.obj.RelativeLength)
-            self.form.if_refinethick.setText(self.obj.RefinementThickness.UserString)
+            setInputFieldQuantity(self.form.if_refinethick, self.obj.RefinementThickness)
             if self.numlayer > 1:  # Only reload when there are more than one layer
                 self.form.check_boundlayer.toggle()
                 self.form.if_numlayer.setValue(self.obj.NumberLayers)
                 self.form.if_expratio.setValue(self.obj.ExpansionRatio)
-                self.form.if_firstlayerheight.setText(self.obj.FirstLayerHeight.UserString)
+                setInputFieldQuantity(self.form.if_firstlayerheight, self.obj.FirstLayerHeight)
 
             self.form.if_refinelevel.setValue(self.obj.RefinementLevel)
             self.form.if_edgerefinement.setValue(self.obj.RegionEdgeRefinement)

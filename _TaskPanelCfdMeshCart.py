@@ -29,6 +29,8 @@ in FEM module but removes the option to generate second-order
 mesh cells.
 """
 
+from __future__ import print_function
+
 __title__ = "_TaskPanelCfdMeshCart"
 __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
@@ -43,7 +45,7 @@ import _CfdMeshCart
 import time
 import tempfile
 import CfdTools
-from CfdTools import inputCheckAndStore
+from CfdTools import inputCheckAndStore, setInputFieldQuantity
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -152,10 +154,10 @@ class _TaskPanelCfdMeshCart:
 
     def update(self):
         """ Fills the widgets """
-        self.form.if_max.setText(self.clmax.UserString)
-        self.form.if_pointInMeshX.setText(str(self.PointInMesh.get('x')) + "mm")
-        self.form.if_pointInMeshY.setText(str(self.PointInMesh.get('y')) + "mm")
-        self.form.if_pointInMeshZ.setText(str(self.PointInMesh.get('z')) + "mm")
+        setInputFieldQuantity(self.form.if_max, self.clmax)
+        setInputFieldQuantity(self.form.if_pointInMeshX, str(self.PointInMesh.get('x')) + "mm")
+        setInputFieldQuantity(self.form.if_pointInMeshY, str(self.PointInMesh.get('y')) + "mm")
+        setInputFieldQuantity(self.form.if_pointInMeshZ, str(self.PointInMesh.get('z')) + "mm")
         self.form.if_cellsbetweenlevels.setValue(self.cellsbetweenlevels)
         self.form.if_edgerefine.setValue(self.edgerefine)
 
@@ -261,7 +263,7 @@ class _TaskPanelCfdMeshCart:
             import CfdCartTools  # Fresh init before remeshing
             self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
             cart_mesh = self.cart_mesh
-            self.form.if_max.setText(str(cart_mesh.get_clmax()))
+            setInputFieldQuantity(self.form.if_max, str(cart_mesh.get_clmax()))
             print("\nStarting cut-cell Cartesian meshing ...\n")
             print('  Part to mesh: Name --> '
                   + cart_mesh.part_obj.Name + ',  Label --> '
@@ -321,7 +323,7 @@ class _TaskPanelCfdMeshCart:
 
     def read_output(self):
         while self.mesh_process.canReadLine():
-            print str(self.mesh_process.readLine()),  # Avoid displaying on FreeCAD status bar
+            print(str(self.mesh_process.readLine()), end="")  # Avoid displaying on FreeCAD status bar
 
         # Print any error output to console
         self.mesh_process.setReadChannel(QtCore.QProcess.StandardError)
@@ -395,6 +397,6 @@ class _TaskPanelCfdMeshCart:
         self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
         pointCheck = self.cart_mesh.automatic_inside_point_detect()
         iMPx, iMPy, iMPz = pointCheck
-        self.form.if_pointInMeshX.setText(str(iMPx) + "mm")
-        self.form.if_pointInMeshY.setText(str(iMPy) + "mm")
-        self.form.if_pointInMeshZ.setText(str(iMPz) + "mm")
+        setInputFieldQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")
+        setInputFieldQuantity(self.form.if_pointInMeshY, str(iMPy) + "mm")
+        setInputFieldQuantity(self.form.if_pointInMeshZ, str(iMPz) + "mm")
