@@ -284,6 +284,7 @@ class _TaskPanelCfdMeshCart:
         except Exception as ex:
             self.console_log("Error: " + ex.message, '#FF0000')
             self.Timer.stop()
+            raise
 
     def runCart(self, cart_mesh):
         cart_mesh.error = False
