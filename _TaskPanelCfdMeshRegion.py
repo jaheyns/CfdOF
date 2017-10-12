@@ -306,7 +306,11 @@ class _TaskPanelCfdMeshRegion:
             print_message = self.selection_mode_solid_print_message
         else:
             print_message = self.selection_mode_std_print_message
-        import FemSelectionObserver
+        try:
+            # Backward compatibility
+            import FemSelectionObserver
+        except ImportError:
+            from PyGui import FemSelectionObserver
         self.sel_server = FemSelectionObserver.FemSelectionObserver(self.selectionParser, print_message)
 
     def selectionParser(self, selection):
