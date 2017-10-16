@@ -202,7 +202,7 @@ class CfdPreferencePage:
         mb_done = float(bytes_done)/(1024*1024)
         msg = "Downloaded {:.2f} MB".format(mb_done)
         if bytes_total > 0:
-            msg += " of {} MB".format(int(bytes_total/(1024*1024)))
+            msg += " of {:.2f} MB".format(int(bytes_total/(1024*1024)))
         self.form.labelDownloadProgress.setText(msg)
 
 
