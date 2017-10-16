@@ -869,23 +869,21 @@ def floatEqual(a, b):
 
 
 def isSameGeometry(shape1, shape2):
-    """ Copy of FemMeshTools.is_same_geometry, with a bug fix """
-    # the vertexes and the CenterOfMass are compared
-    # it is a hack, but I do not know any better !
-    # check of Volume and Area before starting with the vertices could be added
-    # BoundBox is possible too, but is BB calcualtions robust?!
-    # print(shape1)
-    # print(shape2)
+    """ Copy of FemMeshTools.is_same_geometry, with fixes """
+    # Check Area, CenterOfMass because non-planar shapes might not have more than one vertex defined
     same_Vertexes = 0
-    if len(shape1.Vertexes) == len(shape2.Vertexes) and len(shape1.Vertexes) > 1:
+    # Bugfix: below was 1 - did not work for non-planar shapes
+    if len(shape1.Vertexes) == len(shape2.Vertexes) and len(shape1.Vertexes) > 0:
         # compare CenterOfMass
         # Bugfix: Precision seems to be lost on load/save
         if not floatEqual(shape1.CenterOfMass[0], shape2.CenterOfMass[0]) or \
                 not floatEqual(shape1.CenterOfMass[1], shape2.CenterOfMass[1]) or \
                 not floatEqual(shape1.CenterOfMass[2], shape2.CenterOfMass[2]):
             return False
+        elif not floatEqual(shape1.Area, shape2.Area):
+            return False
         else:
-            # compare the Vertexes
+            # compare the Vertices
             for vs1 in shape1.Vertexes:
                 for vs2 in shape2.Vertexes:
                     if floatEqual(vs1.X, vs2.X) and floatEqual(vs1.Y, vs2.Y) and floatEqual(vs1.Z, vs2.Z):

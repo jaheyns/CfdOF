@@ -46,6 +46,7 @@ import TemplateBuilder
 # Write CFD analysis setup into OpenFOAM case
 # write_case() is the only public API
 # Derived from QRunnable in order to run in a worker thread
+# NB: Don't use Console.PrintMessage or any GUI functions here, since running in a worker thread
 
 class CfdCaseWriterSignals(QObject):
     error = QtCore.Signal(str)  # Signal in PySide, pyqtSignal in PyQt
@@ -85,7 +86,7 @@ class CfdCaseWriterFoam(QRunnable):
 
     def write_case(self, updating=False):
         """ Write_case() will collect case setings, and finally build a runnable case. """
-        FreeCAD.Console.PrintMessage("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
+        print("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
         _cwd = os.curdir
         if not os.path.exists(self.solver_obj.WorkingDir):
             raise IOError("Path " + self.solver_obj.WorkingDir + " does not exist.")
@@ -151,8 +152,8 @@ class CfdCaseWriterFoam(QRunnable):
             raise
         finally:
             os.chdir(_cwd)  # Restore working dir
-        FreeCAD.Console.PrintMessage("Successfully wrote {} case to folder {}\n".format(
-                                     self.solver_obj.SolverName, self.solver_obj.WorkingDir))
+        print("Successfully wrote {} case to folder {}\n".format(
+              self.solver_obj.SolverName, self.solver_obj.WorkingDir))
         return True
 
     def getSolverName(self):
@@ -209,7 +210,7 @@ class CfdCaseWriterFoam(QRunnable):
         """ Convert or copy mesh files """
         if self.mesh_obj.Proxy.Type == "FemMeshGmsh":  # GMSH
             # Convert GMSH created UNV file to OpenFoam
-            FreeCAD.Console.PrintMessage("Writing GMSH")
+            print("Writing GMSH")
             unvMeshFile = self.case_folder + os.path.sep + self.solver_obj.InputCaseName + u".unv"
             self.mesh_generated = CfdTools.write_unv_mesh(self.mesh_obj, self.bc_group, unvMeshFile)
             # FreeCAD always stores the CAD geometry in mm, while FOAM by default uses SI units. This is independent
@@ -219,7 +220,7 @@ class CfdCaseWriterFoam(QRunnable):
             import CfdCartTools
             ## Move Cartesian mesh files from temporary mesh directory to case directory
             if self.mesh_obj.MeshUtility == "cfMesh":
-                FreeCAD.Console.PrintMessage("Writing Cartesian mesh\n")
+                print("Writing Cartesian mesh\n")
                 #import CfdCartTools
                 self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
                 cart_mesh = self.cart_mesh
@@ -235,7 +236,7 @@ class CfdCaseWriterFoam(QRunnable):
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.surfaceFeatureEdges'),self.case_folder)
 
             elif self.mesh_obj.MeshUtility == "snappyHexMesh":
-                FreeCAD.Console.PrintMessage("Writing snappyHexMesh generated Cartesian mesh")
+                print("Writing snappyHexMesh generated Cartesian mesh\n")
                 self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
                 cart_mesh = self.cart_mesh
                 # cart_mesh.get_tmp_file_paths("snappyHexMesh")  # Update tmp file locations
@@ -425,7 +426,7 @@ class CfdCaseWriterFoam(QRunnable):
                 #meshStl = MeshPart.meshFromShape(shape, LinearDeflection = self.mesh_obj.STLLinearDeflection)
                 meshStl = MeshPart.meshFromShape(shape, LinearDeflection = 0.1)
                 meshStl.write(fname)
-                FreeCAD.Console.PrintMessage("Successfully wrote stl surface\n")
+                print("Successfully wrote stl surface\n")
 
     def processPorousZoneProperties(self):
         settings = self.settings
@@ -514,8 +515,9 @@ class CfdCaseWriterFoam(QRunnable):
             bc_list = []
             meshFaceList = mobj.Part.Shape.Faces
             for (i, mf) in enumerate(meshFaceList):
-                bcFacesList = bc_obj.Shape.Faces
-                for bf in bcFacesList:
+                bc_refs = bc_obj.References
+                for br in bc_refs:
+                    bf = FreeCAD.ActiveDocument.getObject(br[0]).Shape.getElement(br[1])
                     isSameGeo = CfdTools.isSameGeometry(bf, mf)
                     if isSameGeo:
                         bc_list.append(mobj.ShapeFaceNames[i])
