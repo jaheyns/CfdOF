@@ -162,7 +162,8 @@ class BlockTest(unittest.TestCase):
         vobj = obj.ViewObject
         import _TaskPanelCfdFluidBoundary
         physics_model, is_present = CfdTools.getPhysicsModel(self.analysis)
-        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model)
+        material_objs = CfdTools.getMaterials(self.analysis)
+        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model, material_objs)
         taskd.obj = vobj.Object
         taskd.selecting_references = True
         taskd.addSelection(doc.Name, doc.getObject(self.__class__.__part_name).Name, 'Face1')
