@@ -208,47 +208,47 @@ class BlockTest(unittest.TestCase):
         fccPrint('Checking CFD {} solver ...'.format(self.__class__.__doc_name))
         self.createNewSolver()
         self.assertTrue(self.solver_object, self.__class__.__doc_name + " of solver failed")
-        self.analysis.Member += [self.solver_object]
+        self.analysis.addObject(self.solver_object)
 
         fccPrint('Checking CFD {} physics object ...'.format(self.__class__.__doc_name))
         self.createNewPhysics()
         self.assertTrue(self.physics_object, "CfdTest of physics object failed")
-        self.analysis.Member += [self.physics_object]
+        self.analysis.addObject(self.physics_object)
 
         fccPrint('Checking CFD {} initialise ...'.format(self.__class__.__doc_name))
         self.createNewInitialise()
         self.assertTrue(self.initialise_object, "CfdTest of initialise failed")
-        self.analysis.Member += [self.initialise_object]
+        self.analysis.addObject(self.initialise_object)
 
         fccPrint('Checking CFD {} fluid property ...'.format(self.__class__.__doc_name))
         self.createNewFluidProperty()
         self.assertTrue(self.material_object, "CfdTest of fluid property failed")
-        self.analysis.Member += [self.material_object]
+        self.analysis.addObject(self.material_object)
 
         fccPrint('Checking CFD {} mesh ...'.format(self.__class__.__doc_name))
         self.createNewMesh('mesh')
         self.assertTrue(self.mesh_object, "CfdTest of mesh failed")
-        self.analysis.Member += [self.mesh_object]
+        self.analysis.addObject(self.mesh_object)
 
         fccPrint('Checking Cfd {} velocity inlet boundary ...'.format(self.__class__.__doc_name))
         self.createInletBoundary()
         self.assertTrue(self.inlet_boundary, "CfdTest of inlet boundary failed")
-        self.analysis.Member += [self.inlet_boundary]
+        self.analysis.addObject(self.inlet_boundary)
 
         fccPrint('Checking Cfd {} velocity outlet boundary ...'.format(self.__class__.__doc_name))
         self.createOutletBoundary()
         self.assertTrue(self.outlet_boundary, "CfdTest of outlet boundary failed")
-        self.analysis.Member += [self.outlet_boundary]
+        self.analysis.addObject(self.outlet_boundary)
 
         fccPrint('Checking Cfd {} wall boundary ...'.format(self.__class__.__doc_name))
         self.createWallBoundary()
         self.assertTrue(self.wall_boundary, "CfdTest of wall boundary failed")
-        self.analysis.Member += [self.wall_boundary]
+        self.analysis.addObject(self.wall_boundary)
 
         fccPrint('Checking Cfd {} slip boundary ...'.format(self.__class__.__doc_name))
         self.createSlipBoundary()
         self.assertTrue(self.slip_boundary, "CfdTest of slip boundary failed")
-        self.analysis.Member += [self.slip_boundary]
+        self.analysis.addObject(self.slip_boundary)
 
         fccPrint('Writing {} case files ...'.format(self.__class__.__doc_name))
         self.writeCaseFiles()

@@ -56,8 +56,7 @@ class _CommandCfdInitialisationZone(FemCommands):
         FreeCADGui.addModule("FemGui")
         FreeCADGui.addModule("CfdZone")
         FreeCADGui.doCommand(
-            "FemGui.getActiveAnalysis().Member = "
-            "FemGui.getActiveAnalysis().Member + [CfdZone.makeCfdInitialisationZone()]")
+            "FemGui.getActiveAnalysis().addObject(CfdZone.makeCfdInitialisationZone())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 

@@ -61,25 +61,24 @@ class _CommandCfdAnalysis(FemCommands):
 
         # Add physics object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdPhysicsSelection")
-        FreeCADGui.doCommand("analysis.Member = analysis.Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
+        FreeCADGui.doCommand("analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())")
 
         # Add fluid properties object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdFluidMaterial")
-        FreeCADGui.doCommand(
-            "analysis.Member = analysis.Member + [CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties')]")
+        FreeCADGui.doCommand("analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))")
 
         # Add initialisation object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdInitialiseFlowField")
-        FreeCADGui.doCommand("analysis.Member = analysis.Member + [CfdInitialiseFlowField.makeCfdInitialFlowField()]")
+        FreeCADGui.doCommand("analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())")
 
         # Add solver object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdSolverFoam")
-        FreeCADGui.doCommand("analysis.Member = analysis.Member + [CfdSolverFoam.makeCfdSolverFoam()]")
+        FreeCADGui.doCommand("analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())")
 
         sel = FreeCADGui.Selection.getSelection()
         if len(sel) == 1:
             if sel[0].isDerivedFrom("Fem::FemMeshObject"):
-                FreeCADGui.doCommand("analysis.Member = analysis.Member + [App.activeDocument()." + sel[0].Name + "]")
+                FreeCADGui.doCommand("analysis.addObject(App.activeDocument()." + sel[0].Name + ")")
         FreeCADGui.Selection.clearSelection()
 
 if FreeCAD.GuiUp:

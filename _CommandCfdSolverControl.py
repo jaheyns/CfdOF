@@ -53,7 +53,7 @@ class _CommandCfdSolverControl(FemCommands):
         CfdTools.hide_parts_show_meshes()
 
         isPresent = False
-        members = FemGui.getActiveAnalysis().Member
+        members = FemGui.getActiveAnalysis().Group
         for i in members:
             if "OpenFOAM" in i.Name:
                 FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
@@ -63,7 +63,7 @@ class _CommandCfdSolverControl(FemCommands):
         if not isPresent:
             FreeCADGui.addModule("FemGui")
             FreeCADGui.addModule("CfdSolverFoam")
-            FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdSolverFoam.makeCfdSolverFoam()]")
+            FreeCADGui.doCommand("FemGui.getActiveAnalysis().addObject(CfdSolverFoam.makeCfdSolverFoam())")
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 
 

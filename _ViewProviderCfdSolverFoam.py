@@ -66,7 +66,7 @@ class _ViewProviderCfdSolverFoam:
                 FreeCAD.Console.PrintError('No Active Analysis is detected from solver object in the active Document!\n')
         if not doc.getInEdit():
             if FemGui.getActiveAnalysis().Document is FreeCAD.ActiveDocument:
-                if self.Object in FemGui.getActiveAnalysis().Member:
+                if self.Object in FemGui.getActiveAnalysis().Group:
                     doc.setEdit(vobj.Object.Name)
                 else:
                     FreeCAD.Console.PrintError('Activate the analysis this solver belongs to!\n')

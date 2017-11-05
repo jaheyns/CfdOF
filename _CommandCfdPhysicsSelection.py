@@ -29,7 +29,7 @@ class _CommandCfdPhysicsSelection(FemCommands):
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Choose appropriate physics model")
         isPresent = False
-        members = FemGui.getActiveAnalysis().Member
+        members = FemGui.getActiveAnalysis().Group
         for i in members:
             if "PhysicsModel" in i.Name:
                 FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
@@ -39,7 +39,7 @@ class _CommandCfdPhysicsSelection(FemCommands):
         if not(isPresent):
             FreeCADGui.addModule("CfdPhysicsSelection")
             FreeCADGui.doCommand(
-                "analysis.Member = analysis.Member + [CfdPhysicsSelection.makeCfdPhysicsSelection()]")
+                "analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())")
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 if FreeCAD.GuiUp:

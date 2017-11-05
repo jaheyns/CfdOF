@@ -74,7 +74,7 @@ class _ViewProviderCfdMeshGmsh:
         if not gui_doc.getInEdit():
             if FemGui.getActiveAnalysis() is not None:
                 if FemGui.getActiveAnalysis().Document is FreeCAD.ActiveDocument:
-                    if self.Object in FemGui.getActiveAnalysis().Member:
+                    if self.Object in FemGui.getActiveAnalysis().Group:
                         if not gui_doc.getInEdit():
                             gui_doc.setEdit(vobj.Object.Name)
                         else:
@@ -83,7 +83,7 @@ class _ViewProviderCfdMeshGmsh:
                         print('Mesh does not belong to the active analysis.')
                         for o in gui_doc.Document.Objects:
                             if o.isDerivedFrom('Fem::FemAnalysisPython'):
-                                for m in o.Member:
+                                for m in o.Group:
                                     if m == self.Object:
                                         FemGui.setActiveAnalysis(o)
                                         print('Analysis the Mesh belongs to was activated.')
@@ -95,7 +95,7 @@ class _ViewProviderCfdMeshGmsh:
                 # No active analysis
                 for o in gui_doc.Document.Objects:
                     if o.isDerivedFrom('Fem::FemAnalysisPython'):
-                        for m in o.Member:
+                        for m in o.Group:
                             if m == self.Object:
                                 FemGui.setActiveAnalysis(o)
                                 print('Analysis the Mesh belongs to was activated.')

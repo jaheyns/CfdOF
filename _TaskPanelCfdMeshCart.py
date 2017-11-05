@@ -360,7 +360,7 @@ class _TaskPanelCfdMeshCart:
         import FemGui
         self.analysis = FemGui.getActiveAnalysis()
         if self.analysis:
-            for m in FemGui.getActiveAnalysis().Member:
+            for m in FemGui.getActiveAnalysis().Group:
                 if m.Name == self.mesh_obj.Name:
                     print(self.analysis.Name)
                     return

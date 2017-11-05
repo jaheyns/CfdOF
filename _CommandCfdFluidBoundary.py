@@ -51,7 +51,7 @@ class _CommandCfdFluidBoundary(FemCommands):
         FreeCAD.ActiveDocument.openTransaction("Create CfdFluidBoundary")
         FreeCADGui.addModule("FemGui")
         FreeCADGui.addModule("CfdFluidBoundary")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdFluidBoundary.makeCfdFluidBoundary()]")
+        FreeCADGui.doCommand("FemGui.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
     def GetResources(self):

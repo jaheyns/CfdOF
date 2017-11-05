@@ -45,7 +45,7 @@ class _CommandSolverFoam(FemCommands):
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create OpenFOAM Solver")
         FreeCADGui.addModule("CfdSolverFoam")
-        FreeCADGui.doCommand("FemGui.getActiveAnalysis().Member = FemGui.getActiveAnalysis().Member + [CfdSolverFoam.makeCfdSolverFoam()]")
+        FreeCADGui.doCommand("FemGui.getActiveAnalysis().addObject(CfdSolverFoam.makeCfdSolverFoam())")
 
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Fem_SolverFoam', _CommandSolverFoam())

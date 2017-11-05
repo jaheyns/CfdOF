@@ -55,7 +55,7 @@ class _CommandCfdInitialiseInternalFlowField(FemCommands):
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Initialise the internal flow variables")
         isPresent = False
-        members = FemGui.getActiveAnalysis().Member
+        members = FemGui.getActiveAnalysis().Group
         for i in members:
             if "InitialiseFields" in i.Name:
                 FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
@@ -66,7 +66,7 @@ class _CommandCfdInitialiseInternalFlowField(FemCommands):
             FreeCADGui.addModule("CfdInitialiseFlowField")
             FreeCADGui.addModule("FemGui")
             FreeCADGui.doCommand(
-                "analysis.Member = analysis.Member + [CfdInitialiseFlowField.makeCfdInitialFlowField()]")
+                "analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())")
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 if FreeCAD.GuiUp:

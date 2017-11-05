@@ -134,7 +134,7 @@ if FreeCAD.GuiUp:
             if sel[0].isDerivedFrom("Fem::FemResultObject"):
                 return sel[0]
         import FemGui
-        for i in FemGui.getActiveAnalysis().Member:
+        for i in FemGui.getActiveAnalysis().Group:
             if(i.isDerivedFrom("Fem::FemResultObject")):
                 return i
         return None
@@ -143,14 +143,14 @@ if FreeCAD.GuiUp:
         """ Return CfdAnalysis object to which this obj belongs in the tree """
         for o in FreeCAD.activeDocument().Objects:
             if o.Name.startswith("CfdAnalysis"):
-                if obj in o.Member:
+                if obj in o.Group:
                     return o
         return None
 
 
 def getPhysicsModel(analysis_object):
     isPresent = False
-    for i in analysis_object.Member:
+    for i in analysis_object.Group:
         if "PhysicsModel" in i.Name:
             physicsModel = i.PhysicsModel
             isPresent = True
@@ -163,7 +163,7 @@ def getMeshObject(analysis_object):
     isPresent = False
     meshObj = []
     if analysis_object:
-        members = analysis_object.Member
+        members = analysis_object.Group
     else:
         members = FreeCAD.activeDocument().Objects
     for i in members:
@@ -181,20 +181,20 @@ def getMeshObject(analysis_object):
 
 
 def getPorousZoneObjects(analysis_object):
-    return [i for i in analysis_object.Member if i.Name.startswith('PorousZone')]
+    return [i for i in analysis_object.Group if i.Name.startswith('PorousZone')]
 
 
 def getInitialisationZoneObjects(analysis_object):
-    return [i for i in analysis_object.Member if i.Name.startswith('InitialisationZone')]
+    return [i for i in analysis_object.Group if i.Name.startswith('InitialisationZone')]
 
 
 def getZoneObjects(analysis_object):
-    return [i for i in analysis_object.Member if 'Zone' in i.Name]
+    return [i for i in analysis_object.Group if 'Zone' in i.Name]
 
 
 def getInitialConditions(analysis_object):
     isPresent = False
-    for i in analysis_object.Member:
+    for i in analysis_object.Group:
         if "InitialiseFields" in i.Name:
             InitialVariables = i.InitialVariables
             isPresent = True
@@ -204,12 +204,12 @@ def getInitialConditions(analysis_object):
 
 
 def getMaterials(analysis_object):
-    return [i for i in analysis_object.Member
+    return [i for i in analysis_object.Group
             if i.isDerivedFrom('App::MaterialObjectPython')]
 
 
 def getSolver(analysis_object):
-    for i in analysis_object.Member:
+    for i in analysis_object.Group:
         if i.isDerivedFrom("Fem::FemSolverObjectPython"):  # Fem::FemSolverObject is C++ type name
             return i
 
@@ -225,7 +225,7 @@ def getSolverSettings(solver):
 
 def getConstraintGroup(analysis_object):
     group = []
-    for i in analysis_object.Member:
+    for i in analysis_object.Group:
         if i.isDerivedFrom("Fem::Constraint"):
             group.append(i)
     return group
@@ -233,7 +233,7 @@ def getConstraintGroup(analysis_object):
 
 def getCfdConstraintGroup(analysis_object):
     group = []
-    for i in analysis_object.Member:
+    for i in analysis_object.Group:
         if i.isDerivedFrom("Fem::ConstraintFluidBoundary"):
             group.append(i)
     return group
@@ -242,7 +242,7 @@ def getCfdConstraintGroup(analysis_object):
 def getCfdBoundaryGroup(analysis_object):
     group = []
     import _CfdFluidBoundary
-    for i in analysis_object.Member:
+    for i in analysis_object.Group:
         if isinstance(i.Proxy, _CfdFluidBoundary._CfdFluidBoundary):
             group.append(i)
     return group
@@ -262,7 +262,7 @@ def is_planar(shape):
 
 
 def getMesh(analysis_object):
-    for i in analysis_object.Member:
+    for i in analysis_object.Group:
         if i.isDerivedFrom("Fem::FemMeshObject"):
             return i
     # Python return None by default, so check None outside
@@ -274,7 +274,7 @@ def isSolidMesh(fem_mesh):
 
 
 def getResult(analysis_object):
-    for i in analysis_object.Member:
+    for i in analysis_object.Group:
         if i.isDerivedFrom("Fem::FemResultObject"):
             return i
     return None
@@ -394,7 +394,7 @@ def indexOrDefault(list, findItem, defaultIndex):
 # This is taken from hide_parts_constraints_show_meshes which was removed from FemCommands for some reason
 def hide_parts_show_meshes():
     if FreeCAD.GuiUp:
-        for acnstrmesh in FemGui.getActiveAnalysis().Member:
+        for acnstrmesh in FemGui.getActiveAnalysis().Group:
             if "Mesh" in acnstrmesh.TypeId:
                 aparttoshow = acnstrmesh.Name.replace("_Mesh", "")
                 for apart in FreeCAD.activeDocument().Objects:
