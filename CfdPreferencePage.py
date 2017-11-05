@@ -49,7 +49,7 @@ if FreeCAD.GuiUp:
     from PySide.QtGui import QApplication, QDialog
 
 BLUECFD_URL = \
-    "https://github.com/blueCFD/Core/releases/download/blueCFD-Core-2016-1/blueCFD-Core-2016-1-win64-setup.exe"
+    "https://github.com/blueCFD/Core/releases/download/blueCFD-Core-2016-2/blueCFD-Core-2016-2-win64-setup.exe"
 GNUPLOTPY_URL = "https://sourceforge.net/projects/gnuplot-py/files/Gnuplot-py/1.8/gnuplot-py-1.8.zip/download"
 GNUPLOTPY_FILE_BASE = "gnuplot-py-1.8"
 CFMESH_URL = "https://sourceforge.net/projects/cfmesh/files/v1.1.2/cfMesh-v1.1.2.tgz/download"

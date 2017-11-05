@@ -737,6 +737,9 @@ def readTemplate(fileName, replaceDict=None):
 
 
 def checkCfdDependencies(term_print=True):
+        FC_MINOR_VER_REQUIRED = 17
+        FC_COMMIT_REQUIRED = 12539
+
         import os
         import subprocess
         import platform
@@ -749,9 +752,10 @@ def checkCfdDependencies(term_print=True):
             print("Checking FreeCAD version")
         ver = FreeCAD.Version()
         gitver = int(ver[2].split()[0])
-        if int(ver[0]) == 0 and (int(ver[1]) < 17 or (int(ver[1]) == 17 and gitver < 11832)):
-            fc_msg = "FreeCAD version ({}.{}.{}) must be at least 0.17.11832".format(
-                int(ver[0]), int(ver[1]), gitver)
+        if int(ver[0]) == 0 and (int(ver[1]) < FC_MINOR_VER_REQUIRED or
+                                 (int(ver[1]) == FC_MINOR_VER_REQUIRED and gitver < FC_COMMIT_REQUIRED)):
+            fc_msg = "FreeCAD version ({}.{}.{}) must be at least {}.{}.{}".format(
+                int(ver[0]), int(ver[1]), gitver, 0, FC_MINOR_VER_REQUIRED, FC_COMMIT_REQUIRED)
             if term_print:
                 print(fc_msg)
             message += fc_msg + '\n'

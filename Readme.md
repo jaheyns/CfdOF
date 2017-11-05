@@ -56,8 +56,8 @@ Not tested, but a POSIX system. Possible to install and run OpenFOAM.
 The CFD workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
-- [Latest development version of FreeCAD (0.17 prerelease; requires git commit 11832 or later)](https://www.freecadweb.org/wiki/Download)  
-- [OpenFOAM (version 4.0 or later)](http://openfoam.org/download/)  
+- [Latest development version of FreeCAD (0.17 prerelease; requires git commit 12539 or later)](https://www.freecadweb.org/wiki/Download)  
+- [OpenFOAM (version 4.x tested; other versions may work. However cfMesh currently does not support version 5.x)](http://openfoam.org/download/)  
 - [Gnuplot.py (version 1.8)](http://gnuplot-py.sourceforge.net/)  
 - [Gnuplot](http://www.gnuplot.info/)  
 - [Paraview](http://www.paraview.org/)  
@@ -88,7 +88,7 @@ conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CFD". 
 
-The OpenFOAM installation is via the [blueCFD-Core](http://bluecfd.github.io/Core/Downloads/) package (version 2016-1),
+The OpenFOAM installation is via the [blueCFD-Core](http://bluecfd.github.io/Core/Downloads/) package (version 2016-2),
 with which Gnuplot and Paraview come bundled. This can be installed
 manually using the above link, or by clicking the relevant
 button in the Preferences panel described above.
