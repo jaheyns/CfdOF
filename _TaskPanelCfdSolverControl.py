@@ -41,7 +41,6 @@ import subprocess
 from CfdConsoleProcess import CfdConsoleProcess
 
 import FreeCAD
-from FemTools import FemTools
 import CfdTools
 
 if FreeCAD.GuiUp:

@@ -40,11 +40,6 @@ import subprocess
 
 
 class CfdRunnable(object):
-    ##  run the solver and read the result, corresponding to FemTools class
-    #  @param analysis - analysis object to be used as the core object.
-    #  "__init__" tries to use current active analysis in analysis is left empty.
-    #  Rises exception if analysis is not set and there is no active analysis
-    #  The constructur of FemTools is for use of analysis without solver object
     def __init__(self, analysis=None, solver=None):
         if analysis and analysis.isDerivedFrom("Fem::FemAnalysisPython"):
             ## @var analysis

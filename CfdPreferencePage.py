@@ -36,7 +36,6 @@ import zipfile
 import tempfile
 
 import FreeCAD
-from FemTools import FemTools
 import CfdTools
 import CfdConsoleProcess
 
