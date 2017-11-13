@@ -64,7 +64,7 @@ class _CommandCfdMeshCartFromShape(FemCommands):
                     FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
                     if FemGui.getActiveAnalysis():
                         FreeCADGui.addModule("FemGui")
-                        FreeCADGui.doCommand("FemGui.getActiveAnalysis().addObject((App.ActiveDocument.ActiveObject)")
+                        FreeCADGui.doCommand("FemGui.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
                     FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
         else:
             print "ERROR: You cannot have more than one mesh object"

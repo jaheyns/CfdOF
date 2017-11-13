@@ -56,9 +56,6 @@ class CfdCaseWriterSignals(QObject):
 class CfdCaseWriterFoam(QRunnable):
     def __init__(self, analysis_obj):
         super(CfdCaseWriterFoam, self).__init__()
-        """ analysis_obj should contains all the information needed,
-        boundaryConditionList is a list of all boundary Conditions objects(FemConstraint)
-        """
 
         self.analysis_obj = analysis_obj
         self.solver_obj = CfdTools.getSolver(analysis_obj)
@@ -577,11 +574,9 @@ class CfdCaseWriterFoam(QRunnable):
                                     for elems in sub[1]:
                                         elt = sub[0].Shape.getElement(elems)
                                         if elt.ShapeType == 'Face':
-                                            #isSameGeo = FemMeshTools.is_same_geometry(bf, mf)
                                             bcFacesList = bc_obj.Shape.Faces
                                             for bf in bcFacesList:
-                                                import FemMeshTools
-                                                isSameGeo = FemMeshTools.is_same_geometry(bf, elt)
+                                                isSameGeo = CfdTools.isSameGeometry(bf, elt)
                                                 if isSameGeo:
                                                     tempBaffleList.append(regionObj.Name+sub[0].Name+elems)
                                                     tempBaffleListSlave.append(regionObj.Name+sub[0].Name+elems+"_slave")
