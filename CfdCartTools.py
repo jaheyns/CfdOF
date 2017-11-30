@@ -209,8 +209,7 @@ class CfdCartTools():
                                     # Similarity search for patch used in boundary layer meshing
                                     meshFaceList = self.mesh_obj.Part.Shape.Faces
                                     for (i, mf) in enumerate(meshFaceList):
-                                        import FemMeshTools
-                                        isSameGeo = FemMeshTools.is_same_geometry(elt, mf)
+                                        isSameGeo = CfdTools.isSameGeometry(elt, mf)
                                         if isSameGeo and (mr_obj.NumberLayers > 1):  # Only one matching face
                                             sfN = self.mesh_obj.ShapeFaceNames[i]
                                             self.ele_meshpatch_map[mr_obj.Name].append(sfN)
@@ -343,7 +342,7 @@ class CfdCartTools():
         if self.mesh_obj.MeshUtility == "cfMesh":
             self.cf_settings['ClMax'] = self.clmax*self.scale
 
-            if len(self.cf_settings['MeshRegions']) > 0:
+            if len(self.cf_settings['BoundaryLayers']) > 0:
                 self.cf_settings['BoundaryLayerPresent'] = True
             else:
                 self.cf_settings['BoundaryLayerPresent'] = False
