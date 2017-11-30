@@ -211,7 +211,8 @@ Oliver Oxtoby (CSIR, 2016-2017) <ooxtoby@csir.co.za>
 Johan Heyns (CSIR, 2016-2017) <jheyns@csir.co.za>  
 Alfred Bogaers (CSIR, 2016-2017) <abogaers@csir.co.za>    
 
-We would like to thank the following people for their contributions:
+We would like to thank Eskom for their financial contribution as well as the following people for their contribution to the code:
 
 Qingfeng Xia (2015) - Original framework;
 Klaus Sembritzki (2017) - Multiphase
+
