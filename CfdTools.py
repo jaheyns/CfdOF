@@ -751,7 +751,12 @@ def checkCfdDependencies(term_print=True):
         if term_print:
             print("Checking FreeCAD version")
         ver = FreeCAD.Version()
-        gitver = int(ver[2].split()[0])
+        gitver = ver[2].split()[0]
+        if gitver != 'Unknown':
+            gitver = int(gitver)
+        else:
+            # If we don't have the git version, assume it's OK.
+            gitver = FC_COMMIT_REQUIRED
         if int(ver[0]) == 0 and (int(ver[1]) < FC_MINOR_VER_REQUIRED or
                                  (int(ver[1]) == FC_MINOR_VER_REQUIRED and gitver < FC_COMMIT_REQUIRED)):
             fc_msg = "FreeCAD version ({}.{}.{}) must be at least {}.{}.{}".format(
