@@ -837,7 +837,7 @@ def checkCfdDependencies(term_print=True):
         gmshversion = ""
         try:
             gmshversion = subprocess.check_output(["gmsh", "-version"], stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError:
+        except OSError or subprocess.CalledProcessError:
             gmsh_msg = "gmsh is not installed"
             message += gmsh_msg + '\n'
             if term_print:
