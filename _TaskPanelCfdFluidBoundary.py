@@ -672,7 +672,6 @@ class TaskPanelCfdFluidBoundary:
         if objectName != 'None':
             self.shapeObj = FreeCADGui.ActiveDocument.Document.getObject(objectName)
             self.hideObjects()
-            print(self.obj.References)
             refs = list(self.obj.References)
             self.form.faceListWidget.clear()
             FreeCADGui.showObject(self.shapeObj)
