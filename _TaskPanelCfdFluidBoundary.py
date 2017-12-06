@@ -34,6 +34,7 @@ import sys
 import os.path
 import CfdTools
 from CfdTools import inputCheckAndStore, setInputFieldQuantity, indexOrDefault
+import CfdFaceSelectWidget
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -194,14 +195,31 @@ class TaskPanelCfdFluidBoundary:
         # self.form.thermalFrame.setVisible(physics_model["Thermal"] is not None)
         self.form.thermalFrame.setVisible(False)
 
+        # Face list selection
         self.form.faceList.clicked.connect(self.faceListSelection)
-        self.form.closeListOfFaces.clicked.connect(self.closeFaceList)
         self.form.shapeComboBox.currentIndexChanged.connect(self.faceListShapeChosen)
         self.form.faceListWidget.itemSelectionChanged.connect(self.faceHighlightChange)
-        self.form.addFaceListFace.clicked.connect(self.addFaceListFace)
+        self.form.faceListWidget.itemChanged.connect(self.faceListItemChanged)
+        self.form.selectAllButton.clicked.connect(self.selectAllButtonClicked)
+        self.form.selectNoneButton.clicked.connect(self.selectNoneButtonClicked)
+        self.form.doneButton.clicked.connect(self.closeFaceList)
         self.form.shapeComboBox.setToolTip("Choose a solid object from the drop down list and select one or more of the faces associated with the chosen solid.")
 
+        analysis_obj = FemGui.getActiveAnalysis()
+        self.solidsNames = ['None']
+        self.solidsLabels = ['None']
+        for i in FreeCADGui.ActiveDocument.Document.Objects:
+            if "Shape" in i.PropertiesList:
+                if len(i.Shape.Solids) > 0:
+                    self.solidsNames.append(i.Name)
+                    self.solidsLabels.append(i.Label)
+                    #FreeCADGui.hideObject(i)
+
+
         self.setInitialValues()
+
+        # Face list selection to be moved into own class for reuse
+        #self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget)
 
     def setInitialValues(self):
         """ Populate UI """
@@ -410,7 +428,7 @@ class TaskPanelCfdFluidBoundary:
                     if selection not in self.obj.References:
                         tempList.append(selection)
                         # If the user hasn't picked anything for direction the selected face is used as default.
-                        if self.form.lineDirection.text() == "":
+                        if self.form.lineDirection.text() == "" and CfdTools.is_planar(elt):
                             self.form.lineDirection.setText(selection[0] + ':' + selection[1])
                     else:
                         FreeCAD.Console.PrintMessage(
@@ -432,7 +450,8 @@ class TaskPanelCfdFluidBoundary:
         self.form.listReferences.clear()
         items = []
         for ref in self.obj.References:
-            item_name = ref[0] + ':' + ref[1]
+            idx = self.solidsNames.index(ref[0])
+            item_name = self.solidsLabels[idx] + ':' + ref[1]
             items.append(item_name)
         for listItemName in sorted(items):
             self.form.listReferences.addItem(listItemName)
@@ -643,34 +662,34 @@ class TaskPanelCfdFluidBoundary:
 
     def faceListSelection(self):
         self.form.stackedWidget.setCurrentIndex(1)
-        analysis_obj = FemGui.getActiveAnalysis()
-        self.solidsNames = ['None']
-        self.solidsLabels = ['None']
-        for i in FreeCADGui.ActiveDocument.Document.Objects:
-            if "Shape" in i.PropertiesList:
-                if len(i.Shape.Solids)>0:
-                    self.solidsNames.append(i.Name)
-                    self.solidsLabels.append(i.Label)
-                    #FreeCADGui.hideObject(i)
         self.form.shapeComboBox.clear()
-        #self.form.shapeComboBox.insertItems(1,self.solidsNames)
-        self.form.shapeComboBox.insertItems(1,self.solidsLabels)
-
-    def closeFaceList(self):
-        self.form.stackedWidget.setCurrentIndex(0)
-        #self.obj.ViewObject.show()
+        self.form.faceListWidget.clear()
+        self.form.shapeComboBox.insertItems(1, self.solidsLabels)
 
     def faceListShapeChosen(self):
         ind = self.form.shapeComboBox.currentIndex()
         objectName = self.solidsNames[ind]
-        self.shapeObj = FreeCADGui.ActiveDocument.Document.getObject(objectName)
-        self.hideObjects()
-        self.form.faceListWidget.clear()
         if objectName != 'None':
+            self.shapeObj = FreeCADGui.ActiveDocument.Document.getObject(objectName)
+            self.hideObjects()
+            print(self.obj.References)
+            refs = list(self.obj.References)
+            self.form.faceListWidget.clear()
             FreeCADGui.showObject(self.shapeObj)
             self.listOfShapeFaces = self.shapeObj.Shape.Faces
             for i in range(len(self.listOfShapeFaces)):
-                self.form.faceListWidget.insertItem(i,"Face"+str(i))
+                face_name = "Face" + str(i + 1)
+                item = QtGui.QListWidgetItem(face_name, self.form.faceListWidget)
+                item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+                checked = False
+                for ref in refs:
+                    if ref[0] == objectName and ref[1] == face_name:
+                        checked = True
+                if checked:
+                    item.setCheckState(QtCore.Qt.Checked)
+                else:
+                    item.setCheckState(QtCore.Qt.Unchecked)
+                self.form.faceListWidget.insertItem(i, item)
 
     def hideObjects(self):
         for i in FreeCADGui.ActiveDocument.Document.Objects:
@@ -681,17 +700,43 @@ class TaskPanelCfdFluidBoundary:
     def faceHighlightChange(self):
         ind = self.form.faceListWidget.currentRow()
         FreeCADGui.Selection.clearSelection()
-        FreeCADGui.Selection.addSelection(self.shapeObj,'Face'+str(ind+1))
+        FreeCADGui.Selection.addSelection(self.shapeObj, 'Face'+str(ind+1))
 
-    def addFaceListFace(self):
-        #print self.form.faceListWidget.currentItem()," : ",self.form.faceListWidget.currentRow()
-        if self.form.faceListWidget.count()>0 and self.form.faceListWidget.currentRow()!=-1:
-            ind = self.form.shapeComboBox.currentIndex()
-            objectName = self.solidsNames[ind]
-            ind = self.form.faceListWidget.currentRow()
-            self.selecting_references = True
-            self.addSelection(self.obj.Document.Name, objectName, 'Face'+str(ind+1))
-            self.selecting_references = False
+    def faceListItemChanged(self, item):
+        object_name = self.solidsNames[self.form.shapeComboBox.currentIndex()]
+        if object_name != 'None':
+            face_ind = self.form.faceListWidget.row(item)
+            face_name = 'Face' + str(face_ind+1)
+            if item.checkState() == QtCore.Qt.Checked:
+                self.selecting_references = True
+                self.addSelection(self.obj.Document.Name, object_name, face_name)
+                self.selecting_references = False
+            else:
+                ref_name = object_name + ':' + face_name
+                if not self.obj.References:
+                    return
+                tempList = list(self.obj.References)
+                for ref in self.obj.References:
+                    item_ref_name = ref[0] + ':' + ref[1]
+                    if item_ref_name == ref_name:
+                        tempList.remove(ref)
+                self.obj.References = tempList
+                self.rebuild_list_references()
+            doc_name = str(self.obj.Document.Name)
+            FreeCAD.getDocument(doc_name).recompute()
+            #FreeCADGui.Selection.clearSelection()
 
-        #self.obj.ViewObject.show()
-        #self.addSelection(sel.DocumentName, sel.ObjectName, sub)
+    def selectAllButtonClicked(self):
+        for i in range(self.form.faceListWidget.count()):
+            item = self.form.faceListWidget.item(i)
+            item.setCheckState(QtCore.Qt.Checked)
+
+    def selectNoneButtonClicked(self):
+        for i in range(self.form.faceListWidget.count()):
+            item = self.form.faceListWidget.item(i)
+            item.setCheckState(QtCore.Qt.Unchecked)
+
+    def closeFaceList(self):
+        self.form.stackedWidget.setCurrentIndex(0)
+        # self.obj.ViewObject.show()
+

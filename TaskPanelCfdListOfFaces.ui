@@ -1,53 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>CfdFaceSelect</class>
+ <widget class="QWidget" name="CfdFaceSelect">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>401</width>
-    <height>492</height>
+    <height>186</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Select faces from list of faces</string>
+   <string>Select Faces</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="1">
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="4" column="1">
-      <widget class="QPushButton" name="addFaces">
-       <property name="text">
-        <string>Add Face(s)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Close</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0" rowspan="4" colspan="2">
-      <widget class="QListWidget" name="listWidget"/>
-     </item>
-     <item row="3" column="2">
-      <widget class="QPushButton" name="pushButton_4">
-       <property name="text">
-        <string>Show Complete Object</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QPushButton" name="pushButton_3">
-       <property name="text">
-        <string>Show Face Only</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+  <layout class="QGridLayout" name="gridLayout_4">
+   <item row="0" column="2" colspan="2">
+    <widget class="QComboBox" name="shapeComboBox"/>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>Select Object</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" rowspan="3" colspan="4">
+    <widget class="QListWidget" name="faceListWidget"/>
    </item>
   </layout>
  </widget>
