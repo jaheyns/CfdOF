@@ -97,14 +97,14 @@ boundaryField
     {
         // Fix only the normal component on outflow and all three components of velocity on inflow,
         // in order to be well-posed on outflow and also in case there are any faces with inflowing velocity.
-        type                fixedNormalInletOutletVelocity;
-        fixTangentialInflow yes;
-        normalVelocity
-        {
+        //type                fixedNormalInletOutletVelocity;
+        //fixTangentialInflow yes;
+        //normalVelocity
+        //{
             type            fixedValue;
             value           uniform (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
-        }
-        value               uniform (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
+        //}
+        //value               uniform (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
     }
 %:outFlow
     %(0%)
