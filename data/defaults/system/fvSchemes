@@ -21,7 +21,7 @@ gradSchemes
     // Limit gradient to improve stability when bad cells encountered 
     // (0 = no limiting; 1 = do not exceed surrounding cells)
     default         cellLimited Gauss linear 0.95;
-    grad(p)         leastSquares linear;
+    grad(p)         Gauss linear;
 }
 
 divSchemes
