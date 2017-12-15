@@ -2,7 +2,7 @@
 ; https://gist.github.com/luzpaz/5e12362f0771eec9e6e82ef0e4d1ba56
 
 [general]
-name=CFD-OF
+name=CfdOF
 email=
 author=
 FreeCADMinimumVersion=0.17.11832

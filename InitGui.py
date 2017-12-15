@@ -36,8 +36,8 @@ class CfdOFWorkbench(Workbench):
         import CfdTools
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd.png")
         self.__class__.Icon = icon_path
-        self.__class__.MenuText = "CFD-OF"
-        self.__class__.ToolTip = "CFD workbench"
+        self.__class__.MenuText = "CfdOF"
+        self.__class__.ToolTip = "CfdOF workbench"
 
         from PySide import QtCore
         from CfdPreferencePage import CfdPreferencePage
@@ -75,8 +75,8 @@ class CfdOFWorkbench(Workbench):
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
                   'Cfd_SolverControl']
 
-        self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CFD-OF")), cmdlst)
-        self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CFD-OF")), cmdlst)
+        self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)
+        self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), cmdlst)
 
         # enable QtCore translation here, todo
 

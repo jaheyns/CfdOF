@@ -365,10 +365,13 @@ class TaskPanelCfdFluidBoundary:
     def buttonRemoveFaceClicked(self):
         if not self.obj.References:
             return
+        if not self.form.listReferences.currentItem():
+            return
         current_item_name = str(self.form.listReferences.currentItem().text())
         tempList = list(self.obj.References)
         for ref in self.obj.References:
-            refname = ref[0] + ':' + ref[1]
+            idx = self.solidsNames.index(ref[0])
+            refname = self.solidsLabels[idx] + ':' + ref[1]
             if refname == current_item_name:
                 tempList.remove(ref)
         self.obj.References = tempList
