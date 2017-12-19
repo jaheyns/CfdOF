@@ -41,7 +41,7 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
     from PySide import QtCore
     from PySide import QtGui
-    from PySide.QtCore import Qt
+    from PySide.QtCore import Qt, QTimer
     from PySide.QtGui import QApplication
     from PySide import QtUiTools
     import FemGui
@@ -137,6 +137,10 @@ class TaskPanelCfdFluidBoundary:
         self.selecting_references = False
         self.selecting_direction = False
         self.obj = obj
+
+        self.recompute_timer = QTimer()
+        self.recompute_timer.timeout.connect(self.recomputeDocument)
+
         self.physics_model = physics_model
         self.turbModel = (physics_model['TurbulenceModel']
                           if physics_model['Turbulence'] == 'RANS' or physics_model['Turbulence'] == 'LES'
@@ -311,8 +315,7 @@ class TaskPanelCfdFluidBoundary:
 
         # Change the color of the boundary condition as the selection is made
         self.obj.BoundarySettings = self.BoundarySettings.copy()
-        doc_name = str(self.obj.Document.Name)
-        FreeCAD.getDocument(doc_name).recompute()
+        self.scheduleRecompute()
 
     def comboSubtypeChanged(self):
         type_index = self.form.comboBoundaryType.currentIndex()
@@ -358,8 +361,7 @@ class TaskPanelCfdFluidBoundary:
         else:
             self.form.labelHelpText.setText("")
             FreeCADGui.Selection.removeObserver(self)
-        doc_name = str(self.obj.Document.Name)
-        FreeCAD.getDocument(doc_name).recompute()
+        self.scheduleRecompute()
         self.update_selectionbuttons_ui()
 
     def buttonRemoveFaceClicked(self):
@@ -376,9 +378,7 @@ class TaskPanelCfdFluidBoundary:
                 tempList.remove(ref)
         self.obj.References = tempList
         self.rebuild_list_references()
-        doc_name = str(self.obj.Document.Name)
-        FreeCAD.getDocument(doc_name).recompute()
-        FreeCADGui.Selection.clearSelection()
+        self.scheduleRecompute()
 
     def update_selectionbuttons_ui(self):
         self.form.buttonDirection.setChecked(self.selecting_direction)
@@ -445,9 +445,6 @@ class TaskPanelCfdFluidBoundary:
         self.obj.References = list(tempList)
         self.rebuild_list_references()
         self.update_selectionbuttons_ui()
-
-        doc_name = str(self.obj.Document.Name)
-        FreeCAD.getDocument(doc_name).recompute()
 
     def rebuild_list_references(self):
         self.form.listReferences.clear()
@@ -681,7 +678,7 @@ class TaskPanelCfdFluidBoundary:
             self.form.faceListWidget.clear()
             FreeCADGui.showObject(self.shapeObj)
             self.listOfShapeFaces = self.shapeObj.Shape.Faces
-            selected_faces = [ref[0] for ref in refs if ref[0] == objectName]
+            selected_faces = [ref[1] for ref in refs if ref[0] == objectName]
             for i in range(len(self.listOfShapeFaces)):
                 face_name = "Face" + str(i + 1)
                 item = QtGui.QListWidgetItem(face_name, self.form.faceListWidget)
@@ -704,6 +701,7 @@ class TaskPanelCfdFluidBoundary:
         ind = self.form.faceListWidget.currentRow()
         FreeCADGui.Selection.clearSelection()
         FreeCADGui.Selection.addSelection(self.shapeObj, 'Face'+str(ind+1))
+        self.scheduleRecompute()
 
     def faceListItemChanged(self, item):
         object_name = self.solidsNames[self.form.shapeComboBox.currentIndex()]
@@ -725,9 +723,7 @@ class TaskPanelCfdFluidBoundary:
                         tempList.remove(ref)
                 self.obj.References = tempList
                 self.rebuild_list_references()
-            doc_name = str(self.obj.Document.Name)
-            FreeCAD.getDocument(doc_name).recompute()
-            #FreeCADGui.Selection.clearSelection()
+            self.scheduleRecompute()
 
     def selectAllButtonClicked(self):
         for i in range(self.form.faceListWidget.count()):
@@ -743,3 +739,10 @@ class TaskPanelCfdFluidBoundary:
         self.form.stackedWidget.setCurrentIndex(0)
         # self.obj.ViewObject.show()
 
+    def scheduleRecompute(self):
+        # Only do one (costly) recompute when done processing - call in preference to document.recompute()
+        self.recompute_timer.start()
+
+    def recomputeDocument(self):
+        doc_name = str(self.obj.Document.Name)
+        FreeCAD.getDocument(doc_name).recompute()
