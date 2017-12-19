@@ -67,7 +67,7 @@ runCommand createBaffles -overwrite
 %{%(initialValues/PotentialFoam%)
 %:True
 # Initialise flow
-runCommand potentialFoam
+runCommand potentialFoam -initialiseUBCs
 %}
 %{%(solver/parallel%)
 %:True
