@@ -73,8 +73,9 @@ class _CfdMeshRegion:
                         "Create a zero thickness baffle")
         obj.Baffle = False
 
-        obj.addProperty("App::PropertyLinkSubList", "References", "MeshRegionProperties",
+        obj.addProperty("App::PropertyPythonObject", "References", "MeshRegionProperties",
                         "List of mesh region surfaces")
+        obj.References = []
 
         obj.Proxy = self
         self.Type = "CfdMeshRegion"

@@ -270,39 +270,38 @@ class CfdGmshTools():
                             # print(sub[0])  # Part the elements belongs to
                             # check if the shape of the mesh region is an element of the Part to mesh, if not try to find the element in the shape to mesh
                             search_ele_in_shape_to_mesh = False
-                            if not self.part_obj.Shape.isSame(sub[0].Shape):
-                                # print("  One element of the meshregion " + mr_obj.Name + " is not an element of the Part to mesh.")
-                                # print("  But we gone try to find it in the Shape to mesh :-)")
+                            shape = FreeCAD.ActiveDocument.getObject(sub[0]).Shape
+                            if not self.part_obj.Shape.isSame(shape):
                                 search_ele_in_shape_to_mesh = True
-                            for elems in sub[1]:
-                                # print(elems)  # elems --> element
-                                if search_ele_in_shape_to_mesh:
-                                    # we gone try to find the element it in the Shape to mesh and use the found element as elems
-                                    ele_shape = FemMeshTools.get_element(sub[0], elems)  # the method getElement(element) does not return Solid elements
-                                    found_element = FemMeshTools.find_element_in_shape(self.part_obj.Shape, ele_shape)
-                                    if found_element:
-                                        elems = found_element
-                                    else:
-                                        FreeCAD.Console.PrintError("One element of the meshregion " + mr_obj.Name + " could not be found in the Part to mesh. It will be ignored.\n")
-                                # print(elems)  # element
-                                if elems not in self.ele_length_map:
-                                    # self.ele_length_map[elems] = Units.Quantity(mr_obj.CharacteristicLength).Value
-                                    mr_rellen = mr_obj.RelativeLength
-                                    if mr_rellen > 1.0:
-                                        mr_rellen = 1.0
-                                        FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " should not use a relative length greater than unity.\n")
-                                    elif mr_rellen < 0.01:
-                                        mr_rellen = 0.01  # Relative length should not be less than 1/100 of base length
-                                        FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " should not use a relative length smaller than 0.01.\n")
-
-                                    self.ele_length_map[elems] = mr_rellen*self.clmax
+                            elems = sub[1]
+                            if search_ele_in_shape_to_mesh:
+                                # we gone try to find the element it in the Shape to mesh and use the found element as elems
+                                ele_shape = FemMeshTools.get_element(shape, elems)  # the method getElement(element) does not return Solid elements
+                                found_element = FemMeshTools.find_element_in_shape(self.part_obj.Shape, ele_shape)
+                                if found_element:
+                                    elems = found_element
                                 else:
-                                    FreeCAD.Console.PrintError("The element " + elems + " of the meshregion " + mr_obj.Name + " has been added to another mesh region.\n")
+                                    FreeCAD.Console.PrintError("One element of the meshregion " + mr_obj.Name + " could not be found in the Part to mesh. It will be ignored.\n")
+                            # print(elems)  # element
+                            if elems not in self.ele_length_map:
+                                # self.ele_length_map[elems] = Units.Quantity(mr_obj.CharacteristicLength).Value
+                                mr_rellen = mr_obj.RelativeLength
+                                if mr_rellen > 1.0:
+                                    mr_rellen = 1.0
+                                    FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " should not use a relative length greater than unity.\n")
+                                elif mr_rellen < 0.01:
+                                    mr_rellen = 0.01  # Relative length should not be less than 1/100 of base length
+                                    FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " should not use a relative length smaller than 0.01.\n")
+
+                                self.ele_length_map[elems] = mr_rellen*self.clmax
+                            else:
+                                FreeCAD.Console.PrintError("The element " + elems + " of the meshregion " + mr_obj.Name + " has been added to another mesh region.\n")
                     else:
                         FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " is not used to create the mesh because the reference list is empty.\n")
                 else:
                     FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " is not used to create the mesh because the CharacteristicLength is 0.0 mm.\n")
             for eleml in self.ele_length_map:
+                print(eleml)
                 ele_shape = FemMeshTools.get_element(self.part_obj, eleml)  # the method getElement(element) does not return Solid elements
                 ele_vertexes = FemMeshTools.get_vertexes_by_element(self.part_obj.Shape, ele_shape)
                 self.ele_node_map[eleml] = ele_vertexes

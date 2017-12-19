@@ -178,55 +178,53 @@ class CfdCartTools():
                     snappy_mesh_region_list = []
                     patch_list = []
                     for (si, sub) in enumerate(mr_obj.References):
-                        # print(sub[0])  # Part the elements belongs to
-                        for (ei, elems) in enumerate(sub[1]):
-                            # print(elems)  # elems --> element
-                            elt = sub[0].Shape.getElement(elems)
-                            if elt.ShapeType == 'Face':
-                                facemesh = MeshPart.meshFromShape(elt,
-                                                                  LinearDeflection=self.mesh_obj.STLLinearDeflection)
+                        elems = sub[1]
+                        elt = FreeCAD.ActiveDocument.getObject(sub[0]).Shape.getElement(elems)
+                        if elt.ShapeType == 'Face':
+                            facemesh = MeshPart.meshFromShape(elt,
+                                                              LinearDeflection=self.mesh_obj.STLLinearDeflection)
 
-                                tri_surface += "solid {}{}{}\n".format(mr_obj.Name, sub[0].Name, elems)
-                                for face in facemesh.Facets:
-                                    tri_surface += " facet normal 0 0 0\n"
-                                    tri_surface += "  outer loop\n"
-                                    for i in range(3):
-                                        p = [i * self.scale for i in face.Points[i]]
-                                        tri_surface += "    vertex {} {} {}\n".format(p[0], p[1], p[2])
-                                    tri_surface += "  endloop\n"
-                                    tri_surface += " endfacet\n"
-                                tri_surface += "solid {}{}{}\n".format(mr_obj.Name, sub[0].Name, elems)
+                            tri_surface += "solid {}{}{}\n".format(mr_obj.Name, sub[0], elems)
+                            for face in facemesh.Facets:
+                                tri_surface += " facet normal 0 0 0\n"
+                                tri_surface += "  outer loop\n"
+                                for i in range(3):
+                                    p = [i * self.scale for i in face.Points[i]]
+                                    tri_surface += "    vertex {} {} {}\n".format(p[0], p[1], p[2])
+                                tri_surface += "  endloop\n"
+                                tri_surface += " endfacet\n"
+                            tri_surface += "solid {}{}{}\n".format(mr_obj.Name, sub[0], elems)
 
-                                if self.mesh_obj.MeshUtility == 'snappyHexMesh' and mr_obj.Baffle:
-                                    # Save baffle references or faces individually
-                                    baffle = "{}{}{}".format(mr_obj.Name, sub[0].Name, elems)
-                                    fid = open(os.path.join(self.triSurfaceDir, baffle + ".stl"), 'w')
-                                    fid.write(tri_surface)
-                                    fid.close()
-                                    tri_surface = ""
-                                    snappy_mesh_region_list.append(baffle)
-                                elif self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1:
-                                    # Similarity search for patch used in boundary layer meshing
-                                    meshFaceList = self.mesh_obj.Part.Shape.Faces
-                                    for (i, mf) in enumerate(meshFaceList):
-                                        isSameGeo = CfdTools.isSameGeometry(elt, mf)
-                                        if isSameGeo and (mr_obj.NumberLayers > 1):  # Only one matching face
-                                            sfN = self.mesh_obj.ShapeFaceNames[i]
-                                            self.ele_meshpatch_map[mr_obj.Name].append(sfN)
-                                            patch_list.append(self.mesh_obj.ShapeFaceNames[i])
+                            if self.mesh_obj.MeshUtility == 'snappyHexMesh' and mr_obj.Baffle:
+                                # Save baffle references or faces individually
+                                baffle = "{}{}{}".format(mr_obj.Name, sub[0], elems)
+                                fid = open(os.path.join(self.triSurfaceDir, baffle + ".stl"), 'w')
+                                fid.write(tri_surface)
+                                fid.close()
+                                tri_surface = ""
+                                snappy_mesh_region_list.append(baffle)
+                            elif self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1:
+                                # Similarity search for patch used in boundary layer meshing
+                                meshFaceList = self.mesh_obj.Part.Shape.Faces
+                                for (i, mf) in enumerate(meshFaceList):
+                                    isSameGeo = CfdTools.isSameGeometry(elt, mf)
+                                    if isSameGeo and (mr_obj.NumberLayers > 1):  # Only one matching face
+                                        sfN = self.mesh_obj.ShapeFaceNames[i]
+                                        self.ele_meshpatch_map[mr_obj.Name].append(sfN)
+                                        patch_list.append(self.mesh_obj.ShapeFaceNames[i])
 
-                                            # Limit expansion ratio to greater than 1.0 and less than 1.2
-                                            expratio = mr_obj.ExpansionRatio
-                                            expratio = min(1.2, max(1.0, expratio))
+                                        # Limit expansion ratio to greater than 1.0 and less than 1.2
+                                        expratio = mr_obj.ExpansionRatio
+                                        expratio = min(1.2, max(1.0, expratio))
 
-                                            cf_settings['BoundaryLayers'][self.mesh_obj.ShapeFaceNames[i]] = {
-                                                'NumberLayers': mr_obj.NumberLayers,
-                                                'ExpansionRatio': expratio,
-                                                'FirstLayerHeight': self.scale *
-                                                                    Units.Quantity(mr_obj.FirstLayerHeight).Value
-                                            }
-                            else:
-                                FreeCAD.Console.PrintError("Cartesian meshes only support surface refinement.\n")
+                                        cf_settings['BoundaryLayers'][self.mesh_obj.ShapeFaceNames[i]] = {
+                                            'NumberLayers': mr_obj.NumberLayers,
+                                            'ExpansionRatio': expratio,
+                                            'FirstLayerHeight': self.scale *
+                                                                Units.Quantity(mr_obj.FirstLayerHeight).Value
+                                        }
+                        else:
+                            FreeCAD.Console.PrintError("Cartesian meshes only support surface refinement.\n")
 
                     if self.mesh_obj.MeshUtility == 'cfMesh' or not mr_obj.Baffle:
                         fid = open(os.path.join(self.triSurfaceDir, mr_obj.Name + '.stl'), 'w')

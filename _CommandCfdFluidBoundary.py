@@ -39,7 +39,6 @@ except ImportError:  # Backward compatibility
 import FreeCADGui
 from PySide import QtCore
 import os
-import FemGui
 import CfdTools
 
 

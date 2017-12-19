@@ -44,7 +44,6 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt, QTimer
     from PySide.QtGui import QApplication
     from PySide import QtUiTools
-    import FemGui
 
 # Constants
 
@@ -134,12 +133,8 @@ BOUNDARY_THERMALTAB = [[0], [], [1], [0, 1], [2], []]
 class TaskPanelCfdFluidBoundary:
     """ Taskpanel for adding fluid boundary """
     def __init__(self, obj, physics_model, material_objs):
-        self.selecting_references = False
         self.selecting_direction = False
         self.obj = obj
-
-        self.recompute_timer = QTimer()
-        self.recompute_timer.timeout.connect(self.recomputeDocument)
 
         self.physics_model = physics_model
         self.turbModel = (physics_model['TurbulenceModel']
@@ -147,23 +142,16 @@ class TaskPanelCfdFluidBoundary:
                           else None)
         self.material_objs = material_objs
 
-        self.References = list(self.obj.References)
         self.BoundarySettings = self.obj.BoundarySettings.copy()
 
         self.ReferencesOrig = list(self.obj.References)
         self.BoundarySettingsOrig = self.obj.BoundarySettings.copy()
-
-        self.faceList = list(self.obj.faceList)
 
         ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdFluidBoundary.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.form.comboBoundaryType.currentIndexChanged.connect(self.comboBoundaryTypeChanged)
         self.form.comboSubtype.currentIndexChanged.connect(self.comboSubtypeChanged)
-        self.form.listReferences.itemPressed.connect(self.setSelection)
-        self.form.buttonAddFace.clicked.connect(self.buttonAddFaceClicked)
-        self.form.buttonAddFace.setCheckable(True)
-        self.form.buttonRemoveFace.clicked.connect(self.buttonRemoveFaceClicked)
         self.form.radioButtonCart.toggled.connect(self.radioButtonVelocityToggled)
         self.form.radioButtonMagNormal.toggled.connect(self.radioButtonVelocityToggled)
         self.form.inputCartX.valueChanged.connect(self.inputCartXChanged)
@@ -199,31 +187,11 @@ class TaskPanelCfdFluidBoundary:
         # self.form.thermalFrame.setVisible(physics_model["Thermal"] is not None)
         self.form.thermalFrame.setVisible(False)
 
-        # Face list selection
-        self.form.faceList.clicked.connect(self.faceListSelection)
-        self.form.shapeComboBox.currentIndexChanged.connect(self.faceListShapeChosen)
-        self.form.faceListWidget.itemSelectionChanged.connect(self.faceHighlightChange)
-        self.form.faceListWidget.itemChanged.connect(self.faceListItemChanged)
-        self.form.selectAllButton.clicked.connect(self.selectAllButtonClicked)
-        self.form.selectNoneButton.clicked.connect(self.selectNoneButtonClicked)
-        self.form.doneButton.clicked.connect(self.closeFaceList)
-        self.form.shapeComboBox.setToolTip("Choose a solid object from the drop down list and select one or more of the faces associated with the chosen solid.")
-
-        analysis_obj = FemGui.getActiveAnalysis()
-        self.solidsNames = ['None']
-        self.solidsLabels = ['None']
-        for i in FreeCADGui.ActiveDocument.Document.Objects:
-            if "Shape" in i.PropertiesList:
-                if len(i.Shape.Solids) > 0:
-                    self.solidsNames.append(i.Name)
-                    self.solidsLabels.append(i.Label)
-                    #FreeCADGui.hideObject(i)
-
-
         self.setInitialValues()
 
-        # Face list selection to be moved into own class for reuse
-        #self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget)
+        # Face list selection panel - modifies obj.References passed to it
+        self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
+                                                                    self.obj, True)
 
     def setInitialValues(self):
         """ Populate UI """
@@ -232,7 +200,6 @@ class TaskPanelCfdFluidBoundary:
         self.form.comboBoundaryType.setCurrentIndex(bi)
         si = indexOrDefault(SUBTYPES[bi], self.BoundarySettingsOrig.get('BoundarySubtype'), 0)
         self.form.comboSubtype.setCurrentIndex(si)
-        self.rebuild_list_references()
 
         cart = self.BoundarySettings.get('VelocityIsCartesian', False)
         self.form.radioButtonCart.setChecked(cart)
@@ -283,29 +250,6 @@ class TaskPanelCfdFluidBoundary:
         setInputFieldQuantity(self.form.inputIntensity, str(self.BoundarySettings.get('TurbulenceIntensity')))
         setInputFieldQuantity(self.form.inputLengthScale, str(self.BoundarySettings.get('TurbulenceLengthScale'))+"m")
 
-        # First time, add any currently selected faces to list
-        if len(self.obj.References) == 0:
-            self.selecting_references = True
-            self.add_selection_to_ref_list()
-            self.selecting_references = False
-            FreeCADGui.Selection.clearSelection()
-            self.update_selectionbuttons_ui()
-
-    def setSelection(self, value):
-        FreeCADGui.Selection.clearSelection()
-        docName = str(self.obj.Document.Name)
-        doc = FreeCAD.getDocument(docName)
-        ref = self.obj.References[self.form.listReferences.row(value)]
-        selection_object = doc.getObject(ref[0])
-        FreeCADGui.Selection.addSelection(selection_object, [str(ref[1])])
-
-    def add_selection_to_ref_list(self):
-        """ Add currently selected objects to reference list. """
-        for sel in FreeCADGui.Selection.getSelectionEx():
-            if sel.HasSubObjects:
-                for sub in sel.SubElementNames:
-                    self.addSelection(sel.DocumentName, sel.ObjectName, sub)
-
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
         self.form.comboSubtype.clear()
@@ -315,7 +259,8 @@ class TaskPanelCfdFluidBoundary:
 
         # Change the color of the boundary condition as the selection is made
         self.obj.BoundarySettings = self.BoundarySettings.copy()
-        self.scheduleRecompute()
+        doc_name = str(self.obj.Document.Name)
+        FreeCAD.getDocument(doc_name).recompute()
 
     def comboSubtypeChanged(self):
         type_index = self.form.comboBoundaryType.currentIndex()
@@ -345,44 +290,8 @@ class TaskPanelCfdFluidBoundary:
         alpha_enabled = BOUNDARY_UI[type_index][subtype_index][4]
         self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)
 
-    def buttonAddFaceClicked(self):
-        self.selecting_direction = False
-        self.selecting_references = not self.selecting_references
-        if self.selecting_references:
-            # Add any currently selected objects
-            if len(FreeCADGui.Selection.getSelectionEx()) >= 1:
-                self.add_selection_to_ref_list()
-                self.selecting_references = False
-        FreeCADGui.Selection.clearSelection()
-        # start SelectionObserver and parse the function to add the References to the widget
-        if self.selecting_references:
-            self.form.labelHelpText.setText("Select face(s) to add to list")
-            FreeCADGui.Selection.addObserver(self)
-        else:
-            self.form.labelHelpText.setText("")
-            FreeCADGui.Selection.removeObserver(self)
-        self.scheduleRecompute()
-        self.update_selectionbuttons_ui()
-
-    def buttonRemoveFaceClicked(self):
-        if not self.obj.References:
-            return
-        if not self.form.listReferences.currentItem():
-            return
-        current_item_name = str(self.form.listReferences.currentItem().text())
-        tempList = list(self.obj.References)
-        for ref in self.obj.References:
-            idx = self.solidsNames.index(ref[0])
-            refname = self.solidsLabels[idx] + ':' + ref[1]
-            if refname == current_item_name:
-                tempList.remove(ref)
-        self.obj.References = tempList
-        self.rebuild_list_references()
-        self.scheduleRecompute()
-
-    def update_selectionbuttons_ui(self):
+    def updateSelectionbuttonUI(self):
         self.form.buttonDirection.setChecked(self.selecting_direction)
-        self.form.buttonAddFace.setChecked(self.selecting_references)
 
     def radioButtonVelocityToggled(self, checked):
         self.BoundarySettings['VelocityIsCartesian'] = self.form.radioButtonCart.isChecked()
@@ -390,17 +299,16 @@ class TaskPanelCfdFluidBoundary:
         self.form.frameMagNormal.setVisible(self.form.radioButtonMagNormal.isChecked())
 
     def buttonDirectionClicked(self):
-        self.selecting_references = False
         self.selecting_direction = not self.selecting_direction
         if self.selecting_direction:
-            # If one object selected, use it
+            # If one object already selected, use it
             sels = FreeCADGui.Selection.getSelectionEx()
             if len(sels) == 1:
                 sel = sels[0]
                 if sel.HasSubObjects:
                     if len(sel.SubElementNames) == 1:
                         sub = sel.SubElementNames[0]
-                        self.addSelection(sel.DocumentName, sel.ObjectName, sub)
+                        self.directionSelection(sel.DocumentName, sel.ObjectName, sub)
         FreeCADGui.Selection.clearSelection()
         # start SelectionObserver and parse the function to add the References to the widget
         if self.selecting_direction:
@@ -408,17 +316,13 @@ class TaskPanelCfdFluidBoundary:
             FreeCADGui.Selection.addObserver(self)
         else:
             FreeCADGui.Selection.removeObserver(self)
-        self.update_selectionbuttons_ui()
+        self.updateSelectionbuttonUI()
 
-    def addSelection(self, doc_name, obj_name, sub, selectedPoint=None):
-        """ Add the selected sub-element (face) of the part to the Reference list. Prevent selection in other
-        document.
-        """
+    def directionSelection(self, doc_name, obj_name, sub, selectedPoint=None):
         if FreeCADGui.activeDocument().Document.Name != self.obj.Document.Name:
             return
         selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
         # On double click on a vertex of a solid sub is None and obj is the solid
-        tempList = list(self.obj.References)
         print('Selection: ' +
               selected_object.Shape.ShapeType + '  ' +
               selected_object.Name + ':' +
@@ -427,34 +331,12 @@ class TaskPanelCfdFluidBoundary:
             elt = selected_object.Shape.getElement(sub)
             if elt.ShapeType == 'Face':
                 selection = (selected_object.Name, sub)
-                if self.selecting_references:
-                    if selection not in self.obj.References:
-                        tempList.append(selection)
-                        # If the user hasn't picked anything for direction the selected face is used as default.
-                        if self.form.lineDirection.text() == "" and CfdTools.is_planar(elt):
-                            self.form.lineDirection.setText(selection[0] + ':' + selection[1])
-                    else:
-                        FreeCAD.Console.PrintMessage(
-                            selection[0] + ':' + selection[1] + ' already in reference list\n')
                 if self.selecting_direction:
                     if CfdTools.is_planar(elt):
-                        self.form.lineDirection.setText(selection[0] + ':' + selection[1])
                         self.selecting_direction = False
+                        self.form.lineDirection.setText(selection[0] + ':' + selection[1])  # TODO: Display label, not name
                     else:
                         FreeCAD.Console.PrintMessage('Face must be planar\n')
-        self.obj.References = list(tempList)
-        self.rebuild_list_references()
-        self.update_selectionbuttons_ui()
-
-    def rebuild_list_references(self):
-        self.form.listReferences.clear()
-        items = []
-        for ref in self.obj.References:
-            idx = self.solidsNames.index(ref[0])
-            item_name = self.solidsLabels[idx] + ':' + ref[1]
-            items.append(item_name)
-        for listItemName in sorted(items):
-            self.form.listReferences.addItem(listItemName)
 
     def inputCartXChanged(self, value):
         inputCheckAndStore(value, "m/s", self.BoundarySettings, 'Ux')
@@ -570,8 +452,7 @@ class TaskPanelCfdFluidBoundary:
     def accept(self):
         if "CfdFluidBoundary" in self.obj.Label:
             self.obj.Label = self.obj.BoundarySettings['BoundaryType']
-        if self.selecting_references or self.selecting_direction:
-            FreeCADGui.Selection.removeObserver(self)
+        FreeCADGui.Selection.removeObserver(self)
         self.obj.BoundarySettings = self.BoundarySettings.copy()
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
@@ -645,104 +526,17 @@ class TaskPanelCfdFluidBoundary:
         for ref in self.obj.References:
             faces.append(ref)
         self.obj.References = []
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References = []".format(self.obj.Name))
         for f in faces:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References.append({})".format(self.obj.Name, f))
-        FreeCADGui.doCommand("FreeCAD.getDocument('{}').recompute()".format(doc_name))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
 
     def reject(self):
         self.obj.References = self.ReferencesOrig
         self.obj.BoundarySettings = self.BoundarySettingsOrig.copy()
-        if self.selecting_references or self.selecting_direction:
-            FreeCADGui.Selection.removeObserver(self)
+        FreeCADGui.Selection.removeObserver(self)
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
         FreeCAD.getDocument(doc_name).recompute()
         doc.resetEdit()
         return True
-
-    def faceListSelection(self):
-        self.form.stackedWidget.setCurrentIndex(1)
-        self.form.shapeComboBox.clear()
-        self.form.faceListWidget.clear()
-        self.form.shapeComboBox.insertItems(1, self.solidsLabels)
-
-    def faceListShapeChosen(self):
-        ind = self.form.shapeComboBox.currentIndex()
-        objectName = self.solidsNames[ind]
-        if objectName != 'None':
-            # Disable change notifications for new items added
-            self.form.faceListWidget.itemChanged.disconnect(self.faceListItemChanged)
-            self.shapeObj = FreeCADGui.ActiveDocument.Document.getObject(objectName)
-            self.hideObjects()
-            refs = list(self.obj.References)
-            self.form.faceListWidget.clear()
-            FreeCADGui.showObject(self.shapeObj)
-            self.listOfShapeFaces = self.shapeObj.Shape.Faces
-            selected_faces = [ref[1] for ref in refs if ref[0] == objectName]
-            for i in range(len(self.listOfShapeFaces)):
-                face_name = "Face" + str(i + 1)
-                item = QtGui.QListWidgetItem(face_name, self.form.faceListWidget)
-                item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                checked = face_name in selected_faces
-                if checked:
-                    item.setCheckState(QtCore.Qt.Checked)
-                else:
-                    item.setCheckState(QtCore.Qt.Unchecked)
-                self.form.faceListWidget.insertItem(i, item)
-            self.form.faceListWidget.itemChanged.connect(self.faceListItemChanged)
-
-    def hideObjects(self):
-        for i in FreeCADGui.ActiveDocument.Document.Objects:
-            if "Shape" in i.PropertiesList:
-                FreeCADGui.hideObject(i)
-        self.obj.ViewObject.show()
-
-    def faceHighlightChange(self):
-        ind = self.form.faceListWidget.currentRow()
-        FreeCADGui.Selection.clearSelection()
-        FreeCADGui.Selection.addSelection(self.shapeObj, 'Face'+str(ind+1))
-        self.scheduleRecompute()
-
-    def faceListItemChanged(self, item):
-        object_name = self.solidsNames[self.form.shapeComboBox.currentIndex()]
-        if object_name != 'None':
-            face_ind = self.form.faceListWidget.row(item)
-            face_name = 'Face' + str(face_ind+1)
-            if item.checkState() == QtCore.Qt.Checked:
-                self.selecting_references = True
-                self.addSelection(self.obj.Document.Name, object_name, face_name)
-                self.selecting_references = False
-            else:
-                ref_name = object_name + ':' + face_name
-                if not self.obj.References:
-                    return
-                tempList = list(self.obj.References)
-                for ref in self.obj.References:
-                    item_ref_name = ref[0] + ':' + ref[1]
-                    if item_ref_name == ref_name:
-                        tempList.remove(ref)
-                self.obj.References = tempList
-                self.rebuild_list_references()
-            self.scheduleRecompute()
-
-    def selectAllButtonClicked(self):
-        for i in range(self.form.faceListWidget.count()):
-            item = self.form.faceListWidget.item(i)
-            item.setCheckState(QtCore.Qt.Checked)
-
-    def selectNoneButtonClicked(self):
-        for i in range(self.form.faceListWidget.count()):
-            item = self.form.faceListWidget.item(i)
-            item.setCheckState(QtCore.Qt.Unchecked)
-
-    def closeFaceList(self):
-        self.form.stackedWidget.setCurrentIndex(0)
-        # self.obj.ViewObject.show()
-
-    def scheduleRecompute(self):
-        # Only do one (costly) recompute when done processing - call in preference to document.recompute()
-        self.recompute_timer.start()
-
-    def recomputeDocument(self):
-        doc_name = str(self.obj.Document.Name)
-        FreeCAD.getDocument(doc_name).recompute()

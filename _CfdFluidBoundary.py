@@ -50,9 +50,6 @@ class _CfdFluidBoundary(PartFeature):
         obj.addProperty("App::PropertyPythonObject", "References")
         obj.addProperty("App::PropertyPythonObject", "BoundarySettings")
 
-        # obj.addProperty("App::PropertyPythonObject","partNameList").partNameList = []
-        obj.addProperty("App::PropertyLinkList", "faceList")
-
         # Default settings
         obj.References = []
         obj.BoundarySettings = {'BoundaryType': '',

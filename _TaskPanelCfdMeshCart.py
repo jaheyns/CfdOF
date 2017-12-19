@@ -122,10 +122,7 @@ class _TaskPanelCfdMeshCart:
         # def accept() in no longer needed, since there is no OK button
 
     def reject(self):
-        self.mesh_obj.CharacteristicLengthMax = self.clmax
-        self.mesh_obj.PointInMesh = self.PointInMesh
-        self.mesh_obj.CellsBetweenLevels = self.cellsbetweenlevels
-        self.mesh_obj.EdgeRefinement = self.edgerefine
+        # There is no reject - only close
         self.set_mesh_params()
 
         FreeCADGui.ActiveDocument.resetEdit()
@@ -145,12 +142,18 @@ class _TaskPanelCfdMeshCart:
             self.form.snappySpecificProperties.setVisible(False)
 
     def set_mesh_params(self):
-        self.mesh_obj.CharacteristicLengthMax = self.clmax
-        self.mesh_obj.PointInMesh = self.PointInMesh
-        self.mesh_obj.CellsBetweenLevels = self.cellsbetweenlevels
-        self.mesh_obj.EdgeRefinement = self.edgerefine
-        self.mesh_obj.ElementDimension = self.dimension
-        self.mesh_obj.MeshUtility = self.form.cb_utility.currentText()
+        FreeCADGui.doCommand("\nFreeCAD.ActiveDocument.{}.CharacteristicLengthMax "
+                             "= '{}'".format(self.mesh_obj.Name, self.clmax))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.MeshUtility "
+                             "= '{}'".format(self.mesh_obj.Name, self.utility))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.ElementDimension "
+                             "= '{}'".format(self.mesh_obj.Name, self.dimension))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.CellsBetweenLevels "
+                             "= {}".format(self.mesh_obj.Name, self.cellsbetweenlevels))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.EdgeRefinement "
+                             "= {}".format(self.mesh_obj.Name, self.edgerefine))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.PointInMesh "
+                             "= {}".format(self.mesh_obj.Name, self.PointInMesh))
 
     def update(self):
         """ Fills the widgets """
@@ -211,52 +214,10 @@ class _TaskPanelCfdMeshCart:
             self.form.snappySpecificProperties.setVisible(False)
 
     def runMeshProcess(self):
-        FreeCADGui.doCommand("\nFreeCAD.ActiveDocument.{}.CharacteristicLengthMax "
-                             "= '{}'".format(self.mesh_obj.Name, self.clmax))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.MeshUtility "
-                             "= '{}'".format(self.mesh_obj.Name, self.utility))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.CellsBetweenLevels "
-                             "= {}".format(self.mesh_obj.Name, self.cellsbetweenlevels))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.EdgeRefinement "
-                             "= {}".format(self.mesh_obj.Name, self.edgerefine))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.PointInMesh "
-                             "= {}".format(self.mesh_obj.Name, self.PointInMesh))
-
         self.console_message_cart = ''
         self.Start = time.time()
         self.Timer.start()
         self.console_log("Starting cut-cell Cartesian meshing ...")
-        # try:
-        #     self.get_active_analysis()
-        #     self.set_mesh_params()
-        #     import CfdCartTools  # Fresh init before remeshing
-        #     self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
-        #     cart_mesh = self.cart_mesh
-        #     self.form.if_max.setText(str(cart_mesh.get_clmax()))
-        #     print("\nStarting cut-cell Cartesian meshing ...\n")
-        #     print('  Part to mesh: Name --> '
-        #           + cart_mesh.part_obj.Name + ',  Label --> '
-        #           + cart_mesh.part_obj.Label + ', ShapeType --> '
-        #           + cart_mesh.part_obj.Shape.ShapeType)
-        #     print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
-        #     # print('  CharacteristicLengthMin: ' + str(cart_mesh.clmin))
-        #     # print('  ElementOrder: ' + cart_mesh.order)
-        #     cart_mesh.get_dimension()
-        #     cart_mesh.get_tmp_file_paths(self.utility)
-        #     cart_mesh.setupMeshCaseDir()
-        #     cart_mesh.get_group_data()
-        #     cart_mesh.get_region_data()
-        #     cart_mesh.write_part_file()
-        #     cart_mesh.setupMeshDict(self.utility)
-        #     cart_mesh.createMeshScript(run_parallel='false',
-        #                                mesher_name='cartesianMesh',
-        #                                num_proc=1,
-        #                                cartMethod=self.utility)  # Extend in time
-        #     self.paraviewScriptName = self.cart_mesh.createParaviewScript()
-        #     self.runCart(cart_mesh)
-        # except Exception as ex:
-        #     self.console_log("Error: " + ex.message, '#FF0000')
-        #     self.Timer.stop()
         try:
             self.get_active_analysis()
             self.set_mesh_params()

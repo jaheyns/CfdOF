@@ -573,15 +573,15 @@ class CfdCaseWriterFoam(QRunnable):
                             if regionObj.Baffle:
                                 for sub in regionObj.References:
                                     # print sub[0].Name
-                                    for elems in sub[1]:
-                                        elt = sub[0].Shape.getElement(elems)
-                                        if elt.ShapeType == 'Face':
-                                            bcFacesList = bc_obj.Shape.Faces
-                                            for bf in bcFacesList:
-                                                isSameGeo = CfdTools.isSameGeometry(bf, elt)
-                                                if isSameGeo:
-                                                    tempBaffleList.append(regionObj.Name+sub[0].Name+elems)
-                                                    tempBaffleListSlave.append(regionObj.Name+sub[0].Name+elems+"_slave")
+                                    elems = sub[1]
+                                    elt = FreeCAD.ActiveDocument.getObject(sub[0]).Shape.getElement(elems)
+                                    if elt.ShapeType == 'Face':
+                                        bcFacesList = bc_obj.Shape.Faces
+                                        for bf in bcFacesList:
+                                            isSameGeo = CfdTools.isSameGeometry(bf, elt)
+                                            if isSameGeo:
+                                                tempBaffleList.append(regionObj.Name+sub[0]+elems)
+                                                tempBaffleListSlave.append(regionObj.Name+sub[0]+elems+"_slave")
                     settings['createPatchesSnappyBaffles'][bc_obj.Label] = {"PatchNamesList" : tuple(tempBaffleList),
                                                                             "PatchNamesListSlave" : tuple(tempBaffleListSlave)}
 
