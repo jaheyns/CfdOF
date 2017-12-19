@@ -100,6 +100,8 @@ class CfdCaseWriterFoam(QRunnable):
             solverSettingsDict = CfdTools.getSolverSettings(self.solver_obj)
 
             # Collect settings into single dictionary
+            if not self.mesh_obj:
+                raise RuntimeError("No mesh object found in analysis")
             self.settings = {
                 'physics': self.physics_model,
                 'fluidProperties': [],  # Order is important, so use a list
