@@ -673,25 +673,26 @@ class TaskPanelCfdFluidBoundary:
         ind = self.form.shapeComboBox.currentIndex()
         objectName = self.solidsNames[ind]
         if objectName != 'None':
+            # Disable change notifications for new items added
+            self.form.faceListWidget.itemChanged.disconnect(self.faceListItemChanged)
             self.shapeObj = FreeCADGui.ActiveDocument.Document.getObject(objectName)
             self.hideObjects()
             refs = list(self.obj.References)
             self.form.faceListWidget.clear()
             FreeCADGui.showObject(self.shapeObj)
             self.listOfShapeFaces = self.shapeObj.Shape.Faces
+            selected_faces = [ref[0] for ref in refs if ref[0] == objectName]
             for i in range(len(self.listOfShapeFaces)):
                 face_name = "Face" + str(i + 1)
                 item = QtGui.QListWidgetItem(face_name, self.form.faceListWidget)
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                checked = False
-                for ref in refs:
-                    if ref[0] == objectName and ref[1] == face_name:
-                        checked = True
+                checked = face_name in selected_faces
                 if checked:
                     item.setCheckState(QtCore.Qt.Checked)
                 else:
                     item.setCheckState(QtCore.Qt.Unchecked)
                 self.form.faceListWidget.insertItem(i, item)
+            self.form.faceListWidget.itemChanged.connect(self.faceListItemChanged)
 
     def hideObjects(self):
         for i in FreeCADGui.ActiveDocument.Document.Objects:
