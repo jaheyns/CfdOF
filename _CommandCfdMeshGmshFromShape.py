@@ -25,7 +25,10 @@ __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
-from PyGui.FemCommands import FemCommands
+try:
+    from femcommands.manager import CommandManager
+except ImportError:  # Backward compatibility
+    from PyGui.FemCommands import FemCommands as CommandManager
 import FreeCADGui
 import FemGui
 from PySide import QtCore
@@ -33,7 +36,7 @@ import CfdTools
 import os
 
 
-class _CommandCfdMeshGmshFromShape(FemCommands):
+class _CommandCfdMeshGmshFromShape(CommandManager):
     # the Cfd_MeshGmshFromShape command definition
     def __init__(self):
         super(_CommandCfdMeshGmshFromShape, self).__init__()

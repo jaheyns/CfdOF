@@ -32,7 +32,10 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-from PyGui.FemCommands import FemCommands
+try:
+    from femcommands.manager import CommandManager
+except ImportError:  # Backward compatibility
+    from PyGui.FemCommands import FemCommands as CommandManager
 import FreeCADGui
 from PySide import QtCore
 import os
@@ -40,7 +43,7 @@ import FemGui
 import CfdTools
 
 
-class _CommandCfdFluidBoundary(FemCommands):
+class _CommandCfdFluidBoundary(CommandManager):
     """ The Fem_CfdFluidBoundary command definition """
     def __init__(self):
         super(_CommandCfdFluidBoundary, self).__init__()

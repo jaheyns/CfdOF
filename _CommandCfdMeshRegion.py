@@ -29,14 +29,17 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-from PyGui.FemCommands import FemCommands
+try:
+    from femcommands.manager import CommandManager
+except ImportError:  # Backward compatibility
+    from PyGui.FemCommands import FemCommands as CommandManager
 import FreeCADGui
 from PySide import QtCore
 import os
 import CfdTools
 
 
-class _CommandMeshRegion(FemCommands):
+class _CommandMeshRegion(CommandManager):
     "The Fem_MeshRegion command definition"
     def __init__(self):
         super(_CommandMeshRegion, self).__init__()

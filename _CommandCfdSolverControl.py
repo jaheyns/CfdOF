@@ -26,7 +26,10 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-from PyGui.FemCommands import FemCommands
+try:
+    from femcommands.manager import CommandManager
+except ImportError:  # Backward compatibility
+    from PyGui.FemCommands import FemCommands as CommandManager
 import CfdTools
 import os
 
@@ -36,7 +39,7 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 
 
-class _CommandCfdSolverControl(FemCommands):
+class _CommandCfdSolverControl(CommandManager):
     "the Cfd_SolverControl command definition"
     def __init__(self):
         super(_CommandCfdSolverControl, self).__init__()

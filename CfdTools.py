@@ -391,7 +391,6 @@ def indexOrDefault(list, findItem, defaultIndex):
     except ValueError:
         return defaultIndex
 
-# This is taken from hide_parts_constraints_show_meshes which was removed from FemCommands for some reason
 def hide_parts_show_meshes():
     if FreeCAD.GuiUp:
         for acnstrmesh in FemGui.getActiveAnalysis().Group:

@@ -27,12 +27,15 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-from PyGui.FemCommands import FemCommands
+try:
+    from femcommands.manager import CommandManager
+except ImportError:  # Backward compatibility
+    from PyGui.FemCommands import FemCommands as CommandManager
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore, QtGui
 
-class _CommandSolverFoam(FemCommands):
+class _CommandSolverFoam(CommandManager):
     "Command to create OpenFOAM solver for CFD anlysis"
     def __init__(self):
         super(_CommandSolverFoam, self).__init__()

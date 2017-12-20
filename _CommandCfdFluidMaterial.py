@@ -25,7 +25,10 @@
 
 import FreeCAD
 import platform
-from PyGui.FemCommands import FemCommands
+try:
+    from femcommands.manager import CommandManager
+except ImportError:  # Backward compatibility
+    from PyGui.FemCommands import FemCommands as CommandManager
 import CfdTools
 import os
 
@@ -35,7 +38,7 @@ if FreeCAD.GuiUp:
     import FemGui
 
 
-class setCfdFluidPropertyCommand(FemCommands):
+class setCfdFluidPropertyCommand(CommandManager):
     def __init__(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.png")
         self.resources = {

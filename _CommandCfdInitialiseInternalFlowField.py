@@ -29,7 +29,10 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-from PyGui.FemCommands import FemCommands
+try:
+    from femcommands.manager import CommandManager
+except ImportError:  # Backward compatibility
+    from PyGui.FemCommands import FemCommands as CommandManager
 import FemGui
 import CfdTools
 import os
@@ -39,7 +42,7 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 
 
-class _CommandCfdInitialiseInternalFlowField(FemCommands):
+class _CommandCfdInitialiseInternalFlowField(CommandManager):
     """ Field initialisation command """
     def __init__(self):
         super(_CommandCfdInitialiseInternalFlowField, self).__init__()

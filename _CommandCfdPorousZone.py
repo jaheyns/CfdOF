@@ -28,8 +28,10 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-from PyGui.FemCommands import FemCommands
-import FemGui
+try:
+    from femcommands.manager import CommandManager
+except ImportError:  # Backward compatibility
+    from PyGui.FemCommands import FemCommands as CommandManager
 import CfdTools
 import os
 
@@ -38,7 +40,7 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 
 
-class _CommandCfdPorousZone(FemCommands):
+class _CommandCfdPorousZone(CommandManager):
     """ The Cfd porous zone command definition """
     def __init__(self):
         super(_CommandCfdPorousZone, self).__init__()

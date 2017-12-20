@@ -26,7 +26,10 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-from PyGui.FemCommands import FemCommands
+try:
+    from femcommands.manager import CommandManager
+except ImportError:  # Backward compatibility
+    from PyGui.FemCommands import FemCommands as CommandManager
 import FreeCADGui
 import FemGui
 from PySide import QtCore
@@ -34,7 +37,7 @@ import CfdTools
 import os
 
 
-class _CommandCfdMeshCartFromShape(FemCommands):
+class _CommandCfdMeshCartFromShape(CommandManager):
     # the Cfd_MeshCartFromShape command definition
     def __init__(self):
         super(_CommandCfdMeshCartFromShape, self).__init__()
