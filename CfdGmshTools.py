@@ -29,7 +29,7 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import Fem
-import FemMeshTools
+import femmesh.meshtools as FemMeshTools
 import Units
 import subprocess
 import tempfile
