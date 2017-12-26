@@ -29,7 +29,10 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import Fem
-import FemMeshTools
+try:
+    import femmesh.meshtools as FemMeshTools
+except ImportError:  # Backward compatibility
+    import FemMeshTools
 import Units
 import subprocess
 import tempfile
