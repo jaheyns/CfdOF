@@ -71,7 +71,6 @@ class CfdFaceSelectWidget:
             else:
                 new_refs.append((ref[0], ref[1]))
         self.References = new_refs
-        print(self.References)
         self.doc_name = self.obj.Document.Name
         self.view_object = self.obj.ViewObject
 

@@ -166,7 +166,7 @@ class BlockTest(unittest.TestCase):
         taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model, material_objs)
         taskd.obj = vobj.Object
         taskd.selecting_references = True
-        taskd.addSelection(doc.Name, doc.getObject(self.__class__.__part_name).Name, 'Face1')
+        taskd.faceSelector.addSelection(doc.Name, doc.getObject(self.__class__.__part_name).Name, 'Face1')
         taskd.accept()
 
     def createOutletBoundary(self):
