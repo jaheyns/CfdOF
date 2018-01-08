@@ -110,7 +110,6 @@ class CfdRunnableFoam(CfdRunnable):
         self.print_next_error_lines = 0
         self.print_next_error_file = False
 
-
     def check_prerequisites(self):
         return ""
 

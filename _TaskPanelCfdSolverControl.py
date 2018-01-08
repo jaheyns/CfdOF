@@ -126,7 +126,6 @@ class _TaskPanelCfdSolverControl:
     def reject(self):
         self.solver_run_process.terminate()
         self.solver_run_process.waitForFinished()
-        self.solver_runner.cleanUp()
         import platform
         if platform.system() == "Windows":
             # Hard kill should not be necessary for a GUI application but there appears to be a bug in Windows or Qt
