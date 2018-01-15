@@ -152,9 +152,7 @@ prerequisites have been successfully installed.
 
 ### Submitting Bugs
 
-Please discuss issues on the [CFDOF dedicated FreeCAD forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=24147).
-
-For previous discussions see [CFD WB forum thread](https://forum.freecadweb.org/viewtopic.php?f=18&t=21576).
+Please discuss issues on the [CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37).
 
 ## Developement
 
@@ -203,8 +201,8 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 
 ## Lead developers
 
-Oliver Oxtoby (CSIR, 2016-2017) <ooxtoby@csir.co.za>  
-Johan Heyns (CSIR, 2016-2017) <jheyns@csir.co.za>  
+Oliver Oxtoby (CSIR, 2016-2018) <ooxtoby@csir.co.za>  
+Johan Heyns (CSIR, 2016-2018) <jheyns@csir.co.za>  
 Alfred Bogaers (CSIR, 2016-2017) <abogaers@csir.co.za>    
 
 We would like to thank Eskom for their financial contribution as well as the following people for their contribution to the code:
