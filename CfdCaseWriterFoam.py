@@ -82,7 +82,7 @@ class CfdCaseWriterFoam(QRunnable):
         self.signals.finished.emit(success)
 
     def write_case(self, updating=False):
-        """ Write_case() will collect case setings, and finally build a runnable case. """
+        """ Write_case() will collect case settings, and finally build a runnable case. """
         print("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
         _cwd = os.curdir
         if not os.path.exists(self.solver_obj.WorkingDir):
@@ -559,7 +559,7 @@ class CfdCaseWriterFoam(QRunnable):
             # with a baffle boundary condition (as in there is no baffle boundary condition which 
             # corresponds. Currently openfoam will throw a contextually
             # confusing error (only that the boundary does not exist). The primary difficulty with such a checker is 
-            # that it is possible to define a boundary face as a baffle, which will be overriden
+            # that it is possible to define a boundary face as a baffle, which will be overridden
             # by the actual boundary name and therefore won't exist anymore. 
             for bc_id, bc_obj in enumerate(bc_group):
                 bcDict = bc_obj.BoundarySettings

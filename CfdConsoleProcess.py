@@ -64,7 +64,7 @@ class CfdConsoleProcess:
 
     def terminate(self):
         if platform.system() == "Windows":
-            # terminate() doesn't operate and kill() doesnt allow cleanup and leaves mpi processes running
+            # terminate() doesn't operate and kill() doesn't allow cleanup and leaves mpi processes running
             # Instead, instruct wrapper program to kill child process and itself cleanly with ctrl-break signal
             self.process.write("terminate\n")
             self.process.waitForBytesWritten()  # 'flush'

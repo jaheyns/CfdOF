@@ -136,7 +136,7 @@ class CfdGmshTools():
     def get_dimension(self):
         # Dimension
         # known_element_dimensions = ['From Shape', '1D', '2D', '3D']
-        # if not given, GMSH uses the hightest available.
+        # if not given, GMSH uses the highest available.
         # A use case for not "From Shape" would be a surface (2D) mesh of a solid
         if self.dimension == 'From Shape':
             shty = self.part_obj.Shape.ShapeType
@@ -160,7 +160,7 @@ class CfdGmshTools():
                 self.dimension = '3'  # dimension 3 works for 2D and 1d shapes as well
             else:
                 self.dimension = '0'
-                FreeCAD.Console.PrintError('Could not retrive Dimension from shape type. Please choose dimension.')
+                FreeCAD.Console.PrintError('Could not retrieve Dimension from shape type. Please choose dimension.')
         elif self.dimension == '3D':
             self.dimension = '3'
         elif self.dimension == '2D':
@@ -226,7 +226,7 @@ class CfdGmshTools():
     def get_group_data(self):
         self.group_elements = {}
         # TODO solid, face, edge seam not work together, some print or make it work together
-        # TODO handle groups for Edges and Vertexes
+        # TODO handle groups for Edges and Vertices
 
         # mesh groups and groups of analysis member
         if not self.mesh_obj.MeshGroupList:
@@ -249,7 +249,7 @@ class CfdGmshTools():
                 else:
                     FreeCAD.Console.PrintError("  A group with this name exists already.\n")
         else:
-            print('  No anlysis members for group meshing.')
+            print('  No analysis members for group meshing.')
         print('  {}'.format(self.group_elements))
 
         # mesh regions
@@ -336,8 +336,8 @@ class CfdGmshTools():
                     for ele in gdata:
                         ele_nr += (ele.lstrip('Face') + ', ')
                 elif gdata[0].startswith('Edge') or gdata[0].startswith('Vertex'):
-                    geo.write("// " + group + " group data not written. Edges or Vertexes group data not supported.\n")
-                    print('  Groups for Edges or Vertexes reference shapes not handeled yet.')
+                    geo.write("// " + group + " group data not written. Edges or Vertices group data not supported.\n")
+                    print('  Groups for Edges or Vertices reference shapes not handeled yet.')
                 if ele_nr:
                     ele_nr = ele_nr.rstrip(', ')
                     # print(ele_nr)
@@ -371,7 +371,7 @@ class CfdGmshTools():
             geo.write("Mesh.OptimizeNetgen = 1;\n")
         else:
             geo.write("Mesh.OptimizeNetgen = 0;\n")
-        # hight order mesh optimizing
+        # height order mesh optimizing
         if hasattr(self.mesh_obj, 'OptimizeNetgen') and self.mesh_obj.OptimizeNetgen is True:
             geo.write("Mesh.HighOrderOptimize = 1;  //probably needs more lines off adjustment in geo file\n")
         else:
@@ -394,7 +394,7 @@ class CfdGmshTools():
         if self.analysis and self.group_elements:
             geo.write("// For each group save not only the elements but the nodes too.;\n")
             geo.write("Mesh.SaveGroupsOfNodes = 1;\n")
-            geo.write("// Needed for Group meshing too, because for one material there is no group defined;\n")  # belongs to Mesh.SaveAll but anly needed if there are groups
+            geo.write("// Needed for Group meshing too, because for one material there is no group defined;\n")  # belongs to Mesh.SaveAll but only needed if there are groups
         geo.write("// Ignore Physical definitions and save all elements;\n")
         geo.write("Mesh.SaveAll = 1;\n")
         geo.write('Save "' + self.temp_file_mesh + '";\n')

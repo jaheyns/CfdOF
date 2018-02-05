@@ -8,7 +8,7 @@ Please verify the fluid material properties before use. It aims to
 serve as a quick reference and does not aim to be an extended look
 up table.
 
-To prevent the database from becomming inefficiently large it is only
+To prevent the database from becoming inefficiently large it is only
 limited to commonly used variables at 20 degrees Celcius at 1 atm.
 
 Current values are taken from FM White (2011) Fluid Mechanics.

@@ -36,13 +36,13 @@ if FreeCAD.GuiUp:
     from PySide import QtCore, QtGui
 
 class _CommandSolverFoam(CommandManager):
-    "Command to create OpenFOAM solver for CFD anlysis"
+    "Command to create OpenFOAM solver for CFD analysis"
     def __init__(self):
         super(_CommandSolverFoam, self).__init__()
         self.resources = {'Pixmap': 'fem-solver',
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Fem_SolverFoam", "Create OpenFOAM solver"),
                           'Accel': "S, C",
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Fem_SolverFoam", "Create OpenFOAM solver for CFD anlysis")}
+                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Fem_SolverFoam", "Create OpenFOAM solver for CFD analysis")}
         self.is_active = 'with_analysis'
 
     def Activated(self):
