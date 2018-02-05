@@ -18,7 +18,7 @@ Replacements are made based on the following rules:
    
    where filename is a path relative to 
    the 'defaults' folder.
-   - As a convenience to ignore nonexistant variables (see below),
+   - As a convenience to ignore nonexistent variables (see below),
    if filename ends with `_None`, nothing will be included
    - As a convenient catch-all, if `filename` is not found,
    the same file name with the text after the last underscore

@@ -154,7 +154,7 @@ prerequisites have been successfully installed.
 
 Please discuss issues on the [CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37).
 
-## Developement
+## Development
 
 It is asked that developers should only add functionality or code that is working and can be tested. Dead code, even
 portions included for possible future functionality, reduces function clarity and increases the maintenance overhead. 

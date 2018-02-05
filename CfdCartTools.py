@@ -97,7 +97,7 @@ class CfdCartTools():
         if self.dimension == '3D':
             self.dimension = '3'
         else:
-            FreeCAD.Console.PrintError('Could not retrive Dimension from shape type. Please choose dimension.')
+            FreeCAD.Console.PrintError('Could not retrieve Dimension from shape type. Please choose dimension.')
             self.dimension = '3'
         print('  ElementDimension: ' + self.dimension)
 
@@ -328,7 +328,7 @@ class CfdCartTools():
             print('No mesh was created.')
 
     def write_mesh_case(self):
-        """ Write_case() will collect case setings, and finally build a runnable case. """
+        """ Write_case() will collect case settings, and finally build a runnable case. """
         tmpdir = tempfile.gettempdir()
         FreeCAD.Console.PrintMessage("Populating mesh dictionaries in folder {}\n".format(tmpdir))
         _cwd = os.curdir

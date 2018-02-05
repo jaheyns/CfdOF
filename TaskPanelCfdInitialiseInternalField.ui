@@ -416,7 +416,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_15">
            <property name="text">
-            <string>Bouyancy Properties here</string>
+            <string>Buoyancy Properties here</string>
            </property>
           </widget>
          </item>
