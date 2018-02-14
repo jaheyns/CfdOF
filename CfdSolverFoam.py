@@ -48,7 +48,7 @@ class CfdSolverFoam(CfdSolver.CfdSolver):
         self.Type = "CfdSolverFoam"
         self.SolverName = "OpenFOAM"
         """ NOTE NOTE NOTE 20/01/2017
-        PontentialInit Checker is moved to initialiseobject
+        PotentialInit Checker is moved to initialiseobject
         """
         #if "PotentialInit" not in obj.PropertiesList:
             #obj.addProperty("App::PropertyBool", "PotentialInit", "Solver",
