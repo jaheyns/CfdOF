@@ -14,7 +14,8 @@ class _CfdPhysicsModel:
                             "Flow": "Incompressible",
                             "Turbulence": "Laminar",  # Inviscid, Laminar, RANS
                             "Thermal": None,
-                            "TurbulenceModel": None}
+                            "TurbulenceModel": None,
+                            "Gravity": {"gx":0,"gy":-9.81,"gz":0}}
         obj.Proxy = self
         self.Type = "PhysicsModel"
 

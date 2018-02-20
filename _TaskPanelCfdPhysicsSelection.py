@@ -36,6 +36,7 @@ import os
 import sys
 import os.path
 import CfdTools
+from CfdTools import inputCheckAndStore, setInputFieldQuantity, indexOrDefault
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -64,7 +65,8 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.FlowFrame.setVisible(True)
         self.form.turbulenceFrame.setVisible(True)
         self.form.thermalFrame.setVisible(False)
-        
+        self.form.gravityFrame.setVisible(False)
+
         self.form.turbulenceChoiceFrame.setVisible(False)
         self.form.turbulenceModelFrame.setVisible(False)
         self.form.thermalSelectionFrame.setVisible(False)
@@ -90,6 +92,10 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.radioButtonEnergy.setEnabled(False)
         self.form.radioButtonBuoyancy.setEnabled(False)
         self.form.thermalCheckBox.setEnabled(False)
+
+        self.form.gx.valueChanged.connect(self.inputGxChanged)
+        self.form.gy.valueChanged.connect(self.inputGyChanged)
+        self.form.gz.valueChanged.connect(self.inputGzChanged)
 
         self.initialiseUponReload()
 
@@ -119,6 +125,16 @@ class _TaskPanelCfdPhysicsSelection:
         elif self.physicsModel['Thermal'] == "Buoyancy":
             self.form.thermalCheckBox.toggle()
             self.form.radioButtonBuoyancy.toggle()
+
+        material_objs = CfdTools.getMaterials(CfdTools.getParentAnalysisObject(self.obj))
+        if len(material_objs) > 1:
+            self.form.gravityFrame.setVisible(True)
+            gx = self.physicsModel['Gravity']["gx"]
+            gy = self.physicsModel['Gravity']["gy"]
+            gz = self.physicsModel['Gravity']["gz"]
+            setInputFieldQuantity(self.form.gx, "{} m/s^2".format(gx))
+            setInputFieldQuantity(self.form.gy, "{} m/s^2".format(gy))
+            setInputFieldQuantity(self.form.gz, "{} m/s^2".format(gz))
 
     def timeStateChanged(self):
         self.form.FlowFrame.setVisible(True)
@@ -181,6 +197,15 @@ class _TaskPanelCfdPhysicsSelection:
     def turbulenceComboBoxChanged(self):
         self.physicsModel['TurbulenceModel'] = self.form.turbulenceComboBox.currentText()
 
+    def inputGxChanged(self,text):
+        inputCheckAndStore(text, "m/s^2", self.physicsModel['Gravity'], 'gx')
+
+    def inputGyChanged(self,text):
+        inputCheckAndStore(text, "m/s^2", self.physicsModel['Gravity'], 'gy')
+
+    def inputGzChanged(self,text):
+        inputCheckAndStore(text, "m/s^2", self.physicsModel['Gravity'], 'gz')
+
     def accept(self):
         changed_transient = False
         if self.obj.PhysicsModel['Time'] != self.physicsModel['Time']:
@@ -196,6 +221,7 @@ class _TaskPanelCfdPhysicsSelection:
         FreeCADGui.doCommand("phys['Turbulence'] = '{}'".format(self.physicsModel['Turbulence']))
         FreeCADGui.doCommand("phys['TurbulenceModel'] = '{}'".format(self.physicsModel['TurbulenceModel']))
         FreeCADGui.doCommand("phys['Thermal'] = {}".format(self.physicsModel['Thermal']))
+        FreeCADGui.doCommand("phys['Gravity'] = {}".format(self.physicsModel['Gravity']))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.PhysicsModel = phys".format(self.obj.Name))
 
         if changed_transient:
