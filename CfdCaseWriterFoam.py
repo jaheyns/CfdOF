@@ -175,8 +175,11 @@ class CfdCaseWriterFoam(QRunnable):
                         else:
                             solver = 'simpleFoam'
         if solver is None:
-            raise RuntimeError("No solver is supported to handle the selected physics with {} phases.".format(
-                len(self.material_objs)))
+            if self.physics_model['Time'] == 'Steady' and len(self.material_objs) >= 2:
+                raise RuntimeError("Multiphase flow is only supported for transient simulations.")
+            else:
+                raise RuntimeError("No solver is supported to handle the selected physics with {} phases.".format(
+                    len(self.material_objs)))
         return solver
 
     def processSolverSettings(self):
