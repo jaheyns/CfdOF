@@ -40,7 +40,6 @@ import os
 import sys
 import os.path
 import platform
-# from PyObjects import _FemMeshGmsh
 import _CfdMeshCart
 import time
 import tempfile

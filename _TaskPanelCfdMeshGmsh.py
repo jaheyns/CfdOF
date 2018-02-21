@@ -38,7 +38,10 @@ import os
 import sys
 import os.path
 import platform
-from PyObjects import _FemMeshGmsh
+try:
+    from femobjects import _FemMeshGmsh
+except ImportError:  # Backward compat
+    from PyObjects import _FemMeshGmsh
 import time
 from CfdTools import inputCheckAndStore, setInputFieldQuantity
 

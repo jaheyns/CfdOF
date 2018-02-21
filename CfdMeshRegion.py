@@ -31,7 +31,6 @@ __url__ = "http://www.freecadweb.org"
 #  @{
 
 import FreeCAD
-# from PyObjects import _FemMeshRegion
 import _CfdMeshRegion
 
 

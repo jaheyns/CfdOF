@@ -58,7 +58,7 @@ class _CommandMeshRegion(CommandManager):
             sobj = sel[0]
             if len(sel) == 1 \
                     and hasattr(sobj, "Proxy") \
-                    and (sobj.Proxy.Type == "FemMeshGmsh" or sobj.Proxy.Type == "CfdMeshCart"):
+                    and (sobj.Proxy.Type == "Fem::FemMeshGmsh" or sobj.Proxy.Type == "CfdMeshCart"):
                 FreeCADGui.doCommand("CfdMeshRegion.makeCfdMeshRegion(App.ActiveDocument." + sobj.Name + ")")
                 FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 

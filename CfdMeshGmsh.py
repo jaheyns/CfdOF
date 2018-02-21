@@ -26,7 +26,10 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-from PyObjects import _FemMeshGmsh
+try:
+    from femobjects import _FemMeshGmsh
+except ImportError:  # Backward compat
+    from PyObjects import _FemMeshGmsh
 
 
 def makeCfdMeshGmsh(name="CFDMeshGMSH"):

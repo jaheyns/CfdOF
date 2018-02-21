@@ -26,13 +26,11 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-# from PyObjects import _FemMeshGmsh
 import _CfdMeshCart
 
 def makeCfdMeshCart(name="CFDMeshCart"):
     '''makeCfdMeshCart(name): makes a Cart CFD mesh object'''
     obj = FreeCAD.ActiveDocument.addObject("Fem::FemMeshObjectPython", name)
-    # _FemMeshGmsh._FemMeshGmsh(obj)
     _CfdMeshCart._CfdMeshCart(obj)
     if FreeCAD.GuiUp:
         import _ViewProviderCfdMeshCart

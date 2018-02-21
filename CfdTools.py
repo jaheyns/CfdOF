@@ -169,7 +169,7 @@ def getMeshObject(analysis_object):
     for i in members:
         if hasattr(i, "Proxy") \
                 and hasattr(i.Proxy, "Type") \
-                and (i.Proxy.Type == "FemMeshGmsh" or i.Proxy.Type == "CfdMeshCart"):
+                and (i.Proxy.Type == "Fem::FemMeshGmsh" or i.Proxy.Type == "CfdMeshCart"):
             if isPresent:
                 FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
             else:

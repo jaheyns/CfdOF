@@ -210,7 +210,7 @@ class CfdCaseWriterFoam(QRunnable):
 
     def writeMesh(self):
         """ Convert or copy mesh files """
-        if self.mesh_obj.Proxy.Type == "FemMeshGmsh":  # GMSH
+        if self.mesh_obj.Proxy.Type == "Fem::FemMeshGmsh":  # GMSH
             # Convert GMSH created UNV file to OpenFoam
             print("Writing GMSH")
             unvMeshFile = self.case_folder + os.path.sep + self.solver_obj.InputCaseName + u".unv"
