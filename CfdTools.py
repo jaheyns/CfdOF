@@ -889,3 +889,47 @@ def isSameGeometry(shape1, shape2):
     else:
         return False
 
+
+def findElementInShape(aShape, anElement):
+    """ Copy of FemMeshTools.find_element_in_shape, but calling isSameGeometry"""
+    # import Part
+    ele_st = anElement.ShapeType
+    if ele_st == 'Solid' or ele_st == 'CompSolid':
+        for index, solid in enumerate(aShape.Solids):
+            # print(is_same_geometry(solid, anElement))
+            if isSameGeometry(solid, anElement):
+                # print(index)
+                # Part.show(aShape.Solids[index])
+                ele = ele_st + str(index + 1)
+                return ele
+        FreeCAD.Console.PrintError('Solid ' + str(anElement) + ' not found in: ' + str(aShape) + '\n')
+        if ele_st == 'Solid' and aShape.ShapeType == 'Solid':
+            print('We have been searching for a Solid in a Solid and we have not found it. In most cases this should be searching for a Solid inside a CompSolid. Check the ShapeType of your Part to mesh.')
+        # Part.show(anElement)
+        # Part.show(aShape)
+    elif ele_st == 'Face' or ele_st == 'Shell':
+        for index, face in enumerate(aShape.Faces):
+            # print(is_same_geometry(face, anElement))
+            if isSameGeometry(face, anElement):
+                # print(index)
+                # Part.show(aShape.Faces[index])
+                ele = ele_st + str(index + 1)
+                return ele
+    elif ele_st == 'Edge' or ele_st == 'Wire':
+        for index, edge in enumerate(aShape.Edges):
+            # print(is_same_geometry(edge, anElement))
+            if isSameGeometry(edge, anElement):
+                # print(index)
+                # Part.show(aShape.Edges[index])
+                ele = ele_st + str(index + 1)
+                return ele
+    elif ele_st == 'Vertex':
+        for index, vertex in enumerate(aShape.Vertexes):
+            # print(is_same_geometry(vertex, anElement))
+            if isSameGeometry(vertex, anElement):
+                # print(index)
+                # Part.show(aShape.Vertexes[index])
+                ele = ele_st + str(index + 1)
+                return ele
+    elif ele_st == 'Compound':
+        FreeCAD.Console.PrintError('Compound is not supported.\n')

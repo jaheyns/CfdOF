@@ -70,7 +70,7 @@ class _TaskPanelCfdMeshRegion:
         self.form.label_rellen.setToolTip(tool_tip_mes)
         self.get_meshregion_props()
 
-        if self.mesh_obj.Proxy.Type == 'FemMeshGmsh':
+        if self.mesh_obj.Proxy.Type == 'Fem::FemMeshGmsh':
             self.form.gmsh_frame.setVisible(True)
             self.form.cf_frame.setVisible(False)
             self.form.snappy_frame.setVisible(False)
@@ -103,7 +103,7 @@ class _TaskPanelCfdMeshRegion:
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.referenceSelectWidget,
                                                                     self.obj,
-                                                                    self.mesh_obj.Proxy.Type != 'FemMeshGmsh')
+                                                                    self.mesh_obj.Proxy.Type != 'Fem::FemMeshGmsh')
 
     def accept(self):
         self.set_meshregion_props()
@@ -145,7 +145,7 @@ class _TaskPanelCfdMeshRegion:
 
     def initialiseUponReload(self):
         """ fills the widgets """
-        if self.mesh_obj.Proxy.Type == 'FemMeshGmsh':
+        if self.mesh_obj.Proxy.Type == 'Fem::FemMeshGmsh':
             self.form.if_gmsh_rellen.setValue(self.obj.RelativeLength)
         elif self.mesh_obj.Proxy.Type == 'CfdMeshCart':
             self.form.if_rellen.setValue(self.obj.RelativeLength)
