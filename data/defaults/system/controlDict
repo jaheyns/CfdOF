@@ -43,7 +43,7 @@ maxCo           5;
 
 %}
 %{%(solver/solverName%)
-$:interFoam multiphaseInterFoam
+%:interFoam multiphaseInterFoam
 maxAlphaCo      1;
 
 %}
