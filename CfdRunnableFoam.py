@@ -74,14 +74,12 @@ class CfdRunnable(QObject, object):
 
         self.edit_process = None
 
-
-
     def check_prerequisites(self):
         return "" #CfdTools.check_prerequisites()
 
     def edit_case(self):
         """ Open case folder externally in file browser. """
-        case_path = self.solver.WorkingDir + os.path.sep + self.solver.InputCaseName
+        case_path = os.path.join(self.solver.WorkingDir, self.solver.InputCaseName)
         FreeCAD.Console.PrintMessage("Please edit the case input files externally at: {}\n".format(case_path))
         if platform.system() == 'MacOS':
             self.edit_process = subprocess.Popen(['open', '--', case_path])

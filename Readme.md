@@ -203,10 +203,10 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 
 Oliver Oxtoby (CSIR, 2016-2018) <ooxtoby@csir.co.za>  
 Johan Heyns (CSIR, 2016-2018) <jheyns@csir.co.za>  
-Alfred Bogaers (CSIR, 2016-2017) <abogaers@csir.co.za>    
+Alfred Bogaers (CSIR, 2016-2018) <abogaers@csir.co.za>    
 
 We would like to thank Eskom for their financial contribution as well as the following people for their contribution to the code:
 
-Qingfeng Xia (2015) - Original framework;
+Qingfeng Xia (2015) - Original framework;   
 Klaus Sembritzki (2017) - Multiphase
 
