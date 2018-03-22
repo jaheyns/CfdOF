@@ -1,6 +1,6 @@
 cd $WM_PROJECT_USER_DIR &&
 {
-cd cfMesh-v1.1.2 &&
+cd %(cfMeshDirectory%) &&
 {
 
 echo "Cleaning..."
@@ -19,8 +19,8 @@ do
     sed -i -r "$sedscr" "$f"
 done
 
-echo "Modifying library includes..."
-sed -i -r 's/^[[:space:]]*LIBS =[[:space:]]*$/\0 -lmeshTools -ledgeMesh -ltriSurface/' meshLibrary/Make/options
+#echo "Modifying library includes..."
+#sed -i -r 's/^[[:space:]]*LIBS =[[:space:]]*$/\0 -lmeshTools -ledgeMesh -ltriSurface/' meshLibrary/Make/options
 
 echo "Building..."
 ./Allwmake

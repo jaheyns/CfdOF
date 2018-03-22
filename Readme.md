@@ -25,7 +25,7 @@ before running the simulation. Where possible, best practices are included to im
 * New case builder using a modular template structure
 * Macro scripting
 
-### Future (2017):
+### Planned:
 
 * Conjugate heat transfer.
 
@@ -35,13 +35,15 @@ before running the simulation. Where possible, best practices are included to im
 
 Any system on which FreeCAD and the prerequisites listed below can be installed. The following have been tested:
 * Ubuntu 16.04 
-* Fedora 24
+* Fedora 24-25
 
 #### Windows:
 
 * Windows 7 (tested)
 * Windows 8 (not yet tested)
 * Windows 10 (tested)
+
+Note: 64-bit version is required
 
 #### MacOSX:
 
@@ -57,10 +59,10 @@ The CFD workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
 - [Latest development version of FreeCAD (0.17 prerelease; requires git commit 12539 or later)](https://www.freecadweb.org/wiki/Download)  
-- [OpenFOAM (version 4.x tested; other versions may work. However cfMesh currently does not support version 5.x)](http://openfoam.org/download/)  
+- [OpenFOAM (versions 4.x and 5.x tested; other versions may work.)](http://openfoam.org/download/)  
 - [Paraview](http://www.paraview.org/)  
 - [GMSH (version 2.13 or later)](http://gmsh.info/)  
-- [cfMesh (version 1.1.2)](https://sourceforge.net/projects/cfmesh/files/)
+- [cfMesh (version 1.1.2 updated to compile with OpenFOAM v5.x)](https://sourceforge.net/u/oliveroxtoby/cfmesh/ci/v5update/tree/)
 
 ### Setting up CFD workbench
 
@@ -86,13 +88,13 @@ conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CFD". 
 
-The OpenFOAM installation is via the [blueCFD-Core](http://bluecfd.github.io/Core/Downloads/) package (version 2016-2),
+The OpenFOAM installation is via the [blueCFD-Core](http://bluecfd.github.io/Core/Downloads/) package (version 2017-2),
 with which Paraview comes bundled. This can be installed
 manually using the above link, or by clicking the relevant
 button in the Preferences panel described above.
 
 Set the OpenFOAM install directory in the preferences
-panel to \<blueCFD install directory\>\OpenFOAM-4.x
+panel to \<blueCFD install directory\>\OpenFOAM-5.x
  (It will be automatically detected in the default install
 location.)
 
@@ -135,8 +137,8 @@ installed using your distribution's package manager
 or the links above.
 
 Set the OpenFOAM install directory in the preferences
-panel - typical install locations are /home/user/OpenFOAM/OpenFOAM-4.x
-or /opt/openfoam4 (It will be automatically detected in common default install
+panel - typical install locations are /home/user/OpenFOAM/OpenFOAM-5.x
+or /opt/openfoam5 (It will be automatically detected in common default install
 locations.)
 
 cfMesh can be installed using the Preferences panel described above,

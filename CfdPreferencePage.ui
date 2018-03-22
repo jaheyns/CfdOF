@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>299</width>
-    <height>563</height>
+    <width>560</width>
+    <height>716</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,14 +16,23 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
+     <property name="leftMargin">
+      <number>8</number>
+     </property>
+     <property name="topMargin">
+      <number>8</number>
+     </property>
+     <property name="rightMargin">
+      <number>8</number>
+     </property>
+     <property name="bottomMargin">
+      <number>8</number>
+     </property>
      <property name="horizontalSpacing">
       <number>14</number>
      </property>
      <property name="verticalSpacing">
       <number>6</number>
-     </property>
-     <property name="margin">
-      <number>8</number>
      </property>
      <item row="1" column="0">
       <widget class="QLineEdit" name="le_foam_dir">
@@ -107,24 +116,85 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QPushButton" name="pb_download_install_blueCFD">
-       <property name="text">
-        <string>Download and install blueCFD-Core</string>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string>blueCFD-Core</string>
        </property>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="2" column="0" colspan="2">
+         <widget class="QLineEdit" name="le_bluecfd_url"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Download from URL:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QToolButton" name="tb_pick_bluecfd_file">
+          <property name="text">
+           <string>Choose existing file ...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QPushButton" name="pb_download_install_blueCFD">
+          <property name="text">
+           <string>Install blueCFD-Core</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QPushButton" name="pb_download_install_cfMesh">
-       <property name="text">
-        <string>Download and install cfMesh</string>
+     <item row="5" column="0">
+      <widget class="QGroupBox" name="groupBox_2">
+       <property name="title">
+        <string>cfMesh</string>
        </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Download from URL:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QLineEdit" name="le_cfmesh_url"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QToolButton" name="tb_pick_cfmesh_file">
+          <property name="text">
+           <string>Choose existing file ...</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QPushButton" name="pb_download_install_cfMesh">
+          <property name="text">
+           <string>Install cfMesh</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </item>
     </layout>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
-     <property name="margin">
+     <property name="leftMargin">
+      <number>8</number>
+     </property>
+     <property name="topMargin">
+      <number>8</number>
+     </property>
+     <property name="rightMargin">
+      <number>8</number>
+     </property>
+     <property name="bottomMargin">
       <number>8</number>
      </property>
      <item>
@@ -183,6 +253,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>le_foam_dir</tabstop>
+  <tabstop>tb_choose_foam_dir</tabstop>
+  <tabstop>pb_run_dependency_checker</tabstop>
+  <tabstop>textEdit_Output</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
