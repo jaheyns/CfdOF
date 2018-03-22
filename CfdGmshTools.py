@@ -38,6 +38,7 @@ import subprocess
 import tempfile
 import math
 from platform import system
+import os
 import CfdTools
 
 
@@ -122,22 +123,6 @@ class CfdGmshTools():
         else:
             self.algorithm3D = '1'
 
-    def create_mesh(self):
-        print("\nWe gone start GMSH FEM mesh run!")
-        print('  Part to mesh: Name --> ' + self.part_obj.Name + ',  Label --> ' + self.part_obj.Label + ', ShapeType --> ' + self.part_obj.Shape.ShapeType)
-        print('  CharacteristicLengthMax: ' + str(self.clmax))
-        print('  CharacteristicLengthMin: ' + str(self.clmin))
-        print('  ElementOrder: ' + self.order)
-        self.get_dimension()
-        self.get_tmp_file_paths()
-        self.get_gmsh_command()
-        self.get_group_data()
-        self.write_part_file()
-        self.write_geo()
-        error = self.run_gmsh_with_geo()
-        self.read_and_set_new_mesh()
-        return error
-
     def get_dimension(self):
         # Dimension
         # known_element_dimensions = ['From Shape', '1D', '2D', '3D']
@@ -177,22 +162,16 @@ class CfdGmshTools():
         print('  ElementDimension: ' + self.dimension)
 
     def get_tmp_file_paths(self):
-        if system() == "Linux":
-            path_sep = "/"
-        elif system() == "Windows":
-            path_sep = "\\"
-        else:
-            path_sep = "/"
         tmpdir = tempfile.gettempdir()
         # geometry file
-        self.temp_file_geometry = tmpdir + path_sep + self.part_obj.Name + '_Geometry.brep'
+        self.temp_file_geometry = os.path.join(tmpdir, self.part_obj.Name + '_Geometry.brep')
         print('  ' + self.temp_file_geometry)
         # mesh file
         self.mesh_name = self.part_obj.Name + '_Mesh_TmpGmsh'
-        self.temp_file_mesh = tmpdir + path_sep + self.mesh_name + '.unv'
+        self.temp_file_mesh = os.path.join(tmpdir, self.mesh_name + '.unv')
         print('  ' + self.temp_file_mesh)
         # GMSH input file
-        self.temp_file_geo = tmpdir + path_sep + 'shape2mesh.geo'
+        self.temp_file_geo = os.path.join(tmpdir, 'shape2mesh.geo')
         print('  ' + self.temp_file_geo)
 
     def get_gmsh_command(self):
@@ -435,7 +414,7 @@ class CfdGmshTools():
         if not self.error:
             fem_mesh = Fem.read(self.temp_file_mesh)
             self.mesh_obj.FemMesh = fem_mesh
-            print('  The Part should have a pretty new FEM mesh!')
+            print('  Finished loading mesh')
         else:
             print('No mesh was created.')
         del self.temp_file_geometry
