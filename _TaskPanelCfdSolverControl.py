@@ -28,11 +28,6 @@ __title__ = "Job Control Task Panel"
 __author__ = "Juergen Riegel, Qingfeng Xia"
 __url__ = "http://www.freecadweb.org"
 
-"""
-Naming is not consistent in this file
-solver specific setting is removed from ui
-"""
-
 import os
 import sys
 import os.path
@@ -61,12 +56,6 @@ class _TaskPanelCfdSolverControl:
 
         self.solver_runner = solver_runner_obj
         self.solver_object = solver_runner_obj.solver
-
-        self.writer_thread = QtCore.QThreadPool()
-        self.writer_thread.setMaxThreadCount(1)  # Only allow one concurrent case writer to be triggered
-        self.solver_runner.writer.setAutoDelete(False)  # Don't delete object once writer is run
-        self.solver_runner.writer.signals.error.connect(self.writerError)
-        self.solver_runner.writer.signals.finished.connect(self.writerFinished)
 
         # update UI
         self.console_message = ''
@@ -103,9 +92,7 @@ class _TaskPanelCfdSolverControl:
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
     def updateText(self):
-        pass
-        if self.solver_run_process.state() == QtCore.QProcess.ProcessState.Running or \
-                self.writer_thread.activeThreadCount() > 0:
+        if self.solver_run_process.state() == QtCore.QProcess.ProcessState.Running:
             self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
 
     def getStandardButtons(self):
@@ -153,22 +140,20 @@ class _TaskPanelCfdSolverControl:
             self.consoleMessage("{} case writer is called".format(self.solver_object.SolverName))
             self.form.pb_paraview.setEnabled(False)
             QApplication.setOverrideCursor(Qt.WaitCursor)
-            self.writer_thread.start(self.solver_runner.writer)
-        else:
-            self.consoleMessage("Case check failed", "#FF0000")
-
-    def writerError(self, error_msg):
-        self.consoleMessage("Error writing case:", "#FF0000")
-        self.consoleMessage(str(error_msg), "#FF0000")
-
-    def writerFinished(self, success):
-        if success:
+            try:
+                self.solver_runner.writer.writeCase()
+            except Exception as e:
+                self.consoleMessage("Error writing case:", "#FF0000")
+                self.consoleMessage(str(e), "#FF0000")
+                self.consoleMessage("Write case setup file failed", "#FF0000")
+                raise
+            finally:
+                QApplication.restoreOverrideCursor()
             self.consoleMessage("Write {} case is completed".format(self.solver_object.SolverName))
             self.form.pb_edit_inp.setEnabled(True)
             self.form.pb_run_solver.setEnabled(True)
         else:
-            self.consoleMessage("Write case setup file failed", "#FF0000")
-        QApplication.restoreOverrideCursor()
+            self.consoleMessage("Case check failed", "#FF0000")
 
     def check_prerequisites_helper(self):
         self.consoleMessage("Checking dependencies...")

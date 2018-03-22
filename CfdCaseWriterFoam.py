@@ -23,17 +23,9 @@
 # *                                                                         *
 # ***************************************************************************
 
-"""
-After playback macro, Mesh object need to build up in taskpanel
-"""
-
-__title__ = "FoamCaseWriter"
-__author__ = "Qingfeng Xia"
-__url__ = "http://www.freecadweb.org"
-
-
 import FreeCAD
 import CfdTools
+from CfdTools import cfdMessage
 import os
 import os.path
 import shutil
@@ -42,21 +34,14 @@ from PySide.QtCore import QRunnable, QObject
 import Units
 import TemplateBuilder
 
-
-# Write CFD analysis setup into OpenFOAM case
-# write_case() is the only public API
-# Derived from QRunnable in order to run in a worker thread
-# NB: Don't use Console.PrintMessage or any GUI functions here, since running in a worker thread
-
-class CfdCaseWriterSignals(QObject):
-    error = QtCore.Signal(str)  # Signal in PySide, pyqtSignal in PyQt
-    finished = QtCore.Signal(bool)
+"""
+Write CFD analysis setup into OpenFOAM case
+writeCase() is the only public API
+"""
 
 
-class CfdCaseWriterFoam(QRunnable):
+class CfdCaseWriterFoam:
     def __init__(self, analysis_obj):
-        super(CfdCaseWriterFoam, self).__init__()
-
         self.analysis_obj = analysis_obj
         self.solver_obj = CfdTools.getSolver(analysis_obj)
         self.physics_model, isPresent = CfdTools.getPhysicsModel(analysis_obj)
@@ -69,25 +54,13 @@ class CfdCaseWriterFoam(QRunnable):
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
         self.mesh_generated = False
 
-        self.signals = CfdCaseWriterSignals()
-
-    def run(self):
-        success = False
-        try:
-            success = self.write_case()
-        except Exception as e:
-            self.signals.error.emit(str(e))
-            self.signals.finished.emit(False)
-            raise
-        self.signals.finished.emit(success)
-
-    def write_case(self, updating=False):
-        """ Write_case() will collect case settings, and finally build a runnable case. """
-        print("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
-        _cwd = os.curdir
+    def writeCase(self):
+        """ writeCase() will collect case settings, and finally build a runnable case. """
+        cfdMessage("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
+        cwd = os.curdir
         if not os.path.exists(self.solver_obj.WorkingDir):
             raise IOError("Path " + self.solver_obj.WorkingDir + " does not exist.")
-        os.chdir(self.solver_obj.WorkingDir)  # pyFoam can not write to cwd if FreeCAD is started NOT from terminal
+        os.chdir(self.solver_obj.WorkingDir)
 
         try:  # Make sure we restore cwd after exception here
             # Perform initialisation here rather than __init__ in case of path changes
@@ -150,9 +123,9 @@ class CfdCaseWriterFoam(QRunnable):
         except:
             raise
         finally:
-            os.chdir(_cwd)  # Restore working dir
-        print("Successfully wrote {} case to folder {}\n".format(
-              self.solver_obj.SolverName, self.solver_obj.WorkingDir))
+            os.chdir(cwd)  # Restore working dir
+        cfdMessage("Successfully wrote {} case to folder {}\n".format(
+                   self.solver_obj.SolverName, self.solver_obj.WorkingDir))
         return True
 
     def getSolverName(self):

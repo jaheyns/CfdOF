@@ -49,8 +49,10 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 
 # Some standard install locations that are searched if an install directory is not specified
-FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2016\\OpenFOAM-4.x"],
-                     "Linux": ["/opt/openfoam4", "/opt/openfoam-dev",
+FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM-5.x",
+                                 "C:\\Program Files\\blueCFD-Core-2016\\OpenFOAM-4.x"],
+                     "Linux": ["/opt/openfoam4", "/opt/openfoam5", "/opt/openfoam-dev",
+                               "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
                                "~/OpenFOAM/OpenFOAM-4.x", "~/OpenFOAM/OpenFOAM-4.0", "~/OpenFOAM/OpenFOAM-4.1",
                                "~/OpenFOAM/OpenFOAM-dev"]
                      }
@@ -88,7 +90,6 @@ def checkCfdPrerequisites():
 
         """
 
-# Working directory
 
 def checkWorkingDir(wd):
     """ Check validity of working directory. """
@@ -356,9 +357,16 @@ def cfdError(msg):
     """ Show message for an expected error """
     QtGui.QApplication.restoreOverrideCursor()
     if FreeCAD.GuiUp:
-        QtGui.QMessageBox.critical(None, "CFDFoam Workbench", msg)
+        QtGui.QMessageBox.critical(None, "CfdOF Workbench", msg)
     else:
         FreeCAD.Console.PrintError(msg + "\n")
+
+
+def cfdMessage(msg):
+    """ Print a message to console and refresh GUI """
+    FreeCAD.Console.PrintMessage(msg)
+    if FreeCAD.GuiUp:
+        FreeCAD.Gui.updateGui()
 
 
 def inputCheckAndStore(value, units, dictionary, key):

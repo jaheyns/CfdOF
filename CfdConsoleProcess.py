@@ -82,6 +82,8 @@ class CfdConsoleProcess:
         while self.process.canReadLine():
             text += str(self.process.readLine())
         print(text, end='')  # Avoid displaying on FreeCAD status bar
+        if FreeCAD.GuiUp:
+            FreeCAD.Gui.updateGui()
         if self.stdoutHook:
             self.stdoutHook(text)
 
@@ -95,6 +97,8 @@ class CfdConsoleProcess:
         if self.stderrHook:
             self.stderrHook(text)
         FreeCAD.Console.PrintError(text)
+        if FreeCAD.GuiUp:
+            FreeCAD.Gui.updateGui()
         self.process.setReadChannel(QtCore.QProcess.StandardOutput)
 
     def state(self):
