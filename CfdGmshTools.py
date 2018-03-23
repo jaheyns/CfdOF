@@ -96,6 +96,10 @@ class CfdGmshTools():
         else:
             self.algorithm2D = '2'
 
+        # Override and force the 2D method to Delaunay,
+        # as 'MeshAdapt' seems to produce overlapping face errors in gmsh 3+
+        self.algorithm2D = '5'
+
         # Algorithm3D
         # known_mesh_algorithm_3D = ['Automatic', 'Delaunay', 'New Delaunay', 'Frontal', 'Frontal Delaunay', 'Frontal Hex', 'MMG3D', 'R-tree']
         algo3D = self.mesh_obj.Algorithm2D
