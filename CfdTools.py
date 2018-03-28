@@ -799,7 +799,7 @@ def checkCfdDependencies(term_print=True):
                         print(runmsg)
                 else:
                     foam_ver = foam_ver.rstrip().split('\n')[-1]
-                    if int(foam_ver.split('.')[0]) < 4:
+                    if foam_ver != 'dev' and foam_ver != 'plus' and int(foam_ver.split('.')[0]) < 4:
                         vermsg = "OpenFOAM version " + foam_ver + " pre-loaded is outdated: " \
                                    + "The CFD workbench requires at least OpenFOAM 4.0"
                         message += vermsg + "\n"
