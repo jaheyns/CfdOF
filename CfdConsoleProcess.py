@@ -108,7 +108,13 @@ class CfdConsoleProcess:
         return self.process.waitForStarted()
 
     def waitForFinished(self):
-        return self.process.waitForFinished(-1)
+        # For some reason waitForFinished doesn't always return - so we resort to a failsafe timeout:
+        while True:
+            ret = self.process.waitForFinished(1000)
+            if self.process.error() != self.process.Timedout:
+                return ret
+            if self.process.state() == self.process.NotRunning:
+                return True
 
     def exitCode(self):
         return self.process.exitCode()
