@@ -116,7 +116,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QGroupBox" name="groupBox">
+      <widget class="QGroupBox" name="gb_bluecfd">
        <property name="title">
         <string>blueCFD-Core</string>
        </property>
@@ -149,7 +149,7 @@
       </widget>
      </item>
      <item row="5" column="0">
-      <widget class="QGroupBox" name="groupBox_2">
+      <widget class="QGroupBox" name="gb_cfmesh">
        <property name="title">
         <string>cfMesh</string>
        </property>

@@ -76,22 +76,17 @@ class CfdPreferencePage:
         self.form.le_bluecfd_url.setText(BLUECFD_URL)
         self.form.le_cfmesh_url.setText(CFMESH_URL)
 
-        self.thread = CfdPreferencePageThread()
-        self.thread.signals.error.connect(self.threadError)
-        self.thread.signals.finished.connect(self.threadFinished)
-        self.thread.signals.status.connect(self.threadStatus)
-        self.thread.signals.downloadProgress.connect(self.downloadProgress)
-
+        self.thread = None
         self.install_process = None
 
         self.console_message = ""
         self.foam_dir = ""
         self.initial_foam_dir = ""
 
-        self.form.pb_download_install_blueCFD.setVisible(platform.system() == 'Windows')
+        self.form.gb_bluecfd.setVisible(platform.system() == 'Windows')
 
     def __del__(self):
-        if self.thread.isRunning():
+        if self.thread and self.thread.isRunning():
             FreeCAD.Console.PrintMessage("Terminating a pending install task")
             self.thread.terminate()
         if self.install_process and self.install_process.state() == QtCore.QProcess.Running:
@@ -127,15 +122,18 @@ class CfdPreferencePage:
         self.form.le_foam_dir.setText(self.foam_dir)
 
     def runDependencyChecker(self):
-        self.thread.task = DEPENDENCY_CHECK
-        CfdTools.setFoamDir(self.foam_dir)
-        self.startThread()
-        QApplication.setOverrideCursor(Qt.WaitCursor)
+        if self.createThread():
+            self.thread.task = DEPENDENCY_CHECK
+            # We are forced to apply the foam dir selection - reset when the thread exits
+            CfdTools.setFoamDir(self.foam_dir)
+            self.thread.start()
+            QApplication.setOverrideCursor(Qt.WaitCursor)
 
     def downloadInstallBlueCFD(self):
-        self.thread.task = DOWNLOAD_BLUECFD
-        self.thread.bluecfd_url = self.form.le_bluecfd_url.text()
-        self.startThread()
+        if self.createThread():
+            self.thread.task = DOWNLOAD_BLUECFD
+            self.thread.bluecfd_url = self.form.le_bluecfd_url.text()
+            self.thread.start()
 
     def pickBlueCFDFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose BlueCFD install file', filter="*.exe")
@@ -143,21 +141,29 @@ class CfdPreferencePage:
             self.form.le_bluecfd_url.setText(urlparse.urljoin('file:', urllib.pathname2url(f)))
 
     def downloadInstallCfMesh(self):
-        self.thread.task = DOWNLOAD_CFMESH
-        CfdTools.setFoamDir(self.foam_dir)
-        self.thread.cfmesh_url = self.form.le_cfmesh_url.text()
-        self.startThread()
+        if self.createThread():
+            self.thread.task = DOWNLOAD_CFMESH
+            # We are forced to apply the foam dir selection - reset when the task finishes
+            CfdTools.setFoamDir(self.foam_dir)
+            self.thread.cfmesh_url = self.form.le_cfmesh_url.text()
+            self.thread.start()
 
     def pickCfMeshFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose cfMesh archive', filter="*.zip")
         if f and os.access(f, os.W_OK):
             self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urllib.pathname2url(f)))
 
-    def startThread(self):
-        if self.thread.isRunning():
+    def createThread(self):
+        if self.thread and self.thread.isRunning():
             self.consoleMessage("Busy - please wait...", '#FF0000')
+            return False
         else:
-            self.thread.start()
+            self.thread = CfdPreferencePageThread()
+            self.thread.signals.error.connect(self.threadError)
+            self.thread.signals.finished.connect(self.threadFinished)
+            self.thread.signals.status.connect(self.threadStatus)
+            self.thread.signals.downloadProgress.connect(self.downloadProgress)
+            return True
 
     def threadStatus(self, msg):
         self.consoleMessage(msg)
@@ -167,6 +173,7 @@ class CfdPreferencePage:
 
     def threadFinished(self, status):
         if self.thread.task == DEPENDENCY_CHECK:
+            # Reset foam dir for now in case the user presses 'Cancel'
             CfdTools.setFoamDir(self.initial_foam_dir)
             QApplication.restoreOverrideCursor()
 
@@ -187,9 +194,11 @@ class CfdPreferencePage:
                     self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FOLDER))
                     self.install_process = CfdTools.startFoamApplication(
                         "./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FOLDER, self.installFinished)
+                    # Reset foam dir for now in case the user presses 'Cancel'
                     CfdTools.setFoamDir(self.initial_foam_dir)
             else:
                 self.consoleMessage("Download unsuccessful")
+        self.thread = None
 
     def installFinished(self, exit_code):
         if exit_code:
