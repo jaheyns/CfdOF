@@ -40,7 +40,6 @@ import TemplateBuilder
 
 if FreeCAD.GuiUp:
     import FreeCADGui
-    import FemGui
     from PySide import QtCore
     from PySide import QtGui
     from PySide.QtCore import Qt, QRunnable, QObject, QThread
@@ -49,15 +48,13 @@ if FreeCAD.GuiUp:
 BLUECFD_URL = \
     "https://github.com/blueCFD/Core/releases/download/blueCFD-Core-2017-2/blueCFD-Core-2017-2-win64-setup.exe"
 CFMESH_URL = \
-    "https://sourceforge.net/code-snapshots/git/u/u/u/oliveroxtoby/cfmesh.git/u-oliveroxtoby-cfmesh-3cbcdc8d615794b0a90ef1e2e65c044d6d528da6.zip"
-CFMESH_FILE_BASE = "u-oliveroxtoby-cfmesh-3cbcdc8d615794b0a90ef1e2e65c044d6d528da6"
+    "https://sourceforge.net/projects/cfmesh-cfdof/files/cfmesh-cfdof.zip/download"
+CFMESH_FILE_BASE = "cfmesh-cfdof"
 CFMESH_FILE_EXT = ".zip"
-CFMESH_FOLDER = "cfMesh-CfdOF"
 
 # Tasks for the worker thread
-DEPENDENCY_CHECK = 1
-DOWNLOAD_BLUECFD = 2
-DOWNLOAD_CFMESH = 3
+DOWNLOAD_BLUECFD = 1
+DOWNLOAD_CFMESH = 2
 
 
 class CfdPreferencePage:
@@ -122,12 +119,17 @@ class CfdPreferencePage:
         self.form.le_foam_dir.setText(self.foam_dir)
 
     def runDependencyChecker(self):
-        if self.createThread():
-            self.thread.task = DEPENDENCY_CHECK
-            # We are forced to apply the foam dir selection - reset when the thread exits
-            CfdTools.setFoamDir(self.foam_dir)
-            self.thread.start()
-            QApplication.setOverrideCursor(Qt.WaitCursor)
+        # Temporarily apply the foam dir selection
+        CfdTools.setFoamDir(self.foam_dir)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.consoleMessage("Checking dependencies...")
+        msg = CfdTools.checkCfdDependencies()
+        if not msg:
+            self.consoleMessage("No missing dependencies detected")
+        else:
+            self.consoleMessage(msg)
+        CfdTools.setFoamDir(self.initial_foam_dir)
+        QApplication.restoreOverrideCursor()
 
     def downloadInstallBlueCFD(self):
         if self.createThread():
@@ -172,12 +174,7 @@ class CfdPreferencePage:
         self.consoleMessage(msg, '#FF0000')
 
     def threadFinished(self, status):
-        if self.thread.task == DEPENDENCY_CHECK:
-            # Reset foam dir for now in case the user presses 'Cancel'
-            CfdTools.setFoamDir(self.initial_foam_dir)
-            QApplication.restoreOverrideCursor()
-
-        elif self.thread.task == DOWNLOAD_CFMESH:
+        if self.thread.task == DOWNLOAD_CFMESH:
             if status:
                 self.consoleMessage("Download completed")
                 user_dir = self.thread.user_dir
@@ -187,13 +184,13 @@ class CfdPreferencePage:
                     self.consoleMessage("Log file: {}\\log.{}".format(user_dir, script_name))
                     TemplateBuilder.TemplateBuilder(user_dir,
                                                     os.path.join(CfdTools.get_module_path(), 'data', 'foamUserDir'),
-                                                    {'cfMeshDirectory': CFMESH_FOLDER})
+                                                    {'cfMeshDirectory': CFMESH_FILE_BASE})
                     self.install_process = CfdTools.startFoamApplication(
                         "./"+script_name, "$WM_PROJECT_USER_DIR", self.installFinished)
                 else:
-                    self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FOLDER))
+                    self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
                     self.install_process = CfdTools.startFoamApplication(
-                        "./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FOLDER, self.installFinished)
+                        "./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE, self.installFinished)
                     # Reset foam dir for now in case the user presses 'Cancel'
                     CfdTools.setFoamDir(self.initial_foam_dir)
             else:
@@ -233,9 +230,7 @@ class CfdPreferencePageThread(QThread):
 
     def run(self):
         try:
-            if self.task == DEPENDENCY_CHECK:
-                self.dependencyCheck()
-            elif self.task == DOWNLOAD_BLUECFD:
+            if self.task == DOWNLOAD_BLUECFD:
                 self.downloadBlueCFD()
             elif self.task == DOWNLOAD_CFMESH:
                 self.downloadCfMesh()
@@ -244,14 +239,6 @@ class CfdPreferencePageThread(QThread):
             self.signals.finished.emit(False)
             raise
         self.signals.finished.emit(True)
-
-    def dependencyCheck(self):
-        self.signals.status.emit("Checking dependencies...")
-        msg = CfdTools.checkCfdDependencies()
-        if not msg:
-            self.signals.status.emit("No missing dependencies detected")
-        else:
-            self.signals.status.emit(msg)
 
     def downloadBlueCFD(self):
         self.signals.status.emit("Downloading blueCFD-Core, please wait...")
@@ -282,8 +269,8 @@ class CfdPreferencePageThread(QThread):
 
         self.signals.status.emit("Extracting cfMesh...")
         CfdTools.runFoamCommand(
-            '{{ mkdir -p "$WM_PROJECT_USER_DIR/{}" && cd "$WM_PROJECT_USER_DIR" && unzip -o "{}" && cp -r "{}"/* "{}/" && rm -r "{}"; }}'.
-            format(CFMESH_FOLDER, CfdTools.translatePath(filename), CFMESH_FILE_BASE, CFMESH_FOLDER, CFMESH_FILE_BASE))
+            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && unzip -o "{}"; }}'.
+            format(CfdTools.translatePath(filename)))
 
     def downloadStatus(self, blocks, block_size, total_size):
         self.signals.downloadProgress.emit(blocks*block_size, total_size)
