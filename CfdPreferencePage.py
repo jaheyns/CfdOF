@@ -191,8 +191,8 @@ class CfdPreferencePage:
                     self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
                     self.install_process = CfdTools.startFoamApplication(
                         "./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE, self.installFinished)
-                    # Reset foam dir for now in case the user presses 'Cancel'
-                    CfdTools.setFoamDir(self.initial_foam_dir)
+                # Reset foam dir for now in case the user presses 'Cancel'
+                CfdTools.setFoamDir(self.initial_foam_dir)
             else:
                 self.consoleMessage("Download unsuccessful")
         self.thread = None
