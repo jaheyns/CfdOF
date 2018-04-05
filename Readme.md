@@ -62,7 +62,7 @@ which can be automatically installed (see below for instructions).
 - [OpenFOAM (versions 4.x and 5.x tested; other versions may work.)](http://openfoam.org/download/)  
 - [Paraview](http://www.paraview.org/)  
 - [GMSH (version 2.13 or later)](http://gmsh.info/)  
-- [cfMesh (version 1.1.2 updated to compile with OpenFOAM v5.x)](https://sourceforge.net/u/oliveroxtoby/cfmesh/ci/v5update/tree/)
+- [cfMesh (version 1.1.2 updated to compile with OpenFOAM v5.x)](https://sourceforge.net/projects/cfmesh-cfdof/)
 
 ### Setting up CFD workbench
 
