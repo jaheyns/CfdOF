@@ -241,12 +241,13 @@ class CfdCartTools():
                     elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
                         if not mr_obj.Baffle:
                             snappy_mesh_region_list.append(mr_obj.Name)
-
-                        snappy_settings['MeshRegions'][mr_obj.Name] = {
-                            'RegionName': tuple(snappy_mesh_region_list),
-                            'RefinementLevel': mr_obj.RefinementLevel,
-                            'EdgeRefinementLevel': mr_obj.RegionEdgeRefinement,
-                            'Baffle': mr_obj.Baffle
+                        for rL in range(len(snappy_mesh_region_list)):
+                            mrName = mr_obj.Name + snappy_mesh_region_list[rL]
+                            snappy_settings['MeshRegions'][mrName] = {
+                                'RegionName': snappy_mesh_region_list[rL],
+                                'RefinementLevel': mr_obj.RefinementLevel,
+                                'EdgeRefinementLevel': mr_obj.RegionEdgeRefinement,
+                                'Baffle': mr_obj.Baffle
                         }
 
                 else:
