@@ -455,8 +455,8 @@ class CfdCaseWriterFoam:
                 if 'alphas' in z:
                     for i, m in enumerate(settings['fluidProperties']):
                         alpha_name = m['Name']
-                        if i == len(settings['fluidProperties'])-1 and \
-                           settings['solver']['solverName'] == 'multiphaseInterFoam':
+                        if i == len(settings['fluidProperties'])-1:# and \
+                           #settings['solver']['solverName'] == 'multiphaseInterFoam':
                             z['alphas'][alpha_name] = 1.0-sum_alpha
                         else:
                             alpha = z['alphas'].get(alpha_name, 0.0)
