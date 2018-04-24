@@ -112,8 +112,10 @@ class CfdConsoleProcess:
         while True:
             ret = self.process.waitForFinished(1000)
             if self.process.error() != self.process.Timedout:
+                self.readStdout()
                 return ret
             if self.process.state() == self.process.NotRunning:
+                self.readStdout()
                 return True
 
     def exitCode(self):
