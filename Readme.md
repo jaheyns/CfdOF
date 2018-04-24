@@ -58,7 +58,8 @@ Not tested, but a POSIX system. Possible to install and run OpenFOAM.
 The CFD workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
-- [Latest development version of FreeCAD (0.17 prerelease; requires git commit 12539 or later)](https://www.freecadweb.org/wiki/Download)  
+- [Latest release version of FreeCAD (0.17)](https://www.freecadweb.org/wiki/Download)
+ or [latest development version (0.18 prerelease; requires git commit 12539 or later)](https://github.com/FreeCAD/FreeCAD/releases)  
 - [OpenFOAM (versions 4.x and 5.x tested; other versions may work.)](http://openfoam.org/download/)  
 - [Paraview](http://www.paraview.org/)  
 - [GMSH (version 2.13 or later)](http://gmsh.info/)  
@@ -68,7 +69,7 @@ which can be automatically installed (see below for instructions).
 
 #### Windows
 
-The latest FreeCAD build of the 0.17 prerelease code can be obtained from
+The latest FreeCAD build can be obtained from
 https://github.com/FreeCAD/FreeCAD/releases and the latest
 CFD workbench can be installed into it using the Addon manager:
 
@@ -109,6 +110,7 @@ prerequisites have been successfully installed.
 #### Linux
 
 The latest development version of FreeCAD can be obtained from 
+https://github.com/FreeCAD/FreeCAD/releases (.AppImage file) or
 the [Ubuntu daily build](https://www.freecadweb.org/wiki/Download#Ubuntu_Daily_PPA_Packages)
 packages. Alternatively, it can be built from the source code
 at https://github.com/FreeCAD/FreeCAD .
