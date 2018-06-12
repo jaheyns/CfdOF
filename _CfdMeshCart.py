@@ -55,7 +55,7 @@ class _CfdMeshCart():
         obj.STLLinearDeflection = 0.1
 
         obj.addProperty("App::PropertyInteger", "NumberCores", "Base", "Number of parallel cores "
-                                                                       "(only applicaple when using sHM) ")
+                                                                       "(only applicable when using sHM) ")
         obj.NumberCores = 1
 
         obj.addProperty("App::PropertyLink", "Part", "Mesh Parameters", "Part object to mesh")

@@ -296,17 +296,17 @@ class CfdCaseWriterFoam:
                 # Make sure the first n-1 alpha values exist, and write the n-th one
                 # consistently for multiphaseInterFoam
                 sum_alpha = 0.0
-                if 'alphas' not in bc:
-                    bc['alphas'] = {}
+                alphas_new = {}
                 for i, m in enumerate(settings['fluidProperties']):
                     alpha_name = m['Name']
-                    if i == len(settings['fluidProperties']) - 1 and \
-                                    settings['solver']['solverName'] == 'multiphaseInterFoam':
-                        bc['alphas'][alpha_name] = 1.0 - sum_alpha
+                    if i == len(settings['fluidProperties']) - 1:
+                        if settings['solver']['solverName'] == 'multiphaseInterFoam':
+                            alphas_new[alpha_name] = 1.0 - sum_alpha
                     else:
-                        alpha = bc['alphas'].get(alpha_name, 0.0)
-                        bc['alphas'][alpha_name] = alpha
+                        alpha = bc.get('alphas', {}).get(alpha_name, 0.0)
+                        alphas_new[alpha_name] = alpha
                         sum_alpha += alpha
+                bc['alphas'] = alphas_new
 
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
@@ -319,17 +319,17 @@ class CfdCaseWriterFoam:
             # Make sure the first n-1 alpha values exist, and write the n-th one
             # consistently for multiphaseInterFoam
             sum_alpha = 0.0
-            if 'alphas' not in initial_values:
-                initial_values['alphas'] = {}
+            alphas_new = {}
             for i, m in enumerate(settings['fluidProperties']):
                 alpha_name = m['Name']
-                if i == len(settings['fluidProperties'])-1 and \
-                   settings['solver']['solverName'] == 'multiphaseInterFoam':
-                    initial_values['alphas'][alpha_name] = 1.0-sum_alpha
+                if i == len(settings['fluidProperties'])-1:
+                    if settings['solver']['solverName'] == 'multiphaseInterFoam':
+                        alphas_new[alpha_name] = 1.0-sum_alpha
                 else:
-                    alpha = initial_values['alphas'].get(alpha_name, 0.0)
-                    initial_values['alphas'][alpha_name] = alpha
+                    alpha = initial_values.get('alphas', {}).get(alpha_name, 0.0)
+                    alphas_new[alpha_name] = alpha
                     sum_alpha += alpha
+            initial_values['alphas'] = alphas_new
 
         physics = settings['physics']
         if physics['TurbulenceModel'] is not None:
@@ -453,15 +453,17 @@ class CfdCaseWriterFoam:
                 z = settings['initialisationZones'][zone_name]
                 sum_alpha = 0.0
                 if 'alphas' in z:
+                    alphas_new = {}
                     for i, m in enumerate(settings['fluidProperties']):
                         alpha_name = m['Name']
-                        if i == len(settings['fluidProperties'])-1:# and \
-                           #settings['solver']['solverName'] == 'multiphaseInterFoam':
-                            z['alphas'][alpha_name] = 1.0-sum_alpha
+                        if i == len(settings['fluidProperties'])-1:
+                            if settings['solver']['solverName'] == 'multiphaseInterFoam':
+                                alphas_new[alpha_name] = 1.0-sum_alpha
                         else:
                             alpha = z['alphas'].get(alpha_name, 0.0)
-                            z['alphas'][alpha_name] = alpha
+                            alphas_new[alpha_name] = alpha
                             sum_alpha += alpha
+                    z['alphas'] = alphas_new
 
     def bafflesPresent(self):
         for b in self.bc_group:

@@ -178,7 +178,6 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         inputCheckAndStore(text, "rad/s", self.InitialVariables, 'omega')
 
     def accept(self):
-        self.obj.InitialVariables = self.InitialVariables
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
@@ -189,6 +188,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         FreeCADGui.doCommand("init['Uy'] = {}".format(self.InitialVariables['Uy']))
         FreeCADGui.doCommand("init['Uz'] = {}".format(self.InitialVariables['Uz']))
         FreeCADGui.doCommand("init['Pressure'] = {}".format(self.InitialVariables['Pressure']))
+        FreeCADGui.doCommand("init['alphas'] = {}")
         if len(self.material_objs) > 1:
             for i in range(len(self.material_objs)-1):
                 alphaName = self.getMaterialName(i)

@@ -9,6 +9,7 @@ import FemGui
 import CfdTools
 import os
 
+
 class _ViewProviderCfdInitialseInternalFlowField:
     "A View Provider for the InitialVariables object"
 
@@ -47,7 +48,6 @@ class _ViewProviderCfdInitialseInternalFlowField:
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True
-    
 
     def unsetEdit(self, vobj, mode):
         FreeCADGui.Control.closeDialog()

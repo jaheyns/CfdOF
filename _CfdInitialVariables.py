@@ -27,7 +27,6 @@ __author__ = ""
 __url__ = "http://www.freecadweb.org"
 
 
-
 class _CfdInitialVariables:
     """ The field initialisation object """
     def __init__(self, obj):
