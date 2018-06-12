@@ -69,8 +69,11 @@ class _CfdFluidBoundary(PartFeature):
                                 'PressureDropCoeff': 0.0,
                                 'ScreenWireDiameter': 0.0,
                                 'ScreenSpacing': 0.0,
+                                'ThermalBoundaryType': 'zeroGradient',
+                                'Temperature': 293,
+                                'HeatFlux': 0,
+                                'HeatTransferCoeff': 0,
                                 'TurbulenceInletSpecification': 'intensityAndLengthScale',
-                                'ThermalBoundaryType': '',
                                 'TurbulentKineticEnergy': 0.01,
                                 'SpecificDissipationRate': 1,
                                 'TurbulenceIntensity': 0.1,
@@ -85,7 +88,11 @@ class _CfdFluidBoundary(PartFeature):
         for i in range(len(obj.References)):
             ref = obj.References[i]
             selection_object = doc.getObject(ref[0])
-            listOfFaces.append(selection_object.Shape.getElement(ref[1]))
+            if selection_object is not None:  # May have been deleted
+                try:
+                    listOfFaces.append(selection_object.Shape.getElement(ref[1]))
+                except Part.OCCError:  # Face may have been deleted
+                    pass
         if len(listOfFaces) > 0:
             obj.Shape = Part.makeCompound(listOfFaces)
         else:
@@ -102,7 +109,7 @@ class _CfdFluidBoundary(PartFeature):
             vobj.ShapeColor = (0.0, 0.0, 1.0)  # Blue
         elif obj.BoundarySettings['BoundaryType'] == 'outlet':
             vobj.ShapeColor = (1.0, 0.0, 0.0)  # Red
-        elif obj.BoundarySettings['BoundaryType'] == 'open':
+        elif obj.BoundarySettings['BoundaryType'] == 'open' or obj.BoundarySettings['BoundaryType'] == 'farField':
             vobj.ShapeColor = (0.0, 1.0, 1.0)  # Cyan
         elif (obj.BoundarySettings['BoundaryType'] == 'constraint') or \
              (obj.BoundarySettings['BoundaryType'] == 'baffle'):

@@ -41,6 +41,7 @@ import FreeCAD
 import Fem
 import Units
 import CfdConsoleProcess
+import Part
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -120,7 +121,7 @@ def getPhysicsModel(analysis_object):
     isPresent = False
     for i in analysis_object.Group:
         if "PhysicsModel" in i.Name:
-            physicsModel = i.PhysicsModel
+            physicsModel = i
             isPresent = True
     if not isPresent:
         physicsModel = None  # A placeholder to be created in event that it is not present.
@@ -677,7 +678,7 @@ def readTemplate(fileName, replaceDict=None):
 
 def checkCfdDependencies(term_print=True):
         FC_MINOR_VER_REQUIRED = 17
-        FC_COMMIT_REQUIRED = 12539
+        FC_COMMIT_REQUIRED = 13528
 
         import os
         import subprocess
@@ -767,6 +768,14 @@ def checkCfdDependencies(term_print=True):
                             message += cfmesh_msg + '\n'
                             if term_print:
                                 print(cfmesh_msg)
+                        # Check for HiSA
+                        try:
+                            runFoamCommand("hisa -help")
+                        except subprocess.CalledProcessError:
+                            hisa_msg = "HiSA not found"
+                            message += hisa_msg + '\n'
+                            if term_print:
+                                print(hisa_msg)
 
         if term_print:
             print("Checking for gmsh:")
@@ -843,15 +852,6 @@ def isSameGeometry(shape1, shape2):
                 return True
             else:
                 return False
-    if len(shape1.Vertexes) == len(shape2.Vertexes) and len(shape1.Vertexes) == 1:
-        vs1 = shape1.Vertexes[0]
-        vs2 = shape2.Vertexes[0]
-        if floatEqual(vs1.X, vs1.Y) and floatEqual(vs1.Y, vs2.Y) and floatEqual(vs1.Z, vs2.Z):
-            return True
-        else:
-            return False
-    else:
-        return False
 
 
 def findElementInShape(aShape, anElement):
@@ -897,3 +897,93 @@ def findElementInShape(aShape, anElement):
                 return ele
     elif ele_st == 'Compound':
         FreeCAD.Console.PrintError('Compound is not supported.\n')
+
+
+def matchFacesToTargetShape(ref_lists, shape):
+    """ This function does a geometric matching of groups of faces much faster than doing face-by-face search
+    :param ref_lists: List of lists of references - outer list is 'group' (e.g. boundary); refs are tuples
+    :param shape: The shape to map to
+    :return:  A list of tuples: (group index, reference) of matching refs for each face in shape
+    """
+    # Preserve original indices
+    mesh_face_list = zip(shape.Faces, range(len(shape.Faces)))
+    src_face_list = []
+    for i, rl in enumerate(ref_lists):
+        for br in rl:
+            obj = FreeCAD.ActiveDocument.getObject(br[0])
+            if not obj:
+                raise RuntimeError("Referenced object '{}' not found - object may "
+                                   "have been deleted".format(br[0]))
+            try:
+                bf = obj.Shape.getElement(br[1])
+            except Part.OCCError:
+                raise RuntimeError("Referenced face '{}:{}' not found - face may "
+                                   "have been deleted".format(br[0], br[1]))
+            src_face_list.append((bf, i, br))
+
+    def compFn(x, y):
+        if floatEqual(x, y):
+            return 0
+        elif x < y:
+            return -1
+        else:
+            return 1
+
+    # Sort boundary face list by centre of mass, x then y then z in case all in plane
+    src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.z)
+    src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.y)
+    src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.x)
+
+    # Same sorting on mesh face list
+    mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.z)
+    mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.y)
+    mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.x)
+
+    # Find faces with matching CofM
+    i = 0
+    j = 0
+    j_match_start = 0
+    matching = False
+    candidate_mesh_faces = []
+    for mf in mesh_face_list:
+        candidate_mesh_faces.append([])
+    while i < len(src_face_list) and j < len(mesh_face_list):
+        bf = src_face_list[i][0]
+        mf = mesh_face_list[j][0]
+        if floatEqual(bf.CenterOfMass.x, mf.CenterOfMass.x):
+            if floatEqual(bf.CenterOfMass.y, mf.CenterOfMass.y):
+                if floatEqual(bf.CenterOfMass.z, mf.CenterOfMass.z):
+                    candidate_mesh_faces[j].append((i, src_face_list[i][1], src_face_list[i][2]))
+                    cmp = 0
+                else:
+                    cmp = (-1 if bf.CenterOfMass.z < mf.CenterOfMass.z else 1)
+            else:
+                cmp = (-1 if bf.CenterOfMass.y < mf.CenterOfMass.y else 1)
+        else:
+            cmp = (-1 if bf.CenterOfMass.x < mf.CenterOfMass.x else 1)
+        if cmp == 0:
+            if not matching:
+                j_match_start = j
+            j += 1
+            matching = True
+        elif cmp < 0:
+            i += 1
+            if matching:
+                j = j_match_start
+            matching = False
+        elif cmp > 0:
+            j += 1
+            matching = False
+
+    # Do comprehensive matching, and reallocate to original index
+    successful_candidates = []
+    for mf in mesh_face_list:
+        successful_candidates.append([])
+    for j in range(len(candidate_mesh_faces)):
+        for k in range(len(candidate_mesh_faces[j])):
+            i, nb, bref = candidate_mesh_faces[j][k]
+            if isSameGeometry(src_face_list[i][0], mesh_face_list[j][0]):
+                orig_idx = mesh_face_list[j][1]
+                successful_candidates[orig_idx].append((nb, bref))
+
+    return successful_candidates

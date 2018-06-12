@@ -1,0 +1,88 @@
+%{%(solver/solverName%)
+%:hisa
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform %(initialValues/Temperature%);
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%{%(boundaries/%(0%)/ThermalBoundaryType%)
+%:fixedValue
+    %(0%)
+    {
+        type        boundaryCorrectedFixedValue;
+        value       uniform %(boundaries/%(0%)/Temperature%);
+    }
+%:zeroGradient
+    %(0%)
+    {
+        type        characteristicWallTemperature;
+        value       $internalField;
+    }
+%:fixedGradient
+    %(0%)
+    {
+        type        fixedGradient;
+        gradient    uniform %(boundaries/%(0%)/heatFlux%);
+    }
+%}
+%:inlet
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/Temperature%);
+    }
+%:outlet
+%[0/_boundary_zeroGradient%]
+%:farField
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:characteristic
+    %(0%)
+    {
+        type        characteristicFarfieldTemperature;
+        UInf        ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        pInf        %(boundaries/%(0%)/Pressure%);
+        TInf        %(boundaries/%(0%)/Temperature%);
+        gamma       1.4; //TODO
+        value       $internalField;
+    }
+%}
+%:open
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:porousBaffle
+%[0/_boundary_cyclic_baffle%]
+%}
+%}
+
+%}
+%{defaultFaces
+%[0/_boundary_zeroGradient%]
+%}
+
+}
+
+// ************************************************************************* //
+%}

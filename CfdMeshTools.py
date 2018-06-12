@@ -91,6 +91,10 @@ class CfdMeshTools:
         self.gmsh_settings = {}
         self.two_d_settings = {}
 
+        self.error = False
+
+        self.get_tmp_file_paths()
+
     def get_dimension(self):
         # Dimension
         # 3D cfMesh and snappyHexMesh, and 2D by conversion, while in future cfMesh may support 2D directly
@@ -252,12 +256,9 @@ class CfdMeshTools:
                     else:
                         FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " is not used to create the mesh because the CharacteristicLength is 0.0 mm.\n")
                 for eleml in self.ele_length_map:
-                    print(eleml)
                     ele_shape = FemMeshTools.get_element(self.part_obj, eleml)  # the method getElement(element) does not return Solid elements
                     ele_vertexes = FemMeshTools.get_vertexes_by_element(self.part_obj.Shape, ele_shape)
                     self.ele_node_map[eleml] = ele_vertexes
-            print('  {}'.format(self.ele_length_map))
-            print('  {}'.format(self.ele_node_map))
 
         else:
             cf_settings = self.cf_settings
@@ -277,7 +278,19 @@ class CfdMeshTools:
                 if "Boolean" in self.part_obj.Name:
                     err = "Cartesian meshes should not be generated for boolean split compounds."
                     FreeCAD.Console.PrintError(err + "\n")
-                for mr_obj in self.mesh_obj.MeshRegionList:
+
+                # Make list of list of all references for their corresponding mesh object
+                if self.mesh_obj.MeshUtility == 'cfMesh':
+                    region_face_lists = []
+                    for mr_id, mr_obj in enumerate(self.mesh_obj.MeshRegionList):
+                        region_face_lists.append([])
+                        if mr_obj.NumberLayers > 1 and not mr_obj.Internal:
+                            refs = mr_obj.References
+                            for r in refs:
+                                region_face_lists[mr_id].append(r)
+                    matched_faces = CfdTools.matchFacesToTargetShape(region_face_lists, self.mesh_obj.Part.Shape)
+
+                for mr_id, mr_obj in enumerate(self.mesh_obj.MeshRegionList):
                     try:
                         Internal = mr_obj.Internal
                         InternalRegion = mr_obj.InternalRegion
@@ -328,27 +341,6 @@ class CfdMeshTools:
                                     fid.close()
                                     tri_surface = ""
                                     snappy_mesh_region_list.append(baffle)
-                                elif self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1:
-                                    if not(Internal):
-                                        # Similarity search for patch used in boundary layer meshing
-                                        meshFaceList = self.mesh_obj.Part.Shape.Faces
-                                        for (i, mf) in enumerate(meshFaceList):
-                                            isSameGeo = CfdTools.isSameGeometry(elt, mf)
-                                            if isSameGeo and (mr_obj.NumberLayers > 1):  # Only one matching face
-                                                sfN = self.mesh_obj.ShapeFaceNames[i]
-                                                self.ele_meshpatch_map[mr_obj.Name].append(sfN)
-                                                patch_list.append(self.mesh_obj.ShapeFaceNames[i])
-
-                                                # Limit expansion ratio to greater than 1.0 and less than 1.2
-                                                expratio = mr_obj.ExpansionRatio
-                                                expratio = min(1.2, max(1.0, expratio))
-
-                                                cf_settings['BoundaryLayers'][self.mesh_obj.ShapeFaceNames[i]] = {
-                                                    'NumberLayers': mr_obj.NumberLayers,
-                                                    'ExpansionRatio': expratio,
-                                                    'FirstLayerHeight': self.scale *
-                                                                        Units.Quantity(mr_obj.FirstLayerHeight).Value
-                                                }
                             else:
                                 FreeCAD.Console.PrintError("Cartesian meshes only support surface refinement.\n")
 
@@ -356,6 +348,25 @@ class CfdMeshTools:
                             fid = open(os.path.join(self.triSurfaceDir, mr_obj.Name + '.stl'), 'w')
                             fid.write(tri_surface)
                             fid.close()
+
+                        if self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1 and not Internal:
+                            for (i, mf) in enumerate(matched_faces):
+                                for j in range(len(mf)):
+                                    if mr_id == mf[j][0]:
+                                        sfN = self.mesh_obj.ShapeFaceNames[i]
+                                        self.ele_meshpatch_map[mr_obj.Name].append(sfN)
+                                        patch_list.append(sfN)
+
+                                        # Limit expansion ratio to greater than 1.0 and less than 1.2
+                                        expratio = mr_obj.ExpansionRatio
+                                        expratio = min(1.2, max(1.0, expratio))
+
+                                        cf_settings['BoundaryLayers'][self.mesh_obj.ShapeFaceNames[i]] = {
+                                            'NumberLayers': mr_obj.NumberLayers,
+                                            'ExpansionRatio': expratio,
+                                            'FirstLayerHeight': self.scale *
+                                                                Units.Quantity(mr_obj.FirstLayerHeight).Value
+                                        }
 
                         if self.mesh_obj.MeshUtility == 'cfMesh':
                             if not Internal:
@@ -380,6 +391,7 @@ class CfdMeshTools:
                                         'RegionName': snappy_mesh_region_list[rL],
                                         'RefinementLevel': mr_obj.RefinementLevel,
                                         'EdgeRefinementLevel': mr_obj.RegionEdgeRefinement,
+                                        'MaxRefinementLevel': max(mr_obj.RefinementLevel, mr_obj.RegionEdgeRefinement),
                                         'Baffle': mr_obj.Baffle
                                 }
                             else:

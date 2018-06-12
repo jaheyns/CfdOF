@@ -51,10 +51,16 @@ CFMESH_URL = \
     "https://sourceforge.net/projects/cfmesh-cfdof/files/cfmesh-cfdof.zip/download"
 CFMESH_FILE_BASE = "cfmesh-cfdof"
 CFMESH_FILE_EXT = ".zip"
+HISA_URL = \
+    "https://sourceforge.net/projects/hisa/files/hisa-master.zip/download"
+HISA_FILE_BASE = "hisa-master"
+HISA_FILE_EXT = ".zip"
+
 
 # Tasks for the worker thread
 DOWNLOAD_BLUECFD = 1
 DOWNLOAD_CFMESH = 2
+DOWNLOAD_HISA = 3
 
 
 class CfdPreferencePage:
@@ -69,9 +75,12 @@ class CfdPreferencePage:
         self.form.tb_pick_bluecfd_file.clicked.connect(self.pickBlueCFDFile)
         self.form.pb_download_install_cfMesh.clicked.connect(self.downloadInstallCfMesh)
         self.form.tb_pick_cfmesh_file.clicked.connect(self.pickCfMeshFile)
+        self.form.pb_download_install_hisa.clicked.connect(self.downloadInstallHisa)
+        self.form.tb_pick_hisa_file.clicked.connect(self.pickHisaFile)
 
         self.form.le_bluecfd_url.setText(BLUECFD_URL)
         self.form.le_cfmesh_url.setText(CFMESH_URL)
+        self.form.le_hisa_url.setText(HISA_URL)
 
         self.thread = None
         self.install_process = None
@@ -155,6 +164,19 @@ class CfdPreferencePage:
         if f and os.access(f, os.W_OK):
             self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urllib.pathname2url(f)))
 
+    def downloadInstallHisa(self):
+        if self.createThread():
+            self.thread.task = DOWNLOAD_HISA
+            # We are forced to apply the foam dir selection - reset when the task finishes
+            CfdTools.setFoamDir(self.foam_dir)
+            self.thread.hisa_url = self.form.le_hisa_url.text()
+            self.thread.start()
+
+    def pickHisaFile(self):
+        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose HiSA archive', filter="*.zip")
+        if f and os.access(f, os.W_OK):
+            self.form.le_hisa_url.setText(urlparse.urljoin('file:', urllib.pathname2url(f)))
+
     def createThread(self):
         if self.thread and self.thread.isRunning():
             self.consoleMessage("Busy - please wait...", '#FF0000')
@@ -195,6 +217,18 @@ class CfdPreferencePage:
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:
                 self.consoleMessage("Download unsuccessful")
+        elif self.thread.task == DOWNLOAD_HISA:
+            if status:
+                self.consoleMessage("Download completed")
+                user_dir = self.thread.user_dir
+                self.consoleMessage("Building HiSA. Please wait...")
+                self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, HISA_FILE_BASE))
+                self.install_process = CfdTools.startFoamApplication(
+                    "./Allwmake", "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE, self.installFinished)
+                # Reset foam dir for now in case the user presses 'Cancel'
+                CfdTools.setFoamDir(self.initial_foam_dir)
+            else:
+                self.consoleMessage("Download unsuccessful")
         self.thread = None
 
     def installFinished(self, exit_code):
@@ -227,6 +261,7 @@ class CfdPreferencePageThread(QThread):
         self.task = None
         self.bluecfd_url = None
         self.cfmesh_url = None
+        self.hisa_url = None
 
     def run(self):
         try:
@@ -234,6 +269,8 @@ class CfdPreferencePageThread(QThread):
                 self.downloadBlueCFD()
             elif self.task == DOWNLOAD_CFMESH:
                 self.downloadCfMesh()
+            elif self.task == DOWNLOAD_HISA:
+                self.downloadHisa()
         except Exception as e:
             self.signals.error.emit(str(e))
             self.signals.finished.emit(False)
@@ -272,6 +309,28 @@ class CfdPreferencePageThread(QThread):
             raise Exception("Error downloading cfMesh: {}".format(str(ex)))
 
         self.signals.status.emit("Extracting cfMesh...")
+        CfdTools.runFoamCommand(
+            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && unzip -o "{}"; }}'.
+            format(CfdTools.translatePath(filename)))
+
+    def downloadHisa(self):
+        self.signals.status.emit("Downloading HiSA, please wait...")
+
+        self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
+        self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
+
+        try:
+            import urllib
+            # Work around for certificate issues
+            import ssl
+            urllib._urlopener = urllib.FancyURLopener(context=ssl._create_unverified_context())
+            # Download
+            (filename, header) = urllib.urlretrieve(self.hisa_url,
+                                                    reporthook=self.downloadStatus)
+        except Exception as ex:
+            raise Exception("Error downloading HiSA: {}".format(str(ex)))
+
+        self.signals.status.emit("Extracting HiSA...")
         CfdTools.runFoamCommand(
             '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && unzip -o "{}"; }}'.
             format(CfdTools.translatePath(filename)))

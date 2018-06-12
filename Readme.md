@@ -6,6 +6,14 @@ before running the simulation. Where possible, best practices are included to im
 
 ![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
 
+#### File format compatibility
+
+As the workbench is still in its early development phase and evolving rapidly, new developments may sometimes
+change the saved object format. This may mean that some objects do not load correctly
+from previously saved files, and must be re-generated. For better 
+forward-compatibilty, it is advised that you save the Python script used to generate an analysis
+(right-click in Python console and choose 'Save history as'). 
+
 ## Features
 
 ### Current:
@@ -58,9 +66,9 @@ Not tested, but a POSIX system. Possible to install and run OpenFOAM.
 The CFD workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
-- [Latest release version of FreeCAD (0.17)](https://www.freecadweb.org/wiki/Download)
- or [latest development version (0.18 prerelease; requires git commit 12539 or later)](https://github.com/FreeCAD/FreeCAD/releases)  
-- [OpenFOAM (versions 4.x and 5.x tested; other versions may work.)](http://openfoam.org/download/)  
+- [Latest release version of FreeCAD (0.17)](https://github.com/FreeCAD/FreeCAD/releases/tag/0.17)
+ or [latest development version (0.18 prerelease; requires git commit 13528 or later)](https://github.com/FreeCAD/FreeCAD/releases)  
+- [OpenFOAM (version 5.x currently tested; most other recent versions should work.)](http://openfoam.org/download/)  
 - [Paraview](http://www.paraview.org/)  
 - [GMSH (version 2.13 or later)](http://gmsh.info/)  
 - [cfMesh (version 1.1.2 updated to compile with OpenFOAM v5.x)](https://sourceforge.net/projects/cfmesh-cfdof/)
@@ -70,10 +78,10 @@ which can be automatically installed (see below for instructions).
 #### Windows
 
 The latest FreeCAD build can be obtained from
-https://github.com/FreeCAD/FreeCAD/releases and the latest
+https://www.freecadweb.org/wiki/Download and the latest
 CFD workbench can be installed into it using the Addon manager:
 
-* After extracting the FreeCAD archive to a directory <FreeCAD-directory>,
+* After running the installer or extracting the .7z archive to a directory <FreeCAD-directory>,
 run FreeCAD in place (<FreeCAD-directory\bin\FreeCAD.exe). 
 * Select Tools | Addon manager ...
 * Select CfdOF in the list of workbenches, and click "Install/update"
@@ -109,11 +117,14 @@ prerequisites have been successfully installed.
 
 #### Linux
 
-The latest development version of FreeCAD can be obtained from 
-https://github.com/FreeCAD/FreeCAD/releases (.AppImage file) or
-the [Ubuntu daily build](https://www.freecadweb.org/wiki/Download#Ubuntu_Daily_PPA_Packages)
-packages. Alternatively, it can be built from the source code
-at https://github.com/FreeCAD/FreeCAD .
+The latest release or development version of FreeCAD can be obtained from 
+https://github.com/FreeCAD/FreeCAD/releases (.AppImage files).
+The .AppImage containers may cause library version conflicts
+when running OpenFOAM from within FreeCAD. 
+The [Ubuntu PPA daily build](https://www.freecadweb.org/wiki/Install_on_Unix)
+packages are an alternative binary option. Otherwise, FreeCAD can be built 
+from the source code at 
+https://github.com/FreeCAD/FreeCAD\. 
 
 The latest CFD workbench can be installed into FreeCAD using the Addon manager:
 
@@ -131,7 +142,7 @@ conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CFD".
 
-Manual installation is however required for 
+However, in Linux, manual installation is required for 
 [OpenFOAM](http://openfoam.org/download/),
 [Paraview](http://www.paraview.org/) and
 [GMSH](http://gmsh.info/), which should be
@@ -205,8 +216,8 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 
 ## Lead developers
 
-Oliver Oxtoby (CSIR, 2016-2018) <ooxtoby@csir.co.za>  
-Johan Heyns (CSIR, 2016-2018) <jheyns@csir.co.za>  
+Oliver Oxtoby (CSIR, 2016-2018) <oliveroxtoby@gmail.com>  
+Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>  
 Alfred Bogaers (CSIR, 2016-2018) <abogaers@csir.co.za>    
 
 We would like to thank Eskom for their financial contribution as well as the following people for their contribution to the code:

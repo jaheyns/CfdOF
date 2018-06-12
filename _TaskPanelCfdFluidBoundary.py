@@ -44,17 +44,19 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt, QTimer
     from PySide.QtGui import QApplication
     from PySide import QtUiTools
+    from PySide.QtGui import QFormLayout
 
 # Constants
 
-BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Opening", "Constraint", "Baffle"]
+BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Opening", "Far-field", "Constraint", "Baffle"]
 
-BOUNDARY_TYPES = ["wall", "inlet", "outlet", "open", "constraint", "baffle"]
+BOUNDARY_TYPES = ["wall", "inlet", "outlet", "open", "farField", "constraint", "baffle"]
 
 SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translating", "Rough"],
             ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure"],
             ["Static pressure", "Uniform velocity", "Outflow"],
             ["Ambient pressure"],
+            ["Characteristic-based"],
             ["Symmetry", "2D bounding plane"],
             ["Porous Baffle"]]
 
@@ -62,6 +64,7 @@ SUBTYPES = [["fixed", "slip", "partialSlip", "translating", "rough"],
             ["uniformVelocity", "volumetricFlowRate", "massFlowRate", "totalPressure", "staticPressure"],
             ["staticPressure", "uniformVelocity", "outFlow"],
             ["totalPressureOpening"],
+            ["characteristic"],
             ["symmetry", "twoDBoundingPlane"],
             ["porousBaffle"]]
 
@@ -79,30 +82,33 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                       "Normal component imposed for outflow; velocity fixed for reverse flow",
                       "All fields extrapolated; use with care!"],
                      ["Boundary open to surrounding with total pressure specified"],
+                     ["Sub-/supersonic inlet/outlet with prescribed far-field values"],
                      ["Symmetry of flow quantities about boundary face",
                       "Bounding planes for 2D meshing and simulation"],
                      ["Permeable screen"]]
 
-# For each sub-type, whether the basic tab is enabled, the panel number to show (ignored if false), whether
+# For each sub-type, whether the basic tab is enabled, the panel numbers to show (ignored if false), whether
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
-# whether volume fraction panel is shown
-BOUNDARY_UI = [[[False, 0, False, False, False],  # No slip
-                [False, 0, False, False, False],  # Slip
-                [True, 2, False, False, False],  # Partial slip
-                [True, 0, False, False, False],  # Translating wall
-                [True, 0, False, False, False]],  # Rough
-               [[True, 0, True, True, True],  # Velocity
-                [True, 3, False, True, True],  # Vol flow rate
-                [True, 4, False, True, True],  # Mass Flow rate
-                [True, 1, False, True, True],  # Total pressure
-                [True, 1, False, True, True]],  # Static pressure
-               [[True, 1, False, False, True],  # Static pressure
-                [True, 0, False, False, True],  # Uniform velocity
-                [False, 0, False, False, False]],  # Outflow
-               [[True, 1, False, True, True]],  # Opening
-               [[False, 0, False, False, False],  # Symmetry plane
-                [False, 0, False, False, False]],  # 2D plane
-               [[True, 5, False, False, False]]]  # Permeable screen
+# whether volume fraction panel is shown, whether thermal GUI is shown,
+# rows of thermal UI to show (all shown if None)
+BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
+                [False, [], False, False, False, True, None],  # Slip
+                [True, [2], False, False, False, True, None],  # Partial slip
+                [True, [0], False, False, False, True, None],  # Translating wall
+                [True, [0], False, False, False, True, None]],  # Rough
+               [[True, [0], True, True, True, True, [2]],  # Velocity
+                [True, [3], False, True, True, True, [2]],  # Vol flow rate
+                [True, [4], False, True, True, True, [2]],  # Mass Flow rate
+                [True, [1], False, True, True, True, [2]],  # Total pressure
+                [True, [1], False, True, True, True, [2]]],  # Static pressure
+               [[True, [1], False, False, True, False, None],  # Static pressure
+                [True, [0], False, False, True, False, None],  # Uniform velocity
+                [False, [], False, False, False, False, None]],  # Outflow
+               [[True, [1], False, True, True, True, [2]]],  # Opening
+               [[True, [0, 1], False, True, False, True, [2]]],  # Far-field
+               [[False, [], False, False, False, False, None],  # Symmetry plane
+                [False, [], False, False, False, False, None]],  # 2D plane
+               [[True, [5], False, False, False, False, None]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows
 TURBULENT_INLET_SPEC = {"kOmegaSST":
@@ -115,21 +121,16 @@ TURBULENT_INLET_SPEC = {"kOmegaSST":
                          [[0, 1],  # k, omega
                           [2, 3]]]}  # I, l
 
-THERMAL_BOUNDARY_NAMES = ["Fixed Temperature",
+THERMAL_BOUNDARY_NAMES = ["Fixed temperature",
                           "Adiabatic",
-                          "Fixed Gradient",
-                          "Mixed",
-                          "Heat-transfer coefficient",
-                          "Coupled"]
+                          "Fixed conductive heat flux"]
 
-THERMAL_BOUNDARY_TYPES = ["fixedValue", "zeroGradient", "fixedGradient", "mixed", "HTC", "coupled"]
+THERMAL_BOUNDARY_TYPES = ["fixedValue", "zeroGradient", "fixedGradient"]
 
-THERMAL_HELPTEXT = ["Fixed Temperature", "No heat transfer on boundary", "Fixed value gradient",
-                    "Mixed fixedGradient and fixedValue", "Fixed heat flux", "Heat transfer coefficient",
-                    "Conjugate heat transfer with solid"]
+THERMAL_HELPTEXT = ["Fixed Temperature", "No conductive heat transfer", "Fixed conductive heat flux"]
 
 # For each thermal BC, the input rows presented to the user
-BOUNDARY_THERMALTAB = [[0], [], [1], [0, 1], [2], []]
+BOUNDARY_THERMALTAB = [[0], [], [1]]
 
 
 class TaskPanelCfdFluidBoundary:
@@ -139,8 +140,8 @@ class TaskPanelCfdFluidBoundary:
         self.obj = obj
 
         self.physics_model = physics_model
-        self.turbModel = (physics_model['TurbulenceModel']
-                          if physics_model['Turbulence'] == 'RANS' or physics_model['Turbulence'] == 'LES'
+        self.turbModel = (physics_model.TurbulenceModel
+                          if physics_model.Turbulence == 'RANS' or physics_model.Turbulence == 'LES'
                           else None)
         self.material_objs = material_objs
 
@@ -176,6 +177,10 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputWireDiameter.valueChanged.connect(self.inputWireDiameterChanged)
         self.form.inputSpacing.valueChanged.connect(self.inputSpacingChanged)
 
+        self.form.inputTemperature.valueChanged.connect(self.inputTemperatureChanged)
+        self.form.inputHeatFlux.valueChanged.connect(self.inputHeatFluxChanged)
+        self.form.inputHeatTransferCoeff.valueChanged.connect(self.inputHeatTransferCoeffChanged)
+
         self.form.comboTurbulenceSpecification.currentIndexChanged.connect(self.comboTurbulenceSpecificationChanged)
         self.form.inputKineticEnergy.valueChanged.connect(self.inputKineticEnergyChanged)
         self.form.inputSpecificDissipationRate.valueChanged.connect(self.inputSpecificDissipationRateChanged)
@@ -186,8 +191,6 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
 
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.comboThermalBoundaryTypeChanged)
-        # self.form.thermalFrame.setVisible(physics_model["Thermal"] is not None)
-        self.form.thermalFrame.setVisible(False)
 
         self.setInitialValues()
 
@@ -226,6 +229,13 @@ class TaskPanelCfdFluidBoundary:
         setInputFieldQuantity(self.form.inputWireDiameter, str(self.BoundarySettings.get('ScreenWireDiameter'))+"m")
         setInputFieldQuantity(self.form.inputSpacing, str(self.BoundarySettings.get('ScreenSpacing'))+"m")
 
+        self.form.comboThermalBoundaryType.addItems(THERMAL_BOUNDARY_NAMES)
+        thi = indexOrDefault(THERMAL_BOUNDARY_TYPES, self.BoundarySettings.get('ThermalBoundaryType'), 0)
+        self.form.comboThermalBoundaryType.setCurrentIndex(thi)
+        setInputFieldQuantity(self.form.inputTemperature, str(self.BoundarySettings.get('Temperature', 273.0))+"K")
+        setInputFieldQuantity(self.form.inputHeatFlux, str(self.BoundarySettings.get('HeatFlux', 0.0))+"W/m^2")
+        setInputFieldQuantity(self.form.inputHeatTransferCoeff, str(self.BoundarySettings.get('HeatTransferCoeff', 0.0))+"W/m^2/K")
+
         if self.turbModel is not None:
             self.form.comboTurbulenceSpecification.addItems(TURBULENT_INLET_SPEC[self.turbModel][0])
             ti = indexOrDefault(TURBULENT_INLET_SPEC[self.turbModel][1],
@@ -242,9 +252,6 @@ class TaskPanelCfdFluidBoundary:
         else:
             self.form.comboFluid.clear()
 
-        self.form.comboThermalBoundaryType.addItems(THERMAL_BOUNDARY_NAMES)
-        thi = indexOrDefault(THERMAL_BOUNDARY_TYPES, self.BoundarySettings.get('ThermalBoundaryType'), 0)
-        self.form.comboThermalBoundaryType.setCurrentIndex(thi)
         setInputFieldQuantity(self.form.inputKineticEnergy,
                               str(self.BoundarySettings.get('TurbulentKineticEnergy'))+"m^2/s^2")
         setInputFieldQuantity(self.form.inputSpecificDissipationRate,
@@ -280,17 +287,35 @@ class TaskPanelCfdFluidBoundary:
             if isinstance(self.form.layoutBasicValues.itemAt(paneli), QtGui.QWidgetItem):
                 self.form.layoutBasicValues.itemAt(paneli).widget().setVisible(False)
         if tab_enabled:
-            panel_number = BOUNDARY_UI[type_index][subtype_index][1]
-            self.form.layoutBasicValues.itemAt(panel_number).widget().setVisible(True)
-            if panel_number == 0:
-                reverse = BOUNDARY_UI[type_index][subtype_index][2]
-                # If user hasn't set a patch yet, initialise 'reverse' to default
-                if self.form.lineDirection.text() == "":
-                    self.form.checkReverse.setChecked(reverse)
+            panel_numbers = BOUNDARY_UI[type_index][subtype_index][1]
+            for panel_number in panel_numbers:
+                self.form.layoutBasicValues.itemAt(panel_number).widget().setVisible(True)
+                if panel_number == 0:
+                    reverse = BOUNDARY_UI[type_index][subtype_index][2]
+                    # If user hasn't set a patch yet, initialise 'reverse' to default
+                    if self.form.lineDirection.text() == "":
+                        self.form.checkReverse.setChecked(reverse)
         turb_enabled = BOUNDARY_UI[type_index][subtype_index][3]
         self.form.turbulenceFrame.setVisible(turb_enabled and self.turbModel is not None)
         alpha_enabled = BOUNDARY_UI[type_index][subtype_index][4]
         self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)
+        if self.physics_model.Thermal != 'None' and BOUNDARY_UI[type_index][subtype_index][5]:
+            self.form.thermalFrame.setVisible(True)
+            selected_rows = BOUNDARY_UI[type_index][subtype_index][6]
+            if selected_rows:
+                for rowi in range(self.form.layoutThermal.count()):
+                    for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
+                        item = self.form.layoutThermal.itemAt(rowi, role)
+                        if item:
+                            if isinstance(item, QtGui.QWidgetItem):
+                                item.widget().setVisible(False)
+                for row_enabled in selected_rows:
+                    for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
+                        item = self.form.layoutThermal.itemAt(row_enabled, role)
+                        if item:
+                            item.widget().setVisible(True)
+        else:
+            self.form.thermalFrame.setVisible(False)
 
     def updateSelectionbuttonUI(self):
         self.form.buttonDirection.setChecked(self.selecting_direction)
@@ -320,7 +345,11 @@ class TaskPanelCfdFluidBoundary:
             FreeCADGui.Selection.removeObserver(self)
         self.updateSelectionbuttonUI()
 
-    def directionSelection(self, doc_name, obj_name, sub, selectedPoint=None):
+    def addSelection(self, doc_name, obj_name, sub, selectedPoint=None):
+        # This is the direction selection
+        if not self.selecting_direction:
+            # Shouldn't be here
+            pass
         if FreeCADGui.activeDocument().Document.Name != self.obj.Document.Name:
             return
         selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
@@ -395,6 +424,15 @@ class TaskPanelCfdFluidBoundary:
     def inputSpacingChanged(self, value):
         inputCheckAndStore(value, "m", self.BoundarySettings, 'ScreenSpacing')
 
+    def inputTemperatureChanged(self, value):
+        inputCheckAndStore(value, "K", self.BoundarySettings, 'Temperature')
+
+    def inputHeatFluxChanged(self, value):
+        inputCheckAndStore(value, "W/m^2", self.BoundarySettings, 'HeatFlux')
+
+    def inputHeatTransferCoeffChanged(self, value):
+        inputCheckAndStore(value, "W/m^2/K", self.BoundarySettings, 'HeatTransferCoeff')
+
     def comboTurbulenceSpecificationChanged(self, index):
         self.form.labelTurbulenceDescription.setText(TURBULENT_INLET_SPEC[self.turbModel][2][index])
         self.BoundarySettings['TurbulenceInletSpecification'] = TURBULENT_INLET_SPEC[self.turbModel][1][index]
@@ -416,8 +454,7 @@ class TaskPanelCfdFluidBoundary:
         index = self.form.comboTurbulenceSpecification.currentIndex()
         panel_numbers = TURBULENT_INLET_SPEC[self.turbModel][3][index]
         # Enables specified rows of a QFormLayout
-        from PySide.QtGui import QFormLayout
-        for rowi in range(self.form.layoutTurbulenceValues.rowCount()):
+        for rowi in range(self.form.layoutTurbulenceValues.count()):
             for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
                 item = self.form.layoutTurbulenceValues.itemAt(rowi, role)
                 if isinstance(item, QtGui.QWidgetItem):
@@ -438,14 +475,13 @@ class TaskPanelCfdFluidBoundary:
     def comboThermalBoundaryTypeChanged(self, index):
         self.form.labelThermalDescription.setText(THERMAL_HELPTEXT[index])
         self.BoundarySettings['ThermalBoundaryType'] = THERMAL_BOUNDARY_TYPES[index]
-        self.update_thermal_ui()
+        self.updateThermalUi()
 
-    def update_thermal_ui(self):
+    def updateThermalUi(self):
         index = self.form.comboThermalBoundaryType.currentIndex()
         panel_numbers = BOUNDARY_THERMALTAB[index]
         # Enables specified rows of a QFormLayout
-        from PySide.QtGui import QFormLayout
-        for rowi in range(2, self.form.layoutThermal.rowCount()):  # Input values only start at row 2 of this form
+        for rowi in range(2, self.form.layoutThermal.count()):  # Input values only start at row 2 of this form
             for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
                 item = self.form.layoutThermal.itemAt(rowi, role)
                 if isinstance(item, QtGui.QWidgetItem):
@@ -495,6 +531,14 @@ class TaskPanelCfdFluidBoundary:
         # Wall
         FreeCADGui.doCommand("bc['SlipRatio'] "
                              "= {}".format(self.BoundarySettings['SlipRatio']))
+        # Thermal
+        FreeCADGui.doCommand("bc['Temperature'] "
+                             "= {}".format(self.BoundarySettings['Temperature']))
+        FreeCADGui.doCommand("bc['HeatFlux'] "
+                             "= {}".format(self.BoundarySettings['HeatFlux']))
+        FreeCADGui.doCommand("bc['HeatTransferCoeff'] "
+                             "= {}".format(self.BoundarySettings['HeatTransferCoeff']))
+
         # Turbulence
         FreeCADGui.doCommand("bc['TurbulenceInletSpecification'] "
                              "= '{}'".format(self.BoundarySettings['TurbulenceInletSpecification']))

@@ -116,7 +116,7 @@ castellatedMeshControls
 %{%(SnappySettings/MeshRegions%)
         %(SnappySettings/MeshRegions/%(0%)/RegionName%)
         {
-            level (%(SnappySettings/MeshRegions/%(0%)/EdgeRefinementLevel%) %(SnappySettings/MeshRegions/%(0%)/EdgeRefinementLevel%));
+            level (%(SnappySettings/MeshRegions/%(0%)/RefinementLevel%) %(SnappySettings/MeshRegions/%(0%)/MaxRefinementLevel%));
 %{%(SnappySettings/MeshRegions/%(0%)/Baffle%)
 %:True
             faceType baffle;

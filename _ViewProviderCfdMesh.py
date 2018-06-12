@@ -54,8 +54,8 @@ class _ViewProviderCfdMesh:
 
     def setEdit(self, vobj, mode):
         for obj in FreeCAD.ActiveDocument.Objects:
-            if obj.isDerivedFrom("Part::Feature"):
-                obj.ViewObject.hide()
+            #if obj.isDerivedFrom("Part::Feature"):
+            #    obj.ViewObject.hide()
             if hasattr(obj, 'Proxy') and hasattr(obj.Proxy, 'Type') and obj.Proxy.Type == "CfdMesh":
                 obj.ViewObject.show()
         import _TaskPanelCfdMesh

@@ -42,6 +42,7 @@ import platform
 import subprocess
 from PySide.QtCore import QObject, Signal, QThread
 from CfdResidualPlot import ResidualPlot
+from collections import OrderedDict
 
 
 class CfdRunnable(QObject, object):
@@ -99,11 +100,7 @@ class CfdRunnableFoam(CfdRunnable):
 
         self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam(self.analysis)
 
-        self.UxResiduals = [1.0]
-        self.UyResiduals = [1.0]
-        self.UzResiduals = [1.0]
-        self.pResiduals = [0.0]
-        self.niter = 0
+        self.initResiduals()
 
         self.residualPlot = None
 
@@ -113,12 +110,20 @@ class CfdRunnableFoam(CfdRunnable):
     def check_prerequisites(self):
         return ""
 
-    def get_solver_cmd(self, case_dir):
-        self.UxResiduals = [1.0]
-        self.UyResiduals = [1.0]
-        self.UzResiduals = [1.0]
-        self.pResiduals = [1.0]
+    def initResiduals(self):
+        self.UxResiduals = []
+        self.UyResiduals = []
+        self.UzResiduals = []
+        self.pResiduals = []
+        self.rhoResiduals = []
+        self.EResiduals = []
+        self.kResiduals = []
+        self.omegaResiduals = []
         self.niter = 0
+
+    def get_solver_cmd(self, case_dir):
+        self.initResiduals()
+
         self.print_next_error_lines = 0
         self.print_next_error_file = False
 
@@ -138,7 +143,6 @@ class CfdRunnableFoam(CfdRunnable):
 
     def process_output(self, text):
         loglines = text.split('\n')
-        printlines = []
         for line in loglines:
             # print line,
             split = line.split()
@@ -148,16 +152,36 @@ class CfdRunnableFoam(CfdRunnable):
                 self.niter += 1
 
             # print split
-            if "Ux," in split and self.niter > len(self.UxResiduals):
+            if "Ux," in split and self.niter-1 > len(self.UxResiduals):
                 self.UxResiduals.append(float(split[7].split(',')[0]))
-            if "Uy," in split and self.niter > len(self.UyResiduals):
+            if "Uy," in split and self.niter-1 > len(self.UyResiduals):
                 self.UyResiduals.append(float(split[7].split(',')[0]))
-            if "Uz," in split and self.niter > len(self.UzResiduals):
+            if "Uz," in split and self.niter-1 > len(self.UzResiduals):
                 self.UzResiduals.append(float(split[7].split(',')[0]))
-            if "p," in split and self.niter > len(self.pResiduals):
+            if "p," in split and self.niter-1 > len(self.pResiduals):
                 self.pResiduals.append(float(split[7].split(',')[0]))
+            # HiSA coupled residuals
+            if "Residual:" in split and self.niter-1 > len(self.rhoResiduals):
+                self.rhoResiduals.append(float(split[4]))
+                self.UxResiduals.append(float(split[5].lstrip('(')))
+                self.UyResiduals.append(float(split[6]))
+                self.UzResiduals.append(float(split[7].rstrip(')')))
+                self.EResiduals.append(float(split[8]))
+            if "k," in split and self.niter-1 > len(self.kResiduals):
+                self.kResiduals.append(float(split[7].split(',')[0]))
+            if "omega," in split and self.niter-1 > len(self.omegaResiduals):
+                self.omegaResiduals.append(float(split[7].split(',')[0]))
 
-        self.residualPlot.updateResiduals(self.UxResiduals, self.UyResiduals, self.UzResiduals, self.pResiduals)
+        if self.niter > 1:
+            self.residualPlot.updateResiduals(OrderedDict([
+                ('$\\rho$', self.rhoResiduals),
+                ('$U_x$', self.UxResiduals),
+                ('$U_y$', self.UyResiduals),
+                ('$U_z$', self.UzResiduals),
+                ('$p$', self.pResiduals),
+                ('$E$', self.EResiduals),
+                ('$k$', self.kResiduals),
+                ('$\\omega$', self.omegaResiduals)]))
 
     def processErrorOutput(self, err):
         """

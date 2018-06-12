@@ -64,7 +64,6 @@ class _TaskPanelCfdZone:
         self.partNameList = list(self.obj.partNameList)
         self.partNameListOrig = list(self.obj.partNameList)
 
-
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdZone.ui"))
 
         self.form.selectReference.clicked.connect(self.selectReference)
@@ -392,6 +391,10 @@ class _TaskPanelCfdZone:
         elif self.obj.Name.startswith('InitialisationZone'):
             self.obj.initialisationZoneProperties = self.p
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.partNameList = {}".format(self.obj.Name, self.partNameList))
+        FreeCADGui.doCommand("sl = []")
+        for s in self.partNameList:
+            FreeCADGui.doCommand("sl.append(FreeCAD.ActiveDocument.{})".format(s))
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.shapeList = sl".format(self.obj.Name))
 
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()

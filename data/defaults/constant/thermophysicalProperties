@@ -1,0 +1,56 @@
+%{%(solver/solverName%)
+%:hisa
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+thermoType
+{
+    type            hePsiThermo;
+    mixture         pureMixture;
+%{%(physics/Turbulence%)
+%:Inviscid
+    transport       const;
+%:default
+    transport       sutherland;
+%}
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
+
+
+mixture
+{
+   specie
+   {
+       nMoles          1;
+       molWeight       %(fluidProperties/0/MolarMass%);
+   }
+   thermodynamics
+   {
+       Cp              %(fluidProperties/0/Cp%);
+       Hf              0;
+   }
+   transport
+   {
+%{%(physics/Turbulence%)
+%:Inviscid
+       mu              0;
+       Pr              1;
+%:default
+       As              %(fluidProperties/0/SutherlandConstant%);
+       Ts              %(fluidProperties/0/SutherlandTemperature%);
+%}
+   }
+}
+
+// ************************************************************************* //
+%}

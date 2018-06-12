@@ -32,7 +32,7 @@ boundaryField
 %:slip
 %[0/_boundary_zeroGradient%]
 %}
-%:inlet open
+%:inlet open farField
 %{%(boundaries/%(0%)/TurbulenceInletSpecification%)
 %:TKEAndSpecDissipationRate
     %(0%)

@@ -60,6 +60,8 @@ class _TaskPanelCfdMeshRegion:
         self.form.if_refinelevel.valueChanged.connect(self.refinelevel_changed)
         self.form.if_edgerefinement.valueChanged.connect(self.edgerefinement_changed)
 
+        self.form.baffle_check.stateChanged.connect(self.baffleChanged)
+
         self.form.refinement_frame.setVisible(False)
         self.form.boundlayer_frame.setVisible(False)
         self.form.check_boundlayer.stateChanged.connect(self.boundary_layer_state_changed)
@@ -159,7 +161,7 @@ class _TaskPanelCfdMeshRegion:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.RegionEdgeRefinement "
                                  "= {}".format(self.obj.Name, self.edgerefinement))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Baffle "
-                                 "= {}".format(self.obj.Name, self.obj.Baffle))
+                                 "= {}".format(self.obj.Name, self.baffle))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Internal "
                                  "= {}".format(self.obj.Name, self.obj.Internal))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.InternalRegion "
@@ -237,6 +239,7 @@ class _TaskPanelCfdMeshRegion:
             self.firstlayerheight = self.obj.FirstLayerHeight
             self.refinelevel = self.obj.RefinementLevel
             self.edgerefinement = self.obj.RegionEdgeRefinement
+            self.baffle = self.obj.Baffle
 
     def set_internal_surface(self):
         if self.obj.Internal:
@@ -326,6 +329,8 @@ class _TaskPanelCfdMeshRegion:
     def edgerefinement_changed(self, value):
         self.edgerefinement = value
 
+    def baffleChanged(self, checkedState):
+        self.baffle = bool(checkedState)
 
     def radiusChanged(self,value):
         inputCheckAndStore(value, "m", self.obj.InternalRegion, 'SphereRadius')

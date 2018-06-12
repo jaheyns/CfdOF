@@ -111,10 +111,10 @@ class BlockTest(unittest.TestCase):
 
     def createNewPhysics(self):
         self.physics_object = CfdPhysicsSelection.makeCfdPhysicsSelection()
-        phys = self.physics_object.PhysicsModel
-        phys['Time'] = 'Steady'
-        phys['Flow'] = 'Incompressible'
-        phys['TurbulenceModel'] = 'Laminar'
+        phys = self.physics_object
+        phys.Time = 'Steady'
+        phys.Flow = 'Incompressible'
+        phys.TurbulenceModel = 'Laminar'
         self.active_doc.recompute()
 
     def createNewInitialise(self):

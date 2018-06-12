@@ -53,20 +53,19 @@ class CfdOFWorkbench(Workbench):
         import FemGui
 
         import _CommandCfdAnalysis
+        import CfdPhysicsSelection
+        import CfdFluidMaterial
         import _CommandCfdSolverFoam
         import _CommandCfdSolverControl
-        import _CommandCfdPhysicsSelection
         import _CommandCfdInitialiseInternalFlowField
         import _CommandCfdFluidBoundary
         import _CommandCfdPorousZone
         import _CommandCfdInitialisationZone
-        import _CommandCfdFluidMaterial
 
         import _CommandCfdMeshRegion
         # import _CommandPrintMeshInfo  # Create a fluid specific check as the current does not contain any
         #                               # useful info for flow (see checkMesh)
         import _CommandCfdMeshFromShape
-
 
         cmdlst = ['Cfd_Analysis','Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal',

@@ -11,9 +11,16 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+%{%(solver/solverName%)
+%:hisa
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform %(initialValues/Pressure%);
+%:default
 dimensions      [0 2 -2 0 0 0 0];
 
 internalField   uniform %(initialValues/KinematicPressure%);
+%}
 
 boundaryField
 {
@@ -23,7 +30,16 @@ boundaryField
 %:empty
 %[0/_boundary_empty%]
 %:wall
+%{%(solver/solverName%)
+%:hisa
+    %(0%)
+    {
+        type        characteristicWallPressure;
+        value       $internalField;
+    }
+%:default
 %[0/_boundary_zeroGradient%]
+%}
 %:inlet
 %{%(boundaries/%(0%)/BoundarySubtype%)
 %:totalPressure
@@ -37,7 +53,12 @@ boundaryField
     %(0%)
     {
         type        fixedValue;
+%{%(solver/solverName%)
+%:hisa
+        value       uniform %(boundaries/%(0%)/Pressure%);
+%:default
         value       uniform %(boundaries/%(0%)/KinematicPressure%);
+%}
     }
 %:default
 %[0/_boundary_zeroGradient%]
@@ -48,10 +69,28 @@ boundaryField
     %(0%)
     {
         type        fixedValue;
+%{%(solver/solverName%)
+%:hisa
+        value       uniform %(boundaries/%(0%)/Pressure%);
+%:default
         value       uniform %(boundaries/%(0%)/KinematicPressure%);
+%}
     }
 %:default
 %[0/_boundary_zeroGradient%]
+%}
+%:farField
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:characteristic
+    %(0%)
+    {
+        type        characteristicFarfieldPressure;
+        UInf        ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        pInf        %(boundaries/%(0%)/Pressure%);
+        TInf        %(boundaries/%(0%)/Temperature%);
+        gamma       1.4; //TODO
+        value       $internalField;
+    }
 %}
 %:open
     %(0%)

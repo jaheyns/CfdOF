@@ -1,3 +1,5 @@
+%{%(solver/solverName%)
+%:simpleFoam porousSimpleFoam pimpleFoam interFoam multiphaseInterFoam
 %[_header%]
 FoamFile
 {
@@ -56,3 +58,4 @@ sigmas
 %}
 
 // ************************************************************************* //
+%}

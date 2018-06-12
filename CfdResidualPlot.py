@@ -25,6 +25,7 @@
 from PySide import QtCore
 import FreeCAD
 import Plot
+import math
 
 
 class ResidualPlot:
@@ -32,21 +33,15 @@ class ResidualPlot:
         self.fig = Plot.figure(FreeCAD.ActiveDocument.Name + "Residuals")
 
         self.updated = False
-        self.UxResiduals = []
-        self.UyResiduals = []
-        self.UzResiduals = []
-        self.pResiduals = []
+        self.residuals = {}
 
         self.Timer = QtCore.QTimer()
         self.Timer.timeout.connect(self.refresh)
         self.Timer.start(2000)
 
-    def updateResiduals(self, UxResiduals, UyResiduals, UzResiduals, pResiduals):
+    def updateResiduals(self, residuals):
         self.updated = True
-        self.UxResiduals = UxResiduals
-        self.UyResiduals = UyResiduals
-        self.UzResiduals = UzResiduals
-        self.pResiduals = pResiduals
+        self.residuals = residuals
 
     def refresh(self):
         if self.updated:
@@ -57,13 +52,20 @@ class ResidualPlot:
             ax.set_xlabel("Iteration")
             ax.set_ylabel("Residual")
 
-            ax.plot(self.UxResiduals, label="$U_x$", color='violet', linewidth=1)
-            ax.plot(self.UyResiduals, label="$U_y$", color='green', linewidth=1)
-            ax.plot(self.UzResiduals, label="$U_z$", color='blue', linewidth=1)
-            ax.plot(self.pResiduals, label="$p$", color='orange', linewidth=1)
+            last_residuals_min = 1e-2
+            iter_max = 100
+            for k in self.residuals:
+                if self.residuals[k]:
+                    ax.plot(self.residuals[k], label=k, linewidth=1)
+                    last_residuals_min = min([last_residuals_min]+self.residuals[k][1:-1])
+                    iter_max = max(iter_max, len(self.residuals[k]))
 
             ax.grid()
             ax.set_yscale('log')
-            ax.legend()
+            # Decrease in increments of 10
+            ax.set_ylim([10**(math.floor(math.log10(last_residuals_min))), 1])
+            # Increase in increments of 100
+            ax.set_xlim([0, math.ceil(float(iter_max)/100)*100])
+            ax.legend(loc='lower left')
 
             self.fig.canvas.draw()

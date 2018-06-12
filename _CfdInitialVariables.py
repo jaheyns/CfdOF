@@ -30,20 +30,31 @@ __url__ = "http://www.freecadweb.org"
 class _CfdInitialVariables:
     """ The field initialisation object """
     def __init__(self, obj):
-        obj.addProperty("App::PropertyPythonObject", "InitialVariables")
-        # Default settings
-        obj.InitialVariables = {"PotentialFoam": True,
-                                "Ux": 0,
-                                "Uy": 0,
-                                "Uz": 0,
-                                "Pressure": 0,
-                                "UseInletTurbulenceValues": False,
-                                "Inlet": "",
-                                "k": 0.01,
-                                "omega": 1,
-                                "alphas": {}}
         obj.Proxy = self
         self.Type = "InitialVariables"
+        self.initProperties(obj)
+
+    def initProperties(self, obj):
+        if 'InitialVariables' not in obj.PropertiesList:
+            obj.addProperty("App::PropertyPythonObject", "InitialVariables")
+            obj.InitialVariables = {}
+        # Default settings
+        defaults = {
+            'PotentialFoam': True,
+            'UseInletUPValues': False,
+            'Ux': 0,
+            'Uy': 0,
+            'Uz': 0,
+            'Pressure': 0,
+            'UseInletTemperatureValues': False,
+            'Temperature': 293,
+            'UseInletTurbulenceValues': False,
+            'k': 0.01,
+            'omega': 1,
+            'alphas': {},
+            'Inlet': ""}
+        for k in defaults:
+            obj.InitialVariables[k] = obj.InitialVariables.get(k, defaults[k])
 
     def execute(self, obj):
         return

@@ -8,83 +8,41 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-solvers
-{
-    "(p|p_rgh|pcorr)"
-    {
-        solver           GAMG;
-        tolerance        1e-7;
-        relTol           0.01;
-        smoother         GaussSeidel;
-        nPreSweeps       0;
-        nPostSweeps      2;
-        cacheAgglomeration on;
-        agglomerator     faceAreaPair;
-        nCellsInCoarsestLevel 10;
-        mergeLevels      1;
-    }
-
-    "(pFinal|p_rghFinal|pcorrFinal)"
-    {
-        $p;
-        relTol          0;
-    }
-
-    Phi
-    {
-        $p;
-    }
-
-    U
-    {
-        solver           smoothSolver;
-        smoother         GaussSeidel;
-        tolerance        1e-8;
-        relTol           0.1;
-        nSweeps          1;
-    }
-
-    UFinal
-    {
-        $U;
-        relTol          0;
-    }
-
-    "(k|epsilon|omega|f|v2)"
-    {
-        solver           smoothSolver;
-        smoother         GaussSeidel;
-        tolerance        1e-8;
-        relTol           0.1;
-        nSweeps          1;
-    }
-
-    "(k|epsilon|omega|f|v2)Final"
-    {
-        $k;
-        relTol          0;
-    }
-
 %{%(solver/solverName%)
-%:interFoam multiphaseInterFoam
-    "alpha.*"
-    {
-        nAlphaCorr      2;
-        nAlphaSubCycles 1;
-        cAlpha          1;
+%:hisa
+pseudoTime
+{
+    pseudoTol          1e-6 (1e-6 1e-6 1e-6) 1e-6;
+    pseudoCoNum        0.1;
+    pseudoCoNumMax     25.0;
 
-        MULESCorr       yes;
-        nLimiterIter    3;
+    pseudoCoNumMaxIncreaseFactor  1.5;
+    pseudoCoNumMin                0.1;
 
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       1e-8;
-        relTol          0;
-    }
+    localTimestepping             true;
+    localTimesteppingBounding     true;
+    localTimesteppingLowerBound   0.85;
 
-%}
+    // Last line of defense, in case of very poor grid
+    rhoMin              0.01;  // TODO: Generalise
 }
 
+flowSolver
+{
+    solver             GMRES;
+    GMRES
+    {
+        inviscidJacobian  LaxFriedrich;
+        viscousJacobian   laplacian;
+        preconditioner    LUSGS;
+
+        maxIter           20;
+        nKrylov           8;
+        solverTolRel      1e-1 (1e-1 1e-1 1e-1) 1e-1;
+    }
+}
+
+%:default
 %{%(physics/Time%)
 %:Steady
 SIMPLE
@@ -135,12 +93,131 @@ PIMPLE
 }
 
 %}
+%}
 potentialFlow
 {
     nNonOrthogonalCorrectors 8;
 
     PhiRefValue 0;
     PhiRefCell 0;
+}
+
+solvers
+{
+%{%(solvers/solverName%)
+%:hisa
+%:default
+    "(p|p_rgh|pcorr)"
+    {
+        solver           GAMG;
+        tolerance        1e-7;
+        relTol           0.01;
+        smoother         GaussSeidel;
+        nPreSweeps       0;
+        nPostSweeps      2;
+        cacheAgglomeration on;
+        agglomerator     faceAreaPair;
+        nCellsInCoarsestLevel 10;
+        mergeLevels      1;
+    }
+
+    "(pFinal|p_rghFinal|pcorrFinal)"
+    {
+        $p;
+        relTol          0;
+    }
+
+    U
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-8;
+        relTol           0.1;
+        nSweeps          1;
+    }
+
+    UFinal
+    {
+        $U;
+        relTol           0;
+    }
+
+%}
+%{%(solver/solverName%)
+%:interFoam multiphaseInterFoam
+    "alpha.*"
+    {
+        nAlphaCorr      2;
+        nAlphaSubCycles 1;
+        cAlpha          1;
+
+        MULESCorr       yes;
+        nLimiterIter    3;
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0;
+    }
+
+%}
+%{%(physics/Turbulence%)
+%:RANS
+    "(k|omega|nuTilda)"
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-8;
+        relTol           0.1;
+        nSweeps          1;
+        minIter          1;
+    }
+
+    "(k|omega|nuTilda)Final"
+    {
+        $k;
+        relTol          0;
+    }
+
+%}
+%{%(solver/solverName%)
+%:hisa
+    yPsi
+    {
+        solver          GAMG;
+        smoother        GaussSeidel;
+        nCellsInCoarsestLevel 10;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+        tolerance       1e-3;
+        relTol          0;
+    }
+
+    yWall
+    {
+        solver          GAMG;
+        smoother        symGaussSeidel;
+        nCellsInCoarsestLevel 10;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+        tolerance       1e-8;
+        relTol          0;
+    }
+
+%}
+    Phi
+    {
+        solver           GAMG;
+        tolerance        1e-7;
+        relTol           0.01;
+        smoother         GaussSeidel;
+        nPreSweeps       0;
+        nPostSweeps      2;
+        cacheAgglomeration on;
+        agglomerator     faceAreaPair;
+        nCellsInCoarsestLevel 10;
+        mergeLevels      1;
+    }
 }
 
 relaxationFactors
@@ -168,8 +245,11 @@ relaxationFactors
 %:Transient
     equations
     {
+%{%(solver/solverName%)
+%:default
         U               0.6;
         UFinal          1;
+%}
 %{%(physics/Turbulence%)
 %:RANS
 %{%(physics/TurbulenceModel%)
@@ -178,13 +258,22 @@ relaxationFactors
         kFinal          1;
         omega           0.5;
         omegaFinal      1;
+%:SpalartAllmaras
+        nuTilda         0.5;
 %}
 %}
     }
-    fields
+%{%(solver/solverName%)
+%:hisa
+    yWall               0.7;
+%}
+%{%(solver/solverName%)
+%:default
+q    fields
     {
         p               0.3;
     }
+%}
 %}
 }
 

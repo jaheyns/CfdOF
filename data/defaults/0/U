@@ -24,9 +24,15 @@ boundaryField
 %:fixed rough
     %(0%)
     {
+%{%(solver/solverName%)
+%:hisa
+        type        boundaryCorrectedFixedValue;
+        value       uniform (0 0 0);
+%:default
         // movingWallVelocity reduces to fixedValue if the mesh is not moving
         type        movingWallVelocity;
         value       uniform (0 0 0);
+%}
     }
 %:slip
     %(0%)
@@ -115,6 +121,19 @@ boundaryField
         inletValue  (0 0 0);
         //TODO: We need to write an out-flowing value here so that adjustPhi can have an adjustable flux to work
         //TODO: with at iteration 1
+        value       $internalField;
+    }
+%}
+%:farField
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:characteristic
+    %(0%)
+    {
+        type        characteristicFarfieldVelocity;
+        UInf        ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        pInf        %(boundaries/%(0%)/Pressure%);
+        TInf        %(boundaries/%(0%)/Temperature%);
+        gamma       1.4; //TODO
         value       $internalField;
     }
 %}

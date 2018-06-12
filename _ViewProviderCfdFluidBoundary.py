@@ -96,7 +96,7 @@ class _ViewProviderCfdFluidBoundary:
         for obj in FreeCAD.ActiveDocument.Objects:
             if obj.isDerivedFrom("Fem::FemMeshObject"):
                 obj.ViewObject.hide()
-                obj.Part.ViewObject.show()
+                #obj.Part.ViewObject.show()
         self.Object.ViewObject.show()
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)

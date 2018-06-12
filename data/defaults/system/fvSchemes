@@ -8,20 +8,46 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+%{%(solver/solverName%)
+%:hisa
+fluxScheme          AUSMPlusUp;
+%}
+
 %{%(physics/Time%)
 %:Steady
 
 ddtSchemes
 {
+%{%(solver/solverName%)
+%:hisa
+    default         bounded dualTime rPseudoDeltaT steadyState;
+%:default
     default         steadyState;
+%}
 }
 
 gradSchemes
 {
     // Limit gradient to improve stability when bad cells encountered 
     // (0 = no limiting; 1 = do not exceed surrounding cells)
+%{%(solver/solverName%)
+%:hisa
+    default         cellLimited faceLeastSquares linear 0.6;
+    gradTvd         cellLimited faceLeastSquares linear 0.6;
+%:default
     default         cellLimited Gauss linear 0.95;
     grad(p)         Gauss linear;
+%}
+%{%(turbulence/type%)
+%:RANS
+%{%(turbulence/model%)
+%:kOmegaSST
+    grad(k)          cellLimited Gauss linear 0.9;
+    grad(omega)      cellLimited Gauss linear 0.9;
+%:SpalartAllmaras
+    grad(nuTilda)    cellLimited Gauss linear 0.9;
+%}
+%}
 }
 
 divSchemes
@@ -37,7 +63,14 @@ divSchemes
 %:kOmegaSST
     div(phi,k)      bounded Gauss upwind;
     div(phi,omega)  bounded Gauss upwind;
+%:SpalartAllmaras
+    div(phi,nuTilda) bounded Gauss upwind;
 %}
+%}
+%{%(solver/solverName%)
+%:hisa
+    div(tauMC)      Gauss linear;
+    div(yPhi,yWall) Gauss linearUpwind grad(yWall);
 %}
 }
 
@@ -46,12 +79,26 @@ laplacianSchemes
     // Limited explicit correction to the surface normal gradient,
     // for stability in highly non-orthogonal cells.
     // (0 = uncorrected, fully implicit; 1 = full correction)
+%{%(solver/solverName%)
+%:hisa
+    default                     Gauss linear corrected;
+    laplacian(muEff,U)          Gauss linear compact;
+    laplacian(alphaEff,e)       Gauss linear compact;
+    laplacian(yPsi)             Gauss linear corrected;
+%:default
     default         Gauss linear limited 0.3;
+%}
 }
 
 interpolationSchemes
 {
     default         linear;
+%{%(solver/solverName%)
+%:hisa
+    reconstruct(rho) wVanLeer gradTvd;
+    reconstruct(U)   wVanLeer gradTvd;
+    reconstruct(T)   wVanLeer gradTvd;
+%}
 }
 
 snGradSchemes
@@ -59,7 +106,12 @@ snGradSchemes
     // Limited explicit correction to the surface normal gradient,
     // for stability in highly non-orthogonal cells.
     // (0 = uncorrected, fully implicit; 1 = full correction)
+%{%(solver/solverName%)
+%:default
     default         limited 0.3;
+%:hisa
+    default         corrected;
+%}
 }
 
 %:Transient
@@ -121,7 +173,15 @@ snGradSchemes
 %}
 wallDist
 {
+%{%(solver/solverName%)
+%:hisa
+    method    Poisson;
+    epsilon   0.1;     // Smaller = more accurate but less stable
+    tolerance 1e-5;
+    maxIter   10;
+%:default
     method meshWave;
+%}
 }
 
 

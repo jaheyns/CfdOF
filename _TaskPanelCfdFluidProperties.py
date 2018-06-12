@@ -42,9 +42,11 @@ if FreeCAD.GuiUp:
 
 class TaskPanelCfdFluidProperties:
     '''The editmode TaskPanel for FluidMaterial objects'''
-    def __init__(self, obj):
+    def __init__(self, obj, physics_obj):
         self.obj = obj
-        self.material = self.obj.Material
+        self.physics_obj = physics_obj
+        # Backward compat In case any properties added
+        self.obj.Proxy.initProperties(self.obj)
 
         # Initial version of the flow solver only support single region analysis and therefore selection_mode_solid
         # is not included.
@@ -63,42 +65,44 @@ class TaskPanelCfdFluidProperties:
 
         self.form.PredefinedMaterialLibraryComboBox.currentIndexChanged.connect(self.selectPredefine)
 
-        self.form.fDens.valueChanged.connect(self.densityChanged)
-        self.form.fViscosity.valueChanged.connect(self.viscosityChanged)
+        self.text_boxes = {}
+        self.fields = []
+        self.createTextBoxesBasedOnPhysics()
 
-        self.setTextFields(self.material)
+    def createTextBoxesBasedOnPhysics(self):
+        if self.physics_obj.Flow == 'Incompressible':
+            self.fields = ['Density', 'DynamicViscosity']
+        else:
+            self.fields = ['MolarMass', 'Cp', 'SutherlandConstant', 'SutherlandTemperature']
+        self.text_boxes = {}
+        for name in self.fields:
+            widget = FreeCADGui.UiLoader().createWidget("Gui::InputField")
+            widget.setObjectName(name)
+            widget.setProperty("format", "g")
+            val = getattr(self.obj, name)
+            widget.setProperty("unit", val)
+            widget.setProperty("minimum", 0)
+            widget.setProperty("singleStep", 0.1)
+            self.form.propertiesLayout.addRow(self.obj.getDocumentationOfProperty(name)+":", widget)
+            self.text_boxes[name] = widget
+            setInputFieldQuantity(widget, val)
 
     def selectPredefine(self):
         index = self.form.PredefinedMaterialLibraryComboBox.currentIndex()
 
         mat_file_path = self.form.PredefinedMaterialLibraryComboBox.itemData(index) 
         self.form.fluidDescriptor.setText(self.materials[mat_file_path]["Description"])
-        self.setTextFields(self.materials[mat_file_path])
-
-    def setTextFields(self,matmap):
-        if 'Density' in matmap:
-            setInputFieldQuantity(self.form.fDens, matmap['Density'])
-        if "DynamicViscosity" in matmap:
-            setInputFieldQuantity(self.form.fViscosity, matmap['DynamicViscosity'])
-
-    def densityChanged(self, quantity):
-        self.material['Density'] = str(quantity)
-
-    def viscosityChanged(self, quantity):
-        self.material['DynamicViscosity'] = str(quantity)
+        for m in self.fields:
+            setInputFieldQuantity(self.text_boxes[m], self.materials[mat_file_path].get(m, ''))
 
     def accept(self):
-        self.obj.Material = self.material
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
         doc.Document.recompute()
 
-        # Unlike the other dictionaries, 'Material' still stores values along with their units as str due to
-        # the structure of the database
-        FreeCADGui.doCommand("\nmat = FreeCAD.ActiveDocument." + self.obj.Name + ".Material")
-        FreeCADGui.doCommand("mat['Density'] = '{}'".format(self.material['Density']))
-        FreeCADGui.doCommand("mat['DynamicViscosity'] = '{}'".format(self.material['DynamicViscosity']))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument." + self.obj.Name + ".Material = mat")
+        FreeCADGui.doCommand("\nmat = FreeCAD.ActiveDocument." + self.obj.Name)
+        for f in self.fields:
+            FreeCADGui.doCommand("mat.{} = '{}'".format(f, self.text_boxes[f].property("quantityString")))
 
     def reject(self):
         #self.remove_active_sel_server()
