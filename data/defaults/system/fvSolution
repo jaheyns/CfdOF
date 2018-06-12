@@ -10,7 +10,7 @@ FoamFile
 
 solvers
 {
-    "(p|p_rgh)"
+    "(p|p_rgh|pcorr)"
     {
         solver           GAMG;
         tolerance        1e-7;
@@ -24,7 +24,7 @@ solvers
         mergeLevels      1;
     }
 
-    "(pFinal|p_rghFinal|pcorr)"
+    "(pFinal|p_rghFinal|pcorrFinal)"
     {
         $p;
         relTol          0;
@@ -116,8 +116,7 @@ PIMPLE
     nOuterCorrectors 10;
     nNonOrthogonalCorrectors 2;
     nCorrectors         2;
-%}
-    residualControl
+    outerCorrectorResidualControl
     {
         U
         {
@@ -130,6 +129,7 @@ PIMPLE
             relTol      0;
         }
     }
+%}
     pRefValue   0;
     pRefCell    0;
 }
