@@ -129,9 +129,12 @@ class _TaskPanelCfdPhysicsSelection:
         material_objs = CfdTools.getMaterials(CfdTools.getParentAnalysisObject(self.obj))
         if len(material_objs) > 1:
             self.form.gravityFrame.setVisible(True)
-            gx = self.physicsModel['Gravity']["gx"]
-            gy = self.physicsModel['Gravity']["gy"]
-            gz = self.physicsModel['Gravity']["gz"]
+            # Add if absent for backward file compatibility
+            if not self.physicsModel.get('Gravity'):
+                self.physicsModel['Gravity'] = {'gx': 0.0, 'gy': -9.81, 'gz': 0.0}
+            gx = self.physicsModel['Gravity']['gx']
+            gy = self.physicsModel['Gravity']['gy']
+            gz = self.physicsModel['Gravity']['gz']
             setInputFieldQuantity(self.form.gx, "{} m/s^2".format(gx))
             setInputFieldQuantity(self.form.gy, "{} m/s^2".format(gy))
             setInputFieldQuantity(self.form.gz, "{} m/s^2".format(gz))
