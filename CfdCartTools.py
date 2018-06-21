@@ -147,8 +147,10 @@ class CfdCartTools():
         cf_settings = self.cf_settings
         cf_settings['MeshRegions'] = {}
         cf_settings['BoundaryLayers'] = {}
+        cf_settings['InternalRegions'] = {}
         snappy_settings = self.snappy_settings
         snappy_settings['MeshRegions'] = {}
+        snappy_settings['InternalRegions'] = {}
 
         from collections import defaultdict
         self.ele_meshpatch_map = defaultdict(list)
@@ -160,6 +162,13 @@ class CfdCartTools():
                 err = "Cartesian meshes should not be generated for boolean split compounds."
                 FreeCAD.Console.PrintError(err + "\n")
             for mr_obj in self.mesh_obj.MeshRegionList:
+                try:
+                    Internal = mr_obj.Internal
+                    InternalRegion = mr_obj.InternalRegion
+                except:
+                    Internal = False
+                    InternalRegion = {}
+
                 if mr_obj.RelativeLength:
                     # Store parameters per region
                     mr_rellen = mr_obj.RelativeLength
@@ -204,25 +213,26 @@ class CfdCartTools():
                                 tri_surface = ""
                                 snappy_mesh_region_list.append(baffle)
                             elif self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1:
-                                # Similarity search for patch used in boundary layer meshing
-                                meshFaceList = self.mesh_obj.Part.Shape.Faces
-                                for (i, mf) in enumerate(meshFaceList):
-                                    isSameGeo = CfdTools.isSameGeometry(elt, mf)
-                                    if isSameGeo and (mr_obj.NumberLayers > 1):  # Only one matching face
-                                        sfN = self.mesh_obj.ShapeFaceNames[i]
-                                        self.ele_meshpatch_map[mr_obj.Name].append(sfN)
-                                        patch_list.append(self.mesh_obj.ShapeFaceNames[i])
+                                if not(Internal):
+                                    # Similarity search for patch used in boundary layer meshing
+                                    meshFaceList = self.mesh_obj.Part.Shape.Faces
+                                    for (i, mf) in enumerate(meshFaceList):
+                                        isSameGeo = CfdTools.isSameGeometry(elt, mf)
+                                        if isSameGeo and (mr_obj.NumberLayers > 1):  # Only one matching face
+                                            sfN = self.mesh_obj.ShapeFaceNames[i]
+                                            self.ele_meshpatch_map[mr_obj.Name].append(sfN)
+                                            patch_list.append(self.mesh_obj.ShapeFaceNames[i])
 
-                                        # Limit expansion ratio to greater than 1.0 and less than 1.2
-                                        expratio = mr_obj.ExpansionRatio
-                                        expratio = min(1.2, max(1.0, expratio))
+                                            # Limit expansion ratio to greater than 1.0 and less than 1.2
+                                            expratio = mr_obj.ExpansionRatio
+                                            expratio = min(1.2, max(1.0, expratio))
 
-                                        cf_settings['BoundaryLayers'][self.mesh_obj.ShapeFaceNames[i]] = {
-                                            'NumberLayers': mr_obj.NumberLayers,
-                                            'ExpansionRatio': expratio,
-                                            'FirstLayerHeight': self.scale *
-                                                                Units.Quantity(mr_obj.FirstLayerHeight).Value
-                                        }
+                                            cf_settings['BoundaryLayers'][self.mesh_obj.ShapeFaceNames[i]] = {
+                                                'NumberLayers': mr_obj.NumberLayers,
+                                                'ExpansionRatio': expratio,
+                                                'FirstLayerHeight': self.scale *
+                                                                    Units.Quantity(mr_obj.FirstLayerHeight).Value
+                                            }
                         else:
                             FreeCAD.Console.PrintError("Cartesian meshes only support surface refinement.\n")
 
@@ -232,23 +242,48 @@ class CfdCartTools():
                         fid.close()
 
                     if self.mesh_obj.MeshUtility == 'cfMesh':
-                        cf_settings['MeshRegions'][mr_obj.Label] = {
-                            'RelativeLength': mr_rellen * self.clmax * self.scale,
-                            'RefinementThickness': self.scale * Units.Quantity(
-                                mr_obj.RefinementThickness).Value,
-                        }
+                        if not(Internal):
+                            cf_settings['MeshRegions'][mr_obj.Label] = {
+                                'RelativeLength': mr_rellen * self.clmax * self.scale,
+                                'RefinementThickness': self.scale * Units.Quantity(
+                                    mr_obj.RefinementThickness).Value,
+                            }
+                        else:
+                            cf_settings['InternalRegions'][mr_obj.Label] = {
+                                #"Internal": Internal,
+                                'RelativeLength': mr_rellen * self.clmax * self.scale,
+                                "InternalRegion": InternalRegion}
 
                     elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                        if not mr_obj.Baffle:
-                            snappy_mesh_region_list.append(mr_obj.Name)
-                        for rL in range(len(snappy_mesh_region_list)):
-                            mrName = mr_obj.Name + snappy_mesh_region_list[rL]
-                            snappy_settings['MeshRegions'][mrName] = {
-                                'RegionName': snappy_mesh_region_list[rL],
+                        if not(Internal):
+                            if not mr_obj.Baffle:
+                                snappy_mesh_region_list.append(mr_obj.Name)
+                            for rL in range(len(snappy_mesh_region_list)):
+                                mrName = mr_obj.Name + snappy_mesh_region_list[rL]
+                                snappy_settings['MeshRegions'][mrName] = {
+                                    'RegionName': snappy_mesh_region_list[rL],
+                                    'RefinementLevel': mr_obj.RefinementLevel,
+                                    'EdgeRefinementLevel': mr_obj.RegionEdgeRefinement,
+                                    'Baffle': mr_obj.Baffle
+                            }
+                        else:
+                            minX = InternalRegion["Center"]["x"] - InternalRegion["BoxLengths"]["x"]/2.0
+                            maxX = InternalRegion["Center"]["x"] + InternalRegion["BoxLengths"]["x"]/2.0
+                            minY = InternalRegion["Center"]["y"] - InternalRegion["BoxLengths"]["y"]/2.0
+                            maxY = InternalRegion["Center"]["y"] + InternalRegion["BoxLengths"]["y"]/2.0
+                            minZ = InternalRegion["Center"]["z"] - InternalRegion["BoxLengths"]["z"]/2.0
+                            maxZ = InternalRegion["Center"]["z"] + InternalRegion["BoxLengths"]["z"]/2.0
+                            snappy_settings['InternalRegions'][mr_obj.Label] = {
                                 'RefinementLevel': mr_obj.RefinementLevel,
-                                'EdgeRefinementLevel': mr_obj.RegionEdgeRefinement,
-                                'Baffle': mr_obj.Baffle
-                        }
+                                "Type" : InternalRegion["Type"],
+                                "Center" : InternalRegion["Center"],
+                                "Radius" : InternalRegion["SphereRadius"],
+                                "minX" : minX,
+                                "maxX" : maxX,
+                                "minY" : minY,
+                                "maxY" : maxY,
+                                "minZ" : minZ,
+                                "maxZ" : maxZ}
 
                 else:
                     FreeCAD.Console.PrintError(
@@ -345,6 +380,10 @@ class CfdCartTools():
                 self.cf_settings['BoundaryLayerPresent'] = True
             else:
                 self.cf_settings['BoundaryLayerPresent'] = False
+            if len(self.cf_settings["InternalRegions"]) > 0:
+                self.cf_settings['InternalRefinementRegionsPresent'] = True
+            else:
+                self.cf_settings['InternalRefinementRegionsPresent'] = False
 
         elif self.mesh_obj.MeshUtility == "snappyHexMesh":
             bound_box = self.part_obj.Shape.BoundBox
@@ -393,6 +432,11 @@ class CfdCartTools():
             else:
                 snappy_settings['ParallelMesh'] = True
             snappy_settings['NumberCores'] = self.mesh_obj.NumberCores
+
+            if len(self.snappy_settings["InternalRegions"]) > 0:
+                self.snappy_settings['InternalRefinementRegionsPresent'] = True
+            else:
+                self.snappy_settings['InternalRefinementRegionsPresent'] = False
 
         try:  # Make sure we restore cwd after exception here
             # Perform initialisation here rather than __init__ in case of path changes

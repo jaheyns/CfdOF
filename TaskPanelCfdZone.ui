@@ -22,22 +22,6 @@
      <property name="spacing">
       <number>8</number>
      </property>
-     <item row="1" column="0">
-      <widget class="QListWidget" name="listWidget">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>60</height>
-        </size>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="font">
@@ -51,6 +35,22 @@
        </property>
        <property name="text">
         <string>Region</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QListWidget" name="listWidget">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>60</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -183,7 +183,7 @@
                  <string notr="true"/>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -205,7 +205,7 @@
                  <string notr="true"/>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -227,7 +227,7 @@
                  <string notr="true"/>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -265,7 +265,7 @@
               <string notr="true">m^-2</string>
              </property>
              <property name="format" stdset="0">
-              <number>g</number>
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -287,7 +287,7 @@
               <string notr="true">m^-2</string>
              </property>
              <property name="format" stdset="0">
-              <number>g</number>
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -343,7 +343,7 @@
                  <string>0</string>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -359,7 +359,7 @@
                  <string>0</string>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -375,7 +375,7 @@
                  <string>0</string>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -400,7 +400,7 @@
               <string notr="true">m^-1</string>
              </property>
              <property name="format" stdset="0">
-              <number>g</number>
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -446,7 +446,7 @@
                  <string notr="true"/>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -471,7 +471,7 @@
                  <string notr="true"/>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -493,7 +493,7 @@
                  <string notr="true"/>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -537,7 +537,7 @@
               <string notr="true">m^-1</string>
              </property>
              <property name="format" stdset="0">
-              <number>g</number>
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -559,7 +559,7 @@
               <string notr="true">m^-2</string>
              </property>
              <property name="format" stdset="0">
-              <number>g</number>
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -581,7 +581,7 @@
               <string notr="true">m^-1</string>
              </property>
              <property name="format" stdset="0">
-              <number>g</number>
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -619,7 +619,7 @@
                  <double>0.000000000000000</double>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -650,7 +650,7 @@
               <double>0.000000000000000</double>
              </property>
              <property name="format" stdset="0">
-              <number>g</number>
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -672,7 +672,7 @@
               <double>0.000000000000000</double>
              </property>
              <property name="format" stdset="0">
-              <number>g</number>
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -734,7 +734,7 @@
                  <double>0.100000000000000</double>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -747,7 +747,7 @@
                  <double>0.100000000000000</double>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -760,7 +760,7 @@
                  <double>0.100000000000000</double>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -785,7 +785,7 @@
               <double>0.000000000000000</double>
              </property>
              <property name="format" stdset="0">
-              <number>g</number>
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -836,7 +836,7 @@
                  <double>0.100000000000000</double>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -855,7 +855,7 @@
                  <double>0.100000000000000</double>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -874,7 +874,7 @@
                  <double>0.100000000000000</double>
                 </property>
                 <property name="format" stdset="0">
-                 <number>g</number>
+                 <number>0</number>
                 </property>
                </widget>
               </item>
@@ -899,19 +899,6 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <widget class="Gui::InputField" name="inputUx">
-         <property name="unit" stdset="0">
-          <string notr="true">m/s</string>
-         </property>
-         <property name="singleStep" stdset="0">
-          <double>1.000000000000000</double>
-         </property>
-         <property name="format" stdset="0">
-          <number>g</number>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="1">
         <widget class="Gui::InputField" name="inputUy">
          <property name="unit" stdset="0">
@@ -921,7 +908,7 @@
           <double>1.000000000000000</double>
          </property>
          <property name="format" stdset="0">
-          <number>g</number>
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -934,7 +921,7 @@
           <double>1.000000000000000</double>
          </property>
          <property name="format" stdset="0">
-          <number>g</number>
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -954,7 +941,7 @@
           <double>100.000000000000000</double>
          </property>
          <property name="format" stdset="0">
-          <number>g</number>
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -1004,11 +991,24 @@
              <double>1.000000000000000</double>
             </property>
             <property name="format" stdset="0">
-             <number>g</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="Gui::InputField" name="inputUx">
+         <property name="unit" stdset="0">
+          <string notr="true">m/s</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1.000000000000000</double>
+         </property>
+         <property name="format" stdset="0">
+          <number>0</number>
+         </property>
         </widget>
        </item>
       </layout>

@@ -77,6 +77,16 @@ class _CfdMeshRegion:
                         "List of mesh region surfaces")
         obj.References = []
 
+        #Cartesian mesh internal volume refinement properties
+        obj.addProperty("App::PropertyBool","Internal","MeshRegionProperties")
+        obj.Internal = False
+
+        obj.addProperty("App::PropertyPythonObject","InternalRegion")
+        obj.InternalRegion = {"Type": "Box",
+                              "Center": {"x":0,"y":0,"z":0},
+                              "BoxLengths": {"x":0,"y":0,"z":0},
+                              "SphereRadius": 0}
+
         obj.Proxy = self
         self.Type = "CfdMeshRegion"
 

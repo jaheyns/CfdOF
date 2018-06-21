@@ -16,6 +16,39 @@ surfaceFile       "%(Name%)_Geometry.fms";
 maxCellSize       %(CfSettings/ClMax%);
 boundaryCellSize  %(CfSettings/ClMax%);
 
+
+
+%{%(CfSettings/InternalRefinementRegionsPresent%)
+%:True
+objectRefinements
+{
+%{%(CfSettings/InternalRegions%)
+    %(0%)
+    {
+        cellSize %(CfSettings/InternalRegions/%(0%)/RelativeLength%);
+        centre  (%(CfSettings/InternalRegions/%(0%)/InternalRegion/Center/x%) 
+                 %(CfSettings/InternalRegions/%(0%)/InternalRegion/Center/y%) 
+                 %(CfSettings/InternalRegions/%(0%)/InternalRegion/Center/z%));
+
+%{%(CfSettings/InternalRegions/%(0%)/InternalRegion/Type%)
+%:Box
+        type box;
+        lengthX  %(CfSettings/InternalRegions/%(0%)/InternalRegion/BoxLengths/x%);
+        lengthY  %(CfSettings/InternalRegions/%(0%)/InternalRegion/BoxLengths/y%);
+        lengthZ  %(CfSettings/InternalRegions/%(0%)/InternalRegion/BoxLengths/z%);
+%}
+
+%{%(CfSettings/InternalRegions/%(0%)/InternalRegion/Type%)
+%:Sphere
+        type sphere;
+        radius  %(CfSettings/InternalRegions/%(0%)/InternalRegion/SphereRadius%);
+%}
+    }
+%}
+}
+%}
+
+
 %{%(MeshRegionPresent%)
 %:True
 surfaceMeshRefinement
@@ -29,6 +62,8 @@ surfaceMeshRefinement
     }
 %}
 }
+
+
 
 %{%(CfSettings/BoundaryLayerPresent%)
 %:True
@@ -58,7 +93,6 @@ boundaryLayers
     }
 }
 %}
-
 %}
 
 // ************************************************************************* //

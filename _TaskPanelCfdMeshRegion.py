@@ -60,6 +60,8 @@ class _TaskPanelCfdMeshRegion:
         self.form.if_refinelevel.valueChanged.connect(self.refinelevel_changed)
         self.form.if_edgerefinement.valueChanged.connect(self.edgerefinement_changed)
 
+        
+
         self.form.refinement_frame.setVisible(False)
         self.form.boundlayer_frame.setVisible(False)
         self.form.check_boundlayer.stateChanged.connect(self.boundary_layer_state_changed)
@@ -70,19 +72,38 @@ class _TaskPanelCfdMeshRegion:
         self.form.label_rellen.setToolTip(tool_tip_mes)
         self.get_meshregion_props()
 
+        #for backward compatibility with pre-Internal refinementRegions
+        try:
+            print(self.obj.Internal)
+        except:
+            self.obj.addProperty("App::PropertyBool","Internal","MeshRegionProperties")
+            self.obj.Internal = False
+            self.obj.addProperty("App::PropertyPythonObject","InternalRegion")
+            self.obj.InternalRegion = {"Type": "Box",
+                                  "Center": {"x":0,"y":0,"z":0},
+                                  "BoxLengths": {"x":0,"y":0,"z":0},
+                                  "SphereRadius": 0}
+
+        self.Internal = self.obj.Internal
+        self.InternalRegion = self.obj.InternalRegion
+
+        self.validTypesOfInternalPrimitives = ["Box","Sphere"]
+
+        self.form.internalVolumePrimitiveSelection.addItems(self.validTypesOfInternalPrimitives)
+        self.changePrimitiveType()
+
+        self.form.internalVolumePrimitiveSelection.currentIndexChanged.connect(self.changePrimitiveType)
+        self.form.surfaceRefinementToggle.toggled.connect(self.change_internal_surface)
+        self.form.volumeRefinementToggle.toggled.connect(self.change_internal_surface)
+
         if self.mesh_obj.Proxy.Type == 'Fem::FemMeshGmsh':
+            self.form.cartesianInternalVolumeFrame.setVisible(False)
+            self.form.surfaceOrInernalVolume.setVisible(False)
             self.form.gmsh_frame.setVisible(True)
             self.form.cf_frame.setVisible(False)
             self.form.snappy_frame.setVisible(False)
-        elif self.mesh_obj.Proxy.Type == 'CfdMeshCart' and self.mesh_obj.MeshUtility == 'cfMesh':
-            self.form.gmsh_frame.setVisible(False)
-            self.form.cf_frame.setVisible(True)
-            self.form.snappy_frame.setVisible(False)
-            self.form.refinement_frame.setVisible(True)
-        elif self.mesh_obj.Proxy.Type == 'CfdMeshCart' and self.mesh_obj.MeshUtility == 'snappyHexMesh':
-            self.form.gmsh_frame.setVisible(False)
-            self.form.cf_frame.setVisible(False)
-            self.form.snappy_frame.setVisible(True)
+        elif self.mesh_obj.Proxy.Type == 'CfdMeshCart':
+            self.set_internal_surface()
 
         self.form.if_refinethick.setToolTip("Thickness or distance of the refinement region from the reference "
                                             "surface.")
@@ -107,6 +128,16 @@ class _TaskPanelCfdMeshRegion:
 
     def accept(self):
         self.set_meshregion_props()
+
+        self.InternalRegion["Type"] = self.form.internalVolumePrimitiveSelection.currentText()
+        inputCheckAndStore(self.form.xCenter.text(), "m", self.InternalRegion['Center'], 'x')
+        inputCheckAndStore(self.form.yCenter.text(), "m", self.InternalRegion['Center'], 'y')
+        inputCheckAndStore(self.form.zCenter.text(), "m", self.InternalRegion['Center'], 'z')
+        inputCheckAndStore(self.form.xLength.text(), "m", self.InternalRegion['BoxLengths'], 'x')
+        inputCheckAndStore(self.form.yLength.text(), "m", self.InternalRegion['BoxLengths'], 'y')
+        inputCheckAndStore(self.form.zLength.text(), "m", self.InternalRegion['BoxLengths'], 'z')
+        inputCheckAndStore(self.form.radius.text(), "m", self.InternalRegion, 'SphereRadius')
+
         if self.sel_server:
             FreeCADGui.Selection.removeObserver(self.sel_server)
         FreeCADGui.ActiveDocument.resetEdit()
@@ -133,6 +164,10 @@ class _TaskPanelCfdMeshRegion:
                                  "= {}".format(self.obj.Name, self.edgerefinement))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Baffle "
                                  "= {}".format(self.obj.Name, self.obj.Baffle))
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Internal "
+                                 "= {}".format(self.obj.Name, self.Internal))
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.InternalRegion "
+                                 "= {}".format(self.obj.Name, self.InternalRegion))
         return True
 
     def reject(self):
@@ -160,6 +195,19 @@ class _TaskPanelCfdMeshRegion:
             self.form.if_edgerefinement.setValue(self.obj.RegionEdgeRefinement)
             if self.obj.Baffle:
                 self.form.baffle_check.toggle()
+            if self.Internal:
+                self.form.volumeRefinementToggle.toggle()
+                #self.form.xCenter.setValue(self.obj.InternalRegion["Center"]["x"])
+                index = self.validTypesOfInternalPrimitives.index(self.InternalRegion["Type"])
+                self.form.internalVolumePrimitiveSelection.setCurrentIndex(index)
+                setInputFieldQuantity(self.form.xCenter, str(self.InternalRegion["Center"]["x"])+"m")
+                setInputFieldQuantity(self.form.yCenter, str(self.InternalRegion["Center"]["y"])+"m")
+                setInputFieldQuantity(self.form.zCenter, str(self.InternalRegion["Center"]["z"])+"m")
+                setInputFieldQuantity(self.form.xLength, str(self.InternalRegion["BoxLengths"]["x"])+"m")
+                setInputFieldQuantity(self.form.yLength, str(self.InternalRegion["BoxLengths"]["y"])+"m")
+                setInputFieldQuantity(self.form.zLength, str(self.InternalRegion["BoxLengths"]["z"])+"m")
+                setInputFieldQuantity(self.form.radius, str(self.InternalRegion["SphereRadius"])+"m")
+
 
     def boundary_layer_state_changed(self):
         if self.form.check_boundlayer.isChecked():
@@ -204,6 +252,54 @@ class _TaskPanelCfdMeshRegion:
                 self.obj.Baffle = True
             else:
                 self.obj.Baffle = False
+
+    def set_internal_surface(self):
+        if self.Internal:
+            if not(self.form.volumeRefinementToggle.isChecked()):
+                self.form.volumeRefinementToggle.toggle()
+            self.form.surfaceOrInernalVolume.setVisible(True)
+            self.form.gmsh_frame.setVisible(False)
+            self.form.cf_frame.setVisible(False)
+            self.form.snappy_frame.setVisible(False)
+            self.form.refinement_frame.setVisible(False)
+            self.form.ReferencesFrame.setVisible(False)
+            self.form.cartesianInternalVolumeFrame.setVisible(True)
+            if self.mesh_obj.MeshUtility == 'cfMesh':
+                self.form.cf_frame.setVisible(True)
+                self.form.refinement_frame.setVisible(False)
+            elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
+                self.form.snappy_frame.setVisible(True)
+                self.form.snappySurfaceFrame.setVisible(False)
+        else:
+            if not(self.form.surfaceRefinementToggle.isChecked()):
+                self.form.volumeRefinementToggle.toggle()
+            self.form.cartesianInternalVolumeFrame.setVisible(False)
+            if self.mesh_obj.MeshUtility == 'cfMesh':
+                self.form.gmsh_frame.setVisible(False)
+                self.form.cf_frame.setVisible(True)
+                self.form.snappy_frame.setVisible(False)
+                self.form.refinement_frame.setVisible(True)
+            elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
+                self.form.gmsh_frame.setVisible(False)
+                self.form.cf_frame.setVisible(False)
+                self.form.snappy_frame.setVisible(True)
+                self.form.snappySurfaceFrame.setVisible(True)
+
+    def change_internal_surface(self):
+        if self.form.volumeRefinementToggle.isChecked():
+            self.Internal = True
+        else:
+            self.Internal = False
+        self.set_internal_surface()
+
+    def changePrimitiveType(self):
+        if self.form.internalVolumePrimitiveSelection.currentText() == "Box":
+            self.form.lengthLayout.setVisible(True)
+            self.form.radiusLayout.setVisible(False)
+        elif self.form.internalVolumePrimitiveSelection.currentText() == "Sphere":
+            self.form.lengthLayout.setVisible(False)
+            self.form.radiusLayout.setVisible(True)
+
 
     def gmsh_rellen_changed(self, value):
         self.rellen = value
