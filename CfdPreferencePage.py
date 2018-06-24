@@ -262,6 +262,10 @@ class CfdPreferencePageThread(QThread):
 
         try:
             import urllib
+            # Work around for certificate issues
+            import ssl
+            urllib._urlopener = urllib.FancyURLopener(context=ssl._create_unverified_context())
+            # Download
             (filename, header) = urllib.urlretrieve(self.cfmesh_url,
                                                     reporthook=self.downloadStatus)
         except Exception as ex:
