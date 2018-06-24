@@ -797,6 +797,7 @@ def checkCfdDependencies(term_print=True):
                     message += runmsg + '\n'
                     if term_print:
                         print(runmsg)
+                    raise
                 else:
                     foam_ver = foam_ver.rstrip().split()[-1]
                     if foam_ver != 'dev' and foam_ver != 'plus' and int(foam_ver.split('.')[0]) < 4:
