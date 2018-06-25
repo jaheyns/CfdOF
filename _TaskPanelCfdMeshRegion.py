@@ -60,8 +60,6 @@ class _TaskPanelCfdMeshRegion:
         self.form.if_refinelevel.valueChanged.connect(self.refinelevel_changed)
         self.form.if_edgerefinement.valueChanged.connect(self.edgerefinement_changed)
 
-        
-
         self.form.refinement_frame.setVisible(False)
         self.form.boundlayer_frame.setVisible(False)
         self.form.check_boundlayer.stateChanged.connect(self.boundary_layer_state_changed)
@@ -74,27 +72,36 @@ class _TaskPanelCfdMeshRegion:
 
         #for backward compatibility with pre-Internal refinementRegions
         try:
-            print(self.obj.Internal)
-        except:
+            self.obj.Internal
+        except AttributeError:
             self.obj.addProperty("App::PropertyBool","Internal","MeshRegionProperties")
             self.obj.Internal = False
             self.obj.addProperty("App::PropertyPythonObject","InternalRegion")
             self.obj.InternalRegion = {"Type": "Box",
                                   "Center": {"x":0,"y":0,"z":0},
-                                  "BoxLengths": {"x":0,"y":0,"z":0},
-                                  "SphereRadius": 0}
+                                  "BoxLengths": {"x":1e-3,"y":1e-3,"z":1e-3},
+                                  "SphereRadius": 1e-3}
 
-        self.Internal = self.obj.Internal
-        self.InternalRegion = self.obj.InternalRegion
+        self.InternalOrig = self.obj.Internal
+        self.InternalRegionOrig = self.obj.InternalRegion.copy()
 
         self.validTypesOfInternalPrimitives = ["Box","Sphere"]
 
         self.form.internalVolumePrimitiveSelection.addItems(self.validTypesOfInternalPrimitives)
         self.changePrimitiveType()
 
-        self.form.internalVolumePrimitiveSelection.currentIndexChanged.connect(self.changePrimitiveType)
+        self.form.internalVolumePrimitiveSelection.currentIndexChanged.connect(self.internalTypeChanged)
         self.form.surfaceRefinementToggle.toggled.connect(self.change_internal_surface)
         self.form.volumeRefinementToggle.toggled.connect(self.change_internal_surface)
+
+        #Adding the following changed events to allow for real time update of the internal shape
+        self.form.radius.textChanged.connect(self.radiusChanged)
+        self.form.xCenter.valueChanged.connect(self.xCenterChanged)
+        self.form.yCenter.textChanged.connect(self.yCenterChanged)
+        self.form.zCenter.textChanged.connect(self.zCenterChanged)
+        self.form.xLength.textChanged.connect(self.xLengthChanged)
+        self.form.yLength.textChanged.connect(self.yLengthChanged)
+        self.form.zLength.textChanged.connect(self.zLengthChanged)
 
         if self.mesh_obj.Proxy.Type == 'Fem::FemMeshGmsh':
             self.form.cartesianInternalVolumeFrame.setVisible(False)
@@ -128,16 +135,6 @@ class _TaskPanelCfdMeshRegion:
 
     def accept(self):
         self.set_meshregion_props()
-
-        self.InternalRegion["Type"] = self.form.internalVolumePrimitiveSelection.currentText()
-        inputCheckAndStore(self.form.xCenter.text(), "m", self.InternalRegion['Center'], 'x')
-        inputCheckAndStore(self.form.yCenter.text(), "m", self.InternalRegion['Center'], 'y')
-        inputCheckAndStore(self.form.zCenter.text(), "m", self.InternalRegion['Center'], 'z')
-        inputCheckAndStore(self.form.xLength.text(), "m", self.InternalRegion['BoxLengths'], 'x')
-        inputCheckAndStore(self.form.yLength.text(), "m", self.InternalRegion['BoxLengths'], 'y')
-        inputCheckAndStore(self.form.zLength.text(), "m", self.InternalRegion['BoxLengths'], 'z')
-        inputCheckAndStore(self.form.radius.text(), "m", self.InternalRegion, 'SphereRadius')
-
         if self.sel_server:
             FreeCADGui.Selection.removeObserver(self.sel_server)
         FreeCADGui.ActiveDocument.resetEdit()
@@ -165,9 +162,9 @@ class _TaskPanelCfdMeshRegion:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Baffle "
                                  "= {}".format(self.obj.Name, self.obj.Baffle))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Internal "
-                                 "= {}".format(self.obj.Name, self.Internal))
+                                 "= {}".format(self.obj.Name, self.obj.Internal))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.InternalRegion "
-                                 "= {}".format(self.obj.Name, self.InternalRegion))
+                                 "= {}".format(self.obj.Name, self.obj.InternalRegion))
         return True
 
     def reject(self):
@@ -176,6 +173,12 @@ class _TaskPanelCfdMeshRegion:
         if self.sel_server:
             FreeCADGui.Selection.removeObserver(self.sel_server)
         FreeCADGui.ActiveDocument.resetEdit()
+
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.InternalRegionOrig
+        obj.Internal = self.InternalOrig
+        FreeCAD.getDocument(doc_name).recompute()
         return True
 
     def initialiseUponReload(self):
@@ -195,18 +198,17 @@ class _TaskPanelCfdMeshRegion:
             self.form.if_edgerefinement.setValue(self.obj.RegionEdgeRefinement)
             if self.obj.Baffle:
                 self.form.baffle_check.toggle()
-            if self.Internal:
+            if self.obj.Internal:
                 self.form.volumeRefinementToggle.toggle()
-                #self.form.xCenter.setValue(self.obj.InternalRegion["Center"]["x"])
-                index = self.validTypesOfInternalPrimitives.index(self.InternalRegion["Type"])
-                self.form.internalVolumePrimitiveSelection.setCurrentIndex(index)
-                setInputFieldQuantity(self.form.xCenter, str(self.InternalRegion["Center"]["x"])+"m")
-                setInputFieldQuantity(self.form.yCenter, str(self.InternalRegion["Center"]["y"])+"m")
-                setInputFieldQuantity(self.form.zCenter, str(self.InternalRegion["Center"]["z"])+"m")
-                setInputFieldQuantity(self.form.xLength, str(self.InternalRegion["BoxLengths"]["x"])+"m")
-                setInputFieldQuantity(self.form.yLength, str(self.InternalRegion["BoxLengths"]["y"])+"m")
-                setInputFieldQuantity(self.form.zLength, str(self.InternalRegion["BoxLengths"]["z"])+"m")
-                setInputFieldQuantity(self.form.radius, str(self.InternalRegion["SphereRadius"])+"m")
+            index = self.validTypesOfInternalPrimitives.index(self.obj.InternalRegion["Type"])
+            self.form.internalVolumePrimitiveSelection.setCurrentIndex(index)
+            setInputFieldQuantity(self.form.xCenter, str(self.obj.InternalRegion["Center"]["x"])+"m")
+            setInputFieldQuantity(self.form.yCenter, str(self.obj.InternalRegion["Center"]["y"])+"m")
+            setInputFieldQuantity(self.form.zCenter, str(self.obj.InternalRegion["Center"]["z"])+"m")
+            setInputFieldQuantity(self.form.xLength, str(self.obj.InternalRegion["BoxLengths"]["x"])+"m")
+            setInputFieldQuantity(self.form.yLength, str(self.obj.InternalRegion["BoxLengths"]["y"])+"m")
+            setInputFieldQuantity(self.form.zLength, str(self.obj.InternalRegion["BoxLengths"]["z"])+"m")
+            setInputFieldQuantity(self.form.radius, str(self.obj.InternalRegion["SphereRadius"])+"m")
 
 
     def boundary_layer_state_changed(self):
@@ -254,7 +256,7 @@ class _TaskPanelCfdMeshRegion:
                 self.obj.Baffle = False
 
     def set_internal_surface(self):
-        if self.Internal:
+        if self.obj.Internal:
             if not(self.form.volumeRefinementToggle.isChecked()):
                 self.form.volumeRefinementToggle.toggle()
             self.form.surfaceOrInernalVolume.setVisible(True)
@@ -287,18 +289,34 @@ class _TaskPanelCfdMeshRegion:
 
     def change_internal_surface(self):
         if self.form.volumeRefinementToggle.isChecked():
-            self.Internal = True
+            self.obj.Internal = True
         else:
-            self.Internal = False
+            self.obj.Internal = False
         self.set_internal_surface()
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        obj.Internal = self.obj.Internal
+        FreeCAD.getDocument(doc_name).recompute()
 
     def changePrimitiveType(self):
         if self.form.internalVolumePrimitiveSelection.currentText() == "Box":
+        #if self.obj.InternalRegion['Type'] == "Box":
             self.form.lengthLayout.setVisible(True)
             self.form.radiusLayout.setVisible(False)
+        #elif self.obj.InternalRegion['Type'] == "Sphere":
         elif self.form.internalVolumePrimitiveSelection.currentText() == "Sphere":
             self.form.lengthLayout.setVisible(False)
             self.form.radiusLayout.setVisible(True)
+
+    def internalTypeChanged(self):
+        self.obj.InternalRegion['Type'] = self.form.internalVolumePrimitiveSelection.currentText()
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        FreeCAD.getDocument(doc_name).recompute()
+        
+        self.changePrimitiveType()
 
 
     def gmsh_rellen_changed(self, value):
@@ -324,3 +342,53 @@ class _TaskPanelCfdMeshRegion:
 
     def edgerefinement_changed(self, value):
         self.edgerefinement = value
+
+
+    def radiusChanged(self,value):
+        inputCheckAndStore(value, "m", self.obj.InternalRegion, 'SphereRadius')
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        FreeCAD.getDocument(doc_name).recompute()
+
+    def xCenterChanged(self,text):
+        inputCheckAndStore(text, "m", self.obj.InternalRegion['Center'], 'x')
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        FreeCAD.getDocument(doc_name).recompute()
+
+    def yCenterChanged(self,text):
+        inputCheckAndStore(text, "m", self.obj.InternalRegion['Center'], 'y')
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        FreeCAD.getDocument(doc_name).recompute()
+
+    def zCenterChanged(self,text):
+        inputCheckAndStore(text, "m", self.obj.InternalRegion['Center'], 'z')
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        FreeCAD.getDocument(doc_name).recompute()
+
+    def xLengthChanged(self,text):
+        inputCheckAndStore(text, "m", self.obj.InternalRegion['BoxLengths'], 'x')
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        FreeCAD.getDocument(doc_name).recompute()
+
+    def yLengthChanged(self,text):
+        inputCheckAndStore(text, "m", self.obj.InternalRegion['BoxLengths'], 'y')
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        FreeCAD.getDocument(doc_name).recompute()
+
+    def zLengthChanged(self,text):
+        inputCheckAndStore(text, "m", self.obj.InternalRegion['BoxLengths'], 'z')
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        FreeCAD.getDocument(doc_name).recompute()

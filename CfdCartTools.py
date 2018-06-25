@@ -165,7 +165,7 @@ class CfdCartTools():
                 try:
                     Internal = mr_obj.Internal
                     InternalRegion = mr_obj.InternalRegion
-                except:
+                except AttributeError:
                     Internal = False
                     InternalRegion = {}
 

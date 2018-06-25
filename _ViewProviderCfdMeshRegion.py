@@ -47,6 +47,11 @@ class _ViewProviderCfdMeshRegion:
     def attach(self, vobj):
         self.ViewObject = vobj
         self.Object = vobj.Object
+        #try:
+            #self.ViewObject.ShapeColor = (0.5,0.0,1.0)
+            #self.ViewObject.Transparency = 70
+        #except:
+            #pass
         self.standard = coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
 
@@ -54,15 +59,26 @@ class _ViewProviderCfdMeshRegion:
         return ["Standard"]
 
     def getDefaultDisplayMode(self):
-        return "Standard"
+        #return "Standard"
+        return "Shaded"
 
     def updateData(self, obj, prop):
         return
+
+    def setDisplayMode(self,mode):
+        return mode
 
     def onChanged(self, vobj, prop):
         return
 
     def setEdit(self, vobj, mode=0):
+        #try for backwards compatibility
+        try:
+            if vobj.Object.Internal:
+                vobj.Object.ViewObject.show()
+        except:
+            pass
+
         for obj in FreeCAD.ActiveDocument.Objects:
             if obj.isDerivedFrom("Fem::FemMeshObject"):
                 obj.ViewObject.hide()

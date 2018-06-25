@@ -29,11 +29,18 @@ __url__ = "http://www.freecadweb.org"
 
 # @package CfdMeshRegion
 #  \ingroup CFD
+from FreeCAD import Base
+
+class PartFeature:
+    def __init__(self, obj):
+        obj.Proxy = self
 
 
-class _CfdMeshRegion:
+class _CfdMeshRegion(PartFeature):
     """The CfdMeshRegion object"""
     def __init__(self, obj):
+        PartFeature.__init__(self, obj)
+
         # GMSH related properties
         obj.addProperty("App::PropertyFloat", "RelativeLength", "GMSH",
                         "Set relative length of the elements for this region")
@@ -84,11 +91,39 @@ class _CfdMeshRegion:
         obj.addProperty("App::PropertyPythonObject","InternalRegion")
         obj.InternalRegion = {"Type": "Box",
                               "Center": {"x":0,"y":0,"z":0},
-                              "BoxLengths": {"x":0,"y":0,"z":0},
-                              "SphereRadius": 0}
+                              "BoxLengths": {"x":1e-3,"y":1e-3,"z":1e-3},
+                              "SphereRadius": 1e-3}
 
         obj.Proxy = self
         self.Type = "CfdMeshRegion"
 
     def execute(self, obj):
-        return
+        import Part
+        #try for problem backward compatibility
+        try:
+            if obj.Internal:
+                if obj.InternalRegion["Type"] == "Box":
+                    x = obj.InternalRegion["Center"]["x"]*1000 - obj.InternalRegion["BoxLengths"]["x"]*1000/2.0
+                    y = obj.InternalRegion["Center"]["y"]*1000 - obj.InternalRegion["BoxLengths"]["y"]*1000/2.0
+                    z = obj.InternalRegion["Center"]["z"]*1000 - obj.InternalRegion["BoxLengths"]["z"]*1000/2.0
+                    shape = Part.makeBox(obj.InternalRegion["BoxLengths"]["x"]*1000,
+                                         obj.InternalRegion["BoxLengths"]["y"]*1000,
+                                         obj.InternalRegion["BoxLengths"]["z"]*1000,
+                                         Base.Vector(x,y,z))
+
+                elif obj.InternalRegion["Type"] == "Sphere":
+                    shape = Part.makeSphere(obj.InternalRegion["SphereRadius"]*1000,
+                                            Base.Vector(obj.InternalRegion["Center"]["x"]*1000,
+                                                        obj.InternalRegion["Center"]["y"]*1000,
+                                                        obj.InternalRegion["Center"]["z"]*1000))
+                obj.Shape = shape
+        except AttributeError:
+            #print("""In order to view a shape corresponding to the internal region please
+                #re-create the refinement object""")
+            pass
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
