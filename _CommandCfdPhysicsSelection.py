@@ -41,8 +41,8 @@ class _CommandCfdPhysicsSelection(CommandManager):
         # Allow to re-create if deleted
         if not(isPresent):
             FreeCADGui.addModule("CfdPhysicsSelection")
-            FreeCADGui.doCommand(
-                "analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())")
+            FreeCADGui.addModule("FemGui")
+            FreeCADGui.doCommand("FemGui.getActiveAnalysis().addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())")
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 if FreeCAD.GuiUp:

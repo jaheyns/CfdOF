@@ -37,13 +37,12 @@ import FreeCAD
 import os
 import sys
 import os.path
-import platform
 try:
     from femobjects import _FemMeshGmsh
 except ImportError:  # Backward compat
     from PyObjects import _FemMeshGmsh
 import time
-from CfdTools import inputCheckAndStore, setInputFieldQuantity
+from CfdTools import inputCheckAndStore, setInputFieldQuantity, set2DConversionObjectToFalse
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -219,6 +218,7 @@ class _TaskPanelCfdMeshGmsh:
         try:
             gmsh_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
             self.console_log('Meshing completed')
+            set2DConversionObjectToFalse()
         except RuntimeError as e:
             self.console_log('Could not read mesh: ' + e.message)
         self.Timer.stop()

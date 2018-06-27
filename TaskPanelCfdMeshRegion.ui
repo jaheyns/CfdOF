@@ -744,7 +744,6 @@
            </spacer>
           </item>
          </layout>
-         <zorder>frame</zorder>
          <zorder>xCenter</zorder>
          <zorder>yCenter</zorder>
          <zorder>zCenter</zorder>

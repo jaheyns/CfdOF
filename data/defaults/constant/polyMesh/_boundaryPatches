@@ -1,5 +1,10 @@
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
+%:empty
+    %(0%)
+    {
+        type        empty;
+    }
 %:wall
     %(0%)
     {

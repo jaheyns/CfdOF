@@ -160,6 +160,15 @@ def getPhysicsModel(analysis_object):
     return physicsModel, isPresent
 
 
+def get2DConversionObject(analysis_object):
+    isPresent = False
+    obj = None
+    for i in analysis_object.Group:
+        if hasattr(i, "Proxy") and hasattr(i.Proxy, "Type") and (i.Proxy.Type == "CfdConverter2D"):
+            isPresent = True
+            obj = i
+    return obj, isPresent
+
 def getMeshObject(analysis_object):
     isPresent = False
     meshObj = []
@@ -425,6 +434,8 @@ def getPatchType(bcType, bcSubType):
     """ Get the boundary type based on selected BC condition """
     if bcType == 'wall':
         return 'wall'
+    elif bcType == 'empty':
+        return 'empty'
     elif bcType == 'constraint':
         if bcSubType == 'symmetry':
             return 'symmetry'
@@ -918,6 +929,12 @@ def isSameGeometry(shape1, shape2):
     else:
         return False
 
+def set2DConversionObjectToFalse():
+    import FemGui
+    analysis_obj = FemGui.getActiveAnalysis()
+    conversionObj,isPresent = get2DConversionObject(analysis_obj)
+    if isPresent:
+        conversionObj.Converter2D["TwoDMeshCreated"] = False
 
 def findElementInShape(aShape, anElement):
     """ Copy of FemMeshTools.find_element_in_shape, but calling isSameGeometry"""

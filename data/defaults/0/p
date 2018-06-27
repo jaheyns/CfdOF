@@ -20,6 +20,8 @@ boundaryField
 
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
+%:empty
+%[0/_boundary_empty%]
 %:wall
 %[0/_boundary_zeroGradient%]
 %:inlet

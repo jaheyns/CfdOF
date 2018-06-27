@@ -306,6 +306,7 @@ class _TaskPanelCfdMeshCart:
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(True)
+            CfdTools.set2DConversionObjectToFalse()
         else:
             self.console_log("Meshing exited with error", "#FF0000")
             self.form.pb_run_mesh.setEnabled(True)

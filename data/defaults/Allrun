@@ -64,6 +64,12 @@ runCommand setFields
 # Creating baffles
 runCommand createBaffles -overwrite
 %}
+%{%(runChangeDictionary%)
+%:True
+# Update patch name and type
+runCommand changeDictionary
+
+%}
 %{%(initialValues/PotentialFoam%)
 %:True
 # Initialise flow
