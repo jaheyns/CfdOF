@@ -117,6 +117,8 @@ class _CfdMeshRegion(PartFeature):
                                                         obj.InternalRegion["Center"]["y"]*1000,
                                                         obj.InternalRegion["Center"]["z"]*1000))
                 obj.Shape = shape
+            else:
+                obj.Shape = Part.Vertex()
         except AttributeError:
             #print("""In order to view a shape corresponding to the internal region please
                 #re-create the refinement object""")
