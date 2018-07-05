@@ -800,12 +800,32 @@ def checkCfdDependencies(term_print=True):
                     raise
                 else:
                     foam_ver = foam_ver.rstrip().split()[-1]
-                    if foam_ver != 'dev' and foam_ver != 'plus' and int(foam_ver.split('.')[0]) < 4:
-                        vermsg = "OpenFOAM version " + foam_ver + " pre-loaded is outdated: " \
-                                   + "The CFD workbench requires at least OpenFOAM 4.0"
-                        message += vermsg + "\n"
-                        if term_print:
-                            print(vermsg)
+                    if foam_ver != 'dev' and foam_ver != 'plus':
+                        try:
+                            if foam_ver[0:1] == 'v':  # Plus version
+                                foam_ver = foam_ver.lstrip('v')
+                                if int(foam_ver) < 1706:
+                                    vermsg = "OpenFOAM version " + foam_ver + " is outdated:\n" + \
+                                             "ESI OpenFOAM is untested but must be at least version 1706\n" + \
+                                             "OpenFOAM version 5.0 is recommended"
+                                else:
+                                    vermsg = "ESI OpenFOAM is untested but may work\n" + \
+                                             "OpenFOAM version 5.0 is recommended"
+                                message += vermsg + "\n"
+                                if term_print:
+                                    print(vermsg)
+                            else:
+                                if int(foam_ver.split('.')[0]) < 4:
+                                    vermsg = "OpenFOAM version " + foam_ver + " is outdated:\n" + \
+                                             "The CFD workbench requires at least OpenFOAM 4.0"
+                                    message += vermsg + "\n"
+                                    if term_print:
+                                        print(vermsg)
+                        except ValueError:
+                            vermsg = "Error parsing OpenFOAM version string " + foam_ver
+                            message += vermsg
+                            if term_print:
+                                print(vermsg)
                     else:
                         # Check for cfMesh
                         try:
