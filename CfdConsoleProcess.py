@@ -83,10 +83,11 @@ class CfdConsoleProcess:
             text += str(self.process.readLine())
         if text:
             print(text, end='')  # Avoid displaying on FreeCAD status bar
-            if FreeCAD.GuiUp:
-                FreeCAD.Gui.updateGui()
             if self.stdoutHook:
                 self.stdoutHook(text)
+            # Must be at the end as it can cause re-entrance
+            if FreeCAD.GuiUp:
+                FreeCAD.Gui.updateGui()
 
     def readStderr(self):
         # Ensure only complete lines are passed on
@@ -99,6 +100,7 @@ class CfdConsoleProcess:
             if self.stderrHook:
                 self.stderrHook(text)
             FreeCAD.Console.PrintError(text)
+            # Must be at the end as it can cause re-entrance
             if FreeCAD.GuiUp:
                 FreeCAD.Gui.updateGui()
         self.process.setReadChannel(QtCore.QProcess.StandardOutput)

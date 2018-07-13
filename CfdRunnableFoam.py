@@ -23,6 +23,8 @@
 # *                                                                         *
 # ***************************************************************************
 
+from __future__ import print_function
+
 __title__ = "Classes for New CFD solver"
 __author__ = "Qingfeng Xia"
 __url__ = "http://www.freecadweb.org"
@@ -97,10 +99,10 @@ class CfdRunnableFoam(CfdRunnable):
 
         self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam(self.analysis)
 
-        self.UxResiduals = [1]
-        self.UyResiduals = [1]
-        self.UzResiduals = [1]
-        self.pResiduals = [0]
+        self.UxResiduals = [1.0]
+        self.UyResiduals = [1.0]
+        self.UzResiduals = [1.0]
+        self.pResiduals = [0.0]
         self.niter = 0
 
         self.residualPlot = None
@@ -112,10 +114,10 @@ class CfdRunnableFoam(CfdRunnable):
         return ""
 
     def get_solver_cmd(self, case_dir):
-        self.UxResiduals = [1]
-        self.UyResiduals = [1]
-        self.UzResiduals = [1]
-        self.pResiduals = [1]
+        self.UxResiduals = [1.0]
+        self.UyResiduals = [1.0]
+        self.UzResiduals = [1.0]
+        self.pResiduals = [1.0]
         self.niter = 0
         self.print_next_error_lines = 0
         self.print_next_error_file = False
