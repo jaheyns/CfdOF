@@ -1,8 +1,7 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2018 - .... <...>                *
-# *   Copyright (c) 2018 - Johan Heyns <jheyns@csir.co.za>                  *
 # *   Copyright (c) 2018 - Alfred Bogaers <abogaers@csir.co.za>             *
+# *   Copyright (c) 2018 - Johan Heyns <jheyns@csir.co.za>                  *
 # *   Copyright (c) 2018 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -32,7 +31,7 @@ class _CfdConvert2D:
     def __init__(self, obj):
         obj.addProperty("App::PropertyPythonObject", "Converter2D")
         ''' Default values '''
-        obj.Converter2D = {"TwoDMeshCreated":False,
+        obj.Converter2D = {"TwoDMeshCreated": False,
                            "FrontFace": None,
                            "BackFace":  None}
         obj.Proxy = self

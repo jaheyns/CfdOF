@@ -1,8 +1,8 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
-# *   Copyright (c) 2018 - Johan Heyns <jheyns@csir.co.za>                  *
 # *   Copyright (c) 2018 - Alfred Bogaers <abogaers@csir.co.za>             *
+# *   Copyright (c) 2018 - Johan Heyns <jheyns@csir.co.za>                  *
 # *   Copyright (c) 2018 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -43,19 +43,19 @@ class setCFDConvert3Dto2D(CommandManager):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "3d-to-2d.png")
         self.resources = {
             'Pixmap': icon_path,
-            'MenuText': 'Convert 3D mesh into a 2D OpenFOAM mesh',
-            'ToolTip': 'Convert 3D mesh into a 2D OpenFOAM mesh'
+            'MenuText': 'Convert 3D mesh to 2D',
+            'ToolTip': 'Convert 3D mesh to 2D'
             }
         self.is_active = 'with_femmesh'  
 
     def Activated(self):
-        FreeCAD.Console.PrintMessage("Convert 3D mesh into a 2D mesh \n")
+        FreeCAD.Console.PrintMessage("Convert 3D mesh to 2D\n")
         FreeCADGui.addModule("FemGui")
         FreeCADGui.addModule("CfdConverterTo2D")
         analysis_obj = FemGui.getActiveAnalysis()
-        obj,isPresent = CfdTools.get2DConversionObject(analysis_obj)
+        obj, isPresent = CfdTools.get2DConversionObject(analysis_obj)
 
-        if not(isPresent):
+        if not isPresent:
             sel = FreeCADGui.Selection.getSelection()
             if len(sel) == 1:
                 sobj = sel[0]
@@ -68,5 +68,7 @@ class setCFDConvert3Dto2D(CommandManager):
             FreeCADGui.ActiveDocument.setEdit(obj.Name)
 
         FreeCADGui.Selection.clearSelection()
+
+
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_3DTo2D', setCFDConvert3Dto2D())

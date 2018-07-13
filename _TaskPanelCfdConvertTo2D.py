@@ -1,31 +1,31 @@
-#***************************************************************************
-#*   (c) Bernd Hahnebach (bernd@bimstatik.org) 2014                        *
-#*   (c) Qingfeng Xia @ iesensor.com 2016                                  *
-#*   (c) CSIR, South Africa 2017                                           *
-#*   Copyright (c) 2018 - Johan Heyns <jheyns@csir.co.za>                  *
-#*   Copyright (c) 2018 - Alfred Bogaers <abogaers@csir.co.za>             *
-#*   Copyright (c) 2018 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
-#*                                                                         *
-#*   This file is part of the FreeCAD CAx development system.              *
-#*                                                                         *
-#*   This program is free software; you can redistribute it and/or modify  *
-#*   it under the terms of the GNU Lesser General Public License (LGPL)    *
-#*   as published by the Free Software Foundation; either version 2 of     *
-#*   the License, or (at your option) any later version.                   *
-#*   for detail see the LICENCE text file.                                 *
-#*                                                                         *
-#*   FreeCAD is distributed in the hope that it will be useful,            *
-#*   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
-#*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-#*   GNU Lesser General Public License for more details.                   *
-#*                                                                         *
-#*   You should have received a copy of the GNU Library General Public     *
-#*   License along with FreeCAD; if not, write to the Free Software        *
-#*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
-#*   USA                                                                   *
-#*                                                                         *
-#***************************************************************************/
+# ***************************************************************************
+# *   (c) Bernd Hahnebach (bernd@bimstatik.org) 2014                        *
+# *   (c) Qingfeng Xia @ iesensor.com 2016                                  *
+# *   Copyright (c) 2018 - Alfred Bogaers <abogaers@csir.co.za>             *
+# *   Copyright (c) 2018 - Johan Heyns <jheyns@csir.co.za>                  *
+# *   Copyright (c) 2018 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
+# *                                                                         *
+# *   This file is part of the FreeCAD CAx development system.              *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   FreeCAD is distributed in the hope that it will be useful,            *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Lesser General Public License for more details.                   *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with FreeCAD; if not, write to the Free Software        *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
 
+from __future__ import print_function
 import FreeCAD
 import os
 import sys
@@ -64,13 +64,12 @@ class TaskPanelCfdConvertTo2D:
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
                                                              "TaskPanelCfdConvertTo2D.ui"))
 
-        descriptionText = ("Convert 3D mesh into 2D OpenFOAM mesh (single element through the thickness).")
+        descriptionText = "Convert 3D mesh to 2D (single element through the thickness)."
 
         usageDescriptor = ("1.) Create 3D mesh. \n" \
             "2.) Create boundary conditions for front and back faces \n"\
             "3.) Select corresponding boundary conditions \n"\
             "4.) Selected boundaries will automitically be changed to Type='Empty'.")
-
 
         self.form.labelDescription.setText(descriptionText)
         self.form.labelUsageDescription.setText(usageDescriptor)
@@ -84,7 +83,6 @@ class TaskPanelCfdConvertTo2D:
         doc_name = str(self.obj.Document.Name)
         doc = FreeCAD.getDocument(doc_name)
         for doc_objs in doc.Objects:
-            #if "CfdFluidBoundary"
             if "CfdFluidBoundary" in doc_objs.Name:
                 self.listOfBoundaryLabels.append(doc_objs.Label)
                 self.listOfBoundaryNames.append(doc_objs.Name)
@@ -107,25 +105,26 @@ class TaskPanelCfdConvertTo2D:
             backObj = FreeCAD.getDocument(doc_name).getObject(bFObjName)
             fShape = frontObj.Shape
             bShape = backObj.Shape
-            if len(fShape.Faces) == 0 or len(bShape.Faces)==0:
+            if len(fShape.Faces) == 0 or len(bShape.Faces) == 0:
                 CfdTools.cfdError("Either the front or back face is empty.")
             else:
-                allFFacesPlaner = True
-                allBFacesPlaner = True
+                allFFacesPlanar = True
+                allBFacesPlanar = True
                 for faces in fShape.Faces:
-                    if not(isinstance(faces.Surface,Part.Plane)):
-                        allFFacesPlaner = False
+                    if not isinstance(faces.Surface, Part.Plane):
+                        allFFacesPlanar = False
                         break
                 for faces in bShape.Faces:
-                    if not(isinstance(faces.Surface,Part.Plane)):
-                        allBFacesPlaner = False
+                    if not isinstance(faces.Surface, Part.Plane):
+                        allBFacesPlanar = False
                         break
-                if allFFacesPlaner and allBFacesPlaner:
+                if allFFacesPlanar and allBFacesPlanar:
                     A1 = fShape.Faces[0].Surface.Axis
                     A2 = bShape.Faces[0].Surface.Axis
                     if self.norm(A1-A2) <=1e-6 or self.norm(A1+A2):
-                        if (len(frontObj.Shape.Vertexes) == len(backObj.Shape.Vertexes) and 
-                            len(frontObj.Shape.Vertexes)>0 and (abs(frontObj.Shape.Area - backObj.Shape.Area) < 1e-6)):
+                        if len(frontObj.Shape.Vertexes) == len(backObj.Shape.Vertexes) and \
+                           len(frontObj.Shape.Vertexes) > 0 and \
+                           abs(frontObj.Shape.Area - backObj.Shape.Area) < 1e-6:
                             self.distance = fShape.distToShape(bShape)[0]
                             self.convertMesh()
                         else:
@@ -156,11 +155,9 @@ class TaskPanelCfdConvertTo2D:
         self.open_paraview.start(paraview_cmd, [arg])
         QApplication.restoreOverrideCursor()
 
-
-    def norm(self,first):
-        if isinstance(first,FreeCAD.Vector):
+    def norm(self, first):
+        if isinstance(first, FreeCAD.Vector):
             return math.sqrt(first.x*first.x + first.y*first.y + first.z*first.z)
-
 
     def convertMesh(self):
         import tempfile
@@ -169,8 +166,7 @@ class TaskPanelCfdConvertTo2D:
         import TemplateBuilder
         import os
 
-
-        if not(self.meshConverted):
+        if not self.meshConverted:
             self.Start = time.time()
             self.Timer.start()
             self.console_log("Starting 3D to 2D mesh conversion ...")
@@ -181,10 +177,8 @@ class TaskPanelCfdConvertTo2D:
             tmpdir = tempfile.gettempdir()
             analysis_obj = FemGui.getActiveAnalysis()
 
-
             tmpdir = tempfile.gettempdir()
             self.meshCaseDir = os.path.join(tmpdir, "meshCase")
-
 
             self.meshObj = CfdTools.getMesh(analysis_obj)
             solver_obj = CfdTools.getSolver(analysis_obj)
@@ -215,7 +209,6 @@ class TaskPanelCfdConvertTo2D:
                 backPatchIndex = keys.index(self.backFaceName)
                 backFaceList = case.settings['createPatches'][keys[backPatchIndex]]['PatchNamesList']
 
-
             template_path = os.path.join(CfdTools.get_module_path(), "data", "defaultsMesh")
             settings = {
                 'ConvertTo2D': True,
@@ -224,7 +217,7 @@ class TaskPanelCfdConvertTo2D:
                 'FrontFaceList': frontFaceList,
                 'BackFaceList': backFaceList[0],
                 'Distance': self.distance/1000.0,
-                'TranslatedFoamPath': CfdTools.translatePath(CfdTools.getFoamDir(),),
+                'TranslatedFoamPath': CfdTools.translatePath(CfdTools.getFoamDir()),
                 'MeshPath': self.meshCaseDir
                 }
 
@@ -244,10 +237,8 @@ class TaskPanelCfdConvertTo2D:
             for key in env_vars:
                 env.insert(key, env_vars[key])
 
-
             self.conversion_process.setProcessEnvironment(env)
             self.conversion_process.start(cmd[0], cmd[1:])
-
 
             if self.conversion_process.waitForStarted():
                 self.form.convertButton.setEnabled(False)  # Prevent user running a second instance
@@ -265,11 +256,9 @@ class TaskPanelCfdConvertTo2D:
         self.form.console_output.setText(self.console_message_cart)
         self.form.console_output.moveCursor(QtGui.QTextCursor.End)
 
-
     def read_output(self):
-        #while self.conversion_process.canReadLine():
-            #print(str(self.conversion_process.readLine()), end="")#Avoid displaying on FreeCAD status bar
-            #pass
+        while self.conversion_process.canReadLine():
+            print(str(self.conversion_process.readLine()), end="") # Avoid displaying on FreeCAD status bar
 
         # Print any error output to console
         self.conversion_process.setReadChannel(QtCore.QProcess.StandardError)
@@ -281,10 +270,10 @@ class TaskPanelCfdConvertTo2D:
 
     def mesh_finished(self, exit_code):
         self.read_output()
-        print("exit code",exit_code)
+        print("exit code", exit_code)
         if exit_code == 0:
             self.console_log("Reading mesh")
-            #Reading stl created by OpenFOAM to display representation of mesh
+            # Reading stl created by OpenFOAM to display representation of mesh
             import Mesh
             import Fem
             self.meshConverted = True
@@ -327,7 +316,7 @@ class TaskPanelCfdConvertTo2D:
                 self.form.comboBoxFront.setCurrentIndex(indexFront)
                 self.form.comboBoxBack.setCurrentIndex(indexBack)
             except ValueError:
-                CfdTools.cfdError("NOTE: Either the bounary with the name " + str(self.frontFaceName) + " or " +
+                CfdTools.cfdError("NOTE: Either the boundary with the name " + str(self.frontFaceName) + " or " +
                                   str(self.backFaceName) + " no longer exists.")
         if self.meshConverted:
             self.form.conversionStatusText.setText("Mesh has already been converted.")
@@ -348,7 +337,6 @@ class TaskPanelCfdConvertTo2D:
         self.saveInfo()
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
-
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

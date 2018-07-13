@@ -163,11 +163,13 @@ def getPhysicsModel(analysis_object):
 def get2DConversionObject(analysis_object):
     isPresent = False
     obj = None
-    for i in analysis_object.Group:
-        if hasattr(i, "Proxy") and hasattr(i.Proxy, "Type") and (i.Proxy.Type == "CfdConverter2D"):
-            isPresent = True
-            obj = i
+    if analysis_object is not None:
+        for i in analysis_object.Group:
+            if hasattr(i, "Proxy") and hasattr(i.Proxy, "Type") and (i.Proxy.Type == "CfdConverter2D"):
+                isPresent = True
+                obj = i
     return obj, isPresent
+
 
 def getMeshObject(analysis_object):
     isPresent = False
