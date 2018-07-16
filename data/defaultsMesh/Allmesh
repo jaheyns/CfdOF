@@ -42,6 +42,14 @@ runCommand snappyHexMesh -overwrite
 %}
 
 runCommand surfaceToPatch constant/triSurface/%(Name%)_Geometry.stl
+%:gmsh
+runCommand ideasUnvToFoam %(unvFileName%)
+runCommand transformPoints -scale "(0.001 0.001 0.001)"
+%}
+
+%{%(TwoDSettings/ConvertTo2D%)
+%:True
+runCommand extrudeMesh
 %}
 
 runCommand surfaceMeshTriangulate mesh_outside.stl

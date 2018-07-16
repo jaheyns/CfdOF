@@ -11,4 +11,6 @@
         type        cyclic;
         value       $internalField;
     }
+%:bounding2D
+%[0/_boundary_empty%]
 %}

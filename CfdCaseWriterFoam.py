@@ -73,8 +73,6 @@ class CfdCaseWriterFoam:
 
             solverSettingsDict = CfdTools.getSolverSettings(self.solver_obj)
 
-            self.check2DConversion()
-
             # Collect settings into single dictionary
             if not self.mesh_obj:
                 raise RuntimeError("No mesh object found in analysis")
@@ -187,16 +185,6 @@ class CfdCaseWriterFoam:
         os.makedirs(output_path)  # mkdir -p
 
     # Mesh
-
-    def check2DConversion(self):
-        if self.conversionObjPresent:
-            self.meshConvertedTo2D = self.conversion2D_obj.Converter2D["TwoDMeshCreated"]
-        else:
-            self.meshConvertedTo2D = False
-        for i in range(len(self.bc_group)):
-            if (self.bc_group[i].Label == self.conversion2D_obj.Converter2D["FrontFace"]  or 
-                self.bc_group[i].Label == self.conversion2D_obj.Converter2D["BackFace"]):
-                self.bc_group[i].BoundarySettings["BoundaryType"] = "empty"
 
     def writeMesh(self):
         """ Convert or copy mesh files """

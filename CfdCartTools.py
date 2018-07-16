@@ -40,6 +40,11 @@ import CfdTools
 import math
 import MeshPart
 import TemplateBuilder
+import Part
+import CfdCaseWriterFoam
+if FreeCAD.GuiUp:
+    import FemGui
+
 
 class CfdCartTools():
     def __init__(self, cart_mesh_obj, analysis=None):
@@ -90,16 +95,87 @@ class CfdCartTools():
 
         self.cf_settings = {}
         self.snappy_settings = {}
+        self.two_d_settings = {}
 
     def get_dimension(self):
         # Dimension
-        # 3D cfMesh and snappyHexMesh, while in future cfMesh may support 2D
-        if self.dimension == '3D':
-            self.dimension = '3'
-        else:
-            FreeCAD.Console.PrintError('Could not retrieve Dimension from shape type. Please choose dimension.')
-            self.dimension = '3'
+        # 3D cfMesh and snappyHexMesh, and 2D by conversion, while in future cfMesh may support 2D directly
+        if self.dimension != '3D' and self.dimension != '2D':
+            FreeCAD.Console.PrintError('Invalid element dimension. Setting to 3D.')
+            self.dimension = '3D'
         print('  ElementDimension: ' + self.dimension)
+
+        # Check for 2D boundaries
+        twoDPlanes = []
+        analysis_obj = CfdTools.getParentAnalysisObject(self.mesh_obj)
+        if not analysis_obj:
+            analysis_obj = FemGui.getActiveAnalysis()
+        if analysis_obj:
+            boundaries = CfdTools.getCfdBoundaryGroup(analysis_obj)
+            for b in boundaries:
+                if b.BoundarySettings['BoundaryType'] == 'constraint' and \
+                   b.BoundarySettings['BoundarySubtype'] == 'twoDBoundingPlane':
+                    twoDPlanes.append(b.Name)
+
+        if self.dimension == '2D':
+            self.two_d_settings['ConvertTo2D'] = True
+            if len(twoDPlanes) != 2:
+                raise RuntimeError("For 2D meshing, two parallel 2D bounding planes must be present as boundary "
+                                   "conditions in the CFD analysis object.")
+            doc_name = str(analysis_obj.Document.Name)
+            fFObjName = twoDPlanes[0]
+            bFObjName = twoDPlanes[1]
+            frontObj = FreeCAD.getDocument(doc_name).getObject(fFObjName)
+            backObj = FreeCAD.getDocument(doc_name).getObject(bFObjName)
+            fShape = frontObj.Shape
+            bShape = backObj.Shape
+            if len(fShape.Faces) == 0 or len(bShape.Faces) == 0:
+                raise RuntimeError("A 2D bounding plane is empty.")
+            else:
+                allFFacesPlanar = True
+                allBFacesPlanar = True
+                for faces in fShape.Faces:
+                    if not isinstance(faces.Surface, Part.Plane):
+                        allFFacesPlanar = False
+                        break
+                for faces in bShape.Faces:
+                    if not isinstance(faces.Surface, Part.Plane):
+                        allBFacesPlanar = False
+                        break
+                if allFFacesPlanar and allBFacesPlanar:
+                    A1 = fShape.Faces[0].Surface.Axis
+                    A1 = A1/A1.Length
+                    A2 = bShape.Faces[0].Surface.Axis
+                    A2 = A2/A2.Length
+                    if (A1-A2).Length <= 1e-6 or (A1+A2).Length <= 1e-6:
+                        if len(frontObj.Shape.Vertexes) == len(backObj.Shape.Vertexes) and \
+                           len(frontObj.Shape.Vertexes) > 0 and \
+                           abs(frontObj.Shape.Area) > 0 and \
+                           abs(frontObj.Shape.Area - backObj.Shape.Area)/abs(frontObj.Shape.Area) < 1e-6:
+                            self.two_d_settings['Distance'] = fShape.distToShape(bShape)[0]/1000
+                        else:
+                            raise RuntimeError("2D bounding planes do not match up.")
+                    else:
+                        raise RuntimeError("2D bounding planes are not aligned.")
+                else:
+                    raise RuntimeError("2D bounding planes need to be flat surfaces.")
+
+            case = CfdCaseWriterFoam.CfdCaseWriterFoam(analysis_obj)
+            case.settings = {}
+            case.settings['createPatchesFromSnappyBaffles'] = False
+            case.setupPatchNames()
+            keys = case.settings['createPatches'].keys()
+
+            frontPatchIndex = keys.index(frontObj.Label)
+            self.two_d_settings['FrontFaceList'] = case.settings['createPatches'][keys[frontPatchIndex]]['PatchNamesList']
+
+            backPatchIndex = keys.index(backObj.Label)
+            self.two_d_settings['BackFaceList'] = case.settings['createPatches'][keys[backPatchIndex]]['PatchNamesList']
+            self.two_d_settings['BackFace'] = self.two_d_settings['BackFaceList'][0]
+        else:
+            self.two_d_settings['ConvertTo2D'] = False
+            if len(twoDPlanes):
+                raise RuntimeError("2D bounding planes can not be used in 3D mesh")
 
     def get_clmax(self):
         return Units.Quantity(self.clmax, Units.Length)
@@ -242,7 +318,7 @@ class CfdCartTools():
                         fid.close()
 
                     if self.mesh_obj.MeshUtility == 'cfMesh':
-                        if not(Internal):
+                        if not Internal:
                             cf_settings['MeshRegions'][mr_obj.Label] = {
                                 'RelativeLength': mr_rellen * self.clmax * self.scale,
                                 'RefinementThickness': self.scale * Units.Quantity(
@@ -255,7 +331,7 @@ class CfdCartTools():
                                 "InternalRegion": InternalRegion}
 
                     elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                        if not(Internal):
+                        if not Internal:
                             if not mr_obj.Baffle:
                                 snappy_mesh_region_list.append(mr_obj.Name)
                             for rL in range(len(snappy_mesh_region_list)):
@@ -364,7 +440,7 @@ class CfdCartTools():
             print('No mesh was created.')
 
     def write_mesh_case(self):
-        """ Write_case() will collect case settings, and finally build a runnable case. """
+        """ Collect case settings, and finally build a runnable case. """
         tmpdir = tempfile.gettempdir()
         FreeCAD.Console.PrintMessage("Populating mesh dictionaries in folder {}\n".format(tmpdir))
         _cwd = os.curdir
@@ -454,7 +530,8 @@ class CfdCartTools():
                 'MeshUtility': self.mesh_obj.MeshUtility,
                 'MeshRegionPresent': mesh_region_present,
                 'CfSettings': self.cf_settings,
-                'SnappySettings': self.snappy_settings
+                'SnappySettings': self.snappy_settings,
+                'TwoDSettings': self.two_d_settings
             }
 
             TemplateBuilder.TemplateBuilder(self.meshCaseDir, self.template_path, self.settings)

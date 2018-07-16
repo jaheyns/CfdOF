@@ -30,12 +30,10 @@ class _CfdMeshCart():
     """
 
     # they will be used from the task panel too, thus they need to be outside of the __init__
-    known_element_dimensions = ['3D']
+    known_element_dimensions = ['2D', '3D']
     known_mesh_algorithm_2D = ['Cartesian']
     known_mesh_algorithm_3D = ['Cartesian']
-    known_mesh_utility = ['cfMesh','snappyHexMesh']
-
-
+    known_mesh_utility = ['cfMesh', 'snappyHexMesh']
 
     def __init__(self, obj):
         self.Type = "CfdMeshCart"
@@ -87,7 +85,7 @@ class _CfdMeshCart():
         obj.addProperty("App::PropertyEnumeration", "ElementDimension", "Mesh Parameters",
                         "Dimension of mesh elements (Default 3D)")
         obj.ElementDimension = _CfdMeshCart.known_element_dimensions
-        obj.ElementDimension = '3D'  # Initially CFD will only support 3D
+        obj.ElementDimension = '3D'
 
         obj.addProperty("App::PropertyEnumeration", "Algorithm2D", "Mesh Parameters", "2D mesh algorithm")
         obj.Algorithm2D = _CfdMeshCart.known_mesh_algorithm_2D

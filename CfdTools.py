@@ -57,39 +57,6 @@ FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM
                                "~/OpenFOAM/OpenFOAM-dev"]
                      }
 
-"""
-def checkCfdPrerequisites():
-    #import Units
-    #import FemGui
-    #import subprocess
-    #import FoamCaseBuilder/utility #doesn't work
-    message = ""
-    
-    # analysis
-    analysis = FemGui.getActiveAnalysis()
-    if not analysis:
-        message += "No active Analysis\n"
-    # solver
-    solver = getSolver(analysis)
-    if not solver:
-        message += "No solver object defined in the analysis\n"
-    #if not working_dir:
-    workingdir = solver.WorkingDir
-    if(len(workingdir)<1):
-        message += "Working directory not set\n"
-    if not checkWorkingDir(workingdir):
-            message += "Working directory \'{}\' doesn't exist.".format(workingdir)
-    # mesh
-    mesh = None #NB! TODO: FIGURE OUT HOW TO FIND MESH!
-    if not mesh:
-        message += "No mesh object defined in the analysis\n"
-    else:
-        if mesh.FemMesh.VolumeCount == 0 and mesh.FemMesh.FaceCount == 0 and mesh.FemMesh.EdgeCount == 0:
-            message += "CFD mesh has neither volume nor shell or edge elements. Provide a CFD mesh with elements!\n"
-    return message
-
-        """
-
 
 def checkWorkingDir(wd):
     """ Check validity of working directory. """

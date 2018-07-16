@@ -22,6 +22,11 @@
     {
         type        cyclic;
     }
+%:empty
+    %(0%)
+    {
+        type        empty;
+    }
 %}
 %:baffle
     // Baffle "%(0%)" is created with createBaffles
