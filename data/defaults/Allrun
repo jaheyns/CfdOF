@@ -34,12 +34,9 @@ if [ ! -d constant/polyMesh ]; then
     fi
 fi
 
-%{%(meshType%)
-%:CfdMeshCart
 # Update patch name and type
 runCommand createPatch -overwrite
 
-%}
 %{%(zonesPresent%)
 %:True
 # Scaling .stl files exported from FreeCAD from mm to m
@@ -50,7 +47,7 @@ runCommand surfaceTransformPoints -scale "(0.001 0.001 0.001)" "constant/triSurf
 %}
 %}
 # Set cell zones contained inside the .stl surfaces
-runCommand topoSet
+runCommand topoSet -dict system/topoSetZonesDict
 
 %}
 %{%(initialisationZonesPresent%)
@@ -61,8 +58,15 @@ runCommand setFields
 %}
 %{%(bafflesPresent%)
 %:True
+%{%(createPatchesFromSnappyBaffles%)
+%:False
+# Combine mesh faceZones
+runCommand topoSet -dict system/topoSetBafflesDict
+
 # Creating baffles
 runCommand createBaffles -overwrite
+
+%}
 %}
 %{%(runChangeDictionary%)
 %:True

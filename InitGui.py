@@ -64,15 +64,14 @@ class CfdOFWorkbench(Workbench):
 
         import _CommandCfdMeshGmshFromShape
         import _CommandCfdMeshRegion
-        import _CommandCfdConvertTo2D
         # import _CommandPrintMeshInfo  # Create a fluid specific check as the current does not contain any
         #                               # useful info for flow (see checkMesh)
-        import _CommandCfdMeshCartFromShape
+        import _CommandCfdMeshFromShape
 
 
         cmdlst = ['Cfd_Analysis','Cfd_PhysicsModel', 'Cfd_FluidMaterial',
-                  'Cfd_InitialiseInternal', 'Cfd_MeshGmshFromShape',
-                  'Cfd_MeshCartFromShape', 'Fem_MeshRegion','Cfd_3DTo2D',
+                  'Cfd_InitialiseInternal',
+                  'Cfd_MeshFromShape', 'Cfd_MeshRegion',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
                   'Cfd_SolverControl']
 

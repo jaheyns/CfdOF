@@ -20,7 +20,7 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "Command cut-cell Cartesian Mesh From Shape"
+__title__ = "Command Mesh From Shape"
 __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
@@ -37,20 +37,20 @@ import CfdTools
 import os
 
 
-class _CommandCfdMeshCartFromShape(CommandManager):
-    # the Cfd_MeshCartFromShape command definition
+class _CommandCfdMeshFromShape(CommandManager):
+    # the Cfd_MeshFromShape command definition
     def __init__(self):
-        super(_CommandCfdMeshCartFromShape, self).__init__()
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_c.png")
+        super(_CommandCfdMeshFromShape, self).__init__()
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
         self.resources = {'Pixmap': icon_path,
-                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshCartFromShape",
-                                                               "Cut-cell Cartesian mesh"),
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshCartFromShape",
-                                                              "Create a Cut-cell Cartesian mesh using cfMesh or sHM")}
+                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                                                               "CFD mesh"),
+                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                                                              "Create a mesh using cfMesh, snappyHexMesh or gmsh")}
         self.is_active = 'with_part_feature'
 
     def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Create cut-cell Cartesian mesh")
+        FreeCAD.ActiveDocument.openTransaction("Create CFD mesh")
         FreeCADGui.addModule("FemGui")
         analysis_obj = FemGui.getActiveAnalysis()
         if analysis_obj:
@@ -61,9 +61,9 @@ class _CommandCfdMeshCartFromShape(CommandManager):
             sel = FreeCADGui.Selection.getSelection()
             if len(sel) == 1:
                 if sel[0].isDerivedFrom("Part::Feature"):
-                    mesh_obj_name = sel[0].Name + "_CartesianMesh"
-                    FreeCADGui.addModule("CfdMeshCart")
-                    FreeCADGui.doCommand("CfdMeshCart.makeCfdMeshCart('" + mesh_obj_name + "')")
+                    mesh_obj_name = sel[0].Name + "_Mesh"
+                    FreeCADGui.addModule("CfdMesh")
+                    FreeCADGui.doCommand("CfdMesh.makeCfdMesh('" + mesh_obj_name + "')")
                     FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
                     if FemGui.getActiveAnalysis():
                         FreeCADGui.addModule("FemGui")
@@ -73,4 +73,4 @@ class _CommandCfdMeshCartFromShape(CommandManager):
             print "ERROR: You cannot have more than one mesh object"
         FreeCADGui.Selection.clearSelection()
 
-FreeCADGui.addCommand('Cfd_MeshCartFromShape', _CommandCfdMeshCartFromShape())
+FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())

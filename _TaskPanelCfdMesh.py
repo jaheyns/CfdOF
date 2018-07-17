@@ -23,24 +23,13 @@
 # *                                                                         *
 # ***************************************************************************
 
-"""
-Gmsh meshing UI for CFD analysis object. Adapted from equivalent classes
-in FEM module but removes the option to generate second-order
-mesh cells.
-"""
-
 from __future__ import print_function
-
-__title__ = "_TaskPanelCfdMeshCart"
-__author__ = "Bernd Hahnebach"
-__url__ = "http://www.freecadweb.org"
-
 import FreeCAD
 import os
 import sys
 import os.path
 import platform
-import _CfdMeshCart
+import _CfdMesh
 import time
 import tempfile
 import CfdTools
@@ -56,11 +45,11 @@ if FreeCAD.GuiUp:
     import FemGui
 
 
-class _TaskPanelCfdMeshCart:
-    """ The TaskPanel for editing References property of CfdMeshCart objects and creation of new CFD mesh """
+class _TaskPanelCfdMesh:
+    """ The TaskPanel for editing References property of CfdMesh objects and creation of new CFD mesh """
     def __init__(self, obj):
         self.mesh_obj = obj
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMeshCart.ui"))
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMesh.ui"))
 
         self.mesh_process = QtCore.QProcess()
         self.Timer = QtCore.QTimer()
@@ -98,8 +87,8 @@ class _TaskPanelCfdMeshCart:
         self.form.snappySpecificProperties.setVisible(False)
 
         # Limit mesh dimensions to 3D solids
-        self.form.cb_dimension.addItems(_CfdMeshCart._CfdMeshCart.known_element_dimensions)
-        self.form.cb_utility.addItems(_CfdMeshCart._CfdMeshCart.known_mesh_utility)
+        self.form.cb_dimension.addItems(_CfdMesh._CfdMesh.known_element_dimensions)
+        self.form.cb_utility.addItems(_CfdMesh._CfdMesh.known_mesh_utility)
 
         self.form.if_max.setToolTip("Select 0 to use default value")
         self.form.pb_searchPointInMesh.setToolTip("Specify below a point vector inside of the mesh or press 'Search' "
@@ -209,22 +198,23 @@ class _TaskPanelCfdMeshCart:
         self.utility = self.form.cb_utility.currentText()
         if self.utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
-        elif self.utility == "cfMesh":
+        else:
             self.form.snappySpecificProperties.setVisible(False)
 
     def runMeshProcess(self):
         self.console_message_cart = ''
         self.Start = time.time()
         self.Timer.start()
-        self.console_log("Starting cut-cell Cartesian meshing ...")
+        self.console_log("Starting meshing ...")
         try:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
             self.get_active_analysis()
             self.set_mesh_params()
-            import CfdCartTools  # Fresh init before remeshing
-            self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
+            import CfdMeshTools  # Fresh init before remeshing
+            self.cart_mesh = CfdMeshTools.CfdMeshTools(self.obj)
             cart_mesh = self.cart_mesh
             setInputFieldQuantity(self.form.if_max, str(cart_mesh.get_clmax()))
-            print("\nStarting cut-cell Cartesian meshing ...\n")
+            print("\nStarting meshing ...\n")
             print('  Part to mesh: Name --> '
                   + cart_mesh.part_obj.Name + ',  Label --> '
                   + cart_mesh.part_obj.Label + ', ShapeType --> '
@@ -234,10 +224,11 @@ class _TaskPanelCfdMeshCart:
             # cart_mesh.get_tmp_file_paths(self.utility)
             cart_mesh.get_tmp_file_paths()
             cart_mesh.setup_mesh_case_dir()
-            cart_mesh.get_group_data()
             cart_mesh.get_region_data()  # Writes region stls so need file structure
             cart_mesh.write_mesh_case()
-            self.console_log("Writing the STL files of the part surfaces ...")
+            self.console_log("Exporting the part surfaces ...")
+            if FreeCAD.GuiUp:
+                FreeCAD.Gui.updateGui()
             cart_mesh.write_part_file()
             self.console_log("Running {} ...".format(self.utility))
             self.runCart(cart_mesh)
@@ -245,29 +236,26 @@ class _TaskPanelCfdMeshCart:
             self.console_log("Error: " + ex.message, '#FF0000')
             self.Timer.stop()
             raise
+        finally:
+            QApplication.restoreOverrideCursor()
 
     def runCart(self, cart_mesh):
         cart_mesh.error = False
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-
-        try:
-            cmd = CfdTools.makeRunCommand('./Allmesh', self.meshCaseDir, source_env=False)
-            FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
-            env = QtCore.QProcessEnvironment.systemEnvironment()
-            env_vars = CfdTools.getRunEnvironment()
-            for key in env_vars:
-                env.insert(key, env_vars[key])
-            self.mesh_process.setProcessEnvironment(env)
-            self.mesh_process.start(cmd[0], cmd[1:])
-            if self.mesh_process.waitForStarted():
-                self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
-                self.form.pb_stop_mesh.setEnabled(True)
-                self.form.pb_paraview.setEnabled(False)
-            else:
-                self.console_log("Error starting meshing process", "#FF0000")
-                cart_mesh.error = True
-        finally:
-            QApplication.restoreOverrideCursor()
+        cmd = CfdTools.makeRunCommand('./Allmesh', self.meshCaseDir, source_env=False)
+        FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
+        env = QtCore.QProcessEnvironment.systemEnvironment()
+        env_vars = CfdTools.getRunEnvironment()
+        for key in env_vars:
+            env.insert(key, env_vars[key])
+        self.mesh_process.setProcessEnvironment(env)
+        self.mesh_process.start(cmd[0], cmd[1:])
+        if self.mesh_process.waitForStarted():
+            self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
+            self.form.pb_stop_mesh.setEnabled(True)
+            self.form.pb_paraview.setEnabled(False)
+        else:
+            self.console_log("Error starting meshing process", "#FF0000")
+            cart_mesh.error = True
 
     def killMeshProcess(self):
         self.console_log("Meshing manually stopped")
@@ -301,7 +289,7 @@ class _TaskPanelCfdMeshCart:
             cart_mesh = self.cart_mesh
             cart_mesh.read_and_set_new_mesh()  # Only read once meshing has finished
             self.console_log('Meshing completed')
-            self.console_log('Tetrahedral representation of the Cartesian mesh is shown')
+            self.console_log('Tetrahedral representation of the mesh is shown')
             self.console_log("Warning: FEM Mesh may not display mesh accurately, please view in Paraview.\n")
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
@@ -355,8 +343,8 @@ class _TaskPanelCfdMeshCart:
 
     def searchPointInMesh(self):
         print ("Searching for an internal vector point ...")
-        import CfdCartTools  # Fresh init before remeshing
-        self.cart_mesh = CfdCartTools.CfdCartTools(self.obj)
+        import CfdMeshTools  # Fresh init before remeshing
+        self.cart_mesh = CfdMeshTools.CfdMeshTools(self.obj)
         pointCheck = self.cart_mesh.automatic_inside_point_detect()
         iMPx, iMPy, iMPz = pointCheck
         setInputFieldQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")

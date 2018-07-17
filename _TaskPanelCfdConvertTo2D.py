@@ -162,7 +162,7 @@ class TaskPanelCfdConvertTo2D:
     def convertMesh(self):
         import tempfile
         import CfdCaseWriterFoam
-        import CfdCartTools
+        import CfdMeshTools
         import TemplateBuilder
         import os
 

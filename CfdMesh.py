@@ -20,19 +20,20 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "CfdMeshCart"
+__title__ = "CfdMesh"
 __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-import _CfdMeshCart
+import _CfdMesh
 
-def makeCfdMeshCart(name="CFDMeshCart"):
-    '''makeCfdMeshCart(name): makes a Cart CFD mesh object'''
+
+def makeCfdMesh(name="CFDMesh"):
+    '''makeCfdMesh(name): makes a CFD mesh object'''
     obj = FreeCAD.ActiveDocument.addObject("Fem::FemMeshObjectPython", name)
-    _CfdMeshCart._CfdMeshCart(obj)
+    _CfdMesh._CfdMesh(obj)
     if FreeCAD.GuiUp:
-        import _ViewProviderCfdMeshCart
-        _ViewProviderCfdMeshCart._ViewProviderCfdMeshCart(obj.ViewObject)
+        import _ViewProviderCfdMesh
+        _ViewProviderCfdMesh._ViewProviderCfdMesh(obj.ViewObject)
     return obj

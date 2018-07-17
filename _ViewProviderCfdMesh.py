@@ -20,7 +20,7 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "_ViewProviderCfdMeshCart"
+__title__ = "_ViewProviderCfdMesh"
 __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
@@ -30,8 +30,8 @@ import FemGui
 import CfdTools
 import os
 
-class _ViewProviderCfdMeshCart:
-    """ A View Provider for the CfdMeshCart object """
+class _ViewProviderCfdMesh:
+    """ A View Provider for the CfdMesh object """
     def __init__(self, vobj):
         vobj.Proxy = self
 
@@ -56,10 +56,10 @@ class _ViewProviderCfdMeshCart:
         for obj in FreeCAD.ActiveDocument.Objects:
             if obj.isDerivedFrom("Part::Feature"):
                 obj.ViewObject.hide()
-            if obj.isDerivedFrom("Fem::FemMeshObject"):
+            if hasattr(obj, 'Proxy') and hasattr(obj.Proxy, 'Type') and obj.Proxy.Type == "CfdMesh":
                 obj.ViewObject.show()
-        import _TaskPanelCfdMeshCart
-        taskd = _TaskPanelCfdMeshCart._TaskPanelCfdMeshCart(self.Object)
+        import _TaskPanelCfdMesh
+        taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True
@@ -80,7 +80,7 @@ class _ViewProviderCfdMeshCart:
                         if not gui_doc.getInEdit():
                             gui_doc.setEdit(vobj.Object.Name)
                         else:
-                            FreeCAD.Console.PrintError('Activate the analysis this mesh belongs to!\n')
+                            FreeCAD.Console.PrintError('Activate the analysis this mesh belongs to.\n')
                     else:
                         print('Mesh does not belong to the active analysis.')
                         for o in gui_doc.Document.Objects:
@@ -88,7 +88,7 @@ class _ViewProviderCfdMeshCart:
                                 for m in o.Group:
                                     if m == self.Object:
                                         FemGui.setActiveAnalysis(o)
-                                        print('Analysis the Mesh belongs too was activated.')
+                                        print('Analysis the Mesh belongs to was activated.')
                                         gui_doc.setEdit(vobj.Object.Name)
                                         break
                 else:
@@ -100,14 +100,14 @@ class _ViewProviderCfdMeshCart:
                         for m in o.Group:
                             if m == self.Object:
                                 FemGui.setActiveAnalysis(o)
-                                print('Analysis the Mesh belongs too was activated.')
+                                print('Analysis the Mesh belongs to was activated.')
                                 gui_doc.setEdit(vobj.Object.Name)
                                 break
                 else:
-                    print('Mesh GMSH object does not belong to an analysis. Group meshing will is deactivated.')
+                    print('Mesh GMSH object does not belong to an analysis. Group meshing will be deactivated.')
                     gui_doc.setEdit(vobj.Object.Name)
         else:
-            FreeCAD.Console.PrintError('Active Task Dialog found! Please close this one first!\n')
+            FreeCAD.Console.PrintError('Active Task Dialog found. Please close this one first.\n')
         return True
 
     def claimChildren(self):

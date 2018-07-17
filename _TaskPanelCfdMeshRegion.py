@@ -103,13 +103,13 @@ class _TaskPanelCfdMeshRegion:
         self.form.yLength.textChanged.connect(self.yLengthChanged)
         self.form.zLength.textChanged.connect(self.zLengthChanged)
 
-        if self.mesh_obj.Proxy.Type == 'Fem::FemMeshGmsh':
+        if self.mesh_obj.MeshUtility == 'gmsh':
             self.form.cartesianInternalVolumeFrame.setVisible(False)
             self.form.surfaceOrInernalVolume.setVisible(False)
             self.form.gmsh_frame.setVisible(True)
             self.form.cf_frame.setVisible(False)
             self.form.snappy_frame.setVisible(False)
-        elif self.mesh_obj.Proxy.Type == 'CfdMeshCart':
+        else:
             self.set_internal_surface()
 
         self.form.if_refinethick.setToolTip("Thickness or distance of the refinement region from the reference "
@@ -131,10 +131,9 @@ class _TaskPanelCfdMeshRegion:
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.referenceSelectWidget,
                                                                     self.obj,
-                                                                    self.mesh_obj.Proxy.Type != 'Fem::FemMeshGmsh')
+                                                                    self.mesh_obj.MeshUtility != 'gmsh')
 
     def accept(self):
-        self.set_meshregion_props()
         if self.sel_server:
             FreeCADGui.Selection.removeObserver(self.sel_server)
         FreeCADGui.ActiveDocument.resetEdit()
@@ -146,7 +145,7 @@ class _TaskPanelCfdMeshRegion:
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References = referenceList".format(self.obj.Name))
         FreeCADGui.doCommand("\nFreeCAD.ActiveDocument.{}.RelativeLength "
                              "= {}".format(self.obj.Name, self.rellen))
-        if self.mesh_obj.Proxy.Type == 'CfdMeshCart':
+        if self.mesh_obj.MeshUtility != 'gmsh':
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.RefinementThickness "
                                  "= '{}'".format(self.obj.Name, self.refinethick))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.NumberLayers "
@@ -169,7 +168,6 @@ class _TaskPanelCfdMeshRegion:
 
     def reject(self):
         self.obj.References = self.ReferencesOrig
-        self.set_meshregion_props()
         if self.sel_server:
             FreeCADGui.Selection.removeObserver(self.sel_server)
         FreeCADGui.ActiveDocument.resetEdit()
@@ -183,9 +181,9 @@ class _TaskPanelCfdMeshRegion:
 
     def initialiseUponReload(self):
         """ fills the widgets """
-        if self.mesh_obj.Proxy.Type == 'Fem::FemMeshGmsh':
+        if self.mesh_obj.MeshUtility == "gmsh":
             self.form.if_gmsh_rellen.setValue(self.obj.RelativeLength)
-        elif self.mesh_obj.Proxy.Type == 'CfdMeshCart':
+        else:
             self.form.if_rellen.setValue(self.obj.RelativeLength)
             setInputFieldQuantity(self.form.if_refinethick, self.obj.RefinementThickness)
             if self.numlayer > 1:  # Only reload when there are more than one layer
@@ -210,7 +208,6 @@ class _TaskPanelCfdMeshRegion:
             setInputFieldQuantity(self.form.zLength, str(self.obj.InternalRegion["BoxLengths"]["z"])+"m")
             setInputFieldQuantity(self.form.radius, str(self.obj.InternalRegion["SphereRadius"])+"m")
 
-
     def boundary_layer_state_changed(self):
         if self.form.check_boundlayer.isChecked():
             self.form.boundlayer_frame.setVisible(True)
@@ -233,27 +230,13 @@ class _TaskPanelCfdMeshRegion:
 
     def get_meshregion_props(self):
         self.rellen = self.obj.RelativeLength
-        if self.mesh_obj.Proxy.Type == 'CfdMeshCart':
+        if self.mesh_obj.MeshUtility != "gmsh":
             self.refinethick = self.obj.RefinementThickness
             self.numlayer = self.obj.NumberLayers
             self.expratio = self.obj.ExpansionRatio
             self.firstlayerheight = self.obj.FirstLayerHeight
             self.refinelevel = self.obj.RefinementLevel
             self.edgerefinement = self.obj.RegionEdgeRefinement
-
-    def set_meshregion_props(self):
-        self.obj.RelativeLength = self.rellen
-        if self.mesh_obj.Proxy.Type == 'CfdMeshCart':
-            self.obj.RefinementThickness = self.refinethick
-            self.obj.NumberLayers = self.numlayer
-            self.obj.ExpansionRatio = self.expratio
-            self.obj.FirstLayerHeight = self.firstlayerheight
-            self.obj.RefinementLevel = self.refinelevel
-            self.obj.RegionEdgeRefinement = self.edgerefinement
-            if self.form.baffle_check.isChecked() and self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                self.obj.Baffle = True
-            else:
-                self.obj.Baffle = False
 
     def set_internal_surface(self):
         if self.obj.Internal:
