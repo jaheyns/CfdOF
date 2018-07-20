@@ -1,0 +1,51 @@
+%{%(bafflesPresent%)
+%:True
+%{%(createPatchesFromSnappyBaffles%)
+%:False
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetBafflesDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:baffle
+    // Combine mesh face zones for baffles
+    {
+        name    %(0%);
+        type    faceZoneSet;
+        action  new;
+        source  labelToFace;
+        sourceInfo
+        {
+            value ();
+        }
+    }
+%{%(createPatches/%(0%)/PatchNamesList%)
+    {
+        name    %(1%);
+        type    faceZoneSet;
+        action  add;
+        source  faceZoneToFaceZone;
+        sourceInfo
+        {
+            zone %(0%);
+        }
+    }
+%}
+
+%}
+%}
+);
+
+// ************************************************************************* //
+%}
+%}

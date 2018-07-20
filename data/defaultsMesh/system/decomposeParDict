@@ -1,3 +1,7 @@
+%{%(MeshUtility%)
+%:snappyHexMesh
+%{%(SnappySettings/ParallelMesh%)
+%:True
 %[_header%]
 FoamFile
 {
@@ -13,3 +17,5 @@ numberOfSubdomains  %(SnappySettings/NumberCores%);
 method              scotch;
 
 // ************************************************************************* //
+%}
+%}

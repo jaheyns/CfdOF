@@ -57,39 +57,6 @@ FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM
                                "~/OpenFOAM/OpenFOAM-dev"]
                      }
 
-"""
-def checkCfdPrerequisites():
-    #import Units
-    #import FemGui
-    #import subprocess
-    #import FoamCaseBuilder/utility #doesn't work
-    message = ""
-    
-    # analysis
-    analysis = FemGui.getActiveAnalysis()
-    if not analysis:
-        message += "No active Analysis\n"
-    # solver
-    solver = getSolver(analysis)
-    if not solver:
-        message += "No solver object defined in the analysis\n"
-    #if not working_dir:
-    workingdir = solver.WorkingDir
-    if(len(workingdir)<1):
-        message += "Working directory not set\n"
-    if not checkWorkingDir(workingdir):
-            message += "Working directory \'{}\' doesn't exist.".format(workingdir)
-    # mesh
-    mesh = None #NB! TODO: FIGURE OUT HOW TO FIND MESH!
-    if not mesh:
-        message += "No mesh object defined in the analysis\n"
-    else:
-        if mesh.FemMesh.VolumeCount == 0 and mesh.FemMesh.FaceCount == 0 and mesh.FemMesh.EdgeCount == 0:
-            message += "CFD mesh has neither volume nor shell or edge elements. Provide a CFD mesh with elements!\n"
-    return message
-
-        """
-
 
 def checkWorkingDir(wd):
     """ Check validity of working directory. """
@@ -163,11 +130,13 @@ def getPhysicsModel(analysis_object):
 def get2DConversionObject(analysis_object):
     isPresent = False
     obj = None
-    for i in analysis_object.Group:
-        if hasattr(i, "Proxy") and hasattr(i.Proxy, "Type") and (i.Proxy.Type == "CfdConverter2D"):
-            isPresent = True
-            obj = i
+    if analysis_object is not None:
+        for i in analysis_object.Group:
+            if hasattr(i, "Proxy") and hasattr(i.Proxy, "Type") and (i.Proxy.Type == "CfdConverter2D"):
+                isPresent = True
+                obj = i
     return obj, isPresent
+
 
 def getMeshObject(analysis_object):
     isPresent = False
@@ -179,7 +148,7 @@ def getMeshObject(analysis_object):
     for i in members:
         if hasattr(i, "Proxy") \
                 and hasattr(i.Proxy, "Type") \
-                and (i.Proxy.Type == "Fem::FemMeshGmsh" or i.Proxy.Type == "CfdMeshCart"):
+                and i.Proxy.Type == "CfdMesh":
             if isPresent:
                 FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
             else:
@@ -310,49 +279,6 @@ def setCompSolid(vobj):
             FreeCAD.getDocument(doc_name).getObject(obj.Name).Mode = 'CompSolid'
 
 
-# UNV mesh writer
-
-def write_unv_mesh(mesh_obj, bc_group, mesh_file_name):
-    __objs__ = []
-    __objs__.append(mesh_obj)
-    FreeCAD.Console.PrintMessage("Export FemMesh to UNV format file: {}\n".format(mesh_file_name))
-    Fem.export(__objs__, mesh_file_name)
-    del __objs__
-    # Repen the unv file and write the boundary faces.
-    _write_unv_bc_mesh(mesh_obj, bc_group, mesh_file_name)
-
-
-def _write_unv_bc_mesh(mesh_obj, bc_group, unv_mesh_file):
-    f = open(unv_mesh_file, 'a')  # Appending bc to the volume mesh, which contains node and
-                                  # element definition, ends with '-1'
-    f.write("{:6d}\n".format(-1))  # Start of a section
-    f.write("{:6d}\n".format(2467))  # Group section
-    for bc_id, bc_obj in enumerate(bc_group):
-        _write_unv_bc_faces(mesh_obj, f, bc_id + 1, bc_obj)
-    f.write("{:6d}\n".format(-1))  # end of a section
-    f.write("{:6d}\n".format(-1))  # end of file
-    f.close()
-
-
-def _write_unv_bc_faces(mesh_obj, f, bc_id, bc_object):
-    facet_list = []
-    for o, e in bc_object.References:  # List of (ObjectName, StringName)
-        import FreeCADGui
-        obj = FreeCADGui.activeDocument().Document.getObject(o)
-        elem = obj.Shape.getElement(e)
-        if elem.ShapeType == 'Face':  # OpenFOAM needs only 2D face boundary for 3D model, normally
-            ret = mesh_obj.FemMesh.getFacesByFace(elem)  # FemMeshPyImp.cpp
-            facet_list.extend(i for i in ret)
-    nr_facets = len(facet_list)
-    f.write("{:>10d}         0         0         0         0         0         0{:>10d}\n".format(bc_id, nr_facets))
-    f.writelines(bc_object.Label + "\n")
-    for i in range(int(nr_facets / 2)):
-        f.write("         8{:>10d}         0         0         ".format(facet_list[2 * i]))
-        f.write("         8{:>10d}         0         0         \n".format(facet_list[2 * i + 1]))
-    if nr_facets % 2:
-        f.write("         8{:>10d}         0         0         \n".format(facet_list[-1]))
-
-
 def normalise(v):
     import numpy
     mag = numpy.sqrt(sum(vi**2 for vi in v))
@@ -401,12 +327,14 @@ def setInputFieldQuantity(inputField, quantity):
     q.Format = (12, 'e')
     inputField.setProperty("quantityString", q.UserString)
 
+
 def indexOrDefault(list, findItem, defaultIndex):
     """ Look for findItem in list, and return defaultIndex if not found """
     try:
         return list.index(findItem)
     except ValueError:
         return defaultIndex
+
 
 def hide_parts_show_meshes():
     if FreeCAD.GuiUp:
@@ -443,6 +371,8 @@ def getPatchType(bcType, bcSubType):
             return 'cyclic'
         elif bcSubType == 'wedge':
             return 'wedge'
+        elif bcSubType == 'twoDBoundingPlane':
+            return 'empty'
         elif bcSubType == 'empty':
             return 'empty'
         else:
@@ -929,12 +859,14 @@ def isSameGeometry(shape1, shape2):
     else:
         return False
 
+
 def set2DConversionObjectToFalse():
     import FemGui
     analysis_obj = FemGui.getActiveAnalysis()
     conversionObj,isPresent = get2DConversionObject(analysis_obj)
     if isPresent:
         conversionObj.Converter2D["TwoDMeshCreated"] = False
+
 
 def findElementInShape(aShape, anElement):
     """ Copy of FemMeshTools.find_element_in_shape, but calling isSameGeometry"""

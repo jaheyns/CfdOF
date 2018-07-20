@@ -9,6 +9,11 @@ runCommand()
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
+%{%(MeshUtility%)
+%:gmsh
+gmsh - gmsh/%(Name%)_Geometry.geo
+%}
+
 %{%(FoamRuntime%)
 %:BlueCFD
 %:default
@@ -26,8 +31,6 @@ source "%(TranslatedFoamPath%)/etc/bashrc"
 # Extract feature edges
 runCommand surfaceFeatureEdges -angle 60 constant/triSurface/%(Name%)_Geometry.stl %(Name%)_Geometry.fms
 runCommand cartesianMesh
-%}
-%{%(MeshUtility%)
 %:snappyHexMesh
 runCommand blockMesh
 runCommand surfaceFeatureExtract
@@ -42,6 +45,14 @@ runCommand snappyHexMesh -overwrite
 %}
 
 runCommand surfaceToPatch constant/triSurface/%(Name%)_Geometry.stl
+%:gmsh
+runCommand gmshToFoam gmsh/%(Name%)_Geometry.msh
+runCommand transformPoints -scale "(0.001 0.001 0.001)"
+%}
+
+%{%(TwoDSettings/ConvertTo2D%)
+%:True
+runCommand extrudeMesh
 %}
 
 runCommand surfaceMeshTriangulate mesh_outside.stl

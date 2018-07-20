@@ -55,14 +55,14 @@ SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translatin
             ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure"],
             ["Static pressure", "Uniform velocity", "Outflow"],
             ["Ambient pressure"],
-            ["Symmetry"],
+            ["Symmetry", "2D bounding plane"],
             ["Porous Baffle"]]
 
 SUBTYPES = [["fixed", "slip", "partialSlip", "translating", "rough"],
             ["uniformVelocity", "volumetricFlowRate", "massFlowRate", "totalPressure", "staticPressure"],
             ["staticPressure", "uniformVelocity", "outFlow"],
             ["totalPressureOpening"],
-            ["symmetry"],
+            ["symmetry", "twoDBoundingPlane"],
             ["porousBaffle"]]
 
 SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
@@ -79,7 +79,8 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                       "Normal component imposed for outflow; velocity fixed for reverse flow",
                       "All fields extrapolated; use with care!"],
                      ["Boundary open to surrounding with total pressure specified"],
-                     ["Symmetry of flow quantities about boundary face"],
+                     ["Symmetry of flow quantities about boundary face",
+                      "Bounding planes for 2D meshing and simulation"],
                      ["Permeable screen"]]
 
 # For each sub-type, whether the basic tab is enabled, the panel number to show (ignored if false), whether
@@ -99,7 +100,8 @@ BOUNDARY_UI = [[[False, 0, False, False, False],  # No slip
                 [True, 0, False, False, True],  # Uniform velocity
                 [False, 0, False, False, False]],  # Outflow
                [[True, 1, False, True, True]],  # Opening
-               [[False, 0, False, False, False]],  # Symmetry plane
+               [[False, 0, False, False, False],  # Symmetry plane
+                [False, 0, False, False, False]],  # 2D plane
                [[True, 5, False, False, False]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows

@@ -1,4 +1,4 @@
-%{%(ConvertTo2D%)
+%{%(TwoDSettings/ConvertTo2D%)
 %:True
 %[_header%]
 FoamFile
@@ -18,10 +18,10 @@ FoamFile
 
 constructFrom patch;
 sourceCase "./";
-sourcePatches (%(FrontFaceList%));
+sourcePatches (%(TwoDSettings/FrontFaceList%));
 
 // If construct from patch: patch to use for back (can be same as sourcePatch)
-exposedPatchName %(BackFaceList%);
+exposedPatchName %(TwoDSettings/BackFace%);
 
 
 // Flip surface normals before usage. Valid only for extrude from surface or
@@ -37,7 +37,7 @@ expansionRatio      1.0;
 
 linearNormalCoeffs
 {
-    thickness       %(Distance%);
+    thickness       %(TwoDSettings/Distance%);
 }
 
 // Do front and back need to be merged? Usually only makes sense for 360

@@ -20,11 +20,12 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "Command CFD GMSH Mesh From Shape"
+__title__ = "Command Mesh From Shape"
 __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
+import platform
 try:
     from femcommands.manager import CommandManager
 except ImportError:  # Backward compatibility
@@ -36,20 +37,20 @@ import CfdTools
 import os
 
 
-class _CommandCfdMeshGmshFromShape(CommandManager):
-    # the Cfd_MeshGmshFromShape command definition
+class _CommandCfdMeshFromShape(CommandManager):
+    # the Cfd_MeshFromShape command definition
     def __init__(self):
-        super(_CommandCfdMeshGmshFromShape, self).__init__()
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_g.png")
+        super(_CommandCfdMeshFromShape, self).__init__()
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
         self.resources = {'Pixmap': icon_path,
-                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape",
-                                                               "Tetrahedral meshing using GMSH"),
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshGmshFromShape",
-                                                              "Create a tetrahedral mesh using GMSH")}
+                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                                                               "CFD mesh"),
+                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                                                              "Create a mesh using cfMesh, snappyHexMesh or gmsh")}
         self.is_active = 'with_part_feature'
 
     def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Create CFD mesh by GMSH")
+        FreeCAD.ActiveDocument.openTransaction("Create CFD mesh")
         FreeCADGui.addModule("FemGui")
         analysis_obj = FemGui.getActiveAnalysis()
         if analysis_obj:
@@ -60,9 +61,9 @@ class _CommandCfdMeshGmshFromShape(CommandManager):
             sel = FreeCADGui.Selection.getSelection()
             if len(sel) == 1:
                 if sel[0].isDerivedFrom("Part::Feature"):
-                    mesh_obj_name = sel[0].Name + "_GmshMesh"
-                    FreeCADGui.addModule("CfdMeshGmsh")
-                    FreeCADGui.doCommand("CfdMeshGmsh.makeCfdMeshGmsh('" + mesh_obj_name + "')")
+                    mesh_obj_name = sel[0].Name + "_Mesh"
+                    FreeCADGui.addModule("CfdMesh")
+                    FreeCADGui.doCommand("CfdMesh.makeCfdMesh('" + mesh_obj_name + "')")
                     FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
                     if FemGui.getActiveAnalysis():
                         FreeCADGui.addModule("FemGui")
@@ -72,5 +73,4 @@ class _CommandCfdMeshGmshFromShape(CommandManager):
             print "ERROR: You cannot have more than one mesh object"
         FreeCADGui.Selection.clearSelection()
 
-
-FreeCADGui.addCommand('Cfd_MeshGmshFromShape', _CommandCfdMeshGmshFromShape())
+FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())

@@ -31,7 +31,7 @@ import CfdSolverFoam
 import CfdPhysicsSelection
 import CfdInitialiseFlowField
 import CfdFluidMaterial
-import CfdMeshGmsh
+import CfdMesh
 import CfdFluidBoundary
 import CfdTools
 import CfdCaseWriterFoam
@@ -132,7 +132,7 @@ class BlockTest(unittest.TestCase):
         self.active_doc.recompute()
 
     def createNewMesh(self, mesh_name):
-        self.mesh_object = CfdMeshGmsh.makeCfdMeshGmsh(mesh_name)
+        self.mesh_object = CfdMesh.makeCfdMesh(mesh_name)
         doc = FreeCAD.getDocument(self.__class__.__doc_name)
         obj = doc.getObject(mesh_name)
         vobj = obj.ViewObject
@@ -140,9 +140,10 @@ class BlockTest(unittest.TestCase):
         if obj.isDerivedFrom("Fem::FemMeshObject"):
             obj.ViewObject.show()
         obj.CharacteristicLengthMax = "80 mm"
-        obj.ElementOrder = "1st"
-        import _TaskPanelCfdMeshGmsh
-        taskd = _TaskPanelCfdMeshGmsh._TaskPanelCfdMeshGmsh(obj)  # Error when ran in FreeCADCmd
+        obj.MeshUtility = "gmsh"
+        obj.ElementDimension = "3D"
+        import _TaskPanelCfdMesh
+        taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(obj)  # Error when ran in FreeCADCmd
         taskd.obj = vobj.Object
         taskd.runMeshProcess()
         taskd.mesh_process.waitForFinished()
@@ -197,7 +198,7 @@ class BlockTest(unittest.TestCase):
     def writeCaseFiles(self):
         print ('Write case files ...')
         self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam(self.analysis)
-        self.writer.write_case()
+        self.writer.writeCase()
 
     def test_new_analysis(self):
         fccPrint('--------------- Start of CFD tests ---------------')

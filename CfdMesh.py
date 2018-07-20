@@ -20,23 +20,20 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "CfdMeshGmsh"
+__title__ = "CfdMesh"
 __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import platform
-try:
-    from femobjects import _FemMeshGmsh
-except ImportError:  # Backward compat
-    from PyObjects import _FemMeshGmsh
+import _CfdMesh
 
 
-def makeCfdMeshGmsh(name="CFDMeshGMSH"):
-    '''makeCfdMeshGmsh(name): makes a GMSH CFD mesh object'''
+def makeCfdMesh(name="CFDMesh"):
+    '''makeCfdMesh(name): makes a CFD mesh object'''
     obj = FreeCAD.ActiveDocument.addObject("Fem::FemMeshObjectPython", name)
-    _FemMeshGmsh._FemMeshGmsh(obj)
+    _CfdMesh._CfdMesh(obj)
     if FreeCAD.GuiUp:
-        import _ViewProviderCfdMeshGmsh
-        _ViewProviderCfdMeshGmsh._ViewProviderCfdMeshGmsh(obj.ViewObject)
+        import _ViewProviderCfdMesh
+        _ViewProviderCfdMesh._ViewProviderCfdMesh(obj.ViewObject)
     return obj

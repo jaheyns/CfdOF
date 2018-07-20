@@ -20,13 +20,6 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "_CommandMeshRegion"
-__author__ = "Bernd Hahnebach"
-__url__ = "http://www.freecadweb.org"
-
-## @package CommandMeshRegion
-#  \ingroup FEM
-
 import FreeCAD
 import platform
 try:
@@ -40,14 +33,14 @@ import CfdTools
 
 
 class _CommandMeshRegion(CommandManager):
-    "The Fem_MeshRegion command definition"
+    """ The Cfd_MeshRegion command definition """
     def __init__(self):
         super(_CommandMeshRegion, self).__init__()
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "meshRegion.png")
         self.resources = {'Pixmap': icon_path,
-                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Fem_MeshRegion", "Mesh region"),
+                          'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshRegion", "Mesh region"),
                           'Accel': "M, R",
-                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Fem_MeshRegion", "Creates a mesh region")}
+                          'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshRegion", "Creates a mesh region")}
         self.is_active = 'with_femmesh'
 
     def Activated(self):
@@ -58,10 +51,10 @@ class _CommandMeshRegion(CommandManager):
             sobj = sel[0]
             if len(sel) == 1 \
                     and hasattr(sobj, "Proxy") \
-                    and (sobj.Proxy.Type == "Fem::FemMeshGmsh" or sobj.Proxy.Type == "CfdMeshCart"):
+                    and sobj.Proxy.Type == "CfdMesh":
                 FreeCADGui.doCommand("CfdMeshRegion.makeCfdMeshRegion(App.ActiveDocument." + sobj.Name + ")")
                 FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
         FreeCADGui.Selection.clearSelection()
 
-FreeCADGui.addCommand('Fem_MeshRegion', _CommandMeshRegion())
+FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())

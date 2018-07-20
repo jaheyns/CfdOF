@@ -1,5 +1,3 @@
-%{%(meshType%)
-%:CfdMeshCart
 %[_header%]
 FoamFile
 {
@@ -16,6 +14,9 @@ pointSync false;
 patches
 (
 %{%(createPatches%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:baffle
+%:default
     {
         name %(0%);
         patchInfo
@@ -26,6 +27,7 @@ patches
         patches ( %(createPatches/%(0%)/PatchNamesList%) );
     }
 
+%}
 %}
 
 %{%(createPatchesFromSnappyBaffles%)
@@ -63,4 +65,3 @@ patches
 
 
 // ************************************************************************* //
-%}

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CartCfdMesh</class>
- <widget class="QWidget" name="CartCfdMesh">
+ <class>CfdMesh</class>
+ <widget class="QWidget" name="CfdMesh">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>CFD Cartesian Mesh</string>
+   <string>CFD Mesh</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -117,7 +117,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Cut-cell Cartesian Parameters</string>
+        <string>Mesh Parameters</string>
        </property>
       </widget>
      </item>
@@ -383,7 +383,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Cut-cell Cartesian</string>
+        <string>Mesher</string>
        </property>
       </widget>
      </item>

@@ -73,8 +73,6 @@ class CfdCaseWriterFoam:
 
             solverSettingsDict = CfdTools.getSolverSettings(self.solver_obj)
 
-            self.check2DConversion()
-
             # Collect settings into single dictionary
             if not self.mesh_obj:
                 raise RuntimeError("No mesh object found in analysis")
@@ -109,11 +107,7 @@ class CfdCaseWriterFoam:
             self.processInitialisationZoneProperties()
 
             self.settings['createPatchesFromSnappyBaffles'] = False
-            if self.mesh_obj.Proxy.Type == "CfdMeshCart":  # Cut-cell Cartesian
-                self.setupPatchNames()
-
-            if self.meshConvertedTo2D and self.mesh_obj.Proxy.Type == "Fem::FemMeshGmsh":
-                self.settings['runChangeDictionary'] = True
+            self.setupPatchNames()
 
             TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
             self.writeMesh()
@@ -188,49 +182,14 @@ class CfdCaseWriterFoam:
 
     # Mesh
 
-    def check2DConversion(self):
-        if self.conversionObjPresent:
-            self.meshConvertedTo2D = self.conversion2D_obj.Converter2D["TwoDMeshCreated"]
-        else:
-            self.meshConvertedTo2D = False
-        for i in range(len(self.bc_group)):
-            if (self.bc_group[i].Label == self.conversion2D_obj.Converter2D["FrontFace"]  or 
-                self.bc_group[i].Label == self.conversion2D_obj.Converter2D["BackFace"]):
-                self.bc_group[i].BoundarySettings["BoundaryType"] = "empty"
-
     def writeMesh(self):
         """ Convert or copy mesh files """
-        if self.mesh_obj.Proxy.Type == "Fem::FemMeshGmsh" and not(self.meshConvertedTo2D):  # GMSH
-            # Convert GMSH created UNV file to OpenFoam
-            print("Writing GMSH")
-            unvMeshFile = self.case_folder + os.path.sep + self.solver_obj.InputCaseName + u".unv"
-            self.mesh_generated = CfdTools.write_unv_mesh(self.mesh_obj, self.bc_group, unvMeshFile)
-            # FreeCAD always stores the CAD geometry in mm, while FOAM by default uses SI units. This is independent
-            # of the user selected unit preferences.
-            self.setupMesh(unvMeshFile, scale = 0.001)
-        elif self.mesh_obj.Proxy.Type == "Fem::FemMeshGmsh" and self.meshConvertedTo2D:
-            import tempfile
-            tmpdir = tempfile.gettempdir()
-            meshCaseDir = os.path.join(tmpdir, "meshCase")
-            constantDir = os.path.join(meshCaseDir, 'constant')
-            systemDir = os.path.join(meshCaseDir, 'system')
-            polyMeshDir = os.path.join(constantDir, 'polyMesh')
-            unvMeshFile = meshCaseDir + os.path.sep + self.solver_obj.InputCaseName + u".unv"
-
-            CfdTools.copyFilesRec(polyMeshDir, os.path.join(self.case_folder, 'constant', 'polyMesh'))
-            shutil.copy2(os.path.join(systemDir, 'extrudeMeshDict'), os.path.join(self.case_folder, 'system'))
-            shutil.copy2(os.path.join(meshCaseDir, 'ConvertMeshTo2D'), self.case_folder)
-            shutil.copy2(os.path.join(meshCaseDir, unvMeshFile), self.case_folder)
-            shutil.copy2(os.path.join(meshCaseDir, 'log.extrudeMesh'), self.case_folder)
-            shutil.copy2(os.path.join(meshCaseDir, 'log.ideasUnvToFoam'), self.case_folder)
-            shutil.copy2(os.path.join(meshCaseDir, 'log.transformPoints'), self.case_folder)
-        elif self.mesh_obj.Proxy.Type == "CfdMeshCart":  # Cut-cell Cartesian
-            import CfdCartTools
-            ## Move Cartesian mesh files from temporary mesh directory to case directory
+        if self.mesh_obj.Proxy.Type == "CfdMesh":
+            import CfdMeshTools
+            # Move Cartesian mesh files from temporary mesh directory to case directory
+            self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
             if self.mesh_obj.MeshUtility == "cfMesh":
                 print("Writing Cartesian mesh\n")
-                #import CfdCartTools
-                self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
                 cart_mesh = self.cart_mesh
                 # cart_mesh.get_tmp_file_paths("cfMesh")  # Update tmp file locations
                 cart_mesh.get_tmp_file_paths()  # Update tmp file locations
@@ -245,7 +204,6 @@ class CfdCaseWriterFoam:
 
             elif self.mesh_obj.MeshUtility == "snappyHexMesh":
                 print("Writing snappyHexMesh generated Cartesian mesh\n")
-                self.cart_mesh = CfdCartTools.CfdCartTools(self.mesh_obj)
                 cart_mesh = self.cart_mesh
                 # cart_mesh.get_tmp_file_paths("snappyHexMesh")  # Update tmp file locations
                 cart_mesh.get_tmp_file_paths()  # Update tmp file locations
@@ -265,10 +223,18 @@ class CfdCaseWriterFoam:
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.surfaceFeatureExtract'), self.case_folder)
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.snappyHexMesh'), self.case_folder)
 
-            if self.meshConvertedTo2D:
+            elif self.mesh_obj.MeshUtility == "gmsh":
+                print("Writing gmsh generated mesh\n")
+                cart_mesh = self.cart_mesh
+                cart_mesh.get_tmp_file_paths()  # Update tmp file locations
+                CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
+                CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','gmsh'))
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'Allmesh'), self.case_folder)
+                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.gmshToFoam'), self.case_folder)
+
+            if self.mesh_obj.ElementDimension == '2D':
                 shutil.copy2(os.path.join(os.path.join(cart_mesh.meshCaseDir,'system'),'extrudeMeshDict'), 
                              os.path.join(self.case_folder, 'system'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'ConvertMeshTo2D'), self.case_folder)
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.extrudeMesh'), self.case_folder)
         else:
             raise RuntimeError("Unrecognised mesh type")
@@ -519,9 +485,9 @@ class CfdCaseWriterFoam:
 
     def setupPatchNames(self):
         print ('Populating createPatchDict to update BC names')
-        import CfdCartTools
+        import CfdMeshTools
         # Init in case not meshed yet
-        CfdCartTools.CfdCartTools(self.mesh_obj)
+        CfdMeshTools.CfdMeshTools(self.mesh_obj)
         settings = self.settings
         settings['createPatches'] = {}
         bc_group = self.bc_group
@@ -550,13 +516,6 @@ class CfdCaseWriterFoam:
                 'PatchNamesList': tuple(bc_list),  # Tuple used so that case writer outputs as an array
                 'PatchType': patchType
             }
-            # if bcType != "baffle":
-            #     bcSubType = bcDict["BoundarySubtype"]
-            #     patchType = CfdTools.getPatchType(bcType, bcSubType)
-            #     settings['createPatches'][bc_obj.Label] = {
-            #         'PatchNamesList': bc_list,
-            #         'PatchType': patchType
-            #     }
 
             # In almost all cases the number of faces associated with a bc is going to be less than the number of
             # external or mesh faces.
@@ -567,7 +526,6 @@ class CfdCaseWriterFoam:
             for regionObj in self.mesh_obj.MeshRegionList:
                 if regionObj.Baffle:
                     settings['createPatchesFromSnappyBaffles'] = True
-
 
         if settings['createPatchesFromSnappyBaffles']:
             settings['createPatchesSnappyBaffles'] = {}
