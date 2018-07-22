@@ -62,7 +62,6 @@ class CfdOFWorkbench(Workbench):
         import _CommandCfdInitialisationZone
         import _CommandCfdFluidMaterial
 
-        import _CommandCfdMeshGmshFromShape
         import _CommandCfdMeshRegion
         # import _CommandPrintMeshInfo  # Create a fluid specific check as the current does not contain any
         #                               # useful info for flow (see checkMesh)
