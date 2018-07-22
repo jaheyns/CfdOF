@@ -553,7 +553,7 @@ class CfdMeshTools:
             if platform.system() == "Windows":
                 exe = os.path.join(FreeCAD.getHomePath(), 'bin', 'gmsh.exe')
             else:
-                exe = subprocess.check_output(["which", "gmsh"])
+                exe = subprocess.check_output(["which", "gmsh"]).rstrip('\n')
             self.gmsh_settings['Executable'] = CfdTools.translatePath(exe)
             self.gmsh_settings['ShapeFile'] = self.temp_file_shape
             self.gmsh_settings['HasLengthMap'] = False
