@@ -416,6 +416,8 @@ def getFoamDir():
     # If not specified, try to detect from shell environment settings and defaults
     if not installation_path:
         installation_path = detectFoamDir()
+    if not installation_path:
+        raise IOError("OpenFOAM installation path not set and not found")
 
     return installation_path
 
@@ -802,7 +804,10 @@ def checkCfdDependencies(term_print=True):
         paraview_cmd = "paraview"
         # If using blueCFD, use paraview supplied
         if getFoamRuntime() == 'BlueCFD':
-            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
+            try: # In case OpenFOAM not found
+                paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
+            except IOError:
+                pass
         # Otherwise, the command 'paraview' must be in the path - test to see if it exists
         import distutils.spawn
         if distutils.spawn.find_executable(paraview_cmd) is None:

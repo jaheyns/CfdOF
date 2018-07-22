@@ -41,7 +41,9 @@ except ImportError:  # Backward compat
 import Units
 import tempfile
 import os
+import platform
 import shutil
+import subprocess
 import CfdTools
 import math
 import MeshPart
@@ -548,6 +550,11 @@ class CfdMeshTools:
             else:
                 self.snappy_settings['InternalRefinementRegionsPresent'] = False
         elif self.mesh_obj.MeshUtility == "gmsh":
+            if platform.system() == "Windows":
+                exe = os.path.join(FreeCAD.getHomePath(), 'bin', 'gmsh.exe')
+            else:
+                exe = subprocess.check_output(["which", "gmsh"])
+            self.gmsh_settings['Executable'] = CfdTools.translatePath(exe)
             self.gmsh_settings['ShapeFile'] = self.temp_file_shape
             self.gmsh_settings['HasLengthMap'] = False
             if self.ele_length_map:
