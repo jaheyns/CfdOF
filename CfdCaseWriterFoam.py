@@ -52,7 +52,6 @@ class CfdCaseWriterFoam:
         self.porousZone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisationZone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
-        self.conversion2D_obj,self.conversionObjPresent = CfdTools.get2DConversionObject(analysis_obj)
         self.mesh_generated = False
 
     def writeCase(self):

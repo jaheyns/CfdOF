@@ -127,17 +127,6 @@ def getPhysicsModel(analysis_object):
     return physicsModel, isPresent
 
 
-def get2DConversionObject(analysis_object):
-    isPresent = False
-    obj = None
-    if analysis_object is not None:
-        for i in analysis_object.Group:
-            if hasattr(i, "Proxy") and hasattr(i.Proxy, "Type") and (i.Proxy.Type == "CfdConverter2D"):
-                isPresent = True
-                obj = i
-    return obj, isPresent
-
-
 def getMeshObject(analysis_object):
     isPresent = False
     meshObj = []
@@ -863,14 +852,6 @@ def isSameGeometry(shape1, shape2):
             return False
     else:
         return False
-
-
-def set2DConversionObjectToFalse():
-    import FemGui
-    analysis_obj = FemGui.getActiveAnalysis()
-    conversionObj,isPresent = get2DConversionObject(analysis_obj)
-    if isPresent:
-        conversionObj.Converter2D["TwoDMeshCreated"] = False
 
 
 def findElementInShape(aShape, anElement):
