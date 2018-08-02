@@ -262,10 +262,19 @@ class CfdFaceSelectWidget:
     def rebuildReferenceList(self):
         self.form.listReferences.clear()
         items = []
+        remove_refs = []
         for ref in self.References:
-            idx = self.solidsNames.index(ref[0])
-            item_name = self.solidsLabels[idx] + ':' + ref[1]
-            items.append(item_name)
+            try:
+                idx = self.solidsNames.index(ref[0])
+            except ValueError:  # If solid doesn't exist anymore
+                remove_refs.append(ref)
+            else:
+                item_name = self.solidsLabels[idx] + ':' + ref[1]
+                items.append(item_name)
+        for ref in remove_refs:
+            self.References.remove(ref)
+        if remove_refs:
+            self.scheduleRecompute()
         for listItemName in items:
             self.form.listReferences.addItem(listItemName)
         # At the moment we assume order in listbox is the same as order of references
