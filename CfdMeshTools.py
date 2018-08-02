@@ -47,6 +47,7 @@ import subprocess
 import CfdTools
 import math
 import MeshPart
+import Mesh
 import TemplateBuilder
 import Part
 import CfdCaseWriterFoam
@@ -443,25 +444,24 @@ class CfdMeshTools:
             if ("Boolean" in self.part_obj.Name) and self.mesh_obj.MeshUtility:
                 FreeCAD.Console.PrintError('cfMesh and snappyHexMesh do not accept boolean fragments.')
 
-            fullMeshFile = open(self.temp_file_geo, 'w')
-            for (i, objFaces) in enumerate(self.part_obj.Shape.Faces):
-                faceName = ("face{}".format(i))
-                mesh_stl = MeshPart.meshFromShape(objFaces, LinearDeflection=self.mesh_obj.STLLinearDeflection)
-                fullMeshFile.write("solid {}\n".format(faceName))
-                for face in mesh_stl.Facets:
-                    n = face.Normal
-                    fullMeshFile.write(" facet normal {} {} {}\n".format(n[0], n[1], n[2]))
-                    fullMeshFile.write("  outer loop\n")
-                    for j in range(3):
-                        p = face.Points[j]
-                        fullMeshFile.write("    vertex {} {} {}".format(self.scale*p[0],
-                                                                        self.scale*p[1],
-                                                                        self.scale*p[2]))
-                        fullMeshFile.write("\n")
-                    fullMeshFile.write("  endloop\n")
-                    fullMeshFile.write(" endfacet\n")
-                fullMeshFile.write("endsolid {}\n".format(faceName))
-            fullMeshFile.close()
+            with open(self.temp_file_geo, 'w') as fullMeshFile:
+                for (i, objFaces) in enumerate(self.part_obj.Shape.Faces):
+                    faceName = ("face{}".format(i))
+                    mesh_stl = MeshPart.meshFromShape(objFaces, LinearDeflection=self.mesh_obj.STLLinearDeflection)
+                    mx = FreeCAD.Matrix()
+                    mx.scale(self.scale, self.scale, self.scale)
+                    mesh_stl.transform(mx)
+
+                    face_file_name = self.temp_file_geo.rstrip(".stl") + ".ast"
+                    mesh_stl.write(face_file_name)
+                    with open(face_file_name) as face_file:
+                        # Discard the 'solid' line
+                        face_file.readline()
+                        s = "solid {}\n".format(faceName)
+                        while s:
+                            fullMeshFile.write(s)
+                            s = face_file.read(16384)
+                    os.unlink(face_file_name)
 
     def read_and_set_new_mesh(self):
         if not self.error:
