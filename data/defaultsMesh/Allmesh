@@ -11,7 +11,7 @@ runCommand()
 
 %{%(MeshUtility%)
 %:gmsh
-%(GmshSettings/Executable%) - gmsh/%(Name%)_Geometry.geo
+'%(GmshSettings/Executable%)' - gmsh/%(Name%)_Geometry.geo
 %}
 
 %{%(FoamRuntime%)
