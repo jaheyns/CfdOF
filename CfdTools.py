@@ -759,23 +759,23 @@ def checkCfdDependencies(term_print=True):
                             message += vermsg
                             if term_print:
                                 print(vermsg)
-                    else:
-                        # Check for cfMesh
-                        try:
-                            runFoamCommand("cartesianMesh -help")
-                        except subprocess.CalledProcessError:
-                            cfmesh_msg = "cfMesh not found"
-                            message += cfmesh_msg + '\n'
-                            if term_print:
-                                print(cfmesh_msg)
-                        # Check for HiSA
-                        try:
-                            runFoamCommand("hisa -help")
-                        except subprocess.CalledProcessError:
-                            hisa_msg = "HiSA not found"
-                            message += hisa_msg + '\n'
-                            if term_print:
-                                print(hisa_msg)
+
+                    # Check for cfMesh
+                    try:
+                        runFoamCommand("cartesianMesh -help")
+                    except subprocess.CalledProcessError:
+                        cfmesh_msg = "cfMesh not found"
+                        message += cfmesh_msg + '\n'
+                        if term_print:
+                            print(cfmesh_msg)
+                    # Check for HiSA
+                    try:
+                        runFoamCommand("hisa -help")
+                    except subprocess.CalledProcessError:
+                        hisa_msg = "HiSA not found"
+                        message += hisa_msg + '\n'
+                        if term_print:
+                            print(hisa_msg)
 
         if term_print:
             print("Checking for gmsh:")
