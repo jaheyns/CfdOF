@@ -92,7 +92,11 @@ class _CfdMeshRegion(PartFeature):
         obj.InternalRegion = {"Type": "Box",
                               "Center": {"x":0,"y":0,"z":0},
                               "BoxLengths": {"x":1e-3,"y":1e-3,"z":1e-3},
-                              "SphereRadius": 1e-3}
+                              "SphereRadius": 1e-3,
+                              "Point1": {"x": 0, "y": 0, "z": 0},
+                              "Point2": {"x": 0, "y": 0, "z": 0},
+                              "Radius1": 1e-3,
+                              "Radius2": 1e-3}
 
         obj.Proxy = self
         self.Type = "CfdMeshRegion"
@@ -102,6 +106,7 @@ class _CfdMeshRegion(PartFeature):
         #try for problem backward compatibility
         try:
             if obj.Internal:
+                shape = None
                 if obj.InternalRegion["Type"] == "Box":
                     x = obj.InternalRegion["Center"]["x"]*1000 - obj.InternalRegion["BoxLengths"]["x"]*1000/2.0
                     y = obj.InternalRegion["Center"]["y"]*1000 - obj.InternalRegion["BoxLengths"]["y"]*1000/2.0
@@ -116,7 +121,27 @@ class _CfdMeshRegion(PartFeature):
                                             Base.Vector(obj.InternalRegion["Center"]["x"]*1000,
                                                         obj.InternalRegion["Center"]["y"]*1000,
                                                         obj.InternalRegion["Center"]["z"]*1000))
-                obj.Shape = shape
+                elif obj.InternalRegion["Type"] == "Cone":
+                    p1 = Base.Vector(obj.InternalRegion["Point1"]["x"]*1000,
+                                     obj.InternalRegion["Point1"]["y"]*1000,
+                                     obj.InternalRegion["Point1"]["z"]*1000)
+                    p2 = Base.Vector(obj.InternalRegion["Point2"]["x"]*1000,
+                                     obj.InternalRegion["Point2"]["y"]*1000,
+                                     obj.InternalRegion["Point2"]["z"]*1000)
+                    h = (p2-p1).Length
+                    if h > 0:
+                        if obj.InternalRegion["Radius1"] == obj.InternalRegion["Radius2"]:
+                            # makeCone fails in this special case
+                            shape = Part.makeCylinder(obj.InternalRegion["Radius1"]*1000,
+                                                      h, p1, (p2-p1)/(h+1e-8))
+                        else:
+                            shape = Part.makeCone(obj.InternalRegion["Radius1"]*1000,
+                                                  obj.InternalRegion["Radius2"]*1000,
+                                                  h, p1, (p2-p1)/(h+1e-8))
+                if shape:
+                    obj.Shape = shape
+                else:
+                    obj.Shape = Part.Vertex()
             else:
                 obj.Shape = Part.Vertex()
         except AttributeError:
