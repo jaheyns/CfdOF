@@ -370,13 +370,13 @@ class CfdMeshTools:
 
                         if self.mesh_obj.MeshUtility == 'cfMesh':
                             if not Internal:
-                                cf_settings['MeshRegions'][mr_obj.Label] = {
+                                cf_settings['MeshRegions'][mr_obj.Name] = {
                                     'RelativeLength': mr_rellen * self.clmax * self.scale,
                                     'RefinementThickness': self.scale * Units.Quantity(
                                         mr_obj.RefinementThickness).Value,
                                 }
                             else:
-                                cf_settings['InternalRegions'][mr_obj.Label] = {
+                                cf_settings['InternalRegions'][mr_obj.Name] = {
                                     #"Internal": Internal,
                                     'RelativeLength': mr_rellen * self.clmax * self.scale,
                                     "InternalRegion": InternalRegion}
@@ -401,7 +401,7 @@ class CfdMeshTools:
                                 maxY = InternalRegion["Center"]["y"] + InternalRegion["BoxLengths"]["y"]/2.0
                                 minZ = InternalRegion["Center"]["z"] - InternalRegion["BoxLengths"]["z"]/2.0
                                 maxZ = InternalRegion["Center"]["z"] + InternalRegion["BoxLengths"]["z"]/2.0
-                                snappy_settings['InternalRegions'][mr_obj.Label] = {
+                                snappy_settings['InternalRegions'][mr_obj.Name] = {
                                     'RefinementLevel': mr_obj.RefinementLevel,
                                     "Type" : InternalRegion["Type"],
                                     "Center" : InternalRegion["Center"],
