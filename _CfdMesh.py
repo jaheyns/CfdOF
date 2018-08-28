@@ -48,7 +48,7 @@ class _CfdMesh:
         obj.ShapeFaceNames = []
 
         obj.addProperty("App::PropertyFloat", "STLLinearDeflection", "Base", "STL linear deflection")
-        obj.STLLinearDeflection = 0.1
+        obj.STLLinearDeflection = 0.05
 
         obj.addProperty("App::PropertyInteger", "NumberCores", "Base", "Number of parallel cores "
                                                                        "(only applicable when using snappyHexMesh) ")
