@@ -137,10 +137,6 @@ class CfdRunnableFoam(CfdRunnable):
     def getRunEnvironment(self):
         return CfdTools.getRunEnvironment()
 
-    def getParaviewScript(self):
-        # Already created when case created - just return script name
-        return os.path.join(self.writer.case_folder, "pvScript.py")
-
     def process_output(self, text):
         loglines = text.split('\n')
         for line in loglines:

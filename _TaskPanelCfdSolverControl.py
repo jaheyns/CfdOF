@@ -71,8 +71,11 @@ class _TaskPanelCfdSolverControl:
 
         self.open_paraview = QtCore.QProcess()
 
+        self.solver_object.WorkingDir = CfdTools.getOutputPath(self.analysis_object)
+
+        self.updateUI()
+
         # Connect Signals and Slots
-        QtCore.QObject.connect(self.form.tb_choose_working_dir, QtCore.SIGNAL("clicked()"), self.choose_working_dir)
         QtCore.QObject.connect(self.form.pb_write_inp, QtCore.SIGNAL("clicked()"), self.write_input_file_handler)
         QtCore.QObject.connect(self.form.pb_edit_inp, QtCore.SIGNAL("clicked()"), self.editSolverInputFile)
         QtCore.QObject.connect(self.form.pb_run_solver, QtCore.SIGNAL("clicked()"), self.runSolverProcess)
@@ -82,7 +85,12 @@ class _TaskPanelCfdSolverControl:
 
         QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.updateText)
         self.Start = time.time()
-        self.update()  # update UI from FemSolverObject, like WorkingDir
+
+    def updateUI(self):
+        self.form.pb_edit_inp.setEnabled(os.path.exists(self.solver_object.WorkingDir))
+        solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
+        self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(solverDirectory, "pv.foam")))
+        self.form.pb_run_solver.setEnabled(os.path.exists(os.path.join(solverDirectory, "Allrun")))
 
     def consoleMessage(self, message="", color="#000000"):
         self.console_message = self.console_message + \
@@ -97,15 +105,6 @@ class _TaskPanelCfdSolverControl:
 
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)
-
-    def update(self):
-        if CfdTools.checkWorkingDir(self.solver_object.WorkingDir):
-            self.form.le_working_dir.setText(self.solver_object.WorkingDir)
-        else:
-            wd = CfdTools.getTempWorkingDir()
-            self.solver_object.WorkingDir = wd
-            self.form.le_working_dir.setText(wd)
-        return
 
     def accept(self):
         FreeCADGui.ActiveDocument.resetEdit()
@@ -122,23 +121,13 @@ class _TaskPanelCfdSolverControl:
         self.open_paraview.waitForFinished()
         FreeCADGui.ActiveDocument.resetEdit()
 
-    def choose_working_dir(self):
-        current_wd = self.solver_object.WorkingDir
-        wd = QtGui.QFileDialog.getExistingDirectory(None,
-                                                    'Choose Solver working directory',
-                                                    current_wd)
-        info_obj = self.solver_object
-        if wd and os.access(wd, os.W_OK):
-            info_obj.WorkingDir = wd
-        else:
-            info_obj.WorkingDir = current_wd
-        self.form.le_working_dir.setText(info_obj.WorkingDir)
-
     def write_input_file_handler(self):
         self.Start = time.time()
         if self.check_prerequisites_helper():
             self.consoleMessage("{} case writer is called".format(self.solver_object.SolverName))
             self.form.pb_paraview.setEnabled(False)
+            self.form.pb_edit_inp.setEnabled(False)
+            self.form.pb_run_solver.setEnabled(False)
             QApplication.setOverrideCursor(Qt.WaitCursor)
             try:
                 self.solver_runner.writer.writeCase()
@@ -150,7 +139,7 @@ class _TaskPanelCfdSolverControl:
             finally:
                 QApplication.restoreOverrideCursor()
             self.consoleMessage("Write {} case is completed".format(self.solver_object.SolverName))
-            self.form.pb_edit_inp.setEnabled(True)
+            self.updateUI()
             self.form.pb_run_solver.setEnabled(True)
         else:
             self.consoleMessage("Case check failed", "#FF0000")
@@ -220,7 +209,9 @@ class _TaskPanelCfdSolverControl:
         self.Start = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        script_name = self.solver_runner.getParaviewScript()
+        script_name = os.path.abspath(os.path.join(self.solver_object.WorkingDir,
+                                                   self.solver_object.InputCaseName,
+                                                   "pvScript.py"))
 
         paraview_cmd = "paraview"
         # If using blueCFD, use paraview supplied

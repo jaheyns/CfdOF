@@ -52,7 +52,6 @@ class CfdCaseWriterFoam:
     def writeCase(self):
         """ writeCase() will collect case settings, and finally build a runnable case. """
         cfdMessage("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
-        cwd = os.curdir
         if not os.path.exists(self.solver_obj.WorkingDir):
             raise IOError("Path " + self.solver_obj.WorkingDir + " does not exist.")
 
@@ -198,10 +197,10 @@ class CfdCaseWriterFoam:
             # Move Cartesian mesh files from temporary mesh directory to case directory
             self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
             cart_mesh = self.cart_mesh
+            # Update output file locations
+            cart_mesh.get_file_paths(CfdTools.getOutputPath(self.analysis_obj))
             if self.mesh_obj.MeshUtility == "cfMesh":
                 print("Writing Cartesian mesh\n")
-                # cart_mesh.get_tmp_file_paths("cfMesh")  # Update tmp file locations
-                cart_mesh.get_tmp_file_paths()  # Update tmp file locations
                 CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder, 'constant', 'polyMesh'))
                 CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder, 'constant', 'triSurface'))
                 # shutil.copy2(cart_mesh.temp_file_meshDict, os.path.join(self.case_folder,'system'))
@@ -213,8 +212,6 @@ class CfdCaseWriterFoam:
 
             elif self.mesh_obj.MeshUtility == "snappyHexMesh":
                 print("Writing snappyHexMesh generated Cartesian mesh\n")
-                # cart_mesh.get_tmp_file_paths("snappyHexMesh")  # Update tmp file locations
-                cart_mesh.get_tmp_file_paths()  # Update tmp file locations
                 CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
                 CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','triSurface'))
                 # shutil.copy2(cart_mesh.temp_file_blockMeshDict, os.path.join(self.case_folder,'system'))
@@ -233,7 +230,6 @@ class CfdCaseWriterFoam:
 
             elif self.mesh_obj.MeshUtility == "gmsh":
                 print("Writing gmsh generated mesh\n")
-                cart_mesh.get_tmp_file_paths()  # Update tmp file locations
                 CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
                 CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','gmsh'))
                 shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'Allmesh'), self.case_folder)

@@ -62,8 +62,7 @@ class CfdMeshTools:
             self.analysis = analysis
             # group meshing turned on
         else:
-            self.analysis = None
-            # group meshing turned off
+            self.analysis = CfdTools.getParentAnalysisObject(self.mesh_obj)
 
         self.part_obj = self.mesh_obj.Part  # Part to mesh
         self.scale = 0.001  # Scale mm to m
@@ -93,7 +92,8 @@ class CfdMeshTools:
 
         self.error = False
 
-        self.get_tmp_file_paths()
+        output_path = CfdTools.getOutputPath(self.analysis)
+        self.get_file_paths(output_path)
 
     def get_dimension(self):
         # Dimension
@@ -178,10 +178,9 @@ class CfdMeshTools:
     def get_clmax(self):
         return Units.Quantity(self.clmax, Units.Length)
 
-    def get_tmp_file_paths(self):
-        tmpdir = tempfile.gettempdir()
+    def get_file_paths(self, output_dir):
         self.case_name = 'meshCase'
-        self.meshCaseDir = os.path.join(tmpdir, self.case_name)
+        self.meshCaseDir = os.path.join(output_dir, self.case_name)
         self.constantDir = os.path.join(self.meshCaseDir, 'constant')
         self.polyMeshDir = os.path.join(self.constantDir, 'polyMesh')
         self.triSurfaceDir = os.path.join(self.constantDir, 'triSurface')

@@ -33,6 +33,7 @@ __url__ = "http://www.freecadweb.org"
 def makeCfdAnalysis(name):
     """ makeCfdAnalysis(name): makes a Cfd Analysis group object """
     obj = FreeCAD.ActiveDocument.addObject("Fem::FemAnalysisPython", name)
+    obj.addProperty("App::PropertyPath", "OutputPath", "Path to write cases to (blank to use system default)")
     if FreeCAD.GuiUp:
         from _ViewProviderCfdAnalysis import _ViewProviderCfdAnalysis
         _ViewProviderCfdAnalysis(obj.ViewObject)

@@ -90,7 +90,6 @@ class _TaskPanelCfdMesh:
         self.form.pb_paraview.setEnabled(False)
         self.form.snappySpecificProperties.setVisible(False)
 
-        # Limit mesh dimensions to 3D solids
         self.form.cb_dimension.addItems(_CfdMesh._CfdMesh.known_element_dimensions)
         self.form.cb_utility.addItems(_CfdMesh._CfdMesh.known_mesh_utility)
 
@@ -100,13 +99,12 @@ class _TaskPanelCfdMesh:
         self.form.if_cellsbetweenlevels.setToolTip("Number of cells between each of level of refinement.")
         self.form.if_edgerefine.setToolTip("Number of refinement levels for all edges.")
 
-        tmpdir = tempfile.gettempdir()
-        self.meshCaseDir = os.path.join(tmpdir, 'meshCase')
-
         self.get_mesh_params()
         self.order = '1st'  # Default to first order for CFD mesh
         self.get_active_analysis()
         self.update()
+        self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(self.cart_mesh.meshCaseDir, "pv.foam")))
+        self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(self.cart_mesh.meshCaseDir, "mesh_outside.stl")))
 
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)
@@ -232,7 +230,7 @@ class _TaskPanelCfdMesh:
                   + cart_mesh.part_obj.Shape.ShapeType)
             print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
             cart_mesh.get_dimension()
-            cart_mesh.get_tmp_file_paths()
+            cart_mesh.get_file_paths(CfdTools.getOutputPath(self.analysis))
             cart_mesh.setup_mesh_case_dir()
             self.console_log("Exporting mesh region data ...")
             cart_mesh.get_region_data()  # Writes region stls so need file structure
@@ -250,7 +248,7 @@ class _TaskPanelCfdMesh:
 
     def runCart(self, cart_mesh):
         cart_mesh.error = False
-        cmd = CfdTools.makeRunCommand('./Allmesh', self.meshCaseDir, source_env=False)
+        cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
         FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
         env = QtCore.QProcessEnvironment.systemEnvironment()
         env_vars = CfdTools.getRunEnvironment()
@@ -262,6 +260,7 @@ class _TaskPanelCfdMesh:
             self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
             self.form.pb_stop_mesh.setEnabled(True)
             self.form.pb_paraview.setEnabled(False)
+            self.form.pb_load_mesh.setEnabled(False)
         else:
             self.console_log("Error starting meshing process", "#FF0000")
             cart_mesh.error = True
@@ -298,6 +297,7 @@ class _TaskPanelCfdMesh:
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(True)
+            self.form.pb_load_mesh.setEnabled(True)
         else:
             self.console_log("Meshing exited with error", "#FF0000")
             self.form.pb_run_mesh.setEnabled(True)
@@ -338,7 +338,7 @@ class _TaskPanelCfdMesh:
         if distutils.spawn.find_executable(paraview_cmd) is None:
             raise IOError("Paraview executable " + paraview_cmd + " not found in path.")
 
-        self.paraviewScriptName = os.path.join(self.meshCaseDir, 'pvScriptMesh.py')
+        self.paraviewScriptName = os.path.join(self.cart_mesh.meshCaseDir, 'pvScriptMesh.py')
         arg = '--script={}'.format(self.paraviewScriptName)
 
         self.console_log("Running " + paraview_cmd + " " +arg)

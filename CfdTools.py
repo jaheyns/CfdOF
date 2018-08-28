@@ -59,39 +59,22 @@ FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM
                      }
 
 
-def checkWorkingDir(wd):
-    """ Check validity of working directory. """
-    if not (os.path.isdir(wd) and os.access(wd, os.W_OK)):
-        FreeCAD.Console.PrintError("Working directory \'{}\' is not valid".format(wd))
-        return False
+def getDefaultOutputPath():
+    prefs = getPreferencesLocation()
+    output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+    if not output_path:
+        output_path = tempfile.gettempdir()
+    return output_path
+
+
+def getOutputPath(analysis):
+    if analysis and 'OutputPath' in analysis.PropertiesList:
+        output_path = analysis.OutputPath
     else:
-        return True
-
-
-def getTempWorkingDir():
-    """ Return temporary working directory. """
-    work_dir = ''
-    if os.path.exists('/tmp/'):
-        work_dir = '/tmp/'  # Must exist for POSIX system.
-    elif tempfile.tempdir:
-        work_dir = tempfile.tempdir
-    # else:
-    #     cwd = os.path.abspath('./')
-    return work_dir
-
-
-def setupWorkingDir(solver_object):
-    """Create working directory"""
-    wd = solver_object.WorkingDir
-    if not (os.path.exists(wd)):
-        try:
-            os.makedirs(wd)
-        except:
-            FreeCAD.Console.PrintWarning("Directory \'{}\' doesn't exist and cannot be created, using tmp dir instead".format(wd))
-            wd = getTempWorkingDir()
-            solver_object.WorkingDir = wd
-    return wd
-
+        output_path = ""
+    if not output_path:
+        output_path = getDefaultOutputPath()
+    return output_path
 
 # Get functions
 
@@ -383,7 +366,7 @@ def movePolyMesh(case):
 
 def getPreferencesLocation():
     # Set parameter location
-    return "User parameter:BaseApp/Preferences/Mod/Cfd/OpenFOAM"
+    return "User parameter:BaseApp/Preferences/Mod/CfdOF"
 
 
 def setFoamDir(installation_path):

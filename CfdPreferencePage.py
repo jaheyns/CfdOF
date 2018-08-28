@@ -37,6 +37,7 @@ import urllib
 import FreeCAD
 import CfdTools
 import TemplateBuilder
+import tempfile
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -82,6 +83,9 @@ class CfdPreferencePage:
         self.form.le_cfmesh_url.setText(CFMESH_URL)
         self.form.le_hisa_url.setText(HISA_URL)
 
+        self.form.tb_choose_output_dir.clicked.connect(self.chooseOutputDir)
+        self.form.le_output_dir.textChanged.connect(self.outputDirChanged)
+
         self.thread = None
         self.install_process = None
 
@@ -102,6 +106,8 @@ class CfdPreferencePage:
 
     def saveSettings(self):
         CfdTools.setFoamDir(self.foam_dir)
+        prefs = CfdTools.getPreferencesLocation()
+        FreeCAD.ParamGet(prefs).SetString("DefaultOutputPath", self.output_dir)
 
     def loadSettings(self):
         # Don't set the autodetected location, since the user might want to allow that to vary according
@@ -110,6 +116,9 @@ class CfdPreferencePage:
         self.foam_dir = FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
         self.initial_foam_dir = str(self.foam_dir)
         self.form.le_foam_dir.setText(self.foam_dir)
+
+        self.output_dir = CfdTools.getDefaultOutputPath()
+        self.form.le_output_dir.setText(self.output_dir)
 
     def consoleMessage(self, message="", color="#000000"):
         message = message.replace('\n', '<br>')
@@ -126,6 +135,15 @@ class CfdPreferencePage:
         if d and os.access(d, os.W_OK):
             self.foam_dir = d
         self.form.le_foam_dir.setText(self.foam_dir)
+
+    def outputDirChanged(self, text):
+        self.output_dir = text
+
+    def chooseOutputDir(self):
+        d = QtGui.QFileDialog().getExistingDirectory(None, 'Choose output directory', self.output_dir)
+        if d and os.access(d, os.W_OK):
+            self.output_dir = d
+        self.form.le_output_dir.setText(self.output_dir)
 
     def runDependencyChecker(self):
         # Temporarily apply the foam dir selection
