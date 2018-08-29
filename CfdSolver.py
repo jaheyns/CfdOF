@@ -29,6 +29,7 @@ __url__ = "http://www.freecadweb.org"
 
 import os.path
 
+
 class CfdSolver(object):
     """ Solver specific properties. """
     def __init__(self, obj):
@@ -40,8 +41,6 @@ class CfdSolver(object):
             obj.addProperty("App::PropertyString", "SolverName", "Solver",
                             "Name to identify the solver.", True)  # Currently not active
             obj.SolverName = "OpenFOAM"
-            obj.addProperty("App::PropertyPath", "WorkingDir", "Solver",
-                            "Directory where the case is saved.")
             obj.addProperty("App::PropertyString", "InputCaseName", "Solver",
                             "Name of case containing the input files and from where the solver is executed.")
             obj.addProperty("App::PropertyBool", "Parallel", "Solver",
@@ -49,13 +48,6 @@ class CfdSolver(object):
             obj.addProperty("App::PropertyInteger", "ParallelCores", "Solver",
                             "Number of cores on which to run parallel analysis")
 
-            import tempfile
-            if tempfile.tempdir:
-                obj.WorkingDir = tempfile.tempdir
-            elif os.path.exists('/tmp/'):   # must exist for POSIX system
-                obj.WorkingDir = os.path.abspath('/tmp/')  # On Windows, os.path.exists tests the abs path, i.e. c:\tmp
-            else:
-                obj.WorkingDir = '.'
             obj.InputCaseName = 'case'
 
             obj.addProperty("App::PropertyFloat", "EndTime", "TimeStepControl",

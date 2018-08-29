@@ -71,7 +71,7 @@ class _TaskPanelCfdSolverControl:
 
         self.open_paraview = QtCore.QProcess()
 
-        self.solver_object.WorkingDir = CfdTools.getOutputPath(self.analysis_object)
+        self.working_dir = CfdTools.getOutputPath(self.analysis_object)
 
         self.updateUI()
 
@@ -87,8 +87,8 @@ class _TaskPanelCfdSolverControl:
         self.Start = time.time()
 
     def updateUI(self):
-        self.form.pb_edit_inp.setEnabled(os.path.exists(self.solver_object.WorkingDir))
-        solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
+        self.form.pb_edit_inp.setEnabled(os.path.exists(self.working_dir))
+        solverDirectory = os.path.join(self.working_dir, self.solver_object.InputCaseName)
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(solverDirectory, "pv.foam")))
         self.form.pb_run_solver.setEnabled(os.path.exists(os.path.join(solverDirectory, "Allrun")))
 
@@ -155,14 +155,14 @@ class _TaskPanelCfdSolverControl:
 
     def editSolverInputFile(self):
         self.Start = time.time()
-        solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
+        solverDirectory = os.path.join(self.solver_object.working_dir, self.solver_object.InputCaseName)
         self.consoleMessage("Please edit the case input files externally at: {}\n".format(solverDirectory))
         self.solver_runner.edit_case()
 
     def runSolverProcess(self):
         self.Start = time.time()
 
-        solverDirectory = os.path.join(self.solver_object.WorkingDir, self.solver_object.InputCaseName)
+        solverDirectory = os.path.join(self.working_dir, self.solver_object.InputCaseName)
         solverDirectory = os.path.abspath(solverDirectory)
         cmd = self.solver_runner.get_solver_cmd(solverDirectory)
         FreeCAD.Console.PrintMessage(' '.join(cmd) + '\n')
@@ -209,7 +209,7 @@ class _TaskPanelCfdSolverControl:
         self.Start = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        script_name = os.path.abspath(os.path.join(self.solver_object.WorkingDir,
+        script_name = os.path.abspath(os.path.join(self.working_dir,
                                                    self.solver_object.InputCaseName,
                                                    "pvScript.py"))
 

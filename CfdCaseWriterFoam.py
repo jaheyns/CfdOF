@@ -48,15 +48,16 @@ class CfdCaseWriterFoam:
         self.initialisationZone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
         self.mesh_generated = False
+        self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
 
     def writeCase(self):
         """ writeCase() will collect case settings, and finally build a runnable case. """
-        cfdMessage("Start to write case to folder {}\n".format(self.solver_obj.WorkingDir))
-        if not os.path.exists(self.solver_obj.WorkingDir):
-            raise IOError("Path " + self.solver_obj.WorkingDir + " does not exist.")
+        cfdMessage("Start to write case to folder {}\n".format(self.working_dir))
+        if not os.path.exists(self.working_dir):
+            raise IOError("Path " + self.solver_obj.working_dir + " does not exist.")
 
         # Perform initialisation here rather than __init__ in case of path changes
-        self.case_folder = os.path.join(self.solver_obj.WorkingDir, self.solver_obj.InputCaseName)
+        self.case_folder = os.path.join(self.working_dir, self.solver_obj.InputCaseName)
         self.case_folder = os.path.expanduser(os.path.abspath(self.case_folder))
         self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
 
@@ -116,7 +117,7 @@ class CfdCaseWriterFoam:
         CfdTools.movePolyMesh(self.case_folder)
 
         cfdMessage("Successfully wrote {} case to folder {}\n".format(
-                   self.solver_obj.SolverName, self.solver_obj.WorkingDir))
+                   self.solver_obj.SolverName, self.working_dir))
         return True
 
     def getSolverName(self):
@@ -435,7 +436,7 @@ class CfdCaseWriterFoam:
             import Mesh
             for i in range(len(zo.partNameList)):
                 #shape = zo.shapeList[i].Shape
-                path = os.path.join(self.solver_obj.WorkingDir,
+                path = os.path.join(self.working_dir,
                                     self.solver_obj.InputCaseName,
                                     "constant",
                                     "triSurface")

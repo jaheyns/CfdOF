@@ -64,11 +64,6 @@ __url__ = "http://www.freecadweb.org"
 home_path = CfdTools.get_module_path()
 temp_dir = tempfile.gettempdir()
 test_file_dir = os.path.join(home_path, 'testFiles')
-working_dir = ''
-if os.path.exists('/tmp/'):
-    working_dir = '/tmp/'  # Must exist for POSIX system.
-elif tempfile.tempdir:
-    working_dir = tempfile.tempdir
 
 
 def fccPrint(message):
@@ -105,7 +100,6 @@ class BlockTest(unittest.TestCase):
         self.solver_object.EndTime = 100
         self.solver_object.ConvergenceCriteria = 0.001
         self.solver_object.Parallel = False
-        self.solver_object.WorkingDir = working_dir
         self.solver_object.InputCaseName = self.__class__.__doc_name
         self.active_doc.recompute()
 
