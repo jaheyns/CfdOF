@@ -155,7 +155,7 @@ class _TaskPanelCfdSolverControl:
 
     def editSolverInputFile(self):
         self.Start = time.time()
-        solverDirectory = os.path.join(self.solver_object.working_dir, self.solver_object.InputCaseName)
+        solverDirectory = os.path.join(self.working_dir, self.solver_object.InputCaseName)
         self.consoleMessage("Please edit the case input files externally at: {}\n".format(solverDirectory))
         self.solver_runner.edit_case()
 
