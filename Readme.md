@@ -20,6 +20,7 @@ forward-compatibilty, it is advised that you save the Python script used to gene
 
 * Incompressible, laminar flow (simpleFoam, pimpleFoam).
 * Basic multiphase capability (interFoam, multiphaseInterFoam)
+* High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
 * Basic material data base.
 * Flow initialisation with a potential solver.
 * Tetrahedral meshing using GMSH including multiple region meshing using FEM workbench functionality.
@@ -124,7 +125,7 @@ when running OpenFOAM from within FreeCAD.
 The [Ubuntu PPA daily build](https://www.freecadweb.org/wiki/Install_on_Unix)
 packages are an alternative binary option. Otherwise, FreeCAD can be built 
 from the source code at 
-https://github.com/FreeCAD/FreeCAD\. 
+https://github.com/FreeCAD/FreeCAD . 
 
 The latest CFD workbench can be installed into FreeCAD using the Addon manager:
 

@@ -32,6 +32,7 @@ import shutil
 from PySide import QtCore
 from PySide.QtCore import QRunnable, QObject
 import Units
+from Units import Quantity
 import TemplateBuilder
 
 
@@ -70,6 +71,11 @@ class CfdCaseWriterFoam:
             raise RuntimeError("No mesh object found in analysis")
         phys_settings = dict(zip(self.physics_model.PropertiesList,
                                  (getattr(self.physics_model, prop) for prop in self.physics_model.PropertiesList)))
+        if 'gx' in phys_settings:
+            phys_settings['gx'] = Quantity(phys_settings['gx']).getValueAs('m/s^2')
+            phys_settings['gy'] = Quantity(phys_settings['gy']).getValueAs('m/s^2')
+            phys_settings['gz'] = Quantity(phys_settings['gz']).getValueAs('m/s^2')
+
         self.settings = {
             'physics': phys_settings,
             'fluidProperties': [],  # Order is important, so use a list
