@@ -20,6 +20,8 @@
 # *                                                                         *
 # ***************************************************************************
 
+from __future__ import print_function
+
 __title__ = "Command Mesh From Shape"
 __author__ = "Bernd Hahnebach"
 __url__ = "http://www.freecadweb.org"
@@ -70,7 +72,7 @@ class _CommandCfdMeshFromShape(CommandManager):
                         FreeCADGui.doCommand("FemGui.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
                     FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
         else:
-            print "ERROR: You cannot have more than one mesh object"
+            print("ERROR: You cannot have more than one mesh object")
         FreeCADGui.Selection.clearSelection()
 
 FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())

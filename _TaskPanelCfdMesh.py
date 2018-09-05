@@ -163,11 +163,11 @@ class _TaskPanelCfdMesh:
         if timed:
             self.console_message_cart = self.console_message_cart \
                                         + '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
-                                        format(time.time() - self.Start, color, message.encode('utf-8', 'replace'))
+                                        format(time.time() - self.Start, color, message)
         else:
             self.console_message_cart = self.console_message_cart \
                                         + '<font color="{0}">{1}</font><br>'.\
-                                        format(color, message.encode('utf-8', 'replace'))
+                                        format(color, message)
         self.form.te_output.setText(self.console_message_cart)
         self.form.te_output.moveCursor(QtGui.QTextCursor.End)
         if FreeCAD.GuiUp:
@@ -240,7 +240,7 @@ class _TaskPanelCfdMesh:
             self.console_log("Running {} ...".format(self.utility))
             self.runCart(cart_mesh)
         except Exception as ex:
-            self.console_log("Error: " + str(ex.message), '#FF0000')
+            self.console_log("Error: " + str(ex), '#FF0000')
             self.Timer.stop()
             raise
         finally:

@@ -38,7 +38,7 @@ try:
     from femobjects import _FemMeshGmsh
 except ImportError:  # Backward compat
     from PyObjects import _FemMeshGmsh
-import Units
+from FreeCAD import Units
 import tempfile
 import os
 import platform
@@ -142,9 +142,9 @@ class CfdMeshTools:
                         break
                 if allFFacesPlanar and allBFacesPlanar:
                     A1 = fShape.Faces[0].Surface.Axis
-                    A1 = A1/A1.Length
+                    A1.multiply(1.0/A1.Length)
                     A2 = bShape.Faces[0].Surface.Axis
-                    A2 = A2/A2.Length
+                    A2.multiply(1.0/A2.Length)
                     if (A1-A2).Length <= 1e-6 or (A1+A2).Length <= 1e-6:
                         if len(frontObj.Shape.Vertexes) == len(backObj.Shape.Vertexes) and \
                            len(frontObj.Shape.Vertexes) > 0 and \
@@ -162,7 +162,7 @@ class CfdMeshTools:
             case.settings = {}
             case.settings['createPatchesFromSnappyBaffles'] = False
             case.setupPatchNames()
-            keys = case.settings['createPatches'].keys()
+            keys = list(case.settings['createPatches'].keys())
 
             frontPatchIndex = keys.index(frontObj.Label)
             self.two_d_settings['FrontFaceList'] = case.settings['createPatches'][keys[frontPatchIndex]]['PatchNamesList']

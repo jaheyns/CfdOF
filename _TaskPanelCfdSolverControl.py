@@ -95,7 +95,7 @@ class _TaskPanelCfdSolverControl:
     def consoleMessage(self, message="", color="#000000"):
         self.console_message = self.console_message + \
                                '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
-                               format(time.time() - self.Start, color, message.encode('utf-8', 'replace'))
+                               format(time.time() - self.Start, color, message)
         self.form.textEdit_Output.setText(self.console_message)
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 

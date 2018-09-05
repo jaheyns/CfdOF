@@ -27,7 +27,7 @@ import FreeCAD
 import os
 import sys
 import os.path
-import Units
+from FreeCAD import Units
 from CfdTools import setInputFieldQuantity
 
 if FreeCAD.GuiUp:

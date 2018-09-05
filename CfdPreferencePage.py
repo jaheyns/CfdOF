@@ -31,8 +31,12 @@ __url__ = "http://www.freecadweb.org"
 import os
 import os.path
 import platform
-import urlparse
+import sys
 import urllib
+if sys.version_info >= (3,):  # Python 3
+    import urllib.parse as urlparse
+else:  # Python 2
+    import urlparse
 
 import FreeCAD
 import CfdTools
@@ -123,7 +127,7 @@ class CfdPreferencePage:
     def consoleMessage(self, message="", color="#000000"):
         message = message.replace('\n', '<br>')
         self.console_message = self.console_message + \
-            '<font color="{0}">{1}</font><br>'.format(color, message.encode('utf-8', 'replace'))
+            '<font color="{0}">{1}</font><br>'.format(color, message)
         self.form.textEdit_Output.setText(self.console_message)
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
@@ -317,9 +321,12 @@ class CfdPreferencePageThread(QThread):
 
         try:
             import urllib
-            # Work around for certificate issues
+            # Work around for certificate issues in python >= 2.7.9
             import ssl
-            urllib._urlopener = urllib.FancyURLopener(context=ssl._create_unverified_context())
+            if hasattr(ssl, '_create_unverified_context'):
+                urllib._urlopener = urllib.FancyURLopener(context=ssl._create_unverified_context())
+            else:
+                urllib._urlopener = urllib.FancyURLopener()
             # Download
             (filename, header) = urllib.urlretrieve(self.cfmesh_url,
                                                     reporthook=self.downloadStatus)

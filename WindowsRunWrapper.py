@@ -40,14 +40,14 @@ def processStdin():
 def processStdout():
     with process.stdout:
         for output in iter(process.stdout.readline, ''):
-            sys.stdout.write(output)
+            sys.stdout.write(output.decode())
             sys.stdout.flush()
 
 
 def processStderr():
     with process.stderr:
         for output in iter(process.stderr.readline, ''):
-            sys.stderr.write(output)
+            sys.stderr.write(output.decode())
             sys.stdout.flush()
 
 
@@ -70,4 +70,4 @@ t3 = threading.Thread(target=processStderr)
 t3.daemon = True
 t3.start()
 process.wait()
-exit(process.returncode)
+sys.exit(process.returncode)

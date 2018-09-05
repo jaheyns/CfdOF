@@ -41,7 +41,10 @@ if FreeCAD.GuiUp:
     from PySide import QtGui
     from PySide.QtCore import Qt, QTimer
     from PySide.QtGui import QApplication
-    from PySide import QtUiTools
+    try:  # Qt5
+        from PySide2 import QtUiTools
+    except ImportError:
+        from PySide import QtUiTools
     import FemGui
 
 

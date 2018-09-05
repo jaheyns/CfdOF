@@ -34,7 +34,7 @@ import sys
 import os.path
 import CfdTools
 from CfdTools import inputCheckAndStore, setInputFieldQuantity
-import Units
+from FreeCAD import Units
 
 if FreeCAD.GuiUp:
     import FreeCADGui

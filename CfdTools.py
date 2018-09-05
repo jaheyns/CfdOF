@@ -39,7 +39,7 @@ import sys
 
 import FreeCAD
 import Fem
-import Units
+from FreeCAD import Units
 import CfdConsoleProcess
 import Part
 
@@ -889,7 +889,7 @@ def matchFacesToTargetShape(ref_lists, shape):
     :return:  A list of tuples: (group index, reference) of matching refs for each face in shape
     """
     # Preserve original indices
-    mesh_face_list = zip(shape.Faces, range(len(shape.Faces)))
+    mesh_face_list = list(zip(shape.Faces, range(len(shape.Faces))))
     src_face_list = []
     for i, rl in enumerate(ref_lists):
         for br in rl:
@@ -904,23 +904,62 @@ def matchFacesToTargetShape(ref_lists, shape):
                                    "have been deleted".format(br[0], br[1]))
             src_face_list.append((bf, i, br))
 
-    def compFn(x, y):
-        if floatEqual(x, y):
-            return 0
-        elif x < y:
-            return -1
-        else:
-            return 1
+    if sys.version_info >= (3,):  # Python 3
 
-    # Sort boundary face list by centre of mass, x then y then z in case all in plane
-    src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.z)
-    src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.y)
-    src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.x)
+        def compKeyFn(key):
+            class K(object):
+                def __init__(self, val, *args):
+                    self.val = key(val)
 
-    # Same sorting on mesh face list
-    mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.z)
-    mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.y)
-    mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.x)
+                def __eq__(self, other):
+                    return floatEqual(self.val, other.val)
+
+                def __ne__(self, other):
+                    return not floatEqual(self.val, other.val)
+
+                def __lt__(self, other):
+                    return self.val < other.val and not floatEqual(self.val, other.val)
+
+                def __gt__(self, other):
+                    return self.val > other.val and not floatEqual(self.val, other.val)
+
+                def __le__(self, other):
+                    return self.val < other.val or floatEqual(self.val, other.val)
+
+                def __ge__(self, other):
+                    return self.val > other.val or floatEqual(self.val, other.val)
+
+            return K
+
+        # Sort boundary face list by centre of mass, x then y then z in case all in plane
+        src_face_list.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.z))
+        src_face_list.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.y))
+        src_face_list.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.x))
+
+        # Same sorting on mesh face list
+        mesh_face_list.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.z))
+        mesh_face_list.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.y))
+        mesh_face_list.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.x))
+
+    else:  # Python 2
+
+        def compFn(x, y):
+            if floatEqual(x, y):
+                return 0
+            elif x < y:
+                return -1
+            else:
+                return 1
+
+        # Sort boundary face list by centre of mass, x then y then z in case all in plane
+        src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.z)
+        src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.y)
+        src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.x)
+
+        # Same sorting on mesh face list
+        mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.z)
+        mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.y)
+        mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.x)
 
     # Find faces with matching CofM
     i = 0
