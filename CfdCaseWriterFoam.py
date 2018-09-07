@@ -359,10 +359,10 @@ class CfdCaseWriterFoam:
 
         physics = settings['physics']
 
-        #Find inlet if copying initial values from
+        # Find inlet if copying initial values from
         inlet_bc = None
         if initial_values['UseInletUPValues'] or \
-           (physics['Thermal'] != 'None' and initial_values['UseInletThermalValues']) or \
+           (physics['Thermal'] != 'None' and initial_values['UseInletTemperatureValues']) or \
            (physics['TurbulenceModel'] is not None and initial_values['UseInletTurbulenceValues']):
                 first_inlet = None
                 ninlets = 0
