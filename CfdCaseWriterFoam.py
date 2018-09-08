@@ -398,7 +398,7 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("Inlet type not appropriate to determine initial velocity and pressure.")
 
-        if physics['Thermal'] == 'Energy':
+        if physics['Thermal'] == 'Energy' and initial_values['UseInletTemperatureValues']:
             if inlet_bc['BoundaryType'] == 'inlet':
                 if inlet_bc['ThermalBoundaryType'] == 'fixedValue':
                     initial_values['Temperature'] = inlet_bc['Temperature']
