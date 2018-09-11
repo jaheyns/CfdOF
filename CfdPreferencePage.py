@@ -346,9 +346,12 @@ class CfdPreferencePageThread(QThread):
 
         try:
             import urllib
-            # Work around for certificate issues
+            # Work around for certificate issues in python >= 2.7.9
             import ssl
-            urllib._urlopener = urllib.FancyURLopener(context=ssl._create_unverified_context())
+            if hasattr(ssl, '_create_unverified_context'):
+                urllib._urlopener = urllib.FancyURLopener(context=ssl._create_unverified_context())
+            else:
+                urllib._urlopener = urllib.FancyURLopener()
             # Download
             (filename, header) = urllib.urlretrieve(self.hisa_url,
                                                     reporthook=self.downloadStatus)
