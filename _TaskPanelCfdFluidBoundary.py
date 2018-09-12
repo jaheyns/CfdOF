@@ -233,7 +233,7 @@ class TaskPanelCfdFluidBoundary:
         setInputFieldQuantity(self.form.inputSpacing, str(self.BoundarySettings.get('ScreenSpacing'))+"m")
 
         self.form.comboThermalBoundaryType.addItems(THERMAL_BOUNDARY_NAMES)
-        thi = indexOrDefault(THERMAL_BOUNDARY_TYPES, self.BoundarySettings.get('ThermalBoundaryType'), 0)
+        thi = indexOrDefault(THERMAL_BOUNDARY_TYPES, self.BoundarySettingsOrig.get('ThermalBoundaryType'), 0)
         self.form.comboThermalBoundaryType.setCurrentIndex(thi)
         setInputFieldQuantity(self.form.inputTemperature, str(self.BoundarySettings.get('Temperature', 273.0))+"K")
         setInputFieldQuantity(self.form.inputHeatFlux, str(self.BoundarySettings.get('HeatFlux', 0.0))+"W/m^2")
