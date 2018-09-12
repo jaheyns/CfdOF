@@ -32,10 +32,11 @@ import os
 import os.path
 import platform
 import sys
-import urllib
 if sys.version_info >= (3,):  # Python 3
+    import urllib.request as urlrequest
     import urllib.parse as urlparse
-else:  # Python 2
+else:
+    import urllib as urlrequest
     import urlparse
 
 import FreeCAD
@@ -230,11 +231,11 @@ class CfdPreferencePage:
                                                     os.path.join(CfdTools.get_module_path(), 'data', 'foamUserDir'),
                                                     {'cfMeshDirectory': CFMESH_FILE_BASE})
                     self.install_process = CfdTools.startFoamApplication(
-                        "./"+script_name, "$WM_PROJECT_USER_DIR", self.installFinished)
+                        "export WM_NCOMPPROCS=`nproc`; ./"+script_name, "$WM_PROJECT_USER_DIR", self.installFinished)
                 else:
                     self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
                     self.install_process = CfdTools.startFoamApplication(
-                        "./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE, self.installFinished)
+                        "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE, self.installFinished)
                 # Reset foam dir for now in case the user presses 'Cancel'
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:
@@ -246,7 +247,7 @@ class CfdPreferencePage:
                 self.consoleMessage("Building HiSA. Please wait...")
                 self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, HISA_FILE_BASE))
                 self.install_process = CfdTools.startFoamApplication(
-                    "./Allwmake", "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE, self.installFinished)
+                    "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE, self.installFinished)
                 # Reset foam dir for now in case the user presses 'Cancel'
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:
@@ -302,8 +303,7 @@ class CfdPreferencePageThread(QThread):
     def downloadBlueCFD(self):
         self.signals.status.emit("Downloading blueCFD-Core, please wait...")
         try:
-            import urllib
-            (filename, headers) = urllib.urlretrieve(self.bluecfd_url, reporthook=self.downloadStatus)
+            (filename, headers) = urlrequest.urlretrieve(self.bluecfd_url, reporthook=self.downloadStatus)
         except Exception as ex:
             raise Exception("Error downloading blueCFD-Core: {}".format(str(ex)))
         self.signals.status.emit("blueCFD-Core downloaded to {}".format(filename))
@@ -320,16 +320,15 @@ class CfdPreferencePageThread(QThread):
         self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
 
         try:
-            import urllib
-            # Work around for certificate issues in python >= 2.7.9
+            # Workaround for certificate issues in python >= 2.7.9
             import ssl
             if hasattr(ssl, '_create_unverified_context'):
-                urllib._urlopener = urllib.FancyURLopener(context=ssl._create_unverified_context())
+                urlrequest._urlopener = urlrequest.FancyURLopener(context=ssl._create_unverified_context())
             else:
-                urllib._urlopener = urllib.FancyURLopener()
+                urlrequest._urlopener = urlrequest.FancyURLopener()
             # Download
-            (filename, header) = urllib.urlretrieve(self.cfmesh_url,
-                                                    reporthook=self.downloadStatus)
+            (filename, header) = urlrequest.urlretrieve(self.cfmesh_url,
+                                                        reporthook=self.downloadStatus)
         except Exception as ex:
             raise Exception("Error downloading cfMesh: {}".format(str(ex)))
 
@@ -345,16 +344,15 @@ class CfdPreferencePageThread(QThread):
         self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
 
         try:
-            import urllib
-            # Work around for certificate issues in python >= 2.7.9
+            # Workaround for certificate issues in python >= 2.7.9
             import ssl
             if hasattr(ssl, '_create_unverified_context'):
-                urllib._urlopener = urllib.FancyURLopener(context=ssl._create_unverified_context())
+                urlrequest._urlopener = urlrequest.FancyURLopener(context=ssl._create_unverified_context())
             else:
-                urllib._urlopener = urllib.FancyURLopener()
+                urlrequest._urlopener = urlrequest.FancyURLopener()
             # Download
-            (filename, header) = urllib.urlretrieve(self.hisa_url,
-                                                    reporthook=self.downloadStatus)
+            (filename, header) = urlrequest.urlretrieve(self.hisa_url,
+                                                        reporthook=self.downloadStatus)
         except Exception as ex:
             raise Exception("Error downloading HiSA: {}".format(str(ex)))
 
