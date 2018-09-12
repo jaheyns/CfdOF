@@ -172,7 +172,7 @@ class CfdPreferencePage:
     def pickBlueCFDFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose BlueCFD install file', filter="*.exe")
         if f and os.access(f, os.W_OK):
-            self.form.le_bluecfd_url.setText(urlparse.urljoin('file:', urllib.pathname2url(f)))
+            self.form.le_bluecfd_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallCfMesh(self):
         if self.createThread():
@@ -185,7 +185,7 @@ class CfdPreferencePage:
     def pickCfMeshFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose cfMesh archive', filter="*.zip")
         if f and os.access(f, os.W_OK):
-            self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urllib.pathname2url(f)))
+            self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallHisa(self):
         if self.createThread():
@@ -198,7 +198,7 @@ class CfdPreferencePage:
     def pickHisaFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose HiSA archive', filter="*.zip")
         if f and os.access(f, os.W_OK):
-            self.form.le_hisa_url.setText(urlparse.urljoin('file:', urllib.pathname2url(f)))
+            self.form.le_hisa_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def createThread(self):
         if self.thread and self.thread.isRunning():
