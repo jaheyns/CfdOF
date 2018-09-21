@@ -297,7 +297,11 @@ def setInputFieldQuantity(inputField, quantity):
     # this rather roundabout way involving the UserString of Quantity
     q = Units.Quantity(quantity)
     # Avoid any truncation
-    q.Format = (12, 'e')
+    if isinstance(q.Format, tuple):  # Backward compat
+        q.Format = (12, 'e')
+    else:
+        q.Format['Precision'] = 12
+        q.Format['NumberFormat'] = 'e'
     inputField.setProperty("quantityString", q.UserString)
 
 
