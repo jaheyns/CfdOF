@@ -300,8 +300,7 @@ def setInputFieldQuantity(inputField, quantity):
     if isinstance(q.Format, tuple):  # Backward compat
         q.Format = (12, 'e')
     else:
-        q.Format['Precision'] = 12
-        q.Format['NumberFormat'] = 'e'
+        q.Format = {'Precision': 12, 'NumberFormat': 'e', 'Denominator': q.Format['Denominator']}
     inputField.setProperty("quantityString", q.UserString)
 
 
