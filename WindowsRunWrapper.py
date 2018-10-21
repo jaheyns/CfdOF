@@ -40,14 +40,20 @@ def processStdin():
 def processStdout():
     with process.stdout:
         for output in iter(process.stdout.readline, ''):
-            sys.stdout.write(output.decode())
+            if sys.version_info >= (3,):  # Python 3
+                sys.stdout.write(output.decode())
+            else:
+                sys.stdout.write(str(output))
             sys.stdout.flush()
 
 
 def processStderr():
     with process.stderr:
         for output in iter(process.stderr.readline, ''):
-            sys.stderr.write(output.decode())
+            if sys.version_info >= (3,):  # Python 3
+                sys.stderr.write(output.decode())
+            else:
+                sys.stderr.write(str(output))
             sys.stdout.flush()
 
 

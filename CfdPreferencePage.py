@@ -334,8 +334,8 @@ class CfdPreferencePageThread(QThread):
 
         self.signals.status.emit("Extracting cfMesh...")
         CfdTools.runFoamCommand(
-            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && unzip -o "{}"; }}'.
-            format(CfdTools.translatePath(filename)))
+            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; ); }}'.
+            format(CFMESH_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadHisa(self):
         self.signals.status.emit("Downloading HiSA, please wait...")
@@ -358,8 +358,8 @@ class CfdPreferencePageThread(QThread):
 
         self.signals.status.emit("Extracting HiSA...")
         CfdTools.runFoamCommand(
-            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && unzip -o "{}"; }}'.
-            format(CfdTools.translatePath(filename)))
+            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; );  }}'.
+            format(HISA_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadStatus(self, blocks, block_size, total_size):
         self.signals.downloadProgress.emit(blocks*block_size, total_size)
