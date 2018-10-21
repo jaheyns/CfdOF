@@ -592,12 +592,14 @@ class CfdFoamProcess:
         self.output += output
 
 
-def startFoamApplication(cmd, case, finishedHook=None, stdoutHook=None, stderrHook=None):
-    """ Run OpenFOAM application and automatically generate the log.application file.
+def startFoamApplication(cmd, case, log_name='', finishedHook=None, stdoutHook=None, stderrHook=None):
+    """ Run command cmd in OpenFOAM environment, sending output to log file.
         Returns a CfdConsoleProcess object after launching
         cmd  - List or string with the application being the first entry followed by the options.
               e.g. ['transformPoints', '-scale', '"(0.001 0.001 0.001)"']
         case - Case path
+        log_name - File name to pipe output to, if not None. If zero-length string, will generate automatically
+            as log.<application> where <application> is the first element in cmd.
     """
     if isinstance(cmd, list) or isinstance(cmd, tuple):
         cmds = cmd
@@ -606,27 +608,34 @@ def startFoamApplication(cmd, case, finishedHook=None, stdoutHook=None, stderrHo
     else:
         raise Exception("Error: Application and options must be specified as a list or tuple.")
 
-    app = cmds[0].rsplit('/', 1)[-1]
-    logFile = "log.{}".format(app)
+    if log_name == '':
+        app = cmds[0].rsplit('/', 1)[-1]
+        logFile = "log.{}".format(app)
+    else:
+        logFile = log_name
 
     cmdline = ' '.join(cmds)  # Space to separate options
     # Pipe to log file and terminal
-    cmdline += " 1> >(tee -a " + logFile + ") 2> >(tee -a " + logFile + " >&2)"
-    # Tee appends to the log file, so we must remove first. Can't do directly since
-    # paths may be specified using variables only available in foam runtime environment.
-    cmdline = "{{ rm {}; {}; }}".format(logFile, cmdline)
+    if logFile:
+        cmdline += " 1> >(tee -a " + logFile + ") 2> >(tee -a " + logFile + " >&2)"
+        # Tee appends to the log file, so we must remove first. Can't do directly since
+        # paths may be specified using variables only available in foam runtime environment.
+        cmdline = "{{ rm {}; {}; }}".format(logFile, cmdline)
 
     proc = CfdConsoleProcess.CfdConsoleProcess(finishedHook=finishedHook, stdoutHook=stdoutHook, stderrHook=stderrHook)
-    print("Running ", ' '.join(cmds), " -> ", logFile)
+    if logFile:
+        print("Running ", ' '.join(cmds), " -> ", logFile)
+    else:
+        print("Running ", ' '.join(cmds))
     proc.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
     if not proc.waitForStarted():
         raise Exception("Unable to start command " + ' '.join(cmds))
     return proc
 
 
-def runFoamApplication(cmd, case):
+def runFoamApplication(cmd, case, log_name=''):
     """ Same as startFoamApplication, but waits until complete. Returns exit code. """
-    proc = startFoamApplication(cmd, case)
+    proc = startFoamApplication(cmd, case, log_name)
     proc.waitForFinished()
     return proc.exitCode()
 
