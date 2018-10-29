@@ -101,21 +101,22 @@ class _CfdFluidBoundary(PartFeature):
         return
 
     def updateBoundaryColors(self, obj):
-        vobj = obj.ViewObject
-        vobj.Transparency = 20
-        if obj.BoundarySettings['BoundaryType'] == 'wall':
-            vobj.ShapeColor = (0.1, 0.1, 0.1)  # Dark grey
-        elif obj.BoundarySettings['BoundaryType'] == 'inlet':
-            vobj.ShapeColor = (0.0, 0.0, 1.0)  # Blue
-        elif obj.BoundarySettings['BoundaryType'] == 'outlet':
-            vobj.ShapeColor = (1.0, 0.0, 0.0)  # Red
-        elif obj.BoundarySettings['BoundaryType'] == 'open' or obj.BoundarySettings['BoundaryType'] == 'farField':
-            vobj.ShapeColor = (0.0, 1.0, 1.0)  # Cyan
-        elif (obj.BoundarySettings['BoundaryType'] == 'constraint') or \
-             (obj.BoundarySettings['BoundaryType'] == 'baffle'):
-            vobj.ShapeColor = (0.5, 0.0, 1.0)  # Purple
-        else:
-            vobj.ShapeColor = (1.0, 1.0, 1.0)  # White
+        if FreeCAD.GuiUp:
+            vobj = obj.ViewObject
+            vobj.Transparency = 20
+            if obj.BoundarySettings['BoundaryType'] == 'wall':
+                vobj.ShapeColor = (0.1, 0.1, 0.1)  # Dark grey
+            elif obj.BoundarySettings['BoundaryType'] == 'inlet':
+                vobj.ShapeColor = (0.0, 0.0, 1.0)  # Blue
+            elif obj.BoundarySettings['BoundaryType'] == 'outlet':
+                vobj.ShapeColor = (1.0, 0.0, 0.0)  # Red
+            elif obj.BoundarySettings['BoundaryType'] == 'open' or obj.BoundarySettings['BoundaryType'] == 'farField':
+                vobj.ShapeColor = (0.0, 1.0, 1.0)  # Cyan
+            elif (obj.BoundarySettings['BoundaryType'] == 'constraint') or \
+                 (obj.BoundarySettings['BoundaryType'] == 'baffle'):
+                vobj.ShapeColor = (0.5, 0.0, 1.0)  # Purple
+            else:
+                vobj.ShapeColor = (1.0, 1.0, 1.0)  # White
 
     def __getstate__(self):
         return None

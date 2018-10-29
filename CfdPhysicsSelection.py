@@ -30,9 +30,9 @@ import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
+    import FemGui
 import CfdTools
 from femcommands.manager import CommandManager
-import FemGui
 
 
 def makeCfdPhysicsSelection(name="PhysicsModel"):

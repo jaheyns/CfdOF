@@ -91,13 +91,13 @@ if FreeCAD.GuiUp:
                 return i
         return None
 
-    def getParentAnalysisObject(obj):
-        """ Return CfdAnalysis object to which this obj belongs in the tree """
-        for o in FreeCAD.activeDocument().Objects:
-            if o.Name.startswith("CfdAnalysis"):
-                if obj in o.Group:
-                    return o
-        return None
+def getParentAnalysisObject(obj):
+    """ Return CfdAnalysis object to which this obj belongs in the tree """
+    for o in FreeCAD.activeDocument().Objects:
+        if o.Name.startswith("CfdAnalysis"):
+            if obj in o.Group:
+                return o
+    return None
 
 
 def getPhysicsModel(analysis_object):
