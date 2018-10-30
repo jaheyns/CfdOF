@@ -389,7 +389,9 @@ class _TaskPanelCfdZone:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.porousZoneProperties = p".format(self.obj.Name))
 
         elif self.obj.Name.startswith('InitialisationZone'):
-            self.obj.initialisationZoneProperties = self.p
+            FreeCADGui.doCommand("p = FreeCAD.ActiveDocument.{}.initialisationZoneProperties".format(self.obj.Name))
+            FreeCADGui.doCommand("p = {}".format(self.p))
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.initialisationZoneProperties = p".format(self.obj.Name))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.partNameList = {}".format(self.obj.Name, self.partNameList))
         FreeCADGui.doCommand("sl = []")
         for s in self.partNameList:
