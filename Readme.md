@@ -120,8 +120,6 @@ prerequisites have been successfully installed.
 
 The latest release or development version of FreeCAD can be obtained from 
 https://github.com/FreeCAD/FreeCAD/releases (.AppImage files).
-The .AppImage containers may cause library version conflicts
-when running OpenFOAM from within FreeCAD. 
 The [Ubuntu PPA daily build](https://www.freecadweb.org/wiki/Install_on_Unix)
 packages are an alternative binary option. Otherwise, FreeCAD can be built 
 from the source code at 
@@ -196,7 +194,6 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
     
 5. Imports should usually be on separate lines.
 6. Comments
-
     - Docstrings always use """triple double-quotes"""
     
     - Block comment starts with a # and a single space and are indented to the same level as that code
@@ -215,14 +212,21 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
     - __class_attribute (Double leading underscore)
 
 
-## Lead developers
+## Acknowledgements
 
-Oliver Oxtoby (CSIR, 2016-2018) <oliveroxtoby@gmail.com>  
-Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>  
-Alfred Bogaers (CSIR, 2016-2018) <abogaers@csir.co.za>    
+### Funding
+This development was made possible through funding from [Eskom Holdings SOC Ltd](www.eskom.co.za)
+and the [Council for Scientific and Industrial Research](www.csir.co.za) (South Africa).
 
-We would like to thank Eskom for their financial contribution as well as the following people for their contribution to the code:
+### Lead developers
+The code is maintained by
+* Oliver Oxtoby (CSIR, 2016-2018) <oliveroxtoby@gmail.com>  
+* Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>  
+* Alfred Bogaers (CSIR, 2016-2018) <abogaers@csir.co.za>    
 
-Qingfeng Xia (2015) - Original framework;   
-Klaus Sembritzki (2017) - Multiphase
+### Contributors
 
+We acknowledge significant contributions from
+* Qingfeng Xia (2015) - Original framework
+* Klaus Sembritzki (2017) - Multiphase
+* Thomas Schrader (2017-2018) <info@schraderundschrader.de> - Testing and user assistance
