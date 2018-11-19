@@ -12,7 +12,14 @@ FoamFile
 %:hisa
 pseudoTime
 {
+%{%(physics/Time%)
+%:Steady
     pseudoTol          1e-6 (1e-6 1e-6 1e-6) 1e-6;
+%:Transient
+    nPseudoCorr        100;
+    pseudoTol          1e-3 (1e-3 1e-3 1e-3) 1e-3;
+    pseudoTolRel       1e-3 (1e-3 1e-2 1e-2) 1e-2;
+%}
     pseudoCoNum        0.1;
     pseudoCoNumMax     25.0;
 

@@ -26,30 +26,6 @@ ddtSchemes
 %}
 }
 
-gradSchemes
-{
-    // Limit gradient to improve stability when bad cells encountered 
-    // (0 = no limiting; 1 = do not exceed surrounding cells)
-%{%(solver/solverName%)
-%:hisa
-    default         cellLimited faceLeastSquares linear 0.6;
-    gradTvd         cellLimited faceLeastSquares linear 0.6;
-%:default
-    default         cellLimited Gauss linear 0.95;
-    grad(p)         Gauss linear;
-%}
-%{%(turbulence/type%)
-%:RANS
-%{%(turbulence/model%)
-%:kOmegaSST
-    grad(k)          cellLimited Gauss linear 0.9;
-    grad(omega)      cellLimited Gauss linear 0.9;
-%:SpalartAllmaras
-    grad(nuTilda)    cellLimited Gauss linear 0.9;
-%}
-%}
-}
-
 divSchemes
 {
     default         none;
@@ -71,6 +47,70 @@ divSchemes
 %:hisa
     div(tauMC)      Gauss linear;
     div(yPhi,yWall) Gauss linearUpwind grad(yWall);
+%}
+}
+
+%:Transient
+ddtSchemes
+{
+%{%(solver/solverName%)
+%:hisa
+    default         dualTime rPseudoDeltaT Euler;
+%:default
+    default         steadyState;
+%}
+}
+
+divSchemes
+{
+    // Use second-order accurate convection
+%{%(solver/solverName%)
+%:pimpleFoam
+    div(phi,U)      Gauss linearUpwindV grad(U);
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+%:interFoam multiphaseInterFoam
+    div(rhoPhi,U)   Gauss linearUpwind grad(U);
+    div(phi,alpha)  Gauss vanLeer;
+    div(phirb,alpha) Gauss linear;
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+%}
+%{%(physics/Turbulence%)
+%:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+%}
+%}
+%{%(solver/solverName%)
+%:hisa
+    div(tauMC)      Gauss linear;
+    div(yPhi,yWall) Gauss linearUpwind grad(yWall);
+%}
+}
+
+%}
+gradSchemes
+{
+    // Limit gradient to improve stability when bad cells encountered
+    // (0 = no limiting; 1 = do not exceed surrounding cells)
+%{%(solver/solverName%)
+%:hisa
+    default         cellLimited faceLeastSquares linear 0.6;
+    gradTvd         cellLimited faceLeastSquares linear 0.6;
+%:default
+    default         cellLimited Gauss linear 0.95;
+    grad(p)         Gauss linear;
+%}
+%{%(turbulence/type%)
+%:RANS
+%{%(turbulence/model%)
+%:kOmegaSST
+    grad(k)          cellLimited Gauss linear 0.9;
+    grad(omega)      cellLimited Gauss linear 0.9;
+%:SpalartAllmaras
+    grad(nuTilda)    cellLimited Gauss linear 0.9;
+%}
 %}
 }
 
@@ -114,63 +154,6 @@ snGradSchemes
 %}
 }
 
-%:Transient
-
-ddtSchemes
-{
-    default         Euler;
-}
-
-gradSchemes
-{
-    default         Gauss linear;
-    grad(p)         Gauss linear;
-    grad(U)         Gauss linear;
-}
-
-divSchemes
-{
-    // Use second-order accurate convection
-%{%(solver/solverName%)
-%:pimpleFoam
-    div(phi,U)      Gauss linearUpwindV grad(U);
-    div((nuEff*dev2(T(grad(U))))) Gauss linear;
-%:interFoam multiphaseInterFoam
-    div(rhoPhi,U)   Gauss linearUpwind grad(U);
-    div(phi,alpha)  Gauss vanLeer;
-    div(phirb,alpha) Gauss linear;
-    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
-%}
-%{%(physics/Turbulence%)
-%:RANS
-%{%(physics/TurbulenceModel%)
-%:kOmegaSST
-    div(phi,k)      Gauss upwind;
-    div(phi,omega)  Gauss upwind;
-%}
-%}
-}
-
-laplacianSchemes
-{
-    // Limited explicit correction to the surface normal gradient,
-    // for stability in highly non-orthogonal cells.
-    // (0 = uncorrected, fully implicit; 1 = full correction)
-    default         Gauss linear limited 0.3;
-}
-
-interpolationSchemes
-{
-    default         linear;
-    interpolate(U)  linear;
-}
-
-snGradSchemes
-{
-    default         limited 0.3;
-}
-
-%}
 wallDist
 {
 %{%(solver/solverName%)
