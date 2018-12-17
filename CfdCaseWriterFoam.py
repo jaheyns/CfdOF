@@ -88,6 +88,7 @@ class CfdCaseWriterFoam:
             'zones': {o.Label: {'PartNameList': tuple(o.partNameList)} for o in self.zone_objs},
             'zonesPresent': len(self.zone_objs) > 0,
             'meshType': self.mesh_obj.Proxy.Type,
+            'meshDimension': self.mesh_obj.ElementDimension,
             'solver': solverSettingsDict,
             'system': {},
             'runChangeDictionary':False

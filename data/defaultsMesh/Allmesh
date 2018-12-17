@@ -11,9 +11,9 @@ runCommand()
 
 %{%(MeshUtility%)
 %:gmsh
-'%(GmshSettings/Executable%)' - gmsh/%(Name%)_Geometry.geo
-%}
+runCommand '%(GmshSettings/Executable%)' - gmsh/%(Name%)_Geometry.geo
 
+%}
 %{%(FoamRuntime%)
 %:BlueCFD
 %:default
@@ -24,8 +24,8 @@ else
    source "%(TranslatedFoamPath%)/etc/config.sh/unset" 2> /dev/null
 fi
 source "%(TranslatedFoamPath%)/etc/bashrc"
-%}
 
+%}
 %{%(MeshUtility%)
 %:cfMesh
 # Extract feature edges
@@ -48,12 +48,14 @@ runCommand surfaceToPatch constant/triSurface/%(Name%)_Geometry.stl
 %:gmsh
 runCommand gmshToFoam gmsh/%(Name%)_Geometry.msh
 runCommand transformPoints -scale "(0.001 0.001 0.001)"
-%}
 
+%}
 %{%(TwoDSettings/ConvertTo2D%)
 %:True
+runCommand changeDictionary
+runCommand flattenMesh
 runCommand extrudeMesh
-%}
 
+%}
 runCommand surfaceMeshTriangulate mesh_outside.stl
 runCommand surfaceTransformPoints -scale "(1000 1000 1000)" mesh_outside.stl mesh_outside.stl

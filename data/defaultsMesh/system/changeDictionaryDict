@@ -1,0 +1,29 @@
+%{%(TwoDSettings/ConvertTo2D%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+boundary
+{
+%{%(TwoDSettings/FrontFaceList%)
+    %(0%)
+    {
+        type empty;
+    }
+
+%}
+    %(TwoDSettings/BackFace%)
+    {
+        type empty;
+    }
+}
+
+// ************************************************************************* //
+%}

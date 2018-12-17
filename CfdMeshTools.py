@@ -118,8 +118,8 @@ class CfdMeshTools:
         if self.dimension == '2D':
             self.two_d_settings['ConvertTo2D'] = True
             if len(twoDPlanes) != 2:
-                raise RuntimeError("For 2D meshing, two parallel 2D bounding planes must be present as boundary "
-                                   "conditions in the CFD analysis object.")
+                raise RuntimeError("For 2D meshing, two separate, parallel, 2D bounding planes must be present as "
+                                   "boundary conditions in the CFD analysis object.")
             doc_name = str(analysis_obj.Document.Name)
             fFObjName = twoDPlanes[0]
             bFObjName = twoDPlanes[1]
