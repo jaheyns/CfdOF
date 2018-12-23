@@ -57,7 +57,7 @@ ddtSchemes
 %:hisa
     default         dualTime rPseudoDeltaT Euler;
 %:default
-    default         steadyState;
+    default         Euler;
 %}
 }
 
