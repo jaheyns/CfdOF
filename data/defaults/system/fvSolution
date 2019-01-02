@@ -276,7 +276,7 @@ relaxationFactors
 %}
 %{%(solver/solverName%)
 %:default
-q    fields
+    fields
     {
         p               0.3;
     }
