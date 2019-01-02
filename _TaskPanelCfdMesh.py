@@ -357,6 +357,8 @@ class _TaskPanelCfdMesh:
 
     def searchPointInMesh(self):
         print ("Searching for an internal vector point ...")
+        # Apply latest mesh size
+        self.set_mesh_params()
         pointCheck = self.cart_mesh.automatic_inside_point_detect()
         iMPx, iMPy, iMPz = pointCheck
         setInputFieldQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")
