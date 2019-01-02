@@ -104,9 +104,6 @@ class CfdRunnableFoam(CfdRunnable):
 
         self.residualPlot = None
 
-        self.print_next_error_lines = 0
-        self.print_next_error_file = False
-
     def check_prerequisites(self):
         return ""
 
@@ -123,9 +120,6 @@ class CfdRunnableFoam(CfdRunnable):
 
     def get_solver_cmd(self, case_dir):
         self.initResiduals()
-
-        self.print_next_error_lines = 0
-        self.print_next_error_file = False
 
         self.residualPlot = ResidualPlot()
 
@@ -178,34 +172,3 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$E$', self.EResiduals),
                 ('$k$', self.kResiduals),
                 ('$\\omega$', self.omegaResiduals)]))
-
-    def processErrorOutput(self, err):
-        """
-        Process standard error text output from solver
-        :param err: Standard error output, single or multiple lines
-        :return: A message to be printed on console, or None
-        """
-        ret = ""
-        errlines = err.split('\n')
-        for errline in errlines:
-            if len(errline) > 0:  # Ignore blanks
-                if self.print_next_error_lines > 0:
-                    ret += errline + "\n"
-                    self.print_next_error_lines -= 1
-                if self.print_next_error_file and "file:" in errline:
-                    ret += errline + "\n"
-                    self.print_next_error_file = False
-                words = errline.split(' ', 1)  # Split off first field for parallel
-                FATAL = "--> FOAM FATAL ERROR"
-                FATALIO = "--> FOAM FATAL IO ERROR"
-                if errline.startswith(FATAL) or (len(words) > 1 and words[1].startswith(FATAL)):
-                    self.print_next_error_lines = 1
-                    ret += "OpenFOAM fatal error:\n"
-                elif errline.startswith(FATALIO) or (len(words) > 1 and words[1].startswith(FATALIO)):
-                    self.print_next_error_lines = 1
-                    self.print_next_error_file = True
-                    ret += "OpenFOAM IO error:\n"
-        if len(ret) > 0:
-            return ret
-        else:
-            return None

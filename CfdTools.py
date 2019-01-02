@@ -568,7 +568,7 @@ def runFoamCommand(cmdline, case=None):
               e.g. transformPoints -scale "(0.001 0.001 0.001)"
         case - Case directory or path
     """
-    proc = CfdFoamProcess()
+    proc = CfdSynchronousFoamProcess()
     exit_code = proc.run(cmdline, case)
     # Reproduce behaviour of failed subprocess run
     if exit_code:
@@ -576,7 +576,7 @@ def runFoamCommand(cmdline, case=None):
     return proc.output
 
 
-class CfdFoamProcess:
+class CfdSynchronousFoamProcess:
     def __init__(self):
         self.process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=self.readOutput, stderrHook=self.readOutput)
         self.output = ""

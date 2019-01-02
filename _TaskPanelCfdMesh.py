@@ -4,6 +4,7 @@
 # *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
 # *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
 # *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
+# *   Copyright (c) 2019 - Oliver Oxtoby <oliveroxtoby@gmail.com>           *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -36,6 +37,7 @@ import CfdTools
 from CfdTools import inputCheckAndStore, setInputFieldQuantity
 import CfdMeshTools
 import Fem
+from CfdConsoleProcess import CfdConsoleProcess
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -53,16 +55,15 @@ class _TaskPanelCfdMesh:
         self.mesh_obj = obj
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMesh.ui"))
 
-        self.mesh_process = QtCore.QProcess()
         self.Timer = QtCore.QTimer()
         self.console_message_cart = ''
         self.error_message = ''
         self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
         self.paraviewScriptName = ""
 
-        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardOutput()"), self.read_output)
-        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("readyReadStandardError()"), self.read_output)
-        QtCore.QObject.connect(self.mesh_process, QtCore.SIGNAL("finished(int)"), self.mesh_finished)
+        self.mesh_process = CfdConsoleProcess(finishedHook=self.meshFinished,
+                                              stdoutHook=self.gotOutputLines,
+                                              stderrHook=self.gotErrorLines)
 
         QtCore.QObject.connect(self.form.if_max, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.max_changed)
         QtCore.QObject.connect(self.form.if_pointInMeshX, QtCore.SIGNAL("valueChanged(Base::Quantity)"),
@@ -159,7 +160,7 @@ class _TaskPanelCfdMesh:
         index_utility = self.form.cb_utility.findText(self.utility)
         self.form.cb_utility.setCurrentIndex(index_utility)
 
-    def console_log(self, message="", color="#000000", timed=True):
+    def consoleMessage(self, message="", color="#000000", timed=True):
         if timed:
             self.console_message_cart = self.console_message_cart \
                                         + '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
@@ -216,7 +217,7 @@ class _TaskPanelCfdMesh:
         # Re-initialise CfdMeshTools with new parameters
         self.set_mesh_params()
         self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
-        self.console_log("Starting meshing ...")
+        self.consoleMessage("Starting meshing ...")
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.get_active_analysis()
@@ -232,15 +233,15 @@ class _TaskPanelCfdMesh:
             cart_mesh.get_dimension()
             cart_mesh.get_file_paths(CfdTools.getOutputPath(self.analysis))
             cart_mesh.setup_mesh_case_dir()
-            self.console_log("Exporting mesh region data ...")
+            self.consoleMessage("Exporting mesh region data ...")
             cart_mesh.get_region_data()  # Writes region stls so need file structure
             cart_mesh.write_mesh_case()
-            self.console_log("Exporting the part surfaces ...")
+            self.consoleMessage("Exporting the part surfaces ...")
             cart_mesh.write_part_file()
-            self.console_log("Running {} ...".format(self.utility))
+            self.consoleMessage("Running {} ...".format(self.utility))
             self.runCart(cart_mesh)
         except Exception as ex:
-            self.console_log("Error: " + str(ex), '#FF0000')
+            self.consoleMessage("Error: " + str(ex), '#FF0000')
             self.Timer.stop()
             raise
         finally:
@@ -250,56 +251,43 @@ class _TaskPanelCfdMesh:
         cart_mesh.error = False
         cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
         FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
-        env = QtCore.QProcessEnvironment.systemEnvironment()
         env_vars = CfdTools.getRunEnvironment()
-        for key in env_vars:
-            env.insert(key, env_vars[key])
-        self.mesh_process.setProcessEnvironment(env)
-        self.mesh_process.start(cmd[0], cmd[1:])
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.mesh_process.start(cmd, env_vars=env_vars)
         if self.mesh_process.waitForStarted():
             self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
             self.form.pb_stop_mesh.setEnabled(True)
             self.form.pb_paraview.setEnabled(False)
             self.form.pb_load_mesh.setEnabled(False)
+            self.consoleMessage("Mesher started")
         else:
-            self.console_log("Error starting meshing process", "#FF0000")
+            self.consoleMessage("Error starting meshing process", "#FF0000")
             cart_mesh.error = True
+        QApplication.restoreOverrideCursor()
 
     def killMeshProcess(self):
-        self.console_log("Meshing manually stopped")
+        self.consoleMessage("Meshing manually stopped")
         self.error_message = 'Meshing interrupted'
-        if platform.system() == 'Windows':
-            self.mesh_process.kill()
-        else:
-            self.mesh_process.terminate()
-        self.mesh_process.waitForFinished()
-        self.form.pb_run_mesh.setEnabled(True)
-        self.form.pb_stop_mesh.setEnabled(False)
-        self.form.pb_paraview.setEnabled(False)
-        self.Timer.stop()
+        self.mesh_process.terminate()
+        # Note: solverFinished will still be called
 
-    def read_output(self):
-        while self.mesh_process.canReadLine():
-            print(str(self.mesh_process.readLine()), end="")  # Avoid displaying on FreeCAD status bar
+    def gotOutputLines(self, lines):
+        pass
 
-        # Print any error output to console
-        self.mesh_process.setReadChannel(QtCore.QProcess.StandardError)
-        while self.mesh_process.canReadLine():
-            err = str(self.mesh_process.readLine())
-            self.console_log(err, "#FF0000")
-            FreeCAD.Console.PrintError(err)
-        self.mesh_process.setReadChannel(QtCore.QProcess.StandardOutput)
+    def gotErrorLines(self, lines):
+        print_err = self.mesh_process.processErrorOutput(lines)
+        if print_err is not None:
+            self.consoleMessage(print_err, "#FF0000")
 
-    def mesh_finished(self, exit_code):
-        self.read_output()
+    def meshFinished(self, exit_code):
         if exit_code == 0:
-            self.console_log('Meshing completed')
+            self.consoleMessage('Meshing completed')
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(True)
             self.form.pb_load_mesh.setEnabled(True)
         else:
-            self.console_log("Meshing exited with error", "#FF0000")
+            self.consoleMessage("Meshing exited with error", "#FF0000")
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(False)
@@ -341,15 +329,15 @@ class _TaskPanelCfdMesh:
         self.paraviewScriptName = os.path.join(self.cart_mesh.meshCaseDir, 'pvScriptMesh.py')
         arg = '--script={}'.format(self.paraviewScriptName)
 
-        self.console_log("Running " + paraview_cmd + " " +arg)
+        self.consoleMessage("Running " + paraview_cmd + " " +arg)
         self.open_paraview.start(paraview_cmd, [arg])
         QApplication.restoreOverrideCursor()
 
     def pbLoadMeshClicked(self):
-        self.console_log("Reading mesh ...", timed=False)
+        self.consoleMessage("Reading mesh ...", timed=False)
         self.cart_mesh.read_and_set_new_mesh()
-        self.console_log('Triangulated representation of the surface mesh is shown - ', timed=False)
-        self.console_log("Please view in Paraview for accurate display.\n", timed=False)
+        self.consoleMessage('Triangulated representation of the surface mesh is shown - ', timed=False)
+        self.consoleMessage("Please view in Paraview for accurate display.\n", timed=False)
 
     def pbClearMeshClicked(self):
         self.mesh_obj.FemMesh = Fem.FemMesh()

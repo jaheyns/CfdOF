@@ -41,12 +41,16 @@ class CfdConsoleProcess:
         self.process.finished.connect(self.finished)
         self.process.readyReadStandardOutput.connect(self.readStdout)
         self.process.readyReadStandardError.connect(self.readStderr)
+        self.print_next_error_lines = 0
+        self.print_next_error_file = False
 
     def __del__(self):
         self.terminate()
 
     def start(self, cmd, env_vars=None, working_dir=None):
         """ Start process and return immediately """
+        self.print_next_error_lines = 0
+        self.print_next_error_file = False
         env = QtCore.QProcessEnvironment.systemEnvironment()
         if env_vars:
             for key in env_vars:
@@ -126,3 +130,34 @@ class CfdConsoleProcess:
 
     def exitCode(self):
         return self.process.exitCode()
+
+    def processErrorOutput(self, err):
+        """
+        Process standard error text output from OpenFOAM
+        :param err: Standard error output, single or multiple lines
+        :return: A message to be printed on console, or None
+        """
+        ret = ""
+        errlines = err.split('\n')
+        for errline in errlines:
+            if len(errline) > 0:  # Ignore blanks
+                if self.print_next_error_lines > 0:
+                    ret += errline + "\n"
+                    self.print_next_error_lines -= 1
+                if self.print_next_error_file and "file:" in errline:
+                    ret += errline + "\n"
+                    self.print_next_error_file = False
+                words = errline.split(' ', 1)  # Split off first field for parallel
+                FATAL = "--> FOAM FATAL ERROR"
+                FATALIO = "--> FOAM FATAL IO ERROR"
+                if errline.startswith(FATAL) or (len(words) > 1 and words[1].startswith(FATAL)):
+                    self.print_next_error_lines = 1
+                    ret += "OpenFOAM fatal error:\n"
+                elif errline.startswith(FATALIO) or (len(words) > 1 and words[1].startswith(FATALIO)):
+                    self.print_next_error_lines = 1
+                    self.print_next_error_file = True
+                    ret += "OpenFOAM IO error:\n"
+        if len(ret) > 0:
+            return ret
+        else:
+            return None

@@ -201,7 +201,7 @@ class _TaskPanelCfdSolverControl:
         self.solver_runner.process_output(lines)
 
     def gotErrorLines(self, lines):
-        print_err = self.solver_runner.processErrorOutput(lines)
+        print_err = self.solver_run_process.processErrorOutput(lines)
         if print_err is not None:
             self.consoleMessage(print_err, "#FF0000")
 
