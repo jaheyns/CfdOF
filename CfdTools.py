@@ -52,7 +52,8 @@ if FreeCAD.GuiUp:
 # Some standard install locations that are searched if an install directory is not specified
 FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM-5.x",
                                  "C:\\Program Files\\blueCFD-Core-2016\\OpenFOAM-4.x"],
-                     "Linux": ["/opt/openfoam4", "/opt/openfoam5", "/opt/openfoam-dev",
+                     "Linux": ["/opt/openfoam4", "/opt/openfoam5", "/opt/openfoam6", "/opt/openfoam-dev",
+                               "~/OpenFOAM/OpenFOAM-6.x", "~/OpenFOAM/OpenFOAM-6.0",
                                "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
                                "~/OpenFOAM/OpenFOAM-4.x", "~/OpenFOAM/OpenFOAM-4.0", "~/OpenFOAM/OpenFOAM-4.1",
                                "~/OpenFOAM/OpenFOAM-dev"]
