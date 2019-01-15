@@ -1,10 +1,16 @@
-# Computational fluid dynamics (CFD) workbench for FreeCAD
+# CfdOF: A Computational fluid dynamics (CFD) workbench for FreeCAD
 
-This workbench aims to help users set up and run CFD analyses. It guides the user in selecting the relevant physics, 
+This workbench aims to help users set up and run CFD analyses within the [FreeCAD](https://freecadweb.org)
+modeller. It guides the user in selecting the relevant physics, 
 specifying the material properties, generating a mesh, assigning boundary conditions and setting the solver settings
 before running the simulation. Where possible, best practices are included to improve the stability of the solvers.
 
 ![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
+
+The workbench serves as a front-end to the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
+
+Disclaimer:
+This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 
 #### File format compatibility
 
@@ -18,20 +24,20 @@ forward-compatibilty, it is advised that you save the Python script used to gene
 
 ### Current:
 
-* Incompressible, laminar flow (simpleFoam, pimpleFoam).
+* Incompressible, laminar flow (simpleFoam, pimpleFoam)
 * Basic multiphase capability (interFoam, multiphaseInterFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
-* Basic material data base.
-* Flow initialisation with a potential solver.
-* Tetrahedral meshing using GMSH including multiple region meshing using FEM workbench functionality.
-* Post processing using paraview.
-* Porous regions and porous baffles.
-* Runs on Windows 7-10
+* Basic material data base
+* Flow initialisation with a potential solver
+* Tetrahedral meshing using GMSH
+* Cut-cell Cartesian meshing with boundary layers (cfMesh)
+* Cut-cell Cartesian meshing with porous media (snappyHexMesh)
+* Post processing using paraview
+* Porous regions and porous baffles
+* Runs on Windows 7-10 and Linux
 * Unit testing
-* Cut-cell Cartesian meshing with boundary layers (cfMesh).
-* Cut-cell Cartesian meshing with porous media (snappyHexMesh).
 * Extension to turbulent flow using RANS (k-w SST).
-* New case builder using a modular template structure
+* New case builder using an extensible template structure
 * Macro scripting
 
 ### Planned:
@@ -44,7 +50,7 @@ forward-compatibilty, it is advised that you save the Python script used to gene
 
 Any system on which FreeCAD and the prerequisites listed below can be installed. The following have been tested:
 * Ubuntu 16.04 
-* Fedora 24-25
+* Fedora 24-29
 
 #### Windows:
 
@@ -64,7 +70,7 @@ Not tested, but a POSIX system. Possible to install and run OpenFOAM.
 
 ### Prerequisites
 
-The CFD workbench depends on the following external software, some of
+The CfdOF workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (0.17)](https://github.com/FreeCAD/FreeCAD/releases/tag/0.17)
@@ -72,9 +78,9 @@ which can be automatically installed (see below for instructions).
 - [OpenFOAM (version 5.x currently tested; most other recent versions should work.)](http://openfoam.org/download/)  
 - [Paraview](http://www.paraview.org/)  
 - [GMSH (version 2.13 or later)](http://gmsh.info/)  
-- [cfMesh (version 1.1.2 updated to compile with OpenFOAM v5.x)](https://sourceforge.net/projects/cfmesh-cfdof/)
+- [cfMesh (customised version updated to compile with OpenFOAM v5.x and later)](https://sourceforge.net/projects/cfmesh-cfdof/)
 
-### Setting up CFD workbench
+### Setting up the CfdOF workbench
 
 #### Windows
 
@@ -102,6 +108,11 @@ The OpenFOAM installation is via the [blueCFD-Core](http://bluecfd.github.io/Cor
 with which Paraview comes bundled. This can be installed
 manually using the above link, or by clicking the relevant
 button in the Preferences panel described above.
+
+Please note that User Access Control in Windows 10 can restrict write
+access to the Program Files directory, which interferes with
+the installation of cfMesh and HiSA in blueCFD-Core. **It is therefore recommended
+that blueCFD-Core be installed outside the Program Files folder.**
 
 Set the OpenFOAM install directory in the preferences
 panel to \<blueCFD install directory\>\OpenFOAM-5.x
@@ -167,6 +178,10 @@ prerequisites have been successfully installed.
 ### Submitting Bugs
 
 Please discuss issues on the [CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37).
+Bugs can be reported on the [github project site](https://github.com/jaheyns/cfdof). 
+
+Please first read the [guidelines for reporting bugs](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359) 
+in order to provide sufficient information.
 
 ## Development
 
@@ -228,5 +243,6 @@ The code is maintained by
 
 We acknowledge significant contributions from
 * Qingfeng Xia (2015) - Original framework
+* Michael Hindley (2016) - Initial concept
 * Klaus Sembritzki (2017) - Multiphase
 * Thomas Schrader (2017-2018) <info@schraderundschrader.de> - Testing and user assistance
