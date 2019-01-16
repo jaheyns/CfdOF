@@ -230,8 +230,8 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 ## Acknowledgements
 
 ### Funding
-This development was made possible through funding from [Eskom Holdings SOC Ltd](www.eskom.co.za)
-and the [Council for Scientific and Industrial Research](www.csir.co.za) (South Africa).
+This development was made possible through funding from [Eskom Holdings SOC Ltd](http://www.eskom.co.za)
+and the [Council for Scientific and Industrial Research](https://www.csir.co.za) (South Africa).
 
 ### Lead developers
 The code is maintained by
