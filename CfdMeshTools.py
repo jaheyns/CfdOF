@@ -41,6 +41,7 @@ except ImportError:  # Backward compat
 from FreeCAD import Units
 import tempfile
 import os
+import sys
 import platform
 import shutil
 import subprocess
@@ -564,7 +565,10 @@ class CfdMeshTools:
             if platform.system() == "Windows":
                 exe = os.path.join(FreeCAD.getHomePath(), 'bin', 'gmsh.exe')
             else:
-                exe = subprocess.check_output(["which", "gmsh"]).rstrip('\n')
+                if sys.version_info.major < 3
+                    exe = subprocess.check_output(["which", "gmsh"]).rstrip('\n')
+                else:
+                    exe = subprocess.check_output(["which", "gmsh"]).decode("utf-8").rstrip('\n')
             self.gmsh_settings['Executable'] = CfdTools.translatePath(exe)
             self.gmsh_settings['ShapeFile'] = self.temp_file_shape
             self.gmsh_settings['HasLengthMap'] = False
