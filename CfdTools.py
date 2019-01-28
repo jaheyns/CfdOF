@@ -788,6 +788,8 @@ def checkCfdDependencies(term_print=True):
             # Only the last line contains gmsh version number
             gmshversion = gmshversion.rstrip().split()
             gmshversion = gmshversion[-1]
+            if sys.version_info.major >= 3:
+                gmshversion = gmshversion.decode('utf-8')
             versionlist = gmshversion.split(".")
             if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
                 gmsh_ver_msg = "gmsh version is older than minimum required (2.13)"
