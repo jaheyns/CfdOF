@@ -414,14 +414,9 @@ def detectFoamDir():
     foam_dir = None
     if platform.system() == "Linux":
         cmdline = ['bash', '-l', '-c', 'echo $WM_PROJECT_DIR']
-        foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE)
-        # Python 3 compatible, check_output() return type byte
-        foam_dir = str(foam_dir)
-        if len(foam_dir) > 1:               # If env var is not defined, python 3 returns `b'\n'` and python 2`\n`
-            if foam_dir[:2] == "b'":
-                foam_dir = foam_dir[2:-3]   # Python3: Strip 'b' from front and EOL char
-            else:
-                foam_dir = foam_dir.strip()  # Python2: Strip EOL char
+        foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE, universal_newlines=True)
+        if len(foam_dir) > 1:               # If env var is not defined, `\n` returned
+            foam_dir = foam_dir.strip()  # Python2: Strip EOL char
         else:
             foam_dir = None
         if foam_dir and not os.path.exists(os.path.join(foam_dir, "etc", "bashrc")):
@@ -778,7 +773,8 @@ def checkCfdDependencies(term_print=True):
         # check that gmsh version 2.13 or greater is installed
         gmshversion = ""
         try:
-            gmshversion = subprocess.check_output(["gmsh", "-version"], stderr=subprocess.STDOUT)
+            gmshversion = subprocess.check_output(["gmsh", "-version"],
+                                                  stderr=subprocess.STDOUT, universal_newlines=True)
         except OSError or subprocess.CalledProcessError:
             gmsh_msg = "gmsh is not installed"
             message += gmsh_msg + '\n'
@@ -788,8 +784,6 @@ def checkCfdDependencies(term_print=True):
             # Only the last line contains gmsh version number
             gmshversion = gmshversion.rstrip().split()
             gmshversion = gmshversion[-1]
-            if sys.version_info.major >= 3:
-                gmshversion = gmshversion.decode('utf-8')
             versionlist = gmshversion.split(".")
             if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
                 gmsh_ver_msg = "gmsh version is older than minimum required (2.13)"

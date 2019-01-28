@@ -40,20 +40,14 @@ def processStdin():
 def processStdout():
     with process.stdout:
         for output in iter(process.stdout.readline, ''):
-            if sys.version_info >= (3,):  # Python 3
-                sys.stdout.write(output.decode())
-            else:
-                sys.stdout.write(str(output))
+            sys.stdout.write(output)
             sys.stdout.flush()
 
 
 def processStderr():
     with process.stderr:
         for output in iter(process.stderr.readline, ''):
-            if sys.version_info >= (3,):  # Python 3
-                sys.stderr.write(output.decode())
-            else:
-                sys.stderr.write(str(output))
+            sys.stderr.write(output)
             sys.stdout.flush()
 
 
@@ -64,7 +58,8 @@ process = subprocess.Popen(argv[1:],
                            # delivery to our (the parent's) stdin from outside seems very unreliable
                            stdin=subprocess.PIPE,
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                           creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+                           creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                           universal_newlines=True)
 # Start threads to await input/output.
 t1 = threading.Thread(target=processStdin)
 t1.daemon = True
