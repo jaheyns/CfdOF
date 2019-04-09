@@ -54,10 +54,9 @@ boundaryField
     %(0%)
     {
         type        characteristicFarfieldTemperature;
-        UInf        ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
-        pInf        %(boundaries/%(0%)/Pressure%);
-        TInf        %(boundaries/%(0%)/Temperature%);
-        gamma       1.4; //TODO
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
         value       $internalField;
     }
 %}
