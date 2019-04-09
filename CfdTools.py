@@ -726,22 +726,20 @@ def checkCfdDependencies(term_print=True):
                     foam_ver = foam_ver.rstrip().split()[-1]
                     if foam_ver != 'dev' and foam_ver != 'plus':
                         try:
-                            if foam_ver[0:1] == 'v':  # Plus version
-                                foam_ver = foam_ver.lstrip('v')
-                                if int(foam_ver) < 1706:
+                            # Isolate major version number
+                            foam_ver = foam_ver.lstrip('v')
+                            foam_ver = int(foam_ver.split('.')[0])
+                            if foam_ver >= 1000:  # Plus version
+                                if foam_ver < 1706:
                                     vermsg = "OpenFOAM version " + foam_ver + " is outdated:\n" + \
-                                             "ESI OpenFOAM is untested but must be at least version 1706\n" + \
-                                             "OpenFOAM version 5.0 is recommended"
-                                else:
-                                    vermsg = "ESI OpenFOAM is untested but may work\n" + \
-                                             "OpenFOAM version 5.0 is recommended"
+                                             "Minimum version 1706 or 4.0 required"
                                 message += vermsg + "\n"
                                 if term_print:
                                     print(vermsg)
-                            else:
-                                if int(foam_ver.split('.')[0]) < 4:
+                            else:  # Foundation version
+                                if foam_ver < 4:
                                     vermsg = "OpenFOAM version " + foam_ver + " is outdated:\n" + \
-                                             "The CFD workbench requires at least OpenFOAM 4.0"
+                                             "Minimum version 4.0 or 1706 required"
                                     message += vermsg + "\n"
                                     if term_print:
                                         print(vermsg)
