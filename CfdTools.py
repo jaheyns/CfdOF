@@ -767,6 +767,29 @@ def checkCfdDependencies(term_print=True):
                             print(hisa_msg)
 
         if term_print:
+            print("Checking for Plot workbench:")
+        try:
+            import Plot
+        except ImportError:
+            try:
+                from freecad.plot import Plot
+            except ImportError:
+                plot_msg = "Could not load Plot workbench"
+                message += plot_msg + '\n'
+                if term_print:
+                    print(plot_msg)
+
+        try:
+            import matplotlib
+        except ImportError:
+            matplot_msg = "Could not load matplotlib package (required by Plot workbench)"
+            message += matplot_msg + '\n'
+            if term_print:
+                print(matplot_msg)
+
+
+
+        if term_print:
             print("Checking for gmsh:")
         # check that gmsh version 2.13 or greater is installed
         gmshversion = ""

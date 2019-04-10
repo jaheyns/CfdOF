@@ -48,21 +48,15 @@ forward-compatibilty, it is advised that you save the Python script used to gene
 
 #### Linux: 
 
-Any system on which FreeCAD and the prerequisites listed below can be installed. The following have been tested:
-* Ubuntu 16.04 
-* Fedora 24-29
+Any system on which FreeCAD and the prerequisites listed below can be installed.
 
 #### Windows:
 
-* Windows 7 (tested)
-* Windows 8 (not yet tested)
-* Windows 10 (tested)
-
-Note: 64-bit version is required
+Windows 7-10; 64-bit version is required.
 
 #### MacOSX:
 
-Not tested, but a POSIX system. Possible to install and run OpenFOAM. 
+Not widely tested, but possible. 
       
 =============================================
   
@@ -74,11 +68,13 @@ The CfdOF workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (0.17)](https://github.com/FreeCAD/FreeCAD/releases/tag/0.17)
- or [latest development version (0.18 prerelease; requires git commit 13528 or later)](https://github.com/FreeCAD/FreeCAD/releases)  
-- [OpenFOAM (version 5.x currently tested; most other recent versions should work.)](http://openfoam.org/download/)  
+ or [latest development version (0.19 prerelease; requires git commit 13528 or later)](https://github.com/FreeCAD/FreeCAD/releases)  
+- OpenFOAM [Foundation version 4.0 or later](http://openfoam.org/download/) or [ESI version 1706 or later](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
+- [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
 - [GMSH (version 2.13 or later)](http://gmsh.info/)  
-- [cfMesh (customised version updated to compile with OpenFOAM v5.x and later)](https://sourceforge.net/projects/cfmesh-cfdof/)
+- [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
+- [HiSA (High Speed Aerodynamic Solver)](https://hisa.gitlab.io)
 
 ### Setting up the CfdOF workbench
 
@@ -119,8 +115,8 @@ panel to \<blueCFD install directory\>\OpenFOAM-5.x
  (It will be automatically detected in the default install
 location.)
 
-Likewise, cfMesh can be installed from the 
-Preferences panel. cfMesh is automatically built from source 
+Likewise, cfMesh and HiSA can be installed from the 
+Preferences panel. They are automatically built from source 
 inside the OpenFOAM environment if installed from the 
 Preferences panel. Note that this is a lengthy process.
 
@@ -157,14 +153,21 @@ However, in Linux, manual installation is required for
 [Paraview](http://www.paraview.org/) and
 [GMSH](http://gmsh.info/), which should be
 installed using your distribution's package manager
-or the links above.
+or the links above. 
+
+The FreeCAD plot workbench is included in many packages, but in some cases
+must be installed manually with the command
+```
+pip install git+https://github.com/FreeCAD/freecad.plot.git
+```
+In future it will be available through the AddOn manager. 
 
 Set the OpenFOAM install directory in the preferences
 panel - typical install locations are /home/user/OpenFOAM/OpenFOAM-5.x
 or /opt/openfoam5 (It will be automatically detected in common default install
 locations.)
 
-cfMesh can be installed using the Preferences panel described above,
+cfMesh and HiSA can be installed using the Preferences panel described above,
 and will be downloaded and built from the source
 code inside your OpenFOAM installation if you have
 not already done so yourself. Note that this is a lengthy process.
@@ -175,7 +178,7 @@ prerequisites have been successfully installed.
 
 ## Feedback
 
-### Submitting Bugs
+### Reporting Bugs
 
 Please discuss issues on the [CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37).
 Bugs can be reported on the [github project site](https://github.com/jaheyns/cfdof). 
@@ -237,7 +240,7 @@ and the [Council for Scientific and Industrial Research](https://www.csir.co.za)
 The code is maintained by
 * Oliver Oxtoby (CSIR, 2016-2018) <oliveroxtoby@gmail.com>  
 * Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>  
-* Alfred Bogaers (CSIR, 2016-2018) <abogaers@csir.co.za>    
+* Alfred Bogaers (CSIR, 2016-2018) <alfredbogaers@gmail.com>    
 
 ### Contributors
 
