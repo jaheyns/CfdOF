@@ -38,6 +38,7 @@ if sys.version_info >= (3,):  # Python 3
 else:
     import urllib as urlrequest
     import urlparse
+import ssl
 
 import FreeCAD
 import CfdTools
@@ -267,7 +268,7 @@ class CfdPreferencePage:
         mb_done = float(bytes_done)/(1024*1024)
         msg = "Downloaded {:.2f} MB".format(mb_done)
         if bytes_total > 0:
-            msg += " of {:.2f} MB".format(int(bytes_total/(1024*1024)))
+            msg += " of {:.2f} MB".format(float(bytes_total)/(1024*1024))
         self.form.labelDownloadProgress.setText(msg)
 
 
@@ -316,6 +317,25 @@ class CfdPreferencePageThread(QThread):
         else:
             raise Exception("Failed to launch blueCFD-Core installer")
 
+    def downloadFile(self, url, **kwargs):
+        block_size = kwargs.get('block_size', 10*1024)
+        context = kwargs.get('context', None)
+        reporthook = kwargs.get('reporthook', None)
+        with urlrequest.urlopen(url, context=context) as response:
+            download_len = int(response.info().get('Content-Length', 0))
+            with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+                i = 0
+                while True:
+                    data = response.read(block_size)
+                    if not data:
+                        break
+                    tmp_file.write(data)
+                    i += 1
+                    if reporthook:
+                        reporthook(i, block_size, download_len)
+                filename = tmp_file.name
+                return filename, response.info()
+
     def downloadCfMesh(self):
         self.signals.status.emit("Downloading cfMesh, please wait...")
 
@@ -324,14 +344,12 @@ class CfdPreferencePageThread(QThread):
 
         try:
             # Workaround for certificate issues in python >= 2.7.9
-            import ssl
             if hasattr(ssl, '_create_unverified_context'):
-                urlrequest._urlopener = urlrequest.FancyURLopener(context=ssl._create_unverified_context())
+                context = ssl._create_unverified_context()
             else:
-                urlrequest._urlopener = urlrequest.FancyURLopener()
+                context = None
             # Download
-            (filename, header) = urlrequest.urlretrieve(self.cfmesh_url,
-                                                        reporthook=self.downloadStatus)
+            (filename, header) = self.downloadFile(self.cfmesh_url, reporthook=self.downloadStatus, context=context)
         except Exception as ex:
             raise Exception("Error downloading cfMesh: {}".format(str(ex)))
 
@@ -348,14 +366,12 @@ class CfdPreferencePageThread(QThread):
 
         try:
             # Workaround for certificate issues in python >= 2.7.9
-            import ssl
             if hasattr(ssl, '_create_unverified_context'):
-                urlrequest._urlopener = urlrequest.FancyURLopener(context=ssl._create_unverified_context())
+                context = ssl._create_unverified_context()
             else:
-                urlrequest._urlopener = urlrequest.FancyURLopener()
+                context = None
             # Download
-            (filename, header) = urlrequest.urlretrieve(self.hisa_url,
-                                                        reporthook=self.downloadStatus)
+            (filename, header) = self.downloadFile(self.hisa_url, reporthook=self.downloadStatus, context=context)
         except Exception as ex:
             raise Exception("Error downloading HiSA: {}".format(str(ex)))
 
