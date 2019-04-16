@@ -668,7 +668,9 @@ def readTemplate(fileName, replaceDict=None):
 
 
 def checkCfdDependencies(term_print=True):
+        FC_MAJOR_VER_REQUIRED = 0
         FC_MINOR_VER_REQUIRED = 17
+        FC_PATCH_VER_REQUIRED = 0
         FC_COMMIT_REQUIRED = 13528
 
         import os
@@ -682,16 +684,32 @@ def checkCfdDependencies(term_print=True):
         if term_print:
             print("Checking FreeCAD version")
         ver = FreeCAD.Version()
-        gitver = ver[2].split()[0]
-        if gitver != 'Unknown':
+        major_ver = int(ver[0])
+        minor_vers = ver[1].split('.')
+        minor_ver = int(minor_vers[0])
+        if minor_vers[1:] and minor_vers[1]:
+            patch_ver = int(minor_vers[1])
+        else:
+            patch_ver = 0
+        gitver = ver[2].split()
+        if gitver:
+            gitver = gitver[0]
+        if gitver and gitver != 'Unknown':
             gitver = int(gitver)
         else:
             # If we don't have the git version, assume it's OK.
             gitver = FC_COMMIT_REQUIRED
-        if int(ver[0]) == 0 and (int(ver[1]) < FC_MINOR_VER_REQUIRED or
-                                 (int(ver[1]) == FC_MINOR_VER_REQUIRED and gitver < FC_COMMIT_REQUIRED)):
-            fc_msg = "FreeCAD version ({}.{}.{}) must be at least {}.{}.{}".format(
-                int(ver[0]), int(ver[1]), gitver, 0, FC_MINOR_VER_REQUIRED, FC_COMMIT_REQUIRED)
+
+        if (major_ver < FC_MAJOR_VER_REQUIRED or
+            (major_ver == FC_MAJOR_VER_REQUIRED and
+             (minor_ver < FC_MINOR_VER_REQUIRED or
+              (minor_ver == FC_MINOR_VER_REQUIRED and patch_ver < FC_PATCH_VER_REQUIRED)
+             )
+            )
+           ) or gitver < FC_COMMIT_REQUIRED:
+            fc_msg = "FreeCAD version ({}.{}.{}) ({}) must be at least {}.{}.{} ({})".format(
+                int(ver[0]), minor_ver, patch_ver, gitver,
+                FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED)
             if term_print:
                 print(fc_msg)
             message += fc_msg + '\n'
