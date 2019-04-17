@@ -775,6 +775,7 @@ def checkCfdDependencies(term_print=True):
                         message += cfmesh_msg + '\n'
                         if term_print:
                             print(cfmesh_msg)
+
                     # Check for HiSA
                     try:
                         runFoamCommand("hisa -help")
@@ -783,6 +784,16 @@ def checkCfdDependencies(term_print=True):
                         message += hisa_msg + '\n'
                         if term_print:
                             print(hisa_msg)
+
+                    # Check for paraview
+                    paraview_cmd = "paraview"
+                    # Run through OF/BlueCFD environment in case it is bundled
+                    pv_path = runFoamCommand("which paraview")
+                    if not pv_path.rstrip():
+                        pv_msg = "Paraview executable " + paraview_cmd + " not found in path."
+                        message += pv_msg + '\n'
+                        if term_print:
+                            print(pv_msg)
 
         if term_print:
             print("Checking for Plot workbench:")
@@ -827,21 +838,6 @@ def checkCfdDependencies(term_print=True):
                 message += gmsh_ver_msg + '\n'
                 if term_print:
                     print(gmsh_ver_msg)
-
-        paraview_cmd = "paraview"
-        # If using blueCFD, use paraview supplied
-        if getFoamRuntime() == 'BlueCFD':
-            try:  # In case OpenFOAM not found
-                paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
-            except IOError:
-                pass
-        # Otherwise, the command 'paraview' must be in the path - test to see if it exists
-        import distutils.spawn
-        if distutils.spawn.find_executable(paraview_cmd) is None:
-            pv_msg = "Paraview executable " + paraview_cmd + " not found in path."
-            message += pv_msg + '\n'
-            if term_print:
-                print(pv_msg)
 
         if term_print:
             print("Completed CFD dependency check")

@@ -37,6 +37,7 @@ from CfdConsoleProcess import CfdConsoleProcess
 
 import FreeCAD
 import CfdTools
+from CfdTools import startFoamApplication
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -69,7 +70,7 @@ class _TaskPanelCfdSolverControl:
         self.form.terminateSolver.clicked.connect(self.killSolverProcess)
         self.form.terminateSolver.setEnabled(False)
 
-        self.open_paraview = QtCore.QProcess()
+        self.open_paraview = CfdconsoleProcess()
 
         self.working_dir = CfdTools.getOutputPath(self.analysis_object)
 
@@ -112,13 +113,7 @@ class _TaskPanelCfdSolverControl:
     def reject(self):
         self.solver_run_process.terminate()
         self.solver_run_process.waitForFinished()
-        import platform
-        if platform.system() == "Windows":
-            # Hard kill should not be necessary for a GUI application but there appears to be a bug in Windows or Qt
-            self.open_paraview.kill()
-        else:
-            self.open_paraview.terminate()
-        self.open_paraview.waitForFinished()
+        self.open_paraview.terminate()
         FreeCADGui.ActiveDocument.resetEdit()
 
     def write_input_file_handler(self):
@@ -209,26 +204,18 @@ class _TaskPanelCfdSolverControl:
         self.Start = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        script_name = os.path.abspath(os.path.join(self.working_dir,
-                                                   self.solver_object.InputCaseName,
-                                                   "pvScript.py"))
+        script_name = "pvScript.py"
 
-        paraview_cmd = "paraview"
-        # If using blueCFD, use paraview supplied
-        if CfdTools.getFoamRuntime() == 'BlueCFD':
-            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(CfdTools.getFoamDir())
-        # Otherwise, the command 'paraview' must be in the path. Possibly make path user-settable.
-        # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
-        import distutils.spawn
-        if distutils.spawn.find_executable(paraview_cmd) is None:
-            raise IOError("Paraview executable " + paraview_cmd + " not found in path.")
-
+        paraview_cmd = "$(which paraview)"  # 'which' required due to mingw wierdness(?) on Windows
         arg = '--script={}'.format(script_name)
 
+        case_path = os.path.abspath(os.path.join(self.working_dir,self.solver_object.InputCaseName))
         self.consoleMessage("Running "+paraview_cmd+" "+arg)
-        self.open_paraview.start(paraview_cmd, [arg])
-        if self.open_paraview.waitForStarted():
+        try:
+            self.open_paraview = startFoamApplication([paraview_cmd, arg], case_path, log_name=None)
             self.consoleMessage("Paraview started")
-        else:
+        except:
             self.consoleMessage("Error starting paraview")
-        QApplication.restoreOverrideCursor()
+            raise
+        finally:
+            QApplication.restoreOverrideCursor()

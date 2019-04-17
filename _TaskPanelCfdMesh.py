@@ -34,7 +34,7 @@ import _CfdMesh
 import time
 import tempfile
 import CfdTools
-from CfdTools import inputCheckAndStore, setInputFieldQuantity
+from CfdTools import inputCheckAndStore, setInputFieldQuantity, startFoamApplication
 import CfdMeshTools
 import Fem
 from CfdConsoleProcess import CfdConsoleProcess
@@ -79,7 +79,7 @@ class _TaskPanelCfdMesh:
         QtCore.QObject.connect(self.form.cb_utility, QtCore.SIGNAL("activated(int)"), self.choose_utility)
         QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.update_timer_text)
 
-        self.open_paraview = QtCore.QProcess()
+        self.open_paraview = CfdConsoleProcess()
 
         QtCore.QObject.connect(self.form.pb_run_mesh, QtCore.SIGNAL("clicked()"), self.runMeshProcess)
         QtCore.QObject.connect(self.form.pb_stop_mesh, QtCore.SIGNAL("clicked()"), self.killMeshProcess)
@@ -115,7 +115,9 @@ class _TaskPanelCfdMesh:
     def reject(self):
         # There is no reject - only close
         self.set_mesh_params()
-
+        self.mesh_process.terminate()
+        self.mesh_process.waitForFinished()
+        self.open_paraview.terminate()
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
         return True
@@ -316,22 +318,20 @@ class _TaskPanelCfdMesh:
         self.Start = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        paraview_cmd = "paraview"
-        # If using blueCFD, use paraview supplied
-        if CfdTools.getFoamRuntime() == 'BlueCFD':
-            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(CfdTools.getFoamDir())
-        # Otherwise, the command 'paraview' must be in the path. Possibly make path user-settable.
-        # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
-        import distutils.spawn
-        if distutils.spawn.find_executable(paraview_cmd) is None:
-            raise IOError("Paraview executable " + paraview_cmd + " not found in path.")
+        paraview_cmd = "$(which paraview)"   # 'which' required due to mingw wierdness(?) on Windows
+        script_name = "pvScriptMesh.py"
+        arg = '--script={}'.format(script_name)
 
-        self.paraviewScriptName = os.path.join(self.cart_mesh.meshCaseDir, 'pvScriptMesh.py')
-        arg = '--script={}'.format(self.paraviewScriptName)
-
-        self.consoleMessage("Running " + paraview_cmd + " " +arg)
-        self.open_paraview.start(paraview_cmd, [arg])
-        QApplication.restoreOverrideCursor()
+        case_path = os.path.abspath(self.cart_mesh.meshCaseDir)
+        self.consoleMessage("Running " + paraview_cmd + " " + arg)
+        try:
+            self.open_paraview = startFoamApplication([paraview_cmd, arg], case_path, log_name=None)
+            self.consoleMessage("Paraview started")
+        except:
+            self.consoleMessage("Error starting paraview")
+            raise
+        finally:
+            QApplication.restoreOverrideCursor()
 
     def pbLoadMeshClicked(self):
         self.consoleMessage("Reading mesh ...", timed=False)
