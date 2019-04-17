@@ -47,9 +47,3 @@ class CfdSolverFoam(CfdSolver.CfdSolver):
         super(CfdSolverFoam, self).__init__(obj)
         self.Type = "CfdSolverFoam"
         self.SolverName = "OpenFOAM"
-        """ NOTE NOTE NOTE 20/01/2017
-        PotentialInit Checker is moved to initialiseobject
-        """
-        #if "PotentialInit" not in obj.PropertiesList:
-            #obj.addProperty("App::PropertyBool", "PotentialInit", "Solver",
-                    #"Initialise fields using potential flow solution", True)

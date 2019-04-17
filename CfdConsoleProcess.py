@@ -26,6 +26,7 @@ from __future__ import print_function
 import platform
 import os
 from PySide import QtCore
+from PySide.QtCore import QProcess, QTextStream
 import FreeCAD
 
 
@@ -34,7 +35,7 @@ class CfdConsoleProcess:
     errors to the FreeCAD console and allowing clean termination in Linux
     and Windows """
     def __init__(self, finishedHook=None, stdoutHook=None, stderrHook=None):
-        self.process = QtCore.QProcess()
+        self.process = QProcess()
         self.finishedHook = finishedHook
         self.stdoutHook = stdoutHook
         self.stderrHook = stderrHook
@@ -84,7 +85,8 @@ class CfdConsoleProcess:
         # Ensure only complete lines are passed on
         text = ""
         while self.process.canReadLine():
-            text += str(self.process.readLine())
+            byteArr = self.process.readLine()
+            text += QTextStream(byteArr).readAll()
         if text:
             print(text, end='')  # Avoid displaying on FreeCAD status bar
             if self.stdoutHook:
@@ -96,10 +98,11 @@ class CfdConsoleProcess:
     def readStderr(self):
         # Ensure only complete lines are passed on
         # Print any error output to console
-        self.process.setReadChannel(QtCore.QProcess.StandardError)
+        self.process.setReadChannel(QProcess.StandardError)
         text = ""
         while self.process.canReadLine():
-            text += str(self.process.readLine())
+            byteArr = self.process.readLine()
+            text += QTextStream(byteArr).readAll()
         if text:
             if self.stderrHook:
                 self.stderrHook(text)
@@ -107,7 +110,7 @@ class CfdConsoleProcess:
             # Must be at the end as it can cause re-entrance
             if FreeCAD.GuiUp:
                 FreeCAD.Gui.updateGui()
-        self.process.setReadChannel(QtCore.QProcess.StandardOutput)
+        self.process.setReadChannel(QProcess.StandardOutput)
 
     def state(self):
         return self.process.state()

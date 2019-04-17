@@ -805,8 +805,6 @@ def checkCfdDependencies(term_print=True):
             if term_print:
                 print(matplot_msg)
 
-
-
         if term_print:
             print("Checking for gmsh:")
         # check that gmsh version 2.13 or greater is installed
@@ -833,7 +831,7 @@ def checkCfdDependencies(term_print=True):
         paraview_cmd = "paraview"
         # If using blueCFD, use paraview supplied
         if getFoamRuntime() == 'BlueCFD':
-            try: # In case OpenFOAM not found
+            try:  # In case OpenFOAM not found
                 paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
             except IOError:
                 pass
