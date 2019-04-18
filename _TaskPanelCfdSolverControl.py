@@ -70,7 +70,7 @@ class _TaskPanelCfdSolverControl:
         self.form.terminateSolver.clicked.connect(self.killSolverProcess)
         self.form.terminateSolver.setEnabled(False)
 
-        self.open_paraview = CfdconsoleProcess()
+        self.open_paraview = CfdConsoleProcess()
 
         self.working_dir = CfdTools.getOutputPath(self.analysis_object)
 
