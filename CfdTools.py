@@ -785,15 +785,20 @@ def checkCfdDependencies(term_print=True):
                         if term_print:
                             print(hisa_msg)
 
-                    # Check for paraview
-                    paraview_cmd = "paraview"
-                    # Run through OF/BlueCFD environment in case it is bundled
-                    pv_path = runFoamCommand("which paraview")
-                    if not pv_path.rstrip():
-                        pv_msg = "Paraview executable " + paraview_cmd + " not found in path."
-                        message += pv_msg + '\n'
-                        if term_print:
-                            print(pv_msg)
+            # Check for paraview
+            if term_print:
+                print("Checking for paraview:")
+            paraview_cmd = "paraview"
+            import distutils.spawn
+            if distutils.spawn.find_executable(paraview_cmd) is None:
+                # If not found, try to run from the OpenFOAM environment, in case a bundled version is
+                # available from there
+                pv_path = runFoamCommand("which paraview")
+                if not pv_path.rstrip():
+                    pv_msg = "Paraview executable " + paraview_cmd + " not found in system or OpenFOAM path."
+                    message += pv_msg + '\n'
+                    if term_print:
+                        print(pv_msg)
 
         if term_print:
             print("Checking for Plot workbench:")
@@ -842,6 +847,38 @@ def checkCfdDependencies(term_print=True):
         if term_print:
             print("Completed CFD dependency check")
         return message
+
+
+def startParaview(case_path, script_name, consoleMessageFn):
+    proc = QtCore.QProcess()
+    # If using blueCFD, use paraview supplied
+    if getFoamRuntime() == 'BlueCFD':
+        paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
+    else:
+        paraview_cmd = "paraview"
+    arg = '--script={}'.format(script_name)
+    # Otherwise, the command 'paraview' must be in the path. Possibly make path user-settable.
+    # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
+    import distutils.spawn
+    if distutils.spawn.find_executable(paraview_cmd) is None:
+        # If not found, try to run from the OpenFOAM environment, in case a bundled version is available from there
+        paraview_cmd = "$(which paraview)"  # 'which' required due to mingw weirdness(?) on Windows
+        try:
+            consoleMessageFn("Running " + paraview_cmd + " " + arg)
+            proc = startFoamApplication([paraview_cmd, arg], case_path, log_name=None)
+            consoleMessageFn("Paraview started")
+        except QtCore.QProcess.ProcessError:
+            consoleMessageFn("Error starting paraview")
+    else:
+        arg = '--script={}'.format(script_name)
+        consoleMessageFn("Running " + paraview_cmd + " " + arg)
+        proc.setWorkingDirectory(case_path)
+        proc.start(paraview_cmd, [arg])
+        if proc.waitForStarted():
+            consoleMessageFn("Paraview started")
+        else:
+            consoleMessageFn("Error starting paraview")
+    return proc
 
 
 def floatEqual(a, b):
@@ -1051,3 +1088,4 @@ def matchFacesToTargetShape(ref_lists, shape):
                 successful_candidates[orig_idx].append((nb, bref))
 
     return successful_candidates
+

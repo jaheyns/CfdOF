@@ -70,7 +70,7 @@ class _TaskPanelCfdSolverControl:
         self.form.terminateSolver.clicked.connect(self.killSolverProcess)
         self.form.terminateSolver.setEnabled(False)
 
-        self.open_paraview = CfdConsoleProcess()
+        self.open_paraview = QtCore.QProcess()
 
         self.working_dir = CfdTools.getOutputPath(self.analysis_object)
 
@@ -203,19 +203,9 @@ class _TaskPanelCfdSolverControl:
     def openParaview(self):
         self.Start = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
-
+        case_path = os.path.abspath(os.path.join(self.working_dir, self.solver_object.InputCaseName))
         script_name = "pvScript.py"
-
-        paraview_cmd = "$(which paraview)"  # 'which' required due to mingw wierdness(?) on Windows
-        arg = '--script={}'.format(script_name)
-
-        case_path = os.path.abspath(os.path.join(self.working_dir,self.solver_object.InputCaseName))
-        self.consoleMessage("Running "+paraview_cmd+" "+arg)
         try:
-            self.open_paraview = startFoamApplication([paraview_cmd, arg], case_path, log_name=None)
-            self.consoleMessage("Paraview started")
-        except:
-            self.consoleMessage("Error starting paraview")
-            raise
+            self.open_paraview = CfdTools.startParaview(case_path, script_name, self.consoleMessage)
         finally:
             QApplication.restoreOverrideCursor()

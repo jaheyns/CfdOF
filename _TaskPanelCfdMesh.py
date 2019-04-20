@@ -79,7 +79,7 @@ class _TaskPanelCfdMesh:
         QtCore.QObject.connect(self.form.cb_utility, QtCore.SIGNAL("activated(int)"), self.choose_utility)
         QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.update_timer_text)
 
-        self.open_paraview = CfdConsoleProcess()
+        self.open_paraview = QtCore.QProcess()
 
         QtCore.QObject.connect(self.form.pb_run_mesh, QtCore.SIGNAL("clicked()"), self.runMeshProcess)
         QtCore.QObject.connect(self.form.pb_stop_mesh, QtCore.SIGNAL("clicked()"), self.killMeshProcess)
@@ -317,19 +317,10 @@ class _TaskPanelCfdMesh:
     def openParaview(self):
         self.Start = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
-
-        paraview_cmd = "$(which paraview)"   # 'which' required due to mingw wierdness(?) on Windows
-        script_name = "pvScriptMesh.py"
-        arg = '--script={}'.format(script_name)
-
         case_path = os.path.abspath(self.cart_mesh.meshCaseDir)
-        self.consoleMessage("Running " + paraview_cmd + " " + arg)
+        script_name = "pvScriptMesh.py"
         try:
-            self.open_paraview = startFoamApplication([paraview_cmd, arg], case_path, log_name=None)
-            self.consoleMessage("Paraview started")
-        except:
-            self.consoleMessage("Error starting paraview")
-            raise
+            self.open_paraview = CfdTools.startParaview(case_path, script_name, self.consoleMessage)
         finally:
             QApplication.restoreOverrideCursor()
 
