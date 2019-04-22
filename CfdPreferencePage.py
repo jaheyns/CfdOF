@@ -343,9 +343,8 @@ class CfdPreferencePageThread(QThread):
         self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
 
         try:
-            # Workaround for certificate issues in python >= 2.7.9
-            if hasattr(ssl, '_create_unverified_context'):
-                context = ssl._create_unverified_context()
+            if hasattr(ssl, 'create_default_context'):
+                context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             else:
                 context = None
             # Download
@@ -365,9 +364,8 @@ class CfdPreferencePageThread(QThread):
         self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
 
         try:
-            # Workaround for certificate issues in python >= 2.7.9
-            if hasattr(ssl, '_create_unverified_context'):
-                context = ssl._create_unverified_context()
+            if hasattr(ssl, 'create_default_context'):
+                context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
             else:
                 context = None
             # Download
