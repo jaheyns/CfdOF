@@ -44,6 +44,7 @@ import FreeCAD
 import CfdTools
 import TemplateBuilder
 import tempfile
+from contextlib import closing
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -321,7 +322,7 @@ class CfdPreferencePageThread(QThread):
         block_size = kwargs.get('block_size', 10*1024)
         context = kwargs.get('context', None)
         reporthook = kwargs.get('reporthook', None)
-        with urlrequest.urlopen(url, context=context) as response:
+        with closing(urlrequest.urlopen(url, context=context)) as response:  # For Python < 3.3 backward compatibility
             download_len = int(response.info().get('Content-Length', 0))
             with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
                 i = 0
