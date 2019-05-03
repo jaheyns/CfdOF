@@ -65,7 +65,6 @@ class _TaskPanelCfdSolverControl:
                                                     stdoutHook=self.gotOutputLines,
                                                     stderrHook=self.gotErrorLines)
         self.Timer = QtCore.QTimer()
-        self.Timer.start(100)
 
         self.form.terminateSolver.clicked.connect(self.killSolverProcess)
         self.form.terminateSolver.setEnabled(False)
@@ -88,8 +87,8 @@ class _TaskPanelCfdSolverControl:
         self.Start = time.time()
 
     def updateUI(self):
-        self.form.pb_edit_inp.setEnabled(os.path.exists(self.working_dir))
         solverDirectory = os.path.join(self.working_dir, self.solver_object.InputCaseName)
+        self.form.pb_edit_inp.setEnabled(os.path.exists(solverDirectory))
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(solverDirectory, "pv.foam")))
         self.form.pb_run_solver.setEnabled(os.path.exists(os.path.join(solverDirectory, "Allrun")))
 
@@ -149,7 +148,6 @@ class _TaskPanelCfdSolverControl:
         return True
 
     def editSolverInputFile(self):
-        self.Start = time.time()
         solverDirectory = os.path.join(self.working_dir, self.solver_object.InputCaseName)
         self.consoleMessage("Please edit the case input files externally at: {}\n".format(solverDirectory))
         self.solver_runner.edit_case()

@@ -30,6 +30,7 @@ import os
 import sys
 import os.path
 import platform
+import subprocess
 import _CfdMesh
 import time
 import tempfile
@@ -56,6 +57,7 @@ class _TaskPanelCfdMesh:
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMesh.ui"))
 
         self.Timer = QtCore.QTimer()
+        self.Start = time.time()
         self.console_message_cart = ''
         self.error_message = ''
         self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
@@ -64,6 +66,7 @@ class _TaskPanelCfdMesh:
         self.mesh_process = CfdConsoleProcess(finishedHook=self.meshFinished,
                                               stdoutHook=self.gotOutputLines,
                                               stderrHook=self.gotErrorLines)
+        self.edit_prcess = None
 
         QtCore.QObject.connect(self.form.if_max, QtCore.SIGNAL("valueChanged(Base::Quantity)"), self.max_changed)
         QtCore.QObject.connect(self.form.if_pointInMeshX, QtCore.SIGNAL("valueChanged(Base::Quantity)"),
@@ -81,12 +84,14 @@ class _TaskPanelCfdMesh:
 
         self.open_paraview = QtCore.QProcess()
 
-        QtCore.QObject.connect(self.form.pb_run_mesh, QtCore.SIGNAL("clicked()"), self.runMeshProcess)
-        QtCore.QObject.connect(self.form.pb_stop_mesh, QtCore.SIGNAL("clicked()"), self.killMeshProcess)
-        QtCore.QObject.connect(self.form.pb_paraview, QtCore.SIGNAL("clicked()"), self.openParaview)
+        self.form.pb_write_mesh.clicked.connect(self.writeMesh)
+        self.form.pb_edit_mesh.clicked.connect(self.editMesh)
+        self.form.pb_run_mesh.clicked.connect(self.runMesh)
+        self.form.pb_stop_mesh.clicked.connect(self.killMeshProcess)
+        self.form.pb_paraview.clicked.connect(self.openParaview)
         self.form.pb_load_mesh.clicked.connect(self.pbLoadMeshClicked)
         self.form.pb_clear_mesh.clicked.connect(self.pbClearMeshClicked)
-        QtCore.QObject.connect(self.form.pb_searchPointInMesh, QtCore.SIGNAL("clicked()"), self.searchPointInMesh)
+        self.form.pb_searchPointInMesh.clicked.connect(self.searchPointInMesh)
         self.form.pb_stop_mesh.setEnabled(False)
         self.form.pb_paraview.setEnabled(False)
         self.form.snappySpecificProperties.setVisible(False)
@@ -104,13 +109,20 @@ class _TaskPanelCfdMesh:
         self.order = '1st'  # Default to first order for CFD mesh
         self.get_active_analysis()
         self.update()
-        self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(self.cart_mesh.meshCaseDir, "pv.foam")))
-        self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(self.cart_mesh.meshCaseDir, "mesh_outside.stl")))
+
+        self.updateUI()
 
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)
         # def reject() is called on close button
         # def accept() in no longer needed, since there is no OK button
+
+    def updateUI(self):
+        case_path = self.cart_mesh.meshCaseDir
+        self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
+        self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
+        self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(case_path, "pv.foam")))
+        self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
 
     def reject(self):
         # There is no reject - only close
@@ -212,7 +224,7 @@ class _TaskPanelCfdMesh:
         else:
             self.form.snappySpecificProperties.setVisible(False)
 
-    def runMeshProcess(self):
+    def writeMesh(self):
         self.console_message_cart = ''
         self.Start = time.time()
         self.Timer.start()
@@ -224,7 +236,7 @@ class _TaskPanelCfdMesh:
                              "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
         FreeCADGui.doCommand("cart_mesh = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy.cart_mesh")
         cart_mesh = self.mesh_obj.Proxy.cart_mesh
-        self.consoleMessage("Starting meshing ...")
+        self.consoleMessage("Preparing meshing ...")
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.get_active_analysis()
@@ -244,38 +256,59 @@ class _TaskPanelCfdMesh:
             FreeCADGui.doCommand("cart_mesh.write_mesh_case()")
             self.consoleMessage("Exporting the part surfaces ...")
             FreeCADGui.doCommand("cart_mesh.write_part_file()")
-            self.consoleMessage("Running {} ...".format(self.utility))
-            self.runCart(cart_mesh)
+            self.consoleMessage("Mesh case written to {}".format(self.cart_mesh.meshCaseDir))
         except Exception as ex:
             self.consoleMessage("Error: " + str(ex), '#FF0000')
-            self.Timer.stop()
             raise
         finally:
+            self.Timer.stop()
             QApplication.restoreOverrideCursor()
+        self.updateUI()
 
-    def runCart(self, cart_mesh):
-        cart_mesh.error = False
-        cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
-        FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
-        env_vars = CfdTools.getRunEnvironment()
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.mesh_process.start(cmd, env_vars=env_vars)
-        if self.mesh_process.waitForStarted():
-            self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
-            self.form.pb_stop_mesh.setEnabled(True)
-            self.form.pb_paraview.setEnabled(False)
-            self.form.pb_load_mesh.setEnabled(False)
-            self.consoleMessage("Mesher started")
-        else:
-            self.consoleMessage("Error starting meshing process", "#FF0000")
-            cart_mesh.error = True
-        QApplication.restoreOverrideCursor()
+    def editMesh(self):
+        case_path = self.cart_mesh.meshCaseDir
+        self.consoleMessage("Please edit the case input files externally at: {}\n".format(case_path))
+        if platform.system() == 'MacOS':
+            self.edit_process = subprocess.Popen(['open', '--', case_path])
+        elif platform.system() == 'Linux':
+            self.edit_process = subprocess.Popen(['xdg-open', case_path])
+        elif platform.system() == 'Windows':
+            self.edit_process = subprocess.Popen(['explorer', case_path])
+
+    def runMesh(self):
+        self.Start = time.time()
+        self.Timer.start()
+        cart_mesh = self.cart_mesh
+        try:
+            #QApplication.setOverrideCursor(Qt.WaitCursor)
+            self.consoleMessage("Running {} ...".format(self.utility))
+            cart_mesh.error = False
+            cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
+            FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
+            env_vars = CfdTools.getRunEnvironment()
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            self.mesh_process.start(cmd, env_vars=env_vars)
+            if self.mesh_process.waitForStarted():
+                self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
+                self.form.pb_stop_mesh.setEnabled(True)
+                self.form.pb_paraview.setEnabled(False)
+                self.form.pb_load_mesh.setEnabled(False)
+                self.consoleMessage("Mesher started")
+            else:
+                self.consoleMessage("Error starting meshing process", "#FF0000")
+                cart_mesh.error = True
+        except Exception as ex:
+            self.consoleMessage("Error: " + str(ex), '#FF0000')
+            raise
+        finally:
+            self.Timer.stop()
+            QApplication.restoreOverrideCursor()
 
     def killMeshProcess(self):
         self.consoleMessage("Meshing manually stopped")
         self.error_message = 'Meshing interrupted'
         self.mesh_process.terminate()
-        # Note: solverFinished will still be called
+        # Note: meshFinished will still be called
 
     def gotOutputLines(self, lines):
         pass
@@ -303,6 +336,7 @@ class _TaskPanelCfdMesh:
         self.error_message = ''
         # Get rid of any existing loaded mesh
         self.pbClearMeshClicked()
+        self.updateUI()
 
     def get_active_analysis(self):
         import FemGui

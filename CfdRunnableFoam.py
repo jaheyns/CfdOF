@@ -38,8 +38,6 @@ import FreeCAD
 
 import CfdCaseWriterFoam
 import CfdTools
-import platform
-import subprocess
 from PySide.QtCore import QObject, Signal, QThread
 from CfdResidualPlot import ResidualPlot
 from collections import OrderedDict
@@ -75,21 +73,8 @@ class CfdRunnable(QObject, object):
         else:
             raise Exception('FEM: No active analysis found!')
 
-        self.edit_process = None
-
     def check_prerequisites(self):
         return "" #CfdTools.check_prerequisites()
-
-    def edit_case(self):
-        """ Open case folder externally in file browser. """
-        case_path = os.path.abspath(os.path.join(CfdTools.getOutputPath(self.analysis), self.solver.InputCaseName))
-        FreeCAD.Console.PrintMessage("Please edit the case input files externally at: {}\n".format(case_path))
-        if platform.system() == 'MacOS':
-            self.edit_process = subprocess.Popen(['open', '--', case_path])
-        elif platform.system() == 'Linux':
-            self.edit_process = subprocess.Popen(['xdg-open', case_path])
-        elif platform.system() == 'Windows':
-            self.edit_process = subprocess.Popen(['explorer', case_path])
 
 
 class CfdRunnableFoam(CfdRunnable):
