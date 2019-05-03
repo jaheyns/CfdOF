@@ -1,5 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
+# *   Copyright (c) 2019 - Oliver Oxtoby <oliveroxtoby@gmail.com>           *
 # *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -20,10 +21,6 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "_CfdMesh"
-__author__ = "Bernd Hahnebach"
-__url__ = "http://www.freecadweb.org"
-
 
 class _CfdMesh:
     """ CFD mesh properties
@@ -38,11 +35,11 @@ class _CfdMesh:
         self.Object = obj  # keep a ref to the DocObj for nonGui usage
         obj.Proxy = self  # link between App::DocumentObject to  this object
 
+        obj.addProperty("App::PropertyString", "CaseName", "Base", "Name of directory in which the mesh is created")
+        obj.CaseName = "meshCase"
+
         obj.addProperty("App::PropertyLinkList", "MeshRegionList", "Base", "Mesh regions of the mesh")
         obj.MeshRegionList = []
-
-        obj.addProperty("App::PropertyLinkList", "MeshGroupList", "Base", "Mesh groups of the mesh")
-        obj.MeshGroupList = []
 
         obj.addProperty("App::PropertyStringList", "ShapeFaceNames", "Base", "Mesh face names")
         obj.ShapeFaceNames = []

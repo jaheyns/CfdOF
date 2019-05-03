@@ -23,12 +23,6 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "Classes for New CFD solver"
-__author__ = "Qingfeng Xia"
-__url__ = "http://www.freecadweb.org"
-
-import os.path
-
 
 class CfdSolver(object):
     """ Solver specific properties. """

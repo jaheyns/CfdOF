@@ -111,7 +111,7 @@ class _ViewProviderCfdMesh:
         return True
 
     def claimChildren(self):
-        return (self.Object.MeshRegionList + self.Object.MeshGroupList)
+        return (self.Object.MeshRegionList)
 
     def onDelete(self, feature, subelements):
         try:
