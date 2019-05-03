@@ -218,13 +218,17 @@ class _TaskPanelCfdMesh:
         self.Timer.start()
         # Re-initialise CfdMeshTools with new parameters
         self.set_mesh_params()
-        self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
+        FreeCADGui.addModule("CfdMeshTools")
+        FreeCADGui.addModule("CfdTools")
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy.cart_mesh = "
+                             "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
+        FreeCADGui.doCommand("cart_mesh = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy.cart_mesh")
+        cart_mesh = self.mesh_obj.Proxy.cart_mesh
         self.consoleMessage("Starting meshing ...")
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.get_active_analysis()
             self.set_mesh_params()
-            cart_mesh = self.cart_mesh
             setInputFieldQuantity(self.form.if_max, str(cart_mesh.get_clmax()))
             print("\nStarting meshing ...\n")
             print('  Part to mesh: Name --> '
@@ -232,14 +236,14 @@ class _TaskPanelCfdMesh:
                   + cart_mesh.part_obj.Label + ', ShapeType --> '
                   + cart_mesh.part_obj.Shape.ShapeType)
             print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
-            cart_mesh.get_dimension()
-            cart_mesh.get_file_paths(CfdTools.getOutputPath(self.analysis))
-            cart_mesh.setup_mesh_case_dir()
+            FreeCADGui.doCommand("cart_mesh.get_dimension()")
+            FreeCADGui.doCommand("cart_mesh.get_file_paths(CfdTools.getOutputPath(FreeCAD.ActiveDocument." + self.analysis.Name + "))")
+            FreeCADGui.doCommand("cart_mesh.setup_mesh_case_dir()")
             self.consoleMessage("Exporting mesh region data ...")
-            cart_mesh.get_region_data()  # Writes region stls so need file structure
-            cart_mesh.write_mesh_case()
+            FreeCADGui.doCommand("cart_mesh.get_region_data()")  # Writes region stls so need file structure
+            FreeCADGui.doCommand("cart_mesh.write_mesh_case()")
             self.consoleMessage("Exporting the part surfaces ...")
-            cart_mesh.write_part_file()
+            FreeCADGui.doCommand("cart_mesh.write_part_file()")
             self.consoleMessage("Running {} ...".format(self.utility))
             self.runCart(cart_mesh)
         except Exception as ex:
