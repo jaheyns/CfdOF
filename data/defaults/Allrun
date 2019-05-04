@@ -15,25 +15,15 @@ runCommand()
 %:BlueCFD
 %:default
 # Unset and source bashrc
-if [ -f "%(system/TranslatedFoamPath%)/etc/config/unset.sh" ]; then  # for OF < 4
-   source "%(system/TranslatedFoamPath%)/etc/config/unset.sh" 2> /dev/null
-else
-   source "%(system/TranslatedFoamPath%)/etc/config.sh/unset" 2> /dev/null
-fi
+source "%(system/TranslatedFoamPath%)/etc/config.sh/unset" 2> /dev/null
 source "%(system/TranslatedFoamPath%)/etc/bashrc"
 
 %}
-# Create symbolic links to polyMesh.org
-if [ ! -d constant/polyMesh ]; then
-    mkdir constant/polyMesh
-    ln -s ../polyMesh.org/boundary constant/polyMesh
-    ln -s ../polyMesh.org/faces constant/polyMesh
-    ln -s ../polyMesh.org/neighbour constant/polyMesh
-    ln -s ../polyMesh.org/owner constant/polyMesh
-    ln -s ../polyMesh.org/points constant/polyMesh
-    if [ -f constant/polyMesh.org/faceZones ]; then
-        ln -s ../polyMesh.org/faceZones constant/polyMesh
-    fi
+# Copy mesh from mesh case dir if available
+if [ -d %(meshDir%) ]
+then
+    rm -r constant/polyMesh 2> /dev/null
+    cp -r %(meshDir%)/constant/polyMesh constant/polyMesh
 fi
 
 # Update patch name and type

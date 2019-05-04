@@ -89,9 +89,10 @@ class CfdCaseWriterFoam:
             'zonesPresent': len(self.zone_objs) > 0,
             'meshType': self.mesh_obj.Proxy.Type,
             'meshDimension': self.mesh_obj.ElementDimension,
+            'meshDir': "../"+self.mesh_obj.CaseName,
             'solver': solverSettingsDict,
             'system': {},
-            'runChangeDictionary':False
+            'runChangeDictionary': False
             }
 
         self.processSystemSettings()
@@ -111,16 +112,12 @@ class CfdCaseWriterFoam:
         self.setupPatchNames()
 
         TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
-        self.writeMesh()
 
         # Update Allrun permission - will fail silently on Windows
         fname = os.path.join(self.case_folder, "Allrun")
         import stat
         s = os.stat(fname)
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
-
-        # Move mesh files, after being edited, to polyMesh.org
-        CfdTools.movePolyMesh(self.case_folder)
 
         cfdMessage("Successfully wrote {} case to folder {}\n".format(
                    self.solver_obj.SolverName, self.working_dir))
@@ -194,60 +191,6 @@ class CfdCaseWriterFoam:
         if os.path.isdir(output_path):
             shutil.rmtree(output_path)
         os.makedirs(output_path)  # mkdir -p
-
-    # Mesh
-
-    def writeMesh(self):
-        """ Convert or copy mesh files """
-        if self.mesh_obj.Proxy.Type == "CfdMesh":
-            import CfdMeshTools
-            # Move Cartesian mesh files from temporary mesh directory to case directory
-            self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
-            cart_mesh = self.cart_mesh
-            # Update output file locations
-            cart_mesh.get_file_paths(CfdTools.getOutputPath(self.analysis_obj))
-            if self.mesh_obj.MeshUtility == "cfMesh":
-                print("Writing Cartesian mesh\n")
-                CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder, 'constant', 'polyMesh'))
-                CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder, 'constant', 'triSurface'))
-                # shutil.copy2(cart_mesh.temp_file_meshDict, os.path.join(self.case_folder,'system'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'system', 'meshDict'),
-                             os.path.join(self.case_folder,'system'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'Allmesh'),self.case_folder)
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.cartesianMesh'),self.case_folder)
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir,'log.surfaceFeatureEdges'),self.case_folder)
-
-            elif self.mesh_obj.MeshUtility == "snappyHexMesh":
-                print("Writing snappyHexMesh generated Cartesian mesh\n")
-                CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
-                CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','triSurface'))
-                # shutil.copy2(cart_mesh.temp_file_blockMeshDict, os.path.join(self.case_folder,'system'))
-                # shutil.copy2(cart_mesh.temp_file_snappyMeshDict, os.path.join(self.case_folder,'system'))
-                # shutil.copy2(cart_mesh.temp_file_surfaceFeatureExtractDict, os.path.join(self.case_folder,'system'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'system', 'blockMeshDict'),
-                             os.path.join(self.case_folder,'system'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'system', 'snappyHexMeshDict'),
-                             os.path.join(self.case_folder,'system'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'system', 'surfaceFeatureExtractDict'),
-                             os.path.join(self.case_folder,'system'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'Allmesh'), self.case_folder)
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.blockMesh'), self.case_folder)
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.surfaceFeatureExtract'), self.case_folder)
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.snappyHexMesh'), self.case_folder)
-
-            elif self.mesh_obj.MeshUtility == "gmsh":
-                print("Writing gmsh generated mesh\n")
-                CfdTools.copyFilesRec(cart_mesh.polyMeshDir, os.path.join(self.case_folder,'constant','polyMesh'))
-                CfdTools.copyFilesRec(cart_mesh.triSurfaceDir, os.path.join(self.case_folder,'constant','gmsh'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'Allmesh'), self.case_folder)
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.gmshToFoam'), self.case_folder)
-
-            if self.mesh_obj.ElementDimension == '2D':
-                shutil.copy2(os.path.join(os.path.join(cart_mesh.meshCaseDir,'system'),'extrudeMeshDict'), 
-                             os.path.join(self.case_folder, 'system'))
-                shutil.copy2(os.path.join(cart_mesh.meshCaseDir, 'log.extrudeMesh'), self.case_folder)
-        else:
-            raise RuntimeError("Unrecognised mesh type")
 
     def setupMesh(self, updated_mesh_path, scale):
         if os.path.exists(updated_mesh_path):

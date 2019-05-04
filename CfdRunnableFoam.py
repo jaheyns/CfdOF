@@ -25,10 +25,6 @@
 
 from __future__ import print_function
 
-__title__ = "Classes for New CFD solver"
-__author__ = "Qingfeng Xia"
-__url__ = "http://www.freecadweb.org"
-
 import os
 import os.path
 
@@ -47,9 +43,6 @@ class CfdRunnable(QObject, object):
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnable, self).__init__()
         if analysis and analysis.isDerivedFrom("Fem::FemAnalysisPython"):
-            ## @var analysis
-            #  FEM analysis - the core object. Has to be present.
-            #  It's set to analysis passed in "__init__" or set to current active analysis by default if nothing has been passed to "__init__"
             self.analysis = analysis
         else:
             if FreeCAD.GuiUp:
@@ -57,24 +50,22 @@ class CfdRunnable(QObject, object):
                 self.analysis = FemGui.getActiveAnalysis()
 
         self.solver = None
-        if solver and solver.isDerivedFrom("Fem::FemSolverObjectPython"):
-            ## @var solver
-            #  solver of the analysis. Used to store the active solver and analysis parameters
+        if solver:
             self.solver = solver
         else:
             if analysis:
                 self.solver = CfdTools.getSolver(self.analysis)
-            if self.solver == None:
-                FreeCAD.Console.printMessage("FemSolver object is missing from Analysis Object")
+            if not self.solver:
+                FreeCAD.Console.printMessage("Solver object is missing from Analysis Object")
 
         if self.analysis:
             self.results_present = False
             self.result_object = None
         else:
-            raise Exception('FEM: No active analysis found!')
+            raise Exception('No active analysis found')
 
     def check_prerequisites(self):
-        return "" #CfdTools.check_prerequisites()
+        return ""
 
 
 class CfdRunnableFoam(CfdRunnable):
