@@ -74,8 +74,6 @@ class CfdRunnableFoam(CfdRunnable):
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
 
-        self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam(self.analysis)
-
         self.initResiduals()
 
         self.residualPlot = None

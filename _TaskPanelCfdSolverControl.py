@@ -124,7 +124,10 @@ class _TaskPanelCfdSolverControl:
             self.form.pb_run_solver.setEnabled(False)
             QApplication.setOverrideCursor(Qt.WaitCursor)
             try:
-                self.solver_runner.writer.writeCase()
+                FreeCADGui.addModule("CfdCaseWriterFoam")
+                FreeCADGui.doCommand("writer = CfdCaseWriterFoam.CfdCaseWriterFoam(FreeCAD.ActiveDocument." +
+                                     self.solver_runner.analysis.Name + ")")
+                FreeCADGui.doCommand("writer.writeCase()")
             except Exception as e:
                 self.consoleMessage("Error writing case:", "#FF0000")
                 self.consoleMessage(str(e), "#FF0000")
