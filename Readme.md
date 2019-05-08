@@ -3,7 +3,7 @@
 This workbench aims to help users set up and run CFD analyses within the [FreeCAD](https://freecadweb.org)
 modeller. It guides the user in selecting the relevant physics, 
 specifying the material properties, generating a mesh, assigning boundary conditions and setting the solver settings
-before running the simulation. Where possible, best practices are included to improve the stability of the solvers.
+before running the simulation. Best practices are chosen to maximise the stability of the solvers.
 
 ![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
 
@@ -11,14 +11,6 @@ The workbench serves as a front-end to the popular OpenFOAM® CFD toolkit (www.o
 
 Disclaimer:
 This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
-
-#### File format compatibility
-
-As the workbench is still in its early development phase and evolving rapidly, new developments may sometimes
-change the saved object format. This may mean that some objects do not load correctly
-from previously saved files, and must be re-generated. For better 
-forward-compatibilty, it is advised that you save the Python script used to generate an analysis
-(right-click in Python console and choose 'Save history as'). 
 
 ## Features
 
@@ -29,9 +21,9 @@ forward-compatibilty, it is advised that you save the Python script used to gene
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
 * Basic material data base
 * Flow initialisation with a potential solver
-* Tetrahedral meshing using GMSH
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
 * Cut-cell Cartesian meshing with porous media (snappyHexMesh)
+* Tetrahedral meshing using GMSH
 * Post processing using paraview
 * Porous regions and porous baffles
 * Runs on Windows 7-10 and Linux
@@ -46,20 +38,18 @@ forward-compatibilty, it is advised that you save the Python script used to gene
 
 ### Platforms supported
 
-#### Linux: 
+#### Linux
 
 Any system on which FreeCAD and the prerequisites listed below can be installed.
 
-#### Windows:
+#### Windows
 
 Windows 7-10; 64-bit version is required.
 
-#### MacOSX:
+#### MacOSX
 
 Not widely tested, but possible. 
       
-=============================================
-  
 ## Getting started
 
 ### Prerequisites
@@ -67,22 +57,24 @@ Not widely tested, but possible.
 The CfdOF workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
-- [Latest release version of FreeCAD (0.17)](https://github.com/FreeCAD/FreeCAD/releases/tag/0.17)
- or [latest development version (0.19 prerelease; requires git commit 13528 or later)](https://github.com/FreeCAD/FreeCAD/releases)  
+- [Latest release version of FreeCAD (0.18)](https://www.freecadweb.org/downloads.php)
+ or [latest development version (0.19 prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
 - OpenFOAM [Foundation version 4.0 or later](http://openfoam.org/download/) or [ESI version 1706 or later](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
 - [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
-- [GMSH (version 2.13 or later)](http://gmsh.info/)  
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
 - [HiSA (High Speed Aerodynamic Solver)](https://hisa.gitlab.io)
+- [GMSH (version 2.13 or later)](http://gmsh.info/) - optional, for generating tetrahedral meshes
 
 ### Setting up the CfdOF workbench
 
 #### Windows
 
-The latest FreeCAD build can be obtained from
-https://www.freecadweb.org/wiki/Download and the latest
-CFD workbench can be installed into it using the Addon manager:
+The latest 
+[release](https://www.freecadweb.org/downloads.php) 
+or [development](https://github.com/FreeCAD/FreeCAD/releases)
+FreeCAD build can be obtained (64 bit version) and the latest
+CfdOF workbench can be installed into it using the Addon manager:
 
 * After running the installer or extracting the .7z archive to a directory <FreeCAD-directory>,
 run FreeCAD in place (<FreeCAD-directory\bin\FreeCAD.exe). 
@@ -125,20 +117,25 @@ prerequisites have been successfully installed.
 
 #### Linux
 
-The latest release or development version of FreeCAD can be obtained from 
-https://github.com/FreeCAD/FreeCAD/releases (.AppImage files).
+AppImages of the latest [release](https://www.freecadweb.org/downloads.php) 
+or [development](https://github.com/FreeCAD/FreeCAD/releases) 
+versions of FreeCAD can be downloaded and run directly
+without installation. Note that you will
+have to enable execution permission on the downloaded file to run it.
 The [Ubuntu PPA daily build](https://www.freecadweb.org/wiki/Install_on_Unix)
 packages are an alternative binary option. Otherwise, FreeCAD can be built 
 from the source code at 
 https://github.com/FreeCAD/FreeCAD . 
 
-The latest CFD workbench can be installed into FreeCAD using the Addon manager:
+Before installing CfdOF, the Plot workbench must first be 
+installed into FreeCAD using the Addon manager:
 
 * Run FreeCAD 
 * Select Tools | Addon manager ...
-* Select CfdOF in the list of workbenches, and click "Install/update"
+* Select Plot in the list of workbenches, and click "Install/update"
 * Restart FreeCAD
-* For installation of dependencies, see below.
+* Repeat the above for the "CfdOF" workbench
+* For installation of dependencies, see below
 
 
 ##### Dependency installation
@@ -151,24 +148,18 @@ choose "CFD".
 However, in Linux, manual installation is required for 
 [OpenFOAM](http://openfoam.org/download/),
 [Paraview](http://www.paraview.org/) and
-[GMSH](http://gmsh.info/), which should be
+[GMSH](http://gmsh.info/) (optional). They should be
 installed using your distribution's package manager
 or the links above. 
 
-The FreeCAD plot workbench is included in many packages, but in some cases
-must be installed manually with the command
-```
-pip install git+https://github.com/FreeCAD/freecad.plot.git
-```
-In future it will be available through the AddOn manager. 
-
 Set the OpenFOAM install directory in the preferences
-panel - typical install locations are /home/user/OpenFOAM/OpenFOAM-5.x
-or /opt/openfoam5 (It will be automatically detected in common default install
+panel - typical install locations are /opt/openfoam6 
+or /home/user/OpenFOAM/OpenFOAM-6.x (It will be automatically 
+detected in common default install
 locations.)
 
 cfMesh and HiSA can be installed using the Preferences panel described above,
-and will be downloaded and built from the source
+and can be downloaded and built from the source
 code inside your OpenFOAM installation if you have
 not already done so yourself. Note that this is a lengthy process.
 
@@ -238,7 +229,7 @@ and the [Council for Scientific and Industrial Research](https://www.csir.co.za)
 
 ### Lead developers
 The code is maintained by
-* Oliver Oxtoby (CSIR, 2016-2018) <oliveroxtoby@gmail.com>  
+* Oliver Oxtoby (CSIR, 2016-2018; private 2019-) <oliveroxtoby@gmail.com>  
 * Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>  
 * Alfred Bogaers (CSIR, 2016-2018) <alfredbogaers@gmail.com>    
 
@@ -247,5 +238,5 @@ The code is maintained by
 We acknowledge significant contributions from
 * Qingfeng Xia (2015) - Original framework
 * Michael Hindley (2016) - Initial concept
-* Klaus Sembritzki (2017) - Multiphase
+* Klaus Sembritzki (2017) - Multiphase extension
 * Thomas Schrader (2017-2018) <info@schraderundschrader.de> - Testing and user assistance

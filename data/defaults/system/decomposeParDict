@@ -8,8 +8,19 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains  %(solver/parallelCores%);
+numberOfSubdomains  %(solver/ParallelCores%);
 
 method              scotch;
+
+%{%(bafflesPresent%)
+%:True
+constraints
+{
+    preserveBaffles
+    {
+        type preserveBaffles;
+    }
+}
+%}
 
 // ************************************************************************* //

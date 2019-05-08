@@ -8,7 +8,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
 fluxScheme          AUSMPlusUp;
 %}
@@ -18,7 +18,7 @@ fluxScheme          AUSMPlusUp;
 
 ddtSchemes
 {
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     default         bounded dualTime rPseudoDeltaT steadyState;
 %:default
@@ -44,7 +44,7 @@ divSchemes
     div(phi,nuTilda) bounded Gauss upwind;
 %}
 %}
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     div(tauMC)      Gauss linear;
     div(yPhi,yWall) Gauss linearUpwind grad(yWall);
@@ -54,7 +54,7 @@ divSchemes
 %:Transient
 ddtSchemes
 {
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     default         dualTime rPseudoDeltaT Euler;
 %:default
@@ -65,7 +65,7 @@ ddtSchemes
 divSchemes
 {
     // Use second-order accurate convection
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:pimpleFoam
     div(phi,U)      Gauss linearUpwindV grad(U);
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
@@ -83,7 +83,7 @@ divSchemes
     div(phi,omega)  Gauss upwind;
 %}
 %}
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     div(tauMC)      Gauss linear;
     div(yPhi,yWall) Gauss linearUpwind grad(yWall);
@@ -95,7 +95,7 @@ gradSchemes
 {
     // Limit gradient to improve stability when bad cells encountered
     // (0 = no limiting; 1 = do not exceed surrounding cells)
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     default         cellLimited faceLeastSquares linear 0.6;
     gradTvd         cellLimited faceLeastSquares linear 0.6;
@@ -120,7 +120,7 @@ laplacianSchemes
     // Limited explicit correction to the surface normal gradient,
     // for stability in highly non-orthogonal cells.
     // (0 = uncorrected, fully implicit; 1 = full correction)
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     default                     Gauss linear corrected;
     laplacian(muEff,U)          Gauss linear compact;
@@ -134,7 +134,7 @@ laplacianSchemes
 interpolationSchemes
 {
     default         linear;
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     reconstruct(rho) wVanLeer gradTvd;
     reconstruct(U)   wVanLeer gradTvd;
@@ -147,7 +147,7 @@ snGradSchemes
     // Limited explicit correction to the surface normal gradient,
     // for stability in highly non-orthogonal cells.
     // (0 = uncorrected, fully implicit; 1 = full correction)
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:default
     default         limited 0.3;
 %:hisa
@@ -157,7 +157,7 @@ snGradSchemes
 
 wallDist
 {
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     method    Poisson;
     epsilon   0.1;     // Smaller = more accurate but less stable

@@ -8,7 +8,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
 pseudoTime
 {
@@ -18,7 +18,7 @@ pseudoTime
 %:Transient
     nPseudoCorr        100;
     pseudoTol          1e-3 (1e-3 1e-3 1e-3) 1e-3;
-    pseudoTolRel       1e-3 (1e-3 1e-2 1e-2) 1e-2;
+    pseudoTolRel       1e-2 (1e-2 1e-2 1e-2) 1e-2;
 %}
     pseudoCoNum        0.1;
     pseudoCoNumMax     25.0;
@@ -61,9 +61,9 @@ SIMPLE
     consistent no;  // Setting this impairs stability of porous baffles
     residualControl
     {
-        p %(solver/convergenceCriteria%);
-        U %(solver/convergenceCriteria%);
-        "(k|epsilon|omega|f|v2|nuTilda)" %(solver/convergenceCriteria%);
+        p %(solver/ConvergenceTol%);
+        U %(solver/ConvergenceTol%);
+        "(k|epsilon|omega|f|v2|nuTilda)" %(solver/ConvergenceTol%);
     }
     pRefValue   0;
     pRefCell    0;
@@ -72,7 +72,7 @@ SIMPLE
 %:Transient
 PIMPLE
 {
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
     nOuterCorrectors 3;
     nNonOrthogonalCorrectors 2;
@@ -85,12 +85,12 @@ PIMPLE
     {
         U
         {
-            tolerance   %(solver/convergenceCriteria%);
+            tolerance   %(solver/ConvergenceTol%);
             relTol      0;
         }
         p
         {
-            tolerance   %(solver/convergenceCriteria%);
+            tolerance   %(solver/ConvergenceTol%);
             relTol      0;
         }
     }
@@ -111,7 +111,7 @@ potentialFlow
 
 solvers
 {
-%{%(solvers/solverName%)
+%{%(solver/SolverName%)
 %:hisa
 %:default
     "(p|p_rgh|pcorr)"
@@ -150,7 +150,7 @@ solvers
     }
 
 %}
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
     "alpha.*"
     {
@@ -187,7 +187,7 @@ solvers
     }
 
 %}
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     yPsi
     {
@@ -252,7 +252,7 @@ relaxationFactors
 %:Transient
     equations
     {
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:default
         U               0.6;
         UFinal          1;
@@ -270,11 +270,11 @@ relaxationFactors
 %}
 %}
     }
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     yWall               0.7;
 %}
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:default
     fields
     {

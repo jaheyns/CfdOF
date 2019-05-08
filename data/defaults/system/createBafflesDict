@@ -1,5 +1,7 @@
 %{%(bafflesPresent%)
 %:True
+%{%(createPatchesFromSnappyBaffles%)
+%:False
 %[_header%]
 FoamFile
 {
@@ -37,4 +39,5 @@ baffles
 
 
 // ************************************************************************* //
+%}
 %}

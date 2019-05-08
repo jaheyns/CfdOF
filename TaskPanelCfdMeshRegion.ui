@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>341</width>
+    <width>370</width>
     <height>1147</height>
    </rect>
   </property>
@@ -14,901 +14,881 @@
    <string>Mesh region</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="margin">
-    <number>0</number>
-   </property>
    <item>
-    <widget class="QStackedWidget" name="stackedWidget">
-     <property name="currentIndex">
-      <number>0</number>
+    <widget class="QFrame" name="surfaceOrInernalVolume">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
      </property>
-     <widget class="QWidget" name="page_3">
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QFrame" name="surfaceOrInernalVolume">
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="1" column="0">
-           <widget class="QRadioButton" name="surfaceRefinementToggle">
-            <property name="text">
-             <string>Surface</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QRadioButton" name="volumeRefinementToggle">
-            <property name="text">
-             <string>Internal Volume</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QLabel" name="label_7">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Cartesian Mesh: Type of Refinement</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="gmsh_frame">
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QFormLayout" name="formLayout">
-          <property name="fieldGrowthPolicy">
-           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-          </property>
-          <item row="0" column="1">
-           <widget class="QLabel" name="label_6">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Refinement Parameters (GMSH)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <item>
-             <widget class="QLabel" name="label_rellen_2">
-              <property name="text">
-               <string>Relative element size:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="if_gmsh_rellen">
-              <property name="decimals">
-               <number>3</number>
-              </property>
-              <property name="minimum">
-               <double>0.001000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.050000000000000</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="cf_frame">
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_10">
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Refinement Parameters (cfMesh )</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-             <widget class="QLabel" name="label_rellen">
-              <property name="text">
-               <string>Relative element size:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QDoubleSpinBox" name="if_rellen">
-              <property name="decimals">
-               <number>3</number>
-              </property>
-              <property name="minimum">
-               <double>0.001000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="singleStep">
-               <double>0.050000000000000</double>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="3" column="0">
-           <widget class="QFrame" name="refinement_frame">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Panel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <property name="lineWidth">
-             <number>0</number>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_4">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>3</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>5</number>
-             </property>
-             <item row="2" column="0">
-              <widget class="QFrame" name="boundlayer_frame">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="frameShape">
-                <enum>QFrame::Panel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Plain</enum>
-               </property>
-               <property name="lineWidth">
-                <number>0</number>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_7">
-                <property name="leftMargin">
-                 <number>0</number>
-                </property>
-                <property name="topMargin">
-                 <number>3</number>
-                </property>
-                <property name="rightMargin">
-                 <number>0</number>
-                </property>
-                <property name="bottomMargin">
-                 <number>5</number>
-                </property>
-                <item row="1" column="0">
-                 <layout class="QHBoxLayout" name="horizontalLayout_2">
-                  <item>
-                   <widget class="QLabel" name="label_expratio">
-                    <property name="text">
-                     <string>Expansion ratio:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QDoubleSpinBox" name="if_expratio">
-                    <property name="minimum">
-                     <double>1.000000000000000</double>
-                    </property>
-                    <property name="maximum">
-                     <double>1.200000000000000</double>
-                    </property>
-                    <property name="singleStep">
-                     <double>0.050000000000000</double>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item row="0" column="0">
-                 <layout class="QHBoxLayout" name="horizontalLayout">
-                  <item>
-                   <widget class="QLabel" name="label_numlayer">
-                    <property name="text">
-                     <string>Number of layers:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QSpinBox" name="if_numlayer">
-                    <property name="minimum">
-                     <number>1</number>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-                <item row="2" column="0">
-                 <layout class="QHBoxLayout" name="horizontalLayout_5">
-                  <item>
-                   <widget class="QLabel" name="label_firstlayerheight">
-                    <property name="text">
-                     <string>First cell height:</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="Gui::InputField" name="if_firstlayerheight">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                    <property name="toolTip">
-                     <string extracomment="Select 0 to use default value"/>
-                    </property>
-                    <property name="text">
-                     <string>0.0</string>
-                    </property>
-                    <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                    </property>
-                    <property name="singleStep" stdset="0">
-                     <double>1.000000000000000</double>
-                    </property>
-                    <property name="maximum" stdset="0">
-                     <double>1000000000.000000000000000</double>
-                    </property>
-                    <property name="unit" stdset="0">
-                     <string notr="true">mm</string>
-                    </property>
-                    <property name="format" stdset="0">
-                     <string>g</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="check_boundlayer">
-               <property name="text">
-                <string>Boundary layers</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <layout class="QHBoxLayout" name="horizontalLayout_4">
-               <item>
-                <widget class="QLabel" name="label_refinethick">
-                 <property name="text">
-                  <string>Refinement thickness:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="Gui::InputField" name="if_refinethick">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="toolTip">
-                  <string extracomment="Select 0 to use default value"/>
-                 </property>
-                 <property name="text">
-                  <string>0.0</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                 <property name="singleStep" stdset="0">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="maximum" stdset="0">
-                  <double>1000000000.000000000000000</double>
-                 </property>
-                 <property name="unit" stdset="0">
-                  <string notr="true">mm</string>
-                 </property>
-                 <property name="format" stdset="0">
-                  <string>2</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="snappy_frame">
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_9">
-          <property name="margin">
-           <number>0</number>
-          </property>
-          <item row="2" column="0">
-           <layout class="QGridLayout" name="gridLayout_8">
-            <item row="1" column="0">
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Surface refinement level</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QSpinBox" name="if_refinelevel">
-              <property name="maximum">
-               <number>10</number>
-              </property>
-              <property name="value">
-               <number>1</number>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_5">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Refinement parameters (snappyHexMesh)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QFrame" name="snappySurfaceFrame">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_2">
-             <property name="margin">
-              <number>0</number>
-             </property>
-             <item row="0" column="1">
-              <widget class="QSpinBox" name="if_edgerefinement"/>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>Edge refinement level</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="baffle_check">
-               <property name="text">
-                <string>Baffle</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-         <zorder>label_5</zorder>
-         <zorder></zorder>
-         <zorder>snappySurfaceFrame</zorder>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="ReferencesFrame">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::Panel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Plain</enum>
-         </property>
-         <property name="lineWidth">
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="surfaceRefinementToggle">
+        <property name="text">
+         <string>Surface</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QRadioButton" name="volumeRefinementToggle">
+        <property name="text">
+         <string>Internal Volume</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="label_7">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Cartesian Mesh: Type of Refinement</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_rellen">
+       <property name="text">
+        <string>Relative element size:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="if_rellen">
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="minimum">
+        <double>0.001000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.050000000000000</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="cf_frame">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_10">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Refinement Parameters (cfMesh )</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QFrame" name="refinement_frame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <property name="leftMargin">
           <number>0</number>
          </property>
-         <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_4">
-            <property name="font">
-             <font>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>References</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="2">
-           <widget class="QWidget" name="referenceSelectWidget" native="true">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>20</height>
-             </size>
-            </property>
-            <layout class="QGridLayout" name="gridLayout"/>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="cartesianInternalVolumeFrame">
-         <property name="frameShape">
-          <enum>QFrame::NoFrame</enum>
+         <property name="topMargin">
+          <number>3</number>
          </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+         <property name="rightMargin">
+          <number>0</number>
          </property>
-         <layout class="QGridLayout" name="gridLayout_6">
-          <property name="margin">
-           <number>9</number>
-          </property>
-          <item row="3" column="0" colspan="3">
-           <widget class="QFrame" name="lengthLayout">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
+         <property name="bottomMargin">
+          <number>5</number>
+         </property>
+         <item row="2" column="0">
+          <widget class="QFrame" name="boundlayer_frame">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Panel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="lineWidth">
+            <number>0</number>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_7">
+            <property name="leftMargin">
+             <number>0</number>
             </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
+            <property name="topMargin">
+             <number>3</number>
             </property>
-            <layout class="QGridLayout" name="gridLayout_12">
-             <property name="margin">
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>5</number>
+            </property>
+            <item row="1" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QLabel" name="label_expratio">
+                <property name="text">
+                 <string>Expansion ratio:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="if_expratio">
+                <property name="minimum">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1.200000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.050000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <item>
+               <widget class="QLabel" name="label_numlayer">
+                <property name="text">
+                 <string>Number of layers:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="if_numlayer">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QLabel" name="label_firstlayerheight">
+                <property name="text">
+                 <string>Max first cell height (optional):</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Gui::InputField" name="if_firstlayerheight">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="toolTip">
+                 <string extracomment="Select 0 to use default value"/>
+                </property>
+                <property name="text">
+                 <string>0.0</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+                <property name="singleStep" stdset="0">
+                 <double>1.000000000000000</double>
+                </property>
+                <property name="maximum" stdset="0">
+                 <double>1000000000.000000000000000</double>
+                </property>
+                <property name="unit" stdset="0">
+                 <string notr="true">mm</string>
+                </property>
+                <property name="format" stdset="0">
+                 <string>g</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="check_boundlayer">
+           <property name="text">
+            <string>Boundary layers</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QLabel" name="label_refinethick">
+             <property name="text">
+              <string>Refinement thickness:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Gui::InputField" name="if_refinethick">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="toolTip">
+              <string extracomment="Select 0 to use default value"/>
+             </property>
+             <property name="text">
+              <string>0.0</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="singleStep" stdset="0">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="maximum" stdset="0">
+              <double>1000000000.000000000000000</double>
+             </property>
+             <property name="unit" stdset="0">
+              <string notr="true">mm</string>
+             </property>
+             <property name="format" stdset="0">
+              <string>2</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="snappy_frame">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_9">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Refinement parameters (snappyHexMesh)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QFrame" name="snappySurfaceFrame">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="1">
+          <widget class="QDoubleSpinBox" name="if_edgerefinement">
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="minimum">
+            <double>0.001000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.050000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Edge refinement level</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="baffle_check">
+           <property name="text">
+            <string>Baffle</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="ReferencesFrame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <property name="lineWidth">
+      <number>0</number>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>References</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QWidget" name="referenceSelectWidget" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>20</height>
+         </size>
+        </property>
+        <layout class="QGridLayout" name="gridLayout"/>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="cartesianInternalVolumeFrame">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_6">
+      <property name="leftMargin">
+       <number>9</number>
+      </property>
+      <property name="topMargin">
+       <number>9</number>
+      </property>
+      <property name="rightMargin">
+       <number>9</number>
+      </property>
+      <property name="bottomMargin">
+       <number>9</number>
+      </property>
+      <item row="3" column="0" colspan="3">
+       <widget class="QFrame" name="lengthLayout">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_12">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0" colspan="2">
+          <layout class="QHBoxLayout" name="horizontalLayout_7">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_10">
+             <property name="text">
+              <string>x-Length:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Gui::InputField" name="xLength">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="unit" stdset="0">
+              <string notr="true">m</string>
+             </property>
+             <property name="singleStep" stdset="0">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="format" stdset="0">
               <number>0</number>
              </property>
-             <item row="0" column="0" colspan="2">
-              <layout class="QHBoxLayout" name="horizontalLayout_7">
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="label_10">
-                 <property name="text">
-                  <string>x-Length:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="Gui::InputField" name="xLength">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="unit" stdset="0">
-                  <string notr="true">m</string>
-                 </property>
-                 <property name="singleStep" stdset="0">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="format" stdset="0">
-                  <number>0</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="1" column="0" colspan="2">
-              <layout class="QHBoxLayout" name="horizontalLayout_8">
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="label_11">
-                 <property name="text">
-                  <string>y-Length:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="Gui::InputField" name="yLength">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="unit" stdset="0">
-                  <string notr="true">m</string>
-                 </property>
-                 <property name="singleStep" stdset="0">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="format" stdset="0">
-                  <number>0</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item row="2" column="0" colspan="2">
-              <layout class="QHBoxLayout" name="horizontalLayout_9">
-               <property name="topMargin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="label_12">
-                 <property name="text">
-                  <string>z-Length:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="Gui::InputField" name="zLength">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="unit" stdset="0">
-                  <string notr="true">m</string>
-                 </property>
-                 <property name="singleStep" stdset="0">
-                  <double>1.000000000000000</double>
-                 </property>
-                 <property name="format" stdset="0">
-                  <number>0</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="0" column="1" colspan="2">
-           <widget class="QComboBox" name="internalVolumePrimitiveSelection"/>
-          </item>
-          <item row="8" column="0" colspan="3">
-           <widget class="QFrame" name="radiusLayout">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_13">
-             <property name="margin">
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_11">
+             <property name="text">
+              <string>y-Length:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Gui::InputField" name="yLength">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="unit" stdset="0">
+              <string notr="true">m</string>
+             </property>
+             <property name="singleStep" stdset="0">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="format" stdset="0">
               <number>0</number>
              </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_13">
-               <property name="text">
-                <string>Radius:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="Gui::InputField" name="radius">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_8">
-            <property name="text">
-             <string>Primitive Type:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="3">
-           <widget class="QFrame" name="centerLayout">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_11">
-             <property name="margin">
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="2" column="0" colspan="2">
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_12">
+             <property name="text">
+              <string>z-Length:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Gui::InputField" name="zLength">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="unit" stdset="0">
+              <string notr="true">m</string>
+             </property>
+             <property name="singleStep" stdset="0">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="format" stdset="0">
               <number>0</number>
              </property>
-             <item row="1" column="0">
-              <widget class="Gui::InputField" name="xCenter">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="Gui::InputField" name="yCenter">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="Gui::InputField" name="zCenter">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0" colspan="3">
-              <widget class="QLabel" name="label_9">
-               <property name="text">
-                <string>Center Coordinates:</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item row="9" column="0" colspan="3">
-           <widget class="QFrame" name="coneLayout">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_14">
-             <property name="margin">
-              <number>0</number>
-             </property>
-             <item row="1" column="0">
-              <widget class="Gui::InputField" name="xPoint1">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="Gui::InputField" name="yPoint1">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="Gui::InputField" name="zPoint1">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="0">
-              <widget class="Gui::InputField" name="xPoint2">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="Gui::InputField" name="yPoint2">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0" colspan="3">
-              <widget class="QLabel" name="label_14">
-               <property name="text">
-                <string>Point 1:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0" colspan="3">
-              <widget class="QLabel" name="label_16">
-               <property name="text">
-                <string>Point 2:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="2">
-              <widget class="Gui::InputField" name="zPoint2">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_15">
-               <property name="text">
-                <string>Radius 1:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1" colspan="2">
-              <widget class="Gui::InputField" name="radius1">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="min" stdset="0">
-                <double>0.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <widget class="QLabel" name="label_17">
-               <property name="text">
-                <string>Radius 2:</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="1" colspan="2">
-              <widget class="Gui::InputField" name="radius2">
-               <property name="unit" stdset="0">
-                <string notr="true">m</string>
-               </property>
-               <property name="singleStep" stdset="0">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="min" stdset="0">
-                <double>0.000000000000000</double>
-               </property>
-               <property name="format" stdset="0">
-                <number>0</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-         </layout>
-         <zorder>internalVolumePrimitiveSelection</zorder>
-         <zorder>label_8</zorder>
-         <zorder>lengthLayout</zorder>
-         <zorder>radiusLayout</zorder>
-         <zorder>centerLayout</zorder>
-         <zorder>coneLayout</zorder>
-        </widget>
-       </item>
-      </layout>
-     </widget>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="2">
+       <widget class="QComboBox" name="internalVolumePrimitiveSelection"/>
+      </item>
+      <item row="8" column="0" colspan="3">
+       <widget class="QFrame" name="radiusLayout">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_13">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_13">
+           <property name="text">
+            <string>Radius:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="Gui::InputField" name="radius">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Primitive Type:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="3">
+       <widget class="QFrame" name="centerLayout">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_11">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="1" column="0">
+          <widget class="Gui::InputField" name="xCenter">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="Gui::InputField" name="yCenter">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="Gui::InputField" name="zCenter">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="3">
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>Center Coordinates:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="9" column="0" colspan="3">
+       <widget class="QFrame" name="coneLayout">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_14">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item row="1" column="0">
+          <widget class="Gui::InputField" name="xPoint1">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="Gui::InputField" name="yPoint1">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="Gui::InputField" name="zPoint1">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="Gui::InputField" name="xPoint2">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="Gui::InputField" name="yPoint2">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="3">
+          <widget class="QLabel" name="label_14">
+           <property name="text">
+            <string>Point 1:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="3">
+          <widget class="QLabel" name="label_16">
+           <property name="text">
+            <string>Point 2:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="Gui::InputField" name="zPoint2">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>Radius 1:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1" colspan="2">
+          <widget class="Gui::InputField" name="radius1">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="min" stdset="0">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_17">
+           <property name="text">
+            <string>Radius 2:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1" colspan="2">
+          <widget class="Gui::InputField" name="radius2">
+           <property name="unit" stdset="0">
+            <string notr="true">m</string>
+           </property>
+           <property name="singleStep" stdset="0">
+            <double>1.000000000000000</double>
+           </property>
+           <property name="min" stdset="0">
+            <double>0.000000000000000</double>
+           </property>
+           <property name="format" stdset="0">
+            <number>0</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+     <zorder>internalVolumePrimitiveSelection</zorder>
+     <zorder>label_8</zorder>
+     <zorder>lengthLayout</zorder>
+     <zorder>radiusLayout</zorder>
+     <zorder>centerLayout</zorder>
+     <zorder>coneLayout</zorder>
     </widget>
    </item>
   </layout>

@@ -24,24 +24,14 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "Job Control Task Panel"
-__author__ = "Juergen Riegel, Qingfeng Xia"
-__url__ = "http://www.freecadweb.org"
-
-import os
-import sys
-import os.path
-import time
-import subprocess
-from CfdConsoleProcess import CfdConsoleProcess
-
 import FreeCAD
 import CfdTools
-from CfdTools import startFoamApplication
-
+import os
+import os.path
+import time
+from CfdConsoleProcess import CfdConsoleProcess
 if FreeCAD.GuiUp:
     import FreeCADGui
-    import FemGui
     from PySide import QtCore
     from PySide import QtGui
     from PySide.QtCore import Qt
@@ -53,7 +43,7 @@ class _TaskPanelCfdSolverControl:
         ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdSolverControl.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
-        self.analysis_object = FemGui.getActiveAnalysis()
+        self.analysis_object = CfdTools.getActiveAnalysis()
 
         self.solver_runner = solver_runner_obj
         self.solver_object = solver_runner_obj.solver
@@ -76,14 +66,12 @@ class _TaskPanelCfdSolverControl:
         self.updateUI()
 
         # Connect Signals and Slots
-        QtCore.QObject.connect(self.form.pb_write_inp, QtCore.SIGNAL("clicked()"), self.write_input_file_handler)
-        QtCore.QObject.connect(self.form.pb_edit_inp, QtCore.SIGNAL("clicked()"), self.editSolverInputFile)
-        QtCore.QObject.connect(self.form.pb_run_solver, QtCore.SIGNAL("clicked()"), self.runSolverProcess)
-        # QtCore.QObject.connect(self.form.pb_show_result, QtCore.SIGNAL("clicked()"), self.showResult)
-        QtCore.QObject.connect(self.form.pb_paraview, QtCore.SIGNAL("clicked()"), self.openParaview)
-        # self.form.pb_show_result.setEnabled(False)
+        self.form.pb_write_inp.clicked.connect(self.write_input_file_handler)
+        self.form.pb_edit_inp.clicked.connect(self.editSolverInputFile)
+        self.form.pb_run_solver.clicked.connect(self.runSolverProcess)
+        self.form.pb_paraview.clicked.connect(self.openParaview)
 
-        QtCore.QObject.connect(self.Timer, QtCore.SIGNAL("timeout()"), self.updateText)
+        self.Timer.timeout.connect(self.updateText)
         self.Start = time.time()
 
     def updateUI(self):
@@ -118,7 +106,7 @@ class _TaskPanelCfdSolverControl:
     def write_input_file_handler(self):
         self.Start = time.time()
         if self.check_prerequisites_helper():
-            self.consoleMessage("{} case writer is called".format(self.solver_object.SolverName))
+            self.consoleMessage("Case writer called")
             self.form.pb_paraview.setEnabled(False)
             self.form.pb_edit_inp.setEnabled(False)
             self.form.pb_run_solver.setEnabled(False)
@@ -135,7 +123,7 @@ class _TaskPanelCfdSolverControl:
                 raise
             finally:
                 QApplication.restoreOverrideCursor()
-            self.consoleMessage("Write {} case is completed".format(self.solver_object.SolverName))
+            self.consoleMessage("Write case is completed")
             self.updateUI()
             self.form.pb_run_solver.setEnabled(True)
         else:
@@ -151,9 +139,9 @@ class _TaskPanelCfdSolverControl:
         return True
 
     def editSolverInputFile(self):
-        solverDirectory = os.path.join(self.working_dir, self.solver_object.InputCaseName)
-        self.consoleMessage("Please edit the case input files externally at: {}\n".format(solverDirectory))
-        self.solver_runner.edit_case()
+        case_path = os.path.join(self.working_dir, self.solver_object.InputCaseName)
+        self.consoleMessage("Please edit the case input files externally at: {}\n".format(case_path))
+        CfdTools.openFileManager(case_path)
 
     def runSolverProcess(self):
         self.Start = time.time()

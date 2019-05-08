@@ -8,7 +8,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     %(solver/solverName%);
+application     %(solver/SolverName%);
 
 startFrom       startTime;
 
@@ -16,24 +16,26 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         %(solver/endTime%);
-
 %{%(physics/Time%)
 %:Steady
-deltaT          %(solver/timeStep%);
+deltaT          1;
+
+endTime         %(solver/MaxIterations%);
 
 writeControl    timeStep;
 
-writeInterval   %(solver/writeInterval%);
+writeInterval   %(solver/SteadyWriteInterval%);
 
 purgeWrite      0;
 
 %:Transient
-deltaT          %(solver/timeStep%);
+deltaT          %(solver/TimeStep%);
+
+endTime         %(solver/EndTime%);
 
 writeControl    adjustableRunTime;
 
-writeInterval   %(solver/writeInterval%);
+writeInterval   %(solver/TransientWriteInterval%);
 
 purgeWrite      0;
 
@@ -42,7 +44,7 @@ adjustTimeStep  yes;
 maxCo           5;
 
 %}
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
 maxAlphaCo      1;
 
@@ -58,7 +60,7 @@ timeFormat      general;
 
 timePrecision   6;
 
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
 maxAlphaCo      1;
 %}

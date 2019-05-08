@@ -45,7 +45,16 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout_9">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item row="1" column="0">
@@ -96,16 +105,18 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout_10">
-         <property name="margin">
+         <property name="leftMargin">
           <number>0</number>
          </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_15">
-           <property name="text">
-            <string>Buoyancy Properties here</string>
-           </property>
-          </widget>
-         </item>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
         </layout>
        </widget>
       </item>
@@ -369,7 +380,16 @@
       <enum>QFrame::StyledPanel</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_13">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>8</number>
+      </property>
+      <property name="topMargin">
+       <number>8</number>
+      </property>
+      <property name="rightMargin">
+       <number>8</number>
+      </property>
+      <property name="bottomMargin">
        <number>8</number>
       </property>
       <property name="spacing">

@@ -1,5 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
+# *   Copyright (c) 2019 - Oliver Oxtoby <oliveroxtoby@gmail.com>           *
 # *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -20,20 +21,181 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "CfdMesh"
-__author__ = "Bernd Hahnebach"
-__url__ = "http://www.freecadweb.org"
+from __future__ import print_function
 
 import FreeCAD
-import platform
-import _CfdMesh
+import FreeCADGui
+from PySide import QtCore
+import CfdTools
+from CfdTools import addObjectProperty
+import os
 
 
 def makeCfdMesh(name="CFDMesh"):
-    '''makeCfdMesh(name): makes a CFD mesh object'''
     obj = FreeCAD.ActiveDocument.addObject("Fem::FemMeshObjectPython", name)
-    _CfdMesh._CfdMesh(obj)
+    _CfdMesh(obj)
     if FreeCAD.GuiUp:
-        import _ViewProviderCfdMesh
-        _ViewProviderCfdMesh._ViewProviderCfdMesh(obj.ViewObject)
+        _ViewProviderCfdMesh(obj.ViewObject)
     return obj
+
+
+class _CommandCfdMeshFromShape:
+    def GetResources(self):
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
+        return {'Pixmap': icon_path,
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                                                     "CFD mesh"),
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                                                    "Create a mesh using cfMesh, snappyHexMesh or gmsh")}
+
+    def IsActive(self):
+        sel = FreeCADGui.Selection.getSelection()
+        analysis = CfdTools.getActiveAnalysis()
+        return analysis is not None and sel and len(sel) == 1 and sel[0].isDerivedFrom("Part::Feature")
+
+    def Activated(self):
+        FreeCAD.ActiveDocument.openTransaction("Create CFD mesh")
+        analysis_obj = CfdTools.getActiveAnalysis()
+        if analysis_obj:
+            meshObj = CfdTools.getMesh(analysis_obj)
+            if not meshObj:
+                sel = FreeCADGui.Selection.getSelection()
+                if len(sel) == 1:
+                    if sel[0].isDerivedFrom("Part::Feature"):
+                        mesh_obj_name = sel[0].Name + "_Mesh"
+                        FreeCADGui.doCommand("")
+                        FreeCADGui.addModule("CfdMesh")
+                        FreeCADGui.doCommand("CfdMesh.makeCfdMesh('" + mesh_obj_name + "')")
+                        FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
+                        if CfdTools.getActiveAnalysis():
+                            FreeCADGui.addModule("CfdTools")
+                            FreeCADGui.doCommand(
+                                "CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
+                        FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
+        else:
+            print("ERROR: You cannot have more than one mesh object")
+        FreeCADGui.Selection.clearSelection()
+
+
+class _CfdMesh:
+    """ CFD mesh properties """
+
+    # they will be used from the task panel too, thus they need to be outside of the __init__
+    known_element_dimensions = ['2D', '3D']
+    known_mesh_utility = ['cfMesh', 'snappyHexMesh', 'gmsh']
+
+    def __init__(self, obj):
+        self.Type = "CfdMesh"
+        self.Object = obj
+        obj.Proxy = self
+        self.initProperties(obj)
+
+    def initProperties(self, obj):
+        addObjectProperty(obj, 'CaseName', "meshCase", "App::PropertyString", "",
+                          "Name of directory in which the mesh is created")
+
+        addObjectProperty(obj, 'MeshRegionList', [], "App::PropertyLinkList", "", "Mesh regions of the mesh")
+
+        addObjectProperty(obj, 'ShapeFaceNames', [], "App::PropertyStringList", "", "Mesh face names")
+
+        addObjectProperty(obj, 'STLLinearDeflection', 0.05, "App::PropertyFloat", "", "STL linear deflection")
+
+        addObjectProperty(obj, 'NumberCores', 1, "App::PropertyInteger", "", "Number of parallel cores "
+                          "(only applicable when using snappyHexMesh) ")
+
+        addObjectProperty(obj, "Part", None, "App::PropertyLink", "Mesh Parameters", "Part object to mesh")
+
+        if addObjectProperty(obj, "MeshUtility", _CfdMesh.known_mesh_utility, "App::PropertyEnumeration",
+                             "Mesh Parameters", "Meshing utilities"):
+            obj.MeshUtility = 'cfMesh'
+
+        addObjectProperty(obj, "CharacteristicLengthMax", "0 m", "App::PropertyLength", "Mesh Parameters",
+                          "Max mesh element size (0.0 = infinity)")
+
+        addObjectProperty(obj, 'PointInMesh', {"x": '0 m', "y": '0 m', "z": '0 m'}, "App::PropertyMap",
+                          "Mesh Parameters",
+                          "Location vector inside the region to be meshed (must not coincide with a cell face)")
+
+        addObjectProperty(obj, 'CellsBetweenLevels', 3, "App::PropertyInteger", "Mesh Parameters",
+                          "Number of cells between each level of refinement")
+
+        addObjectProperty(obj, 'EdgeRefinement', 1, "App::PropertyFloat", "Mesh Parameters",
+                          "Relative edge (feature) refinement")
+
+        if addObjectProperty(obj, 'ElementDimension', _CfdMesh.known_element_dimensions, "App::PropertyEnumeration",
+                             "Mesh Parameters", "Dimension of mesh elements (Default 3D)"):
+            obj.ElementDimension = '3D'
+
+    def onDocumentRestored(self, obj):
+        self.initProperties(obj)
+
+    def __getstate__(self):
+        return self.Type
+
+    def __setstate__(self, state):
+        if state:
+            self.Type = state
+
+
+class _ViewProviderCfdMesh:
+    """ A View Provider for the CfdMesh object """
+    def __init__(self, vobj):
+        vobj.Proxy = self
+
+    def getIcon(self):
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
+        return icon_path
+
+    def attach(self, vobj):
+        self.ViewObject = vobj
+        self.Object = vobj.Object
+        self.ViewObject.ShapeColor = (0.4, 0.4, 0.4)
+        # self.ViewObject.LineWidth = 2
+
+    def updateData(self, obj, prop):
+        return
+
+    def onChanged(self, vobj, prop):
+        CfdTools.setCompSolid(vobj)
+        return
+
+    def setEdit(self, vobj, mode):
+        for obj in FreeCAD.ActiveDocument.Objects:
+            if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdMesh):
+                obj.ViewObject.show()
+        import _TaskPanelCfdMesh
+        taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.Object)
+        taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(taskd)
+        return True
+
+    def unsetEdit(self, vobj, mode):
+        FreeCADGui.Control.closeDialog()
+        return
+
+    def doubleClicked(self, vobj):
+        if FreeCADGui.activeWorkbench().name() != 'CfdOFWorkbench':
+            FreeCADGui.activateWorkbench("CfdOFWorkbench")
+        gui_doc = FreeCADGui.getDocument(vobj.Object.Document)
+        if not gui_doc.getInEdit():
+            gui_doc.setEdit(vobj.Object.Name)
+        else:
+            FreeCAD.Console.PrintError('Task dialog already open\n')
+        return True
+
+    def claimChildren(self):
+        return self.Object.MeshRegionList
+
+    def onDelete(self, feature, subelements):
+        try:
+            for obj in self.claimChildren():
+                obj.ViewObject.show()
+        except Exception as err:
+            FreeCAD.Console.PrintError("Error in onDelete: " + str(err))
+        return True
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

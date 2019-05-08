@@ -146,7 +146,7 @@ class BlockTest(unittest.TestCase):
         self.inlet_boundary = CfdFluidBoundary.makeCfdFluidBoundary('inlet')
         bc_set = self.inlet_boundary.BoundarySettings
         bc_set['BoundaryType'] = 'inlet'
-        bc_set['BoundarySubtype'] = 'uniformVelocity'
+        bc_set['BoundarySubType'] = 'uniformVelocity'
         bc_set['Ux'] = 1
         bc_set['Uy'] = 0
         bc_set['Uz'] = 0
@@ -156,7 +156,7 @@ class BlockTest(unittest.TestCase):
         obj = doc.getObject('inlet')
         vobj = obj.ViewObject
         import _TaskPanelCfdFluidBoundary
-        physics_model, is_present = CfdTools.getPhysicsModel(self.analysis)
+        physics_model = CfdTools.getPhysicsModel(self.analysis)
         material_objs = CfdTools.getMaterials(self.analysis)
         taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model, material_objs)
         taskd.obj = vobj.Object
@@ -168,7 +168,7 @@ class BlockTest(unittest.TestCase):
         self.outlet_boundary = CfdFluidBoundary.makeCfdFluidBoundary('outlet')
         bc_set = self.outlet_boundary.BoundarySettings
         bc_set['BoundaryType'] = 'outlet'
-        bc_set['BoundarySubtype'] = 'staticPressure'
+        bc_set['BoundarySubType'] = 'staticPressure'
         bc_set['Pressure'] = 0.0
         self.outlet_boundary.References = [('Box', 'Face4')]
         FreeCADGui.doCommand("FreeCAD.getDocument('"+self.__class__.__doc_name+"').recompute()")
@@ -177,7 +177,7 @@ class BlockTest(unittest.TestCase):
         self.wall_boundary = CfdFluidBoundary.makeCfdFluidBoundary('wall')
         bc_set = self.wall_boundary.BoundarySettings
         bc_set['BoundaryType'] = 'wall'
-        bc_set['BoundarySubtype'] = 'fixed'
+        bc_set['BoundarySubType'] = 'fixed'
         self.wall_boundary.References = [('Box', 'Face2'), ('Box', 'Face3')]
         FreeCADGui.doCommand("FreeCAD.getDocument('"+self.__class__.__doc_name+"').recompute()")
 
@@ -185,7 +185,7 @@ class BlockTest(unittest.TestCase):
         self.slip_boundary = CfdFluidBoundary.makeCfdFluidBoundary('slip')
         bc_set = self.slip_boundary.BoundarySettings
         bc_set['BoundaryType'] = 'wall'
-        bc_set['BoundarySubtype'] = 'slip'
+        bc_set['BoundarySubType'] = 'slip'
         self.slip_boundary.References = [('Box', 'Face5'), ('Box', 'Face6')]
         FreeCADGui.doCommand("FreeCAD.getDocument('"+self.__class__.__doc_name+"').recompute()")
 

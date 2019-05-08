@@ -23,25 +23,13 @@
 # *                                                                         *
 # ***************************************************************************
 
-"""
-UI for CFD PhysicsModel objects allowing selection of flow physics
-"""
-
 import FreeCAD
 import os
-import sys
 import os.path
 import CfdTools
-from CfdTools import setInputFieldQuantity, indexOrDefault
-
+from CfdTools import setQuantity
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
-    from PySide import QtCore
-    from PySide import QtGui
-    from PySide.QtCore import Qt
-    from PySide.QtGui import QApplication
-    import FemGui
 
 
 RANS_MODELS = ["kOmegaSST"]
@@ -70,10 +58,6 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.radioButtonLaminar.toggled.connect(self.updateUI)
         self.form.radioButtonRANS.toggled.connect(self.updateUI)
         #self.form.radioButtonLES_DES.toggled.connect(self.updateUI)
-
-        self.form.thermalCheckBox.stateChanged.connect(self.updateUI)
-        self.form.radioButtonEnergy.toggled.connect(self.updateUI)
-        self.form.radioButtonBuoyancy.toggled.connect(self.updateUI)
 
         self.load()
 
@@ -108,16 +92,9 @@ class _TaskPanelCfdPhysicsSelection:
         ti = CfdTools.indexOrDefault(RANS_MODELS, self.obj.TurbulenceModel, 0)
         self.form.turbulenceComboBox.setCurrentIndex(ti)
 
-        #if self.obj.Thermal == "Energy":
-        #    self.form.thermalCheckBox.toggle()
-        #    self.form.radioButtonEnergy.toggle()
-        #elif self.obj.Thermal == "Buoyancy":
-        #    self.form.thermalCheckBox.toggle()
-        #    self.form.radioButtonBuoyancy.toggle()
-
-        setInputFieldQuantity(self.form.gx, self.obj.gx)
-        setInputFieldQuantity(self.form.gy, self.obj.gy)
-        setInputFieldQuantity(self.form.gz, self.obj.gz)
+        setQuantity(self.form.gx, self.obj.gx)
+        setQuantity(self.form.gy, self.obj.gy)
+        setQuantity(self.form.gz, self.obj.gz)
 
         self.updateUI()
 
@@ -125,7 +102,6 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.TimeFrame.setVisible(True)
         self.form.FlowFrame.setVisible(True)
         self.form.turbulenceFrame.setVisible(True)
-        self.form.thermalFrame.setVisible(False)
 
         if self.form.radioButtonSteady.isChecked():
             self.form.radioButtonFreeSurface.setEnabled(False)
@@ -144,7 +120,6 @@ class _TaskPanelCfdPhysicsSelection:
             self.form.radioButtonCompressible.setEnabled(True)
 
         self.form.checkBoxHighMach.setEnabled(self.form.radioButtonCompressible.isChecked())
-        self.form.thermalSelectionFrame.setVisible(False)
 
         if self.form.viscousCheckBox.isChecked():
             self.form.turbulenceFrame.setVisible(True)
@@ -159,30 +134,14 @@ class _TaskPanelCfdPhysicsSelection:
             self.form.turbulenceFrame.setVisible(False)
             self.form.turbulenceModelFrame.setVisible(False)
 
-        if self.form.thermalCheckBox.isChecked():
-            self.form.thermalSelectionFrame.setVisible(True)
-        else:
-            self.form.radioButtonEnergy.toggle()
-            self.form.thermalSelectionFrame.setVisible(False)
-
-        # Temporarily disabling features which are not yet supported
-        self.form.radioButtonEnergy.setEnabled(False)
-        self.form.radioButtonBuoyancy.setEnabled(False)
-        self.form.thermalCheckBox.setEnabled(False)
-
     def accept(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
         FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-        changed_transient = False
         if self.form.radioButtonSteady.isChecked():
-            if self.obj.Time != 'Steady':
-                changed_transient = True
             FreeCADGui.doCommand("obj.Time = 'Steady'")
         elif self.form.radioButtonTransient.isChecked():
-            if self.obj.Time != 'Transient':
-                changed_transient = True
             FreeCADGui.doCommand("obj.Time = 'Transient'")
 
         if self.form.radioButtonSinglePhase.isChecked():
@@ -196,10 +155,9 @@ class _TaskPanelCfdPhysicsSelection:
         elif self.form.radioButtonCompressible.isChecked():
             if self.form.checkBoxHighMach.isChecked():
                 FreeCADGui.doCommand("obj.Flow = 'HighMachCompressible'")
-                FreeCADGui.doCommand("obj.Thermal = 'Energy'")
             else:
                 FreeCADGui.doCommand("obj.Flow = 'Compressible'")
-                FreeCADGui.doCommand("obj.Thermal = 'None'")
+            FreeCADGui.doCommand("obj.Thermal = 'Energy'")
 
         if self.form.viscousCheckBox.isChecked():
             if self.form.radioButtonLaminar.isChecked():
@@ -211,32 +169,9 @@ class _TaskPanelCfdPhysicsSelection:
         else:
             FreeCADGui.doCommand("obj.Turbulence = 'Inviscid'")
 
-        #if self.form.radioButtonEnergy.isChecked():
-        #    FreeCADGui.doCommand("obj.Thermal = 'Energy'")
-        #elif self.form.radioButtonBuoyancy.isChecked():
-        #    FreeCADGui.doCommand("obj.Thermal = 'Buoyancy'")
-
         FreeCADGui.doCommand("obj.gx = '{}'".format(self.form.gx.text()))
         FreeCADGui.doCommand("obj.gy = '{}'".format(self.form.gy.text()))
         FreeCADGui.doCommand("obj.gz = '{}'".format(self.form.gz.text()))
-
-        if changed_transient:
-            # TODO
-            # For now, init the solver object's time values to sensible defaults for steady or transient
-            # The user can then edit further
-            a = CfdTools.getParentAnalysisObject(self.obj)
-            if a:
-                sol = CfdTools.getSolver(a)
-                if sol:
-                    FreeCADGui.doCommand("\nsol = FreeCAD.ActiveDocument.{}".format(sol.Name))
-                    if self.obj.Time == 'Steady':
-                        FreeCADGui.doCommand("sol.EndTime = 1000\n"
-                                             "sol.TimeStep = 1\n"
-                                             "sol.WriteInterval = 100\n")
-                    else:
-                        FreeCADGui.doCommand("sol.EndTime = 1\n"
-                                             "sol.TimeStep = 0.001\n"
-                                             "sol.WriteInterval = 0.1\n")
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

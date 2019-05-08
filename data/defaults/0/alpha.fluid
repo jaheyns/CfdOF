@@ -1,6 +1,6 @@
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
-%{%(initialValues/alphas%)
+%{%(initialValues/VolumeFractions%)
 %[_header%]
 FoamFile
 {
@@ -13,7 +13,7 @@ FoamFile
 
 dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform %(initialValues/alphas/%(0%)%);
+internalField   uniform %(initialValues/VolumeFractions/%(0%)%);
 
 boundaryField
 {
@@ -26,7 +26,7 @@ boundaryField
     %(0%)
     {
         type        inletOutlet;
-        inletValue  uniform %(boundaries/%(0%)/alphas/%(1%)%);
+        inletValue  uniform %(boundaries/%(0%)/VolumeFractions/%(1%)%);
         value       $internalField;
     }
 %:constraint

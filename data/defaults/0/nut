@@ -22,16 +22,16 @@ boundaryField
 %:empty
 %[0/_boundary_empty%]
 %:wall
-%{%(boundaries/%(0%)/BoundarySubtype%)
-%:fixed translating partialSlip
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall translatingWall partialSlipWall
     %(0%)
     {
         type        nutkWallFunction;
         value       uniform 0;
     }
-%:slip
+%:slipWall
 %[0/_boundary_zeroGradient%]
-%:rough
+%:roughWall
     %(0%)
     {
         type        nutkRoughWallFunction;

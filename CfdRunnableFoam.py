@@ -25,29 +25,23 @@
 
 from __future__ import print_function
 
-import os
-import os.path
-
-from numpy import *
-
 import FreeCAD
-
-import CfdCaseWriterFoam
 import CfdTools
+import CfdAnalysis
 from PySide.QtCore import QObject, Signal, QThread
 from CfdResidualPlot import ResidualPlot
 from collections import OrderedDict
+from numpy import *
 
 
 class CfdRunnable(QObject, object):
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnable, self).__init__()
-        if analysis and analysis.isDerivedFrom("Fem::FemAnalysisPython"):
+        if analysis and isinstance(analysis.Proxy, CfdAnalysis._CfdAnalysis):
             self.analysis = analysis
         else:
             if FreeCAD.GuiUp:
-                import FemGui
-                self.analysis = FemGui.getActiveAnalysis()
+                self.analysis = CfdTools.getActiveAnalysis()
 
         self.solver = None
         if solver:

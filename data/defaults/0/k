@@ -22,17 +22,17 @@ boundaryField
 %:empty
 %[0/_boundary_empty%]
 %:wall
-%{%(boundaries/%(0%)/BoundarySubtype%)
-%:fixed translating partialSlip rough
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall translatingWall partialSlipWall roughWall
     %(0%)
     {
         type        kqRWallFunction;
         value       $internalField;
     }
-%:slip
+%:slipWall
 %[0/_boundary_zeroGradient%]
 %}
-%:inlet open farField
+%:inlet open
 %{%(boundaries/%(0%)/TurbulenceInletSpecification%)
 %:TKEAndSpecDissipationRate
     %(0%)

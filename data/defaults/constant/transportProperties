@@ -1,4 +1,4 @@
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:simpleFoam porousSimpleFoam pimpleFoam interFoam multiphaseInterFoam
 %[_header%]
 FoamFile
@@ -10,7 +10,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:simpleFoam porousSimpleFoam pimpleFoam
 transportModel  Newtonian;
 

@@ -1,6 +1,5 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2015 - Qingfeng Xia <qingfeng.xia eng ox ac uk>         *
 # *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
 # *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
 # *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
@@ -39,11 +38,11 @@ class CfdCaseWriterFoam:
     def __init__(self, analysis_obj):
         self.analysis_obj = analysis_obj
         self.solver_obj = CfdTools.getSolver(analysis_obj)
-        self.physics_model, isPresent = CfdTools.getPhysicsModel(analysis_obj)
+        self.physics_model = CfdTools.getPhysicsModel(analysis_obj)
         self.mesh_obj = CfdTools.getMesh(analysis_obj)
         self.material_objs = CfdTools.getMaterials(analysis_obj)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
-        self.initial_conditions, isPresent = CfdTools.getInitialConditions(analysis_obj)
+        self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
         self.porousZone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisationZone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
@@ -63,34 +62,27 @@ class CfdCaseWriterFoam:
 
         self.template_path = os.path.join(CfdTools.get_module_path(), "data", "defaults")
 
-        solverSettingsDict = CfdTools.getSolverSettings(self.solver_obj)
-
         # Collect settings into single dictionary
         if not self.mesh_obj:
             raise RuntimeError("No mesh object found in analysis")
-        phys_settings = dict(zip(self.physics_model.PropertiesList,
-                                 (getattr(self.physics_model, prop) for prop in self.physics_model.PropertiesList)))
-        if 'gx' in phys_settings:
-            phys_settings['gx'] = Units.Quantity(phys_settings['gx']).getValueAs('m/s^2')
-            phys_settings['gy'] = Units.Quantity(phys_settings['gy']).getValueAs('m/s^2')
-            phys_settings['gz'] = Units.Quantity(phys_settings['gz']).getValueAs('m/s^2')
+        phys_settings = CfdTools.propsToDict(self.physics_model)
 
         self.settings = {
             'physics': phys_settings,
             'fluidProperties': [],  # Order is important, so use a list
-            'initialValues': self.initial_conditions,
-            'boundaries': dict((b.Label, b.BoundarySettings) for b in self.bc_group),
+            'initialValues': CfdTools.propsToDict(self.initial_conditions),
+            'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
-            'initialisationZones': {o.Label: o.initialisationZoneProperties for o in self.initialisationZone_objs},
+            'initialisationZones': {o.Label: CfdTools.propsToDict(o) for o in self.initialisationZone_objs},
             'initialisationZonesPresent': len(self.initialisationZone_objs) > 0,
-            'zones': {o.Label: {'PartNameList': tuple(o.partNameList)} for o in self.zone_objs},
+            'zones': {o.Label: {'PartNameList': tuple(r[0] for r in o.References)} for o in self.zone_objs},
             'zonesPresent': len(self.zone_objs) > 0,
             'meshType': self.mesh_obj.Proxy.Type,
             'meshDimension': self.mesh_obj.ElementDimension,
             'meshDir': "../"+self.mesh_obj.CaseName,
-            'solver': solverSettingsDict,
+            'solver': CfdTools.propsToDict(self.solver_obj),
             'system': {},
             'runChangeDictionary': False
             }
@@ -119,8 +111,7 @@ class CfdCaseWriterFoam:
         s = os.stat(fname)
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
 
-        cfdMessage("Successfully wrote {} case to folder {}\n".format(
-                   self.solver_obj.SolverName, self.working_dir))
+        cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         return True
 
     def getSolverName(self):
@@ -170,10 +161,10 @@ class CfdCaseWriterFoam:
 
     def processSolverSettings(self):
         solver_settings = self.settings['solver']
-        if solver_settings['parallel']:
-            if solver_settings['parallelCores'] < 2:
-                solver_settings['parallelCores'] = 2
-        solver_settings['solverName'] = self.getSolverName()
+        if solver_settings['Parallel']:
+            if solver_settings['ParallelCores'] < 2:
+                solver_settings['ParallelCores'] = 2
+        solver_settings['SolverName'] = self.getSolverName()
 
     def processSystemSettings(self):
         system_settings = self.settings['system']
@@ -201,27 +192,27 @@ class CfdCaseWriterFoam:
         # Convert to (mostly) SI numbers for OpenFOAM
         settings = self.settings
         for material_obj in self.material_objs:
-            mp = {}
+            mp = material_obj.Material
             mp['Name'] = material_obj.Label
-            if 'Density' in material_obj.PropertiesList:
-                mp['Density'] = Units.Quantity(material_obj.Density).getValueAs("kg/m^3").Value
-            if 'DynamicViscosity' in material_obj.PropertiesList:
+            if 'Density' in mp:
+                mp['Density'] = Units.Quantity(mp['Density']).getValueAs("kg/m^3").Value
+            if 'DynamicViscosity' in mp:
                 if self.physics_model.Turbulence == 'Inviscid':
                     mp['DynamicViscosity'] = 0.0
                 else:
-                    mp['DynamicViscosity'] = Units.Quantity(material_obj.DynamicViscosity).getValueAs("kg/m/s").Value
+                    mp['DynamicViscosity'] = Units.Quantity(mp['DynamicViscosity']).getValueAs("kg/m/s").Value
                 mp['KinematicViscosity'] = mp['DynamicViscosity']/mp['Density']
-            if 'MolarMass' in material_obj.PropertiesList:
+            if 'MolarMass' in mp:
                 # OpenFOAM uses kg/kmol
-                mp['MolarMass'] = Units.Quantity(material_obj.MolarMass).getValueAs("kg/mol").Value*1000
-            if 'Cp' in material_obj.PropertiesList:
-                mp['Cp'] = Units.Quantity(material_obj.Cp).getValueAs("J/kg/K").Value
-            if 'SutherlandConstant' in material_obj.PropertiesList:
+                mp['MolarMass'] = Units.Quantity(mp['MolarMass']).getValueAs("kg/mol").Value*1000
+            if 'Cp' in mp:
+                mp['Cp'] = Units.Quantity(mp['Cp']).getValueAs("J/kg/K").Value
+            if 'SutherlandConstant' in mp:
                 #mp['Cp'] = Units.Quantity(material_obj.SutherlandConstant).getValueAs("kg/m/s/K^0.5").Value
                 # TODO workaround: Have to use wrong units as fractional units currently not supported
-                mp['SutherlandConstant'] = Units.Quantity(material_obj.SutherlandConstant).getValueAs("kg/m/s").Value
-            if 'SutherlandTemperature' in material_obj.PropertiesList:
-                mp['SutherlandTemperature'] = Units.Quantity(material_obj.SutherlandTemperature).getValueAs("K").Value
+                mp['SutherlandConstant'] = Units.Quantity(mp['SutherlandConstant']).getValueAs("kg/m/s").Value
+            if 'SutherlandTemperature' in mp:
+                mp['SutherlandTemperature'] = Units.Quantity(mp['SutherlandTemperature']).getValueAs("K").Value
             settings['fluidProperties'].append(mp)
 
     def processBoundaryConditions(self):
@@ -251,7 +242,7 @@ class CfdCaseWriterFoam:
                         raise RuntimeError
                 except (SystemError, RuntimeError):
                     raise RuntimeError(bc['DirectionFace'] + " is not a valid, planar face.")
-            if settings['solver']['solverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
+            if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
                 bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
             if bc['PorousBaffleMethod'] == 1:
@@ -261,7 +252,7 @@ class CfdCaseWriterFoam:
                 beta = (1-wireDiam/spacing)**2
                 bc['PressureDropCoeff'] = CD*(1-beta)
 
-            if settings['solver']['solverName'] in ['interFoam', 'multiphaseInterFoam']:
+            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
                 # Make sure the first n-1 alpha values exist, and write the n-th one
                 # consistently for multiphaseInterFoam
                 sum_alpha = 0.0
@@ -269,22 +260,22 @@ class CfdCaseWriterFoam:
                 for i, m in enumerate(settings['fluidProperties']):
                     alpha_name = m['Name']
                     if i == len(settings['fluidProperties']) - 1:
-                        if settings['solver']['solverName'] == 'multiphaseInterFoam':
+                        if settings['solver']['SolverName'] == 'multiphaseInterFoam':
                             alphas_new[alpha_name] = 1.0 - sum_alpha
                     else:
-                        alpha = bc.get('alphas', {}).get(alpha_name, 0.0)
+                        alpha = Units.Quantity(bc.get('VolumeFractions', {}).get(alpha_name, '0')).Value
                         alphas_new[alpha_name] = alpha
                         sum_alpha += alpha
-                bc['alphas'] = alphas_new
+                bc['VolumeFractions'] = alphas_new
 
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
         settings = self.settings
         initial_values = settings['initialValues']
-        if settings['solver']['solverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
+        if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
             mat_prop = settings['fluidProperties'][0]
             initial_values['KinematicPressure'] = initial_values['Pressure'] / mat_prop['Density']
-        if settings['solver']['solverName'] in ['interFoam', 'multiphaseInterFoam']:
+        if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
             # Make sure the first n-1 alpha values exist, and write the n-th one
             # consistently for multiphaseInterFoam
             sum_alpha = 0.0
@@ -292,13 +283,13 @@ class CfdCaseWriterFoam:
             for i, m in enumerate(settings['fluidProperties']):
                 alpha_name = m['Name']
                 if i == len(settings['fluidProperties'])-1:
-                    if settings['solver']['solverName'] == 'multiphaseInterFoam':
+                    if settings['solver']['SolverName'] == 'multiphaseInterFoam':
                         alphas_new[alpha_name] = 1.0-sum_alpha
                 else:
-                    alpha = initial_values.get('alphas', {}).get(alpha_name, 0.0)
+                    alpha = Units.Quantity(initial_values.get('VolumeFractions', {}).get(alpha_name, '0')).Value
                     alphas_new[alpha_name] = alpha
                     sum_alpha += alpha
-            initial_values['alphas'] = alphas_new
+            initial_values['VolumeFractions'] = alphas_new
 
         physics = settings['physics']
 
@@ -311,7 +302,7 @@ class CfdCaseWriterFoam:
                 ninlets = 0
                 for bc_name in settings['boundaries']:
                     bc = settings['boundaries'][bc_name]
-                    if bc['BoundaryType'] in ['inlet', 'farField']:
+                    if bc['BoundaryType'] in ['inlet', 'open']:
                         ninlets = ninlets + 1
                         # Save first inlet in case match not found
                         if ninlets == 1:
@@ -325,7 +316,7 @@ class CfdCaseWriterFoam:
                             inlet_bc = first_inlet
                         else:
                             raise RuntimeError("Inlet {} not found to copy initial conditions from."
-                                            .format(initial_values['Inlet']))
+                                               .format(initial_values['Inlet']))
                     else:
                         inlet_bc = first_inlet
                 if inlet_bc is None:
@@ -333,7 +324,7 @@ class CfdCaseWriterFoam:
 
         # Copy velocity
         if initial_values['UseInletUPValues']:
-            if inlet_bc['BoundaryType'] == 'farField':
+            if inlet_bc['BoundarySubType'] == 'farField':
                 initial_values['Ux'] = inlet_bc['Ux']
                 initial_values['Uy'] = inlet_bc['Uy']
                 initial_values['Uz'] = inlet_bc['Uz']
@@ -347,7 +338,7 @@ class CfdCaseWriterFoam:
                     initial_values['Temperature'] = inlet_bc['Temperature']
                 else:
                     raise RuntimeError("Inlet type not appropriate to determine initial temperature")
-            elif inlet_bc['BoundaryType'] == 'farField':
+            elif inlet_bc['BoundarySubType'] == 'farField':
                 initial_values['Temperature'] = inlet_bc['Temperature']
             else:
                 raise RuntimeError("Inlet type not appropriate to determine initial temperature.")
@@ -359,8 +350,8 @@ class CfdCaseWriterFoam:
                     initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
                     initial_values['omega'] = inlet_bc['SpecificDissipationRate']
                 elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
-                    if inlet_bc['BoundarySubtype'] == 'uniformVelocity' or \
-                       inlet_bc['BoundarySubtype'] == 'characteristic':
+                    if inlet_bc['BoundarySubType'] == 'uniformVelocity' or \
+                       inlet_bc['BoundarySubType'] == 'characteristic':
                         Uin = (inlet_bc['Ux']**2 +
                                inlet_bc['Uy']**2 +
                                inlet_bc['Uz']**2)**0.5
@@ -382,21 +373,18 @@ class CfdCaseWriterFoam:
 
     def exportZoneStlSurfaces(self):
         for zo in self.zone_objs:
-            import Mesh
-            for i in range(len(zo.partNameList)):
-                #shape = zo.shapeList[i].Shape
+            for r in zo.References:
                 path = os.path.join(self.working_dir,
                                     self.solver_obj.InputCaseName,
                                     "constant",
                                     "triSurface")
                 if not os.path.exists(path):
                     os.makedirs(path)
-                fname = os.path.join(path, zo.partNameList[i]+u".stl")
+                fname = os.path.join(path, r[0]+u".stl")
                 import MeshPart
-                sel_obj = self.analysis_obj.Document.getObject(zo.partNameList[i])
+                sel_obj = self.analysis_obj.Document.getObject(r[0])
                 shape = sel_obj.Shape
-                #meshStl = MeshPart.meshFromShape(shape, LinearDeflection = self.mesh_obj.STLLinearDeflection)
-                meshStl = MeshPart.meshFromShape(shape, LinearDeflection = 0.1)
+                meshStl = MeshPart.meshFromShape(shape, LinearDeflection=self.mesh_obj.STLLinearDeflection)
                 meshStl.write(fname)
                 print("Successfully wrote stl surface\n")
 
@@ -405,22 +393,23 @@ class CfdCaseWriterFoam:
         settings['porousZonesPresent'] = True
         porousZoneSettings = settings['porousZones']
         for po in self.porousZone_objs:
-            pd = {'PartNameList': tuple(po.partNameList)}
-            if po.porousZoneProperties['PorousCorrelation'] == 'DarcyForchheimer':
-                pd['D'] = tuple(po.porousZoneProperties['D'])
-                pd['F'] = tuple(po.porousZoneProperties['F'])
-                pd['e1'] = tuple(po.porousZoneProperties['e1'])
-                pd['e3'] = tuple(po.porousZoneProperties['e3'])
-            elif po.porousZoneProperties['PorousCorrelation'] == 'Jakob':
+            pd = {'PartNameList': tuple(r[0] for r in po.References)}
+            po = CfdTools.propsToDict(po)
+            if po['PorousCorrelation'] == 'DarcyForchheimer':
+                pd['D'] = (po['D1'], po['D2'], po['D3'])
+                pd['F'] = (po['F1'], po['F2'], po['F3'])
+                pd['e1'] = tuple(po['e1'])
+                pd['e3'] = tuple(po['e3'])
+            elif po['PorousCorrelation'] == 'Jakob':
                 # Calculate effective Darcy-Forchheimer coefficients
                 # This is for equilateral triangles arranged with the triangles pointing in BundleLayerNormal
                 # direction (direction of greater spacing - sqrt(3)*triangleEdgeLength)
-                pd['e1'] = tuple(po.porousZoneProperties['SpacingDirection'])  # OpenFOAM modifies to be orthog to e3
-                pd['e3'] = tuple(po.porousZoneProperties['TubeAxis'])
-                spacing = po.porousZoneProperties['TubeSpacing']
-                d0 = po.porousZoneProperties['OuterDiameter']
-                u0 = po.porousZoneProperties['VelocityEstimate']
-                aspectRatio = po.porousZoneProperties['AspectRatio']
+                pd['e1'] = tuple(po['SpacingDirection'])  # OpenFOAM modifies to be orthog to e3
+                pd['e3'] = tuple(po['TubeAxis'])
+                spacing = po['TubeSpacing']
+                d0 = po['OuterDiameter']
+                u0 = po['VelocityEstimate']
+                aspectRatio = po['AspectRatio']
                 kinVisc = self.settings['fluidProperties']['KinematicViscosity']
                 if kinVisc == 0.0:
                     raise ValueError("Viscosity must be set for Jakob correlation")
@@ -430,53 +419,53 @@ class CfdCaseWriterFoam:
                 F = [0, 0, 0]
                 for (i, Sl, St) in [(0, aspectRatio*spacing, spacing), (1, spacing, aspectRatio*spacing)]:
                     C = 1.0/St*0.5*(1.0+0.47/(Sl/d0-1)**1.06)*(1.0/(1-d0/Sl))**(2.0-0.16)
-                    D = C/d0*0.5*(u0*d0/kinVisc)**(1.0-0.16)
-                    F = C*(u0*d0/kinVisc)**(-0.16)
-                    D[i] = D
-                    F[i] = F
+                    Di = C/d0*0.5*(u0*d0/kinVisc)**(1.0-0.16)
+                    Fi = C*(u0*d0/kinVisc)**(-0.16)
+                    D[i] = Di
+                    F[i] = Fi
                 pd['D'] = tuple(D)
                 pd['F'] = tuple(F)
                 # Currently assuming zero drag parallel to tube bundle (3rd principal dirn)
             else:
                 raise RuntimeError("Unrecognised method for porous baffle resistance")
-            porousZoneSettings[po.Label] = pd
+            porousZoneSettings[po['Label']] = pd
 
     def processInitialisationZoneProperties(self):
         settings = self.settings
-        if settings['solver']['solverName'] in ['interFoam', 'multiphaseInterFoam']:
+        if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
             # Make sure the first n-1 alpha values exist, and write the n-th one
             # consistently for multiphaseInterFoam
             for zone_name in settings['initialisationZones']:
                 z = settings['initialisationZones'][zone_name]
                 sum_alpha = 0.0
-                if 'alphas' in z:
+                if 'VolumeFractions' in z:
                     alphas_new = {}
                     for i, m in enumerate(settings['fluidProperties']):
                         alpha_name = m['Name']
                         if i == len(settings['fluidProperties'])-1:
-                            if settings['solver']['solverName'] == 'multiphaseInterFoam':
+                            if settings['solver']['SolverName'] == 'multiphaseInterFoam':
                                 alphas_new[alpha_name] = 1.0-sum_alpha
                         else:
-                            alpha = z['alphas'].get(alpha_name, 0.0)
+                            alpha = Units.Quantity(z['VolumeFractions'].get(alpha_name, '0')).Value
                             alphas_new[alpha_name] = alpha
                             sum_alpha += alpha
-                    z['alphas'] = alphas_new
+                    z['VolumeFractions'] = alphas_new
 
     def bafflesPresent(self):
         for b in self.bc_group:
-            if b.BoundarySettings['BoundaryType'] == 'baffle':
+            if b.BoundaryType == 'baffle':
                 return True
         return False
 
     def porousBafflesPresent(self):
         for b in self.bc_group:
-            if b.BoundarySettings['BoundaryType'] == 'baffle' and \
-               b.BoundarySettings['BoundarySubtype'] == 'porousBaffle':
+            if b.BoundaryType == 'baffle' and \
+               b.BoundarySubType == 'porousBaffle':
                 return True
         return False
 
     def setupPatchNames(self):
-        print ('Populating createPatchDict to update BC names')
+        print('Populating createPatchDict to update BC names')
         import CfdMeshTools
         # Init in case not meshed yet
         CfdMeshTools.CfdMeshTools(self.mesh_obj)
@@ -509,9 +498,8 @@ class CfdCaseWriterFoam:
                                 bc_group[nb].Label, bref[0], bref[1], bc_group[nb2].Label, bref2[0], bref2[1]))
 
         for bc_id, bc_obj in enumerate(bc_group):
-            bcDict = bc_obj.BoundarySettings
-            bcType = bcDict["BoundaryType"]
-            bcSubType = bcDict["BoundarySubtype"]
+            bcType = bc_obj.BoundaryType
+            bcSubType = bc_obj.BoundarySubType
             patchType = CfdTools.getPatchType(bcType, bcSubType)
             settings['createPatches'][bc_obj.Label] = {
                 'PatchNamesList': tuple(bc_lists[bc_id]),  # Tuple used so that case writer outputs as an array
@@ -533,8 +521,7 @@ class CfdCaseWriterFoam:
             # that it is possible to define a boundary face as a baffle, which will be overridden
             # by the actual boundary name and therefore won't exist anymore. 
             for bc_id, bc_obj in enumerate(bc_group):
-                bcDict = bc_obj.BoundarySettings
-                bcType = bcDict["BoundaryType"]
+                bcType = bc_obj.BoundaryType
                 if bcType == "baffle":
                     tempBaffleList = []
                     tempBaffleListSlave = []

@@ -1,4 +1,4 @@
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
 %:default
 %[_header%]
@@ -11,7 +11,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
 dimensions      [1 -1 -2 0 0 0 0];
 
@@ -30,7 +30,7 @@ boundaryField
 %:empty
 %[0/_boundary_empty%]
 %:wall
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
     %(0%)
     {
@@ -41,19 +41,19 @@ boundaryField
 %[0/_boundary_zeroGradient%]
 %}
 %:inlet
-%{%(boundaries/%(0%)/BoundarySubtype%)
-%:totalPressure
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:totalPressureInlet
     %(0%)
     {
         type        totalPressure;
         p0          uniform %(boundaries/%(0%)/Pressure%);
         value       $internalField;
     }
-%:staticPressure
+%:staticPressureInlet
     %(0%)
     {
         type        fixedValue;
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
         value       uniform %(boundaries/%(0%)/Pressure%);
 %:default
@@ -64,12 +64,12 @@ boundaryField
 %[0/_boundary_zeroGradient%]
 %}
 %:outlet
-%{%(boundaries/%(0%)/BoundarySubtype%)
-%:staticPressure
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:staticPressureOutlet
     %(0%)
     {
         type        fixedValue;
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
         value       uniform %(boundaries/%(0%)/Pressure%);
 %:default
@@ -79,9 +79,9 @@ boundaryField
 %:default
 %[0/_boundary_zeroGradient%]
 %}
+%:open
+%{%(boundaries/%(0%)/BoundarySubType%)
 %:farField
-%{%(boundaries/%(0%)/BoundarySubtype%)
-%:characteristic
     %(0%)
     {
         type        characteristicFarfieldPressure;
@@ -90,18 +90,18 @@ boundaryField
         T           %(boundaries/%(0%)/Temperature%);
         value       $internalField;
     }
-%}
-%:open
+%:totalPressureOpening
     %(0%)
     {
         type        totalPressure;
         p0          uniform %(boundaries/%(0%)/Pressure%);
         value       $internalField;
     }
+%}
 %:constraint
 %[0/_boundary_constraint%]
 %:baffle
-%{%(boundaries/%(0%)/BoundarySubtype%)
+%{%(boundaries/%(0%)/BoundarySubType%)
 %:porousBaffle
 %{%(0%)_master %(0%)_slave
     %(0%)

@@ -27,6 +27,11 @@
 # Utility functions like mesh exporting, shared by any CFD solver
 
 from __future__ import print_function
+
+import FreeCAD
+from FreeCAD import Units
+import CfdConsoleProcess
+import Part
 import os
 import os.path
 import shutil
@@ -36,16 +41,9 @@ import numbers
 import platform
 import subprocess
 import sys
-
-import FreeCAD
-import Fem
-from FreeCAD import Units
-import CfdConsoleProcess
-import Part
-
+import math
 if FreeCAD.GuiUp:
     import FreeCADGui
-    import FemGui
     from PySide import QtGui
     from PySide import QtCore
 
@@ -83,22 +81,23 @@ if FreeCAD.GuiUp:
     def getResultObject():
         import FreeCADGui
         sel = FreeCADGui.Selection.getSelection()
-        if (len(sel) == 1):
+        if len(sel) == 1:
             if sel[0].isDerivedFrom("Fem::FemResultObject"):
                 return sel[0]
-        import FemGui
-        for i in FemGui.getActiveAnalysis().Group:
-            if(i.isDerivedFrom("Fem::FemResultObject")):
+        for i in getActiveAnalysis().Group:
+            if i.isDerivedFrom("Fem::FemResultObject"):
                 return i
         return None
 
+
 def getParentAnalysisObject(obj):
     """ Return CfdAnalysis object to which this obj belongs in the tree """
-    for o in FreeCAD.activeDocument().Objects:
-        if o.Name.startswith("CfdAnalysis"):
-            if obj in o.Group:
-                return o
-    return None
+    return obj.getParentGroup()
+    #for o in FreeCAD.activeDocument().Objects:
+    #    if hasattr(o, "Proxy") and isinstance(o.Proxy, _CfdAnalysis):
+    #        if obj in o.Group:
+    #            return o
+    #return None
 
 
 def getPhysicsModel(analysis_object):
@@ -108,8 +107,8 @@ def getPhysicsModel(analysis_object):
             physicsModel = i
             isPresent = True
     if not isPresent:
-        physicsModel = None  # A placeholder to be created in event that it is not present.
-    return physicsModel, isPresent
+        physicsModel = None
+    return physicsModel
 
 
 def getMeshObject(analysis_object):
@@ -119,18 +118,17 @@ def getMeshObject(analysis_object):
         members = analysis_object.Group
     else:
         members = FreeCAD.activeDocument().Objects
+    from CfdMesh import _CfdMesh
     for i in members:
-        if hasattr(i, "Proxy") \
-                and hasattr(i.Proxy, "Type") \
-                and i.Proxy.Type == "CfdMesh":
+        if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
             if isPresent:
                 FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
             else:
                 meshObj.append(i)
                 isPresent = True
     if not isPresent:
-        meshObj = [None]  # just a placeholder to be created in event that it is not present
-    return meshObj[0], isPresent
+        meshObj = [None]
+    return meshObj[0]
 
 
 def getPorousZoneObjects(analysis_object):
@@ -146,14 +144,11 @@ def getZoneObjects(analysis_object):
 
 
 def getInitialConditions(analysis_object):
-    isPresent = False
+    from CfdInitialiseFlowField import _CfdInitialVariables
     for i in analysis_object.Group:
-        if "InitialiseFields" in i.Name:
-            InitialVariables = i.InitialVariables
-            isPresent = True
-    if not isPresent:
-        InitialVariables = None  # A placeholder to be created in event that it is not present.
-    return InitialVariables, isPresent
+        if isinstance(i.Proxy, _CfdInitialVariables):
+            return i
+    return None
 
 
 def getMaterials(analysis_object):
@@ -162,8 +157,9 @@ def getMaterials(analysis_object):
 
 
 def getSolver(analysis_object):
+    from CfdSolverFoam import _CfdSolverFoam
     for i in analysis_object.Group:
-        if i.isDerivedFrom("Fem::FemSolverObjectPython"):  # Fem::FemSolverObject is C++ type name
+        if isinstance(i.Proxy, _CfdSolverFoam):
             return i
 
 
@@ -194,9 +190,9 @@ def getCfdConstraintGroup(analysis_object):
 
 def getCfdBoundaryGroup(analysis_object):
     group = []
-    import _CfdFluidBoundary
+    from CfdFluidBoundary import _CfdFluidBoundary
     for i in analysis_object.Group:
-        if isinstance(i.Proxy, _CfdFluidBoundary._CfdFluidBoundary):
+        if isinstance(i.Proxy, _CfdFluidBoundary):
             group.append(i)
     return group
 
@@ -278,19 +274,7 @@ def cfdMessage(msg):
         FreeCAD.Gui.updateGui()
 
 
-def inputCheckAndStore(value, units, dictionary, key):
-    """ Store the numeric part of value (string or value) in dictionary[key] in the given units if compatible"""
-    # While the user is typing there will be parsing errors. Don't confuse the user by printing these -
-    # the validation icon will show an error.
-    try:
-        quantity = Units.Quantity(value).getValueAs(units)
-    except ValueError:
-        pass
-    else:
-        dictionary[key] = quantity.Value
-
-
-def setInputFieldQuantity(inputField, quantity):
+def setQuantity(inputField, quantity):
     """ Set the quantity (quantity object or unlocalised string) into the inputField correctly """
     # Must set in the correctly localised value as the user would enter it.
     # A bit painful because the python locale settings seem to be based on language,
@@ -305,6 +289,11 @@ def setInputFieldQuantity(inputField, quantity):
     inputField.setProperty("quantityString", q.UserString)
 
 
+def getQuantity(inputField):
+    """ Get the quantity as an unlocalised string from an inputField """
+    return str(inputField.property("quantity"))
+
+
 def indexOrDefault(list, findItem, defaultIndex):
     """ Look for findItem in list, and return defaultIndex if not found """
     try:
@@ -315,7 +304,7 @@ def indexOrDefault(list, findItem, defaultIndex):
 
 def hide_parts_show_meshes():
     if FreeCAD.GuiUp:
-        for acnstrmesh in FemGui.getActiveAnalysis().Group:
+        for acnstrmesh in getActiveAnalysis().Group:
             if "Mesh" in acnstrmesh.TypeId:
                 aparttoshow = acnstrmesh.Name.replace("_Mesh", "")
                 for apart in FreeCAD.activeDocument().Objects:
@@ -671,11 +660,9 @@ def checkCfdDependencies(term_print=True):
         FC_MAJOR_VER_REQUIRED = 0
         FC_MINOR_VER_REQUIRED = 17
         FC_PATCH_VER_REQUIRED = 0
-        FC_COMMIT_REQUIRED = 13528
+        FC_COMMIT_REQUIRED = 14304
 
-        import os
         import subprocess
-        import platform
 
         message = ""
         FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
@@ -720,7 +707,7 @@ def checkCfdDependencies(term_print=True):
         try:
             foam_dir = getFoamDir()
         except IOError as e:
-            ofmsg = "Could not find OpenFOAM installation: " + e.message
+            ofmsg = "Could not find OpenFOAM installation: " + str(e)
             if term_print:
                 print(ofmsg)
             message += ofmsg + '\n'
@@ -735,7 +722,7 @@ def checkCfdDependencies(term_print=True):
                 try:
                     foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")
                 except Exception as e:
-                    runmsg = "OpenFOAM installation found, but unable to run command: " + e.message
+                    runmsg = "OpenFOAM installation found, but unable to run command: " + str(e)
                     message += runmsg + '\n'
                     if term_print:
                         print(runmsg)
@@ -808,7 +795,7 @@ def checkCfdDependencies(term_print=True):
             try:
                 from freecad.plot import Plot
             except ImportError:
-                plot_msg = "Could not load Plot workbench"
+                plot_msg = "Could not load Plot workbench\nPlease install it using Tools | Addon manager"
                 message += plot_msg + '\n'
                 if term_print:
                     print(plot_msg)
@@ -1089,3 +1076,102 @@ def matchFacesToTargetShape(ref_lists, shape):
 
     return successful_candidates
 
+
+def setActiveAnalysis(analysis):
+    from CfdAnalysis import _CfdAnalysis
+    for obj in FreeCAD.ActiveDocument.Objects:
+        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdAnalysis):
+            obj.IsActiveAnalysis = False
+
+    analysis.IsActiveAnalysis = True
+
+
+def getActiveAnalysis():
+    from CfdAnalysis import _CfdAnalysis
+    for obj in FreeCAD.ActiveDocument.Objects:
+        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdAnalysis):
+            if obj.IsActiveAnalysis:
+                return obj
+    return None
+
+
+def addObjectProperty(obj, prop, init_val, type, *args):
+    """ Call addProperty on the object if it does not yet exist """
+    added = False
+    if prop not in obj.PropertiesList:
+        added = obj.addProperty(type, prop, *args)
+    if type == "App::PropertyQuantity":
+        # Set the unit so that the quantity will be accepted
+        # Has to be repeated on load as unit gets lost
+        setattr(obj, prop, Units.Unit(init_val))
+    if added:
+        setattr(obj, prop, init_val)
+        return True
+    else:
+        return False
+
+
+def relLenToRefinementLevel(rel_len):
+    return math.ceil(math.log(1.0/rel_len)/math.log(2))
+
+
+def importMaterials():
+    materials = {}
+    material_name_path_list = []
+
+    # Store the defaults inside the module directory rather than the resource dir
+    # system_mat_dir = FreeCAD.getResourceDir() + "/Mod/Material/FluidMaterialProperties"
+    system_mat_dir = os.path.join(get_module_path(), "data/CfdFluidMaterialProperties")
+    material_name_path_list = material_name_path_list + addMatDir(system_mat_dir, materials)
+    return materials, material_name_path_list
+
+
+def addMatDir(mat_dir, materials):
+    import glob
+    import os
+    import Material
+    mat_file_extension = ".FCMat"
+    ext_len = len(mat_file_extension)
+    dir_path_list = glob.glob(mat_dir + '/*' + mat_file_extension)
+    material_name_path_list = []
+    for a_path in dir_path_list:
+        material_name = os.path.basename(a_path[:-ext_len])
+        materials[a_path] = Material.importFCMat(a_path)
+        material_name_path_list.append([material_name, a_path])
+    material_name_path_list.sort()
+
+    return material_name_path_list
+
+
+QUANTITY_PROPERTIES = ['App::PropertyQuantity',
+                       'App::PropertyLength',
+                       'App::PropertyDistance',
+                       'App::PropertyAngle',
+                       'App::PropertyArea',
+                       'App::PropertyVolume',
+                       'App::PropertySpeed',
+                       'App::PropertyAcceleration',
+                       'App::PropertyForce',
+                       'App::PropertyPressure']
+
+
+def propsToDict(obj):
+    """ Convert an object's properties to dictionary entries, converting any PropertyQuantity to float in SI units """
+    d = {}
+    for k in obj.PropertiesList:
+        if obj.getTypeIdOfProperty(k) in QUANTITY_PROPERTIES:
+            q = Units.Quantity(getattr(obj, k))
+            # q.Value is in FreeCAD internal units, which is same as SI except for mm instead of m
+            d[k] = q.Value/1000**q.Unit.Signature[0]
+        else:
+            d[k] = getattr(obj, k)
+    return d
+
+
+def openFileManager(case_path):
+    if platform.system() == 'MacOS':
+        subprocess.Popen(['open', '--', case_path])
+    elif platform.system() == 'Linux':
+        subprocess.Popen(['xdg-open', case_path])
+    elif platform.system() == 'Windows':
+        subprocess.Popen(['explorer', case_path])

@@ -98,11 +98,11 @@ class TemplateBuilder(object):
         try:
             contents = self.process(contents, rel_file, params)
         except BracketError as err:
-            raise ValueError("Bracket matching error in {}: {}".format(rel_file, err.message))
+            raise ValueError("Bracket matching error in {}: {}".format(rel_file, str(err)))
         except ValueError as err:
-            raise ValueError("Error in {}: {}".format(rel_file, err.message))
+            raise ValueError("Error in {}: {}".format(rel_file, str(err)))
         except Exception as err:
-            print("Unexpected error building file {}: {}".format(rel_file, err.message))
+            print("Unexpected error building file {}: {}".format(rel_file, str(err)))
             raise
         return contents
 

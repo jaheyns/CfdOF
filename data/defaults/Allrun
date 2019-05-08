@@ -71,13 +71,13 @@ runCommand changeDictionary
 # Initialise flow
 runCommand potentialFoam -initialiseUBCs -writep
 %}
-%{%(solver/parallel%)
+%{%(solver/Parallel%)
 %:True
 # Run application in parallel
 runCommand decomposePar -force
-runCommand mpirun -n %(solver/parallelCores%) %(solver/solverName%) -parallel
+runCommand mpirun -n %(solver/ParallelCores%) %(solver/SolverName%) -parallel
 %:False
 # Run application
-runCommand %(solver/solverName%)
+runCommand %(solver/SolverName%)
 %}
 

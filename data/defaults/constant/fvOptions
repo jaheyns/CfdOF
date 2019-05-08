@@ -1,6 +1,6 @@
 %{%(porousZonesPresent%)
 %:True
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:porousSimpleFoam
 %:default
 %[_header%]

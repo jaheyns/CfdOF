@@ -20,11 +20,11 @@ boundaryField
 %:empty
 %[0/_boundary_empty%]
 %:wall
-%{%(boundaries/%(0%)/BoundarySubtype%)
-%:fixed rough
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall roughWall
     %(0%)
     {
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
         type        boundaryCorrectedFixedValue;
         value       uniform (0 0 0);
@@ -34,13 +34,13 @@ boundaryField
         value       uniform (0 0 0);
 %}
     }
-%:slip
+%:slipWall
     %(0%)
     {
         type        slip;
         value       $internalField;
     }
-%:translating
+%:translatingWall
     %(0%)
     {
         // Specified velocity, only component tangential to wall is used
@@ -48,7 +48,7 @@ boundaryField
         U           (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
         value       uniform (0 0 0);
     }
-%:partialSlip
+%:partialSlipWall
     %(0%)
     {
         type            partialSlip;
@@ -57,8 +57,8 @@ boundaryField
     }
 %}
 %:inlet
-%{%(boundaries/%(0%)/BoundarySubtype%)
-%:uniformVelocity
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:uniformVelocityInlet
     %(0%)
     {
         // Fix all three components of velocity on inflow and only the normal component on outflow,
@@ -72,35 +72,35 @@ boundaryField
         }
         value               uniform (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
     }
-%:volumetricFlowRate
+%:volumetricFlowRateInlet
     %(0%)
     {
         type                flowRateInletVelocity;
         volumetricFlowRate  %(boundaries/%(0%)/VolFlowRate%);
         value               $internalField;
     }
-%:massFlowRate
+%:massFlowRateInlet
     %(0%)
     {
         type            flowRateInletVelocity;
         massFlowRate    %(boundaries/%(0%)/MassFlowRate%);
         rho             rho;
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:simpleFoam porousSimpleFoam pimpleFoam
         rhoInlet        %(fluidProperties/0/Density%);
 %}
         value           $internalField;
     }
-%:totalPressure
+%:totalPressureInlet
 %[0/_U_boundary_pressureInletOutletVelocity%]
-%:staticPressure
+%:staticPressureInlet
 %[0/_U_boundary_pressureInletOutletVelocity%]
 %}
 %:outlet
-%{%(boundaries/%(0%)/BoundarySubtype%)
-%:staticPressure
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:staticPressureOutlet
 %[0/_U_boundary_pressureInletOutletVelocity%]
-%:uniformVelocity
+%:uniformVelocityOutlet
     %(0%)
     {
         // Fix only the normal component on outflow and all three components of velocity on inflow,
@@ -114,7 +114,7 @@ boundaryField
         }
         value               uniform (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
     }
-%:outFlow
+%:outFlowOutlet
     %(0%)
     {
         type        inletOutlet;
@@ -124,9 +124,9 @@ boundaryField
         value       $internalField;
     }
 %}
+%:open
+%{%(boundaries/%(0%)/BoundarySubType%)
 %:farField
-%{%(boundaries/%(0%)/BoundarySubtype%)
-%:characteristic
     %(0%)
     {
         type        characteristicFarfieldVelocity;
@@ -135,13 +135,13 @@ boundaryField
         T           %(boundaries/%(0%)/Temperature%);
         value       $internalField;
     }
-%}
-%:open
+%:default
 %[0/_U_boundary_pressureInletOutletVelocity%]
+%}
 %:constraint
 %[0/_boundary_constraint%]
 %:baffle
-%{%(boundaries/%(0%)/BoundarySubtype%)
+%{%(boundaries/%(0%)/BoundarySubType%)
 %:porousBaffle
 %[0/_boundary_cyclic_baffle%]
 %}

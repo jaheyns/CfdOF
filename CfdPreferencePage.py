@@ -226,20 +226,10 @@ class CfdPreferencePage:
                 self.consoleMessage("Download completed")
                 user_dir = self.thread.user_dir
                 self.consoleMessage("Building cfMesh. Lengthy process - please wait...")
-                if CfdTools.getFoamRuntime() == "BlueCFD":
-                    script_name = "buildCfMeshOnBlueCFD.sh"
-                    self.consoleMessage("Log file: {}\\log.Allwmake".format(user_dir, script_name))
-                    TemplateBuilder.TemplateBuilder(user_dir,
-                                                    os.path.join(CfdTools.get_module_path(), 'data', 'foamUserDir'),
-                                                    {'cfMeshDirectory': CFMESH_FILE_BASE})
-                    self.install_process = CfdTools.startFoamApplication(
-                        "export WM_NCOMPPROCS=`nproc`; ./"+script_name, "$WM_PROJECT_USER_DIR",
-                        'log.Allwmake', self.installFinished)
-                else:
-                    self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
-                    self.install_process = CfdTools.startFoamApplication(
-                        "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
-                        'log.Allwmake', self.installFinished)
+                self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
+                self.install_process = CfdTools.startFoamApplication(
+                    "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                    'log.Allwmake', self.installFinished)
                 # Reset foam dir for now in case the user presses 'Cancel'
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:

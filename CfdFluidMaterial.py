@@ -26,18 +26,11 @@
 
 
 import FreeCAD
-import platform
-try:
-    from femcommands.manager import CommandManager
-except ImportError:  # Backward compatibility
-    from PyGui.FemCommands import FemCommands as CommandManager
 import CfdTools
 import os
-
+from CfdTools import addObjectProperty
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
-    import FemGui
 
 
 def makeCfdFluidMaterial(name):
@@ -49,85 +42,70 @@ def makeCfdFluidMaterial(name):
     return obj
 
 
-class setCfdFluidPropertyCommand(CommandManager):
-    def __init__(self):
+class _CommandCfdFluidMaterial:
+
+    def GetResources(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.png")
-        self.resources = {
+        return {
             'Pixmap': icon_path,
             'MenuText': 'Add fluid properties',
             'ToolTip': 'Add fluid properties'
             }
-        self.is_active = 'with_analysis'  # Only activate when analysis is active
+
+    def IsActive(self):
+        return CfdTools.getActiveAnalysis() is not None
 
     def Activated(self):
         FreeCAD.Console.PrintMessage("Set fluid properties \n")
         FreeCAD.ActiveDocument.openTransaction("Set CfdFluidMaterialProperty")
-
-        FreeCADGui.addModule("FemGui")
+        FreeCADGui.doCommand("")
+        FreeCADGui.addModule("CfdTools")
         FreeCADGui.addModule("CfdFluidMaterial")
         editing_existing = False
-        analysis_object = FemGui.getActiveAnalysis()
+        analysis_object = CfdTools.getActiveAnalysis()
         if analysis_object is None:
-            CfdTools.cfdError("No analysis object found")
+            CfdTools.cfdError("No active analysis object found")
             return False
-        physics_model, phys_model_present = CfdTools.getPhysicsModel(analysis_object)
-        if not phys_model_present or physics_model.Phase == 'Single':
+        physics_model = CfdTools.getPhysicsModel(analysis_object)
+        if not physics_model or physics_model.Phase == 'Single':
             members = analysis_object.Group
             for i in members:
-                if i.Name.startswith('FluidProperties'):
-                    FreeCADGui.doCommand("Gui.activeDocument().setEdit('"+i.Name+"')")
+                if isinstance(i.Proxy, _CfdMaterial):
+                    FreeCADGui.activeDocument().setEdit(i.Name)
                     editing_existing = True
         if not editing_existing:
             FreeCADGui.doCommand(
-                "FemGui.getActiveAnalysis().addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))")
+                "CfdTools.getActiveAnalysis().addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))")
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
 if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_FluidMaterial', setCfdFluidPropertyCommand())
+    FreeCADGui.addCommand('Cfd_FluidMaterial', _CommandCfdFluidMaterial())
 
 
 class _CfdMaterial:
-    """ CFD material properties object """
+    """ CFD material properties object. Compatible with FreeCAD material object. """
     def __init__(self, obj):
         obj.Proxy = self
         self.Type = "CfdMaterial"
-        # Currently unused but necessary for compatibility with MaterialObjectPython
-        self.Material = {}
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        if "References" not in obj.PropertiesList:
-            obj.addProperty("App::PropertyLinkSubList", "References", "Material", "List of material shapes")
+        # Not currently used
+        addObjectProperty(obj, "References", [], "App::PropertyLinkSubList", "Material", "List of material shapes")
 
-        #if "Material" not in obj.PropertiesList:
-        #    obj.addProperty("App::PropertyMap", "Material", "Material", "Material Properties")
+        # Compatibility with FEM material object
+        if addObjectProperty(
+                obj, "Category", ["Solid", "Fluid"], "App::PropertyEnumeration", "Material", "Type of material"):
+            obj.Category = "Fluid"
 
-        if 'Density' not in obj.PropertiesList:
-            # We cannot presently use PropertyQuantity because units cannot be
-            # set from Python. Use string instead for now.
-            obj.addProperty("App::PropertyString", "Density", "Properties", "Density")
-            obj.Density = '1.2 kg/m^3'
+        # 'Material' PropertyMap already present in MaterialObjectPython
+        if not obj.Material:
+            mats, name_path_list = CfdTools.importMaterials()
+            obj.Material = mats[name_path_list[[np[0] for np in name_path_list].index('Air')][1]]
 
-        if 'DynamicViscosity' not in obj.PropertiesList:
-            obj.addProperty("App::PropertyString", "DynamicViscosity", "Properties", "Dynamic Viscosity")
-            obj.DynamicViscosity = '1.8e-5 kg/m/s'
-
-        if 'MolarMass' not in obj.PropertiesList:
-            obj.addProperty("App::PropertyString", "MolarMass", "Properties", "Molar mass")
-            obj.MolarMass = '0.02896438 kg/mol'
-
-        if 'Cp' not in obj.PropertiesList:
-            obj.addProperty("App::PropertyString", "Cp", "Properties", "Specific heat (Cp)")
-            obj.Cp = '1004.703 J/kg/K'
-
-        if 'SutherlandConstant' not in obj.PropertiesList:
-            obj.addProperty("App::PropertyString", "SutherlandConstant", "Properties", "Sutherland constant")
-            obj.SutherlandConstant = '1.4579327e-6 kg/m/s/K^0.5'
-
-        if 'SutherlandTemperature' not in obj.PropertiesList:
-            obj.addProperty("App::PropertyString", "SutherlandTemperature", "Properties", "Sutherland temperature")
-            obj.SutherlandTemperature = '110.4 K'
+    def onDocumentRestored(self, obj):
+        self.initProperties(obj)
 
     def execute(self, obj):
         return
@@ -138,8 +116,6 @@ class _ViewProviderCfdFluidMaterial:
         vobj.Proxy = self
 
     def getIcon(self):
-        # """after load from FCStd file, self.icon does not exist, return constant path instead"""
-        # return ":/icons/fem-material.svg"
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.png")
         return icon_path
 
@@ -158,7 +134,7 @@ class _ViewProviderCfdFluidMaterial:
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:
-            FreeCAD.Console.PrintError('Active Task Dialog found! Please close this one first!\n')
+            FreeCAD.Console.PrintError('Existing task dialog already open\n')
         return True
 
     def setEdit(self, vobj, mode):
@@ -166,8 +142,8 @@ class _ViewProviderCfdFluidMaterial:
         if analysis_object is None:
             CfdTools.cfdError("No parent analysis object found")
             return False
-        physics_model, is_present = CfdTools.getPhysicsModel(analysis_object)
-        if not is_present:
+        physics_model = CfdTools.getPhysicsModel(analysis_object)
+        if not physics_model:
             CfdTools.cfdError("Analysis object must have a physics object")
             return False
         import _TaskPanelCfdFluidProperties

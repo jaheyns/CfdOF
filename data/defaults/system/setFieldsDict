@@ -32,7 +32,7 @@ regions
 %:Uy
 %:Uz
 %:Pressure
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
             volScalarFieldValue p_rgh %(initialisationZones/%(2%)/Pressure%)
 %:simpleFoam porousSimpleFoam pimpleFoam
@@ -40,12 +40,10 @@ regions
 %:default
             volScalarFieldValue p %(initialisationZones/%(2%)/Pressure%)
 %}
-%:alphas
-%{%(initialisationZones/%(2%)/alphas%)
-            volScalarFieldValue alpha.%(0%) %(initialisationZones/%(3%)/alphas/%(0%)%)
+%:VolumeFractions
+%{%(initialisationZones/%(2%)/VolumeFractions%)
+            volScalarFieldValue alpha.%(0%) %(initialisationZones/%(3%)/VolumeFractions/%(0%)%)
 %}
-%:default
-            volScalarFieldValue %(0%) %(initialisationZones/%(2%)/%(0%)%)
 %}
 %}
         );
@@ -64,7 +62,7 @@ regions
 %:Uy
 %:Uz
 %:Pressure
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
             volScalarFieldValue p_rgh %(initialisationZones/%(2%)/Pressure%)
 %:simpleFoam porousSimpleFoam pimpleFoam
@@ -72,12 +70,10 @@ regions
 %:default
             volScalarFieldValue p %(initialisationZones/%(2%)/Pressure%)
 %}
-%:alphas
-%{%(initialisationZones/%(2%)/alphas%)
-            volScalarFieldValue alpha.%(0%) %(initialisationZones/%(3%)/alphas/%(0%)%)
+%:VolumeFractions
+%{%(initialisationZones/%(2%)/VolumeFractions%)
+            volScalarFieldValue alpha.%(0%) %(initialisationZones/%(3%)/VolumeFractions/%(0%)%)
 %}
-%:default
-            volScalarFieldValue %(0%) %(initialisationZones/%(2%)/%(0%)%)
 %}
 %}
         );

@@ -4,6 +4,7 @@
 # *   Copyright (c) 2017 - Johan Heyns (CSIR) <jheyns@csir.co.za>           *
 # *   Copyright (c) 2017 - Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>        *
 # *   Copyright (c) 2017 - Alfred Bogaers (CSIR) <abogaers@csir.co.za>      *
+# *   Copyright (c) 2019 - Oliver Oxtoby <oliveroxtoby@gmail.com>           *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -23,20 +24,12 @@
 # *                                                                         *
 # ***************************************************************************
 
-__title__ = "_TaskPanelCfdMeshRegion"
-__author__ = "JH, AB, OO"
-__url__ = "http://www.freecadweb.org"
-
-## @package TaskPanelCfdMeshRegion
-#  \ingroup CFD
-
 import FreeCAD
 import FreeCADGui
-import FemGui
 from PySide import QtGui
-from PySide import QtCore
 import os
-from CfdTools import inputCheckAndStore, setInputFieldQuantity
+import CfdTools
+from CfdTools import getQuantity, setQuantity
 import CfdFaceSelectWidget
 
 
@@ -49,40 +42,14 @@ class _TaskPanelCfdMeshRegion:
         self.mesh_obj = self.getMeshObject()
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMeshRegion.ui"))
-        self.form.if_gmsh_rellen.valueChanged.connect(self.gmsh_rellen_changed)
-        self.form.if_rellen.valueChanged.connect(self.rellen_changed)
 
-        self.form.if_refinethick.valueChanged.connect(self.refinethick_changed)
-        self.form.if_numlayer.valueChanged.connect(self.numlayer_changed)
-        self.form.if_expratio.valueChanged.connect(self.expratio_changed)
-        self.form.if_firstlayerheight.valueChanged.connect(self.firstlayerheight_changed)
+        self.form.baffle_check.stateChanged.connect(self.updateUI)
 
-        self.form.if_refinelevel.valueChanged.connect(self.refinelevel_changed)
-        self.form.if_edgerefinement.valueChanged.connect(self.edgerefinement_changed)
+        self.form.check_boundlayer.stateChanged.connect(self.updateUI)
 
-        self.form.baffle_check.stateChanged.connect(self.baffleChanged)
-
-        self.form.refinement_frame.setVisible(False)
-        self.form.boundlayer_frame.setVisible(False)
-        self.form.check_boundlayer.stateChanged.connect(self.boundary_layer_state_changed)
-
-        tool_tip_mes = "Cell size relative to base cell size."
-        self.form.if_gmsh_rellen.setToolTip(tool_tip_mes)
+        tool_tip_mes = "Cell size relative to base cell size"
         self.form.if_rellen.setToolTip(tool_tip_mes)
         self.form.label_rellen.setToolTip(tool_tip_mes)
-        self.get_meshregion_props()
-
-        #for backward compatibility with pre-Internal refinementRegions
-        try:
-            self.obj.Internal
-        except AttributeError:
-            self.obj.addProperty("App::PropertyBool","Internal","MeshRegionProperties")
-            self.obj.Internal = False
-            self.obj.addProperty("App::PropertyPythonObject","InternalRegion")
-            self.obj.InternalRegion = {"Type": "Box",
-                                  "Center": {"x":0,"y":0,"z":0},
-                                  "BoxLengths": {"x":1e-3,"y":1e-3,"z":1e-3},
-                                  "SphereRadius": 1e-3}
 
         self.InternalOrig = self.obj.Internal
         self.InternalRegionOrig = self.obj.InternalRegion.copy()
@@ -90,58 +57,51 @@ class _TaskPanelCfdMeshRegion:
         self.validTypesOfInternalPrimitives = ["Box", "Sphere", "Cone"]
 
         self.form.internalVolumePrimitiveSelection.addItems(self.validTypesOfInternalPrimitives)
-        self.changePrimitiveType()
 
         self.form.internalVolumePrimitiveSelection.currentIndexChanged.connect(self.internalTypeChanged)
         self.form.surfaceRefinementToggle.toggled.connect(self.change_internal_surface)
         self.form.volumeRefinementToggle.toggled.connect(self.change_internal_surface)
 
-        #Adding the following changed events to allow for real time update of the internal shape
-        self.form.radius.textChanged.connect(self.radiusChanged)
-        self.form.xCenter.valueChanged.connect(self.xCenterChanged)
-        self.form.yCenter.textChanged.connect(self.yCenterChanged)
-        self.form.zCenter.textChanged.connect(self.zCenterChanged)
-        self.form.xLength.textChanged.connect(self.xLengthChanged)
-        self.form.yLength.textChanged.connect(self.yLengthChanged)
-        self.form.zLength.textChanged.connect(self.zLengthChanged)
-        self.form.xPoint1.valueChanged.connect(self.xPoint1Changed)
-        self.form.yPoint1.textChanged.connect(self.yPoint1Changed)
-        self.form.zPoint1.textChanged.connect(self.zPoint1Changed)
-        self.form.xPoint2.valueChanged.connect(self.xPoint2Changed)
-        self.form.yPoint2.textChanged.connect(self.yPoint2Changed)
-        self.form.zPoint2.textChanged.connect(self.zPoint2Changed)
-        self.form.radius1.textChanged.connect(self.radius1Changed)
-        self.form.radius2.textChanged.connect(self.radius2Changed)
+        self.load()
 
-        if self.mesh_obj.MeshUtility == 'gmsh':
-            self.form.cartesianInternalVolumeFrame.setVisible(False)
-            self.form.surfaceOrInernalVolume.setVisible(False)
-            self.form.gmsh_frame.setVisible(True)
-            self.form.cf_frame.setVisible(False)
-            self.form.snappy_frame.setVisible(False)
-        else:
-            self.set_internal_surface()
+        # Adding the following changed events to allow for real time update of the internal shape
+        self.form.radius.valueChanged.connect(self.internalParameterChanged)
+        self.form.xCenter.valueChanged.connect(self.internalParameterChanged)
+        self.form.yCenter.valueChanged.connect(self.internalParameterChanged)
+        self.form.zCenter.valueChanged.connect(self.internalParameterChanged)
+        self.form.xLength.valueChanged.connect(self.internalParameterChanged)
+        self.form.yLength.valueChanged.connect(self.internalParameterChanged)
+        self.form.zLength.valueChanged.connect(self.internalParameterChanged)
+        self.form.xPoint1.valueChanged.connect(self.internalParameterChanged)
+        self.form.yPoint1.valueChanged.connect(self.internalParameterChanged)
+        self.form.zPoint1.valueChanged.connect(self.internalParameterChanged)
+        self.form.xPoint2.valueChanged.connect(self.internalParameterChanged)
+        self.form.yPoint2.valueChanged.connect(self.internalParameterChanged)
+        self.form.zPoint2.valueChanged.connect(self.internalParameterChanged)
+        self.form.radius1.valueChanged.connect(self.internalParameterChanged)
+        self.form.radius2.valueChanged.connect(self.internalParameterChanged)
 
-        self.form.if_refinethick.setToolTip("Thickness or distance of the refinement region from the reference "
-                                            "surface.")
+        self.form.if_refinethick.setToolTip("Distance the refinement region extends from the reference "
+                                            "surface")
         self.form.if_numlayer.setToolTip("Number of boundary layers if the reference surface is an external or "
-                                         "mesh patch.")
+                                         "mesh patch")
         self.form.if_expratio.setToolTip("Expansion ratio of boundary layers (limited to be greater than 1.0 and "
-                                         "smaller than 1.2).")
-        self.form.if_firstlayerheight.setToolTip("Maximum first cell height (optional value and neglected if set "
-                                                 "to 0.0).")
-        self.form.if_refinelevel.setToolTip("Number of refinement levels relative to the base cell size")
-        self.form.if_edgerefinement.setToolTip("Number of edge or feature refinement levels.")
-        self.form.baffle_check.setToolTip("Create a zero thickness baffle.")
-
-        self.initialiseUponReload()
+                                         "smaller than 1.2)")
+        self.form.if_firstlayerheight.setToolTip("Maximum first cell height (ignored if set to 0.0)")
+        self.form.if_edgerefinement.setToolTip("Number of edge or feature refinement levels")
+        self.form.baffle_check.setToolTip("Create a zero thickness baffle")
 
         self.ReferencesOrig = list(self.obj.References)
 
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.referenceSelectWidget,
                                                                     self.obj,
-                                                                    self.mesh_obj.MeshUtility != 'gmsh')
+                                                                    True,
+                                                                    self.mesh_obj.MeshUtility == 'gmsh',
+                                                                    self.mesh_obj.MeshUtility == 'gmsh',
+                                                                    self.mesh_obj.MeshUtility == 'gmsh')
+
+        self.updateUI()
 
     def accept(self):
         if self.sel_server:
@@ -154,22 +114,24 @@ class _TaskPanelCfdMeshRegion:
             FreeCADGui.doCommand("referenceList.append(('{}','{}'))".format(ref[0], ref[1]))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References = referenceList".format(self.obj.Name))
         FreeCADGui.doCommand("\nFreeCAD.ActiveDocument.{}.RelativeLength "
-                             "= {}".format(self.obj.Name, self.rellen))
+                             "= {}".format(self.obj.Name, self.form.if_rellen.value()))
         if self.mesh_obj.MeshUtility != 'gmsh':
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.RefinementThickness "
-                                 "= '{}'".format(self.obj.Name, self.refinethick))
+                                 "= '{}'".format(self.obj.Name, getQuantity(self.form.if_refinethick)))
+            if self.form.check_boundlayer.isChecked():
+                num_layers = self.form.if_numlayer.value()
+            else:
+                num_layers = 1
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.NumberLayers "
-                                 "= {}".format(self.obj.Name, self.numlayer))
+                                 "= {}".format(self.obj.Name, num_layers))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.ExpansionRatio "
-                                 "= {}".format(self.obj.Name, self.expratio))
+                                 "= {}".format(self.obj.Name, self.form.if_expratio.value()))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.FirstLayerHeight "
-                                 "= '{}'".format(self.obj.Name, self.firstlayerheight))
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.RefinementLevel "
-                                 "= {}".format(self.obj.Name, self.refinelevel))
+                                 "= '{}'".format(self.obj.Name, getQuantity(self.form.if_firstlayerheight)))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.RegionEdgeRefinement "
-                                 "= {}".format(self.obj.Name, self.edgerefinement))
+                                 "= {}".format(self.obj.Name, self.form.if_edgerefinement.value()))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Baffle "
-                                 "= {}".format(self.obj.Name, self.baffle))
+                                 "= {}".format(self.obj.Name, self.form.baffle_check.isChecked()))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Internal "
                                  "= {}".format(self.obj.Name, self.obj.Internal))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.InternalRegion "
@@ -189,86 +151,53 @@ class _TaskPanelCfdMeshRegion:
         FreeCAD.getDocument(doc_name).recompute()
         return True
 
-    def initialiseUponReload(self):
+    def load(self):
         """ fills the widgets """
-        if self.mesh_obj.MeshUtility == "gmsh":
-            self.form.if_gmsh_rellen.setValue(self.obj.RelativeLength)
-        else:
-            self.form.if_rellen.setValue(self.obj.RelativeLength)
-            setInputFieldQuantity(self.form.if_refinethick, self.obj.RefinementThickness)
-            if self.numlayer > 1:  # Only reload when there are more than one layer
-                self.form.check_boundlayer.toggle()
-                self.form.if_numlayer.setValue(self.obj.NumberLayers)
-                self.form.if_expratio.setValue(self.obj.ExpansionRatio)
-                setInputFieldQuantity(self.form.if_firstlayerheight, self.obj.FirstLayerHeight)
+        self.form.if_rellen.setValue(self.obj.RelativeLength)
+        if not self.mesh_obj.MeshUtility == "gmsh":
+            setQuantity(self.form.if_refinethick, self.obj.RefinementThickness)
+            self.form.check_boundlayer.setChecked(self.obj.NumberLayers > 1)
+            self.form.if_numlayer.setValue(self.obj.NumberLayers)
+            self.form.if_expratio.setValue(self.obj.ExpansionRatio)
+            setQuantity(self.form.if_firstlayerheight, self.obj.FirstLayerHeight)
 
-            self.form.if_refinelevel.setValue(self.obj.RefinementLevel)
             self.form.if_edgerefinement.setValue(self.obj.RegionEdgeRefinement)
-            if self.obj.Baffle:
-                self.form.baffle_check.toggle()
+            self.form.baffle_check.setChecked(self.obj.Baffle)
             if self.obj.Internal:
                 self.form.volumeRefinementToggle.toggle()
             index = self.validTypesOfInternalPrimitives.index(self.obj.InternalRegion["Type"])
             self.form.internalVolumePrimitiveSelection.setCurrentIndex(index)
-            setInputFieldQuantity(self.form.xCenter, str(self.obj.InternalRegion["Center"]["x"])+"m")
-            setInputFieldQuantity(self.form.yCenter, str(self.obj.InternalRegion["Center"]["y"])+"m")
-            setInputFieldQuantity(self.form.zCenter, str(self.obj.InternalRegion["Center"]["z"])+"m")
-            setInputFieldQuantity(self.form.xLength, str(self.obj.InternalRegion["BoxLengths"]["x"])+"m")
-            setInputFieldQuantity(self.form.yLength, str(self.obj.InternalRegion["BoxLengths"]["y"])+"m")
-            setInputFieldQuantity(self.form.zLength, str(self.obj.InternalRegion["BoxLengths"]["z"])+"m")
-            setInputFieldQuantity(self.form.radius, str(self.obj.InternalRegion["SphereRadius"])+"m")
-            p1 = self.obj.InternalRegion.get("Point1", {"x": 0, "y": 0, "z": 0})
-            self.obj.InternalRegion["Point1"] = p1
-            setInputFieldQuantity(self.form.xPoint1, str(p1["x"])+"m")
-            setInputFieldQuantity(self.form.yPoint1, str(p1["y"])+"m")
-            setInputFieldQuantity(self.form.zPoint1, str(p1["z"])+"m")
-            p2 = self.obj.InternalRegion.get("Point2", {"x": 0, "y": 0, "z": 0})
-            self.obj.InternalRegion["Point2"] = p2
-            setInputFieldQuantity(self.form.xPoint2, str(p2["x"])+"m")
-            setInputFieldQuantity(self.form.yPoint2, str(p2["y"])+"m")
-            setInputFieldQuantity(self.form.zPoint2, str(p2["z"])+"m")
-            self.obj.InternalRegion["Radius1"] = self.obj.InternalRegion.get("Radius1", 0)
-            setInputFieldQuantity(self.form.radius1, str(self.obj.InternalRegion["Radius1"])+"m")
-            self.obj.InternalRegion["Radius2"] = self.obj.InternalRegion.get("Radius2", 0)
-            setInputFieldQuantity(self.form.radius2, str(self.obj.InternalRegion["Radius2"])+"m")
+            setQuantity(self.form.xCenter, self.obj.InternalRegion["Center"]["x"])
+            setQuantity(self.form.yCenter, self.obj.InternalRegion["Center"]["y"])
+            setQuantity(self.form.zCenter, self.obj.InternalRegion["Center"]["z"])
+            setQuantity(self.form.xLength, self.obj.InternalRegion["BoxLengths"]["x"])
+            setQuantity(self.form.yLength, self.obj.InternalRegion["BoxLengths"]["y"])
+            setQuantity(self.form.zLength, self.obj.InternalRegion["BoxLengths"]["z"])
+            setQuantity(self.form.radius, self.obj.InternalRegion["SphereRadius"])
+            p1 = self.obj.InternalRegion["Point1"]
+            setQuantity(self.form.xPoint1, p1["x"])
+            setQuantity(self.form.yPoint1, p1["y"])
+            setQuantity(self.form.zPoint1, p1["z"])
+            p2 = self.obj.InternalRegion["Point2"]
+            setQuantity(self.form.xPoint2, p2["x"])
+            setQuantity(self.form.yPoint2, p2["y"])
+            setQuantity(self.form.zPoint2, p2["z"])
+            setQuantity(self.form.radius1, self.obj.InternalRegion["Radius1"])
+            setQuantity(self.form.radius2, self.obj.InternalRegion["Radius2"])
 
-    def boundary_layer_state_changed(self):
-        if self.form.check_boundlayer.isChecked():
-            self.form.boundlayer_frame.setVisible(True)
-        else:
-            self.form.boundlayer_frame.setVisible(False)
-            self.form.if_numlayer.setValue(int(1))
-            self.form.if_expratio.setValue(1.0)
-            self.form.if_firstlayerheight.setText("0.0 mm")
-
-    def getMeshObject(self):
-        analysis_obj = FemGui.getActiveAnalysis()
-        from CfdTools import getMeshObject
-        mesh_obj, is_present = getMeshObject(analysis_obj)
-        if not is_present:
-            message = "Missing mesh object! \n\nIt appears that the mesh object is not available, please re-create."
-            QtGui.QMessageBox.critical(None, 'Missing mesh object', message)
-            doc = FreeCADGui.getDocument(self.obj.Document)
-            doc.resetEdit()
-        return mesh_obj
-
-    def get_meshregion_props(self):
-        self.rellen = self.obj.RelativeLength
-        if self.mesh_obj.MeshUtility != "gmsh":
-            self.refinethick = self.obj.RefinementThickness
-            self.numlayer = self.obj.NumberLayers
-            self.expratio = self.obj.ExpansionRatio
-            self.firstlayerheight = self.obj.FirstLayerHeight
-            self.refinelevel = self.obj.RefinementLevel
-            self.edgerefinement = self.obj.RegionEdgeRefinement
-            self.baffle = self.obj.Baffle
-
-    def set_internal_surface(self):
-        if self.obj.Internal:
-            if not(self.form.volumeRefinementToggle.isChecked()):
-                self.form.volumeRefinementToggle.toggle()
+    def updateUI(self):
+        self.form.boundlayer_frame.setVisible(self.form.check_boundlayer.isChecked())
+        if self.mesh_obj.MeshUtility == 'gmsh':
+            self.form.cartesianInternalVolumeFrame.setVisible(False)
+            self.form.surfaceOrInernalVolume.setVisible(False)
+            self.form.cf_frame.setVisible(False)
+            self.form.snappy_frame.setVisible(False)
+        elif self.mesh_obj.MeshUtility == 'cfMesh':
             self.form.surfaceOrInernalVolume.setVisible(True)
-            self.form.gmsh_frame.setVisible(False)
+        elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
+            self.form.surfaceOrInernalVolume.setVisible(False)
+        if self.obj.Internal:
+            self.form.surfaceOrInernalVolume.setVisible(True)
             self.form.cf_frame.setVisible(False)
             self.form.snappy_frame.setVisible(False)
             self.form.refinement_frame.setVisible(False)
@@ -281,33 +210,15 @@ class _TaskPanelCfdMeshRegion:
                 self.form.snappy_frame.setVisible(True)
                 self.form.snappySurfaceFrame.setVisible(False)
         else:
-            if not(self.form.surfaceRefinementToggle.isChecked()):
-                self.form.volumeRefinementToggle.toggle()
             self.form.cartesianInternalVolumeFrame.setVisible(False)
             if self.mesh_obj.MeshUtility == 'cfMesh':
-                self.form.gmsh_frame.setVisible(False)
                 self.form.cf_frame.setVisible(True)
                 self.form.snappy_frame.setVisible(False)
                 self.form.refinement_frame.setVisible(True)
             elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                self.form.gmsh_frame.setVisible(False)
                 self.form.cf_frame.setVisible(False)
                 self.form.snappy_frame.setVisible(True)
                 self.form.snappySurfaceFrame.setVisible(True)
-
-    def change_internal_surface(self):
-        if self.form.volumeRefinementToggle.isChecked():
-            self.obj.Internal = True
-        else:
-            self.obj.Internal = False
-        self.set_internal_surface()
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        obj.Internal = self.obj.Internal
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def changePrimitiveType(self):
         if self.form.internalVolumePrimitiveSelection.currentText() == "Box":
             self.form.centerLayout.setVisible(True)
             self.form.lengthLayout.setVisible(True)
@@ -324,142 +235,52 @@ class _TaskPanelCfdMeshRegion:
             self.form.radiusLayout.setVisible(False)
             self.form.coneLayout.setVisible(True)
 
+    def getMeshObject(self):
+        analysis_obj = CfdTools.getActiveAnalysis()
+        mesh_obj = CfdTools.getMeshObject(analysis_obj)
+        if mesh_obj is None:
+            message = "Mesh object not found - please re-create."
+            QtGui.QMessageBox.critical(None, 'Missing mesh object', message)
+            doc = FreeCADGui.getDocument(self.obj.Document)
+            doc.resetEdit()
+        return mesh_obj
+
+    def change_internal_surface(self):
+        if self.form.volumeRefinementToggle.isChecked():
+            self.obj.Internal = True
+        else:
+            self.obj.Internal = False
+        self.updateUI()
+        doc_name = str(self.obj.Document.Name)
+        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
+        obj.InternalRegion = self.obj.InternalRegion
+        obj.Internal = self.obj.Internal
+        FreeCAD.getDocument(doc_name).recompute()
+
     def internalTypeChanged(self):
         self.obj.InternalRegion['Type'] = self.form.internalVolumePrimitiveSelection.currentText()
         doc_name = str(self.obj.Document.Name)
         obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
         obj.InternalRegion = self.obj.InternalRegion
         FreeCAD.getDocument(doc_name).recompute()
-        
-        self.changePrimitiveType()
+        self.updateUI()
 
-    def gmsh_rellen_changed(self, value):
-        self.rellen = value
-
-    def rellen_changed(self, value):
-        self.rellen = value
-
-    def refinethick_changed(self, value):
-        self.refinethick = value
-
-    def numlayer_changed(self, value):
-        self.numlayer = value
-
-    def expratio_changed(self, value):
-        self.expratio = value
-
-    def firstlayerheight_changed(self, value):
-        self.firstlayerheight = value
-
-    def refinelevel_changed(self, value):
-        self.refinelevel = value
-
-    def edgerefinement_changed(self, value):
-        self.edgerefinement = value
-
-    def baffleChanged(self, checkedState):
-        self.baffle = bool(checkedState)
-
-    def radiusChanged(self,value):
-        inputCheckAndStore(value, "m", self.obj.InternalRegion, 'SphereRadius')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def xCenterChanged(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['Center'], 'x')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def yCenterChanged(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['Center'], 'y')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def zCenterChanged(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['Center'], 'z')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def xLengthChanged(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['BoxLengths'], 'x')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def yLengthChanged(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['BoxLengths'], 'y')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def zLengthChanged(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['BoxLengths'], 'z')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def xPoint1Changed(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['Point1'], 'x')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def yPoint1Changed(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['Point1'], 'y')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def zPoint1Changed(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['Point1'], 'z')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def xPoint2Changed(self, text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['Point2'], 'x')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def yPoint2Changed(self, text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['Point2'], 'y')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def zPoint2Changed(self, text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion['Point2'], 'z')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def radius1Changed(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion, 'Radius1')
-        doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
-        obj.InternalRegion = self.obj.InternalRegion
-        FreeCAD.getDocument(doc_name).recompute()
-
-    def radius2Changed(self,text):
-        inputCheckAndStore(text, "m", self.obj.InternalRegion, 'Radius2')
+    def internalParameterChanged(self, value):
+        self.obj.InternalRegion['SphereRadius'] = getQuantity(self.form.radius)
+        self.obj.InternalRegion['Center'] = {'x': getQuantity(self.form.xCenter),
+                                             'y': getQuantity(self.form.yCenter),
+                                             'z': getQuantity(self.form.zCenter)}
+        self.obj.InternalRegion['BoxLengths'] = {'x': getQuantity(self.form.xLength),
+                                                 'y': getQuantity(self.form.yLength),
+                                                 'z': getQuantity(self.form.zLength)}
+        self.obj.InternalRegion['Point1'] = {'x': getQuantity(self.form.xPoint1),
+                                             'y': getQuantity(self.form.yPoint1),
+                                             'z': getQuantity(self.form.zPoint1)}
+        self.obj.InternalRegion['Point2'] = {'x': getQuantity(self.form.xPoint2),
+                                             'y': getQuantity(self.form.yPoint2),
+                                             'z': getQuantity(self.form.zPoint2)}
+        self.obj.InternalRegion['Radius1'] = getQuantity(self.form.radius1)
+        self.obj.InternalRegion['Radius2'] = getQuantity(self.form.radius2)
         doc_name = str(self.obj.Document.Name)
         obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
         obj.InternalRegion = self.obj.InternalRegion

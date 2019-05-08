@@ -24,11 +24,6 @@
 # **************************************************************************/
 
 
-__title__ = "cfd analysis workbench"
-__author__ = "qingfeng xia"
-__url__ = "http://www.freecadweb.org"
-
-
 class CfdOFWorkbench(Workbench):
     """ CfdOF workbench object """
     def __init__(self):
@@ -49,27 +44,26 @@ class CfdOFWorkbench(Workbench):
         # must import QtCore in this function,
         # not at the beginning of this file for translation support
         from PySide import QtCore
-        import Fem
-        import FemGui
 
-        import _CommandCfdAnalysis
-        import CfdPhysicsSelection
-        import CfdFluidMaterial
-        import _CommandCfdSolverFoam
-        import _CommandCfdSolverControl
-        import _CommandCfdInitialiseInternalFlowField
-        import _CommandCfdFluidBoundary
-        import _CommandCfdPorousZone
-        import _CommandCfdInitialisationZone
+        from CfdAnalysis import _CommandCfdAnalysis
+        from CfdMesh import _CommandCfdMeshFromShape
+        from CfdMeshRegion import _CommandMeshRegion
+        from CfdPhysicsSelection import _CommandCfdPhysicsSelection
+        from CfdFluidMaterial import _CommandCfdFluidMaterial
+        from CfdSolverFoam import _CommandCfdSolverFoam
+        from CfdInitialiseFlowField import _CommandCfdInitialiseInternalFlowField
+        from CfdFluidBoundary import _CommandCfdFluidBoundary
+        from CfdZone import _CommandCfdPorousZone
+        from CfdZone import _CommandCfdInitialisationZone
 
-        import _CommandCfdMeshRegion
-        # import _CommandPrintMeshInfo  # Create a fluid specific check as the current does not contain any
-        #                               # useful info for flow (see checkMesh)
-        import _CommandCfdMeshFromShape
+        FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
+        FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
+        FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
 
-        cmdlst = ['Cfd_Analysis','Cfd_PhysicsModel', 'Cfd_FluidMaterial',
-                  'Cfd_InitialiseInternal',
+        cmdlst = ['Cfd_Analysis',
                   'Cfd_MeshFromShape', 'Cfd_MeshRegion',
+                  'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
+                  'Cfd_InitialiseInternal',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
                   'Cfd_SolverControl']
 

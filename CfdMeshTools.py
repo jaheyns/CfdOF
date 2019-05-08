@@ -29,7 +29,6 @@ __url__ = "http://www.freecadweb.org"
 
 import FreeCAD
 import Fem
-import Fem
 try:
     import femmesh.meshtools as FemMeshTools
 except ImportError:  # Backward compatibility
@@ -39,38 +38,29 @@ try:
 except ImportError:  # Backward compat
     from PyObjects import _FemMeshGmsh
 from FreeCAD import Units
-import tempfile
 import os
-import sys
 import platform
 import shutil
 import subprocess
 import CfdTools
 import math
 import MeshPart
-import Mesh
 import TemplateBuilder
 import Part
 import CfdCaseWriterFoam
-if FreeCAD.GuiUp:
-    import FemGui
 
 
 class CfdMeshTools:
-    def __init__(self, cart_mesh_obj, analysis=None):
+    def __init__(self, cart_mesh_obj):
         self.mesh_obj = cart_mesh_obj
-        if analysis:
-            self.analysis = analysis
-            # group meshing turned on
-        else:
-            self.analysis = CfdTools.getParentAnalysisObject(self.mesh_obj)
+        self.analysis = CfdTools.getParentAnalysisObject(self.mesh_obj)
 
         self.part_obj = self.mesh_obj.Part  # Part to mesh
         self.scale = 0.001  # Scale mm to m
 
         # Default to 2 % of bounding box characteristic length
         self.clmax = Units.Quantity(self.mesh_obj.CharacteristicLengthMax).Value
-        if self.clmax == 0.0:
+        if self.clmax <= 0.0:
             shape = self.part_obj.Shape
             cl_bound_box = math.sqrt(shape.BoundBox.XLength**2 + shape.BoundBox.YLength**2 + shape.BoundBox.ZLength**2)
             self.clmax = 0.02*cl_bound_box  # Always in internal format, i.e. mm
@@ -108,12 +98,12 @@ class CfdMeshTools:
         twoDPlanes = []
         analysis_obj = CfdTools.getParentAnalysisObject(self.mesh_obj)
         if not analysis_obj:
-            analysis_obj = FemGui.getActiveAnalysis()
+            analysis_obj = CfdTools.getActiveAnalysis()
         if analysis_obj:
             boundaries = CfdTools.getCfdBoundaryGroup(analysis_obj)
             for b in boundaries:
-                if b.BoundarySettings['BoundaryType'] == 'constraint' and \
-                   b.BoundarySettings['BoundarySubtype'] == 'twoDBoundingPlane':
+                if b.BoundaryType == 'constraint' and \
+                   b.BoundarySubType == 'twoDBoundingPlane':
                     twoDPlanes.append(b.Name)
 
         if self.dimension == '2D':
@@ -295,7 +285,23 @@ class CfdMeshTools:
                 for mr_id, mr_obj in enumerate(self.mesh_obj.MeshRegionList):
                     try:
                         Internal = mr_obj.Internal
-                        InternalRegion = mr_obj.InternalRegion
+                        import copy
+                        InternalRegion = copy.deepcopy(mr_obj.InternalRegion)
+                        InternalRegion['Center']['x'] = Units.Quantity(InternalRegion['Center']['x']).getValueAs("m")
+                        InternalRegion['Center']['y'] = Units.Quantity(InternalRegion['Center']['y']).getValueAs("m")
+                        InternalRegion['Center']['z'] = Units.Quantity(InternalRegion['Center']['z']).getValueAs("m")
+                        InternalRegion['BoxLengths']['x'] = Units.Quantity(InternalRegion['BoxLengths']['x']).getValueAs("m")
+                        InternalRegion['BoxLengths']['y'] = Units.Quantity(InternalRegion['BoxLengths']['y']).getValueAs("m")
+                        InternalRegion['BoxLengths']['z'] = Units.Quantity(InternalRegion['BoxLengths']['z']).getValueAs("m")
+                        InternalRegion['SphereRadius'] = Units.Quantity(InternalRegion['SphereRadius']).getValueAs("m")
+                        InternalRegion['Point1']['x'] = Units.Quantity(InternalRegion['Point1']['x']).getValueAs("m")
+                        InternalRegion['Point1']['y'] = Units.Quantity(InternalRegion['Point1']['y']).getValueAs("m")
+                        InternalRegion['Point1']['z'] = Units.Quantity(InternalRegion['Point1']['z']).getValueAs("m")
+                        InternalRegion['Point2']['x'] = Units.Quantity(InternalRegion['Point2']['x']).getValueAs("m")
+                        InternalRegion['Point2']['y'] = Units.Quantity(InternalRegion['Point2']['y']).getValueAs("m")
+                        InternalRegion['Point2']['z'] = Units.Quantity(InternalRegion['Point2']['z']).getValueAs("m")
+                        InternalRegion['Radius1'] = Units.Quantity(InternalRegion['Radius1']).getValueAs("m")
+                        InternalRegion['Radius2'] = Units.Quantity(InternalRegion['Radius2']).getValueAs("m")
                     except AttributeError:
                         Internal = False
                         InternalRegion = {}
@@ -384,16 +390,18 @@ class CfdMeshTools:
                                     "InternalRegion": InternalRegion}
 
                         elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
+                            refinement_level = CfdTools.relLenToRefinementLevel(mr_obj.RelativeLength)
                             if not Internal:
                                 if not mr_obj.Baffle:
                                     snappy_mesh_region_list.append(mr_obj.Name)
+                                edge_level = CfdTools.relLenToRefinementLevel(mr_obj.RegionEdgeRefinement)
                                 for rL in range(len(snappy_mesh_region_list)):
                                     mrName = mr_obj.Name + snappy_mesh_region_list[rL]
                                     snappy_settings['MeshRegions'][mrName] = {
                                         'RegionName': snappy_mesh_region_list[rL],
-                                        'RefinementLevel': mr_obj.RefinementLevel,
-                                        'EdgeRefinementLevel': mr_obj.RegionEdgeRefinement,
-                                        'MaxRefinementLevel': max(mr_obj.RefinementLevel, mr_obj.RegionEdgeRefinement),
+                                        'RefinementLevel': refinement_level,
+                                        'EdgeRefinementLevel': edge_level,
+                                        'MaxRefinementLevel': max(refinement_level, edge_level),
                                         'Baffle': mr_obj.Baffle
                                 }
                             else:
@@ -404,7 +412,7 @@ class CfdMeshTools:
                                 minZ = InternalRegion["Center"]["z"] - InternalRegion["BoxLengths"]["z"]/2.0
                                 maxZ = InternalRegion["Center"]["z"] + InternalRegion["BoxLengths"]["z"]/2.0
                                 snappy_settings['InternalRegions'][mr_obj.Name] = {
-                                    'RefinementLevel': mr_obj.RefinementLevel,
+                                    'RefinementLevel': refinement_level,
                                     "Type" : InternalRegion["Type"],
                                     "Center" : InternalRegion["Center"],
                                     "Radius" : InternalRegion["SphereRadius"],
@@ -537,15 +545,15 @@ class CfdMeshTools:
                 "cellsZ": cells_z
             }
 
-            inside_x = self.mesh_obj.PointInMesh.get('x')*self.scale
-            inside_y = self.mesh_obj.PointInMesh.get('y')*self.scale
-            inside_z = self.mesh_obj.PointInMesh.get('z')*self.scale
+            inside_x = Units.Quantity(self.mesh_obj.PointInMesh.get('x')).Value*self.scale
+            inside_y = Units.Quantity(self.mesh_obj.PointInMesh.get('y')).Value*self.scale
+            inside_z = Units.Quantity(self.mesh_obj.PointInMesh.get('z')).Value*self.scale
 
             shape_face_names_list = []
             for i in self.mesh_obj.ShapeFaceNames:
                 shape_face_names_list.append(i)
             snappy_settings['ShapeFaceNames'] = tuple(shape_face_names_list)
-            snappy_settings['EdgeRefinementLevel'] = self.mesh_obj.EdgeRefinement
+            snappy_settings['EdgeRefinementLevel'] = CfdTools.relLenToRefinementLevel(self.mesh_obj.EdgeRefinement)
             snappy_settings['PointInMesh'] = {
                 "x": inside_x,
                 "y": inside_y,

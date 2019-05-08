@@ -1,4 +1,4 @@
-%{%(solver/solverName%)
+%{%(solver/SolverName%)
 %:hisa
 %[_header%]
 FoamFile

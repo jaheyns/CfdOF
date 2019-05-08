@@ -11,7 +11,7 @@
         type        wall;
     }
 %:constraint
-%{%(boundaries/%(0%)/BoundarySubtype%)
+%{%(boundaries/%(0%)/BoundarySubType%)
 %:symmetry
     %(0%)
     {
