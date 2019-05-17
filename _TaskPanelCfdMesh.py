@@ -349,7 +349,7 @@ class _TaskPanelCfdMesh:
                 # print('Mesh is not member of active analysis, means no group meshing')
                 self.analysis = None  # no group meshing
         else:
-            # print('No active analyis, means no group meshing')
+            # print('No active analysis, means no group meshing')
             self.analysis = None  # no group meshing
 
     def openParaview(self):
