@@ -662,6 +662,9 @@ def checkCfdDependencies(term_print=True):
         FC_PATCH_VER_REQUIRED = 0
         FC_COMMIT_REQUIRED = 14304
 
+        CF_MAJOR_VER_REQUIRED = 1
+        CF_MINOR_VER_REQUIRED = 1
+
         import subprocess
 
         message = ""
@@ -756,9 +759,20 @@ def checkCfdDependencies(term_print=True):
 
                     # Check for cfMesh
                     try:
-                        runFoamCommand("cartesianMesh -help")
+                        cfmesh_ver = runFoamCommand("cartesianMesh -version")
+                        cfmesh_ver = cfmesh_ver.rstrip().split()[-1]
+                        cfmesh_ver = cfmesh_ver.split('.')
+                        if (not cfmesh_ver or len(cfmesh_ver) != 2 or
+                            int(cfmesh_ver[0]) < CF_MAJOR_VER_REQUIRED or
+                            (int(cfmesh_ver[0]) == CF_MAJOR_VER_REQUIRED and
+                             int(cfmesh_ver[1]) < CF_MAJOR_VER_REQUIRED)):
+                            vermsg = "cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
+                                                                                 CF_MINOR_VER_REQUIRED)
+                            message += vermsg + "\n"
+                            if term_print:
+                                print(vermsg)
                     except subprocess.CalledProcessError:
-                        cfmesh_msg = "cfMesh not found"
+                        cfmesh_msg = "cfMesh (CfdOF version) not found"
                         message += cfmesh_msg + '\n'
                         if term_print:
                             print(cfmesh_msg)
