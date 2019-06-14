@@ -45,7 +45,7 @@ class _CommandCfdInitialisationZone(CommandManager):
     """ The Cfd initialisation zone command definition """
     def __init__(self):
         super(_CommandCfdInitialisationZone, self).__init__()
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.svg")
         self.resources = {'Pixmap': icon_path,
                           'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_InitialisationZone", "Initialisation zone"),
                           'Accel': "",

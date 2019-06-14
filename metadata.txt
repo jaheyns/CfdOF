@@ -18,6 +18,10 @@ license=GPL
 
 ; end of mandatory metadata
 
+; start of optional metadata
+
+icon="Gui/Resources/icons/cfd.svg"
+
 ; start of dependency section
 
 [dependencies]

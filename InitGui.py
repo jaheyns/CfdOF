@@ -34,7 +34,7 @@ class CfdOFWorkbench(Workbench):
     def __init__(self):
         import os
         import CfdTools
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd.svg")
         self.__class__.Icon = icon_path
         self.__class__.MenuText = "CfdOF"
         self.__class__.ToolTip = "CfdOF workbench"
