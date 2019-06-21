@@ -33,6 +33,7 @@ divSchemes
     // Bounded schemes for steady-state solution
     div(phi,U)      bounded Gauss linearUpwindV grad(U);
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
+    div(div(phi,U)) Gauss linear;
 %{%(physics/Turbulence%)
 %:RANS
 %{%(physics/TurbulenceModel%)

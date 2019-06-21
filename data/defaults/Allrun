@@ -69,7 +69,7 @@ runCommand changeDictionary
 %{%(initialValues/PotentialFoam%)
 %:True
 # Initialise flow
-runCommand potentialFoam -initialiseUBCs
+runCommand potentialFoam -initialiseUBCs -writep
 %}
 %{%(solver/parallel%)
 %:True

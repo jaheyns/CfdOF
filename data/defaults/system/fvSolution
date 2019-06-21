@@ -117,9 +117,9 @@ solvers
     "(p|p_rgh|pcorr)"
     {
         solver           GAMG;
-        tolerance        1e-7;
+        tolerance        1e-6;
         relTol           0.01;
-        smoother         GaussSeidel;
+        smoother         symGaussSeidel;
         nPreSweeps       0;
         nPostSweeps      2;
         cacheAgglomeration on;
@@ -137,7 +137,7 @@ solvers
     U
     {
         solver           smoothSolver;
-        smoother         GaussSeidel;
+        smoother         symGaussSeidel;
         tolerance        1e-8;
         relTol           0.1;
         nSweeps          1;
