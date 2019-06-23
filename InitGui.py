@@ -47,7 +47,7 @@ class CfdOFWorkbench(Workbench):
 
         from CfdAnalysis import _CommandCfdAnalysis
         from CfdMesh import _CommandCfdMeshFromShape
-        from CfdMeshRegion import _CommandMeshRegion
+        from CfdMeshRefinement import _CommandMeshRegion
         from CfdPhysicsSelection import _CommandCfdPhysicsSelection
         from CfdFluidMaterial import _CommandCfdFluidMaterial
         from CfdSolverFoam import _CommandCfdSolverFoam

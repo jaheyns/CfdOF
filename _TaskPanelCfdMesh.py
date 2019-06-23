@@ -201,7 +201,7 @@ class _TaskPanelCfdMesh:
             analysis = CfdTools.getParentAnalysisObject(self.mesh_obj)
             FreeCADGui.doCommand("cart_mesh.get_file_paths(CfdTools.getOutputPath(FreeCAD.ActiveDocument." + analysis.Name + "))")
             FreeCADGui.doCommand("cart_mesh.setup_mesh_case_dir()")
-            self.consoleMessage("Exporting mesh region data ...")
+            self.consoleMessage("Exporting mesh refinement data ...")
             FreeCADGui.doCommand("cart_mesh.get_region_data()")  # Writes region stls so need file structure
             FreeCADGui.doCommand("cart_mesh.write_mesh_case()")
             self.consoleMessage("Exporting the part surfaces ...")
@@ -292,12 +292,14 @@ class _TaskPanelCfdMesh:
 
     def pbLoadMeshClicked(self):
         self.consoleMessage("Reading mesh ...", timed=False)
-        self.cart_mesh.read_and_set_new_mesh()
+        self.cart_mesh.loadSurfMesh()
         self.consoleMessage('Triangulated representation of the surface mesh is shown - ', timed=False)
         self.consoleMessage("Please view in Paraview for accurate display.\n", timed=False)
 
     def pbClearMeshClicked(self):
-        self.mesh_obj.FemMesh = Fem.FemMesh()
+        for m in self.mesh_obj.Group:
+            if m.isDerivedFrom("Fem::FemMeshObject"):
+                FreeCAD.ActiveDocument.removeObject(m.Name)
         FreeCAD.ActiveDocument.recompute()
 
     def searchPointInMesh(self):

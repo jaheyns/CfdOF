@@ -101,12 +101,6 @@ class _CommandCfdAnalysis:
         FreeCADGui.addModule("CfdSolverFoam")
         FreeCADGui.doCommand("analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())")
 
-        sel = FreeCADGui.Selection.getSelection()
-        if len(sel) == 1:
-            if sel[0].isDerivedFrom("Fem::FemMeshObject"):
-                FreeCADGui.doCommand("analysis.addObject(App.activeDocument()." + sel[0].Name + ")")
-        FreeCADGui.Selection.clearSelection()
-
 
 class _ViewProviderCfdAnalysis:
     """ A View Provider for the CfdAnalysis container object. """

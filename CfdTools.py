@@ -172,22 +172,6 @@ def getSolverSettings(solver):
     return dict
 
 
-def getConstraintGroup(analysis_object):
-    group = []
-    for i in analysis_object.Group:
-        if i.isDerivedFrom("Fem::Constraint"):
-            group.append(i)
-    return group
-
-
-def getCfdConstraintGroup(analysis_object):
-    group = []
-    for i in analysis_object.Group:
-        if i.isDerivedFrom("Fem::ConstraintFluidBoundary"):
-            group.append(i)
-    return group
-
-
 def getCfdBoundaryGroup(analysis_object):
     group = []
     from CfdFluidBoundary import _CfdFluidBoundary
@@ -211,15 +195,20 @@ def is_planar(shape):
 
 
 def getMesh(analysis_object):
+    from CfdMesh import _CfdMesh
     for i in analysis_object.Group:
-        if i.isDerivedFrom("Fem::FemMeshObject"):
+        if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
             return i
-    # Python return None by default, so check None outside
+    return None
 
 
-def isSolidMesh(fem_mesh):
-    if fem_mesh.VolumeCount > 0:  # solid mesh
-        return True
+def getMeshRefinementObjs(mesh_obj):
+    from CfdMeshRefinement import _CfdMeshRefinement
+    ref_objs = []
+    for obj in mesh_obj.Group:
+        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMeshRefinement):
+            ref_objs = ref_objs + obj
+    return ref_objs
 
 
 def getResult(analysis_object):

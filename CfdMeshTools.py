@@ -198,20 +198,22 @@ class CfdMeshTools:
         os.makedirs(self.systemDir)
 
     def get_region_data(self):
-        """ Mesh regions """
+        """ Mesh refinements """
+        mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+
         if self.mesh_obj.MeshUtility == "gmsh":
             # mesh regions
             self.ele_length_map = {}  # { 'ElementString' : element length }
             self.ele_node_map = {}  # { 'ElementString' : [element nodes] }
-            if not self.mesh_obj.MeshRegionList:
-                print ('  No mesh regions.')
+            if not mr_objs:
+                print ('  No mesh refinements')
             else:
-                print ('  Mesh regions, we need to get the elements.')
+                print ('  Mesh refinements found - getting elements')
                 if self.part_obj.Shape.ShapeType == 'Compound':
                     # see http://forum.freecadweb.org/viewtopic.php?f=18&t=18780&start=40#p149467 and http://forum.freecadweb.org/viewtopic.php?f=18&t=18780&p=149520#p149520
                     err = "GMSH could return unexpected meshes for a boolean split tools Compound. It is strongly recommended to extract the shape to mesh from the Compound and use this one."
                     FreeCAD.Console.PrintError(err + "\n")
-                for mr_obj in self.mesh_obj.MeshRegionList:
+                for mr_obj in mr_objs:
                     if mr_obj.RelativeLength:
                         if mr_obj.References:
                             for sub in mr_obj.References:
@@ -242,7 +244,7 @@ class CfdMeshTools:
                                             FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " should not use a relative length smaller than 0.01.\n")
                                         self.ele_length_map[elems] = mr_rellen*self.clmax
                                     else:
-                                        FreeCAD.Console.PrintError("The element " + elems + " of the meshregion " + mr_obj.Name + " has been added to another mesh region.\n")
+                                        FreeCAD.Console.PrintError("The element " + elems + " of the mesh refinement " + mr_obj.Name + " has been added to another mesh refinement.\n")
                         else:
                             FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " is not used to create the mesh because the reference list is empty.\n")
                     else:
@@ -263,10 +265,10 @@ class CfdMeshTools:
 
             from collections import defaultdict
             self.ele_meshpatch_map = defaultdict(list)
-            if not self.mesh_obj.MeshRegionList:
-                print ('  No mesh regions.')
+            if not mr_objs:
+                print ('  No mesh refinement')
             else:
-                print ('  Mesh regions, we need to get the elements.')
+                print ('  Mesh refinements - getting the elements')
                 if "Boolean" in self.part_obj.Name:
                     err = "Cartesian meshes should not be generated for boolean split compounds."
                     FreeCAD.Console.PrintError(err + "\n")
@@ -274,7 +276,7 @@ class CfdMeshTools:
                 # Make list of list of all references for their corresponding mesh object
                 if self.mesh_obj.MeshUtility == 'cfMesh':
                     region_face_lists = []
-                    for mr_id, mr_obj in enumerate(self.mesh_obj.MeshRegionList):
+                    for mr_id, mr_obj in enumerate(mr_objs):
                         region_face_lists.append([])
                         if mr_obj.NumberLayers > 1 and not mr_obj.Internal:
                             refs = mr_obj.References
@@ -282,29 +284,8 @@ class CfdMeshTools:
                                 region_face_lists[mr_id].append(r)
                     matched_faces = CfdTools.matchFacesToTargetShape(region_face_lists, self.mesh_obj.Part.Shape)
 
-                for mr_id, mr_obj in enumerate(self.mesh_obj.MeshRegionList):
-                    try:
-                        Internal = mr_obj.Internal
-                        import copy
-                        InternalRegion = copy.deepcopy(mr_obj.InternalRegion)
-                        InternalRegion['Center']['x'] = Units.Quantity(InternalRegion['Center']['x']).getValueAs("m")
-                        InternalRegion['Center']['y'] = Units.Quantity(InternalRegion['Center']['y']).getValueAs("m")
-                        InternalRegion['Center']['z'] = Units.Quantity(InternalRegion['Center']['z']).getValueAs("m")
-                        InternalRegion['BoxLengths']['x'] = Units.Quantity(InternalRegion['BoxLengths']['x']).getValueAs("m")
-                        InternalRegion['BoxLengths']['y'] = Units.Quantity(InternalRegion['BoxLengths']['y']).getValueAs("m")
-                        InternalRegion['BoxLengths']['z'] = Units.Quantity(InternalRegion['BoxLengths']['z']).getValueAs("m")
-                        InternalRegion['SphereRadius'] = Units.Quantity(InternalRegion['SphereRadius']).getValueAs("m")
-                        InternalRegion['Point1']['x'] = Units.Quantity(InternalRegion['Point1']['x']).getValueAs("m")
-                        InternalRegion['Point1']['y'] = Units.Quantity(InternalRegion['Point1']['y']).getValueAs("m")
-                        InternalRegion['Point1']['z'] = Units.Quantity(InternalRegion['Point1']['z']).getValueAs("m")
-                        InternalRegion['Point2']['x'] = Units.Quantity(InternalRegion['Point2']['x']).getValueAs("m")
-                        InternalRegion['Point2']['y'] = Units.Quantity(InternalRegion['Point2']['y']).getValueAs("m")
-                        InternalRegion['Point2']['z'] = Units.Quantity(InternalRegion['Point2']['z']).getValueAs("m")
-                        InternalRegion['Radius1'] = Units.Quantity(InternalRegion['Radius1']).getValueAs("m")
-                        InternalRegion['Radius2'] = Units.Quantity(InternalRegion['Radius2']).getValueAs("m")
-                    except AttributeError:
-                        Internal = False
-                        InternalRegion = {}
+                for mr_id, mr_obj in enumerate(mr_objs):
+                    Internal = mr_obj.Internal
 
                     if mr_obj.RelativeLength:
                         # Store parameters per region
@@ -318,7 +299,7 @@ class CfdMeshTools:
                             mr_rellen = 0.001  # Relative length should not be less than 0.1% of base length
                             FreeCAD.Console.PrintError(
                                 "The meshregion: {} should not use a relative length smaller "
-                                "than 0.05.\n".format(mr_obj.Name))
+                                "than 0.001.\n".format(mr_obj.Name))
 
                         tri_surface = ""
                         snappy_mesh_region_list = []
@@ -385,9 +366,8 @@ class CfdMeshTools:
                                 }
                             else:
                                 cf_settings['InternalRegions'][mr_obj.Name] = {
-                                    #"Internal": Internal,
-                                    'RelativeLength': mr_rellen * self.clmax * self.scale,
-                                    "InternalRegion": InternalRegion}
+                                    'RelativeLength': mr_rellen * self.clmax * self.scale
+                                }
 
                         elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
                             refinement_level = CfdTools.relLenToRefinementLevel(mr_obj.RelativeLength)
@@ -405,23 +385,9 @@ class CfdMeshTools:
                                         'Baffle': mr_obj.Baffle
                                 }
                             else:
-                                minX = InternalRegion["Center"]["x"] - InternalRegion["BoxLengths"]["x"]/2.0
-                                maxX = InternalRegion["Center"]["x"] + InternalRegion["BoxLengths"]["x"]/2.0
-                                minY = InternalRegion["Center"]["y"] - InternalRegion["BoxLengths"]["y"]/2.0
-                                maxY = InternalRegion["Center"]["y"] + InternalRegion["BoxLengths"]["y"]/2.0
-                                minZ = InternalRegion["Center"]["z"] - InternalRegion["BoxLengths"]["z"]/2.0
-                                maxZ = InternalRegion["Center"]["z"] + InternalRegion["BoxLengths"]["z"]/2.0
                                 snappy_settings['InternalRegions'][mr_obj.Name] = {
-                                    'RefinementLevel': refinement_level,
-                                    "Type" : InternalRegion["Type"],
-                                    "Center" : InternalRegion["Center"],
-                                    "Radius" : InternalRegion["SphereRadius"],
-                                    "minX" : minX,
-                                    "maxX" : maxX,
-                                    "minY" : minY,
-                                    "maxY" : maxY,
-                                    "minZ" : minZ,
-                                    "maxZ" : maxZ}
+                                    'RefinementLevel': refinement_level
+                                }
 
                     else:
                         FreeCAD.Console.PrintError(
@@ -485,7 +451,7 @@ class CfdMeshTools:
                         fullMeshFile.write(" endfacet\n")
                     fullMeshFile.write("endsolid {}\n".format(faceName))
 
-    def read_and_set_new_mesh(self):
+    def loadSurfMesh(self):
         if not self.error:
             # NOTE: FemMesh does not support multi element stl
             # fem_mesh = Fem.read(os.path.join(self.meshCaseDir,'mesh_outside.stl'))
@@ -498,7 +464,9 @@ class CfdMeshTools:
             os.remove(stl)
             os.rename(ast, stl)
             fem_mesh = Fem.read(stl)
-            self.mesh_obj.FemMesh = fem_mesh
+            fem_mesh_obj = FreeCAD.ActiveDocument.addObject("Fem::FemMeshObject", self.mesh_obj.Name+"_Surf_Vis")
+            fem_mesh_obj.FemMesh = fem_mesh
+            self.mesh_obj.addObject(fem_mesh_obj)
             print('  Finished loading mesh.')
         else:
             print('No mesh was created.')

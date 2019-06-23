@@ -506,10 +506,9 @@ class CfdCaseWriterFoam:
                 'PatchType': patchType
             }
 
-        if self.mesh_obj.MeshRegionList:
-            for regionObj in self.mesh_obj.MeshRegionList:
-                if regionObj.Baffle:
-                    settings['createPatchesFromSnappyBaffles'] = True
+        for regionObj in CfdTools.getMeshRefinementObjs(self.mesh_obj):
+            if regionObj.Baffle:
+                settings['createPatchesFromSnappyBaffles'] = True
 
         if settings['createPatchesFromSnappyBaffles']:
             settings['createPatchesSnappyBaffles'] = {}
@@ -525,8 +524,9 @@ class CfdCaseWriterFoam:
                 if bcType == "baffle":
                     tempBaffleList = []
                     tempBaffleListSlave = []
-                    if self.mesh_obj.MeshRegionList:  # Can this if statement not be lumped with previous?
-                        for regionObj in self.mesh_obj.MeshRegionList:
+                    for regionObj in self.mesh_obj.Group:
+                        if hasattr(regionObj, "Proxy") and \
+                                isinstance(regionObj.Proxy, CfdMeshRefinement._CfdMeshRefinement):
                             # print regionObj.Name
                             if regionObj.Baffle:
                                 for sub in regionObj.References:

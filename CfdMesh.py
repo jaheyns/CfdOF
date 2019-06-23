@@ -32,7 +32,7 @@ import os
 
 
 def makeCfdMesh(name="CFDMesh"):
-    obj = FreeCAD.ActiveDocument.addObject("Fem::FemMeshObjectPython", name)
+    obj = FreeCAD.ActiveDocument.addObject("App::DocumentObjectGroupPython", name)
     _CfdMesh(obj)
     if FreeCAD.GuiUp:
         _ViewProviderCfdMesh(obj.ViewObject)
@@ -94,8 +94,6 @@ class _CfdMesh:
         addObjectProperty(obj, 'CaseName', "meshCase", "App::PropertyString", "",
                           "Name of directory in which the mesh is created")
 
-        addObjectProperty(obj, 'MeshRegionList', [], "App::PropertyLinkList", "", "Mesh regions of the mesh")
-
         addObjectProperty(obj, 'ShapeFaceNames', [], "App::PropertyStringList", "", "Mesh face names")
 
         addObjectProperty(obj, 'STLLinearDeflection', 0.05, "App::PropertyFloat", "", "STL linear deflection")
@@ -149,8 +147,6 @@ class _ViewProviderCfdMesh:
     def attach(self, vobj):
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.ViewObject.ShapeColor = (0.4, 0.4, 0.4)
-        # self.ViewObject.LineWidth = 2
 
     def updateData(self, obj, prop):
         return
@@ -183,12 +179,9 @@ class _ViewProviderCfdMesh:
             FreeCAD.Console.PrintError('Task dialog already open\n')
         return True
 
-    def claimChildren(self):
-        return self.Object.MeshRegionList
-
     def onDelete(self, feature, subelements):
         try:
-            for obj in self.claimChildren():
+            for obj in self.Object.Group:
                 obj.ViewObject.show()
         except Exception as err:
             FreeCAD.Console.PrintError("Error in onDelete: " + str(err))
