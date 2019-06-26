@@ -191,21 +191,21 @@ class _TaskPanelCfdMesh:
         self.consoleMessage("Preparing meshing ...")
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
-            setQuantity(self.form.if_max, str(cart_mesh.get_clmax()))
+            setQuantity(self.form.if_max, str(cart_mesh.getClmax()))
             print('Part to mesh:\n  Name: '
                   + cart_mesh.part_obj.Name + ', Label: '
                   + cart_mesh.part_obj.Label + ', ShapeType: '
                   + cart_mesh.part_obj.Shape.ShapeType)
             print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
-            FreeCADGui.doCommand("cart_mesh.get_dimension()")
+            FreeCADGui.doCommand("cart_mesh.processDimension()")
             analysis = CfdTools.getParentAnalysisObject(self.mesh_obj)
-            FreeCADGui.doCommand("cart_mesh.get_file_paths(CfdTools.getOutputPath(FreeCAD.ActiveDocument." + analysis.Name + "))")
-            FreeCADGui.doCommand("cart_mesh.setup_mesh_case_dir()")
+            FreeCADGui.doCommand("cart_mesh.getFilePaths(CfdTools.getOutputPath(FreeCAD.ActiveDocument." + analysis.Name + "))")
+            FreeCADGui.doCommand("cart_mesh.setupMeshCaseDir()")
             self.consoleMessage("Exporting mesh refinement data ...")
-            FreeCADGui.doCommand("cart_mesh.get_region_data()")  # Writes region stls so need file structure
-            FreeCADGui.doCommand("cart_mesh.write_mesh_case()")
+            FreeCADGui.doCommand("cart_mesh.processRefinements()")  # Writes stls so need file structure
+            FreeCADGui.doCommand("cart_mesh.writeMeshCase()")
             self.consoleMessage("Exporting the part surfaces ...")
-            FreeCADGui.doCommand("cart_mesh.write_part_file()")
+            FreeCADGui.doCommand("cart_mesh.writePartFile()")
             self.consoleMessage("Mesh case written to {}".format(self.cart_mesh.meshCaseDir))
         except Exception as ex:
             self.consoleMessage("Error: " + str(ex), '#FF0000')
@@ -306,7 +306,7 @@ class _TaskPanelCfdMesh:
         print ("Searching for an internal vector point ...")
         # Apply latest mesh size
         self.store()
-        pointCheck = self.cart_mesh.automatic_inside_point_detect()
+        pointCheck = self.cart_mesh.automaticInsidePointDetect()
         iMPx, iMPy, iMPz = pointCheck
         setQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")
         setQuantity(self.form.if_pointInMeshY, str(iMPy) + "mm")

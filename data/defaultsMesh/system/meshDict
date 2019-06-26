@@ -24,33 +24,8 @@ objectRefinements
     %(0%)
     {
         cellSize %(CfSettings/InternalRegions/%(0%)/RelativeLength%);
-
-%{%(CfSettings/InternalRegions/%(0%)/InternalRegion/Type%)
-%:Box
-        type box;
-        centre  (%(CfSettings/InternalRegions/%(0%)/InternalRegion/Center/x%)
-                 %(CfSettings/InternalRegions/%(0%)/InternalRegion/Center/y%) 
-                 %(CfSettings/InternalRegions/%(0%)/InternalRegion/Center/z%));
-        lengthX  %(CfSettings/InternalRegions/%(0%)/InternalRegion/BoxLengths/x%);
-        lengthY  %(CfSettings/InternalRegions/%(0%)/InternalRegion/BoxLengths/y%);
-        lengthZ  %(CfSettings/InternalRegions/%(0%)/InternalRegion/BoxLengths/z%);
-%:Sphere
-        type sphere;
-        centre  (%(CfSettings/InternalRegions/%(0%)/InternalRegion/Center/x%)
-                 %(CfSettings/InternalRegions/%(0%)/InternalRegion/Center/y%)
-                 %(CfSettings/InternalRegions/%(0%)/InternalRegion/Center/z%));
-        radius  %(CfSettings/InternalRegions/%(0%)/InternalRegion/SphereRadius%);
-%:Cone
-        type cone;
-        p0   (%(CfSettings/InternalRegions/%(0%)/InternalRegion/Point1/x%)
-              %(CfSettings/InternalRegions/%(0%)/InternalRegion/Point1/y%)
-              %(CfSettings/InternalRegions/%(0%)/InternalRegion/Point1/z%));
-        p1   (%(CfSettings/InternalRegions/%(0%)/InternalRegion/Point2/x%)
-              %(CfSettings/InternalRegions/%(0%)/InternalRegion/Point2/y%)
-              %(CfSettings/InternalRegions/%(0%)/InternalRegion/Point2/z%));
-        radius0  %(CfSettings/InternalRegions/%(0%)/InternalRegion/Radius1%);
-        radius1  %(CfSettings/InternalRegions/%(0%)/InternalRegion/Radius2%);
-%}
+        type insideSurface;
+        closedSurfaceFile "constant/triSurface/%(0%).stl";
     }
 %}
 }

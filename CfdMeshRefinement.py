@@ -43,6 +43,7 @@ def makeCfdMeshRefinement(base_mesh, name="MeshRefinement"):
     _CfdMeshRefinement(obj)
     if FreeCAD.GuiUp:
         _ViewProviderCfdMeshRefinement(obj.ViewObject)
+    base_mesh.addObject(obj)
     return obj
 
 
@@ -68,9 +69,7 @@ class _CommandMeshRegion:
                 FreeCADGui.doCommand("")
                 FreeCADGui.addModule("CfdMeshRefinement")
                 FreeCADGui.doCommand(
-                    "FreeCAD.ActiveDocument.{}.addObject("
-                    "CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.{}))".format(
-                        sobj.Name, sobj.Name))
+                    "CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.{})".format(sobj.Name))
                 FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
         FreeCADGui.Selection.clearSelection()

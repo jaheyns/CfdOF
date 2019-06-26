@@ -207,7 +207,7 @@ def getMeshRefinementObjs(mesh_obj):
     ref_objs = []
     for obj in mesh_obj.Group:
         if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMeshRefinement):
-            ref_objs = ref_objs + obj
+            ref_objs = ref_objs + [obj]
     return ref_objs
 
 
@@ -652,7 +652,7 @@ def checkCfdDependencies(term_print=True):
         FC_COMMIT_REQUIRED = 14304
 
         CF_MAJOR_VER_REQUIRED = 1
-        CF_MINOR_VER_REQUIRED = 1
+        CF_MINOR_VER_REQUIRED = 2
 
         import subprocess
 
@@ -756,7 +756,7 @@ def checkCfdDependencies(term_print=True):
                             (int(cfmesh_ver[0]) == CF_MAJOR_VER_REQUIRED and
                              int(cfmesh_ver[1]) < CF_MAJOR_VER_REQUIRED)):
                             vermsg = "cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
-                                                                                 CF_MINOR_VER_REQUIRED)
+                                                                                  CF_MINOR_VER_REQUIRED)
                             message += vermsg + "\n"
                             if term_print:
                                 print(vermsg)

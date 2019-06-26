@@ -44,39 +44,17 @@ geometry
 
 %}
 %}
-
-
 %{%(SnappySettings/InternalRefinementRegionsPresent%)
 %:True
-
 %{%(SnappySettings/InternalRegions%)
-    %(0%)
+    "%(0%).stl"
     {
-%{%(SnappySettings/InternalRegions/%(0%)/Type%)
-%:Box
-        type searchableBox;
-        min (%(SnappySettings/InternalRegions/%(0%)/minX%)
-             %(SnappySettings/InternalRegions/%(0%)/minY%)
-             %(SnappySettings/InternalRegions/%(0%)/minZ%));
-        max (%(SnappySettings/InternalRegions/%(0%)/maxX%)
-             %(SnappySettings/InternalRegions/%(0%)/maxY%)
-             %(SnappySettings/InternalRegions/%(0%)/maxZ%));
-%}
-
-%{%(SnappySettings/InternalRegions/%(0%)/Type%)
-%:Sphere
-        type searchableSphere;
-        centre  (%(SnappySettings/InternalRegions/%(0%)/Center/x%) 
-                 %(SnappySettings/InternalRegions/%(0%)/Center/y%) 
-                 %(SnappySettings/InternalRegions/%(0%)/Center/z%));
-        radius  %(SnappySettings/InternalRegions/%(0%)/Radius%);
-%}
+        type triSurfaceMesh;
+        name %(0%);
     }
-%}
 
 %}
-
-
+%}
 };
 
 castellatedMeshControls
@@ -134,15 +112,14 @@ castellatedMeshControls
     {
 %{%(SnappySettings/InternalRefinementRegionsPresent%)
 %:True
-
 %{%(SnappySettings/InternalRegions%)
-    %(0%)
-    {
-        mode inside;
-        levels ((1 %(SnappySettings/InternalRegions/%(0%)/RefinementLevel%)));
-    }
-%}
+        %(0%)
+        {
+            mode inside;
+            levels ((1 %(SnappySettings/InternalRegions/%(0%)/RefinementLevel%)));
+        }
 
+%}
 %}
     }
 

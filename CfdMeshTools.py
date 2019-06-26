@@ -84,10 +84,10 @@ class CfdMeshTools:
         self.error = False
 
         output_path = CfdTools.getOutputPath(self.analysis)
-        self.get_file_paths(output_path)
+        self.getFilePaths(output_path)
 
-    def get_dimension(self):
-        # Dimension
+    def processDimension(self):
+        """ Additional checking/processing for 2D vs 3D """
         # 3D cfMesh and snappyHexMesh, and 2D by conversion, while in future cfMesh may support 2D directly
         if self.dimension != '3D' and self.dimension != '2D':
             FreeCAD.Console.PrintError('Invalid element dimension. Setting to 3D.')
@@ -166,10 +166,10 @@ class CfdMeshTools:
             if len(twoDPlanes):
                 raise RuntimeError("2D bounding planes can not be used in 3D mesh")
 
-    def get_clmax(self):
+    def getClmax(self):
         return Units.Quantity(self.clmax, Units.Length)
 
-    def get_file_paths(self, output_dir):
+    def getFilePaths(self, output_dir):
         if not hasattr(self.mesh_obj, 'CaseName'):  # Backward compat
             self.mesh_obj.CaseName = 'meshCase'
         self.case_name = self.mesh_obj.CaseName
@@ -187,7 +187,7 @@ class CfdMeshTools:
         else:
             self.temp_file_geo = os.path.join(self.constantDir, 'triSurface', self.part_obj.Name + '_Geometry.stl')
 
-    def setup_mesh_case_dir(self):
+    def setupMeshCaseDir(self):
         """ Create temporary mesh case directory """
         if os.path.isdir(self.meshCaseDir):
             shutil.rmtree(self.meshCaseDir)
@@ -197,8 +197,8 @@ class CfdMeshTools:
         os.makedirs(self.gmshDir)
         os.makedirs(self.systemDir)
 
-    def get_region_data(self):
-        """ Mesh refinements """
+    def processRefinements(self):
+        """ Process mesh refinements """
         mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
 
         if self.mesh_obj.MeshUtility == "gmsh":
@@ -217,7 +217,8 @@ class CfdMeshTools:
                     if mr_obj.RelativeLength:
                         if mr_obj.References:
                             for sub in mr_obj.References:
-                                # check if the shape of the mesh region is an element of the Part to mesh, if not try to find the element in the shape to mesh
+                                # Check if the shape of the mesh region is an element of the Part to mesh;
+                                # if not try to find the element in the shape to mesh
                                 search_ele_in_shape_to_mesh = False
                                 ref = FreeCAD.ActiveDocument.getObject(sub[0])
                                 if not self.part_obj.Shape.isSame(ref.Shape):
@@ -264,16 +265,17 @@ class CfdMeshTools:
             snappy_settings['InternalRegions'] = {}
 
             from collections import defaultdict
-            self.ele_meshpatch_map = defaultdict(list)
+            ele_meshpatch_map = defaultdict(list)
             if not mr_objs:
-                print ('  No mesh refinement')
+                print('  No mesh refinement')
             else:
-                print ('  Mesh refinements - getting the elements')
+                print('  Mesh refinements - getting the elements')
                 if "Boolean" in self.part_obj.Name:
                     err = "Cartesian meshes should not be generated for boolean split compounds."
                     FreeCAD.Console.PrintError(err + "\n")
 
                 # Make list of list of all references for their corresponding mesh object
+                bl_matched_faces = []
                 if self.mesh_obj.MeshUtility == 'cfMesh':
                     region_face_lists = []
                     for mr_id, mr_obj in enumerate(mr_objs):
@@ -282,7 +284,7 @@ class CfdMeshTools:
                             refs = mr_obj.References
                             for r in refs:
                                 region_face_lists[mr_id].append(r)
-                    matched_faces = CfdTools.matchFacesToTargetShape(region_face_lists, self.mesh_obj.Part.Shape)
+                    bl_matched_faces = CfdTools.matchFacesToTargetShape(region_face_lists, self.mesh_obj.Part.Shape)
 
                 for mr_id, mr_obj in enumerate(mr_objs):
                     Internal = mr_obj.Internal
@@ -305,13 +307,17 @@ class CfdMeshTools:
                         snappy_mesh_region_list = []
                         patch_list = []
                         for (si, sub) in enumerate(mr_obj.References):
-                            elems = sub[1]
-                            elt = FreeCAD.ActiveDocument.getObject(sub[0]).Shape.getElement(elems)
-                            if elt.ShapeType == 'Face':
+                            shape = FreeCAD.ActiveDocument.getObject(sub[0]).Shape
+                            elem = sub[1]
+                            if elem.startswith('Solid'):  # getElement doesn't work with solids for some reason
+                                elt = shape.Solids[int(elem.lstrip('Solid'))-1]
+                            else:
+                                elt = shape.getElement(elem)
+                            if elt.ShapeType == 'Face' or elt.ShapeType == 'Solid':
                                 facemesh = MeshPart.meshFromShape(elt,
                                                                   LinearDeflection=self.mesh_obj.STLLinearDeflection)
 
-                                tri_surface += "solid {}{}{}\n".format(mr_obj.Name, sub[0], elems)
+                                tri_surface += "solid {}{}{}\n".format(mr_obj.Name, sub[0], elem)
                                 for face in facemesh.Facets:
                                     tri_surface += " facet normal 0 0 0\n"
                                     tri_surface += "  outer loop\n"
@@ -320,18 +326,16 @@ class CfdMeshTools:
                                         tri_surface += "    vertex {} {} {}\n".format(p[0], p[1], p[2])
                                     tri_surface += "  endloop\n"
                                     tri_surface += " endfacet\n"
-                                tri_surface += "solid {}{}{}\n".format(mr_obj.Name, sub[0], elems)
+                                tri_surface += "endsolid {}{}{}\n".format(mr_obj.Name, sub[0], elem)
 
                                 if self.mesh_obj.MeshUtility == 'snappyHexMesh' and mr_obj.Baffle:
                                     # Save baffle references or faces individually
-                                    baffle = "{}{}{}".format(mr_obj.Name, sub[0], elems)
+                                    baffle = "{}{}{}".format(mr_obj.Name, sub[0], elem)
                                     fid = open(os.path.join(self.triSurfaceDir, baffle + ".stl"), 'w')
                                     fid.write(tri_surface)
                                     fid.close()
                                     tri_surface = ""
                                     snappy_mesh_region_list.append(baffle)
-                            else:
-                                FreeCAD.Console.PrintError("Cartesian meshes only support surface refinement.\n")
 
                         if self.mesh_obj.MeshUtility == 'cfMesh' or not mr_obj.Baffle:
                             fid = open(os.path.join(self.triSurfaceDir, mr_obj.Name + '.stl'), 'w')
@@ -339,11 +343,11 @@ class CfdMeshTools:
                             fid.close()
 
                         if self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1 and not Internal:
-                            for (i, mf) in enumerate(matched_faces):
+                            for (i, mf) in enumerate(bl_matched_faces):
                                 for j in range(len(mf)):
                                     if mr_id == mf[j][0]:
                                         sfN = self.mesh_obj.ShapeFaceNames[i]
-                                        self.ele_meshpatch_map[mr_obj.Name].append(sfN)
+                                        ele_meshpatch_map[mr_obj.Name].append(sfN)
                                         patch_list.append(sfN)
 
                                         # Limit expansion ratio to greater than 1.0 and less than 1.2
@@ -394,7 +398,7 @@ class CfdMeshTools:
                             "The meshregion: " + mr_obj.Name + " is not used to create the mesh because the "
                             "CharacteristicLength is 0.0 mm or the reference list is empty.\n")
 
-    def automatic_inside_point_detect(self):
+    def automaticInsidePointDetect(self):
         # Snappy requires that the chosen internal point must remain internal during the meshing process and therefore
         # the meshing algorithm might fail if the point accidentally in a sliver fall between the mesh and the geometry.
         # As a safety measure, the check distance is chosen to be approximately the size of the background mesh.
@@ -424,7 +428,7 @@ class CfdMeshTools:
             if result:
                 return pointCheck
 
-    def write_part_file(self):
+    def writePartFile(self):
         """ Construct multi-element STL based on mesh part faces. """
         if self.mesh_obj.MeshUtility == "gmsh":
             self.part_obj.Shape.exportBrep(self.temp_file_shape)
@@ -471,7 +475,7 @@ class CfdMeshTools:
         else:
             print('No mesh was created.')
 
-    def write_mesh_case(self):
+    def writeMeshCase(self):
         """ Collect case settings, and finally build a runnable case. """
         FreeCAD.Console.PrintMessage("Populating mesh dictionaries in folder {}\n".format(self.meshCaseDir))
 

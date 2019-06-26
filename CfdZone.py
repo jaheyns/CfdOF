@@ -85,7 +85,7 @@ if FreeCAD.GuiUp:
 
 class _CommandCfdInitialisationZone:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_InitialisationZone", "Initialisation zone"),
                 'Accel': "",
@@ -234,7 +234,7 @@ class _ViewProviderCfdZone:
         if self.Object.Name.startswith('PorousZone'):
             icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "porous.png")
         else:
-            icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.png")
+            icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.svg")
         return icon_path
 
     def setEdit(self, vobj, mode):
