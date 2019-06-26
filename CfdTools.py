@@ -652,7 +652,7 @@ def checkCfdDependencies(term_print=True):
         FC_COMMIT_REQUIRED = 14304
 
         CF_MAJOR_VER_REQUIRED = 1
-        CF_MINOR_VER_REQUIRED = 2
+        CF_MINOR_VER_REQUIRED = 3
 
         import subprocess
 
@@ -754,7 +754,7 @@ def checkCfdDependencies(term_print=True):
                         if (not cfmesh_ver or len(cfmesh_ver) != 2 or
                             int(cfmesh_ver[0]) < CF_MAJOR_VER_REQUIRED or
                             (int(cfmesh_ver[0]) == CF_MAJOR_VER_REQUIRED and
-                             int(cfmesh_ver[1]) < CF_MAJOR_VER_REQUIRED)):
+                             int(cfmesh_ver[1]) < CF_MINOR_VER_REQUIRED)):
                             vermsg = "cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
                                                                                   CF_MINOR_VER_REQUIRED)
                             message += vermsg + "\n"
