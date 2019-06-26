@@ -1,9 +1,10 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
-# *   Copyright (c) 2017 - Alfred Bogaers <abogaers@csir.co.za>             *
-# *   Copyright (c) 2017 - Oliver Oxtoby <ooxtoby@csir.co.za>               *
-# *   Copyright (c) 2017 - Johan Heyns <jheyns@csir.co.za>                  *
+# *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
+# *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
+# *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
+# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *

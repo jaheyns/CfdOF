@@ -103,9 +103,9 @@ gradSchemes
     default         cellLimited Gauss linear 0.95;
     grad(p)         Gauss linear;
 %}
-%{%(turbulence/type%)
+%{%(physics/Turbulence%)
 %:RANS
-%{%(turbulence/model%)
+%{%(physics/TurbulenceModel%)
 %:kOmegaSST
     grad(k)          cellLimited Gauss linear 0.9;
     grad(omega)      cellLimited Gauss linear 0.9;

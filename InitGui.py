@@ -1,7 +1,8 @@
 # **************************************************************************
 # *  (c) bernd hahnebach (bernd@bimstatik.org) 2014                        *
 # *  (c) qingfeng xia @ iesensor.com 2016                                  *
-# *  Copyright (c) 2017 - Andrew Gill (CSIR) <agill@csir.co.za>            *
+# *  Copyright (c) 2017 Andrew Gill (CSIR) <agill@csir.co.za>              *
+# *  Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                        *
 # *  this file is part of the freecad cax development system.              *
 # *                                                                        *
