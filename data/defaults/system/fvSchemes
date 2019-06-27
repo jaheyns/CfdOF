@@ -107,10 +107,10 @@ gradSchemes
 %:RANS
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST
-    grad(k)          cellLimited Gauss linear 0.9;
-    grad(omega)      cellLimited Gauss linear 0.9;
+    grad(k)         cellLimited Gauss linear 0.9;
+    grad(omega)     cellLimited Gauss linear 0.9;
 %:SpalartAllmaras
-    grad(nuTilda)    cellLimited Gauss linear 0.9;
+    grad(nuTilda)   cellLimited Gauss linear 0.9;
 %}
 %}
 }
@@ -127,7 +127,17 @@ laplacianSchemes
     laplacian(alphaEff,e)       Gauss linear compact;
     laplacian(yPsi)             Gauss linear corrected;
 %:default
-    default         Gauss linear limited 0.3;
+    default                     Gauss linear limited 0.3;
+%{%(physics/Turbulence%)
+%:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST
+    laplacian(DomegaEff,omega)  Gauss linear uncorrected;
+    laplacian(DkEff,k)          Gauss linear uncorrected;
+%:SpalartAllmaras
+    laplacian(DnuTildaEff,nuTilda)  Gauss linear uncorrected;
+%}
+%}
 %}
 }
 
