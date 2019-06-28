@@ -17,18 +17,18 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 ### Current:
 
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
-* Basic multiphase capability (interFoam, multiphaseInterFoam)
+* Incompressible free-surface flow (interFoam, multiphaseInterFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
-* Basic material data base
+* Basic material database
 * Flow initialisation with a potential solver
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
 * Cut-cell Cartesian meshing with porous media (snappyHexMesh)
 * Tetrahedral meshing using GMSH
-* Post processing using paraview
+* Postprocessing using paraview
 * Porous regions and porous baffles
 * Runs on Windows 7-10 and Linux
 * Unit testing
-* Extension to turbulent flow using RANS (k-w SST).
+* Extension to turbulent flow using RANS (k-w SST)
 * New case builder using an extensible template structure
 * Macro scripting
 
