@@ -71,6 +71,11 @@ libs
 (
     // Needed for availability of porous baffle boundary in potentialFoam
     "libturbulenceModels.so"
+%{%(solver/SolverName%)
+%:hisa
+    // Needed for availability of boundary conditions in potentialFoam
+    "libhisaFiniteVolume.so"
+%}
 );
 
 // ************************************************************************* //
