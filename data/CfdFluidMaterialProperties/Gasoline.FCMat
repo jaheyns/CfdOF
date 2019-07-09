@@ -1,4 +1,6 @@
-[FCdMat]
+; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material
+
+[FCMat]
 Name = Gasoline
 Description = Gasoline at 20 Degrees Celsius and 1 atm
 Density = 680 kg/m^3

@@ -1,3 +1,5 @@
+; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material
+
 [FCdMat]
 Name = SeaWater
 Description = Sea water (30%) at 20 Degrees Celsius and 1 atm

@@ -1,3 +1,5 @@
+; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material
+
 [FCMat]
 Name = Air
 Description = Standard air properties at 20 Degrees Celsius and 1 atm

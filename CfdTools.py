@@ -1133,14 +1133,14 @@ def importMaterials():
 def addMatDir(mat_dir, materials):
     import glob
     import os
-    import Material
+    import importFCMat
     mat_file_extension = ".FCMat"
     ext_len = len(mat_file_extension)
     dir_path_list = glob.glob(mat_dir + '/*' + mat_file_extension)
     material_name_path_list = []
     for a_path in dir_path_list:
         material_name = os.path.basename(a_path[:-ext_len])
-        materials[a_path] = Material.importFCMat(a_path)
+        materials[a_path] = importFCMat.read(a_path)
         material_name_path_list.append([material_name, a_path])
     material_name_path_list.sort()
 

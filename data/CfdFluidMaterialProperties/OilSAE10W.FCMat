@@ -1,4 +1,6 @@
-[FCdMat]
+; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material
+
+[FCMat]
 Name = OilSAE10W
 Description = SAE 10W oil at 20 Degrees Celsius and 1 atm
 Density = 870 kg/m^3
