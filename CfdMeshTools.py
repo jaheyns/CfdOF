@@ -200,6 +200,7 @@ class CfdMeshTools:
 
     def processRefinements(self):
         """ Process mesh refinements """
+
         mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
 
         if self.mesh_obj.MeshUtility == "gmsh":
@@ -304,12 +305,21 @@ class CfdMeshTools:
                                 "The meshregion: {} should not use a relative length smaller "
                                 "than 0.001.\n".format(mr_obj.Name))
 
-                        tri_surface = ""
+                        if not (self.mesh_obj.MeshUtility == 'snappyHexMesh' and mr_obj.Baffle):
+                            fid = open(os.path.join(self.triSurfaceDir, mr_obj.Name + '.stl'), 'w')
+
                         snappy_mesh_region_list = []
                         patch_list = []
                         for (si, sub) in enumerate(mr_obj.References):
                             shape = FreeCAD.ActiveDocument.getObject(sub[0]).Shape
                             elem = sub[1]
+
+                            if self.mesh_obj.MeshUtility == 'snappyHexMesh' and mr_obj.Baffle:
+                                # Save baffle references or faces individually
+                                baffle = "{}{}{}".format(mr_obj.Name, sub[0], elem)
+                                fid = open(os.path.join(self.triSurfaceDir, baffle + ".stl"), 'w')
+                                snappy_mesh_region_list.append(baffle)
+
                             if elem.startswith('Solid'):  # getElement doesn't work with solids for some reason
                                 elt = shape.Solids[int(elem.lstrip('Solid'))-1]
                             else:
@@ -318,29 +328,21 @@ class CfdMeshTools:
                                 facemesh = MeshPart.meshFromShape(elt,
                                                                   LinearDeflection=self.mesh_obj.STLLinearDeflection)
 
-                                tri_surface += "solid {}{}{}\n".format(mr_obj.Name, sub[0], elem)
+                                fid.write("solid {}{}{}\n".format(mr_obj.Name, sub[0], elem))
                                 for face in facemesh.Facets:
-                                    tri_surface += " facet normal 0 0 0\n"
-                                    tri_surface += "  outer loop\n"
+                                    fid.write(" facet normal 0 0 0\n")
+                                    fid.write("  outer loop\n")
                                     for i in range(3):
                                         p = [i * self.scale for i in face.Points[i]]
-                                        tri_surface += "    vertex {} {} {}\n".format(p[0], p[1], p[2])
-                                    tri_surface += "  endloop\n"
-                                    tri_surface += " endfacet\n"
-                                tri_surface += "endsolid {}{}{}\n".format(mr_obj.Name, sub[0], elem)
+                                        fid.write("    vertex {} {} {}\n".format(p[0], p[1], p[2]))
+                                    fid.write("  endloop\n")
+                                    fid.write(" endfacet\n")
+                                fid.write("endsolid {}{}{}\n".format(mr_obj.Name, sub[0], elem))
 
-                                if self.mesh_obj.MeshUtility == 'snappyHexMesh' and mr_obj.Baffle:
-                                    # Save baffle references or faces individually
-                                    baffle = "{}{}{}".format(mr_obj.Name, sub[0], elem)
-                                    fid = open(os.path.join(self.triSurfaceDir, baffle + ".stl"), 'w')
-                                    fid.write(tri_surface)
-                                    fid.close()
-                                    tri_surface = ""
-                                    snappy_mesh_region_list.append(baffle)
+                            if self.mesh_obj.MeshUtility == 'snappyHexMesh' and mr_obj.Baffle:
+                                fid.close()
 
-                        if self.mesh_obj.MeshUtility == 'cfMesh' or not mr_obj.Baffle:
-                            fid = open(os.path.join(self.triSurfaceDir, mr_obj.Name + '.stl'), 'w')
-                            fid.write(tri_surface)
+                        if not (self.mesh_obj.MeshUtility == 'snappyHexMesh' and mr_obj.Baffle):
                             fid.close()
 
                         if self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1 and not Internal:
