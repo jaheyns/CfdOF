@@ -64,6 +64,7 @@ def getDefaultOutputPath():
     output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
     if not output_path:
         output_path = tempfile.gettempdir()
+    output_path = os.path.normpath(output_path)
     return output_path
 
 
@@ -74,6 +75,7 @@ def getOutputPath(analysis):
         output_path = ""
     if not output_path:
         output_path = getDefaultOutputPath()
+    output_path = os.path.normpath(output_path)
     return output_path
 
 # Get functions
@@ -1173,6 +1175,7 @@ def propsToDict(obj):
 
 
 def openFileManager(case_path):
+    case_path = os.path.abspath(case_path)
     if platform.system() == 'MacOS':
         subprocess.Popen(['open', '--', case_path])
     elif platform.system() == 'Linux':

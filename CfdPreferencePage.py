@@ -101,6 +101,8 @@ class CfdPreferencePage:
         self.foam_dir = ""
         self.initial_foam_dir = ""
 
+        self.output_dir = ""
+
         self.form.gb_bluecfd.setVisible(platform.system() == 'Windows')
 
     def __del__(self):
@@ -150,7 +152,7 @@ class CfdPreferencePage:
     def chooseOutputDir(self):
         d = QtGui.QFileDialog().getExistingDirectory(None, 'Choose output directory', self.output_dir)
         if d and os.access(d, os.W_OK):
-            self.output_dir = d
+            self.output_dir = os.path.abspath(d)
         self.form.le_output_dir.setText(self.output_dir)
 
     def runDependencyChecker(self):
