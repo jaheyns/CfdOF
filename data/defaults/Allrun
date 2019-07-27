@@ -69,7 +69,13 @@ runCommand changeDictionary
 %{%(initialValues/PotentialFoam%)
 %:True
 # Initialise flow
+%{%(bafflesPresent%)
+%:True
+# Baffle BC does not work with potentialFoam; do not initialise p
+runCommand potentialFoam -initialiseUBCs
+%:default
 runCommand potentialFoam -initialiseUBCs -writep
+%}
 %}
 %{%(solver/Parallel%)
 %:True
