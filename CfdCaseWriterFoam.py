@@ -34,6 +34,7 @@ from PySide import QtCore
 from PySide.QtCore import QRunnable, QObject
 from FreeCAD import Units
 import TemplateBuilder
+import CfdMeshRefinement
 
 
 class CfdCaseWriterFoam:
