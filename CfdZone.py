@@ -118,7 +118,14 @@ class _CfdZone(PartFeature):
     def __init__(self, obj):
         PartFeature.__init__(self, obj)
 
+        obj.Proxy = self
+        self.Type = 'Zone'
+
+        self.initProperties(obj)
+
+    def initProperties(self, obj):
         addObjectProperty(obj, 'References', [], "App::PropertyPythonObject")
+        addObjectProperty(obj, 'LinkedObjects', [], 'App::PropertyLinkList', "", "Linked objects")
         if obj.Name.startswith('PorousZone'):
             if addObjectProperty(obj, 'PorousCorrelation', POROUS_CORRELATIONS, "App::PropertyEnumeration",
                                  "Porous zone", "Porous drag model"):
@@ -165,17 +172,18 @@ class _CfdZone(PartFeature):
             addObjectProperty(obj, "PressureSpecified", False, "App::PropertyBool",
                               "Initialisation zone", "Whether the zone initialises pressure")
             addObjectProperty(obj, 'Pressure', '0 kg/m/s^2', "App::PropertyPressure",
-                              "Initialiseation zone", "Static pressure")
+                              "Initialisation zone", "Static pressure")
             addObjectProperty(obj, "VolumeFractionSpecified", True, "App::PropertyBool",
                               "Initialisation zone", "Whether the zone initialises volume fraction")
             addObjectProperty(obj, "VolumeFractions", {}, "App::PropertyMap",
                               "Initialisation zone", "Volume fraction values")
 
-        obj.Proxy = self
-        self.Type = 'Zone'
+    def onDocumentRestored(self, obj):
+        self.initProperties(obj)
 
     def execute(self, fp):
         listOfShapes = []
+        fp.LinkedObjects = []
         for r in fp.References:
             object = FreeCAD.ActiveDocument.getObject(r[0])
             if object is not None:  # Could have been deleted
@@ -183,6 +191,8 @@ class _CfdZone(PartFeature):
                     listOfShapes.append(object.Shape)
                 except Part.OCCError:  # In case solid deleted
                     pass
+                if object not in fp.LinkedObjects:
+                    fp.LinkedObjects += [object]
         if listOfShapes:
             fp.Shape = Part.makeCompound(listOfShapes)
         else:
