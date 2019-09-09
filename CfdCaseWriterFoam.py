@@ -509,9 +509,10 @@ class CfdCaseWriterFoam:
                 'PatchType': patchType
             }
 
-        for regionObj in CfdTools.getMeshRefinementObjs(self.mesh_obj):
-            if regionObj.Baffle:
-                settings['createPatchesFromSnappyBaffles'] = True
+        if self.mesh_obj.MeshUtility == 'snappyHexMesh':
+            for regionObj in CfdTools.getMeshRefinementObjs(self.mesh_obj):
+                if regionObj.Baffle:
+                    settings['createPatchesFromSnappyBaffles'] = True
 
         if settings['createPatchesFromSnappyBaffles']:
             settings['createPatchesSnappyBaffles'] = {}

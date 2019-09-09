@@ -117,7 +117,7 @@ solvers
     "(p|p_rgh|pcorr)"
     {
         solver           GAMG;
-        tolerance        1e-6;
+        tolerance        1e-8;
         relTol           0.01;
         smoother         symGaussSeidel;
         nPreSweeps       0;
