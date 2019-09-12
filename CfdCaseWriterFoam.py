@@ -52,7 +52,7 @@ class CfdCaseWriterFoam:
         self.mesh_generated = False
         self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
 
-    def writeCase(self):
+    def writeCase(self, progressCallback=None):
         """ writeCase() will collect case settings, and finally build a runnable case. """
         cfdMessage("Start to write case to folder {}\n".format(self.working_dir))
         if not os.path.exists(self.working_dir):
@@ -69,6 +69,8 @@ class CfdCaseWriterFoam:
         if not self.mesh_obj:
             raise RuntimeError("No mesh object found in analysis")
         phys_settings = CfdTools.propsToDict(self.physics_model)
+
+        # TODO: Make sure boundary labels are unique and valid
 
         self.settings = {
             'physics': phys_settings,
@@ -104,6 +106,8 @@ class CfdCaseWriterFoam:
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         cfdMessage("Matching boundary conditions ...\n")
+        if progressCallback:
+            progressCallback("Matching boundary conditions ...")
         self.setupPatchNames()
 
         TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
@@ -210,12 +214,12 @@ class CfdCaseWriterFoam:
                 mp['MolarMass'] = Units.Quantity(mp['MolarMass']).getValueAs("kg/mol").Value*1000
             if 'Cp' in mp:
                 mp['Cp'] = Units.Quantity(mp['Cp']).getValueAs("J/kg/K").Value
-            if 'SutherlandConstant' in mp:
-                #mp['Cp'] = Units.Quantity(material_obj.SutherlandConstant).getValueAs("kg/m/s/K^0.5").Value
-                # TODO workaround: Have to use wrong units as fractional units currently not supported
-                mp['SutherlandConstant'] = Units.Quantity(mp['SutherlandConstant']).getValueAs("kg/m/s").Value
             if 'SutherlandTemperature' in mp:
                 mp['SutherlandTemperature'] = Units.Quantity(mp['SutherlandTemperature']).getValueAs("K").Value
+                if 'SutherlandRefViscosity' in mp and 'SutherlandRefTemperature' in mp:
+                    mu0 = Units.Quantity(mp['SutherlandRefViscosity']).getValueAs("kg/m/s").Value
+                    T0 = Units.Quantity(mp['SutherlandRefTemperature']).getValueAs("K").Value
+                    mp['SutherlandConstant'] = mu0/T0**(3./2)*(T0+mp['SutherlandTemperature'])
             settings['fluidProperties'].append(mp)
 
     def processBoundaryConditions(self):
@@ -310,7 +314,7 @@ class CfdCaseWriterFoam:
                         # Save first inlet in case match not found
                         if ninlets == 1:
                             first_inlet = bc
-                        if initial_values['Inlet'] == bc_name:
+                        if initial_values['Inlet'].Label == bc_name:
                             inlet_bc = bc
                             break
                 if inlet_bc is None:
@@ -319,11 +323,12 @@ class CfdCaseWriterFoam:
                             inlet_bc = first_inlet
                         else:
                             raise RuntimeError("Inlet {} not found to copy initial conditions from."
-                                               .format(initial_values['Inlet']))
+                                               .format(initial_values['Inlet'].Label))
                     else:
                         inlet_bc = first_inlet
                 if inlet_bc is None:
-                    raise RuntimeError("No inlets found to copy initial conditions from.")
+                    raise RuntimeError(
+                        "Did not find single inlet to copy initial conditions from - please specify one.")
 
         # Copy velocity
         if initial_values['UseInletUPValues']:
@@ -354,7 +359,7 @@ class CfdCaseWriterFoam:
                     initial_values['omega'] = inlet_bc['SpecificDissipationRate']
                 elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
                     if inlet_bc['BoundarySubType'] == 'uniformVelocity' or \
-                       inlet_bc['BoundarySubType'] == 'characteristic':
+                       inlet_bc['BoundarySubType'] == 'farField':
                         Uin = (inlet_bc['Ux']**2 +
                                inlet_bc['Uy']**2 +
                                inlet_bc['Uz']**2)**0.5

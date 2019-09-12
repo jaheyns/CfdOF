@@ -67,7 +67,7 @@ class TaskPanelCfdFluidProperties:
         if self.physics_obj.Flow == 'Incompressible':
             self.fields = ['Density', 'DynamicViscosity']
         else:
-            self.fields = ['MolarMass', 'Cp', 'SutherlandConstant', 'SutherlandTemperature']
+            self.fields = ['MolarMass', 'Cp', 'SutherlandTemperature', 'SutherlandRefTemperature', 'SutherlandRefViscosity']
         self.text_boxes = {}
         for name in self.fields:
             widget = FreeCADGui.UiLoader().createWidget("Gui::InputField")
