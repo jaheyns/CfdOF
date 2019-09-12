@@ -286,6 +286,7 @@ class CfdMeshTools:
                             refs = mr_obj.References
                             for r in refs:
                                 region_face_lists[mr_id].append(r)
+                    CfdTools.cfdMessage("Matching refinement regions")
                     bl_matched_faces = CfdTools.matchFacesToTargetShape(region_face_lists, self.mesh_obj.Part.Shape)
 
                 for mr_id, mr_obj in enumerate(mr_objs):
@@ -325,9 +326,12 @@ class CfdMeshTools:
                             else:
                                 elt = shape.getElement(elem)
                             if elt.ShapeType == 'Face' or elt.ShapeType == 'Solid':
+                                CfdTools.cfdMessage("Triangulating part: {}:{} ...".format(
+                                        FreeCAD.ActiveDocument.getObject(sub[0]).Label, sub[1]))
                                 facemesh = MeshPart.meshFromShape(elt,
                                                                   LinearDeflection=self.mesh_obj.STLLinearDeflection)
 
+                                CfdTools.cfdMessage(" writing to file\n")
                                 fid.write("solid {}{}{}\n".format(mr_obj.Name, sub[0], elem))
                                 for face in facemesh.Facets:
                                     fid.write(" facet normal 0 0 0\n")
@@ -442,7 +446,9 @@ class CfdMeshTools:
             with open(self.temp_file_geo, 'w') as fullMeshFile:
                 for (i, objFaces) in enumerate(self.part_obj.Shape.Faces):
                     faceName = ("face{}".format(i))
+                    CfdTools.cfdMessage("Triangulating part: {}:{} ...".format(self.part_obj.Label, faceName))
                     mesh_stl = MeshPart.meshFromShape(objFaces, LinearDeflection=self.mesh_obj.STLLinearDeflection)
+                    CfdTools.cfdMessage(" writing to file\n")
                     fullMeshFile.write("solid {}\n".format(faceName))
                     for face in mesh_stl.Facets:
                         n = face.Normal
@@ -480,7 +486,7 @@ class CfdMeshTools:
 
     def writeMeshCase(self):
         """ Collect case settings, and finally build a runnable case. """
-        FreeCAD.Console.PrintMessage("Populating mesh dictionaries in folder {}\n".format(self.meshCaseDir))
+        CfdTools.cfdMessage("Populating mesh dictionaries in folder {}\n".format(self.meshCaseDir))
 
         if self.mesh_obj.MeshUtility == "cfMesh":
             self.cf_settings['ClMax'] = self.clmax*self.scale
@@ -600,4 +606,4 @@ class CfdMeshTools:
         s = os.stat(fname)
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
 
-        FreeCAD.Console.PrintMessage("Successfully wrote meshCase to folder {}\n".format(self.meshCaseDir))
+        CfdTools.cfdMessage("Successfully wrote meshCase to folder {}\n".format(self.meshCaseDir))

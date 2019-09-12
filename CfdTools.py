@@ -264,6 +264,7 @@ def cfdMessage(msg):
     FreeCAD.Console.PrintMessage(msg)
     if FreeCAD.GuiUp:
         FreeCAD.Gui.updateGui()
+        FreeCAD.Gui.updateGui()
 
 
 def setQuantity(inputField, quantity):
