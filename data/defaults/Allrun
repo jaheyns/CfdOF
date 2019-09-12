@@ -15,15 +15,21 @@ runCommand()
 %:BlueCFD
 %:default
 # Unset and source bashrc
-source "%(system/TranslatedFoamPath%)/etc/config.sh/unset" 2> /dev/null
-source "%(system/TranslatedFoamPath%)/etc/bashrc"
+FOAMDIR="%(system/TranslatedFoamPath%)"
+source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+source "$FOAMDIR/etc/bashrc"
 
 %}
 # Copy mesh from mesh case dir if available
-if [ -d %(meshDir%) ]
+MESHDIR="%(meshDir%)"
+if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
     rm -r constant/polyMesh 2> /dev/null
-    cp -r %(meshDir%)/constant/polyMesh constant/polyMesh
+    cp -r "$MESHDIR"/constant/polyMesh constant/polyMesh
+elif [ ! -f constant/polyMesh/faces ]
+then
+    echo "Fatal error: Unable to find mesh in directory $MESHDIR" 1>&2
+    exit 1
 fi
 
 # Update patch name and type
@@ -76,6 +82,7 @@ runCommand potentialFoam -initialiseUBCs
 %:default
 runCommand potentialFoam -initialiseUBCs -writep
 %}
+
 %}
 %{%(solver/Parallel%)
 %:True

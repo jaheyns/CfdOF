@@ -161,6 +161,8 @@ class CfdConsoleProcess:
                     self.print_next_error_lines = 1
                     self.print_next_error_file = True
                     ret += "OpenFOAM IO error:\n"
+                elif errline.startswith("Fatal error:"):
+                    ret += errline
         if len(ret) > 0:
             return ret
         else:
