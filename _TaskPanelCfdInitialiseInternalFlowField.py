@@ -101,7 +101,8 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         for b in self.boundaries:
             if b.BoundaryType in ['inlet', 'open']:
                 self.form.comboInlets.addItem(b.Label, b.Name)
-        self.form.comboInlets.setCurrentIndex(self.form.comboInlets.findData(self.obj.Inlet.Name))
+        if self.obj.Inlet is not None:
+            self.form.comboInlets.setCurrentIndex(self.form.comboInlets.findData(self.obj.Inlet.Name))
 
         self.updateUi()
 
