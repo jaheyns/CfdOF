@@ -80,6 +80,7 @@ class _CommandCfdPorousZone:
         FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdZone.makeCfdPorousZone())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
+
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_PorousZone', _CommandCfdPorousZone())
 
@@ -109,18 +110,10 @@ if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_InitialisationZone', _CommandCfdInitialisationZone())
 
 
-class PartFeature:
+class _CfdZone:
     def __init__(self, obj):
-        obj.Proxy = self
-
-
-class _CfdZone(PartFeature):
-    def __init__(self, obj):
-        PartFeature.__init__(self, obj)
-
         obj.Proxy = self
         self.Type = 'Zone'
-
         self.initProperties(obj)
 
     def initProperties(self, obj):

@@ -35,9 +35,8 @@ if FreeCAD.GuiUp:
 
 
 def makeCfdInitialFlowField(name="InitialiseFields"):
-    obj = FreeCAD.ActiveDocument.addObject("App::FeaturePython", name)
+    obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdInitialVariables(obj)
-
     if FreeCAD.GuiUp:
         _ViewProviderCfdInitialseInternalFlowField(obj.ViewObject)
     return obj
@@ -72,7 +71,7 @@ class _CommandCfdInitialiseInternalFlowField:
             FreeCADGui.doCommand("")
             FreeCADGui.addModule("CfdInitialiseFlowField")
             FreeCADGui.doCommand(
-                "analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())")
+                "CfdTools.getActiveAnalysis().addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())")
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
@@ -108,9 +107,6 @@ class _CfdInitialVariables:
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
-
-    def execute(self, obj):
-        return
 
 
 class _ViewProviderCfdInitialseInternalFlowField:

@@ -155,15 +155,8 @@ if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_FluidBoundary', _CommandCfdFluidBoundary())
 
 
-class PartFeature:
-    """ Part containing CfdFluidBoundary faces """
+class _CfdFluidBoundary:
     def __init__(self, obj):
-        obj.Proxy = self
-
-
-class _CfdFluidBoundary(PartFeature):
-    def __init__(self, obj):
-        PartFeature.__init__(self, obj)
 
         obj.Proxy = self
         self.Type = "CfdFluidBoundary"

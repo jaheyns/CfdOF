@@ -151,8 +151,6 @@ class _TaskPanelCfdSolverControl:
         solverDirectory = os.path.abspath(solverDirectory)
         cmd = self.solver_runner.get_solver_cmd(solverDirectory)
         FreeCAD.Console.PrintMessage(' '.join(cmd) + '\n')
-        self.consoleMessage("Starting solver command:")
-        self.consoleMessage(' '.join(cmd))
         envVars = self.solver_runner.getRunEnvironment()
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.solver_run_process.start(cmd, env_vars=envVars)

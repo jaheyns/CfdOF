@@ -36,7 +36,7 @@ if FreeCAD.GuiUp:
 
 
 def makeCfdSolverFoam(name="CfdSolver"):
-    obj = FreeCAD.ActiveDocument.addObject("App::FeaturePython", name)
+    obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdSolverFoam(obj)
     if FreeCAD.GuiUp:
         _ViewProviderCfdSolverFoam(obj.ViewObject)
