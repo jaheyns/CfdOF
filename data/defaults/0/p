@@ -46,7 +46,12 @@ boundaryField
     %(0%)
     {
         type        totalPressure;
+%{%(solver/SolverName%)
+%:hisa
         p0          uniform %(boundaries/%(0%)/Pressure%);
+%:default
+        p0          uniform %(boundaries/%(0%)/KinematicPressure%);
+%}
         value       $internalField;
     }
 %:staticPressureInlet
@@ -68,13 +73,14 @@ boundaryField
 %:staticPressureOutlet
     %(0%)
     {
-        type        fixedValue;
+        type        totalPressure;
 %{%(solver/SolverName%)
 %:hisa
-        value       uniform %(boundaries/%(0%)/Pressure%);
+        p0          uniform %(boundaries/%(0%)/Pressure%);
 %:default
-        value       uniform %(boundaries/%(0%)/KinematicPressure%);
+        p0          uniform %(boundaries/%(0%)/KinematicPressure%);
 %}
+        value       $internalField;
     }
 %:default
 %[0/_boundary_zeroGradient%]
@@ -94,7 +100,12 @@ boundaryField
     %(0%)
     {
         type        totalPressure;
+%{%(solver/SolverName%)
+%:hisa
         p0          uniform %(boundaries/%(0%)/Pressure%);
+%:default
+        p0          uniform %(boundaries/%(0%)/KinematicPressure%);
+%}
         value       $internalField;
     }
 %}
