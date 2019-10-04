@@ -41,13 +41,63 @@ boundaryField
     }
 %}
 %:inlet
+%{%(solver/SolverName%)
+%:hisa
+    %(0%)
+    {
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:uniformVelocityInlet
+        type        characteristicVelocityInletOutletTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+%:staticPressureInlet
+        type        characteristicPressureInletOutletTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+%:default
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/Temperature%);
+%}
+    }
+%:default
     %(0%)
     {
         type        fixedValue;
         value       uniform %(boundaries/%(0%)/Temperature%);
     }
+%}
 %:outlet
+%{%(solver/SolverName%)
+%:hisa
+%{%(boundaries/%(0%)/BoundarySubtype%)
+%:staticPressureOutlet
+    %(0%)
+    {
+        type        characteristicPressureInletOutletTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       $internalValue;
+    }
+%:uniformVelocityOutlet
+    %(0%)
+    {
+        type        characteristicVelocityInletOutletTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       $internalValue;
+    }
+%:default
 %[0/_boundary_zeroGradient%]
+%}
+%:default
+%[0/_boundary_zeroGradient%]
+%}
 %:open
 %{%(boundaries/%(0%)/BoundarySubType%)
 %:farField

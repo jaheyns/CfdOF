@@ -136,10 +136,10 @@ class TaskPanelCfdFluidBoundary:
         self.form.lineDirection.textChanged.connect(self.lineDirectionChanged)
         self.form.buttonDirection.clicked.connect(self.buttonDirectionClicked)
         self.form.buttonGroupPorous.buttonClicked.connect(self.updateUI)
-        self.form.comboTurbulenceSpecification.currentIndexChanged.connect(self.comboTurbulenceSpecificationChanged)
+        self.form.comboTurbulenceSpecification.currentIndexChanged.connect(self.updateUI)
         self.form.comboFluid.currentIndexChanged.connect(self.comboFluidChanged)
         self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
-        self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.comboThermalBoundaryTypeChanged)
+        self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.updateUI)
 
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
@@ -171,13 +171,13 @@ class TaskPanelCfdFluidBoundary:
         if self.physics_model.Thermal != 'None' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
             self.form.thermalFrame.setVisible(True)
             selected_rows = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6]
+            for rowi in range(self.form.layoutThermal.count()):
+                for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
+                    item = self.form.layoutThermal.itemAt(rowi, role)
+                    if item:
+                        if isinstance(item, QtGui.QWidgetItem):
+                            item.widget().setVisible(selected_rows is None)
             if selected_rows:
-                for rowi in range(self.form.layoutThermal.count()):
-                    for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
-                        item = self.form.layoutThermal.itemAt(rowi, role)
-                        if item:
-                            if isinstance(item, QtGui.QWidgetItem):
-                                item.widget().setVisible(False)
                 for row_enabled in selected_rows:
                     for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
                         item = self.form.layoutThermal.itemAt(row_enabled, role)
@@ -194,6 +194,8 @@ class TaskPanelCfdFluidBoundary:
 
         if self.turbModel:
             index = self.form.comboTurbulenceSpecification.currentIndex()
+            self.form.labelTurbulenceDescription.setText(
+                CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][2][index])
             panel_numbers = CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][3][index]
             # Enables specified rows of a QFormLayout
             for rowi in range(self.form.layoutTurbulenceValues.count()):
@@ -202,14 +204,17 @@ class TaskPanelCfdFluidBoundary:
                     if isinstance(item, QtGui.QWidgetItem):
                         item.widget().setVisible(rowi in panel_numbers)
 
-        index = self.form.comboThermalBoundaryType.currentIndex()
-        panel_numbers = CfdFluidBoundary.BOUNDARY_THERMALTAB[index]
-        # Enables specified rows of a QFormLayout
-        for rowi in range(2, self.form.layoutThermal.count()):  # Input values only start at row 2 of this form
-            for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
-                item = self.form.layoutThermal.itemAt(rowi, role)
-                if isinstance(item, QtGui.QWidgetItem):
-                    item.widget().setVisible(rowi-2 in panel_numbers)
+        if CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6] is None:
+            # Rows of thermal not stipulated - choose with dropdown
+            index = self.form.comboThermalBoundaryType.currentIndex()
+            self.form.labelThermalDescription.setText(CfdFluidBoundary.THERMAL_HELPTEXT[index])
+            panel_numbers = CfdFluidBoundary.BOUNDARY_THERMALTAB[index]
+            # Enables specified rows of a QFormLayout
+            for rowi in range(2, self.form.layoutThermal.count()):  # Input values only start at row 2 of this form
+                for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
+                    item = self.form.layoutThermal.itemAt(rowi, role)
+                    if isinstance(item, QtGui.QWidgetItem):
+                        item.widget().setVisible(rowi-2 in panel_numbers)
 
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
@@ -287,10 +292,6 @@ class TaskPanelCfdFluidBoundary:
             pass
         FreeCAD.Console.PrintMessage(value + " is not a valid, planar face\n")
 
-    def comboTurbulenceSpecificationChanged(self, index):
-        self.form.labelTurbulenceDescription.setText(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][2][index])
-        self.updateUI()
-
     def getMaterialName(self, index):
         return self.material_objs[index].Label
 
@@ -299,10 +300,6 @@ class TaskPanelCfdFluidBoundary:
 
     def inputVolumeFractionChanged(self, value):
         self.alphas[self.form.comboFluid.currentText()] = getQuantity(self.form.inputVolumeFraction)
-
-    def comboThermalBoundaryTypeChanged(self, index):
-        self.form.labelThermalDescription.setText(CfdFluidBoundary.THERMAL_HELPTEXT[index])
-        self.updateUI()
 
     def accept(self):
         if self.obj.Label.startswith("CfdFluidBoundary"):

@@ -51,7 +51,8 @@ if FreeCAD.GuiUp:
 # Some standard install locations that are searched if an install directory is not specified
 FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM-5.x",
                                  "C:\\Program Files\\blueCFD-Core-2016\\OpenFOAM-4.x"],
-                     "Linux": ["/opt/openfoam4", "/opt/openfoam5", "/opt/openfoam6", "/opt/openfoam-dev",
+                     "Linux": ["/opt/openfoam4", "/opt/openfoam5", "/opt/openfoam6", "/opt/openfoam7", "/opt/openfoam-dev",
+                               "~/OpenFOAM/OpenFOAM-7.x", "~/OpenFOAM/OpenFOAM-7.0",
                                "~/OpenFOAM/OpenFOAM-6.x", "~/OpenFOAM/OpenFOAM-6.0",
                                "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
                                "~/OpenFOAM/OpenFOAM-4.x", "~/OpenFOAM/OpenFOAM-4.0", "~/OpenFOAM/OpenFOAM-4.1",
@@ -658,6 +659,10 @@ def checkCfdDependencies(term_print=True):
         CF_MAJOR_VER_REQUIRED = 1
         CF_MINOR_VER_REQUIRED = 4
 
+        HISA_MAJOR_VER_REQUIRED = 1
+        HISA_MINOR_VER_REQUIRED = 1
+        HISA_PATCH_VER_REQUIRED = 1
+
         import subprocess
 
         message = ""
@@ -772,7 +777,21 @@ def checkCfdDependencies(term_print=True):
 
                     # Check for HiSA
                     try:
-                        runFoamCommand("hisa -help")
+                        hisa_ver = runFoamCommand("hisa -version")
+                        hisa_ver = hisa_ver.rstrip().split()[-1]
+                        hisa_ver = hisa_ver.split('.')
+                        if (not hisa_ver or len(hisa_ver) != 3 or
+                            int(hisa_ver[0]) < HISA_MAJOR_VER_REQUIRED or
+                            (int(hisa_ver[0]) == HISA_MAJOR_VER_REQUIRED and
+                             (int(hisa_ver[1]) < HISA_MINOR_VER_REQUIRED or
+                              (int(hisa_ver[1]) == HISA_MINOR_VER_REQUIRED and
+                               int(hisa_ver[2]) < HISA_PATCH_VER_REQUIRED)))):
+                            vermsg = "HiSA version {}.{}.{} required".format(HISA_MAJOR_VER_REQUIRED,
+                                                                             HISA_MINOR_VER_REQUIRED,
+                                                                             HISA_PATCH_VER_REQUIRED)
+                            message += vermsg + "\n"
+                            if term_print:
+                                print(vermsg)
                     except subprocess.CalledProcessError:
                         hisa_msg = "HiSA not found"
                         message += hisa_msg + '\n'

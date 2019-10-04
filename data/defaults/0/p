@@ -57,14 +57,32 @@ boundaryField
 %:staticPressureInlet
     %(0%)
     {
-        type        fixedValue;
 %{%(solver/SolverName%)
 %:hisa
+        type        characteristicPressureInletOutletPressure;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
         value       uniform %(boundaries/%(0%)/Pressure%);
 %:default
+        type        fixedValue;
         value       uniform %(boundaries/%(0%)/KinematicPressure%);
 %}
     }
+%:fixedVelocityInlet
+%{%(solver/SolverName%)
+%:hisa
+    %(0%)
+    {
+        type        characteristicVelocityInletOutletPressure;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       $internalField;
+    }
+%:default
+%[0/_boundary_zeroGradient%]
+%}
 %:default
 %[0/_boundary_zeroGradient%]
 %}
@@ -73,15 +91,32 @@ boundaryField
 %:staticPressureOutlet
     %(0%)
     {
-        type        totalPressure;
 %{%(solver/SolverName%)
 %:hisa
-        p0          uniform %(boundaries/%(0%)/Pressure%);
+        type        characteristicPressureInletOutletPressure;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
 %:default
+        type        totalPressure;
         p0          uniform %(boundaries/%(0%)/KinematicPressure%);
 %}
         value       $internalField;
     }
+%:uniformVelocityOutlet
+%{%(solver/SolverName%)
+%:hisa
+    %(0%)
+    {
+        type        characteristicVelocityInletOutletPressure;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       $internalField;
+    }
+%:default
+%[0/_boundary_zeroGradient%]
+%}
 %:default
 %[0/_boundary_zeroGradient%]
 %}

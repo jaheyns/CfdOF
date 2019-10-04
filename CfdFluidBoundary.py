@@ -43,7 +43,7 @@ BOUNDARY_TYPES = ["wall", "inlet", "outlet", "open", "constraint", "baffle"]
 
 SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translating", "Rough"],
             ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure"],
-            ["Static pressure", "Uniform velocity", "Outflow"],
+            ["Static pressure", "Uniform velocity", "Extrapolated"],
             ["Ambient pressure", "Far-field"],
             ["Symmetry", "2D bounding plane"],
             ["Porous Baffle"]]
@@ -67,7 +67,7 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                       "Static pressure specified"],
                      ["Static pressure specified for outflow and total pressure for reverse flow",
                       "Normal component imposed for outflow; velocity fixed for reverse flow",
-                      "All fields extrapolated; use with care!"],
+                      "All fields extrapolated; possibly unstable"],
                      ["Boundary open to surroundings with total pressure specified",
                       "Characteristic-based non-reflecting boundary"],
                      ["Symmetry of flow quantities about boundary face",
@@ -83,13 +83,13 @@ BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                 [True, [2], False, False, False, True, None],  # Partial slip
                 [True, [0], False, False, False, True, None],  # Translating wall
                 [True, [0], False, False, False, True, None]],  # Rough
-               [[True, [0], True, True, True, True, [2]],  # Velocity
+               [[True, [0, 1], True, True, True, True, [2]],  # Velocity
                 [True, [3], False, True, True, True, [2]],  # Vol flow rate
                 [True, [4], False, True, True, True, [2]],  # Mass Flow rate
                 [True, [1], False, True, True, True, [2]],  # Total pressure
-                [True, [1], False, True, True, True, [2]]],  # Static pressure
-               [[True, [1], False, False, True, False, None],  # Static pressure
-                [True, [0], False, False, True, False, None],  # Uniform velocity
+                [True, [0, 1], False, True, True, True, [2]]],  # Static pressure
+               [[True, [0, 1], False, False, True, True, [2]],  # Static pressure
+                [True, [0, 1], False, False, True, True, [2]],  # Uniform velocity
                 [False, [], False, False, False, False, None]],  # Outflow
                [[True, [1], False, True, True, True, [2]],  # Opening
                 [True, [0, 1], False, True, False, True, [2]]],  # Far-field

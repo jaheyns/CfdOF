@@ -61,6 +61,13 @@ boundaryField
 %:uniformVelocityInlet
     %(0%)
     {
+%{%(solver/SolverName%)
+%:hisa
+        type                characteristicVelocityInletOutletVelocity;
+        U                   ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p                   %(boundaries/%(0%)/Pressure%);
+        T                   %(boundaries/%(0%)/Temperature%);
+%:default
         // Fix all three components of velocity on inflow and only the normal component on outflow,
         // in order to be well-posed if there are some faces on the patch which are actually outflows.
         type                fixedNormalInletOutletVelocity;
@@ -68,9 +75,10 @@ boundaryField
         normalVelocity
         {
             type            fixedValue;
-            value           uniform (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
+            value           uniform ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
         }
-        value               uniform (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
+%}
+        value               uniform ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
     }
 %:volumetricFlowRateInlet
     %(0%)
@@ -94,15 +102,46 @@ boundaryField
 %:totalPressureInlet
 %[0/_U_boundary_pressureInletOutletVelocity%]
 %:staticPressureInlet
+%{%(solver/SolverName%)
+%:hisa
+    %(0%)
+    {
+        type                characteristicPressureInletOutletVelocity;
+        U                   (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
+        p                   %(boundaries/%(0%)/Pressure%);
+        T                   %(boundaries/%(0%)/T%);
+        value               $internalField;
+    }
+%:default
 %[0/_U_boundary_pressureInletOutletVelocity%]
+%}
 %}
 %:outlet
 %{%(boundaries/%(0%)/BoundarySubType%)
 %:staticPressureOutlet
+%{%(solver/SolverName%)
+%:hisa
+    %(0%)
+    {
+        type                characteristicPressureInletOutletVelocity;
+        U                   ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p                   %(boundaries/%(0%)/Pressure%);
+        T                   %(boundaries/%(0%)/Temperature%);
+        value               $internalField;
+    }
+%:default
 %[0/_U_boundary_pressureInletOutletVelocity%]
+%}
 %:uniformVelocityOutlet
     %(0%)
     {
+%{%(solver/SolverName%)
+%:hisa
+        type                characteristicVelocityInletOutletVelocity;
+        U                   ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p                   %(boundaries/%(0%)/Pressure%);
+        T                   %(boundaries/%(0%)/Temperature%);
+%:default
         // Fix only the normal component on outflow and all three components of velocity on inflow,
         // in order to be well-posed on outflow and also in case there are any faces with inflowing velocity.
         type                fixedNormalInletOutletVelocity;
@@ -112,6 +151,7 @@ boundaryField
             type            fixedValue;
             value           uniform (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
         }
+%}
         value               uniform (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
     }
 %:outFlowOutlet
