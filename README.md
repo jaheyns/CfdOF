@@ -32,10 +32,6 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 * New case builder using an extensible template structure
 * Macro scripting
 
-### Planned:
-
-* Conjugate heat transfer.
-
 ### Platforms supported
 
 #### Linux
@@ -48,7 +44,7 @@ Windows 7-10; 64-bit version is required.
 
 #### MacOSX
 
-Not widely tested, but possible. 
+Not widely tested, but success has been reported. 
       
 ## Getting started
 
@@ -73,15 +69,20 @@ which can be automatically installed (see below for instructions).
 The latest 
 [release](https://www.freecadweb.org/downloads.php) 
 or [development](https://github.com/FreeCAD/FreeCAD/releases)
-FreeCAD build can be obtained (64 bit version) and the latest
-CfdOF workbench can be installed into it using the Addon manager:
+FreeCAD build can be obtained (64 bit version) and installed
+by running the installer or extracting the .7z archive to a directory
+<FreeCAD-directory>. In the latter case, FreeCAD can be run in place
+(<FreeCAD-directory\bin\FreeCAD.exe). 
 
-* After running the installer or extracting the .7z archive to a directory <FreeCAD-directory>,
-run FreeCAD in place (<FreeCAD-directory\bin\FreeCAD.exe). 
+Before installing CfdOF, the Plot workbench must first be 
+installed into FreeCAD using the Addon manager:
+
+* Run FreeCAD
 * Select Tools | Addon manager ...
-* Select CfdOF in the list of workbenches, and click "Install/update"
+* Select Plot in the list of workbenches, and click "Install/update"
 * Restart FreeCAD
-* For installation of dependencies, see below.
+* Repeat the above for the "CfdOF" workbench
+* For installation of dependencies, see below
 
 Note: The CFD workbench can be updated at any time through the Addon manager.
 

@@ -816,15 +816,12 @@ def checkCfdDependencies(term_print=True):
         if term_print:
             print("Checking for Plot workbench:")
         try:
-            import Plot
+            from freecad.plot import Plot
         except ImportError:
-            try:
-                from freecad.plot import Plot
-            except ImportError:
-                plot_msg = "Could not load Plot workbench\nPlease install it using Tools | Addon manager"
-                message += plot_msg + '\n'
-                if term_print:
-                    print(plot_msg)
+            plot_msg = "Could not load Plot workbench\nPlease install it using Tools | Addon manager"
+            message += plot_msg + '\n'
+            if term_print:
+                print(plot_msg)
 
         try:
             import matplotlib
