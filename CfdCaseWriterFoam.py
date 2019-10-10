@@ -252,7 +252,7 @@ class CfdCaseWriterFoam:
             if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
                 bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
-            if bc['PorousBaffleMethod'] == 1:
+            if bc['PorousBaffleMethod'] == 'porousScreen':
                 wireDiam = bc['ScreenWireDiameter']
                 spacing = bc['ScreenSpacing']
                 CD = 1.0  # Drag coeff of wire (Simmons - valid for Re > ~300)

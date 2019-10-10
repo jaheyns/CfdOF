@@ -2,8 +2,8 @@
 
 This workbench aims to help users set up and run CFD analyses within the [FreeCAD](https://freecadweb.org)
 modeller. It guides the user in selecting the relevant physics, 
-specifying the material properties, generating a mesh, assigning boundary conditions and setting the solver settings
-before running the simulation. Best practices are chosen to maximise the stability of the solvers.
+specifying the material properties, generating a mesh, assigning boundary conditions and choosing the solver settings
+before running the simulation. Best practices are specified to maximise the stability of the solvers.
 
 ![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
 
@@ -70,7 +70,7 @@ The latest
 [release](https://www.freecadweb.org/downloads.php) 
 or [development](https://github.com/FreeCAD/FreeCAD/releases)
 FreeCAD build can be obtained (64 bit version) and installed
-by running the installer or extracting the .7z archive to a directory
+by respectively running the installer or extracting the .7z archive to a directory
 <FreeCAD-directory>. In the latter case, FreeCAD can be run in place
 (<FreeCAD-directory\bin\FreeCAD.exe). 
 

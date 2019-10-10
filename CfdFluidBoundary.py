@@ -198,9 +198,9 @@ class _CfdFluidBoundary:
             obj.PorousBaffleMethod = 'porousCoeff'
         addObjectProperty(obj, 'PressureDropCoeff', '0', "App::PropertyQuantity", "Baffle",
                           "Porous baffle pressure drop coefficient")
-        addObjectProperty(obj, 'ScreenWireDiameter', '0 m', "App::PropertyLength", "Baffle",
+        addObjectProperty(obj, 'ScreenWireDiameter', '0.2 mm', "App::PropertyLength", "Baffle",
                           "Porous screen mesh diameter")
-        addObjectProperty(obj, 'ScreenSpacing', '0 m', "App::PropertyLength", "Baffle",
+        addObjectProperty(obj, 'ScreenSpacing', '2 mm', "App::PropertyLength", "Baffle",
                           "Porous screen mesh spacing")
         addObjectProperty(obj, 'ThermalBoundaryType', THERMAL_BOUNDARY_TYPES, "App::PropertyEnumeration", "Thermal",
                           "Type of thermal boundary")
