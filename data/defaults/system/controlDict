@@ -54,12 +54,6 @@ writeFormat     ascii;
 
 writePrecision  8;
 
-writeCompression uncompressed;
-
-timeFormat      general;
-
-timePrecision   6;
-
 %{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
 maxAlphaCo      1;
