@@ -234,11 +234,11 @@ def get_module_path():
 # Set functions
 
 def setCompSolid(vobj):
-    """ To enable correct mesh refinement boolean fragments are set to compSolid mode, """
+    """ To enable correct mesh refinement, boolean fragments are set to compSolid mode """
     doc_name = str(vobj.Object.Document.Name)
     doc = FreeCAD.getDocument(doc_name)
     for obj in doc.Objects:
-        if ("Boolean" in obj.Name) and not ("Mesh" in obj.Name):
+        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, BOPTools.SplitFeatures.FeatureBooleanFragments):
             FreeCAD.getDocument(doc_name).getObject(obj.Name).Mode = 'CompSolid'
 
 
