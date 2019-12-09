@@ -43,6 +43,8 @@ import platform
 import subprocess
 import sys
 import math
+import BOPTools
+from BOPTools import SplitFeatures
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
