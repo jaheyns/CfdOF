@@ -663,7 +663,7 @@ def checkCfdDependencies(term_print=True):
 
         HISA_MAJOR_VER_REQUIRED = 1
         HISA_MINOR_VER_REQUIRED = 1
-        HISA_PATCH_VER_REQUIRED = 1
+        HISA_PATCH_VER_REQUIRED = 2
 
         import subprocess
 
