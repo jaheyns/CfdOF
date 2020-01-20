@@ -693,10 +693,10 @@ def checkCfdDependencies(term_print=True):
         if (major_ver < FC_MAJOR_VER_REQUIRED or
             (major_ver == FC_MAJOR_VER_REQUIRED and
              (minor_ver < FC_MINOR_VER_REQUIRED or
-              (minor_ver == FC_MINOR_VER_REQUIRED and patch_ver < FC_PATCH_VER_REQUIRED)
-             )
-            )
-           ) or gitver < FC_COMMIT_REQUIRED:
+              (minor_ver == FC_MINOR_VER_REQUIRED and
+               (patch_ver < FC_PATCH_VER_REQUIRED or
+                (patch_ver == FC_PATCH_VER_REQUIRED and
+                 giver < FC_COMMIT_REQUIRED)))))):
             fc_msg = "FreeCAD version ({}.{}.{}) ({}) must be at least {}.{}.{} ({})".format(
                 int(ver[0]), minor_ver, patch_ver, gitver,
                 FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED)
