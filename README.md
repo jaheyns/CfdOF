@@ -241,3 +241,8 @@ We acknowledge significant contributions from
 * Michael Hindley (2016) - Initial concept
 * Klaus Sembritzki (2017) - Multiphase extension
 * Thomas Schrader (2017-2018) <info@schraderundschrader.de> - Testing and user assistance
+
+### Dedication
+
+CfdOF is dedicated to the memory of Michael Hindley, whose irrepressible enthusiasm for 
+FreeCAD and open source software is the reason this workbench was created. Rest in peace.
