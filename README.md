@@ -1,4 +1,5 @@
 # CfdOF: A Computational fluid dynamics (CFD) workbench for FreeCAD
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/alerts/)[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/context:python)
 
 This workbench aims to help users set up and run CFD analyses within the [FreeCAD](https://freecadweb.org)
 modeller. It guides the user in selecting the relevant physics, 
