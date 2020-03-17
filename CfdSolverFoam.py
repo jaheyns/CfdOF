@@ -32,7 +32,7 @@ import os
 import os.path
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore, QtGui
+    from PySide import QtCore
 
 
 def makeCfdSolverFoam(name="CfdSolver"):

@@ -34,10 +34,6 @@ try:
     import femmesh.meshtools as FemMeshTools
 except ImportError:  # Backward compatibility
     import FemMeshTools
-try:
-    from femobjects import _FemMeshGmsh
-except ImportError:  # Backward compat
-    from PyObjects import _FemMeshGmsh
 from FreeCAD import Units
 import os
 import platform

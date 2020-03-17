@@ -34,10 +34,6 @@ import CfdFluidBoundary
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
-    try:  # Qt5
-        from PySide2 import QtUiTools
-    except ImportError:
-        from PySide import QtUiTools
     from PySide.QtGui import QFormLayout
 
 

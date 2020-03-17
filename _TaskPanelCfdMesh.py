@@ -33,7 +33,6 @@ import time
 import CfdTools
 from CfdTools import setQuantity, getQuantity
 import CfdMeshTools
-import Fem
 from CfdConsoleProcess import CfdConsoleProcess
 if FreeCAD.GuiUp:
     import FreeCADGui

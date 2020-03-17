@@ -123,7 +123,6 @@ class _TaskPanelCfdMeshRefinement:
         FreeCADGui.ActiveDocument.resetEdit()
 
         doc_name = str(self.obj.Document.Name)
-        obj = FreeCAD.getDocument(doc_name).getObject(self.obj.Name)
         FreeCAD.getDocument(doc_name).recompute()
         return True
 

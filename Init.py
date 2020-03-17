@@ -23,7 +23,6 @@
 # ***************************************************************************/
 
 
-import FreeCAD
 # add import and export file for this workbench
 
 # NOTE: Revive if VTK is added (JH) 16/02/2017

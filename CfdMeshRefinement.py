@@ -25,8 +25,6 @@
 # ***************************************************************************
 
 import FreeCAD
-from FreeCAD import Base
-from FreeCAD import Units
 import FreeCADGui
 from CfdMesh import _CfdMesh
 from PySide import QtCore

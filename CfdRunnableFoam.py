@@ -29,10 +29,9 @@ from __future__ import print_function
 import FreeCAD
 import CfdTools
 import CfdAnalysis
-from PySide.QtCore import QObject, Signal, QThread
+from PySide.QtCore import QObject, Signal
 from CfdResidualPlot import ResidualPlot
 from collections import OrderedDict
-from numpy import *
 
 
 class CfdRunnable(QObject, object):

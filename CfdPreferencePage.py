@@ -43,7 +43,6 @@ import ssl
 
 import FreeCAD
 import CfdTools
-import TemplateBuilder
 import tempfile
 from contextlib import closing
 
@@ -51,8 +50,8 @@ if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
     from PySide import QtGui
-    from PySide.QtCore import Qt, QRunnable, QObject, QThread
-    from PySide.QtGui import QApplication, QDialog
+    from PySide.QtCore import Qt, QObject, QThread
+    from PySide.QtGui import QApplication
 
 BLUECFD_URL = \
     "https://github.com/blueCFD/Core/releases/download/blueCFD-Core-2017-2/blueCFD-Core-2017-2-win64-setup.exe"

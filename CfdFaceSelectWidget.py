@@ -33,10 +33,6 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
     from PySide import QtGui
     from PySide.QtCore import QTimer
-    try:  # Qt5
-        from PySide2 import QtUiTools
-    except ImportError:
-        from PySide import QtUiTools
 
 
 class CfdFaceSelectWidget:

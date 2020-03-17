@@ -299,7 +299,7 @@ class TemplateBuilder(object):
             end = self.findClosingBracket(contents, start)
             new_file = contents[start+2:end]
             if cur_file == new_file:
-                ValueError("File cannot include itself: " + cur_file)
+                raise ValueError("File cannot include itself: " + cur_file)
             replacement = self.buildFile(new_file, params)
             afterEnd = (end+3 if contents[end+2:end+3] == '\n' else end+2)
             contents = contents[:start] + replacement + contents[afterEnd:]

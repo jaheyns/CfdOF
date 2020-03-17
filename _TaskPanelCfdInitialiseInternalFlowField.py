@@ -27,7 +27,6 @@
 import FreeCAD
 import os
 import os.path
-import CfdTools
 from CfdTools import getQuantity, setQuantity
 if FreeCAD.GuiUp:
     import FreeCADGui
