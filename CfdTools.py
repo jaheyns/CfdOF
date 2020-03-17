@@ -5,7 +5,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -37,7 +37,6 @@ import os
 import os.path
 import shutil
 import tempfile
-import string
 import numbers
 import platform
 import subprocess
@@ -85,7 +84,6 @@ def getOutputPath(analysis):
 
 if FreeCAD.GuiUp:
     def getResultObject():
-        import FreeCADGui
         sel = FreeCADGui.Selection.getSelection()
         if len(sel) == 1:
             if sel[0].isDerivedFrom("Fem::FemResultObject"):
@@ -665,8 +663,6 @@ def checkCfdDependencies(term_print=True):
         HISA_MINOR_VER_REQUIRED = 1
         HISA_PATCH_VER_REQUIRED = 2
 
-        import subprocess
-
         message = ""
         FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
 
@@ -804,8 +800,7 @@ def checkCfdDependencies(term_print=True):
             if term_print:
                 print("Checking for paraview:")
             paraview_cmd = "paraview"
-            import distutils.spawn
-            if distutils.spawn.find_executable(paraview_cmd) is None:
+            if shutil.which(paraview_cmd) is None:
                 # If not found, try to run from the OpenFOAM environment, in case a bundled version is
                 # available from there
                 pv_path = runFoamCommand("which paraview")
@@ -871,8 +866,7 @@ def startParaview(case_path, script_name, consoleMessageFn):
     arg = '--script={}'.format(script_name)
     # Otherwise, the command 'paraview' must be in the path. Possibly make path user-settable.
     # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
-    import distutils.spawn
-    if distutils.spawn.find_executable(paraview_cmd) is None:
+    if shutil.which(paraview_cmd) is None:
         # If not found, try to run from the OpenFOAM environment, in case a bundled version is available from there
         paraview_cmd = "$(which paraview)"  # 'which' required due to mingw weirdness(?) on Windows
         try:
@@ -1057,9 +1051,7 @@ def matchFacesToTargetShape(ref_lists, shape):
     j = 0
     j_match_start = 0
     matching = False
-    candidate_mesh_faces = []
-    for mf in mesh_face_list:
-        candidate_mesh_faces.append([])
+    candidate_mesh_faces = [[]]*len(mesh_face_list)
     while i < len(src_face_list) and j < len(mesh_face_list):
         bf = src_face_list[i][0]
         mf = mesh_face_list[j][0]
@@ -1089,9 +1081,7 @@ def matchFacesToTargetShape(ref_lists, shape):
             matching = False
 
     # Do comprehensive matching, and reallocate to original index
-    successful_candidates = []
-    for mf in mesh_face_list:
-        successful_candidates.append([])
+    successful_candidates = [[]]*len(mesh_face_list)
     for j in range(len(candidate_mesh_faces)):
         for k in range(len(candidate_mesh_faces[j])):
             i, nb, bref = candidate_mesh_faces[j][k]
