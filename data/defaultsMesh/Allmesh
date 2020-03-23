@@ -55,8 +55,8 @@ runCommand transformPoints -scale "(0.001 0.001 0.001)"
 %{%(TwoDSettings/ConvertTo2D%)
 %:True
 runCommand changeDictionary
-runCommand flattenMesh
 runCommand extrudeMesh
+runCommand flattenMesh
 
 %}
 
