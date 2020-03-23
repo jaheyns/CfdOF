@@ -657,7 +657,7 @@ def checkCfdDependencies(term_print=True):
         FC_COMMIT_REQUIRED = 14304
 
         CF_MAJOR_VER_REQUIRED = 1
-        CF_MINOR_VER_REQUIRED = 5
+        CF_MINOR_VER_REQUIRED = 6
 
         HISA_MAJOR_VER_REQUIRED = 1
         HISA_MINOR_VER_REQUIRED = 1
