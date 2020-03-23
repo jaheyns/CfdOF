@@ -1046,12 +1046,14 @@ def matchFacesToTargetShape(ref_lists, shape):
         mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.y)
         mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.x)
 
+    print(src_face_list)
+    print(mesh_face_list)
     # Find faces with matching CofM
     i = 0
     j = 0
     j_match_start = 0
     matching = False
-    candidate_mesh_faces = [[]]*len(mesh_face_list)
+    candidate_mesh_faces = [[] for mf in mesh_face_list]
     while i < len(src_face_list) and j < len(mesh_face_list):
         bf = src_face_list[i][0]
         mf = mesh_face_list[j][0]
@@ -1081,7 +1083,7 @@ def matchFacesToTargetShape(ref_lists, shape):
             matching = False
 
     # Do comprehensive matching, and reallocate to original index
-    successful_candidates = [[]]*len(mesh_face_list)
+    successful_candidates = [[] for mf in mesh_face_list]
     for j in range(len(candidate_mesh_faces)):
         for k in range(len(candidate_mesh_faces[j])):
             i, nb, bref = candidate_mesh_faces[j][k]

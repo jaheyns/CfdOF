@@ -488,7 +488,7 @@ class CfdCaseWriterFoam:
         # Match them up with faces in the meshed part
         matched_faces = CfdTools.matchFacesToTargetShape(boundary_ref_lists, mobj.Part.Shape)
 
-        bc_lists = [[]]*len(bc_group)
+        bc_lists = [[] for g in bc_group]
         for i in range(len(matched_faces)):
             if matched_faces[i]:
                 nb, bref = matched_faces[i][0]
