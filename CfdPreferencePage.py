@@ -55,6 +55,7 @@ if FreeCAD.GuiUp:
 
 BLUECFD_URL = \
     "https://github.com/blueCFD/Core/releases/download/blueCFD-Core-2017-2/blueCFD-Core-2017-2-win64-setup.exe"
+BLUECFD_FILE_EXT = ".exe"
 CFMESH_URL = \
     "https://sourceforge.net/projects/cfmesh-cfdof/files/cfmesh-cfdof.zip/download"
 CFMESH_FILE_BASE = "cfmesh-cfdof"
@@ -297,26 +298,14 @@ class CfdPreferencePageThread(QThread):
             raise
         self.signals.finished.emit(True)
 
-    def downloadBlueCFD(self):
-        self.signals.status.emit("Downloading blueCFD-Core, please wait...")
-        try:
-            (filename, headers) = urlrequest.urlretrieve(self.bluecfd_url, reporthook=self.downloadStatus)
-        except Exception as ex:
-            raise Exception("Error downloading blueCFD-Core: {}".format(str(ex)))
-        self.signals.status.emit("blueCFD-Core downloaded to {}".format(filename))
-
-        if QtCore.QProcess().startDetached(filename):
-            self.signals.status.emit("blueCFD-Core installer launched - please complete the installation")
-        else:
-            raise Exception("Failed to launch blueCFD-Core installer")
-
     def downloadFile(self, url, **kwargs):
         block_size = kwargs.get('block_size', 10*1024)
         context = kwargs.get('context', None)
         reporthook = kwargs.get('reporthook', None)
+        suffix = kwargs.get('suffix', '')
         with closing(urlrequest.urlopen(url, context=context)) as response:  # For Python < 3.3 backward compatibility
             download_len = int(response.info().get('Content-Length', 0))
-            with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+            with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_file:
                 i = 0
                 while True:
                     data = response.read(block_size)
@@ -328,6 +317,26 @@ class CfdPreferencePageThread(QThread):
                         reporthook(i, block_size, download_len)
                 filename = tmp_file.name
                 return filename, response.info()
+
+    def downloadBlueCFD(self):
+        self.signals.status.emit("Downloading blueCFD-Core, please wait...")
+        try:
+            if hasattr(ssl, 'create_default_context'):
+                context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+            else:
+                context = None
+            # Download
+            (filename, header) = self.downloadFile(
+                self.bluecfd_url, suffix=BLUECFD_FILE_EXT, reporthook=self.downloadStatus, context=context)
+        except Exception as ex:
+            raise Exception("Error downloading blueCFD-Core: {}".format(str(ex)))
+
+        self.signals.status.emit("blueCFD-Core downloaded to {}".format(filename))
+
+        if QtCore.QProcess().startDetached(filename):
+            self.signals.status.emit("blueCFD-Core installer launched - please complete the installation")
+        else:
+            raise Exception("Failed to launch blueCFD-Core installer")
 
     def downloadCfMesh(self):
         self.signals.status.emit("Downloading cfMesh, please wait...")
@@ -341,7 +350,8 @@ class CfdPreferencePageThread(QThread):
             else:
                 context = None
             # Download
-            (filename, header) = self.downloadFile(self.cfmesh_url, reporthook=self.downloadStatus, context=context)
+            (filename, header) = self.downloadFile(
+                self.cfmesh_url, suffix=CFMESH_FILE_EXT, reporthook=self.downloadStatus, context=context)
         except Exception as ex:
             raise Exception("Error downloading cfMesh: {}".format(str(ex)))
 
@@ -362,7 +372,8 @@ class CfdPreferencePageThread(QThread):
             else:
                 context = None
             # Download
-            (filename, header) = self.downloadFile(self.hisa_url, reporthook=self.downloadStatus, context=context)
+            (filename, header) = self.downloadFile(
+                self.hisa_url, suffix=HISA_FILE_EXT, reporthook=self.downloadStatus, context=context)
         except Exception as ex:
             raise Exception("Error downloading HiSA: {}".format(str(ex)))
 
