@@ -31,9 +31,9 @@ __url__ = "http://www.freecadweb.org"
 import FreeCAD
 import Fem
 try:
-    import femmesh.meshtools as FemMeshTools
+    import femtools.geomtools as FemGeomTools
 except ImportError:  # Backward compatibility
-    import FemMeshTools
+    import femmesh.meshtools as FemGeomTools
 from FreeCAD import Units
 import os
 import platform
@@ -224,7 +224,7 @@ class CfdMeshTools:
                                 elems = sub[1]
                                 if search_ele_in_shape_to_mesh:
                                     # Try to find the element in the Shape to mesh
-                                    ele_shape = FemMeshTools.get_element(ref, elems)  # the method getElement(element) does not return Solid elements
+                                    ele_shape = FemGeomTools.get_element(ref, elems)  # the method getElement(element) does not return Solid elements
                                     found_element = CfdTools.findElementInShape(self.part_obj.Shape, ele_shape)
                                     if found_element:
                                         elems = found_element
@@ -249,8 +249,8 @@ class CfdMeshTools:
                     else:
                         FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " is not used to create the mesh because the CharacteristicLength is 0.0 mm.\n")
                 for eleml in self.ele_length_map:
-                    ele_shape = FemMeshTools.get_element(self.part_obj, eleml)  # the method getElement(element) does not return Solid elements
-                    ele_vertexes = FemMeshTools.get_vertexes_by_element(self.part_obj.Shape, ele_shape)
+                    ele_shape = FemGeomTools.get_element(self.part_obj, eleml)  # the method getElement(element) does not return Solid elements
+                    ele_vertexes = FemGeomTools.get_vertexes_by_element(self.part_obj.Shape, ele_shape)
                     self.ele_node_map[eleml] = ele_vertexes
 
         else:
