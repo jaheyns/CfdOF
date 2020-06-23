@@ -285,7 +285,8 @@ def setQuantity(inputField, quantity):
 
 def getQuantity(inputField):
     """ Get the quantity as an unlocalised string from an inputField """
-    return str(inputField.property("quantity"))
+    q = inputField.property("quantity")
+    return str(q)
 
 
 def indexOrDefault(list, findItem, defaultIndex):
@@ -967,27 +968,13 @@ def findElementInShape(aShape, anElement):
         FreeCAD.Console.PrintError('Compound is not supported.\n')
 
 
-def matchFacesToTargetShape(ref_lists, shape):
-    """ This function does a geometric matching of groups of faces much faster than doing face-by-face search
-    :param ref_lists: List of lists of references - outer list is 'group' (e.g. boundary); refs are tuples
-    :param shape: The shape to map to
-    :return:  A list of tuples: (group index, reference) of matching refs for each face in shape
+def matchFaces(faces1, faces2):
+    """ This function does a geometric matching of face lists much faster than doing face-by-face search
+    :param faces1: List of tuples - first item is face object, second is any user data
+    :param faces2: List of tuples - first item is face object, second is any user data
+    :return:  A list of (data1, data2) containing the user data for any/all matching faces
+    Note that faces1 and faces2 are sorted in place and can be re-used for faster subsequent searches
     """
-    # Preserve original indices
-    mesh_face_list = list(zip(shape.Faces, range(len(shape.Faces))))
-    src_face_list = []
-    for i, rl in enumerate(ref_lists):
-        for br in rl:
-            obj = FreeCAD.ActiveDocument.getObject(br[0])
-            if not obj:
-                raise RuntimeError("Referenced object '{}' not found - object may "
-                                   "have been deleted".format(br[0]))
-            try:
-                bf = obj.Shape.getElement(br[1])
-            except Part.OCCError:
-                raise RuntimeError("Referenced face '{}:{}' not found - face may "
-                                   "have been deleted".format(br[0], br[1]))
-            src_face_list.append((bf, i, br))
 
     if sys.version_info >= (3,):  # Python 3
 
@@ -1016,15 +1003,15 @@ def matchFacesToTargetShape(ref_lists, shape):
 
             return K
 
-        # Sort boundary face list by centre of mass, x then y then z in case all in plane
-        src_face_list.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.z))
-        src_face_list.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.y))
-        src_face_list.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.x))
+        # Sort face list by centre of mass, x then y then z in case all in plane
+        faces1.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.z))
+        faces1.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.y))
+        faces1.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.x))
 
-        # Same sorting on mesh face list
-        mesh_face_list.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.z))
-        mesh_face_list.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.y))
-        mesh_face_list.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.x))
+        # Same on other face list
+        faces2.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.z))
+        faces2.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.y))
+        faces2.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.x))
 
     else:  # Python 2
 
@@ -1036,31 +1023,29 @@ def matchFacesToTargetShape(ref_lists, shape):
             else:
                 return 1
 
-        # Sort boundary face list by centre of mass, x then y then z in case all in plane
-        src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.z)
-        src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.y)
-        src_face_list.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.x)
+        # Sort face list by centre of mass, x then y then z in case all in plane
+        faces1.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.z)
+        faces1.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.y)
+        faces1.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.x)
 
-        # Same sorting on mesh face list
-        mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.z)
-        mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.y)
-        mesh_face_list.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.x)
+        # Same on other face list
+        faces2.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.z)
+        faces2.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.y)
+        faces2.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.x)
 
-    print(src_face_list)
-    print(mesh_face_list)
     # Find faces with matching CofM
     i = 0
     j = 0
     j_match_start = 0
     matching = False
-    candidate_mesh_faces = [[] for mf in mesh_face_list]
-    while i < len(src_face_list) and j < len(mesh_face_list):
-        bf = src_face_list[i][0]
-        mf = mesh_face_list[j][0]
+    candidate_mesh_faces = []
+    while i < len(faces1) and j < len(faces2):
+        bf = faces1[i][0]
+        mf = faces2[j][0]
         if floatEqual(bf.CenterOfMass.x, mf.CenterOfMass.x):
             if floatEqual(bf.CenterOfMass.y, mf.CenterOfMass.y):
                 if floatEqual(bf.CenterOfMass.z, mf.CenterOfMass.z):
-                    candidate_mesh_faces[j].append((i, src_face_list[i][1], src_face_list[i][2]))
+                    candidate_mesh_faces.append((i, j))
                     cmp = 0
                 else:
                     cmp = (-1 if bf.CenterOfMass.z < mf.CenterOfMass.z else 1)
@@ -1083,13 +1068,11 @@ def matchFacesToTargetShape(ref_lists, shape):
             matching = False
 
     # Do comprehensive matching, and reallocate to original index
-    successful_candidates = [[] for mf in mesh_face_list]
-    for j in range(len(candidate_mesh_faces)):
-        for k in range(len(candidate_mesh_faces[j])):
-            i, nb, bref = candidate_mesh_faces[j][k]
-            if isSameGeometry(src_face_list[i][0], mesh_face_list[j][0]):
-                orig_idx = mesh_face_list[j][1]
-                successful_candidates[orig_idx].append((nb, bref))
+    successful_candidates = []
+    for k in range(len(candidate_mesh_faces)):
+        i, j = candidate_mesh_faces[k]
+        if isSameGeometry(faces1[i][0], faces2[j][0]):
+            successful_candidates.append((faces1[i][1], faces2[j][1]))
 
     return successful_candidates
 

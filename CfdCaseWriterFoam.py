@@ -480,26 +480,48 @@ class CfdCaseWriterFoam:
         bc_group = self.bc_group
         mobj = self.mesh_obj
 
-        # Make list of list of all boundary references for their corresponding boundary
-        boundary_ref_lists = []
+        # Make list of all boundary references
+        boundary_face_list = []
         for bc_id, bc_obj in enumerate(bc_group):
-            boundary_ref_lists.append(bc_obj.References)
+            for ref in bc_obj.References:
+                obj = FreeCAD.ActiveDocument.getObject(ref[0])
+                if not obj:
+                    raise RuntimeError("Referenced object '{}' not found - object may "
+                                       "have been deleted".format(ref[0]))
+                try:
+                    bf = obj.Shape.getElement(ref[1])
+                except Part.OCCError:
+                    raise RuntimeError("Referenced face '{}:{}' not found - face may "
+                                       "have been deleted".format(ref[0], ref[1]))
+                boundary_face_list.append((bf, (bc_id, ref)))
 
-        # Match them up with faces in the meshed part
-        matched_faces = CfdTools.matchFacesToTargetShape(boundary_ref_lists, mobj.Part.Shape)
+        # Make list of all faces in meshed shape with original index
+        mesh_face_list = list(zip(mobj.Part.Shape.Faces, range(len(mobj.Part.Shape.Faces))))
+
+        # Match them up
+        matched_faces = CfdTools.matchFaces(boundary_face_list, mesh_face_list)
+
+        # Check for and filter duplicates
+        match_per_shape_face = [-1]*len(mesh_face_list)
+        for k in range(len(matched_faces)):
+            match = matched_faces[k][1]
+            prev_k = match_per_shape_face[match]
+            if prev_k >= 0:
+                nb, bref = matched_faces[k][0]
+                nb2, bref2 = matched_faces[prev_k][0]
+                cfdMessage(
+                    "Boundary '{}' reference {}:{} also assigned as "
+                    "boundary '{}' reference {}:{} - ignoring duplicate\n".format(
+                        bc_group[nb].Label, bref[0], bref[1], bc_group[nb2].Label, bref2[0], bref2[1]))
+            else:
+                match_per_shape_face[match] = k
 
         bc_lists = [[] for g in bc_group]
-        for i in range(len(matched_faces)):
-            if matched_faces[i]:
-                nb, bref = matched_faces[i][0]
+        for i in range(len(match_per_shape_face)):
+            k = match_per_shape_face[i]
+            if k >= 0:
+                nb, bref = matched_faces[k][0]
                 bc_lists[nb].append(mobj.ShapeFaceNames[i])
-                for k in range(len(matched_faces[i])-1):
-                    nb2, bref2 = matched_faces[i][k+1]
-                    if nb2 != nb:
-                        cfdMessage(
-                            "Boundary '{}' reference {}:{} also assigned as "
-                            "boundary '{}' reference {}:{}\n".format(
-                                bc_group[nb].Label, bref[0], bref[1], bc_group[nb2].Label, bref2[0], bref2[1]))
 
         for bc_id, bc_obj in enumerate(bc_group):
             bcType = bc_obj.BoundaryType
@@ -517,42 +539,49 @@ class CfdCaseWriterFoam:
 
         if settings['createPatchesFromSnappyBaffles']:
             settings['createPatchesSnappyBaffles'] = {}
-            # TODO Still need to include an error checker in the event that 
-            # an internal baffle is created using snappy but is not linked up
-            # with a baffle boundary condition (as in there is no baffle boundary condition which 
-            # corresponds. Currently openfoam will throw a contextually
-            # confusing error (only that the boundary does not exist). The primary difficulty with such a checker is 
-            # that it is possible to define a boundary face as a baffle, which will be overridden
-            # by the actual boundary name and therefore won't exist anymore. 
-            for bc_id, bc_obj in enumerate(bc_group):
-                bcType = bc_obj.BoundaryType
-                if bcType == "baffle":
-                    tempBaffleList = []
-                    tempBaffleListSlave = []
-                    for regionObj in self.mesh_obj.Group:
-                        if hasattr(regionObj, "Proxy") and \
-                                isinstance(regionObj.Proxy, CfdMeshRefinement._CfdMeshRefinement):
-                            # print regionObj.Name
-                            if regionObj.Baffle:
-                                for sub in regionObj.References:
-                                    # print sub[0].Name
-                                    elems = sub[1]
-                                    elt = FreeCAD.ActiveDocument.getObject(sub[0]).Shape.getElement(elems)
-                                    if elt.ShapeType == 'Face':
-                                        bcFacesList = bc_obj.Shape.Faces
-                                        for bf in bcFacesList:
-                                            isSameGeo = CfdTools.isSameGeometry(bf, elt)
-                                            if isSameGeo:
-                                                tempBaffleList.append(regionObj.Name+sub[0]+elems)
-                                                tempBaffleListSlave.append(regionObj.Name+sub[0]+elems+"_slave")
-                    settings['createPatchesSnappyBaffles'][bc_obj.Label] = {"PatchNamesList" : tuple(tempBaffleList),
-                                                                            "PatchNamesListSlave" : tuple(tempBaffleListSlave)}
+            baffle_geoms = []
+            for regionObj in self.mesh_obj.Group:
+                if hasattr(regionObj, "Proxy") and isinstance(regionObj.Proxy, CfdMeshRefinement._CfdMeshRefinement):
+                    if regionObj.Baffle:
+                        for sub in regionObj.References:
+                            elems = sub[1]
+                            elt = FreeCAD.ActiveDocument.getObject(sub[0]).Shape.getElement(elems)
+                            if elt.ShapeType == 'Face':
+                                baffle_geoms.append((elt, (regionObj.Name+sub[0]+elems, len(baffle_geoms))))
+
+            print(boundary_face_list)
+            matched_baffle_faces = CfdTools.matchFaces(boundary_face_list, baffle_geoms)
+
+            # Check for duplicates
+            match_per_baffle_face = [-1]*len(baffle_geoms)
+            for matchi, mf in enumerate(matched_baffle_faces):
+                if match_per_baffle_face[mf[1][1]] > -1:
+                    cfdMessage("Baffle face matches to boundary "
+                               + mf[0][1] + " and " + matched_baffle_faces[match_per_baffle_face[mf[1][1]]][0][1]
+                               + " - discarding duplicate")
+                else:
+                    match_per_baffle_face[mf[1][1]] = matchi
+
+            for bfi, mi in enumerate(match_per_baffle_face):
+                if mi > -1:
+                    mf = matched_baffle_faces[mi]
+                    bc_label = bc_group[mf[0][0]].Label
+                    settings['createPatchesSnappyBaffles'][bc_label] = \
+                        settings['createPatchesSnappyBaffles'].get(bc_label, {})
+                    settings['createPatchesSnappyBaffles'][bc_label]['PatchNamesList'] = \
+                        settings['createPatchesSnappyBaffles'][bc_label].get('PatchNamesList', ()) + \
+                        (mf[1][0],)
+                    settings['createPatchesSnappyBaffles'][bc_label]['PatchNamesListSlave'] = \
+                        settings['createPatchesSnappyBaffles'][bc_label].get('PatchNamesListSlave', ()) + \
+                        ((mf[1][0]+"_slave"),)
+                else:
+                    cfdMessage("No boundary condition specified for baffle face " + baffle_geoms[bfi][1][0])
 
         # Add default faces
         flagName = False
         def_bc_list = []
-        for i in range(len(matched_faces)):
-            if not matched_faces[i]:
+        for i in range(len(match_per_shape_face)):
+            if match_per_shape_face[i] < 0:
                 def_bc_list.append(mobj.ShapeFaceNames[i])
                 flagName = True
         if flagName:

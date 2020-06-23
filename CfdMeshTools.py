@@ -275,15 +275,30 @@ class CfdMeshTools:
                 # Make list of list of all references for their corresponding mesh object
                 bl_matched_faces = []
                 if self.mesh_obj.MeshUtility == 'cfMesh':
-                    region_face_lists = []
+                    CfdTools.cfdMessage("Matching refinement regions")
+
+                    region_face_list = []
                     for mr_id, mr_obj in enumerate(mr_objs):
-                        region_face_lists.append([])
                         if mr_obj.NumberLayers > 1 and not mr_obj.Internal:
                             refs = mr_obj.References
                             for r in refs:
-                                region_face_lists[mr_id].append(r)
-                    CfdTools.cfdMessage("Matching refinement regions")
-                    bl_matched_faces = CfdTools.matchFacesToTargetShape(region_face_lists, self.mesh_obj.Part.Shape)
+                                obj = FreeCAD.ActiveDocument.getObject(r[0])
+                                if not obj:
+                                    raise RuntimeError("Referenced object '{}' not found - object may "
+                                                       "have been deleted".format(r[0]))
+                                try:
+                                    f = obj.Shape.getElement(r[1])
+                                except Part.OCCError:
+                                    raise RuntimeError("Referenced face '{}:{}' not found - face may "
+                                                       "have been deleted".format(r[0], r[1]))
+                                region_face_list.append((f, mr_id))
+
+                    # Make list of all faces in meshed shape with original index
+                    mesh_face_list = \
+                        list(zip(self.mesh_obj.Part.Shape.Faces, range(len(self.mesh_obj.Part.Shape.Faces))))
+
+                    # Match them up
+                    bl_matched_faces = CfdTools.matchFaces(region_face_list, mesh_face_list)
 
                 for mr_id, mr_obj in enumerate(mr_objs):
                     Internal = mr_obj.Internal
@@ -346,23 +361,22 @@ class CfdMeshTools:
                             fid.close()
 
                         if self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1 and not Internal:
-                            for (i, mf) in enumerate(bl_matched_faces):
-                                for j in range(len(mf)):
-                                    if mr_id == mf[j][0]:
-                                        sfN = self.mesh_obj.ShapeFaceNames[i]
-                                        ele_meshpatch_map[mr_obj.Name].append(sfN)
-                                        patch_list.append(sfN)
+                            for mf in bl_matched_faces:
+                                if mr_id == mf[0]:
+                                    sfN = self.mesh_obj.ShapeFaceNames[mf[1]]
+                                    ele_meshpatch_map[mr_obj.Name].append(sfN)
+                                    patch_list.append(sfN)
 
-                                        # Limit expansion ratio to greater than 1.0 and less than 1.2
-                                        expratio = mr_obj.ExpansionRatio
-                                        expratio = min(1.2, max(1.0, expratio))
+                                    # Limit expansion ratio to greater than 1.0 and less than 1.2
+                                    expratio = mr_obj.ExpansionRatio
+                                    expratio = min(1.2, max(1.0, expratio))
 
-                                        cf_settings['BoundaryLayers'][self.mesh_obj.ShapeFaceNames[i]] = {
-                                            'NumberLayers': mr_obj.NumberLayers,
-                                            'ExpansionRatio': expratio,
-                                            'FirstLayerHeight': self.scale *
-                                                                Units.Quantity(mr_obj.FirstLayerHeight).Value
-                                        }
+                                    cf_settings['BoundaryLayers'][self.mesh_obj.ShapeFaceNames[mf[1]]] = {
+                                        'NumberLayers': mr_obj.NumberLayers,
+                                        'ExpansionRatio': expratio,
+                                        'FirstLayerHeight': self.scale *
+                                                            Units.Quantity(mr_obj.FirstLayerHeight).Value
+                                    }
 
                         if self.mesh_obj.MeshUtility == 'cfMesh':
                             if not Internal:
