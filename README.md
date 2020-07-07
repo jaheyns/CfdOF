@@ -89,29 +89,30 @@ Note: The CFD workbench can be updated at any time through the Addon manager.
 ##### Dependency installation
 
 Dependencies can be checked and installed
-conveniently from the CFD Preferences panel in FreeCAD.
+conveniently from the CfdOF Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
-choose "CFD". 
+choose "CfdOF". 
 
-The OpenFOAM installation is via the [blueCFD-Core](http://bluecfd.github.io/Core/Downloads/) package (version 2017-2),
-with which Paraview comes bundled. This can be installed
+The OpenFOAM installation is via the [OpenCFD docker package](https://www.openfoam.com/download/release-history.php) (version 1912). 
+This can be installed
 manually using the above link, or by clicking the relevant
 button in the Preferences panel described above.
 
-Please note that User Access Control in Windows 10 can restrict write
-access to the Program Files directory, which interferes with
-the installation of cfMesh and HiSA in blueCFD-Core. **It is therefore recommended
-that blueCFD-Core be installed outside the Program Files folder.**
-
 Set the OpenFOAM install directory in the preferences
-panel to \<blueCFD install directory\>\OpenFOAM-5.x
- (It will be automatically detected in the default install
-location.)
+panel to the install directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed).
+ It will be automatically detected in the default install
+location.
+
+Any version of [ParaView](https://www.paraview.org/download/) can be installed, 
+by following the above link or clicking the relevant button in the Preferences panel.
+Set the ParaView install path in the preferences panel to the 'paraview.exe' file in the 'bin' 
+subfolder of the ParaView installation. Common defaults will be detected if it is left blank.
 
 Likewise, cfMesh and HiSA can be installed from the 
 Preferences panel. They are automatically built from source 
 inside the OpenFOAM environment if installed from the 
-Preferences panel. Note that this is a lengthy process.
+Preferences panel. Note that this is a lengthy process. Do not close the
+Preferences panel until the 'Install completed' message is received.
 
 Choosing the "Check dependencies" option will verify that all 
 prerequisites have been successfully installed.
@@ -154,8 +155,8 @@ installed using your distribution's package manager
 or the links above. 
 
 Set the OpenFOAM install directory in the preferences
-panel - typical install locations are /opt/openfoam6 
-or /home/user/OpenFOAM/OpenFOAM-6.x (It will be automatically 
+panel - examples of typical install locations are /opt/openfoam7 
+or /home/user/OpenFOAM/OpenFOAM-7.x (It will be automatically 
 detected in common default install
 locations.)
 

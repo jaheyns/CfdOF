@@ -69,14 +69,15 @@ class CfdConsoleProcess:
         self.process.start(cmd[0], cmd[1:])
 
     def terminate(self):
-        if platform.system() == "Windows":
-            # terminate() doesn't operate and kill() doesn't allow cleanup and leaves mpi processes running
-            # Instead, instruct wrapper program to kill child process and itself cleanly with ctrl-break signal
-            self.process.write(b"terminate\n")
-            self.process.waitForBytesWritten()  # 'flush'
-        else:
-            self.process.terminate()
-        self.process.waitForFinished()
+        if self.process.state() != self.process.NotRunning:
+            if platform.system() == "Windows":
+                # terminate() doesn't operate and kill() doesn't allow cleanup and leaves mpi processes running
+                # Instead, instruct wrapper program to kill child process and itself cleanly with ctrl-break signal
+                self.process.write(b"terminate\n")
+                self.process.waitForBytesWritten()  # 'flush'
+            else:
+                self.process.terminate()
+            self.process.waitForFinished()
 
     def finished(self, exit_code):
         if self.finishedHook:
@@ -104,6 +105,7 @@ class CfdConsoleProcess:
         while self.process.canReadLine():
             byteArr = self.process.readLine()
             text += QTextStream(byteArr).readAll()
+        self.process.setReadChannel(QProcess.StandardOutput)
         if text:
             if self.stderrHook:
                 self.stderrHook(text)
@@ -111,7 +113,6 @@ class CfdConsoleProcess:
             # Must be at the end as it can cause re-entrance
             if FreeCAD.GuiUp:
                 FreeCAD.Gui.updateGui()
-        self.process.setReadChannel(QProcess.StandardOutput)
 
     def state(self):
         return self.process.state()

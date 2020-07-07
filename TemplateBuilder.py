@@ -72,9 +72,9 @@ class TemplateBuilder(object):
                 pass
             else:
                 raise
-        # Write file
-        with open(os.path.join(self.case_path, rel_file), 'w') as ofid:
-            ofid.write(contents)
+        # Write file - always want unix line endings so use binary
+        with open(os.path.join(self.case_path, rel_file), 'wb') as ofid:
+            ofid.write(contents.encode('utf-8'))
 
     def buildFile(self, rel_file, params):
         """ Open the specified template file, make replacements, and return as a string """

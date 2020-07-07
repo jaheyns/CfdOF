@@ -50,7 +50,9 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 
 # Some standard install locations that are searched if an install directory is not specified
-FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM-5.x",
+FOAM_DIR_DEFAULTS = {"Windows": ["~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v2006",
+                                 "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v1912",
+                                 "C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM-5.x",
                                  "C:\\Program Files\\blueCFD-Core-2016\\OpenFOAM-4.x"],
                      "Linux": ["/opt/openfoam4", "/opt/openfoam5", "/opt/openfoam6", "/opt/openfoam7", "/opt/openfoam-dev",
                                "~/OpenFOAM/OpenFOAM-7.x", "~/OpenFOAM/OpenFOAM-7.0",
@@ -59,7 +61,11 @@ FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM
                                "~/OpenFOAM/OpenFOAM-4.x", "~/OpenFOAM/OpenFOAM-4.0", "~/OpenFOAM/OpenFOAM-4.1",
                                "~/OpenFOAM/OpenFOAM-dev"]
                      }
-
+PARAVIEW_PATH_DEFAULTS = {
+                    "Windows": ["C:\\Program Files\\ParaView 5.5.2-Qt5-Windows-64bit\\bin\\paraview.exe",
+                                "C:\\Program Files\\ParaView 5.5.2-Qt5-MPI-Windows-64bit\\bin\\paraview.exe"],
+                    "Linux": []
+                    }
 
 def getDefaultOutputPath():
     prefs = getPreferencesLocation()
@@ -97,11 +103,6 @@ if FreeCAD.GuiUp:
 def getParentAnalysisObject(obj):
     """ Return CfdAnalysis object to which this obj belongs in the tree """
     return obj.getParentGroup()
-    #for o in FreeCAD.activeDocument().Objects:
-    #    if hasattr(o, "Proxy") and isinstance(o.Proxy, _CfdAnalysis):
-    #        if obj in o.Group:
-    #            return o
-    #return None
 
 
 def getPhysicsModel(analysis_object):
@@ -370,27 +371,36 @@ def getFoamDir():
     # Ensure parameters exist for future editing
     setFoamDir(installation_path)
 
-    if installation_path and \
-       (not os.path.isabs(installation_path) or not os.path.exists(os.path.join(installation_path, "etc", "bashrc"))):
-        raise IOError("The directory {} is not a valid OpenFOAM installation".format(installation_path))
-
     # If not specified, try to detect from shell environment settings and defaults
     if not installation_path:
         installation_path = detectFoamDir()
-    if not installation_path:
-        raise IOError("OpenFOAM installation path not set and not found")
 
     return installation_path
 
 
 def getFoamRuntime():
+    installation_path = getFoamDir()
+    if not installation_path:
+        raise IOError("OpenFOAM installation path not set and not detected")
+
+    runtime = None
     if platform.system() == 'Windows':
-        #if os.path.exists(os.path.join(getFoamDir(), "..", "msys64")):
-        return 'BlueCFD'  # Not set yet...
-        #else:
-        #    return 'BashWSL'
+        if os.path.exists(os.path.join(installation_path, "msys64", "home", "ofuser")):
+            runtime = 'MinGW'
+        elif os.path.exists(os.path.join(installation_path, "Windows", "Scripts")):
+            runtime = 'WindowsDocker'
+        elif os.path.exists(os.path.join(installation_path, "..", "msys64")):
+            runtime = 'BlueCFD'
+        elif os.path.exists(os.path.join(getFoamDir(), "etc", "bashrc")):
+            runtime = 'BashWSL'
     else:
-        return 'Posix'
+        if os.path.exists(os.path.join(getFoamDir(), "etc", "bashrc")):
+            runtime = 'Posix'
+
+    if not runtime:
+        raise IOError("The directory {} is not a recognised OpenFOAM installation".format(installation_path))
+
+    return runtime
 
 
 def detectFoamDir():
@@ -409,11 +419,26 @@ def detectFoamDir():
     if not foam_dir:
         for d in FOAM_DIR_DEFAULTS[platform.system()]:
             foam_dir = os.path.expanduser(d)
-            if foam_dir and not os.path.exists(os.path.join(foam_dir, "etc", "bashrc")):
+            if foam_dir and not os.path.exists(foam_dir):
                 foam_dir = None
             else:
                 break
     return foam_dir
+
+
+def setParaviewPath(paraview_path):
+    prefs = getPreferencesLocation()
+    # Set Paraview install path in parameters
+    FreeCAD.ParamGet(prefs).SetString("ParaviewPath", paraview_path)
+
+
+def getParaviewPath():
+    prefs = getPreferencesLocation()
+    # Get path from parameters
+    paraview_path = FreeCAD.ParamGet(prefs).GetString("ParaviewPath", "")
+    # Ensure parameters exist for future editing
+    setParaviewPath(paraview_path)
+    return paraview_path
 
 
 def translatePath(p):
@@ -435,16 +460,32 @@ def reverseTranslatePath(p):
 def fromWindowsPath(p):
     drive, tail = os.path.splitdrive(p)
     pp = tail.replace('\\', '/')
-    if getFoamRuntime() == "BashWSL":
+    if getFoamRuntime() == "MinGW" or getFoamRuntime() == "BlueCFD":
+        # Under mingw: c:\path -> /c/path
+        if os.path.isabs(p):
+            return "/" + (drive[:-1]).lower() + pp
+        else:
+            return pp
+    elif getFoamRuntime() == "WindowsDocker":
+        # Under docker: <userDir>/<path> -> /home/ofuser/workingDir/<path>
+        if os.path.isabs(p):
+            homepath = os.path.expanduser('~')
+            try:
+                if os.path.commonpath((os.path.normpath(p), homepath)) == homepath:
+                    return '/home/ofuser/workingDir/' + os.path.relpath(p, homepath).replace('\\', '/')
+                else:
+                    raise ValueError("The path {} is not inside the users's home directory.".format(p))
+            except ValueError:
+                cfdError(
+                    "The path {} cannot be used in the Docker environment. "
+                    "Only paths inside the user's home directory are accessible.".format(p))
+                raise
+        else:
+            return pp
+    elif getFoamRuntime() == "BashWSL":
         # bash on windows: C:\Path -> /mnt/c/Path
         if os.path.isabs(p):
             return "/mnt/" + (drive[:-1]).lower() + pp
-        else:
-            return pp
-    elif getFoamRuntime() == "BlueCFD":
-        # Under blueCFD (mingw): c:\path -> /c/path
-        if os.path.isabs(p):
-            return "/" + (drive[:-1]).lower() + pp
         else:
             return pp
     else:  # Nothing needed for posix
@@ -453,7 +494,22 @@ def fromWindowsPath(p):
 
 def toWindowsPath(p):
     pp = p.split('/')
-    if getFoamRuntime() == "BashWSL":
+    if getFoamRuntime() == "MinGW":
+        # Under mingw: /c/path -> c:\path; /home/ofuser -> <instDir>/msys64/home/ofuser
+        if p.startswith('/home/ofuser'):
+            return getFoamDir() + '\\msys64\\home\\ofuser\\' + '\\'.join(pp[3:])
+        elif p.startswith('/'):
+            return pp[1].upper() + ':\\' + '\\'.join(pp[2:])
+        else:
+            return p.replace('/', '\\')
+    elif getFoamRuntime() == "WindowsDocker":
+        # Under docker: /home/ofuser/workingDir/<path> ->  <userDir>/<path>
+        homepath = os.path.expanduser('~')
+        if p.startswith('/home/ofuser/workingDir/'):
+            return os.path.join(homepath, "\\".join(pp[4:]))
+        else:
+            return p.replace('/', '\\')
+    elif getFoamRuntime() == "BashWSL":
         # bash on windows: /mnt/c/Path -> C:\Path
         if p.startswith('/mnt/'):
             return pp[2].toupper() + ':\\' + '\\'.join(pp[3:])
@@ -494,8 +550,11 @@ def getShortWindowsPath(long_name):
 
 def getRunEnvironment():
     """ Return native environment settings necessary for running on relevant platform """
-    if getFoamRuntime() == "BashWSL":
-        return {}
+    if getFoamRuntime() == "MinGW":
+        return {"MSYSTEM": "MSYS",
+                "USERNAME": "ofuser",
+                "USER": "ofuser",
+                "HOME": "/home/ofuser"}
     elif getFoamRuntime() == "BlueCFD":
         return {"MSYSTEM": "MINGW64",
                 "USERNAME": "ofuser",
@@ -521,7 +580,27 @@ def makeRunCommand(cmd, dir, source_env=True):
     if dir:
         cd = 'cd "{}" && '.format(translatePath(dir))
 
-    if getFoamRuntime() == "BashWSL":
+    if getFoamRuntime() == "MinGW":
+        # .bashrc will exit unless shell is interactive, so we have to manually load the foam bashrc
+        foamVersion = os.path.split(installation_path)[-1].lstrip('v')
+        cmdline = ['{}\\msys64\\usr\\bin\\bash'.format(installation_path), '--login', '-O', 'expand_aliases', '-c',
+                    'echo Sourcing OpenFOAM environment...; '
+                    'source $HOME/OpenFOAM/OpenFOAM-v{}/etc/bashrc; '.format(foamVersion) +
+                    'export PATH=$FOAM_LIBBIN/msmpi:$FOAM_LIBBIN:$WM_THIRD_PARTY_DIR/platforms/linux64MingwDPInt32/lib:$PATH; '
+                     + cd + cmd]
+        return cmdline
+    if getFoamRuntime() == "WindowsDocker":
+        foamVersion = os.path.split(installation_path)[-1].lstrip('v')
+        cmdline = ['powershell.exe',
+                   'docker-machine.exe start default; '
+                   'docker-machine.exe env --shell powershell default | Invoke-Expression; '
+                   'docker start of_{}; '.format(foamVersion) +
+                   'docker exec --privileged of_{} '.format(foamVersion) +
+                   'bash -c "su -c \'' +  # $ -> `$: escaping for powershell
+                   (cd + cmd).replace('$', '`$').replace('"', '\\`"') + # Escape quotes for powershell and also cmdline to bash
+                   '\' -l ofuser"']
+        return cmdline
+    elif getFoamRuntime() == "BashWSL":
         cmdline = ['bash', '-c', source + cd + cmd]
         return cmdline
     elif getFoamRuntime() == "BlueCFD":
@@ -642,15 +721,6 @@ def convertMesh(case, mesh_file, scale):
         print("Error: mesh scaling ratio is must be a float or integer\n")
 
 
-def readTemplate(fileName, replaceDict=None):
-    helperFile = open(fileName, 'r')
-    helperText = helperFile.read()
-    for key in replaceDict:
-        helperText = helperText.replace("#"+key+"#", "{}".format(replaceDict[key]))
-    helperFile.close()
-    return helperText
-
-
 def checkCfdDependencies(term_print=True):
         FC_MAJOR_VER_REQUIRED = 0
         FC_MINOR_VER_REQUIRED = 17
@@ -750,7 +820,7 @@ def checkCfdDependencies(term_print=True):
                                         print(vermsg)
                         except ValueError:
                             vermsg = "Error parsing OpenFOAM version string " + foam_ver
-                            message += vermsg
+                            message += vermsg + "\n"
                             if term_print:
                                 print(vermsg)
 
@@ -800,16 +870,22 @@ def checkCfdDependencies(term_print=True):
             # Check for paraview
             if term_print:
                 print("Checking for paraview:")
-            paraview_cmd = "paraview"
-            if shutil.which(paraview_cmd) is None:
+            paraview_cmd = getParaviewExecutable()
+            failed = False
+            if not paraview_cmd:
+                paraview_cmd = 'paraview'
                 # If not found, try to run from the OpenFOAM environment, in case a bundled version is
                 # available from there
-                pv_path = runFoamCommand("which paraview")
-                if not pv_path.rstrip():
-                    pv_msg = "Paraview executable " + paraview_cmd + " not found in system or OpenFOAM path."
-                    message += pv_msg + '\n'
-                    if term_print:
-                        print(pv_msg)
+                try:
+                    runFoamCommand("which paraview")
+                except subprocess.CalledProcessError:
+                    failed = True
+            if failed or not os.path.exists(paraview_cmd):
+                pv_msg = "Paraview executable '" + paraview_cmd + "' not found."
+                message += pv_msg + '\n'
+                if term_print:
+                    print(pv_msg)
+
 
         if term_print:
             print("Checking for Plot workbench:")
@@ -857,17 +933,33 @@ def checkCfdDependencies(term_print=True):
         return message
 
 
+def getParaviewExecutable():
+    # If path of paraview executable specified, use that
+    paraview_cmd = getParaviewPath()
+    if not paraview_cmd:
+        # If using blueCFD, use paraview supplied
+        if getFoamRuntime() == 'BlueCFD':
+            paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
+        else:
+            # Go through the defaults and see if any are found
+            for d in PARAVIEW_PATH_DEFAULTS[platform.system()]:
+                paraview_cmd = os.path.expanduser(d)
+                if paraview_cmd and not os.path.exists(paraview_cmd):
+                    paraview_cmd = None
+                else:
+                    break
+    if not paraview_cmd:
+        # Otherwise, see if the command 'paraview' is in the path.
+        paraview_cmd = shutil.which("paraview")
+    return paraview_cmd
+
+
 def startParaview(case_path, script_name, consoleMessageFn):
     proc = QtCore.QProcess()
-    # If using blueCFD, use paraview supplied
-    if getFoamRuntime() == 'BlueCFD':
-        paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
-    else:
-        paraview_cmd = "paraview"
+    paraview_cmd = getParaviewExecutable()
     arg = '--script={}'.format(script_name)
-    # Otherwise, the command 'paraview' must be in the path. Possibly make path user-settable.
-    # Test to see if it exists, as the exception thrown is cryptic on Windows if it doesn't
-    if shutil.which(paraview_cmd) is None:
+
+    if not paraview_cmd:
         # If not found, try to run from the OpenFOAM environment, in case a bundled version is available from there
         paraview_cmd = "$(which paraview)"  # 'which' required due to mingw weirdness(?) on Windows
         try:
@@ -877,7 +969,6 @@ def startParaview(case_path, script_name, consoleMessageFn):
         except QtCore.QProcess.ProcessError:
             consoleMessageFn("Error starting paraview")
     else:
-        arg = '--script={}'.format(script_name)
         consoleMessageFn("Running " + paraview_cmd + " " + arg)
         proc.setWorkingDirectory(case_path)
         proc.start(paraview_cmd, [arg])

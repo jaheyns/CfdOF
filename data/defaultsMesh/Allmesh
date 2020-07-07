@@ -17,6 +17,7 @@ runCommand '%(GmshSettings/Executable%)' - "gmsh/%(Name%)_Geometry.geo"
 
 %}
 %{%(FoamRuntime%)
+%:WindowsDocker
 %:BlueCFD
 %:default
 # Unset and source bashrc

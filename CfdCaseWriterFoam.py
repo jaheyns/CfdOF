@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -175,9 +175,9 @@ class CfdCaseWriterFoam:
         system_settings = self.settings['system']
         system_settings['FoamRuntime'] = CfdTools.getFoamRuntime()
         system_settings['CasePath'] = self.case_folder
-        system_settings['TranslatedCasePath'] = CfdTools.translatePath(self.case_folder)
         system_settings['FoamPath'] = CfdTools.getFoamDir()
-        system_settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
+        if CfdTools.getFoamRuntime() != 'WindowsDocker':
+            self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
 
     def clearCase(self, backup_path=None):
         """ Remove and recreate case directory, optionally backing up """
@@ -549,7 +549,6 @@ class CfdCaseWriterFoam:
                             if elt.ShapeType == 'Face':
                                 baffle_geoms.append((elt, (regionObj.Name+sub[0]+elems, len(baffle_geoms))))
 
-            print(boundary_face_list)
             matched_baffle_faces = CfdTools.matchFaces(boundary_face_list, baffle_geoms)
 
             # Check for duplicates

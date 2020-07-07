@@ -12,6 +12,7 @@ runCommand()
 }
 
 %{%(system/FoamRuntime%)
+%:WindowsDocker
 %:BlueCFD
 %:default
 # Unset and source bashrc

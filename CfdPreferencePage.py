@@ -49,9 +49,14 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt, QObject, QThread
     from PySide.QtGui import QApplication
 
-BLUECFD_URL = \
-    "https://github.com/blueCFD/Core/releases/download/blueCFD-Core-2017-2/blueCFD-Core-2017-2-win64-setup.exe"
-BLUECFD_FILE_EXT = ".exe"
+#OPENFOAM_URL = \
+#    "https://sourceforge.net/projects/openfoam/files/v2006/OpenCFD-OpenFOAM-v2006-DP-mingw-crosscompiled-WindowsInstaller.exe/download"
+OPENFOAM_URL = \
+    "https://sourceforge.net/projects/openfoam/files/v1912/OpenCFD-OpenFOAM4WindowsInstaller-v1912.exe/download"
+OPENFOAM_FILE_EXT = ".exe"
+PARAVIEW_URL = \
+    "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v5.5&type=binary&os=Windows&downloadFile=ParaView-5.5.2-Qt5-Windows-64bit.exe"
+PARAVIEW_FILE_EXT = ".exe"
 CFMESH_URL = \
     "https://sourceforge.net/projects/cfmesh-cfdof/files/cfmesh-cfdof.zip/download"
 CFMESH_FILE_BASE = "cfmesh-cfdof"
@@ -63,9 +68,10 @@ HISA_FILE_EXT = ".zip"
 
 
 # Tasks for the worker thread
-DOWNLOAD_BLUECFD = 1
-DOWNLOAD_CFMESH = 2
-DOWNLOAD_HISA = 3
+DOWNLOAD_OPENFOAM = 1
+DOWNLOAD_PARAVIEW = 2
+DOWNLOAD_CFMESH = 3
+DOWNLOAD_HISA = 4
 
 
 class CfdPreferencePage:
@@ -75,15 +81,20 @@ class CfdPreferencePage:
 
         self.form.tb_choose_foam_dir.clicked.connect(self.chooseFoamDir)
         self.form.le_foam_dir.textChanged.connect(self.foamDirChanged)
+        self.form.tb_choose_paraview_path.clicked.connect(self.chooseParaviewPath)
+        self.form.le_paraview_path.textChanged.connect(self.paraviewPathChanged)
         self.form.pb_run_dependency_checker.clicked.connect(self.runDependencyChecker)
-        self.form.pb_download_install_blueCFD.clicked.connect(self.downloadInstallBlueCFD)
-        self.form.tb_pick_bluecfd_file.clicked.connect(self.pickBlueCFDFile)
+        self.form.pb_download_install_openfoam.clicked.connect(self.downloadInstallOpenFoam)
+        self.form.tb_pick_openfoam_file.clicked.connect(self.pickOpenFoamFile)
+        self.form.pb_download_install_paraview.clicked.connect(self.downloadInstallParaview)
+        self.form.tb_pick_paraview_file.clicked.connect(self.pickParaviewFile)
         self.form.pb_download_install_cfMesh.clicked.connect(self.downloadInstallCfMesh)
         self.form.tb_pick_cfmesh_file.clicked.connect(self.pickCfMeshFile)
         self.form.pb_download_install_hisa.clicked.connect(self.downloadInstallHisa)
         self.form.tb_pick_hisa_file.clicked.connect(self.pickHisaFile)
 
-        self.form.le_bluecfd_url.setText(BLUECFD_URL)
+        self.form.le_openfoam_url.setText(OPENFOAM_URL)
+        self.form.le_paraview_url.setText(PARAVIEW_URL)
         self.form.le_cfmesh_url.setText(CFMESH_URL)
         self.form.le_hisa_url.setText(HISA_URL)
 
@@ -94,12 +105,17 @@ class CfdPreferencePage:
         self.install_process = None
 
         self.console_message = ""
+
         self.foam_dir = ""
         self.initial_foam_dir = ""
 
+        self.paraview_path = ""
+        self.initial_paraview_path = ""
+
         self.output_dir = ""
 
-        self.form.gb_bluecfd.setVisible(platform.system() == 'Windows')
+        self.form.gb_openfoam.setVisible(platform.system() == 'Windows')
+        self.form.gb_paraview.setVisible(platform.system() == 'Windows')
 
     def __del__(self):
         if self.thread and self.thread.isRunning():
@@ -112,6 +128,7 @@ class CfdPreferencePage:
 
     def saveSettings(self):
         CfdTools.setFoamDir(self.foam_dir)
+        CfdTools.setParaviewPath(self.paraview_path)
         prefs = CfdTools.getPreferencesLocation()
         FreeCAD.ParamGet(prefs).SetString("DefaultOutputPath", self.output_dir)
 
@@ -122,6 +139,10 @@ class CfdPreferencePage:
         self.foam_dir = FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
         self.initial_foam_dir = str(self.foam_dir)
         self.form.le_foam_dir.setText(self.foam_dir)
+
+        self.paraview_path = CfdTools.getParaviewPath()
+        self.initial_paraview_path = str(self.paraview_path)
+        self.form.le_paraview_path.setText(self.paraview_path)
 
         self.output_dir = CfdTools.getDefaultOutputPath()
         self.form.le_output_dir.setText(self.output_dir)
@@ -136,11 +157,21 @@ class CfdPreferencePage:
     def foamDirChanged(self, text):
         self.foam_dir = text
 
+    def paraviewPathChanged(self, text):
+        self.paraview_path = text
+
     def chooseFoamDir(self):
         d = QtGui.QFileDialog().getExistingDirectory(None, 'Choose OpenFOAM directory', self.foam_dir)
         if d and os.access(d, os.W_OK):
             self.foam_dir = d
         self.form.le_foam_dir.setText(self.foam_dir)
+
+    def chooseParaviewPath(self):
+        p, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose ParaView executable', self.paraview_path,
+                                                filter="*.exe")
+        if p and os.access(p, os.W_OK):
+            self.paraview_path = p
+        self.form.le_paraview_path.setText(self.paraview_path)
 
     def outputDirChanged(self, text):
         self.output_dir = text
@@ -152,8 +183,9 @@ class CfdPreferencePage:
         self.form.le_output_dir.setText(self.output_dir)
 
     def runDependencyChecker(self):
-        # Temporarily apply the foam dir selection
+        # Temporarily apply the foam dir selection and paraview path selection
         CfdTools.setFoamDir(self.foam_dir)
+        CfdTools.setParaviewPath(self.paraview_path)
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.consoleMessage("Checking dependencies...")
         msg = CfdTools.checkCfdDependencies()
@@ -162,18 +194,30 @@ class CfdPreferencePage:
         else:
             self.consoleMessage(msg)
         CfdTools.setFoamDir(self.initial_foam_dir)
+        CfdTools.setParaviewPath(self.initial_paraview_path)
         QApplication.restoreOverrideCursor()
 
-    def downloadInstallBlueCFD(self):
+    def downloadInstallOpenFoam(self):
         if self.createThread():
-            self.thread.task = DOWNLOAD_BLUECFD
-            self.thread.bluecfd_url = self.form.le_bluecfd_url.text()
+            self.thread.task = DOWNLOAD_OPENFOAM
+            self.thread.openfoam_url = self.form.le_openfoam_url.text()
             self.thread.start()
 
-    def pickBlueCFDFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose BlueCFD install file', filter="*.exe")
+    def pickOpenFoamFile(self):
+        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose OpenFOAM install file', filter="*.exe")
         if f and os.access(f, os.W_OK):
-            self.form.le_bluecfd_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
+            self.form.le_openfoam_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
+
+    def downloadInstallParaview(self):
+        if self.createThread():
+            self.thread.task = DOWNLOAD_PARAVIEW
+            self.thread.paraview_url = self.form.le_paraview_url.text()
+            self.thread.start()
+
+    def pickParaviewFile(self):
+        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose ParaView install file', filter="*.exe")
+        if f and os.access(f, os.W_OK):
+            self.form.le_paraview_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallCfMesh(self):
         if self.createThread():
@@ -226,9 +270,17 @@ class CfdPreferencePage:
                 user_dir = self.thread.user_dir
                 self.consoleMessage("Building cfMesh. Lengthy process - please wait...")
                 self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
-                self.install_process = CfdTools.startFoamApplication(
-                    "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
-                    'log.Allwmake', self.installFinished)
+                if CfdTools.getFoamRuntime() == 'WindowsDocker':
+                    # There seem to be issues when using multi processors to build in docker
+                    self.install_process = CfdTools.startFoamApplication(
+#                        "export WM_NCOMPPROCS={}; ./Allwmake".format(min(os.cpu_count(), 4)),
+                        "./Allwmake",
+                        "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                        'log.Allwmake', self.installFinished)
+                else:
+                    self.install_process = CfdTools.startFoamApplication(
+                        "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                        'log.Allwmake', self.installFinished)
                 # Reset foam dir for now in case the user presses 'Cancel'
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:
@@ -239,9 +291,16 @@ class CfdPreferencePage:
                 user_dir = self.thread.user_dir
                 self.consoleMessage("Building HiSA. Please wait...")
                 self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, HISA_FILE_BASE))
-                self.install_process = CfdTools.startFoamApplication(
-                    "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
-                    'log.Allwmake', self.installFinished)
+                if CfdTools.getFoamRuntime() == 'WindowsDocker':
+                    # There seem to be issues when using many processors in docker, so limit to 4
+                    self.install_process = CfdTools.startFoamApplication(
+                        "export WM_NCOMPPROCS={}; ./Allwmake".format(min(os.cpu_count(), 4)),
+                        "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                        'log.Allwmake', self.installFinished)
+                else:
+                    self.install_process = CfdTools.startFoamApplication(
+                        "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                        'log.Allwmake', self.installFinished)
                 # Reset foam dir for now in case the user presses 'Cancel'
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:
@@ -276,14 +335,17 @@ class CfdPreferencePageThread(QThread):
         self.signals = CfdPreferencePageSignals()
         self.user_dir = None
         self.task = None
-        self.bluecfd_url = None
+        self.openfoam_url = None
+        self.paraview_url = None
         self.cfmesh_url = None
         self.hisa_url = None
 
     def run(self):
         try:
-            if self.task == DOWNLOAD_BLUECFD:
-                self.downloadBlueCFD()
+            if self.task == DOWNLOAD_OPENFOAM:
+                self.downloadOpenFoam()
+            elif self.task == DOWNLOAD_PARAVIEW:
+                self.downloadParaview()
             elif self.task == DOWNLOAD_CFMESH:
                 self.downloadCfMesh()
             elif self.task == DOWNLOAD_HISA:
@@ -314,8 +376,8 @@ class CfdPreferencePageThread(QThread):
                 filename = tmp_file.name
                 return filename, response.info()
 
-    def downloadBlueCFD(self):
-        self.signals.status.emit("Downloading blueCFD-Core, please wait...")
+    def download(self, url, suffix, name):
+        self.signals.status.emit("Downloading {}, please wait...".format(name))
         try:
             if hasattr(ssl, 'create_default_context'):
                 context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
@@ -323,60 +385,70 @@ class CfdPreferencePageThread(QThread):
                 context = None
             # Download
             (filename, header) = self.downloadFile(
-                self.bluecfd_url, suffix=BLUECFD_FILE_EXT, reporthook=self.downloadStatus, context=context)
+                url, suffix=suffix, reporthook=self.downloadStatus, context=context)
         except Exception as ex:
-            raise Exception("Error downloading blueCFD-Core: {}".format(str(ex)))
+            raise Exception("Error downloading {}: {}".format(name, str(ex)))
 
-        self.signals.status.emit("blueCFD-Core downloaded to {}".format(filename))
+        self.signals.status.emit("{} downloaded to {}".format(name, filename))
+        return filename
 
+    def downloadOpenFoam(self):
+        filename = self.download(self.openfoam_url, OPENFOAM_FILE_EXT, "OpenFOAM")
         if QtCore.QProcess().startDetached(filename):
-            self.signals.status.emit("blueCFD-Core installer launched - please complete the installation")
+            self.signals.status.emit("OpenFOAM installer launched - please complete the installation")
         else:
-            raise Exception("Failed to launch blueCFD-Core installer")
+            raise Exception("Failed to launch OpenFOAM installer")
+
+    def downloadParaview(self):
+        filename = self.download(self.paraview_url, PARAVIEW_FILE_EXT, "ParaView")
+        if QtCore.QProcess().startDetached(filename):
+            self.signals.status.emit("ParaView installer launched - please complete the installation")
+        else:
+            raise Exception("Failed to launch ParaView installer")
 
     def downloadCfMesh(self):
-        self.signals.status.emit("Downloading cfMesh, please wait...")
+        filename = self.download(self.cfmesh_url, CFMESH_FILE_EXT, "cfMesh")
 
         self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
-        self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
-
-        try:
-            if hasattr(ssl, 'create_default_context'):
-                context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-            else:
-                context = None
-            # Download
-            (filename, header) = self.downloadFile(
-                self.cfmesh_url, suffix=CFMESH_FILE_EXT, reporthook=self.downloadStatus, context=context)
-        except Exception as ex:
-            raise Exception("Error downloading cfMesh: {}".format(str(ex)))
+        # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
+        if CfdTools.getFoamRuntime() != 'WindowsDocker':
+            self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
 
         self.signals.status.emit("Extracting cfMesh...")
-        CfdTools.runFoamCommand(
-            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; ); }}'.
-            format(CFMESH_FILE_BASE, CfdTools.translatePath(filename)))
+        if CfdTools.getFoamRuntime() == 'WindowsDocker':
+            from zipfile import ZipFile
+            with ZipFile(filename, 'r') as zip:
+                with tempfile.TemporaryDirectory() as tempdir:
+                    zip.extractall(path=tempdir)
+                    CfdTools.runFoamCommand(
+                        '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cp -r "{}" "$WM_PROJECT_USER_DIR/"; }}'
+                            .format(CfdTools.translatePath(os.path.join(tempdir, CFMESH_FILE_BASE))))
+        else:
+            CfdTools.runFoamCommand(
+                '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; ); }}'.
+                format(CFMESH_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadHisa(self):
-        self.signals.status.emit("Downloading HiSA, please wait...")
+        filename = self.download(self.hisa_url, HISA_FILE_EXT, "HiSA")
 
         self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
-        self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
-
-        try:
-            if hasattr(ssl, 'create_default_context'):
-                context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-            else:
-                context = None
-            # Download
-            (filename, header) = self.downloadFile(
-                self.hisa_url, suffix=HISA_FILE_EXT, reporthook=self.downloadStatus, context=context)
-        except Exception as ex:
-            raise Exception("Error downloading HiSA: {}".format(str(ex)))
+        # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
+        if CfdTools.getFoamRuntime() != 'WindowsDocker':
+            self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
 
         self.signals.status.emit("Extracting HiSA...")
-        CfdTools.runFoamCommand(
-            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; );  }}'.
-            format(HISA_FILE_BASE, CfdTools.translatePath(filename)))
+        if CfdTools.getFoamRuntime() == 'WindowsDocker':
+            from zipfile import ZipFile
+            with ZipFile(filename, 'r') as zip:
+                with tempfile.TemporaryDirectory() as tempdir:
+                    zip.extractall(path=tempdir)
+                    CfdTools.runFoamCommand(
+                        '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cp -r "{}" "$WM_PROJECT_USER_DIR/"; }}'
+                            .format(CfdTools.translatePath(os.path.join(tempdir, HISA_FILE_BASE))))
+        else:
+            CfdTools.runFoamCommand(
+                '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; );  }}'.
+                format(HISA_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadStatus(self, blocks, block_size, total_size):
         self.signals.downloadProgress.emit(blocks*block_size, total_size)

@@ -39,7 +39,7 @@ class CfdOFWorkbench(Workbench):
         from CfdPreferencePage import CfdPreferencePage
         ICONS_PATH = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons")
         QtCore.QDir.addSearchPath("icons", ICONS_PATH)
-        FreeCADGui.addPreferencePage(CfdPreferencePage, "CFD")
+        FreeCADGui.addPreferencePage(CfdPreferencePage, "CfdOF")
 
     def Initialize(self):
         # must import QtCore in this function,

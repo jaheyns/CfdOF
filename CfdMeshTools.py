@@ -599,7 +599,6 @@ class CfdMeshTools:
             'Name': self.part_obj.Name,
             'MeshPath': self.meshCaseDir,
             'FoamRuntime': CfdTools.getFoamRuntime(),
-            'TranslatedFoamPath': CfdTools.translatePath(CfdTools.getFoamDir()),
             'MeshUtility': self.mesh_obj.MeshUtility,
             'MeshRegionPresent': mesh_region_present,
             'CfSettings': self.cf_settings,
@@ -607,6 +606,8 @@ class CfdMeshTools:
             'GmshSettings': self.gmsh_settings,
             'TwoDSettings': self.two_d_settings
         }
+        if CfdTools.getFoamRuntime() != 'WindowsDocker':
+            self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
 
         TemplateBuilder.TemplateBuilder(self.meshCaseDir, self.template_path, self.settings)
 
