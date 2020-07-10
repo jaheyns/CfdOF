@@ -55,7 +55,7 @@ which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (0.18)](https://www.freecadweb.org/downloads.php)
  or [latest development version (0.19 prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
-- OpenFOAM [Foundation version 4.0 or later](http://openfoam.org/download/) or [ESI version 1706 or later](http://openfoam.com/download)  
+- OpenFOAM [Foundation versions 5-7](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-1912](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
 - [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)

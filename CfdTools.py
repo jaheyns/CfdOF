@@ -807,14 +807,14 @@ def checkCfdDependencies(term_print=True):
                             if foam_ver >= 1000:  # Plus version
                                 if foam_ver < 1706:
                                     vermsg = "OpenFOAM version " + foam_ver + " is outdated:\n" + \
-                                             "Minimum version 1706 or 4.0 required"
+                                             "Minimum version 1706 or 5.0 required"
                                     message += vermsg + "\n"
                                     if term_print:
                                         print(vermsg)
                             else:  # Foundation version
-                                if foam_ver < 4:
+                                if foam_ver < 5:
                                     vermsg = "OpenFOAM version " + foam_ver + " is outdated:\n" + \
-                                             "Minimum version 4.0 or 1706 required"
+                                             "Minimum version 5.0 or 1706 required"
                                     message += vermsg + "\n"
                                     if term_print:
                                         print(vermsg)
