@@ -52,7 +52,7 @@ if FreeCAD.GuiUp:
 #OPENFOAM_URL = \
 #    "https://sourceforge.net/projects/openfoam/files/v2006/OpenCFD-OpenFOAM-v2006-DP-mingw-crosscompiled-WindowsInstaller.exe/download"
 OPENFOAM_URL = \
-    "https://sourceforge.net/projects/openfoam/files/v1912/OpenCFD-OpenFOAM4WindowsInstaller-v1912.exe/download"
+    "https://sourceforge.net/projects/openfoam/files/v2006/OpenCFD-OpenFOAM4WindowsInstaller-v2006.exe/download"
 OPENFOAM_FILE_EXT = ".exe"
 PARAVIEW_URL = \
     "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v5.5&type=binary&os=Windows&downloadFile=ParaView-5.5.2-Qt5-Windows-64bit.exe"
