@@ -96,9 +96,9 @@ choose "CfdOF".
 The OpenFOAM installation is via the [OpenCFD docker package](https://www.openfoam.com/download/release-history.php) (version 2006). 
 This can be installed manually using the above link, or by clicking the relevant
 button in the Preferences panel described above. Please note that the 'OF_Env_Create' shortcut created by the installer on the
-desktop must be run after installation before OpenFOAM can be used. See the [installation page](https://www.openfoam.com/download/install-binary-windows.php)
-for troubleshooting. Please test to ensure you can run the tutorial case mentioned one the above page if you experience problems in CfdOF, to make
-sure the installation is valid.
+desktop *must be run after installation* before OpenFOAM can be used. See the [OpenFOAM installation page](https://www.openfoam.com/download/install-binary-windows.php)
+for troubleshooting. If you experience problems running OpenFOAM in CfdOF, please test to ensure the installation is valid by making sure you are able to
+run the tutorial case mentioned on the above page.
 
 Set the OpenFOAM install directory in the preferences
 panel to the install directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed).
