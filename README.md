@@ -55,7 +55,7 @@ which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (0.18)](https://www.freecadweb.org/downloads.php)
  or [latest development version (0.19 prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
-- OpenFOAM [Foundation versions 5-7](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-1912](http://openfoam.com/download)  
+- OpenFOAM [Foundation versions 5-7](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2006](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
 - [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
@@ -93,10 +93,12 @@ conveniently from the CfdOF Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CfdOF". 
 
-The OpenFOAM installation is via the [OpenCFD docker package](https://www.openfoam.com/download/release-history.php) (version 1912). 
-This can be installed
-manually using the above link, or by clicking the relevant
-button in the Preferences panel described above.
+The OpenFOAM installation is via the [OpenCFD docker package](https://www.openfoam.com/download/release-history.php) (version 2006). 
+This can be installed manually using the above link, or by clicking the relevant
+button in the Preferences panel described above. Please note that the 'OF_Env_Create' shortcut created by the installer on the
+desktop must be run after installation before OpenFOAM can be used. See the [installation page](https://www.openfoam.com/download/install-binary-windows.php)
+for troubleshooting. Please test to ensure you can run the tutorial case mentioned one the above page if you experience problems in CfdOF, to make
+sure the installation is valid.
 
 Set the OpenFOAM install directory in the preferences
 panel to the install directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed).
