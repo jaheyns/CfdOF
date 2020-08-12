@@ -136,6 +136,11 @@ class CfdCaseWriterFoam:
                                 solver = 'simpleFoam'
                     else:
                         raise RuntimeError("Only isothermal simulation currently supported for incompressible flow.")
+                elif self.physics_model.Flow == 'Compressible':
+                    if self.physics_model.Time == 'Transient':
+                        solver = 'buoyantPimpleFoam'
+                    else:
+                        solver = 'buoyantSimpleFoam'
                 elif self.physics_model.Flow == 'HighMachCompressible':
                     solver = 'hisa'
                 else:
@@ -177,7 +182,7 @@ class CfdCaseWriterFoam:
         system_settings['CasePath'] = self.case_folder
         system_settings['FoamPath'] = CfdTools.getFoamDir()
         if CfdTools.getFoamRuntime() != 'WindowsDocker':
-            self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
+            system_settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
 
     def clearCase(self, backup_path=None):
         """ Remove and recreate case directory, optionally backing up """
@@ -298,47 +303,28 @@ class CfdCaseWriterFoam:
 
         physics = settings['physics']
 
-        # Find inlet if copying initial values from
-        inlet_bc = None
-        if initial_values['UseInletUPValues'] or \
-           (physics['Thermal'] != 'None' and initial_values['UseInletTemperatureValues']) or \
-           (physics['TurbulenceModel'] is not None and initial_values['UseInletTurbulenceValues']):
-                first_inlet = None
-                ninlets = 0
-                for bc_name in settings['boundaries']:
-                    bc = settings['boundaries'][bc_name]
-                    if bc['BoundaryType'] in ['inlet', 'open']:
-                        ninlets = ninlets + 1
-                        # Save first inlet in case match not found
-                        if ninlets == 1:
-                            first_inlet = bc
-                        if initial_values['Inlet'].Label == bc_name:
-                            inlet_bc = bc
-                            break
-                if inlet_bc is None:
-                    if initial_values['Inlet']:
-                        if ninlets == 1:
-                            inlet_bc = first_inlet
-                        else:
-                            raise RuntimeError("Inlet {} not found to copy initial conditions from."
-                                               .format(initial_values['Inlet'].Label))
-                    else:
-                        inlet_bc = first_inlet
-                if inlet_bc is None:
-                    raise RuntimeError(
-                        "Did not find single inlet to copy initial conditions from - please specify one.")
-
         # Copy velocity
-        if initial_values['UseInletUPValues']:
-            if inlet_bc['BoundarySubType'] == 'farField':
+        if initial_values['UseInletUValues']:
+            inlet_bc = settings['boundaries'][initial_values['BoundaryU'].Label]
+            if inlet_bc['BoundarySubType'] == 'uniformVelocityInlet' or inlet_bc['BoundarySubType'] == 'farField':
                 initial_values['Ux'] = inlet_bc['Ux']
                 initial_values['Uy'] = inlet_bc['Uy']
                 initial_values['Uz'] = inlet_bc['Uz']
-                initial_values['Pressure'] = inlet_bc['Pressure']
             else:
-                raise RuntimeError("Inlet type not appropriate to determine initial velocity and pressure.")
+                raise RuntimeError("Boundary type not appropriate to determine initial velocity.")
 
-        if physics['Thermal'] == 'Energy' and initial_values['UseInletTemperatureValues']:
+        # Copy pressure
+        if initial_values['UseOutletPValue']:
+            outlet_bc = settings['boundaries'][initial_values['BoundaryP'].Label]
+            if outlet_bc['BoundarySubType'] == 'staticPressureOutlet' or \
+                    outlet_bc['BoundarySubType'] == 'totalPressureOpening' or \
+                    outlet_bc['BoundarySubType'] == 'farField':
+                initial_values['Pressure'] = outlet_bc['Pressure']
+            else:
+                raise RuntimeError("Boundary type not appropriate to determine initial pressure.")
+
+        if physics['Thermal'] == 'Energy' and initial_values['UseInletTemperatureValue']:
+            inlet_bc = settings['boundaries'][initial_values['BoundaryT'].Label]
             if inlet_bc['BoundaryType'] == 'inlet':
                 if inlet_bc['ThermalBoundaryType'] == 'fixedValue':
                     initial_values['Temperature'] = inlet_bc['Temperature']
@@ -352,6 +338,7 @@ class CfdCaseWriterFoam:
         # Copy turbulence settings
         if physics['TurbulenceModel'] is not None:
             if initial_values['UseInletTurbulenceValues']:
+                inlet_bc = settings['boundaries'][initial_values['BoundaryTurb'].Label]
                 if inlet_bc['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
                     initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
                     initial_values['omega'] = inlet_bc['SpecificDissipationRate']

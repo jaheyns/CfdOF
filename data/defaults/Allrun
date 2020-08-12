@@ -73,15 +73,31 @@ runCommand createBaffles -overwrite
 runCommand changeDictionary
 
 %}
-%{%(initialValues/PotentialFoam%)
+%{%(initialValues/PotentialFlow%)
 %:True
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
+PNAME=p_rgh
+%:default
+PNAME=p
+%}
 # Initialise flow
 %{%(bafflesPresent%)
 %:True
 # Baffle BC does not work with potentialFoam; do not initialise p
-runCommand potentialFoam -initialiseUBCs
+runCommand potentialFoam -initialiseUBCs -pName $PNAME
 %:default
-runCommand potentialFoam -initialiseUBCs -writep
+%{%(initialValues/PotentialFlowP%)
+%:True
+runCommand potentialFoam -initialiseUBCs -pName $PNAME -writep
+%:default
+runCommand potentialFoam -initialiseUBCs -pName $PNAME
+%}
+%}
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
+# Remove phi with wrong units
+rm 0/phi
 %}
 
 %}

@@ -1,5 +1,5 @@
 %{%(solver/SolverName%)
-%:hisa
+%:buoyantSimpleFoam buoyantPimpleFoam hisa
 %[_header%]
 FoamFile
 {
@@ -12,7 +12,12 @@ FoamFile
 
 thermoType
 {
+%{%(solver/SolverName%)
+%:hisa
     type            hePsiThermo;
+%:default
+    type            heRhoThermo;
+%}
     mixture         pureMixture;
 %{%(physics/Turbulence%)
 %:Inviscid
@@ -23,7 +28,12 @@ thermoType
     thermo          hConst;
     equationOfState perfectGas;
     specie          specie;
+%{%(solver/SolverName%)
+%:hisa
     energy          sensibleInternalEnergy;
+%:default
+    energy          sensibleEnthalpy;
+%}
 }
 
 

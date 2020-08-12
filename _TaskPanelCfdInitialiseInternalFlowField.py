@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -43,32 +43,46 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
                                                 "TaskPanelCfdInitialiseInternalField.ui"))
 
-        self.form.basicPropertiesFrame.setVisible(False)
-        self.form.radioButtonPotentialFlow.toggled.connect(self.radioUPChanged)
-        self.form.radioButtonUseInletValuesUP.toggled.connect(self.radioUPChanged)
+        self.form.velocityFrame.setVisible(False)
+        self.form.pressureFrame.setVisible(False)
+        self.form.radioButtonPotentialFlowU.toggled.connect(self.radioChanged)
+        self.form.radioButtonUseInletValuesU.toggled.connect(self.radioChanged)
+        self.form.radioButtonPotentialFlowP.toggled.connect(self.radioChanged)
+        self.form.radioButtonUseInletValuesP.toggled.connect(self.radioChanged)
         self.form.turbulencePropertiesFrame.setVisible(False)
         self.form.checkUseInletValuesThermal.toggled.connect(self.updateUi)
-        self.form.checkUseInletValues.toggled.connect(self.updateUi)
+        self.form.checkUseInletValuesTurb.toggled.connect(self.updateUi)
 
         self.form.comboFluid.currentIndexChanged.connect(self.comboFluidChanged)
         self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
 
-        self.form.radioButtonPotentialFlow.setToolTip(
+        self.form.radioButtonPotentialFlowU.setToolTip(
             "Initialise the velocity field using an incompressible, potential "
+            "(irrotational) flow assumption.")
+        self.form.radioButtonPotentialFlowP.setToolTip(
+            "Initialise the pressure field using an incompressible, potential "
             "(irrotational) flow assumption.")
 
         self.alphas = {}
         self.load()
 
     def load(self):
-        potential_foam = self.obj.PotentialFoam
-        use_inlet_UP = self.obj.UseInletUPValues
-        if potential_foam:
-            self.form.radioButtonPotentialFlow.toggle()
-        elif use_inlet_UP:
-            self.form.radioButtonUseInletValuesUP.toggle()
+        potential_u = self.obj.PotentialFlow
+        potential_p = self.obj.PotentialFlowP
+        use_inlet_U = self.obj.UseInletUValues
+        use_outlet_P = self.obj.UseOutletPValue
+        if potential_u:
+            self.form.radioButtonPotentialFlowU.toggle()
+        elif use_inlet_U:
+            self.form.radioButtonUseInletValuesU.toggle()
         else:
-            self.form.radioButtonSpecifyValues.toggle()
+            self.form.radioButtonSpecifyValuesU.toggle()
+        if potential_p:
+            self.form.radioButtonPotentialFlowP.toggle()
+        elif use_outlet_P:
+            self.form.radioButtonUseInletValuesP.toggle()
+        else:
+            self.form.radioButtonSpecifyValuesP.toggle()
 
         setQuantity(self.form.Ux, self.obj.Ux)
         setQuantity(self.form.Uy, self.obj.Uy)
@@ -88,29 +102,42 @@ class _TaskPanelCfdInitialiseInternalFlowField:
             self.form.comboFluid.clear()
 
         use_inlet_turb = self.obj.UseInletTurbulenceValues
-        self.form.checkUseInletValues.setChecked(use_inlet_turb)
+        self.form.checkUseInletValuesTurb.setChecked(use_inlet_turb)
         setQuantity(self.form.inputk, self.obj.k)
         setQuantity(self.form.inputOmega, self.obj.omega)
 
-        use_inlet_temp = self.obj.UseInletTemperatureValues
+        use_inlet_temp = self.obj.UseInletTemperatureValue
         self.form.checkUseInletValuesThermal.setChecked(use_inlet_temp)
         setQuantity(self.form.inputTemperature, self.obj.Temperature)
 
-        # Add any inlets to the list
+        # Add any inlets to the lists
         for b in self.boundaries:
             if b.BoundaryType in ['inlet', 'open']:
-                self.form.comboInlets.addItem(b.Label, b.Name)
-        if self.obj.Inlet is not None:
-            self.form.comboInlets.setCurrentIndex(self.form.comboInlets.findData(self.obj.Inlet.Name))
+                self.form.comboBoundaryU.addItem(b.Label, b.Name)
+                self.form.comboBoundaryT.addItem(b.Label, b.Name)
+                self.form.comboBoundaryTurb.addItem(b.Label, b.Name)
+            if b.BoundaryType in ['outlet', 'open']:
+                self.form.comboBoundaryP.addItem(b.Label, b.Name)
+        if self.obj.BoundaryU is not None:
+            self.form.comboBoundaryU.setCurrentIndex(self.form.comboBoundaryU.findData(self.obj.BoundaryU.Name))
+        if self.obj.BoundaryP is not None:
+            self.form.comboBoundaryP.setCurrentIndex(self.form.comboBoundaryP.findData(self.obj.BoundaryP.Name))
+        if self.obj.BoundaryT is not None:
+            self.form.comboBoundaryT.setCurrentIndex(self.form.comboBoundaryT.findData(self.obj.BoundaryT.Name))
+        if self.obj.BoundaryTurb is not None:
+            self.form.comboBoundaryTurb.setCurrentIndex(self.form.comboBoundaryTurb.findData(self.obj.BoundaryTurb.Name))
 
         self.updateUi()
 
     def updateUi(self):
-        potential_foam = self.form.radioButtonPotentialFlow.isChecked()
-        use_inlet_UP = self.form.radioButtonUseInletValuesUP.isChecked()
-        use_inlet_turb = self.form.checkUseInletValues.isChecked()
+        potential_flow = self.form.radioButtonPotentialFlowU.isChecked()
+        potential_flow_P = self.form.radioButtonPotentialFlowP.isChecked()
+        use_inlet_U = self.form.radioButtonUseInletValuesU.isChecked()
+        use_outlet_P = self.form.radioButtonUseInletValuesP.isChecked()
+        use_inlet_turb = self.form.checkUseInletValuesTurb.isChecked()
         use_inlet_temp = self.form.checkUseInletValuesThermal.isChecked()
-        self.form.basicPropertiesFrame.setVisible(not (potential_foam or use_inlet_UP))
+        self.form.velocityFrame.setVisible(not (potential_flow or use_inlet_U))
+        self.form.pressureFrame.setVisible(not (potential_flow_P or use_outlet_P))
 
         if self.physicsModel.Phase != 'Single':
             self.form.volumeFractionsFrame.setVisible(True)
@@ -127,15 +154,23 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         else:
             self.form.thermalPropertiesFrame.setVisible(False)
 
-        self.form.frameInlets.setVisible(
-            (use_inlet_UP or use_inlet_turb or use_inlet_temp) and self.form.comboInlets.count() > 1)
+        self.form.comboBoundaryU.setVisible(use_inlet_U)
+        self.form.comboBoundaryP.setVisible(use_outlet_P)
+        self.form.comboBoundaryT.setVisible(use_inlet_temp)
+        self.form.comboBoundaryTurb.setVisible(use_inlet_turb)
+
+        potlU = self.form.radioButtonPotentialFlowU.isChecked()
+        self.form.radioButtonPotentialFlowP.setEnabled(potlU)
+        if self.form.radioButtonPotentialFlowP.isChecked() and not potlU:
+            self.form.radioButtonSpecifyValuesP.toggle()
+
         self.form.kEpsilonFrame.setVisible(False)
         self.form.kOmegaSSTFrame.setVisible(False)
         self.form.SpalartAlmerasFrame.setVisible(False)
         if self.physicsModel.TurbulenceModel == 'kOmegaSST':
             self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
 
-    def radioUPChanged(self):
+    def radioChanged(self):
         self.updateUi()
 
     def getMaterialName(self, index):
@@ -152,26 +187,43 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         doc.resetEdit()
 
         FreeCADGui.doCommand("\ninit = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-        FreeCADGui.doCommand("init.PotentialFoam = {}".format(self.form.radioButtonPotentialFlow.isChecked()))
-        FreeCADGui.doCommand("init.UseInletUPValues = {}".format(self.form.radioButtonUseInletValuesUP.isChecked()))
+        FreeCADGui.doCommand("init.PotentialFlow = {}".format(self.form.radioButtonPotentialFlowU.isChecked()))
+        FreeCADGui.doCommand("init.UseInletUValues = {}".format(self.form.radioButtonUseInletValuesU.isChecked()))
         FreeCADGui.doCommand("init.Ux = '{}'".format(getQuantity(self.form.Ux)))
         FreeCADGui.doCommand("init.Uy = '{}'".format(getQuantity(self.form.Uy)))
         FreeCADGui.doCommand("init.Uz = '{}'".format(getQuantity(self.form.Uz)))
+        FreeCADGui.doCommand("init.UseOutletPValue = {}".format(self.form.radioButtonUseInletValuesP.isChecked()))
+        FreeCADGui.doCommand("init.PotentialFlowP = {}".format(self.form.radioButtonPotentialFlowP.isChecked()))
         FreeCADGui.doCommand("init.Pressure = '{}'".format(getQuantity(self.form.pressure)))
         FreeCADGui.doCommand("init.VolumeFractions = {}".format(self.alphas))
-        FreeCADGui.doCommand("init.UseInletTemperatureValues "
+        FreeCADGui.doCommand("init.UseInletTemperatureValue "
                              "= {}".format(self.form.checkUseInletValuesThermal.isChecked()))
         FreeCADGui.doCommand("init.Temperature "
                              "= '{}'".format(getQuantity(self.form.inputTemperature)))
         FreeCADGui.doCommand("init.UseInletTurbulenceValues "
-                             "= {}".format(self.form.checkUseInletValues.isChecked()))
+                             "= {}".format(self.form.checkUseInletValuesTurb.isChecked()))
         FreeCADGui.doCommand("init.omega = '{}'".format(getQuantity(self.form.inputOmega)))
         FreeCADGui.doCommand("init.k = '{}'".format(getQuantity(self.form.inputk)))
-        inlet = self.form.comboInlets.currentData()
-        if inlet:
-            FreeCADGui.doCommand("init.Inlet = FreeCAD.ActiveDocument.{}".format(inlet))
+        boundaryU = self.form.comboBoundaryU.currentData()
+        boundaryP = self.form.comboBoundaryP.currentData()
+        boundaryT = self.form.comboBoundaryT.currentData()
+        boundaryTurb = self.form.comboBoundaryTurb.currentData()
+        if boundaryU:
+            FreeCADGui.doCommand("init.BoundaryU = FreeCAD.ActiveDocument.{}".format(boundaryU))
         else:
-            FreeCADGui.doCommand("init.Inlet = None")
+            FreeCADGui.doCommand("init.BoundaryU = None")
+        if boundaryP:
+            FreeCADGui.doCommand("init.BoundaryP = FreeCAD.ActiveDocument.{}".format(boundaryP))
+        else:
+            FreeCADGui.doCommand("init.BoundaryP = None")
+        if boundaryT:
+            FreeCADGui.doCommand("init.BoundaryT = FreeCAD.ActiveDocument.{}".format(boundaryT))
+        else:
+            FreeCADGui.doCommand("init.BoundaryT = None")
+        if boundaryTurb:
+            FreeCADGui.doCommand("init.BoundaryTurb = FreeCAD.ActiveDocument.{}".format(boundaryTurb))
+        else:
+            FreeCADGui.doCommand("init.BoundaryTurb = None")
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

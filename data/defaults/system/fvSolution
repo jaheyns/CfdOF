@@ -57,8 +57,12 @@ SIMPLE
     // Non-orthogonal correctors for robustness on tet meshes. Porous baffles require a
     // higher number of corrections.
     nNonOrthogonalCorrectors 5;
-
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam
+    momentumPredictor no;
+%}
     consistent no;  // Setting this impairs stability of porous baffles
+
     residualControl
     {
         p %(solver/ConvergenceTol%);
@@ -166,6 +170,21 @@ solvers
         tolerance       1e-8;
         relTol          0;
     }
+%:buoyantSimpleFoam buoyantPimpleFoam
+    h
+    {
+        solver           smoothSolver;
+        smoother         symGaussSeidel;
+        tolerance        1e-8;
+        relTol           0.1;
+        nSweeps          1;
+    }
+
+    hFinal
+    {
+        $U;
+        relTol           0;
+    }
 
 %}
 %{%(physics/Turbulence%)
@@ -236,6 +255,10 @@ relaxationFactors
     equations
     {
         U               0.6;
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam
+        h               0.6;
+%}
 %{%(physics/Turbulence%)
 %:RANS
 %{%(physics/TurbulenceModel%)
@@ -248,14 +271,21 @@ relaxationFactors
     fields
     {
         p               0.3;
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam
+        p_rgh           0.3;
+        rho             0.5;
+%}
     }
 %:Transient
     equations
     {
-%{%(solver/SolverName%)
-%:default
         U               0.6;
         UFinal          1;
+%{%(solver/SolverName%)
+%:buoyantPimpleFoam
+        h               0.6;
+        hFinal          1;
 %}
 %{%(physics/Turbulence%)
 %:RANS
@@ -278,7 +308,7 @@ relaxationFactors
 %:default
     fields
     {
-        p               0.3;
+        p               1;
     }
 %}
 %}

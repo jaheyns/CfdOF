@@ -110,7 +110,9 @@ class _TaskPanelCfdPhysicsSelection:
         else:
             self.form.radioButtonFreeSurface.setEnabled(True)
 
-        self.form.gravityFrame.setEnabled(self.form.radioButtonFreeSurface.isChecked())
+        self.form.gravityFrame.setEnabled(
+            self.form.radioButtonFreeSurface.isChecked() or
+            (self.form.radioButtonCompressible.isChecked() and not self.form.checkBoxHighMach.isChecked()))
 
         if self.form.radioButtonFreeSurface.isChecked():
             self.form.radioButtonCompressible.setEnabled(False)

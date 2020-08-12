@@ -1,5 +1,5 @@
 %{%(solver/SolverName%)
-%:interFoam multiphaseInterFoam
+%:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
 %[_header%]
 FoamFile
 {
@@ -19,8 +19,6 @@ boundaryField
 
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
-%:empty
-%[0/_boundary_empty%]
 %:wall
 %[0/_boundary_fixedFluxPressure%]
 %:inlet
@@ -46,8 +44,14 @@ boundaryField
 %:staticPressureOutlet
     %(0%)
     {
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam
         type        fixedValue;
-        value       uniform %(boundaries/%(0%)/Pressure%);
+%:default
+        type        totalPressure;
+        p0          uniform %(boundaries/%(0%)/Pressure%);
+%}
+        value       $internalField;
     }
 %:default
 %[0/_boundary_fixedFluxPressure%]

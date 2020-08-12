@@ -1,5 +1,5 @@
 %{%(solver/SolverName%)
-%:hisa
+%:buoyantSimpleFoam buoyantPimpleFoam hisa
 %[_header%]
 FoamFile
 {
@@ -24,13 +24,23 @@ boundaryField
 %:fixedValue
     %(0%)
     {
+%{%(solver/SolverName%)
+%:hisa
         type        boundaryCorrectedFixedValue;
+%:default
+        type        fixedValue;
+%}
         value       uniform %(boundaries/%(0%)/Temperature%);
     }
 %:zeroGradient
     %(0%)
     {
+%{%(solver/SolverName%)
+%:hisa
         type        characteristicWallTemperature;
+%:default
+        type        zeroGradient;
+%}
         value       $internalField;
     }
 %:fixedGradient
@@ -59,14 +69,16 @@ boundaryField
         T           %(boundaries/%(0%)/Temperature%);
         value       uniform %(boundaries/%(0%)/Temperature%);
 %:default
-        type        fixedValue;
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
         value       uniform %(boundaries/%(0%)/Temperature%);
 %}
     }
 %:default
     %(0%)
     {
-        type        fixedValue;
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
         value       uniform %(boundaries/%(0%)/Temperature%);
     }
 %}
@@ -93,10 +105,20 @@ boundaryField
         value       $internalValue;
     }
 %:default
-%[0/_boundary_zeroGradient%]
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+    }
 %}
 %:default
-%[0/_boundary_zeroGradient%]
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+    }
 %}
 %:open
 %{%(boundaries/%(0%)/BoundarySubType%)

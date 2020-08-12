@@ -1,5 +1,5 @@
 %{%(solver/SolverName%)
-%:hisa
+%:buoyantSimpleFoam buoyantPimpleFoam hisa
 %{%(physics/Turbulence%)
 %:RANS
 %[_header%]

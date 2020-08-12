@@ -12,19 +12,31 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 %{%(solver/SolverName%)
-%:hisa
-dimensions      [1 -1 -2 0 0 0 0];
-
-internalField   uniform %(initialValues/Pressure%);
-%:default
+%:simpleFoam porousSimpleFoam pimpleFoam
 dimensions      [0 2 -2 0 0 0 0];
 
 internalField   uniform %(initialValues/KinematicPressure%);
+%:default
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform %(initialValues/Pressure%);
 %}
 
 boundaryField
 {
 
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:constraint
+%[0/_boundary_constraint%]
+%:default
+%[0/_boundary_calculated%]
+%}
+
+%}
+%:default
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
 %:empty
@@ -163,6 +175,7 @@ boundaryField
 %}
 %}
 
+%}
 %}
 %{defaultFaces
 %[0/_boundary_zeroGradient%]

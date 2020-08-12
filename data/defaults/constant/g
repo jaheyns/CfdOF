@@ -1,5 +1,5 @@
 %{%(solver/SolverName%)
-%:interFoam multiphaseInterFoam
+%:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
 %[_header%]
 FoamFile
 {
