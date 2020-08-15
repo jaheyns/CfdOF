@@ -130,6 +130,7 @@ solvers
         agglomerator     faceAreaPair;
         nCellsInCoarsestLevel 10;
         mergeLevels      1;
+        maxIter          20;
     }
 
     "(pFinal|p_rghFinal|pcorrFinal)"
