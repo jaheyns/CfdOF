@@ -777,6 +777,10 @@ def checkCfdDependencies(term_print=True):
             print("Checking for OpenFOAM:")
         try:
             foam_dir = getFoamDir()
+            if term_print:
+                print("OpenFOAM directory: {}".format(foam_dir))
+                print("System: {}".format(platform.system()))
+                print("Runtime: {}".format(getFoamRuntime()))
         except IOError as e:
             ofmsg = "Could not find OpenFOAM installation: " + str(e)
             if term_print:
