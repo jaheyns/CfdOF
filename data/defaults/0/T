@@ -47,7 +47,7 @@ boundaryField
     %(0%)
     {
         type        fixedGradient;
-        gradient    uniform %(boundaries/%(0%)/heatFlux%);
+        gradient    uniform %(boundaries/%(0%)/HeatFlux%);
     }
 %}
 %:inlet
