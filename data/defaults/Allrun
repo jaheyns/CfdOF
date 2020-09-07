@@ -14,6 +14,7 @@ runCommand()
 %{%(system/FoamRuntime%)
 %:WindowsDocker
 %:BlueCFD
+%:BlueCFD2
 %:default
 # Unset and source bashrc
 FOAMDIR="%(system/TranslatedFoamPath%)"

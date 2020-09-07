@@ -386,12 +386,14 @@ def getFoamRuntime():
 
     runtime = None
     if platform.system() == 'Windows':
-        if os.path.exists(os.path.join(installation_path, "msys64", "home", "ofuser")):
+        if os.path.exists(os.path.join(installation_path, "msys64", "home", "ofuser", ".blueCFDCore")):
+            runtime = 'BlueCFD'
+        elif os.path.exists(os.path.join(installation_path, "..", "msys64", "home", "ofuser", ".blueCFDCore")):
+            runtime = 'BlueCFD2'
+        elif os.path.exists(os.path.join(installation_path, "msys64", "home", "ofuser")):
             runtime = 'MinGW'
         elif os.path.exists(os.path.join(installation_path, "Windows", "Scripts")):
             runtime = 'WindowsDocker'
-        elif os.path.exists(os.path.join(installation_path, "..", "msys64")):
-            runtime = 'BlueCFD'
         elif os.path.exists(os.path.join(getFoamDir(), "etc", "bashrc")):
             runtime = 'BashWSL'
     else:
@@ -461,7 +463,7 @@ def reverseTranslatePath(p):
 def fromWindowsPath(p):
     drive, tail = os.path.splitdrive(p)
     pp = tail.replace('\\', '/')
-    if getFoamRuntime() == "MinGW" or getFoamRuntime() == "BlueCFD":
+    if getFoamRuntime() == "MinGW" or getFoamRuntime() == "BlueCFD" or getFoamRuntime() == "BlueCFD2":
         # Under mingw: c:\path -> /c/path
         if os.path.isabs(p):
             return "/" + (drive[:-1]).lower() + pp
@@ -516,10 +518,14 @@ def toWindowsPath(p):
             return pp[2].toupper() + ':\\' + '\\'.join(pp[3:])
         else:
             return p.replace('/', '\\')
-    elif getFoamRuntime() == "BlueCFD":
+    elif getFoamRuntime().startswith("BlueCFD"):
         # Under blueCFD (mingw): /c/path -> c:\path; /home/ofuser/blueCFD -> <blueCFDDir>
         if p.startswith('/home/ofuser/blueCFD'):
-            return getFoamDir() + '\\' + '..' + '\\' + '\\'.join(pp[4:])
+            if getFoamRuntime() == "BlueCFD2":
+                foam_dir = getFoamDir + '\\'
+            else:
+                foam_dir = getFoamDir()
+            return foam_dir + '\\' + '\\'.join(pp[4:])
         elif p.startswith('/'):
             return pp[1].upper() + ':\\' + '\\'.join(pp[2:])
         else:
@@ -542,7 +548,7 @@ def getShortWindowsPath(long_name):
     output_buf_size = 0
     while True:
         output_buf = ctypes.create_unicode_buffer(output_buf_size)
-        needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
+        needed = _GetShortPathNameW(os.path.normpath(long_name), output_buf, output_buf_size)
         if output_buf_size >= needed:
             return output_buf.value
         else:
@@ -556,7 +562,7 @@ def getRunEnvironment():
                 "USERNAME": "ofuser",
                 "USER": "ofuser",
                 "HOME": "/home/ofuser"}
-    elif getFoamRuntime() == "BlueCFD":
+    elif getFoamRuntime().startswith("BlueCFD"):
         return {"MSYSTEM": "MINGW64",
                 "USERNAME": "ofuser",
                 "USER": "ofuser",
@@ -604,10 +610,14 @@ def makeRunCommand(cmd, dir, source_env=True):
     elif getFoamRuntime() == "BashWSL":
         cmdline = ['bash', '-c', source + cd + cmd]
         return cmdline
-    elif getFoamRuntime() == "BlueCFD":
+    elif getFoamRuntime().startswith("BlueCFD"):
         # Set-up necessary for running a command - only needs doing once, but to be safe...
-        short_bluecfd_path = getShortWindowsPath('{}\\..'.format(installation_path))
-        with open('{}\\..\\msys64\\home\\ofuser\\.blueCFDOrigin'.format(installation_path), "w") as f:
+        if getFoamRuntime() == "BlueCFD2":
+            inst_path = "{}\\..".format(installation_path)
+        else:
+            inst_path = "{}".format(installation_path)
+        short_bluecfd_path = getShortWindowsPath(inst_path)
+        with open('{}\\msys64\\home\\ofuser\\.blueCFDOrigin'.format(inst_path), "w") as f:
             f.write(short_bluecfd_path)
             f.close()
 
@@ -944,6 +954,8 @@ def getParaviewExecutable():
     if not paraview_cmd:
         # If using blueCFD, use paraview supplied
         if getFoamRuntime() == 'BlueCFD':
+            paraview_cmd = '{}\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
+        elif getFoamRuntime() == 'BlueCFD2':
             paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
         else:
             # Go through the defaults and see if any are found
