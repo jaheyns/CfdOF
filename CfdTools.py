@@ -522,7 +522,7 @@ def toWindowsPath(p):
         # Under blueCFD (mingw): /c/path -> c:\path; /home/ofuser/blueCFD -> <blueCFDDir>
         if p.startswith('/home/ofuser/blueCFD'):
             if getFoamRuntime() == "BlueCFD2":
-                foam_dir = getFoamDir + '\\'
+                foam_dir = getFoamDir() + '\\' + '..'
             else:
                 foam_dir = getFoamDir()
             return foam_dir + '\\' + '\\'.join(pp[4:])
