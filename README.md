@@ -176,7 +176,7 @@ prerequisites have been successfully installed.
 ### Reporting Bugs
 
 Please discuss issues on the [CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37).
-Bugs can be reported on the [github project site](https://github.com/jaheyns/cfdof). 
+Bugs can be reported on the [gitlab project site](https://gitlab.com/opensimproject/cfdof). 
 
 Please first read the [guidelines for reporting bugs](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359) 
 in order to provide sufficient information.
