@@ -98,8 +98,11 @@ class _CfdMesh:
 
         addObjectProperty(obj, 'STLLinearDeflection', 0.05, "App::PropertyFloat", "", "STL linear deflection")
 
-        addObjectProperty(obj, 'NumberCores', 1, "App::PropertyInteger", "", "Number of parallel cores "
-                          "(only applicable when using snappyHexMesh) ")
+        addObjectProperty(obj, 'NumberOfProcesses', 1, "App::PropertyInteger", "", "Number of parallel processes")
+
+        addObjectProperty(obj, 'NumberOfThreads', 0, "App::PropertyInteger", "",
+                          "Number of parallel threads per process (only applicable when using cfMesh) "
+                          "0 means use all available (if NumberOfProcesses = 1) or use 1 (if NumberOfProcesses > 1)")
 
         addObjectProperty(obj, "Part", None, "App::PropertyLink", "Mesh Parameters", "Part object to mesh")
 

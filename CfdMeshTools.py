@@ -551,12 +551,6 @@ class CfdMeshTools:
                 "z": inside_z
             }
             snappy_settings['CellsBetweenLevels'] = self.mesh_obj.CellsBetweenLevels
-            if self.mesh_obj.NumberCores <= 1:
-                self.mesh_obj.NumberCores = 1
-                snappy_settings['ParallelMesh'] = False
-            else:
-                snappy_settings['ParallelMesh'] = True
-            snappy_settings['NumberCores'] = self.mesh_obj.NumberCores
 
             if len(self.snappy_settings["InternalRegions"]) > 0:
                 self.snappy_settings['InternalRefinementRegionsPresent'] = True
@@ -608,6 +602,14 @@ class CfdMeshTools:
         }
         if CfdTools.getFoamRuntime() != 'WindowsDocker':
             self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
+
+        if self.mesh_obj.NumberOfProcesses <= 1:
+            self.mesh_obj.NumberOfProcesses = 1
+            self.settings['ParallelMesh'] = False
+        else:
+            self.settings['ParallelMesh'] = True
+        self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
+        self.settings['NumberOfThreads'] = self.mesh_obj.NumberOfThreads
 
         TemplateBuilder.TemplateBuilder(self.meshCaseDir, self.template_path, self.settings)
 

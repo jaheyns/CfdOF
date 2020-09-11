@@ -34,15 +34,33 @@ source "%(TranslatedFoamPath%)/etc/bashrc"
 %:cfMesh
 # Extract feature edges
 runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/%(Name%)_Geometry.stl" "%(Name%)_Geometry.fms"
+%{%(ParallelMesh%)
+%:True
+%{%(NumberOfThreads%)
+%:0
+export OMP_NUM_THREADS=1
+%:default
+export OMP_NUM_THREADS=%(NumberOfThreads%)
+%}
+runCommand preparePar
+runCommand mpirun -np %(NumberOfProcesses%) cartesianMesh -parallel
+runCommand reconstructParMesh -constant -fullMatch
+%:False
+%{%(NumberOfThreads%)
+%:0
+%:default
+export OMP_NUM_THREADS=%(NumberOfThreads%)
+%}
 runCommand cartesianMesh
+%}
 %:snappyHexMesh
 runCommand blockMesh
 runCommand surfaceFeatureExtract
 
-%{%(SnappySettings/ParallelMesh%)
+%{%(ParallelMesh%)
 %:True
 runCommand decomposePar
-runCommand mpirun -np %(SnappySettings/NumberCores%) snappyHexMesh -overwrite -parallel
+runCommand mpirun -np %(NumberOfProcesses%) snappyHexMesh -overwrite -parallel
 runCommand reconstructParMesh -constant
 %:False
 runCommand snappyHexMesh -overwrite
