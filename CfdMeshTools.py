@@ -157,6 +157,10 @@ class CfdMeshTools:
 
             backPatchIndex = keys.index(backObj.Label)
             self.two_d_settings['BackFaceList'] = case.settings['createPatches'][keys[backPatchIndex]]['PatchNamesList']
+
+            if not self.two_d_settings['BackFaceList'] or not self.two_d_settings['FrontFaceList']:
+                raise RuntimeError("2D front and/or back plane(s) could not be found in the shape being meshed.")
+
             self.two_d_settings['BackFace'] = self.two_d_settings['BackFaceList'][0]
         else:
             self.two_d_settings['ConvertTo2D'] = False

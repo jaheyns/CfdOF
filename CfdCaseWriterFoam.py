@@ -518,6 +518,9 @@ class CfdCaseWriterFoam:
                 'PatchNamesList': tuple(bc_lists[bc_id]),  # Tuple used so that case writer outputs as an array
                 'PatchType': patchType
             }
+            if not bc_lists[bc_id]:
+                raise RuntimeError("No faces were found for boundary '{}' in part '{}' being meshed".format(
+                    bc_obj.Label, mobj.Part.Label))
 
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
             for regionObj in CfdTools.getMeshRefinementObjs(self.mesh_obj):
