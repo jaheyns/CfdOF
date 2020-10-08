@@ -168,7 +168,7 @@ class CfdPreferencePage:
 
     def chooseParaviewPath(self):
         p, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose ParaView executable', self.paraview_path,
-                                                filter="*.exe")
+                                                        filter="*.exe"  if platform.system() == 'Windows' else None)
         if p and os.access(p, os.W_OK):
             self.paraview_path = p
         self.form.le_paraview_path.setText(self.paraview_path)
