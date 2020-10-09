@@ -55,7 +55,7 @@ which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (0.18)](https://www.freecadweb.org/downloads.php)
  or [latest development version (0.19 prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
-- OpenFOAM [Foundation versions 5-7](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2006](http://openfoam.com/download)  
+- OpenFOAM [Foundation versions 5-8](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2006](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
 - [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
@@ -248,5 +248,5 @@ We acknowledge significant contributions from
 
 ### Dedication
 
-CfdOF is dedicated to the memory of Michael Hindley, whose irrepressible enthusiasm for 
-FreeCAD and open source software is the reason this workbench was created. Rest in peace.
+CfdOF is dedicated to the memory of Michael Hindley. It is because of his irrepressible enthusiasm for 
+FreeCAD and open source software that this workbench exists. Rest in peace.

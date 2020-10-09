@@ -742,8 +742,8 @@ def checkCfdDependencies(term_print=True):
         CF_MINOR_VER_REQUIRED = 6
 
         HISA_MAJOR_VER_REQUIRED = 1
-        HISA_MINOR_VER_REQUIRED = 1
-        HISA_PATCH_VER_REQUIRED = 4
+        HISA_MINOR_VER_REQUIRED = 2
+        HISA_PATCH_VER_REQUIRED = 1
 
         message = ""
         FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
