@@ -273,7 +273,7 @@ class CfdPreferencePage:
                 if CfdTools.getFoamRuntime() == 'WindowsDocker':
                     # There seem to be issues when using multi processors to build in docker
                     self.install_process = CfdTools.startFoamApplication(
-#                       "export WM_NCOMPPROCS=1; ./Allwmake",
+                        "export WM_NCOMPPROCS=1; ./Allwmake",
                         "./Allwmake",
                         "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
                         'log.Allwmake', self.installFinished)
@@ -292,9 +292,9 @@ class CfdPreferencePage:
                 self.consoleMessage("Building HiSA. Please wait...")
                 self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, HISA_FILE_BASE))
                 if CfdTools.getFoamRuntime() == 'WindowsDocker':
-                    # There seem to be issues when using many processors in docker, so limit to 4
+                    # There seem to be issues when using multi processors to build in docker
                     self.install_process = CfdTools.startFoamApplication(
-                        "export WM_NCOMPPROCS={}; ./Allwmake".format(min(os.cpu_count(), 4)),
+                        "export WM_NCOMPPROCS=1; ./Allwmake",
                         "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
                         'log.Allwmake', self.installFinished)
                 else:
