@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -58,8 +58,6 @@ class _TaskPanelCfdMeshRefinement:
                                                                      False,
                                                                      True)
 
-        self.form.baffle_check.stateChanged.connect(self.updateUI)
-
         self.form.check_boundlayer.stateChanged.connect(self.updateUI)
 
         tool_tip_mes = "Cell size relative to base cell size"
@@ -79,7 +77,6 @@ class _TaskPanelCfdMeshRefinement:
                                          "smaller than 1.2)")
         self.form.if_firstlayerheight.setToolTip("Maximum first cell height (ignored if set to 0.0)")
         self.form.if_edgerefinement.setToolTip("Number of edge or feature refinement levels")
-        self.form.baffle_check.setToolTip("Create a zero thickness baffle")
 
         self.updateUI()
 
@@ -110,8 +107,6 @@ class _TaskPanelCfdMeshRefinement:
                                  "= '{}'".format(self.obj.Name, getQuantity(self.form.if_firstlayerheight)))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.RegionEdgeRefinement "
                                  "= {}".format(self.obj.Name, self.form.if_edgerefinement.value()))
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Baffle "
-                                 "= {}".format(self.obj.Name, self.form.baffle_check.isChecked()))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Internal "
                                  "= {}".format(self.obj.Name, self.form.volumeRefinementToggle.isChecked()))
         return True
@@ -137,7 +132,6 @@ class _TaskPanelCfdMeshRefinement:
             setQuantity(self.form.if_firstlayerheight, self.obj.FirstLayerHeight)
 
             self.form.if_edgerefinement.setValue(self.obj.RegionEdgeRefinement)
-            self.form.baffle_check.setChecked(self.obj.Baffle)
             if self.obj.Internal:
                 self.form.volumeRefinementToggle.toggle()
 

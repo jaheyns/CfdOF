@@ -24,8 +24,7 @@ FoamFile
 %{%(MeshRegionPresent%)
 %:True
 %{%(SnappySettings/MeshRegions%)
-//%(0%)
-%(SnappySettings/MeshRegions/%(0%)/RegionName%).stl
+%(0%).stl
 {
     extractionMethod    extractFromSurface;
     extractFromSurfaceCoeffs

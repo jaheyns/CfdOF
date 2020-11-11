@@ -23,7 +23,7 @@ geometry
         name %(Name%)_Geometry;
         regions
         {
-%{%(SnappySettings/ShapeFaceNames%)
+%{%(SnappySettings/ShapePatchNames%)
             %(0%)
             {
                 name %(0%);
@@ -36,10 +36,10 @@ geometry
 %{%(MeshRegionPresent%)
 %:True
 %{%(SnappySettings/MeshRegions%)
-    "%(SnappySettings/MeshRegions/%(0%)/RegionName%).stl"
+    "%(0%).stl"
     {
         type triSurfaceMesh;
-        name %(SnappySettings/MeshRegions/%(0%)/RegionName%);
+        name %(0%);
     }
 
 %}
@@ -74,7 +74,7 @@ castellatedMeshControls
 %:True
 %{%(SnappySettings/MeshRegions%)
         {
-            file "%(SnappySettings/MeshRegions/%(0%)/RegionName%).eMesh";
+            file "%(0%).eMesh";
             level %(SnappySettings/MeshRegions/%(0%)/EdgeRefinementLevel%);
         }
 
@@ -92,14 +92,14 @@ castellatedMeshControls
 %{%(MeshRegionPresent%)
 %:True
 %{%(SnappySettings/MeshRegions%)
-        %(SnappySettings/MeshRegions/%(0%)/RegionName%)
+        %(0%)
         {
             level (%(SnappySettings/MeshRegions/%(0%)/RefinementLevel%) %(SnappySettings/MeshRegions/%(0%)/MaxRefinementLevel%));
 %{%(SnappySettings/MeshRegions/%(0%)/Baffle%)
 %:True
             faceType baffle;
 %}
-            faceZone %(SnappySettings/MeshRegions/%(0%)/RegionName%);
+            faceZone %(0%);
         }
 
 %}

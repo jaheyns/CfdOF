@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -31,6 +31,8 @@ from PySide import QtCore
 import os
 import CfdTools
 from CfdTools import addObjectProperty
+from pivy import coin
+import Part
 import _TaskPanelCfdMeshRefinement
 
 
@@ -38,7 +40,7 @@ def makeCfdMeshRefinement(base_mesh, name="MeshRefinement"):
     """ makeCfdMeshRefinement([name]):
         Creates an object to define refinement properties for a surface or region of the mesh
     """
-    obj = FreeCAD.ActiveDocument.addObject("App::FeaturePython", name)
+    obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdMeshRefinement(obj)
     if FreeCAD.GuiUp:
         _ViewProviderCfdMeshRefinement(obj.ViewObject)
@@ -86,6 +88,8 @@ class _CfdMeshRefinement:
         addObjectProperty(obj, "RelativeLength", 0.75, "App::PropertyFloat", "",
                           "Set relative length of the elements for this region")
 
+        addObjectProperty(obj, 'LinkedObjects', [], "App::PropertyLinkList", "", "Linked objects")
+
         addObjectProperty(obj, "References", [], "App::PropertyPythonObject", "",
                           "List of mesh refinement objects")
 
@@ -109,14 +113,28 @@ class _CfdMeshRefinement:
         addObjectProperty(obj, "RegionEdgeRefinement", 1, "App::PropertyFloat", "snappyHexMesh",
                           "Relative edge (feature) refinement")
 
-        addObjectProperty(obj, "Baffle", False, "App::PropertyBool", "snappyHexMesh",
-                          "Create a zero thickness baffle")
-
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
 
     def execute(self, obj):
-        pass
+        """ Create compound part at recompute. """
+        docName = str(obj.Document.Name)
+        doc = FreeCAD.getDocument(docName)
+        obj.LinkedObjects = []
+        for ref in obj.References:
+            selection_object = doc.getObject(ref[0])
+            if selection_object is not None:  # May have been deleted
+                if selection_object not in obj.LinkedObjects:
+                    obj.LinkedObjects += [selection_object]
+        shape = CfdTools.makeShapeFromReferences(obj.References, False)
+        if shape is None:
+            obj.Shape = Part.Shape()
+        else:
+            obj.Shape = shape
+        if FreeCAD.GuiUp:
+            vobj = obj.ViewObject
+            vobj.Transparency = 20
+            vobj.ShapeColor = (1.0, 0.4, 0.0)  # Orange
 
 
 class _ViewProviderCfdMeshRefinement:
@@ -130,6 +148,18 @@ class _ViewProviderCfdMeshRefinement:
     def attach(self, vobj):
         self.ViewObject = vobj
         self.Object = vobj.Object
+        self.standard = coin.SoGroup()
+        vobj.addDisplayMode(self.standard, "Standard")
+
+    def getDisplayModes(self, obj):
+        modes = []
+        return modes
+
+    def getDefaultDisplayMode(self):
+        return "Shaded"
+
+    def setDisplayMode(self, mode):
+        return mode
 
     def updateData(self, obj, prop):
         return

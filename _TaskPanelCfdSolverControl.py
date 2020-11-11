@@ -106,6 +106,9 @@ class _TaskPanelCfdSolverControl:
 
     def write_input_file_handler(self):
         self.Start = time.time()
+        import CfdCaseWriterFoam
+        import importlib
+        importlib.reload(CfdCaseWriterFoam)
         if self.check_prerequisites_helper():
             self.consoleMessage("Case writer called")
             self.form.pb_paraview.setEnabled(False)
@@ -119,7 +122,7 @@ class _TaskPanelCfdSolverControl:
                 FreeCADGui.doCommand("writer.writeCase()")
             except Exception as e:
                 self.consoleMessage("Error writing case:", "#FF0000")
-                self.consoleMessage(str(e), "#FF0000")
+                self.consoleMessage(type(e).__name__ + ": " + str(e), "#FF0000")
                 self.consoleMessage("Write case setup file failed", "#FF0000")
                 raise
             finally:

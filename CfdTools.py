@@ -68,6 +68,7 @@ PARAVIEW_PATH_DEFAULTS = {
                     "Linux": []
                     }
 
+
 def getDefaultOutputPath():
     prefs = getPreferencesLocation()
     output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
@@ -86,6 +87,7 @@ def getOutputPath(analysis):
         output_path = getDefaultOutputPath()
     output_path = os.path.normpath(output_path)
     return output_path
+
 
 # Get functions
 
@@ -1185,6 +1187,37 @@ def matchFaces(faces1, faces2):
     return successful_candidates
 
 
+def makeShapeFromReferences(refs, raise_error=True):
+    face_list = []
+    for ref in refs:
+        face_list.append(resolveReference(ref, raise_error))
+    if len(face_list) > 0:
+        shape = Part.makeCompound(face_list)
+        return shape
+    else:
+        return None
+
+
+def resolveReference(r, raise_error=True):
+    obj = FreeCAD.ActiveDocument.getObject(r[0])
+    if not obj:
+        if raise_error:
+            raise RuntimeError("Object '{}' was not found - object may have been deleted".format(r[0]))
+        else:
+            return None
+    try:
+        if r[1].startswith('Solid'):  # getElement doesn't work with solids for some reason
+            f = obj.Shape.Solids[int(r[1].lstrip('Solid')) - 1]
+        else:
+            f = obj.Shape.getElement(r[1])
+    except Part.OCCError:
+        if raise_error:
+            raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0], r[1]))
+        else:
+            return None
+    return f
+
+
 def setActiveAnalysis(analysis):
     from CfdAnalysis import _CfdAnalysis
     for obj in FreeCAD.ActiveDocument.Objects:
@@ -1284,3 +1317,17 @@ def openFileManager(case_path):
         subprocess.Popen(['xdg-open', case_path])
     elif platform.system() == 'Windows':
         subprocess.Popen(['explorer', case_path])
+
+
+def writePatchToStl(solid_name, facemesh, fid, scale=1):
+    fid.write("solid {}\n".format(solid_name))
+    for face in facemesh.Facets:
+        n = face.Normal
+        fid.write(" facet normal {} {} {}\n".format(n[0], n[1], n[2]))
+        fid.write("  outer loop\n")
+        for i in range(3):
+            p = [i * scale for i in face.Points[i]]
+            fid.write("   vertex {} {} {}\n".format(p[0], p[1], p[2]))
+        fid.write("  endloop\n")
+        fid.write(" endfacet\n")
+    fid.write("endsolid {}\n".format(solid_name))

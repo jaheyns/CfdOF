@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -148,6 +148,7 @@ class _TaskPanelCfdMesh:
                          'z': getQuantity(self.form.if_pointInMeshZ)}
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.PointInMesh "
                              "= {}".format(self.mesh_obj.Name, point_in_mesh))
+        self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
 
     def consoleMessage(self, message="", color="#000000", timed=True):
         if timed:
@@ -176,6 +177,8 @@ class _TaskPanelCfdMesh:
             self.form.snappySpecificProperties.setVisible(False)
 
     def writeMesh(self):
+        import importlib
+        importlib.reload(CfdMeshTools)
         self.console_message_cart = ''
         self.Start = time.time()
         self.Timer.start()
@@ -196,18 +199,18 @@ class _TaskPanelCfdMesh:
                   + cart_mesh.part_obj.Label + ', ShapeType: '
                   + cart_mesh.part_obj.Shape.ShapeType)
             print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
-            FreeCADGui.doCommand("cart_mesh.processDimension()")
             analysis = CfdTools.getParentAnalysisObject(self.mesh_obj)
             FreeCADGui.doCommand("cart_mesh.getFilePaths(CfdTools.getOutputPath(FreeCAD.ActiveDocument." + analysis.Name + "))")
             FreeCADGui.doCommand("cart_mesh.setupMeshCaseDir()")
             self.consoleMessage("Exporting mesh refinement data ...")
             FreeCADGui.doCommand("cart_mesh.processRefinements()")  # Writes stls so need file structure
+            FreeCADGui.doCommand("cart_mesh.processDimension()")
             FreeCADGui.doCommand("cart_mesh.writeMeshCase()")
             self.consoleMessage("Exporting the part surfaces ...")
             FreeCADGui.doCommand("cart_mesh.writePartFile()")
             self.consoleMessage("Mesh case written to {}".format(self.cart_mesh.meshCaseDir))
         except Exception as ex:
-            self.consoleMessage("Error: " + str(ex), '#FF0000')
+            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
             raise
         finally:
             self.Timer.stop()
@@ -241,7 +244,7 @@ class _TaskPanelCfdMesh:
                 self.consoleMessage("Error starting meshing process", "#FF0000")
                 cart_mesh.error = True
         except Exception as ex:
-            self.consoleMessage("Error: " + str(ex), '#FF0000')
+            self.consoleMessage("Error " + type(e).__name__ + ": " + str(ex), '#FF0000')
             raise
         finally:
             QApplication.restoreOverrideCursor()
@@ -306,7 +309,8 @@ class _TaskPanelCfdMesh:
         # Apply latest mesh size
         self.store()
         pointCheck = self.cart_mesh.automaticInsidePointDetect()
-        iMPx, iMPy, iMPz = pointCheck
-        setQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")
-        setQuantity(self.form.if_pointInMeshY, str(iMPy) + "mm")
-        setQuantity(self.form.if_pointInMeshZ, str(iMPz) + "mm")
+        if pointCheck is not None:
+            iMPx, iMPy, iMPz = pointCheck
+            setQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")
+            setQuantity(self.form.if_pointInMeshY, str(iMPy) + "mm")
+            setQuantity(self.form.if_pointInMeshZ, str(iMPz) + "mm")

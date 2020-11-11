@@ -235,24 +235,18 @@ class _CfdFluidBoundary:
         """ Create compound part at recompute. """
         docName = str(obj.Document.Name)
         doc = FreeCAD.getDocument(docName)
-        listOfFaces = []
         obj.LinkedObjects = []
-        for i in range(len(obj.References)):
-            ref = obj.References[i]
+        for ref in obj.References:
             selection_object = doc.getObject(ref[0])
             if selection_object is not None:  # May have been deleted
-                try:
-                    listOfFaces.append(selection_object.Shape.getElement(ref[1]))
-                except Part.OCCError:  # Face may have been deleted
-                    pass
                 if selection_object not in obj.LinkedObjects:
                     obj.LinkedObjects += [selection_object]
-        if len(listOfFaces) > 0:
-            obj.Shape = Part.makeCompound(listOfFaces)
-        else:
+        shape = CfdTools.makeShapeFromReferences(obj.References, False)
+        if shape is None:
             obj.Shape = Part.Shape()
+        else:
+            obj.Shape = shape
         self.updateBoundaryColors(obj)
-        return
 
     def updateBoundaryColors(self, obj):
         if FreeCAD.GuiUp:

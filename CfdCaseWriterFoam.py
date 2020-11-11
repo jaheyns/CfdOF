@@ -52,7 +52,7 @@ class CfdCaseWriterFoam:
 
     def writeCase(self, progressCallback=None):
         """ writeCase() will collect case settings, and finally build a runnable case. """
-        cfdMessage("Start to write case to folder {}\n".format(self.working_dir))
+        cfdMessage("Writing case to folder {}\n".format(self.working_dir))
         if not os.path.exists(self.working_dir):
             raise IOError("Path " + self.solver_obj.working_dir + " does not exist.")
 
@@ -68,7 +68,15 @@ class CfdCaseWriterFoam:
             raise RuntimeError("No mesh object found in analysis")
         phys_settings = CfdTools.propsToDict(self.physics_model)
 
-        # TODO: Make sure boundary labels are unique and valid
+        # Validate BC labels
+        bc_labels = [b.Label for b in self.bc_group]
+        for i, l in enumerate(bc_labels):
+            if bc_labels[i].find(' ') >= 0:
+                raise ValueError("Boundary condition label '" + bc_labels[i] + "' is not valid: May not contain spaces")
+        for i, l in enumerate(bc_labels):
+            for j in range(i+1, len(bc_labels)):
+                if bc_labels[j] == l:
+                    raise ValueError("Boundary condition label '" + bc_labels[i] + "' is duplicated")
 
         self.settings = {
             'physics': phys_settings,
@@ -459,122 +467,28 @@ class CfdCaseWriterFoam:
 
     def setupPatchNames(self):
         print('Populating createPatchDict to update BC names')
-        import CfdMeshTools
-        # Init in case not meshed yet
-        CfdMeshTools.CfdMeshTools(self.mesh_obj)
         settings = self.settings
         settings['createPatches'] = {}
+        settings['createPatchesSnappyBaffles'] = {}
         bc_group = self.bc_group
-        mobj = self.mesh_obj
-
-        # Make list of all boundary references
-        boundary_face_list = []
-        for bc_id, bc_obj in enumerate(bc_group):
-            for ref in bc_obj.References:
-                obj = FreeCAD.ActiveDocument.getObject(ref[0])
-                if not obj:
-                    raise RuntimeError("Referenced object '{}' not found - object may "
-                                       "have been deleted".format(ref[0]))
-                try:
-                    bf = obj.Shape.getElement(ref[1])
-                except Part.OCCError:
-                    raise RuntimeError("Referenced face '{}:{}' not found - face may "
-                                       "have been deleted".format(ref[0], ref[1]))
-                boundary_face_list.append((bf, (bc_id, ref)))
-
-        # Make list of all faces in meshed shape with original index
-        mesh_face_list = list(zip(mobj.Part.Shape.Faces, range(len(mobj.Part.Shape.Faces))))
-
-        # Match them up
-        matched_faces = CfdTools.matchFaces(boundary_face_list, mesh_face_list)
-
-        # Check for and filter duplicates
-        match_per_shape_face = [-1]*len(mesh_face_list)
-        for k in range(len(matched_faces)):
-            match = matched_faces[k][1]
-            prev_k = match_per_shape_face[match]
-            if prev_k >= 0:
-                nb, bref = matched_faces[k][0]
-                nb2, bref2 = matched_faces[prev_k][0]
-                cfdMessage(
-                    "Boundary '{}' reference {}:{} also assigned as "
-                    "boundary '{}' reference {}:{} - ignoring duplicate\n".format(
-                        bc_group[nb].Label, bref[0], bref[1], bc_group[nb2].Label, bref2[0], bref2[1]))
-            else:
-                match_per_shape_face[match] = k
-
-        bc_lists = [[] for g in bc_group]
-        for i in range(len(match_per_shape_face)):
-            k = match_per_shape_face[i]
-            if k >= 0:
-                nb, bref = matched_faces[k][0]
-                bc_lists[nb].append(mobj.ShapeFaceNames[i])
 
         for bc_id, bc_obj in enumerate(bc_group):
             bcType = bc_obj.BoundaryType
             bcSubType = bc_obj.BoundarySubType
             patchType = CfdTools.getPatchType(bcType, bcSubType)
             settings['createPatches'][bc_obj.Label] = {
-                'PatchNamesList': tuple(bc_lists[bc_id]),  # Tuple used so that case writer outputs as an array
+                'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
                 'PatchType': patchType
             }
-            if not bc_lists[bc_id]:
-                raise RuntimeError("No faces were found for boundary '{}' in part '{}' being meshed".format(
-                    bc_obj.Label, mobj.Part.Label))
 
-        if self.mesh_obj.MeshUtility == 'snappyHexMesh':
-            for regionObj in CfdTools.getMeshRefinementObjs(self.mesh_obj):
-                if regionObj.Baffle:
-                    settings['createPatchesFromSnappyBaffles'] = True
-
-        if settings['createPatchesFromSnappyBaffles']:
-            settings['createPatchesSnappyBaffles'] = {}
-            baffle_geoms = []
-            for regionObj in self.mesh_obj.Group:
-                if hasattr(regionObj, "Proxy") and isinstance(regionObj.Proxy, CfdMeshRefinement._CfdMeshRefinement):
-                    if regionObj.Baffle:
-                        for sub in regionObj.References:
-                            elems = sub[1]
-                            elt = FreeCAD.ActiveDocument.getObject(sub[0]).Shape.getElement(elems)
-                            if elt.ShapeType == 'Face':
-                                baffle_geoms.append((elt, (regionObj.Name+sub[0]+elems, len(baffle_geoms))))
-
-            matched_baffle_faces = CfdTools.matchFaces(boundary_face_list, baffle_geoms)
-
-            # Check for duplicates
-            match_per_baffle_face = [-1]*len(baffle_geoms)
-            for matchi, mf in enumerate(matched_baffle_faces):
-                if match_per_baffle_face[mf[1][1]] > -1:
-                    cfdMessage("Baffle face matches to boundary "
-                               + mf[0][1] + " and " + matched_baffle_faces[match_per_baffle_face[mf[1][1]]][0][1]
-                               + " - discarding duplicate")
-                else:
-                    match_per_baffle_face[mf[1][1]] = matchi
-
-            for bfi, mi in enumerate(match_per_baffle_face):
-                if mi > -1:
-                    mf = matched_baffle_faces[mi]
-                    bc_label = bc_group[mf[0][0]].Label
-                    settings['createPatchesSnappyBaffles'][bc_label] = \
-                        settings['createPatchesSnappyBaffles'].get(bc_label, {})
-                    settings['createPatchesSnappyBaffles'][bc_label]['PatchNamesList'] = \
-                        settings['createPatchesSnappyBaffles'][bc_label].get('PatchNamesList', ()) + \
-                        (mf[1][0],)
-                    settings['createPatchesSnappyBaffles'][bc_label]['PatchNamesListSlave'] = \
-                        settings['createPatchesSnappyBaffles'][bc_label].get('PatchNamesListSlave', ()) + \
-                        ((mf[1][0]+"_slave"),)
-                else:
-                    cfdMessage("No boundary condition specified for baffle face " + baffle_geoms[bfi][1][0])
+            if bcType == 'baffle' and self.mesh_obj.MeshUtility == 'snappyHexMesh':
+                settings['createPatchesFromSnappyBaffles'] = True
+                settings['createPatchesSnappyBaffles'][bc_obj.Label] = {
+                    'PatchNamesList': '"'+bc_obj.Name+'_.*"',
+                    'PatchNamesListSlave': '"'+bc_obj.Name+'_.*_slave"'}
 
         # Add default faces
-        flagName = False
-        def_bc_list = []
-        for i in range(len(match_per_shape_face)):
-            if match_per_shape_face[i] < 0:
-                def_bc_list.append(mobj.ShapeFaceNames[i])
-                flagName = True
-        if flagName:
-            settings['createPatches']['defaultFaces'] = {
-                'PatchNamesList': tuple(def_bc_list),
-                'PatchType': "patch"
-            }
+        settings['createPatches']['defaultFaces'] = {
+            'PatchNamesList': '"patch_0_.*"',
+            'PatchType': "patch"
+        }

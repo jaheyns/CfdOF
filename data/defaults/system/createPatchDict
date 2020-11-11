@@ -43,7 +43,7 @@ patches
         }
 
         constructFrom patches;
-        patches (%(createPatchesSnappyBaffles/%(0%)/PatchNamesList%));
+        patches ( %(createPatchesSnappyBaffles/%(0%)/PatchNamesList%) );
     }
 
     {
@@ -56,7 +56,7 @@ patches
         }
 
         constructFrom patches;
-        patches ( %(createPatchesSnappyBaffles/%(0%)/PatchNamesListSlave%));
+        patches ( %(createPatchesSnappyBaffles/%(0%)/PatchNamesListSlave%) );
     }
 
 %}

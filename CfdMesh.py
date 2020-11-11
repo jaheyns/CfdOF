@@ -94,8 +94,6 @@ class _CfdMesh:
         addObjectProperty(obj, 'CaseName', "meshCase", "App::PropertyString", "",
                           "Name of directory in which the mesh is created")
 
-        addObjectProperty(obj, 'ShapeFaceNames', [], "App::PropertyStringList", "", "Mesh face names")
-
         addObjectProperty(obj, 'STLLinearDeflection', 0.05, "App::PropertyFloat", "", "STL linear deflection")
 
         addObjectProperty(obj, 'NumberOfProcesses', 1, "App::PropertyInteger", "", "Number of parallel processes")
