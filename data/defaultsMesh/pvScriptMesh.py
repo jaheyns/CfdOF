@@ -4,7 +4,7 @@ from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
 
 # create a new OpenFOAMReader
-pfoam = OpenFOAMReader(FileName=r'%(MeshPath%)/p.foam')
+pfoam = OpenFOAMReader(FileName=r'%(MeshPath%)/pv.foam')
 pfoam.CaseType = 'Reconstructed Case'
 pfoam.Decomposepolyhedra = 0
 
@@ -20,13 +20,12 @@ pfoamDisplay = Show(pfoam, renderView1)
 pfoamDisplay.ColorArrayName = [None, '']
 #pfoamDisplay.LookupTable = pLUT
 pfoamDisplay.EdgeColor = [0.0, 0.0, 0.5]
-pfoamDisplay.ScalarOpacityUnitDistance = 0.05
 
 # change representation type
 pfoamDisplay.SetRepresentationType('Surface With Edges')
 
 # Properties modified on pfoamDisplay
-pfoamDisplay.Opacity = 0.5
+#pfoamDisplay.Opacity = 0.5
 
 # create a new 'Extract Cells By Region'
 extractCellsByRegion1 = ExtractCellsByRegion(Input=pfoam)
@@ -37,7 +36,6 @@ extractCellsByRegion1Display = Show(extractCellsByRegion1, renderView1)
 # trace defaults for the display properties.
 extractCellsByRegion1Display.ColorArrayName = [None, '']
 extractCellsByRegion1Display.EdgeColor = [0.0, 0.0, 0.5]
-extractCellsByRegion1Display.ScalarOpacityUnitDistance = 0.001
 
 # Properties modified on extractCellsByRegion1
 extractCellsByRegion1.Extractonlyintersected = 1
@@ -47,3 +45,6 @@ extractCellsByRegion1.Extractintersected = 1
 extractCellsByRegion1Display.SetRepresentationType('Surface With Edges')
 
 SetActiveSource(pfoam)
+
+# reset view to fit data
+renderView1.ResetCamera()

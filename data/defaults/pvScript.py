@@ -29,3 +29,15 @@ pfoamDisplay.ScalarOpacityUnitDistance = 0.05
 
 # reset view to fit data
 renderView1.ResetCamera()
+
+# get animation scene
+animationScene1 = GetAnimationScene()
+
+# get the time-keeper
+timeKeeper1 = GetTimeKeeper()
+
+# update animation scene based on data timesteps
+animationScene1.UpdateAnimationUsingDataTimeSteps()
+
+# update the view to ensure updated data information
+renderView1.Update()

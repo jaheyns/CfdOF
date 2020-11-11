@@ -990,6 +990,22 @@ def startParaview(case_path, script_name, consoleMessageFn):
     else:
         consoleMessageFn("Running " + paraview_cmd + " " + arg)
         proc.setWorkingDirectory(case_path)
+
+        env = QtCore.QProcessEnvironment.systemEnvironment()
+        if env.contains("APPIMAGE"):
+            # Strip any value starting with the appimage directory, to attempt to revert to the system environment
+            appdir = env.value("APPDIR")
+            keys = env.keys()
+            for k in keys:
+                vals = env.value(k).split(':')
+                newvals = ''
+                for val in vals:
+                    if not val.startswith(appdir):
+                        newvals += val + ':'
+                newvals = newvals.rstrip(':')
+                env.insert(k, newvals)
+        proc.setProcessEnvironment(env)
+
         proc.start(paraview_cmd, [arg])
         if proc.waitForStarted():
             consoleMessageFn("Paraview started")
