@@ -116,7 +116,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
                 self.form.comboBoundaryU.addItem(b.Label, b.Name)
                 self.form.comboBoundaryT.addItem(b.Label, b.Name)
                 self.form.comboBoundaryTurb.addItem(b.Label, b.Name)
-            if b.BoundaryType in ['outlet', 'open']:
+            if b.BoundaryType in ['inlet', 'outlet', 'open']:
                 self.form.comboBoundaryP.addItem(b.Label, b.Name)
         if self.obj.BoundaryU is not None:
             self.form.comboBoundaryU.setCurrentIndex(self.form.comboBoundaryU.findData(self.obj.BoundaryU.Name))

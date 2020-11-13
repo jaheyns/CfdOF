@@ -241,6 +241,8 @@ class CfdCaseWriterFoam:
             if not bc['VelocityIsCartesian']:
                 veloMag = bc['VelocityMag']
                 face = bc['DirectionFace'].split(':')
+                if not face[0]:
+                    face = bc['References'][0]
                 # See if entered face actually exists and is planar
                 try:
                     selected_object = self.analysis_obj.Document.getObject(face[0])
@@ -259,7 +261,7 @@ class CfdCaseWriterFoam:
                     else:
                         raise RuntimeError
                 except (SystemError, RuntimeError):
-                    raise RuntimeError(bc['DirectionFace'] + " is not a valid, planar face.")
+                    raise RuntimeError(str(bc['DirectionFace']) + " is not a valid, planar face.")
             if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
                 bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
@@ -313,23 +315,29 @@ class CfdCaseWriterFoam:
 
         # Copy velocity
         if initial_values['UseInletUValues']:
-            inlet_bc = settings['boundaries'][initial_values['BoundaryU'].Label]
-            if inlet_bc['BoundarySubType'] == 'uniformVelocityInlet' or inlet_bc['BoundarySubType'] == 'farField':
-                initial_values['Ux'] = inlet_bc['Ux']
-                initial_values['Uy'] = inlet_bc['Uy']
-                initial_values['Uz'] = inlet_bc['Uz']
+            if initial_values['BoundaryU']:
+                inlet_bc = settings['boundaries'][initial_values['BoundaryU'].Label]
+                if inlet_bc['BoundarySubType'] == 'uniformVelocityInlet' or inlet_bc['BoundarySubType'] == 'farField':
+                    initial_values['Ux'] = inlet_bc['Ux']
+                    initial_values['Uy'] = inlet_bc['Uy']
+                    initial_values['Uz'] = inlet_bc['Uz']
+                else:
+                    raise RuntimeError("Boundary type not appropriate to determine initial velocity.")
             else:
-                raise RuntimeError("Boundary type not appropriate to determine initial velocity.")
+                raise RuntimeError("No boundary selected to copy initial velocity value from.")
 
         # Copy pressure
         if initial_values['UseOutletPValue']:
-            outlet_bc = settings['boundaries'][initial_values['BoundaryP'].Label]
-            if outlet_bc['BoundarySubType'] == 'staticPressureOutlet' or \
-                    outlet_bc['BoundarySubType'] == 'totalPressureOpening' or \
-                    outlet_bc['BoundarySubType'] == 'farField':
-                initial_values['Pressure'] = outlet_bc['Pressure']
+            if initial_values['BoundaryP']:
+                outlet_bc = settings['boundaries'][initial_values['BoundaryP'].Label]
+                if outlet_bc['BoundarySubType'] == 'staticPressureOutlet' or \
+                        outlet_bc['BoundarySubType'] == 'totalPressureOpening' or \
+                        outlet_bc['BoundarySubType'] == 'farField':
+                    initial_values['Pressure'] = outlet_bc['Pressure']
+                else:
+                    raise RuntimeError("Boundary type not appropriate to determine initial pressure.")
             else:
-                raise RuntimeError("Boundary type not appropriate to determine initial pressure.")
+                raise RuntimeError("No boundary selected to copy initial pressure value from.")
 
         if physics['Thermal'] == 'Energy' and initial_values['UseInletTemperatureValue']:
             inlet_bc = settings['boundaries'][initial_values['BoundaryT'].Label]
@@ -346,29 +354,32 @@ class CfdCaseWriterFoam:
         # Copy turbulence settings
         if physics['TurbulenceModel'] is not None:
             if initial_values['UseInletTurbulenceValues']:
-                inlet_bc = settings['boundaries'][initial_values['BoundaryTurb'].Label]
-                if inlet_bc['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
-                    initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
-                    initial_values['omega'] = inlet_bc['SpecificDissipationRate']
-                elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
-                    if inlet_bc['BoundarySubType'] == 'uniformVelocity' or \
-                       inlet_bc['BoundarySubType'] == 'farField':
-                        Uin = (inlet_bc['Ux']**2 +
-                               inlet_bc['Uy']**2 +
-                               inlet_bc['Uz']**2)**0.5
-                        I = inlet_bc['TurbulenceIntensity']
-                        k = 3/2*(Uin*I)**2
-                        Cmu = 0.09  # Standard turb model parameter
-                        l = inlet_bc['TurbulenceLengthScale']
-                        omega = k**0.5/(Cmu**0.25*l)
-                        initial_values['k'] = k
-                        initial_values['omega'] = omega
+                if initial_values['BoundaryTurb']:
+                    inlet_bc = settings['boundaries'][initial_values['BoundaryTurb'].Label]
+                    if inlet_bc['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
+                        initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
+                        initial_values['omega'] = inlet_bc['SpecificDissipationRate']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
+                        if inlet_bc['BoundarySubType'] == 'uniformVelocity' or \
+                           inlet_bc['BoundarySubType'] == 'farField':
+                            Uin = (inlet_bc['Ux']**2 +
+                                   inlet_bc['Uy']**2 +
+                                   inlet_bc['Uz']**2)**0.5
+                            I = inlet_bc['TurbulenceIntensity']
+                            k = 3/2*(Uin*I)**2
+                            Cmu = 0.09  # Standard turb model parameter
+                            l = inlet_bc['TurbulenceLengthScale']
+                            omega = k**0.5/(Cmu**0.25*l)
+                            initial_values['k'] = k
+                            initial_values['omega'] = omega
+                        else:
+                            raise RuntimeError(
+                                "Inlet type currently unsupported for copying turbulence initial conditions.")
                     else:
                         raise RuntimeError(
-                            "Inlet type currently unsupported for copying turbulence initial conditions.")
+                            "Turbulence inlet specification currently unsupported for copying turbulence initial conditions")
                 else:
-                    raise RuntimeError(
-                        "Turbulence inlet specification currently unsupported for copying turbulence initial conditions")
+                    raise RuntimeError("No boundary selected to copy initial turbulence values from.")
 
     # Zones
 
