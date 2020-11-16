@@ -106,7 +106,7 @@ rm 0/phi
 %:True
 # Run application in parallel
 runCommand decomposePar -force
-runCommand mpirun -n %(solver/ParallelCores%) %(solver/SolverName%) -parallel
+runCommand mpirun -np %(solver/ParallelCores%) %(solver/SolverName%) -parallel
 %:False
 # Run application
 runCommand %(solver/SolverName%)

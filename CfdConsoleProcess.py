@@ -29,6 +29,7 @@ import os
 from PySide import QtCore
 from PySide.QtCore import QProcess, QTextStream
 import FreeCAD
+import CfdTools
 
 
 class CfdConsoleProcess:
@@ -57,6 +58,7 @@ class CfdConsoleProcess:
         if env_vars:
             for key in env_vars:
                 env.insert(key, env_vars[key])
+        CfdTools.removeAppimageEnvironment(env)
         self.process.setProcessEnvironment(env)
         if working_dir:
             self.process.setWorkingDirectory(working_dir)
