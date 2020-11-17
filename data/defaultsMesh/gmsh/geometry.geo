@@ -32,8 +32,7 @@ Mesh.HighOrderOptimize = 0;
 Mesh.ElementOrder = 1;
 
 // 2D mesh algorithm (1=MeshAdapt, 2=Automatic, 5=Delaunay, 6=Frontal, 7=BAMG, 8=DelQuad)
-// Force the 2D method to Delaunay, as default 'MeshAdapt' seems to produce overlapping face errors in gmsh 3+
-Mesh.Algorithm = 5;
+Mesh.Algorithm = 2;
 // 3D mesh algorithm (1=Delaunay, 2=New Delaunay, 4=Frontal, 5=Frontal Delaunay, 6=Frontal Hex, 7=MMG3D, 9=R-tree)
 Mesh.Algorithm3D = 1;
 
