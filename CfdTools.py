@@ -776,7 +776,7 @@ def checkCfdDependencies(term_print=True):
               (minor_ver == FC_MINOR_VER_REQUIRED and
                (patch_ver < FC_PATCH_VER_REQUIRED or
                 (patch_ver == FC_PATCH_VER_REQUIRED and
-                 giver < FC_COMMIT_REQUIRED)))))):
+                 gitver < FC_COMMIT_REQUIRED)))))):
             fc_msg = "FreeCAD version ({}.{}.{}) ({}) must be at least {}.{}.{} ({})".format(
                 int(ver[0]), minor_ver, patch_ver, gitver,
                 FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED)
@@ -903,7 +903,6 @@ def checkCfdDependencies(term_print=True):
                 if term_print:
                     print(pv_msg)
 
-
         if term_print:
             print("Checking for Plot workbench:")
         try:
@@ -926,24 +925,31 @@ def checkCfdDependencies(term_print=True):
             print("Checking for gmsh:")
         # check that gmsh version 2.13 or greater is installed
         gmshversion = ""
-        try:
-            gmshversion = subprocess.check_output(["gmsh", "-version"],
-                                                  stderr=subprocess.STDOUT, universal_newlines=True)
-        except (OSError, subprocess.CalledProcessError):
-            gmsh_msg = "gmsh is not installed"
+        gmsh_exe = shutil.which("gmsh")
+        if gmsh_exe is None:
+            gmsh_msg = "gmsh not found"
             message += gmsh_msg + '\n'
             if term_print:
                 print(gmsh_msg)
-        if len(gmshversion) > 1:
-            # Only the last line contains gmsh version number
-            gmshversion = gmshversion.rstrip().split()
-            gmshversion = gmshversion[-1]
-            versionlist = gmshversion.split(".")
-            if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
-                gmsh_ver_msg = "gmsh version is older than minimum required (2.13)"
-                message += gmsh_ver_msg + '\n'
+        else:
+            try:
+                # Needs to be runnable from OpenFOAM environment
+                gmshversion = runFoamCommand(gmsh_exe + " -version")
+            except (OSError, subprocess.CalledProcessError):
+                gmsh_msg = "gmsh could not be run from OpenFOAM environement"
+                message += gmsh_msg + '\n'
                 if term_print:
-                    print(gmsh_ver_msg)
+                    print(gmsh_msg)
+            if len(gmshversion) > 1:
+                # Only the last line contains gmsh version number
+                gmshversion = gmshversion.rstrip().split()
+                gmshversion = gmshversion[-1]
+                versionlist = gmshversion.split(".")
+                if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
+                    gmsh_ver_msg = "gmsh version is older than minimum required (2.13)"
+                    message += gmsh_ver_msg + '\n'
+                    if term_print:
+                        print(gmsh_ver_msg)
 
         if term_print:
             print("Completed CFD dependency check")
