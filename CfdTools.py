@@ -925,7 +925,11 @@ def checkCfdDependencies(term_print=True):
             print("Checking for gmsh:")
         # check that gmsh version 2.13 or greater is installed
         gmshversion = ""
-        gmsh_exe = shutil.which("gmsh")
+        if platform.system() == "Windows":
+            # Use forward slashes to avoid escaping problems
+            gmsh_exe = '/'.join([FreeCAD.getHomePath(), 'bin', 'gmsh.exe'])
+        else:
+            gmsh_exe = shutil.which("gmsh")
         if gmsh_exe is None:
             gmsh_msg = "gmsh not found"
             message += gmsh_msg + '\n'
