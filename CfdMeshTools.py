@@ -452,16 +452,17 @@ class CfdMeshTools:
             # In addition, for cfMesh, record matched boundary layer patches
             if self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1 and not Internal:
                 for k in range(len(self.patch_faces)):
-                    # Limit expansion ratio to greater than 1.0 and less than 1.2
-                    expratio = mr_obj.ExpansionRatio
-                    expratio = min(1.2, max(1.0, expratio))
+                    if len(self.patch_faces[k][mr_id+1]):
+                        # Limit expansion ratio to greater than 1.0 and less than 1.2
+                        expratio = mr_obj.ExpansionRatio
+                        expratio = min(1.2, max(1.0, expratio))
 
-                    cf_settings['BoundaryLayers'][self.patch_names[k][mr_id]] = {
-                        'NumberLayers': mr_obj.NumberLayers,
-                        'ExpansionRatio': expratio,
-                        'FirstLayerHeight': self.scale *
-                                            Units.Quantity(mr_obj.FirstLayerHeight).Value
-                    }
+                        cf_settings['BoundaryLayers'][self.patch_names[k][mr_id+1]] = {
+                            'NumberLayers': mr_obj.NumberLayers,
+                            'ExpansionRatio': expratio,
+                            'FirstLayerHeight': self.scale *
+                                                Units.Quantity(mr_obj.FirstLayerHeight).Value
+                        }
 
         # For gmsh, generate element length maps
         if self.mesh_obj.MeshUtility == "gmsh":
