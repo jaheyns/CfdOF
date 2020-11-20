@@ -54,8 +54,9 @@ class CfdMeshTools:
         self.clmax = Units.Quantity(self.mesh_obj.CharacteristicLengthMax).Value
         if self.clmax <= 0.0:
             shape = self.part_obj.Shape
-            cl_bound_box = math.sqrt(shape.BoundBox.XLength**2 + shape.BoundBox.YLength**2 + shape.BoundBox.ZLength**2)
-            self.clmax = 0.02*cl_bound_box  # Always in internal format, i.e. mm
+            cl_bound_mag = math.sqrt(shape.BoundBox.XLength**2 + shape.BoundBox.YLength**2 + shape.BoundBox.ZLength**2)
+            cl_bound_min = min(min(shape.BoundBox.XLength, shape.BoundBox.YLength), shape.BoundBox.ZLength)
+            self.clmax = min(0.02*cl_bound_mag, 0.4*cl_bound_min)  # Always in internal format, i.e. mm
 
         # Only used by gmsh - what purpose?
         self.clmin = 0.0
