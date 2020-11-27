@@ -110,14 +110,16 @@ TURBULENT_INLET_SPEC = {"kOmegaSST":
 
 THERMAL_BOUNDARY_NAMES = ["Fixed temperature",
                           "Adiabatic",
-                          "Fixed conductive heat flux"]
+                          "Fixed conductive heat flux",
+                          "Heat transfer coefficient"]
 
-THERMAL_BOUNDARY_TYPES = ["fixedValue", "zeroGradient", "fixedGradient"]
+THERMAL_BOUNDARY_TYPES = ["fixedValue", "zeroGradient", "fixedGradient", "heatTransferCoeff"]
 
-THERMAL_HELPTEXT = ["Fixed Temperature", "No conductive heat transfer", "Fixed conductive heat flux"]
+THERMAL_HELPTEXT = ["Fixed Temperature", "No conductive heat transfer", "Fixed conductive heat flux",
+                    "Specified heat transfer coefficient and ambient temperature"]
 
 # For each thermal BC, the input rows presented to the user
-BOUNDARY_THERMALTAB = [[0], [], [1]]
+BOUNDARY_THERMALTAB = [[0], [], [1], [2, 0]]
 
 POROUS_METHODS = ['porousCoeff', 'porousScreen']
 
