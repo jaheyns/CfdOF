@@ -67,6 +67,10 @@ SIMPLE
     {
         p %(solver/ConvergenceTol%);
         U %(solver/ConvergenceTol%);
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam
+        h %(solver/ConvergenceTol%);
+%}
         "(k|epsilon|omega|f|v2|nuTilda)" %(solver/ConvergenceTol%);
     }
     pRefValue   0;
@@ -93,6 +97,19 @@ PIMPLE
             relTol      0;
         }
         p
+        {
+            tolerance   %(solver/ConvergenceTol%);
+            relTol      0;
+        }
+%{%(solver/SolverName%)
+%:buoyantPimpleFoam
+        h
+        {
+            tolerance   %(solver/ConvergenceTol%);
+            relTol      0;
+        }
+%}
+        "(k|epsilon|omega|f|v2|nuTilda)"
         {
             tolerance   %(solver/ConvergenceTol%);
             relTol      0;
