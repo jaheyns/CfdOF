@@ -44,6 +44,12 @@ import sys
 import math
 import BOPTools
 from BOPTools import SplitFeatures
+if platform.system() == "Windows":
+    import ctypes
+    from ctypes import wintypes
+    _GetShortPathNameW = ctypes.windll.kernel32.GetShortPathNameW
+    _GetShortPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+    _GetShortPathNameW.restype = wintypes.DWORD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
@@ -928,6 +934,7 @@ def checkCfdDependencies(term_print=True):
         if platform.system() == "Windows":
             # Use forward slashes to avoid escaping problems
             gmsh_exe = '/'.join([FreeCAD.getHomePath(), 'bin', 'gmsh.exe'])
+            gmsh_exe = get_short_path_name(gmsh_exe)
         else:
             gmsh_exe = shutil.which("gmsh")
         if gmsh_exe is None:
@@ -1363,3 +1370,18 @@ def writePatchToStl(solid_name, facemesh, fid, scale=1):
         fid.write("  endloop\n")
         fid.write(" endfacet\n")
     fid.write("endsolid {}\n".format(solid_name))
+
+def get_short_path_name(long_name):
+    """
+    Gets the short path name of a given long path.
+    http://stackoverflow.com/a/23598461/200291
+    """
+    # output_buf_size = 0
+    output_buf_size=len(long_name)
+    while True:
+        output_buf = ctypes.create_unicode_buffer(output_buf_size)
+        needed = _GetShortPathNameW(long_name, output_buf, output_buf_size)
+        if output_buf_size >= needed:
+            return output_buf.value
+        else:
+            output_buf_size = needed
