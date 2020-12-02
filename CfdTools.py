@@ -938,7 +938,7 @@ def checkCfdDependencies(term_print=True):
         else:
             try:
                 # Needs to be runnable from OpenFOAM environment
-                gmshversion = runFoamCommand(gmsh_exe + " -version")
+                gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")
             except (OSError, subprocess.CalledProcessError):
                 gmsh_msg = "gmsh could not be run from OpenFOAM environement"
                 message += gmsh_msg + '\n'
