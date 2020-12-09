@@ -1222,7 +1222,9 @@ def matchFaces(faces1, faces2):
 def makeShapeFromReferences(refs, raise_error=True):
     face_list = []
     for ref in refs:
-        face_list.append(resolveReference(ref, raise_error))
+        shape = resolveReference(ref, raise_error)
+        if shape is not None:
+            face_list.append(shape)
     if len(face_list) > 0:
         shape = Part.makeCompound(face_list)
         return shape
@@ -1242,6 +1244,8 @@ def resolveReference(r, raise_error=True):
             f = obj.Shape.Solids[int(r[1].lstrip('Solid')) - 1]
         else:
             f = obj.Shape.getElement(r[1])
+            if f is None and raise_error:
+                raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0], r[1]))
     except Part.OCCError:
         if raise_error:
             raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0], r[1]))

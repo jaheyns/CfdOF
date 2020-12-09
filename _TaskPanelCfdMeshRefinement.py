@@ -86,10 +86,6 @@ class _TaskPanelCfdMeshRefinement:
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
         # Macro script
-        FreeCADGui.doCommand("referenceList = []")
-        for ref in self.obj.References:
-            FreeCADGui.doCommand("referenceList.append(('{}','{}'))".format(ref[0], ref[1]))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References = referenceList".format(self.obj.Name))
         FreeCADGui.doCommand("\nFreeCAD.ActiveDocument.{}.RelativeLength "
                              "= {}".format(self.obj.Name, self.form.if_rellen.value()))
         if self.mesh_obj.MeshUtility != 'gmsh':
@@ -109,6 +105,11 @@ class _TaskPanelCfdMeshRefinement:
                                  "= {}".format(self.obj.Name, self.form.if_edgerefinement.value()))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Internal "
                                  "= {}".format(self.obj.Name, self.form.volumeRefinementToggle.isChecked()))
+        refstr = "FreeCAD.ActiveDocument.{}.References = [\n".format(self.obj.Name)
+        refstr += ',\n'.join("{}".format(ref) for ref in self.obj.References)
+        refstr += "]"
+        FreeCADGui.doCommand(refstr)
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
         return True
 
     def reject(self):

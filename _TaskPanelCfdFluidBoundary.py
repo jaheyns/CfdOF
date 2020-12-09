@@ -375,13 +375,10 @@ class TaskPanelCfdFluidBoundary:
         FreeCADGui.doCommand("bc.ScreenSpacing "
                              "= '{}'".format(getQuantity(self.form.inputSpacing)))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Label = '{}'".format(self.obj.Name, self.obj.Label))
-        faces = []
-        for ref in self.obj.References:
-            faces.append(ref)
-        self.obj.References = []
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References = []".format(self.obj.Name))
-        for f in faces:
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.References.append({})".format(self.obj.Name, f))
+        refstr = "FreeCAD.ActiveDocument.{}.References = [\n".format(self.obj.Name)
+        refstr += ',\n'.join("{}".format(ref) for ref in self.obj.References)
+        refstr += "]"
+        FreeCADGui.doCommand(refstr)
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
         self.faceSelector.closing()
 
