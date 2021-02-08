@@ -927,7 +927,7 @@ def checkCfdDependencies(term_print=True):
         gmshversion = ""
         if platform.system() == "Windows":
             # Use forward slashes to avoid escaping problems
-            gmsh_exe = '/'.join([FreeCAD.getHomePath(), 'bin', 'gmsh.exe'])
+            gmsh_exe = '/'.join([FreeCAD.getHomePath().rstrip('/'), 'bin', 'gmsh.exe'])
         else:
             gmsh_exe = shutil.which("gmsh")
         if gmsh_exe is None:
