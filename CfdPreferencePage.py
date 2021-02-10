@@ -5,7 +5,7 @@
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -49,20 +49,22 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt, QObject, QThread
     from PySide.QtGui import QApplication
 
-#OPENFOAM_URL = \
-#    "https://sourceforge.net/projects/openfoam/files/v2006/OpenCFD-OpenFOAM-v2006-DP-mingw-crosscompiled-WindowsInstaller.exe/download"
 OPENFOAM_URL = \
-    "https://sourceforge.net/projects/openfoam/files/v2006/OpenCFD-OpenFOAM4WindowsInstaller-v2006.exe/download"
+    "https://sourceforge.net/projects/openfoam/files/v2012/OpenCFD-OpenFOAM-v2012-DP-mingw-crosscompiled-WindowsInstaller.exe/download"
 OPENFOAM_FILE_EXT = ".exe"
 PARAVIEW_URL = \
     "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v5.5&type=binary&os=Windows&downloadFile=ParaView-5.5.2-Qt5-Windows-64bit.exe"
 PARAVIEW_FILE_EXT = ".exe"
 CFMESH_URL = \
     "https://sourceforge.net/projects/cfmesh-cfdof/files/cfmesh-cfdof.zip/download"
+CFMESH_URL_MINGW = \
+    "https://sourceforge.net/projects/cfmesh-cfdof/files/cfmesh-cfdof-binaries-{}.zip/download"
 CFMESH_FILE_BASE = "cfmesh-cfdof"
 CFMESH_FILE_EXT = ".zip"
 HISA_URL = \
     "https://sourceforge.net/projects/hisa/files/hisa-master.zip/download"
+HISA_URL_MINGW = \
+    "https://sourceforge.net/projects/hisa/files/hisa-master-binaries-{}.zip/download"
 HISA_FILE_BASE = "hisa-master"
 HISA_FILE_EXT = ".zip"
 
@@ -95,8 +97,6 @@ class CfdPreferencePage:
 
         self.form.le_openfoam_url.setText(OPENFOAM_URL)
         self.form.le_paraview_url.setText(PARAVIEW_URL)
-        self.form.le_cfmesh_url.setText(CFMESH_URL)
-        self.form.le_hisa_url.setText(HISA_URL)
 
         self.form.tb_choose_output_dir.clicked.connect(self.chooseOutputDir)
         self.form.le_output_dir.textChanged.connect(self.outputDirChanged)
@@ -116,6 +116,8 @@ class CfdPreferencePage:
 
         self.form.gb_openfoam.setVisible(platform.system() == 'Windows')
         self.form.gb_paraview.setVisible(platform.system() == 'Windows')
+
+        self.setDownloadURLs()
 
     def __del__(self):
         if self.thread and self.thread.isRunning():
@@ -156,6 +158,29 @@ class CfdPreferencePage:
 
     def foamDirChanged(self, text):
         self.foam_dir = text
+        if self.foam_dir and os.access(self.foam_dir, os.W_OK):
+            self.setDownloadURLs()
+
+    def testGetRuntime(self, disable_exception=True):
+        """ Set the foam dir temporarily and see if we can detect the runtime """
+        CfdTools.setFoamDir(self.foam_dir)
+        try:
+            runtime = CfdTools.getFoamRuntime()
+        except IOError as e:
+            runtime = None
+            if not disable_exception:
+                raise
+        CfdTools.setFoamDir(self.initial_foam_dir)
+        return runtime
+
+    def setDownloadURLs(self):
+        if self.testGetRuntime() == "MinGW":
+            foam_ver = os.path.split(CfdTools.getFoamDir())[-1]
+            self.form.le_cfmesh_url.setText(CFMESH_URL_MINGW.format(foam_ver))
+            self.form.le_hisa_url.setText(HISA_URL_MINGW.format(foam_ver))
+        else:
+            self.form.le_cfmesh_url.setText(CFMESH_URL)
+            self.form.le_hisa_url.setText(HISA_URL)
 
     def paraviewPathChanged(self, text):
         self.paraview_path = text
@@ -220,6 +245,12 @@ class CfdPreferencePage:
             self.form.le_paraview_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallCfMesh(self):
+        runtime = self.testGetRuntime(False)
+
+        if self.testGetRuntime() == "MinGW" and self.form.le_cfmesh_url.text() == CFMESH_URL:
+            # Openfoam might have just been installed and the URL would not have had a chance to update
+            self.setDownloadURLs()
+
         if self.createThread():
             self.thread.task = DOWNLOAD_CFMESH
             # We are forced to apply the foam dir selection - reset when the task finishes
@@ -233,6 +264,12 @@ class CfdPreferencePage:
             self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallHisa(self):
+        runtime = self.testGetRuntime(False)
+
+        if runtime == "MinGW" and self.form.le_hisa_url.text() == HISA_URL:
+            # Openfoam might have just been installed and the URL would not have had a chance to update
+            self.setDownloadURLs()
+
         if self.createThread():
             self.thread.task = DOWNLOAD_HISA
             # We are forced to apply the foam dir selection - reset when the task finishes
@@ -267,19 +304,20 @@ class CfdPreferencePage:
         if self.thread.task == DOWNLOAD_CFMESH:
             if status:
                 self.consoleMessage("Download completed")
-                user_dir = self.thread.user_dir
-                self.consoleMessage("Building cfMesh. Lengthy process - please wait...")
-                self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
-                if CfdTools.getFoamRuntime() == 'WindowsDocker':
-                    # There seem to be issues when using multi processors to build in docker
-                    self.install_process = CfdTools.startFoamApplication(
-                        "export WM_NCOMPPROCS=1; ./Allwmake",
-                        "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
-                        'log.Allwmake', self.installFinished)
-                else:
-                    self.install_process = CfdTools.startFoamApplication(
-                        "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
-                        'log.Allwmake', self.installFinished)
+                if CfdTools.getFoamRuntime() != "MinGW":
+                    user_dir = self.thread.user_dir
+                    self.consoleMessage("Building cfMesh. Lengthy process - please wait...")
+                    self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
+                    if CfdTools.getFoamRuntime() == 'WindowsDocker':
+                        # There seem to be issues when using multi processors to build in docker
+                        self.install_process = CfdTools.startFoamApplication(
+                            "export WM_NCOMPPROCS=1; ./Allwmake",
+                            "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                            'log.Allwmake', self.installFinished)
+                    else:
+                        self.install_process = CfdTools.startFoamApplication(
+                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                            'log.Allwmake', self.installFinished)
                 # Reset foam dir for now in case the user presses 'Cancel'
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:
@@ -287,19 +325,20 @@ class CfdPreferencePage:
         elif self.thread.task == DOWNLOAD_HISA:
             if status:
                 self.consoleMessage("Download completed")
-                user_dir = self.thread.user_dir
-                self.consoleMessage("Building HiSA. Please wait...")
-                self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, HISA_FILE_BASE))
-                if CfdTools.getFoamRuntime() == 'WindowsDocker':
-                    # There seem to be issues when using multi processors to build in docker
-                    self.install_process = CfdTools.startFoamApplication(
-                        "export WM_NCOMPPROCS=1; ./Allwmake",
-                        "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
-                        'log.Allwmake', self.installFinished)
-                else:
-                    self.install_process = CfdTools.startFoamApplication(
-                        "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
-                        'log.Allwmake', self.installFinished)
+                if CfdTools.getFoamRuntime() != "MinGW":
+                    user_dir = self.thread.user_dir
+                    self.consoleMessage("Building HiSA. Please wait...")
+                    self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, HISA_FILE_BASE))
+                    if CfdTools.getFoamRuntime() == 'WindowsDocker':
+                        # There seem to be issues when using multi processors to build in docker
+                        self.install_process = CfdTools.startFoamApplication(
+                            "export WM_NCOMPPROCS=1; ./Allwmake",
+                            "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                            'log.Allwmake', self.installFinished)
+                    else:
+                        self.install_process = CfdTools.startFoamApplication(
+                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                            'log.Allwmake', self.installFinished)
                 # Reset foam dir for now in case the user presses 'Cancel'
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:
@@ -395,7 +434,6 @@ class CfdPreferencePageThread(QThread):
         filename = self.download(self.openfoam_url, OPENFOAM_FILE_EXT, "OpenFOAM")
         if QtCore.QProcess().startDetached(filename):
             self.signals.status.emit("OpenFOAM installer launched - please complete the installation")
-            self.signals.status.emit("NB: OF_Env_Create desktop shortcut must be run after installation")
         else:
             raise Exception("Failed to launch OpenFOAM installer")
 
@@ -409,46 +447,60 @@ class CfdPreferencePageThread(QThread):
     def downloadCfMesh(self):
         filename = self.download(self.cfmesh_url, CFMESH_FILE_EXT, "cfMesh")
 
-        self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
-        # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
-        if CfdTools.getFoamRuntime() != 'WindowsDocker':
-            self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
-
-        self.signals.status.emit("Extracting cfMesh...")
-        if CfdTools.getFoamRuntime() == 'WindowsDocker':
-            from zipfile import ZipFile
-            with ZipFile(filename, 'r') as zip:
-                with tempfile.TemporaryDirectory() as tempdir:
-                    zip.extractall(path=tempdir)
-                    CfdTools.runFoamCommand(
-                        '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cp -r "{}" "$WM_PROJECT_USER_DIR/"; }}'
-                            .format(CfdTools.translatePath(os.path.join(tempdir, CFMESH_FILE_BASE))))
-        else:
+        if CfdTools.getFoamRuntime() == "MinGW":
+            self.user_dir = None
+            self.signals.status.emit("Installing cfMesh...")
             CfdTools.runFoamCommand(
-                '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; ); }}'.
-                format(CFMESH_FILE_BASE, CfdTools.translatePath(filename)))
+                '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
+                    format(CfdTools.translatePath(filename)))
+        else:
+            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
+            # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
+            if CfdTools.getFoamRuntime() != 'WindowsDocker':
+                self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
+
+            self.signals.status.emit("Extracting cfMesh...")
+            if CfdTools.getFoamRuntime() == 'WindowsDocker':
+                from zipfile import ZipFile
+                with ZipFile(filename, 'r') as zip:
+                    with tempfile.TemporaryDirectory() as tempdir:
+                        zip.extractall(path=tempdir)
+                        CfdTools.runFoamCommand(
+                            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cp -r "{}" "$WM_PROJECT_USER_DIR/"; }}'
+                                .format(CfdTools.translatePath(os.path.join(tempdir, CFMESH_FILE_BASE))))
+            else:
+                CfdTools.runFoamCommand(
+                    '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; ); }}'.
+                    format(CFMESH_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadHisa(self):
         filename = self.download(self.hisa_url, HISA_FILE_EXT, "HiSA")
 
-        self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
-        # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
-        if CfdTools.getFoamRuntime() != 'WindowsDocker':
-            self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
-
-        self.signals.status.emit("Extracting HiSA...")
-        if CfdTools.getFoamRuntime() == 'WindowsDocker':
-            from zipfile import ZipFile
-            with ZipFile(filename, 'r') as zip:
-                with tempfile.TemporaryDirectory() as tempdir:
-                    zip.extractall(path=tempdir)
-                    CfdTools.runFoamCommand(
-                        '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cp -r "{}" "$WM_PROJECT_USER_DIR/"; }}'
-                            .format(CfdTools.translatePath(os.path.join(tempdir, HISA_FILE_BASE))))
-        else:
+        if CfdTools.getFoamRuntime() == "MinGW":
+            self.user_dir = None
+            self.signals.status.emit("Installing HiSA...")
             CfdTools.runFoamCommand(
-                '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; );  }}'.
-                format(HISA_FILE_BASE, CfdTools.translatePath(filename)))
+                '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
+                    format(CfdTools.translatePath(filename)))
+        else:
+            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
+            # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
+            if CfdTools.getFoamRuntime() != 'WindowsDocker':
+                self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
+
+            self.signals.status.emit("Extracting HiSA...")
+            if CfdTools.getFoamRuntime() == 'WindowsDocker':
+                from zipfile import ZipFile
+                with ZipFile(filename, 'r') as zip:
+                    with tempfile.TemporaryDirectory() as tempdir:
+                        zip.extractall(path=tempdir)
+                        CfdTools.runFoamCommand(
+                            '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cp -r "{}" "$WM_PROJECT_USER_DIR/"; }}'
+                                .format(CfdTools.translatePath(os.path.join(tempdir, HISA_FILE_BASE))))
+            else:
+                CfdTools.runFoamCommand(
+                    '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; );  }}'.
+                    format(HISA_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadStatus(self, blocks, block_size, total_size):
         self.signals.downloadProgress.emit(blocks*block_size, total_size)

@@ -50,12 +50,14 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 
 # Some standard install locations that are searched if an install directory is not specified
-FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files (x86)\\ESI\\OpenFOAM\\v2006",
-                                 "~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v2006",
+FOAM_DIR_DEFAULTS = {"Windows": ["~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v2012",
+                                 "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v2012",
+                                 "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v2006",
                                  "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v1912",
                                  "C:\\Program Files\\blueCFD-Core-2017\\OpenFOAM-5.x",
                                  "C:\\Program Files\\blueCFD-Core-2016\\OpenFOAM-4.x"],
-                     "Linux": ["/opt/openfoam4", "/opt/openfoam5", "/opt/openfoam6", "/opt/openfoam7", "/opt/openfoam-dev",
+                     "Linux": ["/opt/openfoam8", "/opt/openfoam7", "/opt/openfoam6", "/opt/openfoam5", "/opt/openfoam4", "/opt/openfoam-dev",
+                               "~/OpenFOAM/OpenFOAM-8.x", "~/OpenFOAM/OpenFOAM-8.0",
                                "~/OpenFOAM/OpenFOAM-7.x", "~/OpenFOAM/OpenFOAM-7.0",
                                "~/OpenFOAM/OpenFOAM-6.x", "~/OpenFOAM/OpenFOAM-6.0",
                                "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
@@ -807,7 +809,10 @@ def checkCfdDependencies(term_print=True):
                 message += ofmsg + '\n'
             else:
                 try:
-                    foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")
+                    if getFoamRuntime() == "MinGW":
+                        foam_ver = runFoamCommand("echo $FOAM_API")
+                    else:
+                        foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")
                 except Exception as e:
                     runmsg = "OpenFOAM installation found, but unable to run command: " + str(e)
                     message += runmsg + '\n'
@@ -821,6 +826,13 @@ def checkCfdDependencies(term_print=True):
                             # Isolate major version number
                             foam_ver = foam_ver.lstrip('v')
                             foam_ver = int(foam_ver.split('.')[0])
+                            if getFoamRuntime() == "MinGW":
+                                if foam_ver != 2012:
+                                    vermsg = "OpenFOAM version " + foam_ver + " is not supported:\n" + \
+                                             "Only version 2012 supported for MinGW installation"
+                                    message += vermsg + "\n"
+                                    if term_print:
+                                        print(vermsg)
                             if foam_ver >= 1000:  # Plus version
                                 if foam_ver < 1706:
                                     vermsg = "OpenFOAM version " + foam_ver + " is outdated:\n" + \
@@ -931,7 +943,7 @@ def checkCfdDependencies(term_print=True):
         else:
             gmsh_exe = shutil.which("gmsh")
         if gmsh_exe is None:
-            gmsh_msg = "gmsh not found"
+            gmsh_msg = "gmsh not found (optional)"
             message += gmsh_msg + '\n'
             if term_print:
                 print(gmsh_msg)

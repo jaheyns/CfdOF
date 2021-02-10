@@ -55,7 +55,7 @@ which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (0.18)](https://www.freecadweb.org/downloads.php)
  or [latest development version (0.19 prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
-- OpenFOAM [Foundation versions 5-8](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2006](http://openfoam.com/download)  
+- OpenFOAM [Foundation versions 5-8](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2012](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
 - [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
@@ -72,7 +72,7 @@ or [development](https://github.com/FreeCAD/FreeCAD/releases)
 FreeCAD build can be obtained (64 bit version) and installed
 by respectively running the installer or extracting the .7z archive to a directory
 <FreeCAD-directory>. In the latter case, FreeCAD can be run in place
-(<FreeCAD-directory\bin\FreeCAD.exe). 
+(<FreeCAD-directory>\bin\FreeCAD.exe). 
 
 Before installing CfdOF, the Plot workbench must first be 
 installed into FreeCAD using the Addon manager:
@@ -93,12 +93,13 @@ conveniently from the CfdOF Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CfdOF". 
 
-The OpenFOAM installation is via the [OpenCFD docker package](https://www.openfoam.com/download/release-history.php) (version 2006). 
-This can be installed manually using the above link, or by clicking the relevant
-button in the Preferences panel described above. Please note that the 'OF_Env_Create' shortcut created by the installer on the
-desktop *must be run after installation* before OpenFOAM can be used. See the [OpenFOAM installation page](https://www.openfoam.com/download/install-binary-windows.php)
-for troubleshooting. If you experience problems running OpenFOAM in CfdOF, please test to ensure the installation is valid by making sure you are able to
-run the tutorial case mentioned on the above page.
+The OpenFOAM installation is via the [OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php).
+The [OpenCFD docker package](https://www.openfoam.com/download/install-binary-windows.php) as
+well as the [BlueCFD Core](http://bluecfd.github.io/Core/) port are also currently supported.  
+
+OpenFOAM can be installed manually using the above link, or by clicking the relevant
+button in the Preferences panel described above. If you experience problems running OpenFOAM in CfdOF, please make
+sure you have a working installation.
 
 Set the OpenFOAM install directory in the preferences
 panel to the install directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed).
@@ -111,10 +112,10 @@ Set the ParaView install path in the preferences panel to the 'paraview.exe' fil
 subfolder of the ParaView installation. Common defaults will be detected if it is left blank.
 
 Likewise, cfMesh and HiSA can be installed from the 
-Preferences panel. They are automatically built from source 
-inside the OpenFOAM environment if installed from the 
-Preferences panel. Note that this is a lengthy process. Do not close the
-Preferences panel until the 'Install completed' message is received.
+Preferences panel. Do not close the
+it until the 'Install completed' message is received.
+Note that the OpenFOAM installation must be in a writable location
+for cfMesh and HiSA to be installed successfully.
 
 Choosing the "Check dependencies" option will verify that all 
 prerequisites have been successfully installed.
@@ -150,7 +151,7 @@ In the FreeCAD window, select Edit | Preferences ... and
 choose "CFD".
 
 However, in Linux, manual installation is required for 
-[OpenFOAM](http://openfoam.org/download/),
+OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openfoam.org/download/) versions),
 [Paraview](http://www.paraview.org/) and
 [GMSH](http://gmsh.info/) (optional). They should be
 installed using your distribution's package manager
@@ -163,7 +164,7 @@ detected in common default install
 locations.)
 
 cfMesh and HiSA can be installed using the Preferences panel described above,
-and can be downloaded and built from the source
+and can be downloaded and built from their source
 code inside your OpenFOAM installation if you have
 not already done so yourself. Note that this is a lengthy process.
 
@@ -229,7 +230,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 ## Acknowledgements
 
 ### Funding
-This development was made possible through funding from [Eskom Holdings SOC Ltd](http://www.eskom.co.za)
+This development was made possible through initial funding from [Eskom Holdings SOC Ltd](http://www.eskom.co.za)
 and the [Council for Scientific and Industrial Research](https://www.csir.co.za) (South Africa).
 
 ### Lead developers
@@ -244,9 +245,9 @@ We acknowledge significant contributions from
 * Qingfeng Xia (2015) - Original framework
 * Michael Hindley (2016) - Initial concept
 * Klaus Sembritzki (2017) - Multiphase extension
-* Thomas Schrader (2017-2018) <info@schraderundschrader.de> - Testing and user assistance
+* Thomas Schrader (2017-) <info@schraderundschrader.de> - Testing and user assistance
 
 ### Dedication
 
-CfdOF is dedicated to the memory of Michael Hindley. It is because of his irrepressible enthusiasm for 
+CfdOF is dedicated to the memory of Michael Hindley. It is thanks to his irrepressible enthusiasm for 
 FreeCAD and open source software that this workbench exists. Rest in peace.
