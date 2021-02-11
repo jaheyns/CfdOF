@@ -11,31 +11,34 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-%(Name%)_Geometry.stl
-{
-    extractionMethod    extractFromSurface;
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   150;
-    }
-    writeObj            yes;
-}
-
+surfaces
+(
+    "%(Name%)_Geometry.stl"
 %{%(MeshRegionPresent%)
 %:True
 %{%(SnappySettings/MeshRegions%)
-%(0%).stl
+    "%(0%).stl"
+%}
+%}
+);
+
+includedAngle       150;
+geometricTestOnly   no;
+
+subsetFeatures
 {
-    extractionMethod    extractFromSurface;
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   150;
-    }
-    writeObj            yes;
+    nonManifoldEdges    yes;
+    openEdges           yes;
 }
 
-%}
-%}
+trimFeatures
+{
+    minElem         0;
+    minLen          0.0;
+}
+
+writeObj            yes;
+verboseObj          no;
 
 // ************************************************************************* //
 %}

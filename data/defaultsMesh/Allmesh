@@ -56,7 +56,12 @@ runCommand cartesianMesh
 %}
 %:snappyHexMesh
 runCommand blockMesh
-runCommand surfaceFeatureExtract
+if [ -x $(which surfaceFeatures) ];
+then
+    runCommand surfaceFeatures
+else
+    runCommand surfaceFeatureExtract
+fi
 
 %{%(ParallelMesh%)
 %:True
