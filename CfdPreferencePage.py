@@ -158,11 +158,13 @@ class CfdPreferencePage:
 
     def foamDirChanged(self, text):
         self.foam_dir = text
-        if self.foam_dir and os.access(self.foam_dir, os.W_OK):
+        if self.foam_dir and os.access(self.foam_dir, os.R_OK):
             self.setDownloadURLs()
 
     def testGetRuntime(self, disable_exception=True):
         """ Set the foam dir temporarily and see if we can detect the runtime """
+        prefs = CfdTools.getPreferencesLocation()
+        prev_foam_dir = FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
         CfdTools.setFoamDir(self.foam_dir)
         try:
             runtime = CfdTools.getFoamRuntime()
@@ -170,7 +172,7 @@ class CfdPreferencePage:
             runtime = None
             if not disable_exception:
                 raise
-        CfdTools.setFoamDir(self.initial_foam_dir)
+        CfdTools.setFoamDir(prev_foam_dir)
         return runtime
 
     def setDownloadURLs(self):
@@ -187,14 +189,14 @@ class CfdPreferencePage:
 
     def chooseFoamDir(self):
         d = QtGui.QFileDialog().getExistingDirectory(None, 'Choose OpenFOAM directory', self.foam_dir)
-        if d and os.access(d, os.W_OK):
+        if d and os.access(d, os.R_OK):
             self.foam_dir = d
         self.form.le_foam_dir.setText(self.foam_dir)
 
     def chooseParaviewPath(self):
         p, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose ParaView executable', self.paraview_path,
                                                         filter="*.exe"  if platform.system() == 'Windows' else None)
-        if p and os.access(p, os.W_OK):
+        if p and os.access(p, os.R_OK):
             self.paraview_path = p
         self.form.le_paraview_path.setText(self.paraview_path)
 
@@ -230,7 +232,7 @@ class CfdPreferencePage:
 
     def pickOpenFoamFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose OpenFOAM install file', filter="*.exe")
-        if f and os.access(f, os.W_OK):
+        if f and os.access(f, os.R_OK):
             self.form.le_openfoam_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallParaview(self):
@@ -241,7 +243,7 @@ class CfdPreferencePage:
 
     def pickParaviewFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose ParaView install file', filter="*.exe")
-        if f and os.access(f, os.W_OK):
+        if f and os.access(f, os.R_OK):
             self.form.le_paraview_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallCfMesh(self):
@@ -260,7 +262,7 @@ class CfdPreferencePage:
 
     def pickCfMeshFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose cfMesh archive', filter="*.zip")
-        if f and os.access(f, os.W_OK):
+        if f and os.access(f, os.R_OK):
             self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallHisa(self):
@@ -279,7 +281,7 @@ class CfdPreferencePage:
 
     def pickHisaFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose HiSA archive', filter="*.zip")
-        if f and os.access(f, os.W_OK):
+        if f and os.access(f, os.R_OK):
             self.form.le_hisa_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def createThread(self):
