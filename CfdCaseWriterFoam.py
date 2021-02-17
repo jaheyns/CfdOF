@@ -332,6 +332,8 @@ class CfdCaseWriterFoam:
                 outlet_bc = settings['boundaries'][initial_values['BoundaryP'].Label]
                 if outlet_bc['BoundarySubType'] == 'staticPressureOutlet' or \
                         outlet_bc['BoundarySubType'] == 'totalPressureOpening' or \
+                        outlet_bc['BoundarySubType'] == 'totalPressureInlet' or \
+                        outlet_bc['BoundarySubType'] == 'staticPressureInlet' or \
                         outlet_bc['BoundarySubType'] == 'farField':
                     initial_values['Pressure'] = outlet_bc['Pressure']
                 else:
