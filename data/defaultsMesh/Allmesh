@@ -56,7 +56,8 @@ runCommand cartesianMesh
 %}
 %:snappyHexMesh
 runCommand blockMesh
-if [ -x $(which surfaceFeatures) ];
+which surfaceFeatures > /dev/null 2>&1
+if [ $? == 0 ]
 then
     runCommand surfaceFeatures
 else
