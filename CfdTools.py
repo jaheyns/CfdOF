@@ -366,7 +366,7 @@ def getPreferencesLocation():
 def setFoamDir(installation_path):
     prefs = getPreferencesLocation()
     # Set OpenFOAM install path in parameters
-    FreeCAD.ParamGet(prefs).SetString("InstallationPath", os.path.normpath(installation_path))
+    FreeCAD.ParamGet(prefs).SetString("InstallationPath", installation_path)
 
 
 def getFoamDir():
@@ -380,7 +380,7 @@ def getFoamDir():
     if not installation_path:
         installation_path = detectFoamDir()
 
-    return installation_path
+    return os.path.normpath(installation_path)
 
 
 def getFoamRuntime():
