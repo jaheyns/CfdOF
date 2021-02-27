@@ -380,7 +380,10 @@ def getFoamDir():
     if not installation_path:
         installation_path = detectFoamDir()
 
-    return os.path.normpath(installation_path)
+    if installation_path:
+        installation_path = os.path.normpath(installation_path)
+
+    return installation_path
 
 
 def getFoamRuntime():
