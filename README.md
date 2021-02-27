@@ -95,7 +95,7 @@ choose "CfdOF".
 
 The OpenFOAM installation is via the [OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php).
 The [OpenCFD docker package](https://www.openfoam.com/download/install-binary-windows.php) as
-well as the [BlueCFD Core](http://bluecfd.github.io/Core/) port are also currently supported.  
+well as the [BlueCFD Core](http://bluecfd.github.io/Core/) port are also currently supported but have some issues.  
 
 OpenFOAM can be installed manually using the above link, or by clicking the relevant
 button in the Preferences panel described above. If you experience problems running OpenFOAM in CfdOF, please make
@@ -161,7 +161,11 @@ Set the OpenFOAM install directory in the preferences
 panel - examples of typical install locations are /opt/openfoam7 
 or /home/user/OpenFOAM/OpenFOAM-7.x (It will be automatically 
 detected in common default install
-locations.)
+locations.) Note that if you have loaded the desired OpenFOAM 
+environment already, the installation path must be left blank
+to use this.
+This also applies in the case of the Debian OpenFOAM package which is integrated into
+the system.  
 
 cfMesh and HiSA can be installed using the Preferences panel described above,
 and can be downloaded and built from their source
