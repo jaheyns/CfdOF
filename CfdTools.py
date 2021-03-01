@@ -1,6 +1,5 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2015 - FreeCAD Developers                               *
 # *   Copyright (c) 2015 - Qingfeng Xia <qingfeng xia eng.ox.ac.uk>         *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
@@ -603,7 +602,7 @@ def makeRunCommand(cmd, dir, source_env=True):
                     'export PATH=$FOAM_LIBBIN/msmpi:$FOAM_LIBBIN:$WM_THIRD_PARTY_DIR/platforms/linux64MingwDPInt32/lib:$PATH; '
                      + cd + cmd]
         return cmdline
-    if getFoamRuntime() == "WindowsDocker":
+    elif getFoamRuntime() == "WindowsDocker":
         foamVersion = os.path.split(installation_path)[-1].lstrip('v')
         cmdline = ['powershell.exe',
                    'docker-machine.exe start default; '
@@ -746,7 +745,7 @@ def checkCfdDependencies(term_print=True):
         FC_COMMIT_REQUIRED = 14304
 
         CF_MAJOR_VER_REQUIRED = 1
-        CF_MINOR_VER_REQUIRED = 6
+        CF_MINOR_VER_REQUIRED = 8
 
         HISA_MAJOR_VER_REQUIRED = 1
         HISA_MINOR_VER_REQUIRED = 2
@@ -1160,15 +1159,15 @@ def matchFaces(faces1, faces2):
 
             return K
 
-        # Sort face list by centre of mass, x then y then z in case all in plane
-        faces1.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.z))
-        faces1.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.y))
-        faces1.sort(key=compKeyFn(lambda bf: bf[0].CenterOfMass.x))
+        # Sort face list by centre of bounding box (since this is supported by both Compounds and Faces, unline CofM)
+        faces1.sort(key=compKeyFn(lambda bf: bf[0].BoundBox.Center.z))
+        faces1.sort(key=compKeyFn(lambda bf: bf[0].BoundBox.Center.y))
+        faces1.sort(key=compKeyFn(lambda bf: bf[0].BoundBox.Center.x))
 
         # Same on other face list
-        faces2.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.z))
-        faces2.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.y))
-        faces2.sort(key=compKeyFn(lambda mf: mf[0].CenterOfMass.x))
+        faces2.sort(key=compKeyFn(lambda mf: mf[0].BoundBox.Center.z))
+        faces2.sort(key=compKeyFn(lambda mf: mf[0].BoundBox.Center.y))
+        faces2.sort(key=compKeyFn(lambda mf: mf[0].BoundBox.Center.x))
 
     else:  # Python 2
 
@@ -1181,14 +1180,14 @@ def matchFaces(faces1, faces2):
                 return 1
 
         # Sort face list by centre of mass, x then y then z in case all in plane
-        faces1.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.z)
-        faces1.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.y)
-        faces1.sort(cmp=compFn, key=lambda bf: bf[0].CenterOfMass.x)
+        faces1.sort(cmp=compFn, key=lambda bf: bf[0].BoundBox.Center.z)
+        faces1.sort(cmp=compFn, key=lambda bf: bf[0].BoundBox.Center.y)
+        faces1.sort(cmp=compFn, key=lambda bf: bf[0].BoundBox.Center.x)
 
         # Same on other face list
-        faces2.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.z)
-        faces2.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.y)
-        faces2.sort(cmp=compFn, key=lambda mf: mf[0].CenterOfMass.x)
+        faces2.sort(cmp=compFn, key=lambda mf: mf[0].BoundBox.Center.z)
+        faces2.sort(cmp=compFn, key=lambda mf: mf[0].BoundBox.Center.y)
+        faces2.sort(cmp=compFn, key=lambda mf: mf[0].BoundBox.Center.x)
 
     # Find faces with matching CofM
     i = 0
@@ -1254,18 +1253,21 @@ def resolveReference(r, raise_error=True):
             raise RuntimeError("Object '{}' was not found - object may have been deleted".format(r[0]))
         else:
             return None
-    try:
-        if r[1].startswith('Solid'):  # getElement doesn't work with solids for some reason
-            f = obj.Shape.Solids[int(r[1].lstrip('Solid')) - 1]
-        else:
-            f = obj.Shape.getElement(r[1])
-            if f is None and raise_error:
+    if r[1] is not None:
+        try:
+            if r[1].startswith('Solid'):  # getElement doesn't work with solids for some reason
+                f = obj.Shape.Solids[int(r[1].lstrip('Solid')) - 1]
+            else:
+                f = obj.Shape.getElement(r[1])
+                if f is None and raise_error:
+                    raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0], r[1]))
+        except Part.OCCError:
+            if raise_error:
                 raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0], r[1]))
-    except Part.OCCError:
-        if raise_error:
-            raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0], r[1]))
-        else:
-            return None
+            else:
+                return None
+    else:
+        f = obj.Shape
     return f
 
 
