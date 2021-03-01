@@ -317,11 +317,11 @@ relaxationFactors
         nuTilda         0.5;
 %}
 %}
-    }
 %{%(solver/SolverName%)
 %:hisa
     yWall               0.7;
 %}
+    }
 %{%(solver/SolverName%)
 %:default
     fields
