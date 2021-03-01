@@ -740,9 +740,9 @@ def convertMesh(case, mesh_file, scale):
 
 def checkCfdDependencies(term_print=True):
         FC_MAJOR_VER_REQUIRED = 0
-        FC_MINOR_VER_REQUIRED = 17
-        FC_PATCH_VER_REQUIRED = 0
-        FC_COMMIT_REQUIRED = 14304
+        FC_MINOR_VER_REQUIRED = 18
+        FC_PATCH_VER_REQUIRED = 4
+        FC_COMMIT_REQUIRED = 16146
 
         CF_MAJOR_VER_REQUIRED = 1
         CF_MINOR_VER_REQUIRED = 8
