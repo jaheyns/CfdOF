@@ -73,7 +73,6 @@ runCommand reconstructParMesh -constant
 runCommand snappyHexMesh -overwrite
 %}
 
-runCommand surfaceToPatch "constant/triSurface/%(Name%)_Geometry.stl"
 %:gmsh
 runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 runCommand transformPoints -scale "(0.001 0.001 0.001)"
