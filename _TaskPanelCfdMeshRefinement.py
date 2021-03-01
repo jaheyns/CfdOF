@@ -49,12 +49,16 @@ class _TaskPanelCfdMeshRefinement:
 
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.referenceSelectWidget,
-                                                                    self.obj, True, False,
+                                                                    self.obj,
+                                                                    self.mesh_obj.MeshUtility != 'gmsh',
+                                                                    True,
+                                                                    False,
                                                                     self.mesh_obj.MeshUtility == 'gmsh',
                                                                     self.mesh_obj.MeshUtility == 'gmsh')
 
         self.solidSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.volReferenceSelectWidget,
                                                                      self.obj,
+                                                                     False,
                                                                      False,
                                                                      True)
 

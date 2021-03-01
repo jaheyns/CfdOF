@@ -139,7 +139,7 @@ class TaskPanelCfdFluidBoundary:
 
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
-                                                                    self.obj, True, False)
+                                                                    self.obj, True, True, False)
 
         self.updateUI()
 

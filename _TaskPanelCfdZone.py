@@ -104,7 +104,7 @@ class _TaskPanelCfdZone:
 
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
-                                                                    self.obj, False, True)
+                                                                    self.obj, True, False, True)
 
     def load(self):
         if self.obj.Name.startswith('PorousZone'):

@@ -7,68 +7,35 @@
     <x>0</x>
     <y>0</y>
     <width>431</width>
-    <height>243</height>
+    <height>477</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Select Faces</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_4">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item row="6" column="0">
-    <widget class="QStackedWidget" name="stackedWidget">
+    <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="page">
+     <widget class="QWidget" name="tabWidgetPage1">
+      <attribute name="title">
+       <string>Select in model</string>
+      </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="2" column="2" colspan="2">
-        <widget class="QPushButton" name="buttonAddFace">
-         <property name="text">
-          <string>Add</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="labelSelection">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2" colspan="2">
-        <widget class="QRadioButton" name="rb_standard">
-         <property name="text">
-          <string>Face, Ed&amp;ge, Vertex</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QPushButton" name="faceList">
-         <property name="text">
-          <string>Select from list</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="4" colspan="2">
-        <widget class="QPushButton" name="buttonRemoveFace">
-         <property name="text">
-          <string>Remove</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="4" colspan="2">
-        <widget class="QRadioButton" name="rb_solid">
-         <property name="text">
-          <string>So&amp;lid</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0" colspan="6">
         <widget class="QListWidget" name="listReferences">
          <property name="sizePolicy">
@@ -89,6 +56,9 @@
            <height>20</height>
           </size>
          </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
         </widget>
        </item>
        <item row="1" column="0" colspan="6">
@@ -107,43 +77,132 @@
          </property>
         </widget>
        </item>
+       <item row="3" column="4" colspan="2">
+        <widget class="QRadioButton" name="rb_solid">
+         <property name="text">
+          <string>So&amp;lid</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2" colspan="2">
+        <widget class="QRadioButton" name="rb_standard">
+         <property name="text">
+          <string>Face, Ed&amp;ge, Vertex</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4" colspan="2">
+        <widget class="QPushButton" name="buttonRemoveFace">
+         <property name="text">
+          <string>Remove</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="labelSelection">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2" colspan="2">
+        <widget class="QPushButton" name="buttonAddFace">
+         <property name="text">
+          <string>Add</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="page_2">
+     <widget class="QWidget" name="tabWidgetPage2">
+      <attribute name="title">
+       <string>Select from list</string>
+      </attribute>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="0" colspan="3">
-        <widget class="QListWidget" name="faceListWidget"/>
-       </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="selectAllButton">
-         <property name="text">
-          <string>Select all</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="selectNoneButton">
-         <property name="text">
-          <string>Select none</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QPushButton" name="doneButton">
-         <property name="text">
-          <string>Done</string>
-         </property>
-        </widget>
+       <item row="1" column="0" colspan="2">
+        <widget class="QListWidget" name="objectListWidget"/>
        </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>Select Object</string>
+          <string>Select objects</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1" colspan="2">
-        <widget class="QComboBox" name="shapeComboBox"/>
+       <item row="3" column="0" colspan="2">
+        <widget class="QFrame" name="individualFacesFrame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_5">
+          <item row="1" column="0">
+           <widget class="QPushButton" name="selectAllButton">
+            <property name="text">
+             <string>Select all</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="selectNoneButton">
+            <property name="text">
+             <string>Select none</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QListWidget" name="faceListWidget"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QFrame" name="frame">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="faceSelectPushButton">
+         <property name="text">
+          <string>▼ Select components</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

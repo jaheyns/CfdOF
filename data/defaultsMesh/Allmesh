@@ -71,7 +71,12 @@ runCommand snappyHexMesh -overwrite
 
 %:gmsh
 runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
-runCommand transformPoints -scale "(0.001 0.001 0.001)"
+if [ $WM_PROJECT_VERSION -ge 9 ]
+then
+    runCommand transformPoints "scale=(0.001 0.001 0.001)"
+else
+    runCommand transformPoints -scale "(0.001 0.001 0.001)"
+fi
 
 %}
 %{%(TwoDSettings/ConvertTo2D%)
@@ -89,4 +94,9 @@ else
     runCommand surfaceMeshTriangulate mesh_outside.stl
 fi
 
-runCommand surfaceTransformPoints -scale "(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
+if [ $WM_PROJECT_VERSION -ge 9 ]
+then
+    runCommand surfaceTransformPoints "scale=(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
+else
+    runCommand surfaceTransformPoints -scale "(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
+fi

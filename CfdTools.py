@@ -1134,24 +1134,25 @@ def isSameGeometry(shape1, shape2):
     if len(shape1.Vertexes) == len(shape2.Vertexes) and len(shape1.Vertexes) > 0:
         # compare CenterOfMass
         # Bugfix: Precision seems to be lost on load/save
-        if not floatEqual(shape1.CenterOfMass[0], shape2.CenterOfMass[0]) or \
-                not floatEqual(shape1.CenterOfMass[1], shape2.CenterOfMass[1]) or \
-                not floatEqual(shape1.CenterOfMass[2], shape2.CenterOfMass[2]):
-            return False
-        elif not floatEqual(shape1.Area, shape2.Area):
-            return False
-        else:
-            # compare the Vertices
-            for vs1 in shape1.Vertexes:
-                for vs2 in shape2.Vertexes:
-                    if floatEqual(vs1.X, vs2.X) and floatEqual(vs1.Y, vs2.Y) and floatEqual(vs1.Z, vs2.Z):
-                        same_Vertexes += 1
-                        # Bugfix: was 'continue' - caused false-negative with repeated vertices
-                        break
-            if same_Vertexes == len(shape1.Vertexes):
-                return True
-            else:
+        if hasattr(shape1, "CenterOfMass") and hasattr(shape2, "CenterOfMass"):
+            if not floatEqual(shape1.CenterOfMass[0], shape2.CenterOfMass[0]) or \
+                    not floatEqual(shape1.CenterOfMass[1], shape2.CenterOfMass[1]) or \
+                    not floatEqual(shape1.CenterOfMass[2], shape2.CenterOfMass[2]):
                 return False
+        if hasattr(shape1, "Area") and hasattr(shape2, "Area"):
+            if not floatEqual(shape1.Area, shape2.Area):
+                return False
+        # compare the Vertices
+        for vs1 in shape1.Vertexes:
+            for vs2 in shape2.Vertexes:
+                if floatEqual(vs1.X, vs2.X) and floatEqual(vs1.Y, vs2.Y) and floatEqual(vs1.Z, vs2.Z):
+                    same_Vertexes += 1
+                    # Bugfix: was 'continue' - caused false-negative with repeated vertices
+                    break
+        if same_Vertexes == len(shape1.Vertexes):
+            return True
+        else:
+            return False
 
 
 def findElementInShape(aShape, anElement):
@@ -1264,7 +1265,7 @@ def matchFaces(faces1, faces2):
         faces2.sort(cmp=compFn, key=lambda mf: mf[0].Vertexes[0].Point.y)
         faces2.sort(cmp=compFn, key=lambda mf: mf[0].Vertexes[0].Point.x)
 
-    # Find faces with matching CofM
+    # Find faces with matching first vertex
     i = 0
     j = 0
     j_match_start = 0
@@ -1328,6 +1329,8 @@ def resolveReference(r, raise_error=True):
             raise RuntimeError("Object '{}' was not found - object may have been deleted".format(r[0]))
         else:
             return None
+    if not r[1]:
+        return obj.Shape
     try:
         if r[1].startswith('Solid'):  # getElement doesn't work with solids for some reason
             f = obj.Shape.Solids[int(r[1].lstrip('Solid')) - 1]

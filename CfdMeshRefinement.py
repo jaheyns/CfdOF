@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -168,9 +168,9 @@ class _ViewProviderCfdMeshRefinement:
         return
 
     def setEdit(self, vobj, mode=0):
-        for obj in FreeCAD.ActiveDocument.Objects:
-            if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMesh) and (self.Object in obj.Group):
-                obj.Part.ViewObject.show()
+        #for obj in FreeCAD.ActiveDocument.Objects:
+        #    if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMesh) and (self.Object in obj.Group):
+        #        obj.Part.ViewObject.show()
         taskd = _TaskPanelCfdMeshRefinement._TaskPanelCfdMeshRefinement(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)

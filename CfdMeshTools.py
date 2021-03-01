@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -228,11 +228,10 @@ class CfdMeshTools:
                     bf = CfdTools.resolveReference(ref)
                 except RuntimeError as re:
                     raise RuntimeError("Error processing boundary condition {}: {}".format(bc_obj.Label, str(re)))
-                boundary_face_list.append((bf, (bc_id, ref, ri)))
+                boundary_face_list += [(bff, (bc_id, ref, ri)) for bff in bf.Faces]
 
         # Match them up to faces in the main geometry
         bc_matched_faces = CfdTools.matchFaces(boundary_face_list, mesh_face_list)
-
 
         # Check for and filter duplicates
         bc_match_per_shape_face = [-1] * len(mesh_face_list)
@@ -263,7 +262,7 @@ class CfdMeshTools:
                         except RuntimeError as re:
                             raise RuntimeError("Error processing mesh refinement {}: {}".format(
                                 mr_obj.Label, str(re)))
-                        bl_face_list.append((f, (mr_id, r, ri)))
+                        bl_face_list += [(ff, (mr_id, r, ri)) for ff in f.Faces]
 
             # Match them up
             bl_matched_faces = CfdTools.matchFaces(bl_face_list, mesh_face_list)
@@ -316,7 +315,7 @@ class CfdMeshTools:
                         except RuntimeError as re:
                             raise RuntimeError("Error processing mesh refinement {}: {}".format(
                                 mr_obj.Label, str(re)))
-                        mr_face_list.append((f, (mr_id, r, ri)))
+                        mr_face_list += [(ff, (mr_id, r, ri)) for ff in f.Faces]
 
             # Match mesh regions to the boundary conditions, to identify boundary conditions on supplementary
             # geometry (including on baffles)
@@ -384,8 +383,7 @@ class CfdMeshTools:
                     "than 0.001.\n".format(mr_obj.Name))
 
             # Find any matches with boundary conditions; mark those matching baffles for removal
-            bc_matches = [
-                m for m in bc_mr_matched_faces if m[1][0] == mr_id]
+            bc_matches = [m for m in bc_mr_matched_faces if m[1][0] == mr_id]
             bc_match_per_mr_ref = [-1]*len(mr_obj.References)
             for m in bc_matches:
                 bc_match_per_mr_ref[m[1][2]] = -2 if bc_group[m[0][0]].BoundaryType == 'baffle' else m[0][0]
@@ -477,7 +475,7 @@ class CfdMeshTools:
                 print ('  Mesh refinements found - getting elements')
                 if self.part_obj.Shape.ShapeType == 'Compound':
                     # see http://forum.freecadweb.org/viewtopic.php?f=18&t=18780&start=40#p149467 and http://forum.freecadweb.org/viewtopic.php?f=18&t=18780&p=149520#p149520
-                    err = "GMSH could return unexpected meshes for a boolean split tools Compound. It is strongly recommended to extract the shape to mesh from the Compound and use this one."
+                    err = "GMSH may not work correctly with compounds. It is recommended to convert them to solids."
                     FreeCAD.Console.PrintError(err + "\n")
                 for mr_obj in mr_objs:
                     if mr_obj.RelativeLength:
@@ -520,7 +518,6 @@ class CfdMeshTools:
                     ele_shape = FemGeomTools.get_element(self.part_obj, eleml)  # the method getElement(element) does not return Solid elements
                     ele_vertexes = FemGeomTools.get_vertexes_by_element(self.part_obj.Shape, ele_shape)
                     self.ele_node_map[eleml] = ele_vertexes
-
 
     def automaticInsidePointDetect(self):
         # Snappy requires that the chosen internal point must remain internal during the meshing process and therefore

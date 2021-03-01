@@ -1,5 +1,6 @@
 # ***************************************************************************
-# *   (c) Juergen Riegel (juergen.riegel@web.de) 2002                       *
+# *                                                                         *
+# *   Copyright (c) 2021 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                         *
 # *   This file is part of the FreeCAD CAx development system.              *
 # *                                                                         *
@@ -19,13 +20,8 @@
 # *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
 # *   USA                                                                   *
 # *                                                                         *
-# *   Juergen Riegel 2002                                                   *
 # ***************************************************************************/
 
 
-# add import and export file for this workbench
-
-# NOTE: Revive if VTK is added (JH) 16/02/2017
-# if("BUILD_FEM_VTK" in FreeCAD.__cmake__):
-#     FreeCAD.addImportType("CFD result formats (*.vtk)", "CfdResultFoamVTK")
-
+# Import/export types
+FreeCAD.addImportType("Multi-part ASCII STL Mesh (*.stl *.ast)", "CfdImportSTL")

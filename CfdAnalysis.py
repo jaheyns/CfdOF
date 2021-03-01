@@ -137,7 +137,7 @@ class _ViewProviderCfdAnalysis:
         docName = str(vobj.Object.Document.Name)
         doc = FreeCAD.getDocument(docName)
         for obj in doc.Objects:
-            if obj.isDerivedFrom("Part::Feature") and not("CfdFluidBoundary" in obj.Name):
+            if obj.isDerivedFrom("Part::Feature") and not ("CfdFluidBoundary" in obj.Name):
                 vobj2 = FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject
                 if hasattr(vobj2, 'Transparency'):
                     vobj2.Transparency = 70
@@ -145,8 +145,6 @@ class _ViewProviderCfdAnalysis:
                     doc.getObject(obj.Name).ViewObject.LineWidth = 1
                     doc.getObject(obj.Name).ViewObject.LineColor = (0.5, 0.5, 0.5)
                     doc.getObject(obj.Name).ViewObject.PointColor = (0.5, 0.5, 0.5)
-            if obj.isDerivedFrom("Part::Feature") and obj.Name.startswith("Compound"):
-                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Visibility = False
 
     def __getstate__(self):
         return None
