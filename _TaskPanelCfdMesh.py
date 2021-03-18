@@ -30,6 +30,7 @@ import os
 import os.path
 from CfdMesh import _CfdMesh
 import time
+from datetime import timedelta
 import CfdTools
 from CfdTools import setQuantity, getQuantity
 import CfdMeshTools
@@ -165,7 +166,8 @@ class _TaskPanelCfdMesh:
             FreeCAD.Gui.updateGui()
 
     def update_timer_text(self):
-        self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
+        delta = str(timedelta(seconds=time.time() - self.Start))[:-5]
+        self.form.l_time.setText('Time: {}'.format(delta))
 
     def choose_utility(self, index):
         if index < 0:
@@ -181,7 +183,7 @@ class _TaskPanelCfdMesh:
         importlib.reload(CfdMeshTools)
         self.console_message_cart = ''
         self.Start = time.time()
-        self.Timer.start()
+        self.Timer.start(100)
         # Re-initialise CfdMeshTools with new parameters
         self.store()
         FreeCADGui.addModule("CfdMeshTools")
@@ -224,7 +226,7 @@ class _TaskPanelCfdMesh:
 
     def runMesh(self):
         self.Start = time.time()
-        self.Timer.start()
+        self.Timer.start(100)
         cart_mesh = self.cart_mesh
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
