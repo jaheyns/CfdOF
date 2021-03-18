@@ -305,8 +305,8 @@ class CfdPreferencePage:
     def threadFinished(self, status):
         if self.thread.task == DOWNLOAD_CFMESH:
             if status:
-                self.consoleMessage("Download completed")
                 if CfdTools.getFoamRuntime() != "MinGW":
+                    self.consoleMessage("Download completed")
                     user_dir = self.thread.user_dir
                     self.consoleMessage("Building cfMesh. Lengthy process - please wait...")
                     self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
@@ -320,14 +320,16 @@ class CfdPreferencePage:
                         self.install_process = CfdTools.startFoamApplication(
                             "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
                             'log.Allwmake', self.installFinished)
+                else:
+                    self.consoleMessage("Install completed")
                 # Reset foam dir for now in case the user presses 'Cancel'
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:
                 self.consoleMessage("Download unsuccessful")
         elif self.thread.task == DOWNLOAD_HISA:
             if status:
-                self.consoleMessage("Download completed")
                 if CfdTools.getFoamRuntime() != "MinGW":
+                    self.consoleMessage("Download completed")
                     user_dir = self.thread.user_dir
                     self.consoleMessage("Building HiSA. Please wait...")
                     self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, HISA_FILE_BASE))
@@ -341,6 +343,8 @@ class CfdPreferencePage:
                         self.install_process = CfdTools.startFoamApplication(
                             "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
                             'log.Allwmake', self.installFinished)
+                else:
+                    self.consoleMessage("Install completed")
                 # Reset foam dir for now in case the user presses 'Cancel'
                 CfdTools.setFoamDir(self.initial_foam_dir)
             else:
