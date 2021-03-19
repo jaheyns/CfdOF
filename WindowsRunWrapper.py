@@ -39,16 +39,23 @@ def processStdin():
 
 def processStdout():
     with process.stdout:
-        for output in iter(process.stdout.readline, ''):
-            sys.stdout.write(output)
-            sys.stdout.flush()
-
+        try:
+            for output in iter(process.stdout.readline, ''):
+                sys.stdout.write(output)
+                sys.stdout.flush()
+        except UnicodeDecodeError:
+            # Avoid falling over is some weird character is emitted
+            pass
 
 def processStderr():
     with process.stderr:
-        for output in iter(process.stderr.readline, ''):
-            sys.stderr.write(output)
-            sys.stdout.flush()
+        try:
+            for output in iter(process.stderr.readline, ''):
+                sys.stderr.write(output)
+                sys.stderr.flush()
+        except UnicodeDecodeError:
+            # Avoid falling over is some weird character is emitted
+            pass
 
 
 # Run program, return its exit code, while awaiting quit instruction on stdin pipe
