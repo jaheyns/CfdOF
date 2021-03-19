@@ -5,7 +5,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -56,6 +56,8 @@ class _TaskPanelCfdSolverControl:
                                                     stdoutHook=self.gotOutputLines,
                                                     stderrHook=self.gotErrorLines)
         self.Timer = QtCore.QTimer()
+        self.Timer.setInterval(1000)
+        self.Timer.timeout.connect(self.updateText)
 
         self.form.terminateSolver.clicked.connect(self.killSolverProcess)
         self.form.terminateSolver.setEnabled(False)
@@ -72,8 +74,8 @@ class _TaskPanelCfdSolverControl:
         self.form.pb_run_solver.clicked.connect(self.runSolverProcess)
         self.form.pb_paraview.clicked.connect(self.openParaview)
 
-        self.Timer.timeout.connect(self.updateText)
         self.Start = time.time()
+        self.Timer.start()
 
     def updateUI(self):
         solverDirectory = os.path.join(self.working_dir, self.solver_object.InputCaseName)
@@ -90,7 +92,7 @@ class _TaskPanelCfdSolverControl:
 
     def updateText(self):
         if self.solver_run_process.state() == QtCore.QProcess.ProcessState.Running:
-            self.form.l_time.setText('Time: {0:4.1f}'.format(time.time() - self.Start))
+            self.form.l_time.setText('Time: ' + CfdTools.formatTimer(time.time() - self.Start))
 
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)

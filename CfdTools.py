@@ -41,6 +41,7 @@ import platform
 import subprocess
 import sys
 import math
+from datetime import timedelta
 import BOPTools
 from BOPTools import SplitFeatures
 if FreeCAD.GuiUp:
@@ -271,6 +272,11 @@ def cfdMessage(msg):
     if FreeCAD.GuiUp:
         FreeCAD.Gui.updateGui()
         FreeCAD.Gui.updateGui()
+
+
+def formatTimer(seconds):
+    """ Put the elapsed time printout into a nice format """
+    return str(timedelta(seconds=seconds)).split('.', 2)[0].lstrip('0').lstrip(':')
 
 
 def setQuantity(inputField, quantity):

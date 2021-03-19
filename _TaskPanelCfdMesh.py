@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -50,8 +50,6 @@ class _TaskPanelCfdMesh:
         self.mesh_obj = obj
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMesh.ui"))
 
-        self.Timer = QtCore.QTimer()
-        self.Start = time.time()
         self.console_message_cart = ''
         self.error_message = ''
         self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
@@ -60,9 +58,11 @@ class _TaskPanelCfdMesh:
         self.mesh_process = CfdConsoleProcess(finishedHook=self.meshFinished,
                                               stdoutHook=self.gotOutputLines,
                                               stderrHook=self.gotErrorLines)
-        self.edit_prcess = None
 
         self.form.cb_utility.activated.connect(self.choose_utility)
+
+        self.Timer = QtCore.QTimer()
+        self.Timer.setInterval(1000)
         self.Timer.timeout.connect(self.update_timer_text)
 
         self.open_paraview = QtCore.QProcess()
@@ -90,6 +90,9 @@ class _TaskPanelCfdMesh:
 
         self.load()
         self.updateUI()
+
+        self.Start = time.time()
+        self.Timer.start()
 
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)
@@ -166,8 +169,8 @@ class _TaskPanelCfdMesh:
             FreeCAD.Gui.updateGui()
 
     def update_timer_text(self):
-        delta = str(timedelta(seconds=time.time() - self.Start))[:-5]
-        self.form.l_time.setText('Time: {}'.format(delta))
+        if self.mesh_process.state() == QtCore.QProcess.ProcessState.Running:
+            self.form.l_time.setText('Time: ' + CfdTools.formatTimer(time.time() - self.Start))
 
     def choose_utility(self, index):
         if index < 0:
@@ -183,7 +186,6 @@ class _TaskPanelCfdMesh:
         importlib.reload(CfdMeshTools)
         self.console_message_cart = ''
         self.Start = time.time()
-        self.Timer.start(100)
         # Re-initialise CfdMeshTools with new parameters
         self.store()
         FreeCADGui.addModule("CfdMeshTools")
@@ -215,7 +217,6 @@ class _TaskPanelCfdMesh:
             self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
             raise
         finally:
-            self.Timer.stop()
             QApplication.restoreOverrideCursor()
         self.updateUI()
 
@@ -226,7 +227,6 @@ class _TaskPanelCfdMesh:
 
     def runMesh(self):
         self.Start = time.time()
-        self.Timer.start(100)
         cart_mesh = self.cart_mesh
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -278,7 +278,6 @@ class _TaskPanelCfdMesh:
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(False)
 
-        self.Timer.stop()
         self.error_message = ''
         # Get rid of any existing loaded mesh
         self.pbClearMeshClicked()
