@@ -36,6 +36,7 @@ else:
     import urllib as urlrequest
     import urlparse
 import ssl
+import ctypes
 
 import FreeCAD
 import CfdTools
@@ -224,7 +225,22 @@ class CfdPreferencePage:
         CfdTools.setParaviewPath(self.initial_paraview_path)
         QApplication.restoreOverrideCursor()
 
+    def showAdministratorWarningMessage(self):
+        if platform.system() == "Windows":
+            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+            if not is_admin:
+                button = QtGui.QMessageBox.question(None, "CfdOF Workbench",
+                  "Before installing this software, it is advised to run FreeCAD in administrator mode (hold down "
+                  " the 'Shift' key, right-click on the FreeCAD launcher, and choose 'Run as administrator').\n\n"
+                  "If this is not possible, please make sure OpenFOAM is installed in a location to which you have "
+                  "full read/write access rights.\n\n"
+                  "You are not currently running as administrator - do you wish to continue anyway?")
+                return button == QtGui.QMessageBox.StandardButton.Yes
+        return True
+
     def downloadInstallOpenFoam(self):
+        if not self.showAdministratorWarningMessage():
+            return
         if self.createThread():
             self.thread.task = DOWNLOAD_OPENFOAM
             self.thread.openfoam_url = self.form.le_openfoam_url.text()
@@ -247,9 +263,11 @@ class CfdPreferencePage:
             self.form.le_paraview_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallCfMesh(self):
-        runtime = self.testGetRuntime(False)
+        if not self.showAdministratorWarningMessage():
+            return
 
-        if self.testGetRuntime() == "MinGW" and self.form.le_cfmesh_url.text() == CFMESH_URL:
+        runtime = self.testGetRuntime(False)
+        if runtime == "MinGW" and self.form.le_cfmesh_url.text() == CFMESH_URL:
             # Openfoam might have just been installed and the URL would not have had a chance to update
             self.setDownloadURLs()
 
@@ -266,8 +284,10 @@ class CfdPreferencePage:
             self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def downloadInstallHisa(self):
-        runtime = self.testGetRuntime(False)
+        if not self.showAdministratorWarningMessage():
+            return
 
+        runtime = self.testGetRuntime(False)
         if runtime == "MinGW" and self.form.le_hisa_url.text() == HISA_URL:
             # Openfoam might have just been installed and the URL would not have had a chance to update
             self.setDownloadURLs()

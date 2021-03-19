@@ -50,7 +50,8 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 
 # Some standard install locations that are searched if an install directory is not specified
-FOAM_DIR_DEFAULTS = {"Windows": ["~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v2012",
+FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v2012",
+                                 "~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v2012",
                                  "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v2012",
                                  "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v2006",
                                  "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v1912",
