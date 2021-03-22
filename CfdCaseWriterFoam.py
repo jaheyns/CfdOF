@@ -313,7 +313,7 @@ class CfdCaseWriterFoam:
 
         if initial_values['PotentialFlowP']:
             if settings['solver']['SolverName'] not in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'hisa']:
-                RuntimeError("Selected solver does not support potential pressure initialisation.")
+                raise RuntimeError("Selected solver does not support potential pressure initialisation.")
 
         physics = settings['physics']
 
