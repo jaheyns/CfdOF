@@ -138,7 +138,9 @@ class _ViewProviderCfdAnalysis:
         doc = FreeCAD.getDocument(docName)
         for obj in doc.Objects:
             if obj.isDerivedFrom("Part::Feature") and not("CfdFluidBoundary" in obj.Name):
-                FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject.Transparency = 70
+                vobj2 = FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject
+                if hasattr(vobj2, 'Transparency'):
+                    vobj2.Transparency = 70
                 if obj.isDerivedFrom("PartDesign::Feature"):
                     doc.getObject(obj.Name).ViewObject.LineWidth = 1
                     doc.getObject(obj.Name).ViewObject.LineColor = (0.5, 0.5, 0.5)
