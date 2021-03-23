@@ -35,6 +35,14 @@ then
     exit 1
 fi
 
+# Detect available turbulence lib
+if [ -f "$FOAM_LIBBIN/libmomentumTransportModels.so" ]
+then
+    echo \"libmomentumTransportModels.so\" > system/turbulenceLib
+else
+    echo \"libturbulenceModels.so\" > system/turbulenceLib
+fi
+
 # Update patch name and type
 runCommand createPatch -overwrite
 

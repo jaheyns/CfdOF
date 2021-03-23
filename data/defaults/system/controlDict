@@ -64,8 +64,7 @@ runTimeModifiable true;
 libs
 (
     // Needed for availability of porous baffle boundary in potentialFoam
-    "libturbulenceModels.so"
-    "libmomentumTransportModels.so"
+    #include "turbulenceLib"
 %{%(solver/SolverName%)
 %:hisa
     // Needed for availability of boundary conditions in potentialFoam
