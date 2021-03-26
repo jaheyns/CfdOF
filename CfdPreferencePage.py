@@ -229,12 +229,14 @@ class CfdPreferencePage:
         if platform.system() == "Windows":
             is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
             if not is_admin:
-                button = QtGui.QMessageBox.question(None, "CfdOF Workbench",
-                  "Before installing this software, it is advised to run FreeCAD in administrator mode (hold down "
-                  " the 'Shift' key, right-click on the FreeCAD launcher, and choose 'Run as administrator').\n\n"
-                  "If this is not possible, please make sure OpenFOAM is installed in a location to which you have "
-                  "full read/write access rights.\n\n"
-                  "You are not currently running as administrator - do you wish to continue anyway?")
+                button = QtGui.QMessageBox.question(
+                    None,
+                    "CfdOF Workbench",
+                    "Before installing this software, it is advised to run FreeCAD in administrator mode (hold down "
+                    " the 'Shift' key, right-click on the FreeCAD launcher, and choose 'Run as administrator').\n\n"
+                    "If this is not possible, please make sure OpenFOAM is installed in a location to which you have "
+                    "full read/write access rights.\n\n"
+                    "You are not currently running as administrator - do you wish to continue anyway?")
                 return button == QtGui.QMessageBox.StandardButton.Yes
         return True
 
