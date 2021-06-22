@@ -54,7 +54,7 @@ The CfdOF workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (at least version 0.18.4 / git commit 16146)](https://www.freecadweb.org/downloads.php)
- or [latest development version (0.19 prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
+ or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
 - OpenFOAM [Foundation versions 5-8](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2012](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
 - [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
@@ -93,18 +93,19 @@ conveniently from the CfdOF Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CfdOF". 
 
-The OpenFOAM installation is via the [OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php).
-The [OpenCFD docker package](https://www.openfoam.com/download/install-binary-windows.php) as
-well as the [BlueCFD Core](http://bluecfd.github.io/Core/) port are also currently supported but have some issues.  
+The OpenFOAM installation is via the [OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php), and 
+the [BlueCFD Core](https://bluecfd.github.io/Core/) port of OpenFOAM is also supported. 
+The [OpenCFD docker package](https://www.openfoam.com/download/install-binary-windows.php) is also currently supported but has some issues.  
 
-OpenFOAM can be installed manually using the above link, or by clicking the relevant
+OpenFOAM can be installed manually using the above links, or by clicking the relevant
 button in the Preferences panel described above. If you experience problems running OpenFOAM in CfdOF, please make
-sure you have a working installation.
+sure you have a working installation by following instructions on the relevant websites.
 
 Set the OpenFOAM install directory in the preferences
-panel to the install directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed).
+panel to the install directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed)
+for the MinGW package, or the BlueCFD install directory.
  It will be automatically detected in the default install
-location.
+locations.
 
 Any version of [ParaView](https://www.paraview.org/download/) can be installed, 
 by following the above link or clicking the relevant button in the Preferences panel.
@@ -112,7 +113,7 @@ Set the ParaView install path in the preferences panel to the 'paraview.exe' fil
 subfolder of the ParaView installation. Common defaults will be detected if it is left blank.
 
 Likewise, cfMesh and HiSA can be installed from the 
-Preferences panel. Do not close the
+Preferences panel. Do not close
 it until the 'Install completed' message is received.
 Note that the OpenFOAM installation must be in a writable location
 for cfMesh and HiSA to be installed successfully.
@@ -131,6 +132,9 @@ The [Ubuntu PPA daily build](https://www.freecadweb.org/wiki/Install_on_Unix)
 packages are an alternative binary option. Otherwise, FreeCAD can be built 
 from the source code at 
 https://github.com/FreeCAD/FreeCAD . 
+Note that installation of the Snap containers is problematic as they restrict access to system
+directories, and therefore OpenFOAM has to be installed in the user's home directory
+to be accessible by FreeCAD. 
 
 Before installing CfdOF, the Plot workbench must first be 
 installed into FreeCAD using the Addon manager:
@@ -158,10 +162,10 @@ installed using your distribution's package manager
 or the links above. 
 
 Set the OpenFOAM install directory in the preferences
-panel - examples of typical install locations are /opt/openfoam7 
-or /home/user/OpenFOAM/OpenFOAM-7.x (It will be automatically 
+panel - examples of typical install locations are /opt/openfoam8 
+or /home/user/OpenFOAM/OpenFOAM-8.x (It will be automatically 
 detected in common default install
-locations.) Note that if you have loaded the desired OpenFOAM 
+locations). Note that if you have loaded the desired OpenFOAM 
 environment already, the installation path must be left blank
 to use this.
 This also applies in the case of the Debian OpenFOAM package which is integrated into
