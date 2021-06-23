@@ -36,7 +36,7 @@ then
 fi
 
 # Detect available turbulence lib
-if [ -f "$FOAM_LIBBIN/libmomentumTransportModels.so" ]
+if [ -f "$FOAM_LIBBIN/libmomentumTransportModels.so" ] || [ -f "$FOAM_LIBBIN/libmomentumTransportModels.dll" ]
 then
     echo \"libmomentumTransportModels.so\" > system/turbulenceLib
 else
