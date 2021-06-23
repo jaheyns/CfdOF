@@ -137,11 +137,11 @@ class _ViewProviderCfdInitialseInternalFlowField:
     def setEdit(self, vobj, mode):
         analysis_object = CfdTools.getParentAnalysisObject(self.Object)
         if analysis_object is None:
-            CfdTools.cfdError("No parent analysis object found")
+            CfdTools.cfdErrorBox("No parent analysis object found")
             return False
         physics_model = CfdTools.getPhysicsModel(analysis_object)
         if not physics_model:
-            CfdTools.cfdError("Analysis object must have a physics object")
+            CfdTools.cfdErrorBox("Analysis object must have a physics object")
             return False
         boundaries = CfdTools.getCfdBoundaryGroup(analysis_object)
         material_objs = CfdTools.getMaterials(analysis_object)
@@ -165,7 +165,7 @@ class _ViewProviderCfdInitialseInternalFlowField:
             if analysis_obj:
                 CfdTools.setActiveAnalysis(analysis_obj)
             else:
-                CfdTools.cfdError('No parent analysis object detected')
+                CfdTools.cfdErrorBox('No parent analysis object detected')
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:

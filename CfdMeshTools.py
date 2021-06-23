@@ -233,6 +233,22 @@ class CfdMeshTools:
         # Match them up to faces in the main geometry
         bc_matched_faces = CfdTools.matchFaces(boundary_face_list, mesh_face_list)
 
+
+        # Check for and filter duplicates
+        bc_match_per_shape_face = [-1] * len(mesh_face_list)
+        for k in range(len(bc_matched_faces)):
+            match = bc_matched_faces[k][1]
+            prev_k = bc_match_per_shape_face[match]
+            if prev_k >= 0:
+                nb, bref, ri = bc_matched_faces[k][0]
+                nb2, bref2, ri2 = bc_matched_faces[prev_k][0]
+                CfdTools.cfdWarning(
+                    "Boundary '{}' reference {}:{} also assigned as "
+                    "boundary '{}' reference {}:{} - ignoring duplicate\n".format(
+                        bc_group[nb].Label, bref[0], bref[1], bc_group[nb2].Label, bref2[0], bref2[1]))
+            else:
+                bc_match_per_shape_face[match] = k
+
         # Make list of all boundary layer mesh regions for cfMesh
         bl_matched_faces = []
         if self.mesh_obj.MeshUtility == 'cfMesh':
@@ -252,21 +268,6 @@ class CfdMeshTools:
             # Match them up
             bl_matched_faces = CfdTools.matchFaces(bl_face_list, mesh_face_list)
 
-        # Check for and filter duplicates
-        bc_match_per_shape_face = [-1] * len(mesh_face_list)
-        for k in range(len(bc_matched_faces)):
-            match = bc_matched_faces[k][1]
-            prev_k = bc_match_per_shape_face[match]
-            if prev_k >= 0:
-                nb, bref, ri = bc_matched_faces[k][0]
-                nb2, bref2, ri2 = bc_matched_faces[prev_k][0]
-                CfdTools.cfdMessage(
-                    "Boundary '{}' reference {}:{} also assigned as "
-                    "boundary '{}' reference {}:{} - ignoring duplicate\n".format(
-                        bc_group[nb].Label, bref[0], bref[1], bc_group[nb2].Label, bref2[0], bref2[1]))
-            else:
-                bc_match_per_shape_face[match] = k
-
         bl_match_per_shape_face = [-1] * len(mesh_face_list)
         for k in range(len(bl_matched_faces)):
             match = bl_matched_faces[k][1]
@@ -274,7 +275,7 @@ class CfdMeshTools:
             if prev_k >= 0:
                 nr, ref, ri = bl_matched_faces[k][0]
                 nr2, ref2, ri2 = bl_matched_faces[prev_k][0]
-                CfdTools.cfdMessage(
+                CfdTools.cfdWarning(
                     "Mesh refinement '{}' reference {}:{} also assigned as "
                     "mesh refinement '{}' reference {}:{} - ignoring duplicate\n".format(
                         mr_objs[nr].Label, ref[0], ref[1], mr_objs[nr2].Label, ref2[0], ref2[1]))
@@ -533,8 +534,8 @@ class CfdMeshTools:
         if (step_size*error_safety_factor >= bound_box.XLength or
                         step_size*error_safety_factor >= bound_box.YLength or
                         step_size*error_safety_factor >= bound_box.ZLength):
-            CfdTools.cfdError("Current choice in characteristic length of {} might be too large for automatic "
-                              "internal point detection.".format(self.clmax))
+            CfdTools.cfdErrorBox("Current choice in characteristic length of {} might be too large for automatic "
+                                 "internal point detection.".format(self.clmax))
         x1 = bound_box.XMin
         x2 = bound_box.XMax
         y1 = bound_box.YMin
@@ -550,7 +551,7 @@ class CfdMeshTools:
             result = shape.isInside(pointCheck, step_size, False)
             if result:
                 return pointCheck
-        CfdTools.cfdError("Failed to find an internal point - please specify manually.")
+        CfdTools.cfdErrorBox("Failed to find an internal point - please specify manually.")
         return None
 
     def writePartFile(self):

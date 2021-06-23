@@ -319,11 +319,11 @@ class _ViewProviderCfdFluidBoundary:
     def setEdit(self, vobj, mode):
         analysis_object = CfdTools.getParentAnalysisObject(self.Object)
         if analysis_object is None:
-            CfdTools.cfdError("Boundary must have a parent analysis object")
+            CfdTools.cfdErrorBox("Boundary must have a parent analysis object")
             return False
         physics_model = CfdTools.getPhysicsModel(analysis_object)
         if not physics_model:
-            CfdTools.cfdError("Analysis object must have a physics object")
+            CfdTools.cfdErrorBox("Analysis object must have a physics object")
             return False
         material_objs = CfdTools.getMaterials(analysis_object)
 

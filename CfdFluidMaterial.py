@@ -64,7 +64,7 @@ class _CommandCfdFluidMaterial:
         editing_existing = False
         analysis_object = CfdTools.getActiveAnalysis()
         if analysis_object is None:
-            CfdTools.cfdError("No active analysis object found")
+            CfdTools.cfdErrorBox("No active analysis object found")
             return False
         physics_model = CfdTools.getPhysicsModel(analysis_object)
         if not physics_model or physics_model.Phase == 'Single':
@@ -140,11 +140,11 @@ class _ViewProviderCfdFluidMaterial:
     def setEdit(self, vobj, mode):
         analysis_object = CfdTools.getParentAnalysisObject(self.Object)
         if analysis_object is None:
-            CfdTools.cfdError("No parent analysis object found")
+            CfdTools.cfdErrorBox("No parent analysis object found")
             return False
         physics_model = CfdTools.getPhysicsModel(analysis_object)
         if not physics_model:
-            CfdTools.cfdError("Analysis object must have a physics object")
+            CfdTools.cfdErrorBox("Analysis object must have a physics object")
             return False
         import _TaskPanelCfdFluidProperties
         taskd = _TaskPanelCfdFluidProperties.TaskPanelCfdFluidProperties(self.Object, physics_model)

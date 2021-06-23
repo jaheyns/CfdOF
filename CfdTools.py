@@ -259,21 +259,37 @@ def normalise(v):
     return [vi/mag for vi in v]
 
 
-def cfdError(msg):
-    """ Show message for an expected error """
-    QtGui.QApplication.restoreOverrideCursor()
-    if FreeCAD.GuiUp:
-        QtGui.QMessageBox.critical(None, "CfdOF Workbench", msg)
-    else:
-        FreeCAD.Console.PrintError(msg + "\n")
-
-
 def cfdMessage(msg):
     """ Print a message to console and refresh GUI """
     FreeCAD.Console.PrintMessage(msg)
     if FreeCAD.GuiUp:
         FreeCAD.Gui.updateGui()
         FreeCAD.Gui.updateGui()
+
+
+def cfdWarning(msg):
+    """ Print a message to console and refresh GUI """
+    FreeCAD.Console.PrintMessage(msg)
+    if FreeCAD.GuiUp:
+        FreeCAD.Gui.updateGui()
+        FreeCAD.Gui.updateGui()
+
+
+def cfdError(msg):
+    """ Print a message to console and refresh GUI """
+    FreeCAD.Console.PrintMessage(msg)
+    if FreeCAD.GuiUp:
+        FreeCAD.Gui.updateGui()
+        FreeCAD.Gui.updateGui()
+
+
+def cfdErrorBox(msg):
+    """ Show message for an expected error """
+    QtGui.QApplication.restoreOverrideCursor()
+    if FreeCAD.GuiUp:
+        QtGui.QMessageBox.critical(None, "CfdOF Workbench", msg)
+    else:
+        FreeCAD.Console.PrintError(msg + "\n")
 
 
 def formatTimer(seconds):
