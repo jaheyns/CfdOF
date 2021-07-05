@@ -650,6 +650,24 @@ def makeRunCommand(cmd, dir, source_env=True):
         with open('{}\\msys64\\home\\ofuser\\.blueCFDOrigin'.format(inst_path), "w") as f:
             f.write(short_bluecfd_path)
             f.close()
+        srcdir = '{}\\msys64\\mingw64\\bin'.format(inst_path)
+        destdir1 = '{}\\OpenFOAM-8\\platforms\\mingw_w64GccDPInt32Opt\\bin'.format(inst_path)
+        destdir2 = '{}\\ofuser-of8\\platforms\\mingw_w64GccDPInt32Opt\\bin'.format(inst_path)
+        try:
+            file = 'libstdc++-6.dll'
+            if not os.path.isfile(os.path.join(destdir1, file)):
+                shutil.copy(os.path.join(srcdir, file), os.path.join(destdir1, file))
+            if not os.path.isfile(os.path.join(destdir2, file)):
+                shutil.copy(os.path.join(srcdir, file), os.path.join(destdir2, file))
+            file = 'libgomp-1.dll'
+            if not os.path.isfile(os.path.join(destdir1, file)):
+                shutil.copy(os.path.join(srcdir, file), os.path.join(destdir1, file))
+            if not os.path.isfile(os.path.join(destdir2, file)):
+                shutil.copy(os.path.join(srcdir, file), os.path.join(destdir2, file))
+        except IOError as err:
+            cfdErrorBox('Unable to copy file {} from directory {} to {} and {}: {}\n'
+                        'Try running FreeCAD again with administrator privileges, or copy the file manually.'
+                        .format(file, srcdir, destdir1, destdir2, str(err)))
 
         # Note: Prefixing bash call with the *short* path can prevent errors due to spaces in paths
         # when running linux tools - specifically when building
