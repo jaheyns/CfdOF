@@ -454,14 +454,6 @@ def detectFoamDir():
         if not foam_dir:
             foam_dir = None
 
-        # Detect system integrated version
-        cmdline = ['bash', '-l', '-c', 'which simpleFoam']
-        simple_path = subprocess.check_output(cmdline, stderr=subprocess.PIPE, universal_newlines=True)
-        if os.path.exists(simple_path.strip()):
-            foam_dir = ""  # Empty string means use system installed version
-        else:
-            foam_dir = None
-
     if foam_dir is None:
         for d in FOAM_DIR_DEFAULTS[platform.system()]:
             foam_dir = os.path.expanduser(d)
@@ -718,8 +710,10 @@ def runFoamCommand(cmdline, case=None):
 
 class CfdSynchronousFoamProcess:
     def __init__(self):
-        self.process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=self.readOutput, stderrHook=self.readOutput)
+        self.process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=self.readOutput, stderrHook=self.readError)
         self.output = ""
+        self.outputErr = ""
+        self.outputAll = ""
 
     def run(self, cmdline, case=None):
         print("Running ", cmdline)
@@ -730,6 +724,11 @@ class CfdSynchronousFoamProcess:
 
     def readOutput(self, output):
         self.output += output
+        self.outputAll += output
+
+    def readError(self, output):
+        self.outputErr += output
+        self.outputAll += output
 
 
 def startFoamApplication(cmd, case, log_name='', finishedHook=None, stdoutHook=None, stderrHook=None):
@@ -852,13 +851,13 @@ def checkCfdDependencies(term_print=True):
                 print(fc_msg)
             message += fc_msg + '\n'
 
-        # check openfoam
+        # check openfoam7
         if term_print:
             print("Checking for OpenFOAM:")
         try:
             foam_dir = getFoamDir()
             if term_print:
-                print("OpenFOAM directory: " + foam_dir if len(foam_dir) else "(system installation)")
+                print("OpenFOAM directory: " + (foam_dir if len(foam_dir) else "(system installation)"))
                 print("System: {}".format(platform.system()))
                 print("Runtime: {}".format(getFoamRuntime()))
         except IOError as e:
@@ -867,7 +866,7 @@ def checkCfdDependencies(term_print=True):
                 print(ofmsg)
             message += ofmsg + '\n'
         else:
-            if not foam_dir:
+            if foam_dir is None:
                 ofmsg = "OpenFOAM installation path not set and OpenFOAM environment neither pre-loaded before " + \
                         "running FreeCAD nor detected in standard locations"
                 if term_print:
@@ -886,8 +885,10 @@ def checkCfdDependencies(term_print=True):
                         print(runmsg)
                     raise
                 else:
-                    foam_ver = foam_ver.rstrip().split()[-1]
-                    if foam_ver != 'dev' and foam_ver != 'plus':
+                    foam_ver = foam_ver.rstrip()
+                    if foam_ver:
+                        foam_ver = foam_ver.split()[-1]
+                    if foam_ver and foam_ver != 'dev' and foam_ver != 'plus':
                         try:
                             # Isolate major version number
                             foam_ver = foam_ver.lstrip('v')
@@ -920,12 +921,12 @@ def checkCfdDependencies(term_print=True):
                                 print(vermsg)
                     # Check for wmake
                     if getFoamRuntime() != "MinGW":
-                        wmake_output = runFoamCommand("wmake -help")
-                        wmake_output.strip()
-                        if wmake_output.find("Usage: wmake") < 0:
-                            wmakemsg = "OpenFOAM installation does not include 'wmake'.\n" + \
+                        try:
+                            runFoamCommand("wmake -help")
+                        except subprocess.CalledProcessError:
+                            wmakemsg = "OpenFOAM installation does not include 'wmake'. " + \
                                        "Installation of cfMesh and HiSA will not be possible."
-                            message += wmakemsg
+                            message += wmakemsg + "\n"
                             if term_print:
                                 print(wmakemsg)
 

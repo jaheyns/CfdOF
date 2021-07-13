@@ -82,7 +82,7 @@ runCommand flattenMesh
 
 %}
 
-if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ]
+if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ] || [ $WM_PROJECT_VERSION == "v1906" ]
 then
     runCommand surfaceMeshExtract mesh_outside.stl
 else
