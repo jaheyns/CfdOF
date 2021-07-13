@@ -71,8 +71,8 @@ The latest
 or [development](https://github.com/FreeCAD/FreeCAD/releases)
 FreeCAD build can be obtained (64 bit version) and installed
 by respectively running the installer or extracting the .7z archive to a directory
-<FreeCAD-directory>. In the latter case, FreeCAD can be run in place
-(<FreeCAD-directory>\bin\FreeCAD.exe). 
+\<FreeCAD-directory\>. In the latter case, FreeCAD can be run in place
+(\<FreeCAD-directory\>\bin\FreeCAD.exe). 
 
 Before installing CfdOF, the Plot workbench must first be 
 installed into FreeCAD using the Addon manager:
@@ -100,6 +100,12 @@ The [OpenCFD docker package](https://www.openfoam.com/download/install-binary-wi
 OpenFOAM can be installed manually using the above links, or by clicking the relevant
 button in the Preferences panel described above. If you experience problems running OpenFOAM in CfdOF, please make
 sure you have a working installation by following instructions on the relevant websites.
+
+To interface correctly with the OpenFOAM installation, CfdOF needs to be able to write to its
+install location.
+Some users experience problems using a location inside C:\Program Files due to restrictions
+imposed by Windows User Account Control. It is therefore suggested to install to an alternative 
+location, preferably in your home directory.  
 
 Set the OpenFOAM install directory in the preferences
 panel to the install directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed)
@@ -132,9 +138,11 @@ The [Ubuntu PPA daily build](https://www.freecadweb.org/wiki/Install_on_Unix)
 packages are an alternative binary option. Otherwise, FreeCAD can be built 
 from the source code at 
 https://github.com/FreeCAD/FreeCAD . 
-Note that installation of the Snap containers is problematic as they restrict access to system
+
+Note that the Snap container installed through some distributions' package managers
+can be problematic as it does not allow access to system
 directories, and therefore OpenFOAM has to be installed in the user's home directory
-to be accessible by FreeCAD. 
+to be runnable from FreeCAD. 
 
 Before installing CfdOF, the Plot workbench must first be 
 installed into FreeCAD using the Addon manager:
@@ -159,17 +167,18 @@ OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openf
 [Paraview](http://www.paraview.org/) and
 [GMSH](http://gmsh.info/) (optional). They should be
 installed using your distribution's package manager
-or the links above. 
+or the links above. The version packaged with some distributions
+does not include the build command 'wmake' and therefore
+cannot be used with the optional components 'HiSA' and 'cfMesh'.
 
 Set the OpenFOAM install directory in the preferences
 panel - examples of typical install locations are /opt/openfoam8 
 or /home/user/OpenFOAM/OpenFOAM-8.x (It will be automatically 
 detected in common default install
 locations). Note that if you have loaded the desired OpenFOAM 
-environment already, the installation path must be left blank
-to use this.
-This also applies in the case of the Debian OpenFOAM package which is integrated into
-the system.  
+environment already, the install directory should be left blank.
+This also applies in the case of packages that are integrated
+into the system, such as the Debian OpenFOAM package
 
 cfMesh and HiSA can be installed using the Preferences panel described above,
 and can be downloaded and built from their source
@@ -184,7 +193,8 @@ prerequisites have been successfully installed.
 
 ### Reporting Bugs
 
-Please discuss issues on the [CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37).
+Please discuss issues on the [CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37) 
+for community assistance.
 Bugs can be reported on the [gitlab project site](https://gitlab.com/opensimproject/cfdof). 
 
 Please first read the [guidelines for reporting bugs](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359) 

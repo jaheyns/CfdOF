@@ -17,11 +17,7 @@ runCommand '%(GmshSettings/Executable%)' - "gmsh/%(Name%)_Geometry.geo"
 
 %}
 %{%(FoamRuntime%)
-%:MinGW
-%:WindowsDocker
-%:BlueCFD
-%:BlueCFD2
-%:default
+%:Posix
 # Unset and source bashrc
 if [ -f "%(TranslatedFoamPath%)/etc/config/unset.sh" ]; then  # for OF < 4
    source "%(TranslatedFoamPath%)/etc/config/unset.sh" 2> /dev/null

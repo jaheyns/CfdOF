@@ -5,7 +5,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -269,7 +269,7 @@ def cfdMessage(msg):
 
 def cfdWarning(msg):
     """ Print a message to console and refresh GUI """
-    FreeCAD.Console.PrintMessage(msg)
+    FreeCAD.Console.PrintWarning(msg)
     if FreeCAD.GuiUp:
         FreeCAD.Gui.updateGui()
         FreeCAD.Gui.updateGui()
@@ -277,7 +277,7 @@ def cfdWarning(msg):
 
 def cfdError(msg):
     """ Print a message to console and refresh GUI """
-    FreeCAD.Console.PrintMessage(msg)
+    FreeCAD.Console.PrintError(msg)
     if FreeCAD.GuiUp:
         FreeCAD.Gui.updateGui()
         FreeCAD.Gui.updateGui()
@@ -411,7 +411,7 @@ def getFoamDir():
 
 def getFoamRuntime():
     installation_path = getFoamDir()
-    if not installation_path:
+    if installation_path is None:
         raise IOError("OpenFOAM installation path not set and not detected")
 
     runtime = None
@@ -427,6 +427,8 @@ def getFoamRuntime():
         elif os.path.exists(os.path.join(getFoamDir(), "etc", "bashrc")):
             runtime = 'BashWSL'
     else:
+        if not len(getFoamDir()):
+            runtime = 'PosixPreloaded'
         if os.path.exists(os.path.join(getFoamDir(), "etc", "bashrc")):
             runtime = 'Posix'
 
@@ -440,6 +442,7 @@ def detectFoamDir():
     """ Try to guess Foam install dir from WM_PROJECT_DIR or, failing that, various defaults """
     foam_dir = None
     if platform.system() == "Linux":
+        # Detect pre-loaded environment
         cmdline = ['bash', '-l', '-c', 'echo $WM_PROJECT_DIR']
         foam_dir = subprocess.check_output(cmdline, stderr=subprocess.PIPE, universal_newlines=True)
         if len(foam_dir) > 1:               # If env var is not defined, `\n` returned
@@ -448,8 +451,18 @@ def detectFoamDir():
             foam_dir = None
         if foam_dir and not os.path.exists(os.path.join(foam_dir, "etc", "bashrc")):
             foam_dir = None
+        if not foam_dir:
+            foam_dir = None
 
-    if not foam_dir:
+        # Detect system integrated version
+        cmdline = ['bash', '-l', '-c', 'which simpleFoam']
+        simple_path = subprocess.check_output(cmdline, stderr=subprocess.PIPE, universal_newlines=True)
+        if os.path.exists(simple_path.strip()):
+            foam_dir = ""  # Empty string means use system installed version
+        else:
+            foam_dir = None
+
+    if foam_dir is None:
         for d in FOAM_DIR_DEFAULTS[platform.system()]:
             foam_dir = os.path.expanduser(d)
             if foam_dir and not os.path.exists(foam_dir):
@@ -610,7 +623,7 @@ def makeRunCommand(cmd, dir, source_env=True):
         raise IOError("OpenFOAM installation directory not found")
 
     source = ""
-    if source_env:
+    if source_env and len(installation_path):
         env_setup_script = "{}/etc/bashrc".format(installation_path)
         source = 'source "{}" && '.format(env_setup_script)
     cd = ""
@@ -651,13 +664,22 @@ def makeRunCommand(cmd, dir, source_env=True):
             f.write(short_bluecfd_path)
             f.close()
         srcdir = '{}\\msys64\\mingw64\\bin'.format(inst_path)
-        destdir1 = '{}\\OpenFOAM-8\\platforms\\mingw_w64GccDPInt32Opt\\bin'.format(inst_path)
-        destdir2 = '{}\\ofuser-of8\\platforms\\mingw_w64GccDPInt32Opt\\bin'.format(inst_path)
+        destdir1 = None
+        destdir2 = None
+        with os.scandir('{}'.format(inst_path)) as dirs:
+            for dir in dirs:
+                if dir.is_dir() and dir.name.startswith('OpenFOAM-'):
+                    destdir1 = os.path.join(inst_path, dir.name, 'platforms\\mingw_w64GccDPInt32Opt\\bin')
+                if dir.is_dir() and dir.name.startswith('ofuser-of'):
+                    destdir2 = os.path.join(inst_path, dir.name, 'platforms\\mingw_w64GccDPInt32Opt\\bin')
+        if not destdir1 or not destdir2:
+            cfdError("Unable to find directories 'OpenFOAM-*' and 'ofuser-of*' in path {}. "
+                     "Possible error in BlueCFD installation.".format(inst_path))
         try:
             file = 'libstdc++-6.dll'
-            if not os.path.isfile(os.path.join(destdir1, file)):
+            if destdir1 and not os.path.isfile(os.path.join(destdir1, file)):
                 shutil.copy(os.path.join(srcdir, file), os.path.join(destdir1, file))
-            if not os.path.isfile(os.path.join(destdir2, file)):
+            if destdir2 and not os.path.isfile(os.path.join(destdir2, file)):
                 shutil.copy(os.path.join(srcdir, file), os.path.join(destdir2, file))
             file = 'libgomp-1.dll'
             if not os.path.isfile(os.path.join(destdir1, file)):
@@ -665,9 +687,9 @@ def makeRunCommand(cmd, dir, source_env=True):
             if not os.path.isfile(os.path.join(destdir2, file)):
                 shutil.copy(os.path.join(srcdir, file), os.path.join(destdir2, file))
         except IOError as err:
-            cfdErrorBox('Unable to copy file {} from directory {} to {} and {}: {}\n'
-                        'Try running FreeCAD again with administrator privileges, or copy the file manually.'
-                        .format(file, srcdir, destdir1, destdir2, str(err)))
+            cfdError("Unable to copy file {} from directory {} to {} and {}: {}\n"
+                     "Try running FreeCAD again with administrator privileges, or copy the file manually."
+                     .format(file, srcdir, destdir1, destdir2, str(err)))
 
         # Note: Prefixing bash call with the *short* path can prevent errors due to spaces in paths
         # when running linux tools - specifically when building
@@ -836,7 +858,7 @@ def checkCfdDependencies(term_print=True):
         try:
             foam_dir = getFoamDir()
             if term_print:
-                print("OpenFOAM directory: {}".format(foam_dir))
+                print("OpenFOAM directory: " + foam_dir if len(foam_dir) else "(system installation)")
                 print("System: {}".format(platform.system()))
                 print("Runtime: {}".format(getFoamRuntime()))
         except IOError as e:
@@ -896,6 +918,16 @@ def checkCfdDependencies(term_print=True):
                             message += vermsg + "\n"
                             if term_print:
                                 print(vermsg)
+                    # Check for wmake
+                    if getFoamRuntime() != "MinGW":
+                        wmake_output = runFoamCommand("wmake -help")
+                        wmake_output.strip()
+                        if wmake_output.find("Usage: wmake") < 0:
+                            wmakemsg = "OpenFOAM installation does not include 'wmake'.\n" + \
+                                       "Installation of cfMesh and HiSA will not be possible."
+                            message += wmakemsg
+                            if term_print:
+                                print(wmakemsg)
 
                     # Check for cfMesh
                     try:

@@ -12,11 +12,7 @@ runCommand()
 }
 
 %{%(system/FoamRuntime%)
-%:MinGW
-%:WindowsDocker
-%:BlueCFD
-%:BlueCFD2
-%:default
+%:Posix
 # Unset and source bashrc
 FOAMDIR="%(system/TranslatedFoamPath%)"
 source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
