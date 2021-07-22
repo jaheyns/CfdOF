@@ -694,7 +694,7 @@ def makeRunCommand(cmd, dir, source_env=True):
 
 
 def runFoamCommand(cmdline, case=None):
-    """ Run a command in the OpenFOAM environment and wait until finished. Return output.
+    """ Run a command in the OpenFOAM environment and wait until finished. Return output as (stdout, stderr, combined)
         Also print output as we go.
         cmdline - The command line to run as a string
               e.g. transformPoints -scale "(0.001 0.001 0.001)"
@@ -705,7 +705,7 @@ def runFoamCommand(cmdline, case=None):
     # Reproduce behaviour of failed subprocess run
     if exit_code:
         raise subprocess.CalledProcessError(exit_code, cmdline)
-    return proc.output
+    return proc.output, proc.outputErr, proc.outputAll
 
 
 class CfdSynchronousFoamProcess:
@@ -875,9 +875,9 @@ def checkCfdDependencies(term_print=True):
             else:
                 try:
                     if getFoamRuntime() == "MinGW":
-                        foam_ver = runFoamCommand("echo $FOAM_API")
+                        foam_ver = runFoamCommand("echo $FOAM_API")[0]
                     else:
-                        foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")
+                        foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")[0]
                 except Exception as e:
                     runmsg = "OpenFOAM installation found, but unable to run command: " + str(e)
                     message += runmsg + '\n'
@@ -932,7 +932,7 @@ def checkCfdDependencies(term_print=True):
 
                     # Check for cfMesh
                     try:
-                        cfmesh_ver = runFoamCommand("cartesianMesh -version")
+                        cfmesh_ver = runFoamCommand("cartesianMesh -version")[0]
                         cfmesh_ver = cfmesh_ver.rstrip().split()[-1]
                         cfmesh_ver = cfmesh_ver.split('.')
                         if (not cfmesh_ver or len(cfmesh_ver) != 2 or
@@ -952,7 +952,7 @@ def checkCfdDependencies(term_print=True):
 
                     # Check for HiSA
                     try:
-                        hisa_ver = runFoamCommand("hisa -version")
+                        hisa_ver = runFoamCommand("hisa -version")[0]
                         hisa_ver = hisa_ver.rstrip().split()[-1]
                         hisa_ver = hisa_ver.split('.')
                         if (not hisa_ver or len(hisa_ver) != 3 or
@@ -1027,7 +1027,7 @@ def checkCfdDependencies(term_print=True):
         else:
             try:
                 # Needs to be runnable from OpenFOAM environment
-                gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")
+                gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")[1]
             except (OSError, subprocess.CalledProcessError):
                 gmsh_msg = "gmsh could not be run from OpenFOAM environment"
                 message += gmsh_msg + '\n'

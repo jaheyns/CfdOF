@@ -482,7 +482,7 @@ class CfdPreferencePageThread(QThread):
                 '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
                     format(CfdTools.translatePath(filename)))
         else:
-            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
+            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR")[0].rstrip().split('\n')[-1]
             # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
             if CfdTools.getFoamRuntime() != 'WindowsDocker':
                 self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
@@ -511,7 +511,7 @@ class CfdPreferencePageThread(QThread):
                 '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
                     format(CfdTools.translatePath(filename)))
         else:
-            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR").rstrip().split('\n')[-1]
+            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR")[0].rstrip().split('\n')[-1]
             # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
             if CfdTools.getFoamRuntime() != 'WindowsDocker':
                 self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
