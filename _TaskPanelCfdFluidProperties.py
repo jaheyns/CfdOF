@@ -97,6 +97,8 @@ class TaskPanelCfdFluidProperties:
             if name.endswith("Polynomial"):
                 widget = FreeCADGui.UiLoader().createWidget("QLineEdit")
                 widget.setObjectName(name)
+                widget.setToolTip(
+                    "Enter coefficients of temperature-polynomial starting from constant followed by higher powers")
                 val = self.material.get(name, '0')
                 self.form.propertiesLayout.addRow(name + ":", widget)
                 self.text_boxes[name] = widget
