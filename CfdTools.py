@@ -1128,7 +1128,10 @@ def removeAppimageEnvironment(env):
                 if not val.startswith(appdir):
                     newvals += val + ':'
             newvals = newvals.rstrip(':')
-            env.insert(k, newvals)
+            if newvals:
+                env.insert(k, newvals)
+            else:
+                env.remove(k)
 
 
 def floatEqual(a, b):
