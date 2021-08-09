@@ -851,7 +851,7 @@ def checkCfdDependencies(term_print=True):
                 print(fc_msg)
             message += fc_msg + '\n'
 
-        # check openfoam7
+        # check openfoam
         if term_print:
             print("Checking for OpenFOAM:")
         try:
@@ -895,22 +895,34 @@ def checkCfdDependencies(term_print=True):
                             foam_ver = int(foam_ver.split('.')[0])
                             if getFoamRuntime() == "MinGW":
                                 if foam_ver != 2012:
-                                    vermsg = "OpenFOAM version " + foam_ver + " is not supported:\n" + \
+                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is not supported:\n" + \
                                              "Only version 2012 supported for MinGW installation"
                                     message += vermsg + "\n"
                                     if term_print:
                                         print(vermsg)
                             if foam_ver >= 1000:  # Plus version
                                 if foam_ver < 1706:
-                                    vermsg = "OpenFOAM version " + foam_ver + " is outdated:\n" + \
-                                             "Minimum version 1706 or 5.0 required"
+                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
+                                             "Minimum version 1706 or 5 required"
+                                    message += vermsg + "\n"
+                                    if term_print:
+                                        print(vermsg)
+                                if foam_ver > 2106:
+                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
+                                             "Last tested version is 2106"
                                     message += vermsg + "\n"
                                     if term_print:
                                         print(vermsg)
                             else:  # Foundation version
                                 if foam_ver < 5:
-                                    vermsg = "OpenFOAM version " + foam_ver + " is outdated:\n" + \
-                                             "Minimum version 5.0 or 1706 required"
+                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
+                                             "Minimum version 5 or 1706 required"
+                                    message += vermsg + "\n"
+                                    if term_print:
+                                        print(vermsg)
+                                if foam_ver > 9:
+                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
+                                             "Last tested version is 9"
                                     message += vermsg + "\n"
                                     if term_print:
                                         print(vermsg)
