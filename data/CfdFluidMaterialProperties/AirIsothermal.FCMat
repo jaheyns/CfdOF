@@ -4,11 +4,7 @@
 
 [FCMat]
 Name = Air
+Type = Isothermal
 Description = Standard air properties at 20 Degrees Celsius and 1 atm
 Density = 1.20 kg/m^3
 DynamicViscosity = 1.80e-5 kg/m/s
-MolarMass = 0.0289643897748887 kg/mol
-Cp = 1004.703 J/kg/K
-SutherlandTemperature = 110.4 K
-SutherlandRefViscosity = 1.716e-5 kg/m/s
-SutherlandRefTemperature = 273.15 K

@@ -5,7 +5,7 @@
 # *   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>        *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>   *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -46,43 +46,76 @@ class TaskPanelCfdFluidProperties:
 
         self.material = self.obj.Material
 
-        self.import_materials()
-        self.form.PredefinedMaterialLibraryComboBox.addItem("Custom")
-
-        self.form.PredefinedMaterialLibraryComboBox.currentIndexChanged.connect(self.selectPredefine)
+        self.form.compressibleCheckBox.setVisible(self.physics_obj.Flow == "Compressible")
+        self.form.compressibleCheckBox.setChecked(self.material['Type'] == "Compressible")
+        self.form.compressibleCheckBox.stateChanged.connect(self.compressibleCheckBoxChanged)
 
         self.text_boxes = {}
         self.fields = []
-        self.createTextBoxesBasedOnPhysics()
+        if self.physics_obj.Flow == 'Incompressible':
+            material_type = 'Isothermal'
+        else:
+            if self.physics_obj.Flow == "Compressible" and not self.form.compressibleCheckBox.isChecked():
+                material_type = 'Incompressible'
+            else:
+                material_type = 'Compressible'
+        self.material['Type'] = material_type
+        self.createUIBasedOnPhysics()
+        self.populateMaterialsList()
+
+        self.form.PredefinedMaterialLibraryComboBox.currentIndexChanged.connect(self.selectPredefined)
 
         self.selecting_predefined = True
         try:
-            self.form.PredefinedMaterialLibraryComboBox.setCurrentIndex(
-                self.form.PredefinedMaterialLibraryComboBox.findText(self.material['Name']))
-            self.selectPredefine()
+            idx = self.form.PredefinedMaterialLibraryComboBox.findText(self.material['Name'])
+            if idx == -1:
+                # Select first one if not found
+                idx = 0
+            self.form.PredefinedMaterialLibraryComboBox.setCurrentIndex(idx)
+            self.selectPredefined()
         finally:
             self.selecting_predefined = False
 
-    def createTextBoxesBasedOnPhysics(self):
-        if self.physics_obj.Flow == 'Incompressible':
+    def compressibleCheckBoxChanged(self):
+        self.material['Type'] = 'Compressible' if self.form.compressibleCheckBox.isChecked() else 'Incompressible'
+        self.createUIBasedOnPhysics()
+        self.populateMaterialsList()
+
+    def createUIBasedOnPhysics(self):
+        for rowi in range(self.form.propertiesLayout.rowCount()):
+            self.form.propertiesLayout.removeRow(0)
+
+        if self.material['Type'] == 'Isothermal':
             self.fields = ['Density', 'DynamicViscosity']
+        elif self.material['Type'] == 'Incompressible':
+            self.fields = ['MolarMass', 'DensityPolynomial', 'CpPolynomial', 'DynamicViscosityPolynomial', 'ThermalConductivityPolynomial']
         else:
             self.fields = ['MolarMass', 'Cp', 'SutherlandTemperature', 'SutherlandRefTemperature', 'SutherlandRefViscosity']
+
         self.text_boxes = {}
         for name in self.fields:
-            widget = FreeCADGui.UiLoader().createWidget("Gui::InputField")
-            widget.setObjectName(name)
-            widget.setProperty("format", "g")
-            val = self.material.get(name, '0')
-            widget.setProperty("unit", val)
-            widget.setProperty("minimum", 0)
-            widget.setProperty("singleStep", 0.1)
-            self.form.propertiesLayout.addRow(name+":", widget)
-            self.text_boxes[name] = widget
-            setQuantity(widget, val)
-            widget.valueChanged.connect(self.manualEdit)
+            if name.endswith("Polynomial"):
+                widget = FreeCADGui.UiLoader().createWidget("QLineEdit")
+                widget.setObjectName(name)
+                val = self.material.get(name, '0')
+                self.form.propertiesLayout.addRow(name + ":", widget)
+                self.text_boxes[name] = widget
+                widget.setText(val)
+                widget.textChanged.connect(self.manualEdit)
+            else:
+                widget = FreeCADGui.UiLoader().createWidget("Gui::InputField")
+                widget.setObjectName(name)
+                widget.setProperty("format", "g")
+                val = self.material.get(name, '0')
+                widget.setProperty("unit", val)
+                widget.setProperty("minimum", 0)
+                widget.setProperty("singleStep", 0.1)
+                self.form.propertiesLayout.addRow(name+":", widget)
+                self.text_boxes[name] = widget
+                setQuantity(widget, val)
+                widget.valueChanged.connect(self.manualEdit)
 
-    def selectPredefine(self):
+    def selectPredefined(self):
         index = self.form.PredefinedMaterialLibraryComboBox.currentIndex()
 
         mat_file_path = self.form.PredefinedMaterialLibraryComboBox.itemData(index)
@@ -91,7 +124,10 @@ class TaskPanelCfdFluidProperties:
             self.selecting_predefined = True
             try:
                 for m in self.fields:
-                    setQuantity(self.text_boxes[m], self.material.get(m, ''))
+                    if m.endswith("Polynomial"):
+                        self.text_boxes[m].setText(self.material.get(m, ''))
+                    else:
+                        setQuantity(self.text_boxes[m], self.material.get(m, '0'))
             finally:
                 self.selecting_predefined = False
         self.form.fluidDescriptor.setText(self.material["Description"])
@@ -100,10 +136,15 @@ class TaskPanelCfdFluidProperties:
         if not self.selecting_predefined:
             self.form.PredefinedMaterialLibraryComboBox.setCurrentIndex(
                 self.form.PredefinedMaterialLibraryComboBox.findText('Custom'))
-            self.material = {'Name': 'Custom', 'Description': 'User-entered properties'}
+            self.form.fluidDescriptor.setText("User-entered properties")
+            curr_type = self.material['Type']
+            self.material = {'Name': 'Custom', 'Description': 'User-entered properties', 'Type': curr_type}
             for f in self.fields:
-                self.material[f] = getQuantity(self.text_boxes[f])
-            self.selectPredefine()
+                if f.endswith('Polynomial'):
+                    self.material[f] = self.text_boxes[f].text()
+                else:
+                    self.material[f] = getQuantity(self.text_boxes[f])
+            self.selectPredefined()
 
     def accept(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
@@ -114,12 +155,14 @@ class TaskPanelCfdFluidProperties:
                              " = {}".format(self.material))
 
     def reject(self):
-        #self.remove_active_sel_server()
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-    def import_materials(self):
+    def populateMaterialsList(self):
         self.form.PredefinedMaterialLibraryComboBox.clear()
         self.materials, material_name_path_list = CfdTools.importMaterials()
         for mat in material_name_path_list:
-            self.form.PredefinedMaterialLibraryComboBox.addItem(QtGui.QIcon(":/icons/freecad.svg"), mat[0], mat[1])
+            if self.material['Type'] == self.materials[mat[1]]['Type']:
+                mat_name = self.materials[mat[1]]['Name']
+                self.form.PredefinedMaterialLibraryComboBox.addItem(QtGui.QIcon(":/icons/freecad.svg"), mat_name, mat[1])
+        self.form.PredefinedMaterialLibraryComboBox.addItem("Custom")

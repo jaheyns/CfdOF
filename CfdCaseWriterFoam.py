@@ -231,6 +231,17 @@ class CfdCaseWriterFoam:
                     mu0 = Units.Quantity(mp['SutherlandRefViscosity']).getValueAs("kg/m/s").Value
                     T0 = Units.Quantity(mp['SutherlandRefTemperature']).getValueAs("K").Value
                     mp['SutherlandConstant'] = mu0/T0**(3./2)*(T0+mp['SutherlandTemperature'])
+            for k in mp:
+                if k.endswith('Polynomial'):
+                    poly = mp[k].split()
+                    poly8 = [0.0]*8
+                    for i in range(len(poly)):
+                        try:
+                            poly8[i] = float(poly[i])
+                        except ValueError:
+                            raise ValueError("Invalid coefficient {} in polynomial coefficient {}".format(poly[i], k))
+                    mp[k] = ' '.join(str(v) for v in poly8)
+
             settings['fluidProperties'].append(mp)
 
     def processBoundaryConditions(self):

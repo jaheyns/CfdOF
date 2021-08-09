@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>   *
 # *   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>        *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -102,7 +102,12 @@ class _CfdMaterial:
         # 'Material' PropertyMap already present in MaterialObjectPython
         if not obj.Material:
             mats, name_path_list = CfdTools.importMaterials()
-            obj.Material = mats[name_path_list[[np[0] for np in name_path_list].index('Air')][1]]
+            # Load a default to initialise the values for each type
+            obj.Material = mats[name_path_list[[np[0] for np in name_path_list].index('AirIsothermal')][1]]
+        elif not obj.Material.get('Type'):
+            mat = obj.Material
+            mat['Type'] = 'Isothermal'
+            obj.Material = mat
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

@@ -209,9 +209,9 @@ class _TaskPanelCfdMesh:
             self.consoleMessage("Exporting mesh refinement data ...")
             FreeCADGui.doCommand("cart_mesh.processRefinements()")  # Writes stls so need file structure
             FreeCADGui.doCommand("cart_mesh.processDimension()")
-            FreeCADGui.doCommand("cart_mesh.writeMeshCase()")
             self.consoleMessage("Exporting the part surfaces ...")
             FreeCADGui.doCommand("cart_mesh.writePartFile()")
+            FreeCADGui.doCommand("cart_mesh.writeMeshCase()")
             self.consoleMessage("Mesh case written to {}".format(self.cart_mesh.meshCaseDir))
         except Exception as ex:
             self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
