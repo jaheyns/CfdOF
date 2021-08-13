@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -127,6 +127,8 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputIntensity, self.obj.TurbulenceIntensity)
         setQuantity(self.form.inputLengthScale, self.obj.TurbulenceLengthScale)
 
+        self.form.checkBoxDefaultBoundary.setChecked(self.obj.DefaultBoundary)
+
         self.form.radioButtonCart.toggled.connect(self.updateUI)
         self.form.radioButtonMagNormal.toggled.connect(self.updateUI)
         self.form.lineDirection.textChanged.connect(self.lineDirectionChanged)
@@ -136,6 +138,7 @@ class TaskPanelCfdFluidBoundary:
         self.form.comboFluid.currentIndexChanged.connect(self.comboFluidChanged)
         self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.updateUI)
+        self.form.checkBoxDefaultBoundary.stateChanged.connect(self.updateUI)
 
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
@@ -375,10 +378,20 @@ class TaskPanelCfdFluidBoundary:
         FreeCADGui.doCommand("bc.ScreenSpacing "
                              "= '{}'".format(getQuantity(self.form.inputSpacing)))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Label = '{}'".format(self.obj.Name, self.obj.Label))
+
         refstr = "FreeCAD.ActiveDocument.{}.References = [\n".format(self.obj.Name)
         refstr += ',\n'.join("{}".format(ref) for ref in self.obj.References)
         refstr += "]"
         FreeCADGui.doCommand(refstr)
+
+        defaultBoundary = self.form.checkBoxDefaultBoundary.isChecked()
+        FreeCADGui.doCommand("bc.DefaultBoundary = {}".format(defaultBoundary))
+        boundaries = CfdTools.getCfdBoundaryGroup(CfdTools.getParentAnalysisObject(self.obj))
+        # Deactivate previous default boundary, if any
+        for b in boundaries:
+            if b.Name != self.obj.Name and b.DefaultBoundary:
+                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.DefaultBoundary = False".format(b.Name))
+
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
         self.faceSelector.closing()
 

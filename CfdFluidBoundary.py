@@ -167,6 +167,7 @@ class _CfdFluidBoundary:
 
     def initProperties(self, obj):
         addObjectProperty(obj, 'References', [], "App::PropertyPythonObject", "", "Boundary faces")
+        addObjectProperty(obj, 'DefaultBoundary', False, "App::PropertyBool", "Boundary faces")
         addObjectProperty(obj, 'LinkedObjects', [], "App::PropertyLinkList", "", "Linked objects")
         addObjectProperty(obj, 'BoundaryType', BOUNDARY_TYPES, "App::PropertyEnumeration", "", "Boundary condition category")
         all_subtypes = []

@@ -247,7 +247,9 @@ class CfdCaseWriterFoam:
     def processBoundaryConditions(self):
         """ Compute any quantities required before case build """
         settings = self.settings
-        for bc_name in settings['boundaries']:
+        # Copy keys so that we can delete while iterating
+        bc_names = list(settings['boundaries'].keys())
+        for bc_name in bc_names:
             bc = settings['boundaries'][bc_name]
             if not bc['VelocityIsCartesian']:
                 veloMag = bc['VelocityMag']
@@ -298,6 +300,17 @@ class CfdCaseWriterFoam:
                         alphas_new[alpha_name] = alpha
                         sum_alpha += alpha
                 bc['VolumeFractions'] = alphas_new
+
+            if bc['DefaultBoundary']:
+                if settings['boundaries'].get('defaultFaces'):
+                    raise ValueError("More than one default boundary defined")
+                settings['boundaries']['defaultFaces'] = bc
+        if not settings['boundaries'].get('defaultFaces'):
+            settings['boundaries']['defaultFaces'] = {
+                'BoundaryType': 'wall',
+                'BoundarySubType': 'slipWall',
+                'ThermalBoundaryType': 'zeroGradient'
+            }
 
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """

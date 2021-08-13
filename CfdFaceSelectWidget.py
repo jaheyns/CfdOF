@@ -233,6 +233,8 @@ class CfdFaceSelectWidget:
         if FreeCADGui.activeDocument().Document.Name != self.doc_name:
             return
         selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
+        if selected_object.Shape.isNull():
+            return
         # On double click of a shape, sub is None and obj is the shape
         print('Selection: ' +
               selected_object.Shape.ShapeType + '  ' +

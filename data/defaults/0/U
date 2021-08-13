@@ -188,12 +188,6 @@ boundaryField
 %}
 
 %}
-    defaultFaces
-    {
-        type        slip;
-        value       $internalField;
-    }
-
 }
 
 // ************************************************************************* //
