@@ -25,7 +25,10 @@
 
 from PySide import QtCore
 import FreeCAD
-from freecad.plot import Plot
+try:
+    from FreeCAD.Plot import Plot
+except ImportError:
+    from freecad.plot import Plot
 import math
 
 

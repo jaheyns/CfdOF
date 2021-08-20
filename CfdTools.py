@@ -1005,19 +1005,22 @@ def checkCfdDependencies(term_print=True):
                     print(pv_msg)
 
         if term_print:
-            print("Checking for Plot workbench:")
+            print("Checking for Plot module:")
         try:
-            from freecad.plot import Plot
+            from FreeCAD.Plot import Plot
         except ImportError:
-            plot_msg = "Could not load Plot workbench\nPlease install it using Tools | Addon manager"
-            message += plot_msg + '\n'
-            if term_print:
-                print(plot_msg)
+            try:
+                from freecad.plot import Plot
+            except ImportError:
+                plot_msg = "Could not load Plot module\nPlease install it using Tools | Addon manager"
+                message += plot_msg + '\n'
+                if term_print:
+                    print(plot_msg)
 
         try:
             import matplotlib
         except ImportError:
-            matplot_msg = "Could not load matplotlib package (required by Plot workbench)"
+            matplot_msg = "Could not load matplotlib package (required by Plot module)"
             message += matplot_msg + '\n'
             if term_print:
                 print(matplot_msg)
