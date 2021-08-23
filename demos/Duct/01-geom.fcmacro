@@ -1,0 +1,22 @@
+doc = App.newDocument()
+Gui.activateWorkbench("PartWorkbench")
+import PartDesignGui
+App.ActiveDocument.addObject("Part::Box","Box")
+App.ActiveDocument.ActiveObject.Label = "Cube"
+App.ActiveDocument.recompute()
+App.ActiveDocument.addObject("Part::Box","Box")
+App.ActiveDocument.ActiveObject.Label = "Cube"
+App.ActiveDocument.recompute()
+Gui.SendMsgToActiveView("ViewFit")
+App.ActiveDocument.getObject("Box").Width = '100 mm'
+App.ActiveDocument.getObject("Box").Height = '300 mm'
+App.ActiveDocument.getObject("Box").Length = '100 mm'
+App.ActiveDocument.getObject("Box001").Width = '100 mm'
+App.ActiveDocument.getObject("Box001").Height = '100 mm'
+App.ActiveDocument.getObject("Box001").Length = '600 mm'
+App.activeDocument().addObject("Part::MultiFuse","Fusion")
+App.activeDocument().Fusion.Shapes = [App.activeDocument().Box,App.activeDocument().Box001,]
+
+FreeCAD.ActiveDocument.recompute()
+Gui.SendMsgToActiveView("ViewFit")
+Gui.activeDocument().activeView().viewFront()

@@ -194,6 +194,7 @@ class _TaskPanelCfdMesh:
                              "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
         FreeCADGui.doCommand("cart_mesh = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy.cart_mesh")
         cart_mesh = self.mesh_obj.Proxy.cart_mesh
+        cart_mesh.progressCallback = self.progressCallback
         self.consoleMessage("Preparing meshing ...")
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -203,22 +204,16 @@ class _TaskPanelCfdMesh:
                   + cart_mesh.part_obj.Label + ', ShapeType: '
                   + cart_mesh.part_obj.Shape.ShapeType)
             print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
-            analysis = CfdTools.getParentAnalysisObject(self.mesh_obj)
-            FreeCADGui.doCommand("cart_mesh.getFilePaths(CfdTools.getOutputPath(FreeCAD.ActiveDocument." + analysis.Name + "))")
-            FreeCADGui.doCommand("cart_mesh.setupMeshCaseDir()")
-            self.consoleMessage("Exporting mesh refinement data ...")
-            FreeCADGui.doCommand("cart_mesh.processRefinements()")  # Writes stls so need file structure
-            FreeCADGui.doCommand("cart_mesh.processDimension()")
-            self.consoleMessage("Exporting the part surfaces ...")
-            FreeCADGui.doCommand("cart_mesh.writePartFile()")
-            FreeCADGui.doCommand("cart_mesh.writeMeshCase()")
-            self.consoleMessage("Mesh case written to {}".format(self.cart_mesh.meshCaseDir))
+            FreeCADGui.doCommand("cart_mesh.writeMesh()")
         except Exception as ex:
             self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
             raise
         finally:
             QApplication.restoreOverrideCursor()
         self.updateUI()
+
+    def progressCallback(self, message):
+        self.consoleMessage(message)
 
     def editMesh(self):
         case_path = self.cart_mesh.meshCaseDir

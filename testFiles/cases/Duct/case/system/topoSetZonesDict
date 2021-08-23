@@ -1,0 +1,51 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetZonesDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+actions
+(
+
+    {
+        name    CylinderSelectedSurface;
+        type    cellSet;
+        action  new;
+        source  surfaceToCell;
+        sourceInfo
+        {
+            file            "constant/triSurface/CylinderScaled.stl";
+            useSurfaceOrientation true;
+            outsidePoints   ();    //Ignored if useSurfaceOrientation true
+            includeCut      false; //Ignored if useSurfaceOrientation true
+            includeInside   true;
+            includeOutside  false;
+            nearDistance    -1;
+            curvature       -100;
+        }
+    }
+
+    {
+        name    Cylinder;
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set CylinderSelectedSurface;
+        }
+    }
+
+);
+
+// ************************************************************************* //

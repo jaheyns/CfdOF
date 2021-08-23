@@ -1,0 +1,98 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     4.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      meshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+surfaceFile       "Compound001_Geometry.fms";
+
+maxCellSize       0.225;
+boundaryCellSize  0.225;
+
+objectRefinements
+{
+    MeshRefinement002
+    {
+        cellSize 0.00675;
+        type insideSurface;
+        closedSurfaceFile "constant/triSurface/MeshRefinement002.stl";
+    }
+    MeshRefinement003
+    {
+        cellSize 0.0135;
+        type insideSurface;
+        closedSurfaceFile "constant/triSurface/MeshRefinement003.stl";
+    }
+    MeshRefinement004
+    {
+        cellSize 0.027;
+        type insideSurface;
+        closedSurfaceFile "constant/triSurface/MeshRefinement004.stl";
+    }
+    MeshRefinement005
+    {
+        cellSize 0.027;
+        type insideSurface;
+        closedSurfaceFile "constant/triSurface/MeshRefinement005.stl";
+    }
+}
+
+surfaceMeshRefinement
+{
+    MeshRefinement
+    {
+        cellSize  0.003375;
+        surfaceFile "constant/triSurface/MeshRefinement.stl";
+        refinementThickness 0.005;
+    }
+    MeshRefinement001
+    {
+        cellSize  0.001575;
+        surfaceFile "constant/triSurface/MeshRefinement001.stl";
+        refinementThickness 0.005;
+    }
+}
+
+boundaryLayers
+{
+    patchBoundaryLayers
+    {
+        "patch_1_1"
+        {
+            nLayers 10;
+            thicknessRatio 1.05;
+            maxFirstLayerThickness 0.0;
+        }
+        "patch_1_2"
+        {
+            nLayers 10;
+            thicknessRatio 1.05;
+            maxFirstLayerThickness 0.0;
+        }
+    }
+
+    optimiseLayer 1;
+    untangleLayers 0;
+
+    optimisationParameters
+    {
+        nSmoothNormals 3;
+        maxNumIterations 5;
+        featureSizeFactor 0.4;
+        reCalculateNormals 1;
+        relThicknessTol 0.1;
+    }
+}
+
+// ************************************************************************* //

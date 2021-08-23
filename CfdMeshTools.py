@@ -78,6 +78,24 @@ class CfdMeshTools:
         # 2D array of names of each patch, indexed by [bc_id+1][meshregion_id+1]
         self.patch_names = []
 
+        self.progressCallback = None
+
+    def writeMesh(self):
+        self.setupMeshCaseDir()
+        CfdTools.cfdMessage("Exporting mesh refinement data ...")
+        if self.progressCallback:
+            self.progressCallback("Exporting mesh refinement data ...")
+        self.processRefinements()
+        self.processDimension()
+        CfdTools.cfdMessage("Exporting the part surfaces ...")
+        if self.progressCallback:
+            self.progressCallback("Exporting the part surfaces ...")
+        self.writePartFile()
+        self.writeMeshCase()
+        CfdTools.cfdMessage("Wrote mesh case to {}".format(self.meshCaseDir))
+        if self.progressCallback:
+            self.progressCallback("Mesh case written successfully")
+
     def processDimension(self):
         """ Additional checking/processing for 2D vs 3D """
         # 3D cfMesh and snappyHexMesh, and 2D by conversion, while in future cfMesh may support 2D directly

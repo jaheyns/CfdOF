@@ -1,0 +1,74 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     4.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      meshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+surfaceFile       "Compound001_Geometry.fms";
+
+maxCellSize       0.1;
+boundaryCellSize  0.1;
+
+objectRefinements
+{
+    MeshRefinement001
+    {
+        cellSize 0.025;
+        type insideSurface;
+        closedSurfaceFile "constant/triSurface/MeshRefinement001.stl";
+    }
+}
+
+surfaceMeshRefinement
+{
+    MeshRefinement
+    {
+        cellSize  0.005;
+        surfaceFile "constant/triSurface/MeshRefinement.stl";
+        refinementThickness 0.0;
+    }
+    MeshRefinement002
+    {
+        cellSize  0.002;
+        surfaceFile "constant/triSurface/MeshRefinement002.stl";
+        refinementThickness 0.001;
+    }
+}
+
+boundaryLayers
+{
+    patchBoundaryLayers
+    {
+        "patch_5_1"
+        {
+            nLayers 3;
+            thicknessRatio 1.2;
+            maxFirstLayerThickness 0.0;
+        }
+    }
+
+    optimiseLayer 1;
+    untangleLayers 0;
+
+    optimisationParameters
+    {
+        nSmoothNormals 3;
+        maxNumIterations 5;
+        featureSizeFactor 0.4;
+        reCalculateNormals 1;
+        relThicknessTol 0.1;
+    }
+}
+
+// ************************************************************************* //

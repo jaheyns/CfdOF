@@ -1,0 +1,31 @@
+Gui.activateWorkbench("PartWorkbench")
+App.ActiveDocument.addObject("Part::Cylinder","Cylinder")
+App.ActiveDocument.ActiveObject.Label = "Cylinder"
+App.ActiveDocument.recompute()
+App.ActiveDocument.getObject("Cylinder").Height = '100 mm'
+App.ActiveDocument.getObject("Cylinder").Placement = App.Placement(App.Vector(100,100,100),App.Rotation(App.Vector(1,0,0),90))
+App.ActiveDocument.getObject("Cylinder").Radius = '45 mm'
+
+Gui.activateWorkbench("CfdOFWorkbench")
+
+import CfdZone
+import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdZone.makeCfdPorousZone())
+p = FreeCAD.ActiveDocument.PorousZone
+p.PorousCorrelation = 'DarcyForchheimer'
+p.D1 = '0 1/mm^2'
+p.D2 = '0 1/mm^2'
+p.D3 = '0 1/mm^2'
+p.F1 = '0.1 1/mm'
+p.F2 = '0.1 1/mm'
+p.F3 = '0.1 1/mm'
+p.e1 = (1.0, 0.0, 0.0)
+p.e2 = (0.0, 1.0, 0.0)
+p.e3 = (0.0, 0.0, 1.0)
+p.OuterDiameter = '0 mm'
+p.TubeAxis = (0.0, 0.0, 1.0 )
+p.TubeSpacing = '0 mm'
+p.SpacingDirection = (1.0, 0.0, 0.0)
+p.AspectRatio = '1.73 '
+p.VelocityEstimate = '0 mm/s'
+FreeCAD.ActiveDocument.PorousZone.References = [('Cylinder', 'Solid1')]

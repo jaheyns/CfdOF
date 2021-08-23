@@ -7,7 +7,7 @@ before running the simulation. Best practices are specified to maximise the stab
 
 ![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
 
-The workbench serves as a front-end to the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
+The workbench serves as a front-end (GUI) for the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
 
 Disclaimer:
 This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
@@ -17,18 +17,18 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 ### Current:
 
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
+* Extension to turbulent flow using RANS (k-omega SST)
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
 * Basic material database
 * Flow initialisation with a potential solver
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
-* Cut-cell Cartesian meshing with porous media (snappyHexMesh)
-* Tetrahedral meshing using GMSH
-* Postprocessing using paraview
+* Cut-cell Cartesian meshing with baffles (snappyHexMesh)
+* Tetrahedral meshing using Gmsh
+* Postprocessing using Paraview
 * Porous regions and porous baffles
 * Runs on Windows 7-10 and Linux
-* Unit testing
-* Extension to turbulent flow using RANS (k-w SST)
+* Unit/regression testing
 * New case builder using an extensible template structure
 * Macro scripting
 
@@ -55,12 +55,12 @@ which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (at least version 0.18.4 / git commit 16146)](https://www.freecadweb.org/downloads.php)
  or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
-- OpenFOAM [Foundation versions 5-8](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2012](http://openfoam.com/download)  
+- OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2012](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
 - [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
 - [HiSA (High Speed Aerodynamic Solver)](https://hisa.gitlab.io)
-- [GMSH (version 2.13 or later)](http://gmsh.info/) - optional, for generating tetrahedral meshes
+- [Gmsh (version 2.13 or later)](http://gmsh.info/) - optional, for generating tetrahedral meshes
 
 ### Setting up the CfdOF workbench
 
@@ -84,7 +84,7 @@ installed into FreeCAD using the Addon manager:
 * Repeat the above for the "CfdOF" workbench
 * For installation of dependencies, see below
 
-Note: The CFD workbench can be updated at any time through the Addon manager.
+Note: The CfdOF workbench can be updated at any time through the Addon manager.
 
 ##### Dependency installation
 
@@ -139,10 +139,18 @@ packages are an alternative binary option. Otherwise, FreeCAD can be built
 from the source code at 
 https://github.com/FreeCAD/FreeCAD . 
 
-Note that the Snap container installed through some distributions' package managers
+Note:
+* Installations of FreeCAD via Linux package managers (including the PPA daily build above)
+make use of your local python installation. Therefore you might need to install additional
+python packages to get full functionality. The dependency checker (see below) can help to diagnose 
+this. 
+* Note that the 'Snap' container installed through some distributions' package managers
 can be problematic as it does not allow access to system
 directories, and therefore OpenFOAM has to be installed in the user's home directory
 to be runnable from FreeCAD. 
+
+For the reasons above we recommend the AppImage as the most robust installation
+option on Linux.
 
 Before installing CfdOF, the Plot workbench must first be 
 installed into FreeCAD using the Addon manager:
@@ -165,11 +173,14 @@ choose "CFD".
 However, in Linux, manual installation is required for 
 OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openfoam.org/download/) versions),
 [Paraview](http://www.paraview.org/) and
-[GMSH](http://gmsh.info/) (optional). They should be
-installed using your distribution's package manager
-or the links above. The version packaged with some distributions
-does not include the build command 'wmake' and therefore
-cannot be used with the optional components 'HiSA' and 'cfMesh'.
+[Gmsh](http://gmsh.info/) (optional). They should be
+installed using the links above or your distribution's package 
+manager. Note, however, that the OpenFOAM packages bundled in 
+some Linux distributions may be out of date or incomplete; for example,
+the standard Debian and Ubuntu packages do not include the build command 'wmake' 
+and therefore cannot be used with the optional components 'HiSA' and 'cfMesh'.
+We therefore recommend installation of the packages supplied through
+the official websites above.
 
 Set the OpenFOAM install directory in the preferences
 panel - examples of typical install locations are /opt/openfoam8 
@@ -177,8 +188,6 @@ or /home/user/OpenFOAM/OpenFOAM-8.x (It will be automatically
 detected in common default install
 locations). Note that if you have loaded the desired OpenFOAM 
 environment already, the install directory should be left blank.
-This also applies in the case of packages that are integrated
-into the system, such as the Debian OpenFOAM package
 
 cfMesh and HiSA can be installed using the Preferences panel described above,
 and can be downloaded and built from their source
@@ -188,12 +197,27 @@ not already done so yourself. Note that this is a lengthy process.
 Choosing the "Check dependencies" option will verify that all 
 prerequisites have been successfully installed.
 
+## Documentation
+
+At present there is no formal documentation for CfdOF apart from this README. 
+However, demonstration cases
+are provided inside the 'demos' folder of the 
+[CfdOF workbench directory](https://gitlab.com/opensimproject/cfdof). These aim
+to provide a basic overview of features and best practices. The examples are run
+by loading and executing the macro files ending in '.FCMacro' in the various sub-directories
+in the 'demos' directory. Where there are several numbered files, these should be run in order
+and aim to demonstrate step-by-step how the case is set up.
+
+Community assistance may be sought at the 
+[CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37),
+and a list of various third-party documentation is available in
+[the following forum post](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359).
 
 ## Feedback
 
 ### Reporting Bugs
 
-Please discuss issues on the [CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37) 
+Please discuss issues on the [CfdOF FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37) 
 for community assistance.
 Bugs can be reported on the [gitlab project site](https://gitlab.com/opensimproject/cfdof). 
 
@@ -209,8 +233,15 @@ Our philosophy is 'Do the basics well' and therefore robust operation takes prec
 
 ### Testing
 
-Unit testing is currently under development. Where possible, it is asked that all new functionality should be included
+Unit and regression testing is supported. Where possible, it is asked that new functionality be included
 in the unit test framework.
+
+In order to run the tests, the following command can be used from the terminal:
+```
+FreeCAD -t TestCfdOF
+```
+Alternatively, from FreeCAD, select the 'Testing framework' workbench, choose the 'Self-test' button,
+select the 'TestCfdOF' test name and click 'Start'.
 
 
 ### Style guide
@@ -227,7 +258,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
     
 5. Imports should usually be on separate lines.
 6. Comments
-    - Docstrings always use """triple double-quotes"""
+    - Docstrings always use """ triple double-quotes """
     
     - Block comment starts with a # and a single space and are indented to the same level as that code
     
@@ -240,8 +271,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
     - ClassNames (Camel)
     - variable_names_without_capitals (Underscore)
     - CONSTANTS_USE_CAPITALS (Uppercase)
-    - functions_without_capitals (underscore, preferred as it follows PEP8)
-    - functionsWithoutCapitals (Camel instead of underscore is accepted as it is widely used within FreeCAD)
+    - functionsWithCapitals (Although not following PEP8, Camel-case instead of underscore is preferred as it is widely used within FreeCAD)
     - __class_attribute (Double leading underscore)
 
 
@@ -252,7 +282,7 @@ This development was made possible through initial funding from [Eskom Holdings 
 and the [Council for Scientific and Industrial Research](https://www.csir.co.za) (South Africa).
 
 ### Lead developers
-The code is maintained by
+The code is primarily developed by
 * Oliver Oxtoby (CSIR, 2016-2018; private 2019-) <oliveroxtoby@gmail.com>  
 * Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>  
 * Alfred Bogaers (CSIR, 2016-2018) <alfredbogaers@gmail.com>    

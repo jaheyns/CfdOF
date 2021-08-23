@@ -1,0 +1,163 @@
+import CfdAnalysis
+analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+import CfdTools
+CfdTools.setActiveAnalysis(analysis)
+import CfdPhysicsSelection
+analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+import CfdFluidMaterial
+analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+import CfdInitialiseFlowField
+analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+import CfdSolverFoam
+analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+
+obj = FreeCAD.ActiveDocument.PhysicsModel
+obj.Time = 'Steady'
+obj.Flow = 'Incompressible'
+obj.Thermal = 'None'
+obj.Turbulence = 'Laminar'
+obj.gx = '0 mm/s^2'
+obj.gy = '-9810 mm/s^2'
+obj.gz = '0 mm/s^2'
+
+FreeCAD.ActiveDocument.FluidProperties.Material = {'Name': 'Air', 'Description': 'Standard air properties at 20 Degrees Celsius and 1 atm', 'Density': '1.20 kg/m^3', 'DynamicViscosity': '1.80e-5 kg/m/s', 'MolarMass': '0.0289643897748887 kg/mol', 'Cp': '1004.703 J/kg/K', 'SutherlandConstant': '1.4579326545176254e-06 kg/m/s/K^0.5', 'SutherlandTemperature': '110.4 K'}
+
+import CfdMesh
+CfdMesh.makeCfdMesh('Fusion_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Fusion
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+
+FreeCAD.ActiveDocument.Fusion_Mesh.CharacteristicLengthMax = '10 mm'
+FreeCAD.ActiveDocument.Fusion_Mesh.MeshUtility = 'snappyHexMesh'
+FreeCAD.ActiveDocument.Fusion_Mesh.ElementDimension = '3D'
+FreeCAD.ActiveDocument.Fusion_Mesh.CellsBetweenLevels = 3
+FreeCAD.ActiveDocument.Fusion_Mesh.EdgeRefinement = 1.0
+FreeCAD.ActiveDocument.Fusion_Mesh.PointInMesh = {'x': '487.7 mm', 'y': '41.5 mm', 'z': '54.03 mm'}
+
+import CfdFluidBoundary
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+
+bc = FreeCAD.ActiveDocument.CfdFluidBoundary
+bc.BoundaryType = 'inlet'
+bc.BoundarySubType = 'uniformVelocityInlet'
+bc.ThermalBoundaryType = 'fixedValue'
+bc.VelocityIsCartesian = True
+bc.Ux = '0 mm/s'
+bc.Uy = '0 mm/s'
+bc.Uz = '-5000 mm/s'
+bc.VelocityMag = '0 mm/s'
+bc.DirectionFace = ''
+bc.ReverseNormal = True
+bc.MassFlowRate = '0 kg/s'
+bc.VolFlowRate = '0 mm^3/s'
+bc.Pressure = '0 kg/(mm*s^2)'
+bc.SlipRatio = '0 '
+bc.Temperature = '293 K'
+bc.HeatFlux = '0 kg/s^3'
+bc.HeatTransferCoeff = '0 kg/(s^3*K)'
+bc.TurbulenceInletSpecification = 'intensityAndLengthScale'
+bc.TurbulentKineticEnergy = '10000 mm^2/s^2'
+bc.SpecificDissipationRate = '57.3 deg/s'
+bc.TurbulenceIntensity = '0.1 '
+bc.TurbulenceLengthScale = '100 mm'
+bc.PorousBaffleMethod = 'porousCoeff'
+bc.PressureDropCoeff = '0 '
+bc.ScreenWireDiameter = '0.1 mm'
+bc.ScreenSpacing = '0 mm'
+FreeCAD.ActiveDocument.CfdFluidBoundary.Label = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary.References = [
+('Fusion', 'Face8')]
+FreeCAD.ActiveDocument.recompute()
+
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+
+bc = FreeCAD.ActiveDocument.CfdFluidBoundary001
+bc.BoundaryType = 'outlet'
+bc.BoundarySubType = 'staticPressureOutlet'
+bc.ThermalBoundaryType = 'fixedValue'
+bc.VelocityIsCartesian = True
+bc.Ux = '0 mm/s'
+bc.Uy = '0 mm/s'
+bc.Uz = '0 mm/s'
+bc.VelocityMag = '0 mm/s'
+bc.DirectionFace = ''
+bc.ReverseNormal = False
+bc.MassFlowRate = '0 kg/s'
+bc.VolFlowRate = '0 mm^3/s'
+bc.Pressure = '0 kg/(mm*s^2)'
+bc.SlipRatio = '0 '
+bc.Temperature = '293 K'
+bc.HeatFlux = '0 kg/s^3'
+bc.HeatTransferCoeff = '0 kg/(s^3*K)'
+bc.TurbulenceInletSpecification = 'intensityAndLengthScale'
+bc.TurbulentKineticEnergy = '10000 mm^2/s^2'
+bc.SpecificDissipationRate = '57.3 deg/s'
+bc.TurbulenceIntensity = '0.1 '
+bc.TurbulenceLengthScale = '100 mm'
+bc.PorousBaffleMethod = 'porousCoeff'
+bc.PressureDropCoeff = '0 '
+bc.ScreenWireDiameter = '0.1 mm'
+bc.ScreenSpacing = '0 mm'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.Label = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.References = [
+('Fusion', 'Face12')]
+FreeCAD.ActiveDocument.recompute()
+
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+
+bc = FreeCAD.ActiveDocument.CfdFluidBoundary002
+bc.BoundaryType = 'wall'
+bc.BoundarySubType = 'fixedWall'
+bc.ThermalBoundaryType = 'fixedValue'
+bc.VelocityIsCartesian = True
+bc.Ux = '0 mm/s'
+bc.Uy = '0 mm/s'
+bc.Uz = '0 mm/s'
+bc.VelocityMag = '0 mm/s'
+bc.DirectionFace = ''
+bc.ReverseNormal = False
+bc.MassFlowRate = '0 kg/s'
+bc.VolFlowRate = '0 mm^3/s'
+bc.Pressure = '0 kg/(mm*s^2)'
+bc.SlipRatio = '0 '
+bc.Temperature = '293 K'
+bc.HeatFlux = '0 kg/s^3'
+bc.HeatTransferCoeff = '0 kg/(s^3*K)'
+bc.TurbulenceInletSpecification = 'intensityAndLengthScale'
+bc.TurbulentKineticEnergy = '10000 mm^2/s^2'
+bc.SpecificDissipationRate = '57.3 deg/s'
+bc.TurbulenceIntensity = '0.1 '
+bc.TurbulenceLengthScale = '100 mm'
+bc.PorousBaffleMethod = 'porousCoeff'
+bc.PressureDropCoeff = '0 '
+bc.ScreenWireDiameter = '0.1 mm'
+bc.ScreenSpacing = '0 mm'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.Label = 'wall'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.References = [
+('Fusion', 'Face1'),
+('Fusion', 'Face2'),
+('Fusion', 'Face3'),
+('Fusion', 'Face4'),
+('Fusion', 'Face5'),
+('Fusion', 'Face6'),
+('Fusion', 'Face7'),
+('Fusion', 'Face9'),
+('Fusion', 'Face10'),
+('Fusion', 'Face11'),
+('Fusion', 'Face13'),
+('Fusion', 'Face14')]
+FreeCAD.ActiveDocument.recompute()
+
+init = FreeCAD.ActiveDocument.InitialiseFields
+init.PotentialFlow = True
+init.Ux = '0 mm/s'
+init.Uy = '0 mm/s'
+init.Uz = '0 mm/s'
+init.UseOutletPValue = True
+init.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary001
+init.Pressure = '0 kg/(mm*s^2)'
+init.VolumeFractions = {}
+init.Temperature = '293 K'
+init.omega = '57.3 deg/s'
+init.k = '10000 mm^2/s^2'
+

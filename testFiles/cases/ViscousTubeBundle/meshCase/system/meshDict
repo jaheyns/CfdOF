@@ -1,0 +1,59 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     4.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      meshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+surfaceFile       "Cut_Geometry.fms";
+
+maxCellSize       0.01;
+boundaryCellSize  0.01;
+
+
+surfaceMeshRefinement
+{
+    MeshRefinement
+    {
+        cellSize  0.005;
+        surfaceFile "constant/triSurface/MeshRefinement.stl";
+        refinementThickness 0.005;
+    }
+}
+
+boundaryLayers
+{
+    patchBoundaryLayers
+    {
+        "patch_3_1"
+        {
+            nLayers 16;
+            thicknessRatio 1.2;
+            maxFirstLayerThickness 0.0;
+        }
+    }
+
+    optimiseLayer 1;
+    untangleLayers 0;
+
+    optimisationParameters
+    {
+        nSmoothNormals 3;
+        maxNumIterations 5;
+        featureSizeFactor 0.4;
+        reCalculateNormals 1;
+        relThicknessTol 0.1;
+    }
+}
+
+// ************************************************************************* //

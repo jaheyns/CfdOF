@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -49,8 +49,9 @@ class CfdCaseWriterFoam:
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
         self.mesh_generated = False
         self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
+        self.progressCallback = None
 
-    def writeCase(self, progressCallback=None):
+    def writeCase(self):
         """ writeCase() will collect case settings, and finally build a runnable case. """
         cfdMessage("Writing case to folder {}\n".format(self.working_dir))
         if not os.path.exists(self.working_dir):
@@ -112,8 +113,8 @@ class CfdCaseWriterFoam:
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         cfdMessage("Matching boundary conditions ...\n")
-        if progressCallback:
-            progressCallback("Matching boundary conditions ...")
+        if self.progressCallback:
+            self.progressCallback("Matching boundary conditions ...")
         self.setupPatchNames()
 
         TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
@@ -125,6 +126,8 @@ class CfdCaseWriterFoam:
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
 
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
+        if self.progressCallback:
+            self.progressCallback("Case written successfully")
         return True
 
     def getSolverName(self):

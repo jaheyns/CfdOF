@@ -1,0 +1,69 @@
+Gui.activateWorkbench("PartWorkbench")
+App.ActiveDocument.addObject("Part::Sphere","Sphere")
+App.ActiveDocument.ActiveObject.Label = "Sphere"
+FreeCAD.ActiveDocument.getObject("Sphere").Placement = App.Placement(App.Vector(0,100,-350),App.Rotation(App.Vector(0,0,1),0))
+FreeCAD.ActiveDocument.getObject("Sphere").Radius = '800 mm'
+App.ActiveDocument.recompute()
+
+Gui.activateWorkbench("CfdOFWorkbench")
+
+import CfdMeshRefinement
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound001_Mesh)
+FreeCAD.ActiveDocument.MeshRefinement001.References = []
+referenceList = FreeCAD.ActiveDocument.MeshRefinement001.References
+referenceList.append(('Sphere','Solid1'))
+
+FreeCAD.ActiveDocument.MeshRefinement001.RelativeLength = 0.25
+FreeCAD.ActiveDocument.MeshRefinement001.RefinementThickness = '0 mm'
+FreeCAD.ActiveDocument.MeshRefinement001.NumberLayers = 1
+FreeCAD.ActiveDocument.MeshRefinement001.ExpansionRatio = 1.2
+FreeCAD.ActiveDocument.MeshRefinement001.FirstLayerHeight = '0 mm'
+FreeCAD.ActiveDocument.MeshRefinement001.RegionEdgeRefinement = 1.0
+FreeCAD.ActiveDocument.MeshRefinement001.Internal = True
+
+FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.05
+FreeCAD.ActiveDocument.MeshRefinement.RefinementThickness = '0 mm'
+FreeCAD.ActiveDocument.MeshRefinement.NumberLayers = 3
+FreeCAD.ActiveDocument.MeshRefinement.ExpansionRatio = 1.2
+FreeCAD.ActiveDocument.MeshRefinement.FirstLayerHeight = '0 mm'
+FreeCAD.ActiveDocument.MeshRefinement.RegionEdgeRefinement = 1
+FreeCAD.ActiveDocument.MeshRefinement.Internal = False
+
+# Front wheel 
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound001_Mesh)
+FreeCAD.ActiveDocument.MeshRefinement002.References = []
+referenceList = FreeCAD.ActiveDocument.MeshRefinement002.References
+referenceList.append(('Cut','Face19'))
+referenceList.append(('Cut','Face20'))
+referenceList.append(('Cut','Face21'))
+referenceList.append(('Cut','Face22'))
+referenceList.append(('Cut','Face23'))
+referenceList.append(('Cut','Face24'))
+referenceList.append(('Cut','Face25'))
+referenceList.append(('Cut','Face26'))
+referenceList.append(('Cut','Face27'))
+referenceList.append(('Cut','Face28'))
+referenceList.append(('Cut','Face29'))
+referenceList.append(('Cut','Face30'))
+referenceList.append(('Cut','Face31'))
+referenceList.append(('Cut','Face32'))
+referenceList.append(('Cut','Face45'))
+referenceList.append(('Cut','Face46'))
+referenceList.append(('Cut','Face47'))
+referenceList.append(('Cut','Face48'))
+referenceList.append(('Cut','Face49'))
+referenceList.append(('Cut','Face50'))
+referenceList.append(('Cut','Face51'))
+referenceList.append(('Cut','Face52'))
+referenceList.append(('Cut','Face53'))
+referenceList.append(('Cut','Face75'))
+
+FreeCAD.ActiveDocument.MeshRefinement002.RelativeLength = 0.02
+FreeCAD.ActiveDocument.MeshRefinement002.RefinementThickness = '1 mm'
+FreeCAD.ActiveDocument.MeshRefinement002.NumberLayers = 1
+FreeCAD.ActiveDocument.MeshRefinement002.ExpansionRatio = 1.2
+FreeCAD.ActiveDocument.MeshRefinement002.FirstLayerHeight = '0 mm'
+FreeCAD.ActiveDocument.MeshRefinement002.RegionEdgeRefinement = 1.0
+FreeCAD.ActiveDocument.MeshRefinement002.Internal = False
+
+FreeCADGui.ActiveDocument.Sphere.Transparency = 50

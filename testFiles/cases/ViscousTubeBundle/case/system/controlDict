@@ -1,0 +1,49 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  4.x                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     simpleFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+deltaT          1;
+
+endTime         500;
+
+writeControl    timeStep;
+
+writeInterval   50.0;
+
+purgeWrite      0;
+
+
+writeFormat     ascii;
+
+writePrecision  8;
+
+
+runTimeModifiable true;
+
+libs
+(
+    // Needed for availability of porous baffle boundary in potentialFoam
+    #include "turbulenceLib"
+);
+
+// ************************************************************************* //
