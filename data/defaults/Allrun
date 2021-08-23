@@ -11,14 +11,17 @@ runCommand()
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
+# Unset and source bashrc
 %{%(system/FoamRuntime%)
 %:Posix
-# Unset and source bashrc
 FOAMDIR="%(system/TranslatedFoamPath%)"
-source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
-source "$FOAMDIR/etc/bashrc"
-
 %}
+if [ ! -z "$FOAMDIR" ]
+then
+    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+    source "$FOAMDIR/etc/bashrc"
+fi
+
 # Copy mesh from mesh case dir if available
 MESHDIR="%(meshDir%)"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]

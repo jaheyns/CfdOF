@@ -12,12 +12,11 @@ runCommand()
 }
 
 # Unset and source bashrc
-if [ -f "/opt/openfoam9/etc/config/unset.sh" ]; then  # for OF < 4
-   source "/opt/openfoam9/etc/config/unset.sh" 2> /dev/null
-else
-   source "/opt/openfoam9/etc/config.sh/unset" 2> /dev/null
+if [ ! -z "$FOAMDIR" ]
+then
+    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+    source "$FOAMDIR/etc/bashrc"
 fi
-source "/opt/openfoam9/etc/bashrc"
 
 runCommand blockMesh
 which surfaceFeatures > /dev/null 2>&1

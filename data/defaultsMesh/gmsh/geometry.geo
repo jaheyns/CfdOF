@@ -4,7 +4,7 @@
 // geo file created by FreeCAD for meshing with GMSH meshing software
 
 // Open brep geometry
-Merge "%(GmshSettings/ShapeFile%)";
+Merge "%(0%)_Geometry.brep";
 
 // Characteristic Length
 %{%(GmshSettings/HasLengthMap%)
@@ -55,6 +55,6 @@ Mesh.MshFileVersion = 2.2;
 Mesh.SaveAll = 0;
 
 // Save in msh for OpenFOAM as its unv converter is outdated
-Save "%(GmshSettings/MeshFile%)";
+Save "%(0%)_Geometry.msh";
 %} gmsh/%(0%)_Geometry.geo
 %}

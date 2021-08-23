@@ -1,7 +1,7 @@
 // geo file created by FreeCAD for meshing with GMSH meshing software
 
 // Open brep geometry
-Merge "/tmp/meshCaseblock/gmsh/Box_Geometry.brep";
+Merge "Box_Geometry.brep";
 
 // Characteristic Length
 
@@ -46,4 +46,4 @@ Mesh.MshFileVersion = 2.2;
 Mesh.SaveAll = 0;
 
 // Save in msh for OpenFOAM as its unv converter is outdated
-Save "/tmp/meshCaseblock/gmsh/Box_Geometry.msh";
+Save "Box_Geometry.msh";

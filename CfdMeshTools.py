@@ -679,7 +679,6 @@ class CfdMeshTools:
             else:
                 exe = shutil.which("gmsh")
             self.gmsh_settings['Executable'] = CfdTools.translatePath(exe)
-            self.gmsh_settings['ShapeFile'] = self.temp_file_shape
             self.gmsh_settings['HasLengthMap'] = False
             if self.ele_length_map:
                 self.gmsh_settings['HasLengthMap'] = True
@@ -699,7 +698,6 @@ class CfdMeshTools:
                     patch_name = self.patch_names[k][l]
                     if len(patch_faces):
                         self.gmsh_settings['BoundaryFaceMap'][patch_name] = ', '.join(str(fi+1) for fi in patch_faces)
-            self.gmsh_settings['MeshFile'] = self.temp_file_mesh
 
         # Perform initialisation here rather than __init__ in case of path changes
         self.template_path = os.path.join(CfdTools.get_module_path(), "data", "defaultsMesh")

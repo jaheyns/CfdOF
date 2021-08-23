@@ -11,15 +11,15 @@ runCommand()
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
-runCommand 'None' - "gmsh/Box_Geometry.geo"
+GMSH_EXE='/c/data/projects/FreeCAD/FreeCAD_0.20.25065_Win-LPv12.5.4_vc17.x-x86-64/bin/gmsh.exe'
+runCommand "$GMSH_EXE" - "gmsh/Box_Geometry.geo"
 
 # Unset and source bashrc
-if [ -f "/opt/openfoam9/etc/config/unset.sh" ]; then  # for OF < 4
-   source "/opt/openfoam9/etc/config/unset.sh" 2> /dev/null
-else
-   source "/opt/openfoam9/etc/config.sh/unset" 2> /dev/null
+if [ ! -z "$FOAMDIR" ]
+then
+    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+    source "$FOAMDIR/etc/bashrc"
 fi
-source "/opt/openfoam9/etc/bashrc"
 
 runCommand gmshToFoam "gmsh/Box_Geometry.msh"
 if [ $WM_PROJECT_VERSION -ge 9 ]
