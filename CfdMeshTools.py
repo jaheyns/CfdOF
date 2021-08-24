@@ -82,17 +82,17 @@ class CfdMeshTools:
 
     def writeMesh(self):
         self.setupMeshCaseDir()
-        CfdTools.cfdMessage("Exporting mesh refinement data ...")
+        CfdTools.cfdMessage("Exporting mesh refinement data ...\n")
         if self.progressCallback:
             self.progressCallback("Exporting mesh refinement data ...")
         self.processRefinements()
         self.processDimension()
-        CfdTools.cfdMessage("Exporting the part surfaces ...")
+        CfdTools.cfdMessage("Exporting the part surfaces ...\n")
         if self.progressCallback:
             self.progressCallback("Exporting the part surfaces ...")
         self.writePartFile()
         self.writeMeshCase()
-        CfdTools.cfdMessage("Wrote mesh case to {}".format(self.meshCaseDir))
+        CfdTools.cfdMessage("Wrote mesh case to {}\n".format(self.meshCaseDir))
         if self.progressCallback:
             self.progressCallback("Mesh case written successfully")
 
@@ -558,7 +558,9 @@ class CfdMeshTools:
         z1 = bound_box.ZMin
         z2 = bound_box.ZMax
         import random
-        for i in range(1000):
+        if not shape.isClosed():
+            CfdTools.cfdErrorBox("Can not find an internal point as shape is not closed - please specify manually.")
+        for i in range(100):
             x = random.uniform(x1,x2)
             y = random.uniform(y1,y2)
             z = random.uniform(z1,z2)
