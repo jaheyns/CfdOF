@@ -18,7 +18,7 @@ runCommand "$GMSH_EXE" - "gmsh/%(Name%)_Geometry.geo"
 
 %}
 # Unset and source bashrc
-%{%(system/FoamRuntime%)
+%{%(FoamRuntime%)
 %:Posix
 FOAMDIR="%(TranslatedFoamPath%)"
 %}
