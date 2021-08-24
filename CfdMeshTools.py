@@ -560,6 +560,7 @@ class CfdMeshTools:
         import random
         if not shape.isClosed():
             CfdTools.cfdErrorBox("Can not find an internal point as shape is not closed - please specify manually.")
+            return None
         for i in range(100):
             x = random.uniform(x1,x2)
             y = random.uniform(y1,y2)

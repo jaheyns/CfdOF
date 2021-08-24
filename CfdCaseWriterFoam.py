@@ -516,6 +516,7 @@ class CfdCaseWriterFoam:
         settings['createPatchesSnappyBaffles'] = {}
         bc_group = self.bc_group
 
+        defaultPatchType = "patch"
         for bc_id, bc_obj in enumerate(bc_group):
             bcType = bc_obj.BoundaryType
             bcSubType = bc_obj.BoundarySubType
@@ -524,6 +525,8 @@ class CfdCaseWriterFoam:
                 'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
                 'PatchType': patchType
             }
+            if bc_obj.DefaultBoundary:
+                defaultPatchType = patchType
 
             if bcType == 'baffle' and self.mesh_obj.MeshUtility == 'snappyHexMesh':
                 settings['createPatchesFromSnappyBaffles'] = True
@@ -534,5 +537,5 @@ class CfdCaseWriterFoam:
         # Add default faces
         settings['createPatches']['defaultFaces'] = {
             'PatchNamesList': '"patch_0_.*"',
-            'PatchType': "patch"
+            'PatchType': defaultPatchType
         }
