@@ -12,6 +12,7 @@ runCommand()
 }
 
 # Unset and source bashrc
+FOAMDIR="/opt/openfoam9"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null

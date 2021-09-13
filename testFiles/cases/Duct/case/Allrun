@@ -12,6 +12,7 @@ runCommand()
 }
 
 # Unset and source bashrc
+FOAMDIR="/opt/openfoam9"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -42,7 +43,7 @@ fi
 runCommand createPatch -overwrite
 
 # Scaling .stl files exported from FreeCAD from mm to m
-if [ $WM_PROJECT_VERSION -ge 9 ]
+if [ -z $FOAM_API ] && [ $WM_PROJECT_VERSION -ge 9 ]
 then
     runCommand surfaceTransformPoints "scale=(0.001 0.001 0.001)" "constant/triSurface/Cylinder.stl" "constant/triSurface/CylinderScaled.stl"
 else
