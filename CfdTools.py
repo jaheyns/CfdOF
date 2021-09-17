@@ -64,12 +64,19 @@ FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v201
                                "~/OpenFOAM/OpenFOAM-6.x", "~/OpenFOAM/OpenFOAM-6.0",
                                "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
                                "~/OpenFOAM/OpenFOAM-4.x", "~/OpenFOAM/OpenFOAM-4.0", "~/OpenFOAM/OpenFOAM-4.1",
-                               "~/OpenFOAM/OpenFOAM-dev"]
+                               "~/OpenFOAM/OpenFOAM-dev"],
+                     "Darwin": ["~/OpenFOAM/OpenFOAM-8.x", "~/OpenFOAM/OpenFOAM-8.0",
+                                "~/OpenFOAM/OpenFOAM-7.x", "~/OpenFOAM/OpenFOAM-7.0",
+                                "~/OpenFOAM/OpenFOAM-6.x", "~/OpenFOAM/OpenFOAM-6.0",
+                                "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
+                                "~/OpenFOAM/OpenFOAM-4.x", "~/OpenFOAM/OpenFOAM-4.0", "~/OpenFOAM/OpenFOAM-4.1",
+                                "~/OpenFOAM/OpenFOAM-dev"]
                      }
 PARAVIEW_PATH_DEFAULTS = {
                     "Windows": ["C:\\Program Files\\ParaView 5.5.2-Qt5-Windows-64bit\\bin\\paraview.exe",
                                 "C:\\Program Files\\ParaView 5.5.2-Qt5-MPI-Windows-64bit\\bin\\paraview.exe"],
-                    "Linux": []
+                    "Linux": [],
+                    "Darwin": []
                     }
 
 
