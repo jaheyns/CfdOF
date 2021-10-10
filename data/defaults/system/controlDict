@@ -46,18 +46,12 @@ maxCo           5;
 %}
 %{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
-maxAlphaCo      1;
+maxAlphaCo      5;
 
 %}
-
 writeFormat     ascii;
 
 writePrecision  8;
-
-%{%(solver/SolverName%)
-%:interFoam multiphaseInterFoam
-maxAlphaCo      1;
-%}
 
 runTimeModifiable true;
 

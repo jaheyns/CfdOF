@@ -82,9 +82,9 @@ PIMPLE
 {
 %{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
-    nOuterCorrectors 3;
+    nOuterCorrectors 1;
     nNonOrthogonalCorrectors 2;
-    nCorrectors         2;
+    nCorrectors         3;
 %:default
     nOuterCorrectors 10;
     nNonOrthogonalCorrectors 2;
@@ -176,12 +176,12 @@ solvers
 %:interFoam multiphaseInterFoam
     "alpha.*"
     {
-        nAlphaCorr      2;
+        nAlphaCorr      1;
         nAlphaSubCycles 1;
         cAlpha          1;
 
         MULESCorr       yes;
-        nLimiterIter    3;
+        nLimiterIter    7;
 
         solver          smoothSolver;
         smoother        symGaussSeidel;
