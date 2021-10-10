@@ -1,10 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -45,7 +44,7 @@ class _TaskPanelCfdMeshRefinement:
         self.form = FreeCADGui.PySideUic.loadUi(
             os.path.join(os.path.dirname(__file__), "TaskPanelCfdMeshRefinement.ui"))
 
-        self.ReferencesOrig = list(self.obj.References)
+        self.ShapeRefsOrig = list(self.obj.ShapeRefs)
 
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.referenceSelectWidget,
@@ -109,15 +108,16 @@ class _TaskPanelCfdMeshRefinement:
                                  "= {}".format(self.obj.Name, self.form.if_edgerefinement.value()))
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Internal "
                                  "= {}".format(self.obj.Name, self.form.volumeRefinementToggle.isChecked()))
-        refstr = "FreeCAD.ActiveDocument.{}.References = [\n".format(self.obj.Name)
-        refstr += ',\n'.join("{}".format(ref) for ref in self.obj.References)
+        refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
+        refstr += ',\n'.join(
+            "(FreeCAD.ActiveDocument.getObject('{}'),{})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
         refstr += "]"
         FreeCADGui.doCommand(refstr)
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
         return True
 
     def reject(self):
-        self.obj.References = self.ReferencesOrig
+        self.obj.ShapeRefs = self.ShapeRefsOrig
         if self.sel_server:
             FreeCADGui.Selection.removeObserver(self.sel_server)
         FreeCADGui.ActiveDocument.resetEdit()
@@ -179,7 +179,7 @@ class _TaskPanelCfdMeshRefinement:
         return mesh_obj
 
     def changeInternal(self):
-        self.obj.References.clear()
+        self.obj.ShapeRefs.clear()
         self.faceSelector.rebuildReferenceList()
         self.solidSelector.rebuildReferenceList()
         self.updateUI()

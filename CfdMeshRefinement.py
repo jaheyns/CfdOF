@@ -1,6 +1,5 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
@@ -85,13 +84,18 @@ class _CfdMeshRefinement:
 
     def initProperties(self, obj):
         # Common to all
+        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList",
+                             "", "List of mesh refinement objects"):
+            # Backward compat
+            if 'References' in obj.PropertiesList:
+                doc = FreeCAD.getDocument(obj.Document.Name)
+                for r in obj.References:
+                    obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
+                obj.removeProperty('References')
+                obj.removeProperty('LinkedObjects')
+
         addObjectProperty(obj, "RelativeLength", 0.75, "App::PropertyFloat", "",
                           "Set relative length of the elements for this region")
-
-        addObjectProperty(obj, 'LinkedObjects', [], "App::PropertyLinkList", "", "Linked objects")
-
-        addObjectProperty(obj, "References", [], "App::PropertyPythonObject", "",
-                          "List of mesh refinement objects")
 
         addObjectProperty(obj, "Internal", False, "App::PropertyBool", "",
                           "Whether the refinement region is a volume rather than surface")
@@ -118,15 +122,7 @@ class _CfdMeshRefinement:
 
     def execute(self, obj):
         """ Create compound part at recompute. """
-        docName = str(obj.Document.Name)
-        doc = FreeCAD.getDocument(docName)
-        obj.LinkedObjects = []
-        for ref in obj.References:
-            selection_object = doc.getObject(ref[0])
-            if selection_object is not None:  # May have been deleted
-                if selection_object not in obj.LinkedObjects:
-                    obj.LinkedObjects += [selection_object]
-        shape = CfdTools.makeShapeFromReferences(obj.References, False)
+        shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
             obj.Shape = Part.Shape()
         else:

@@ -1,10 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -27,6 +26,8 @@
 import FreeCAD
 import os
 import os.path
+import CfdMeshRefinement
+import CfdFluidBoundary
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -49,7 +50,7 @@ class CfdFaceSelectWidget:
         self.recompute_timer.timeout.connect(self.recomputeDocument)
 
         self.obj = obj
-        self.References = self.obj.References
+        self.ShapeRefs = self.obj.ShapeRefs
         self.doc_name = self.obj.Document.Name
         self.view_object = self.obj.ViewObject
 
@@ -112,8 +113,8 @@ class CfdFaceSelectWidget:
         for i in FreeCADGui.ActiveDocument.Document.Objects:
             if "Shape" in i.PropertiesList:
                 if not i.Shape.isNull() and \
-                        not i.Name.startswith("CfdFluidBoundary") and \
-                        not i.Name.startswith("MeshRefinement"):
+                        not (hasattr(i, 'Proxy') and isinstance(i.Proxy, CfdFluidBoundary._CfdFluidBoundary)) and \
+                        not (hasattr(i, 'Proxy') and isinstance(i.Proxy, CfdMeshRefinement._CfdMeshRefinement)):
                     self.shapeNames.append(i.Name)
                     self.shapeLabels.append(i.Label)
 
@@ -122,9 +123,6 @@ class CfdFaceSelectWidget:
             if allow_obj_sel:
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
                 item.setCheckState(QtCore.Qt.Unchecked)
-            #else:
-            #    item.setFlags(item.flags() & QtCore.Qt.ItemIsUserCheckable)
-            #    item.setFlags(item.flags() | QtCore.Qt.ItemIsEnabled)
             item.setData(QtCore.Qt.UserRole, i)
             self.form.objectListWidget.addItem(item)
 
@@ -138,11 +136,12 @@ class CfdFaceSelectWidget:
         self.form.selectNoneButton.clicked.connect(self.selectNoneButtonClicked)
         self.form.objectListWidget.setToolTip("Choose solid objects from the list and optionally select one or more of "
                                               "the sub-components associated with the currently selected shape.")
+        self.form.tabWidget.currentChanged.connect(self.tabChanged)
 
         self.rebuildReferenceList()
 
         # First time, add any currently selected faces to list
-        if len(self.References) == 0:
+        if len(self.ShapeRefs) == 0:
             self.addSelectionToRefList()
             self.scheduleRecompute()
             FreeCADGui.Selection.clearSelection()
@@ -152,14 +151,12 @@ class CfdFaceSelectWidget:
     def setReferenceListSelection(self, row):
         if row > -1:
             self.enableSelectingMode(False)
-            docName = str(self.doc_name)
-            doc = FreeCAD.getDocument(docName)
-            ref = self.References[row]
-            selection_object = doc.getObject(ref[0])
-            if ref[1] is None:
+            item = self.form.listReferences.item(row)
+            selection_object, sub = item.data(QtCore.Qt.UserRole)
+            if sub is None:
                 FreeCADGui.Selection.addSelection(selection_object)
             else:
-                FreeCADGui.Selection.addSelection(selection_object, [str(ref[1])])
+                FreeCADGui.Selection.addSelection(selection_object, [str(sub)])
 
     def addSelectionToRefList(self):
         """ Add currently selected objects to reference list. """
@@ -194,19 +191,22 @@ class CfdFaceSelectWidget:
         self.enableSelectingMode(self.selecting_references)
 
     def buttonRemoveFaceClicked(self):
-        if not self.References:
+        if not self.ShapeRefs:
             return
         if not self.form.listReferences.selectedItems():
             return
         for item in self.form.listReferences.selectedItems():
-            current_item_name = str(item.data(QtCore.Qt.UserRole))
-            for ref in self.References:
-                idx = self.shapeNames.index(ref[0])
-                refname = self.shapeNames[idx]
-                if ref[1] is not None:
-                     refname += ':' + ref[1]
-                if refname == current_item_name:
-                    self.References.remove(ref)
+            object, sub = item.data(QtCore.Qt.UserRole)
+            for i, ref in enumerate(self.ShapeRefs):
+                if ref[0].Name == object.Name:
+                    if not sub:
+                        self.ShapeRefs.remove(ref)
+                    else:
+                        newsub = tuple([ss for ss in ref[1] if ss != sub])
+                        if len(newsub):
+                            self.ShapeRefs[i] = tuple([ref[0], newsub])
+                        else:
+                            self.ShapeRefs.remove(ref)
         self.rebuildReferenceList()
         self.scheduleRecompute()
 
@@ -217,6 +217,9 @@ class CfdFaceSelectWidget:
     def choose_selection_mode_solid(self, state):
         self.selection_mode_solid = state
         self.updateSelectionbuttonUI()
+
+    def tabChanged(self, index):
+        self.enableSelectingMode(False)
 
     def updateSelectionbuttonUI(self):
         self.form.buttonAddFace.setChecked(self.selecting_references)
@@ -250,7 +253,7 @@ class CfdFaceSelectWidget:
                 elt = selected_object.Shape
             selection = None
             if as_is:
-                selection = (selected_object.Name, sub)
+                selection = (selected_object, (sub if sub else '',))
             elif self.selection_mode_solid:
                 # in solid selection mode use edges and faces for selection of a solid
                 solid_to_add = None
@@ -279,30 +282,30 @@ class CfdFaceSelectWidget:
                 elif elt.ShapeType == 'Solid':
                     solid_to_add = sub
                 if solid_to_add:
-                    selection = (selected_object.Name, solid_to_add)
+                    selection = (selected_object, (solid_to_add,))
                     print('Selection element changed to Solid: ' +
                           selected_object.Shape.ShapeType + '  ' +
                           selection[0] + '  ' +
-                          selection[1])
+                          selection[1][0])
             else:
                 # Allow Vertex, Edge, Face or just Face selection
                 if (elt.ShapeType == 'Face' and self.allow_face_sel) or \
                         (elt.ShapeType == 'Edge' and self.allow_edge_sel) or \
                         (elt.ShapeType == 'Vertex' and self.allow_point_sel):
-                    selection = (selected_object.Name, sub)
+                    selection = (selected_object, (sub,))
                 elif self.allow_obj_sel and \
                         (elt.ShapeType == 'Shell' or elt.ShapeType == 'Solid' or elt.ShapeType == 'Compound'):
-                    selection = (selected_object.Name, None)
+                    selection = (selected_object, ('',))
             if selection:
-                if selection not in self.References:
-                    self.References.append(selection)
+                if selection not in self.ShapeRefs:
+                    self.ShapeRefs.append(selection)
                 else:
                     if not selection[1]:
                         FreeCAD.Console.PrintMessage(
                             selection[0] + ' already in reference list\n')
                     else:
                         FreeCAD.Console.PrintMessage(
-                            selection[0] + ':' + selection[1] + ' already in reference list\n')
+                            selection[0].Name + ':' + selection[1][0] + ' already in reference list\n')
             self.rebuildReferenceList()
             self.scheduleRecompute()
         self.updateSelectionbuttonUI()
@@ -320,34 +323,32 @@ class CfdFaceSelectWidget:
         self.form.listReferences.clear()
         items = []
         remove_refs = []
-        for ref in self.References:
+        for ref in self.ShapeRefs:
             try:
-                idx = self.shapeNames.index(ref[0])
+                idx = self.shapeNames.index(ref[0].Name)
             except ValueError:  # If solid doesn't exist anymore
                 remove_refs.append(ref)
             else:
                 listItem = self.form.objectListWidget.item(idx)
-                if ref[1] is not None:
-                    item_label = self.shapeLabels[idx] + ':' + ref[1]
-                    item_name = self.shapeNames[idx] + ':' + ref[1]
-                    if self.allow_obj_sel:
-                        if listItem.checkState() == QtCore.Qt.Unchecked:
-                            listItem.setCheckState(QtCore.Qt.PartiallyChecked)
-                else:
-                    item_label = self.shapeLabels[idx]
-                    item_name = self.shapeNames[idx]
-                    if self.allow_obj_sel:
-                        listItem.setCheckState(QtCore.Qt.Checked)
-                items.append((item_label, item_name))
+                for rr in ref[1]:
+                    if rr:
+                        item_label = self.shapeLabels[idx] + ':' + rr
+                        if self.allow_obj_sel:
+                            if listItem.checkState() == QtCore.Qt.Unchecked:
+                                listItem.setCheckState(QtCore.Qt.PartiallyChecked)
+                    else:
+                        item_label = self.shapeLabels[idx]
+                        if self.allow_obj_sel:
+                            listItem.setCheckState(QtCore.Qt.Checked)
+                    items.append((item_label, (ref[0], rr)))
         for ref in remove_refs:
-            self.References.remove(ref)
+            self.ShapeRefs.remove(ref)
         if remove_refs:
             self.scheduleRecompute()
         for listItem in items:
             item = QtGui.QListWidgetItem(listItem[0])
             item.setData(QtCore.Qt.UserRole, listItem[1])
             self.form.listReferences.addItem(item)
-        # At the moment we assume order in listbox is the same as order of references
         self.form.listReferences.setSortingEnabled(False)
         self.form.objectListWidget.itemChanged.connect(self.objectListItemChanged)
 
@@ -355,11 +356,11 @@ class CfdFaceSelectWidget:
         idx = item.data(QtCore.Qt.UserRole)
         object_name = self.shapeNames[idx]
         refs_to_remove = []
-        for ref in self.References:
-            if ref[0] == object_name:
+        for ref in self.ShapeRefs:
+            if ref[0].Name == object_name:
                 refs_to_remove.append(ref)
         for r in refs_to_remove:
-            self.References.remove(r)
+            self.ShapeRefs.remove(r)
         if item.checkState() == QtCore.Qt.Checked:
             self.addSelection(self.doc_name, object_name, None, as_is=True)
         self.rebuildReferenceList()
@@ -381,15 +382,18 @@ class CfdFaceSelectWidget:
         ind = self.form.objectListWidget.currentIndex().row()
         objectName = self.shapeNames[ind]
         # Disable change notifications while we add new items
-        self.form.faceListWidget.itemChanged.disconnect(self.faceListItemChanged)
+        self.form.faceListWidget.itemChanged.disconnect()
         self.shapeObj = FreeCADGui.ActiveDocument.Document.getObject(objectName)
         self.hideObjects()
-        refs = list(self.References)
+        refs = list(self.ShapeRefs)
         self.form.faceListWidget.clear()
         FreeCADGui.showObject(self.shapeObj)
         if self.allow_face_sel:
             self.listOfShapeFaces = self.shapeObj.Shape.Faces
-            selected_faces = [ref[1] for ref in refs if ref[0] == objectName]
+            selected_faces = []
+            for ref in refs:
+                if ref[0].Name == objectName:
+                    selected_faces += ref[1]
             for i in range(len(self.listOfShapeFaces)):
                 face_name = "Face" + str(i + 1)
                 item = QtGui.QListWidgetItem(face_name, self.form.faceListWidget)
@@ -402,7 +406,7 @@ class CfdFaceSelectWidget:
                 self.form.faceListWidget.insertItem(i, item)
         if self.allow_solid_sel:
             self.listOfShapeSolids = self.shapeObj.Shape.Solids
-            selected_solids = [ref[1] for ref in refs if ref[0] == objectName]
+            selected_solids = [ref[1] for ref in refs if ref[0].Name == objectName]
             for i in range(len(self.listOfShapeSolids)):
                 face_name = "Solid" + str(i + 1)
                 item = QtGui.QListWidgetItem(face_name, self.form.faceListWidget)
@@ -415,7 +419,7 @@ class CfdFaceSelectWidget:
                 self.form.faceListWidget.insertItem(i, item)
         if self.allow_edge_sel:
             self.listOfShapeEdges = self.shapeObj.Shape.Edges
-            selected_edges = [ref[1] for ref in refs if ref[0] == objectName]
+            selected_edges = [ref[1] for ref in refs if ref[0].Name == objectName]
             for i in range(len(self.listOfShapeEdges)):
                 face_name = "Edge" + str(i + 1)
                 item = QtGui.QListWidgetItem(face_name, self.form.faceListWidget)
@@ -428,7 +432,7 @@ class CfdFaceSelectWidget:
                 self.form.faceListWidget.insertItem(i, item)
         if self.allow_point_sel:
             self.listOfShapeVertices = self.shapeObj.Shape.Vertexes
-            selected_solids = [ref[1] for ref in refs if ref[0] == objectName]
+            selected_solids = [ref[1] for ref in refs if ref[0].Name == objectName]
             for i in range(len(self.listOfShapeVertices)):
                 face_name = "Vertex" + str(i + 1)
                 item = QtGui.QListWidgetItem(face_name, self.form.faceListWidget)
@@ -459,16 +463,20 @@ class CfdFaceSelectWidget:
         face_name = item.text()
         if item.checkState() == QtCore.Qt.Checked:
             # If current object was already added in its entirety, remove it since we are now editing on the face level
-            for ref in self.References:
-                if ref[0] == object_name and ref[1] is None:
-                    self.References.remove(ref)
+            for ref in self.ShapeRefs:
+                if ref[0].Name == object_name and ref[1] == ('',):
+                    self.ShapeRefs.remove(ref)
             self.addSelection(self.doc_name, object_name, face_name, as_is=True)
         else:
-            if not self.References:
+            if not self.ShapeRefs:
                 return
-            for ref in self.References:
-                if ref[0] == object_name and ref[1] == face_name:
-                    self.References.remove(ref)
+            for i, ref in enumerate(self.ShapeRefs):
+                if ref[0].Name == object_name:
+                    newsub = tuple([rr for rr in ref[1] if rr != face_name])
+                    if not len(newsub):
+                        self.ShapeRefs.remove(ref)
+                    else:
+                        self.ShapeRefs[i] = (ref[0], newsub)
             self.rebuildReferenceList()
         self.scheduleRecompute()
 
@@ -488,7 +496,7 @@ class CfdFaceSelectWidget:
 
     def recomputeDocument(self):
         # Re-assign to force update of FreeCAD property
-        self.obj.References = self.References
+        self.obj.ShapeRefs = self.ShapeRefs
         FreeCAD.getDocument(self.doc_name).recompute()
 
     def closing(self):

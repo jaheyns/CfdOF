@@ -1,6 +1,5 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net> *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
@@ -50,7 +49,7 @@ class TaskPanelCfdFluidBoundary:
         self.material_objs = material_objs
 
         # Store values which are changed on the fly for visual update
-        self.ReferencesOrig = list(self.obj.References)
+        self.ShapeRefsOrig = list(self.obj.ShapeRefs)
         self.BoundaryTypeOrig = str(self.obj.BoundaryType)
         self.BoundarySubTypeOrig = str(self.obj.BoundarySubType)
 
@@ -140,7 +139,7 @@ class TaskPanelCfdFluidBoundary:
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.updateUI)
         self.form.checkBoxDefaultBoundary.stateChanged.connect(self.updateUI)
 
-        # Face list selection panel - modifies obj.References passed to it
+        # Face list selection panel - modifies obj.ShapeRefs passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
                                                                     self.obj, True, True, False)
 
@@ -379,8 +378,9 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputSpacing)))
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Label = '{}'".format(self.obj.Name, self.obj.Label))
 
-        refstr = "FreeCAD.ActiveDocument.{}.References = [\n".format(self.obj.Name)
-        refstr += ',\n'.join("{}".format(ref) for ref in self.obj.References)
+        refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
+        refstr += ',\n'.join(
+            "(FreeCAD.ActiveDocument.getObject('{}'),{})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
         refstr += "]"
         FreeCADGui.doCommand(refstr)
 
@@ -396,7 +396,7 @@ class TaskPanelCfdFluidBoundary:
         self.faceSelector.closing()
 
     def reject(self):
-        self.obj.References = self.ReferencesOrig
+        self.obj.ShapeRefs = self.ShapeRefsOrig
         self.obj.BoundaryType = self.BoundaryTypeOrig
         self.obj.BoundarySubType = self.BoundarySubTypeOrig
         FreeCADGui.Selection.removeObserver(self)

@@ -1,11 +1,9 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
-# *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -166,9 +164,16 @@ class _CfdFluidBoundary:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, 'References', [], "App::PropertyPythonObject", "", "Boundary faces")
+        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "Boundary faces"):
+            # Backward compat
+            if 'References' in obj.PropertiesList:
+                doc = FreeCAD.getDocument(obj.Document.Name)
+                for r in obj.References:
+                    obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
+                obj.removeProperty('References')
+                obj.removeProperty('LinkedObjects')
+
         addObjectProperty(obj, 'DefaultBoundary', False, "App::PropertyBool", "Boundary faces")
-        addObjectProperty(obj, 'LinkedObjects', [], "App::PropertyLinkList", "", "Linked objects")
         addObjectProperty(obj, 'BoundaryType', BOUNDARY_TYPES, "App::PropertyEnumeration", "", "Boundary condition category")
         all_subtypes = []
         for s in SUBTYPES:
@@ -236,15 +241,7 @@ class _CfdFluidBoundary:
 
     def execute(self, obj):
         """ Create compound part at recompute. """
-        docName = str(obj.Document.Name)
-        doc = FreeCAD.getDocument(docName)
-        obj.LinkedObjects = []
-        for ref in obj.References:
-            selection_object = doc.getObject(ref[0])
-            if selection_object is not None:  # May have been deleted
-                if selection_object not in obj.LinkedObjects:
-                    obj.LinkedObjects += [selection_object]
-        shape = CfdTools.makeShapeFromReferences(obj.References, False)
+        shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
             obj.Shape = Part.Shape()
         else:
@@ -330,9 +327,6 @@ class _ViewProviderCfdFluidBoundary:
 
         import _TaskPanelCfdFluidBoundary
         taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
-        for obj in FreeCAD.ActiveDocument.Objects:
-            if obj.isDerivedFrom("Fem::FemMeshObject"):
-                obj.ViewObject.hide()
         self.Object.ViewObject.show()
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)

@@ -213,6 +213,15 @@ Community assistance may be sought at the
 and a list of various third-party documentation is available in
 [the following forum post](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359).
 
+### FAQ
+
+Q: Do I have to create a watertight geometry?
+
+A: This isn't necessary if using the cartesian mesh generators _snappyHexMesh_ and _cfMesh_.
+You can make use of shells and compounds instead of creating solids, as long as the 
+collection of shapes in the compound being meshed blocks off the volume desired. 
+Gaps smaller than the mesh spacing are also allowed.
+
 ## Feedback
 
 ### Reporting Bugs

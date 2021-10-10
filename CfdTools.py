@@ -1337,9 +1337,9 @@ def matchFaces(faces1, faces2):
 def makeShapeFromReferences(refs, raise_error=True):
     face_list = []
     for ref in refs:
-        shape = resolveReference(ref, raise_error)
-        if shape is not None:
-            face_list.append(shape)
+        shapes = resolveReference(ref, raise_error)
+        if len(shapes):
+            face_list += shapes
     if len(face_list) > 0:
         shape = Part.makeCompound(face_list)
         return shape
@@ -1348,24 +1348,22 @@ def makeShapeFromReferences(refs, raise_error=True):
 
 
 def resolveReference(r, raise_error=True):
-    obj = FreeCAD.ActiveDocument.getObject(r[0])
-    if not obj:
-        if raise_error:
-            raise RuntimeError("Object '{}' was not found - object may have been deleted".format(r[0]))
-        else:
-            return None
-    if not r[1]:
-        return obj.Shape
+    obj = r[0]
+    if not r[1] or r[1] == ('',):
+        return [obj.Shape]
     try:
-        if r[1].startswith('Solid'):  # getElement doesn't work with solids for some reason
-            f = obj.Shape.Solids[int(r[1].lstrip('Solid')) - 1]
-        else:
-            f = obj.Shape.getElement(r[1])
-            if f is None and raise_error:
-                raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0], r[1]))
+        f = []
+        for rr in r[1]:
+            if rr.startswith('Solid'):  # getElement doesn't work with solids for some reason
+                f += [obj.Shape.Solids[int(rr.lstrip('Solid')) - 1]]
+            else:
+                ff = obj.Shape.getElement(rr)
+                if ff is None and raise_error:
+                    raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0].Name, rr))
+                f += [ff]
     except Part.OCCError:
         if raise_error:
-            raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0], r[1]))
+            raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0].Name, r[1]))
         else:
             return None
     return f
