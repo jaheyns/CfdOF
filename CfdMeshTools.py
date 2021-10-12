@@ -241,12 +241,13 @@ class CfdMeshTools:
             bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         boundary_face_list = []
         for bc_id, bc_obj in enumerate(bc_group):
-            for ri, ref in enumerate(bc_obj.References):
+            for ri, ref in enumerate(bc_obj.ShapeRefs):
                 try:
                     bf = CfdTools.resolveReference(ref)
                 except RuntimeError as re:
                     raise RuntimeError("Error processing boundary condition {}: {}".format(bc_obj.Label, str(re)))
-                boundary_face_list += [(bff, (bc_id, ref, ri)) for bff in bf.Faces]
+                for si, s in enumerate(bf):
+                    boundary_face_list += [(sf, (bc_id, ri, si)) for sf in s[0].Faces]
 
         # Match them up to faces in the main geometry
         bc_matched_faces = CfdTools.matchFaces(boundary_face_list, mesh_face_list)
@@ -274,13 +275,14 @@ class CfdMeshTools:
             bl_face_list = []
             for mr_id, mr_obj in enumerate(mr_objs):
                 if mr_obj.NumberLayers > 1 and not mr_obj.Internal:
-                    for ri, r in enumerate(mr_obj.References):
+                    for ri, r in enumerate(mr_obj.ShapeRefs):
                         try:
-                            f = CfdTools.resolveReference(r)
+                            bf = CfdTools.resolveReference(r)
                         except RuntimeError as re:
                             raise RuntimeError("Error processing mesh refinement {}: {}".format(
                                 mr_obj.Label, str(re)))
-                        bl_face_list += [(ff, (mr_id, r, ri)) for ff in f.Faces]
+                        for si, s in enumerate(bf):
+                            bl_face_list += [(f, (mr_id, ri, si)) for f in s[0].Faces]
 
             # Match them up
             bl_matched_faces = CfdTools.matchFaces(bl_face_list, mesh_face_list)
@@ -290,12 +292,13 @@ class CfdMeshTools:
             match = bl_matched_faces[k][1]
             prev_k = bl_match_per_shape_face[match]
             if prev_k >= 0:
-                nr, ref, ri = bl_matched_faces[k][0]
-                nr2, ref2, ri2 = bl_matched_faces[prev_k][0]
+                nr, ri, si = bl_matched_faces[k][0]
+                nr2, ri2, si2 = bl_matched_faces[prev_k][0]
                 CfdTools.cfdWarning(
                     "Mesh refinement '{}' reference {}:{} also assigned as "
                     "mesh refinement '{}' reference {}:{} - ignoring duplicate\n".format(
-                        mr_objs[nr].Label, ref[0], ref[1], mr_objs[nr2].Label, ref2[0], ref2[1]))
+                        mr_objs[nr].Label, mr_objs[nr].ShapeRefs[ri][0], mr_objs[nr].ShapeRefs[ri][1][si],
+                        mr_objs[nr2].Label, mr_objs[nr2].ShapeRefs[ri2][0], mr_objs[nr2].ShapeRefs[ri2][1][si2]))
             else:
                 bl_match_per_shape_face[match] = k
 
@@ -327,13 +330,14 @@ class CfdMeshTools:
 
             for mr_id, mr_obj in enumerate(mr_objs):
                 if not mr_obj.Internal:
-                    for ri, r in enumerate(mr_obj.References):
+                    for ri, r in enumerate(mr_obj.ShapeRefs):
                         try:
-                            f = CfdTools.resolveReference(r)
+                            bf = CfdTools.resolveReference(r)
                         except RuntimeError as re:
                             raise RuntimeError("Error processing mesh refinement {}: {}".format(
                                 mr_obj.Label, str(re)))
-                        mr_face_list += [(ff, (mr_id, r, ri)) for ff in f.Faces]
+                        for si, s in enumerate(bf):
+                            mr_face_list += [(f, (mr_id, ri, si)) for f in s[0].Faces]
 
             # Match mesh regions to the boundary conditions, to identify boundary conditions on supplementary
             # geometry (including on baffles)
@@ -342,13 +346,16 @@ class CfdMeshTools:
         for bc_id, bc_obj in enumerate(bc_group):
             if bc_obj.BoundaryType == 'baffle':
                 baffle_matches = [m for m in bc_mr_matched_faces if m[0][0] == bc_id]
-                mr_match_per_baffle_ref = [-1]*len(bc_obj.References)
+                mr_match_per_baffle_ref = []
+                for r in bc_obj.ShapeRefs:
+                    mr_match_per_baffle_ref += [[-1]*len(r[1])]
                 for m in baffle_matches:
-                    mr_match_per_baffle_ref[m[0][2]] = m[1][0]
+                    mr_match_per_baffle_ref[m[0][1]][m[0][2]] = m[1][0]
                 # For each mesh region, the refs that are part of this baffle
                 baffle_patch_refs = [[] for ri in range(len(mr_objs)+1)]
-                for ri, mri in enumerate(mr_match_per_baffle_ref):
-                    baffle_patch_refs[mri+1].append(bc_obj.References[ri])
+                for ri, mr in enumerate(mr_match_per_baffle_ref):
+                    for si, mri in enumerate(mr_match_per_baffle_ref[ri]):
+                        baffle_patch_refs[mri+1].append((bc_obj.ShapeRefs[ri][0], (bc_obj.ShapeRefs[ri][1][si],)))
 
                 # Write these geometries
                 for ri, refs in enumerate(baffle_patch_refs):
@@ -402,20 +409,23 @@ class CfdMeshTools:
 
             # Find any matches with boundary conditions; mark those matching baffles for removal
             bc_matches = [m for m in bc_mr_matched_faces if m[1][0] == mr_id]
-            bc_match_per_mr_ref = [-1]*len(mr_obj.References)
+            bc_match_per_mr_ref = []
+            for ri, r in enumerate(mr_obj.ShapeRefs):
+                bc_match_per_mr_ref.append([-1]*len(r[1]))
             for m in bc_matches:
-                bc_match_per_mr_ref[m[1][2]] = -2 if bc_group[m[0][0]].BoundaryType == 'baffle' else m[0][0]
+                bc_match_per_mr_ref[m[1][1]][m[1][2]] = -2 if bc_group[m[0][0]].BoundaryType == 'baffle' else m[0][0]
 
             # Unmatch those in primary geometry
             main_geom_matches = [m for m in mr_matched_faces if m[0][0] == mr_id]
             for m in main_geom_matches:
-                bc_match_per_mr_ref[m[0][2]] = -1
+                bc_match_per_mr_ref[m[0][1]][m[0][2]] = -1
 
             # For each boundary, the refs that are part of this mesh region
             mr_patch_refs = [[] for ri in range(len(bc_group)+1)]
-            for ri, bci in enumerate(bc_match_per_mr_ref):
-                if bci > -2:
-                    mr_patch_refs[bci+1].append(mr_obj.References[ri])
+            for ri, m in enumerate(bc_match_per_mr_ref):
+                for si, bci in enumerate(m):
+                    if bci > -2:
+                        mr_patch_refs[bci+1].append((mr_obj.ShapeRefs[ri][0], (mr_obj.ShapeRefs[ri][1][si],)))
 
             # Loop over and write the sub-sections of this mesh object
             for bi in range(len(mr_patch_refs)):

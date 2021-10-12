@@ -1339,7 +1339,7 @@ def makeShapeFromReferences(refs, raise_error=True):
     for ref in refs:
         shapes = resolveReference(ref, raise_error)
         if len(shapes):
-            face_list += shapes
+            face_list += [s[0] for s in shapes]
     if len(face_list) > 0:
         shape = Part.makeCompound(face_list)
         return shape
@@ -1350,22 +1350,22 @@ def makeShapeFromReferences(refs, raise_error=True):
 def resolveReference(r, raise_error=True):
     obj = r[0]
     if not r[1] or r[1] == ('',):
-        return [obj.Shape]
-    try:
-        f = []
-        for rr in r[1]:
+        return [(obj.Shape, (r[0], None))]
+    f = []
+    for rr in r[1]:
+        try:
             if rr.startswith('Solid'):  # getElement doesn't work with solids for some reason
-                f += [obj.Shape.Solids[int(rr.lstrip('Solid')) - 1]]
+                f += [(obj.Shape.Solids[int(rr.lstrip('Solid')) - 1], (r[0], rr))]
             else:
                 ff = obj.Shape.getElement(rr)
-                if ff is None and raise_error:
-                    raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0].Name, rr))
-                f += [ff]
-    except Part.OCCError:
-        if raise_error:
-            raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0].Name, r[1]))
-        else:
-            return None
+                if ff is None:
+                    if raise_error:
+                        raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0].Name, rr))
+                else:
+                    f += [(ff, (r[0], rr))]
+        except Part.OCCError:
+            if raise_error:
+                raise RuntimeError("Face '{}:{}' was not found - geometry may have changed".format(r[0].Name, r[1]))
     return f
 
 

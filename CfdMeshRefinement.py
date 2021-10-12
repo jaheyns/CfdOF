@@ -90,7 +90,10 @@ class _CfdMeshRefinement:
             if 'References' in obj.PropertiesList:
                 doc = FreeCAD.getDocument(obj.Document.Name)
                 for r in obj.References:
-                    obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
+                    if not r[1]:
+                        obj.ShapeRefs += [doc.getObject(r[0])]
+                    else:
+                        obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
                 obj.removeProperty('References')
                 obj.removeProperty('LinkedObjects')
 
