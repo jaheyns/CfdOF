@@ -1,6 +1,5 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
@@ -25,16 +24,10 @@
 # ***************************************************************************
 
 import FreeCAD
-import Fem
-try:
-    import femtools.geomtools as FemGeomTools
-except ImportError:  # Backward compatibility
-    import femmesh.meshtools as FemGeomTools
 from FreeCAD import Units
 import os
 import platform
 import shutil
-import subprocess
 import CfdTools
 import math
 import MeshPart
@@ -233,13 +226,13 @@ class CfdMeshTools:
 
         # Make list of all boundary references
         CfdTools.cfdMessage("Matching boundary patches\n")
+        boundary_face_list = []
         bc_group = None
         analysis_obj = CfdTools.getParentAnalysisObject(self.mesh_obj)
         if not analysis_obj:
             analysis_obj = CfdTools.getActiveAnalysis()
         if analysis_obj:
             bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
-        boundary_face_list = []
         for bc_id, bc_obj in enumerate(bc_group):
             for ri, ref in enumerate(bc_obj.ShapeRefs):
                 try:
@@ -271,7 +264,6 @@ class CfdMeshTools:
         bl_matched_faces = []
         if self.mesh_obj.MeshUtility == 'cfMesh':
             CfdTools.cfdMessage("Matching boundary layer regions\n")
-
             bl_face_list = []
             for mr_id, mr_obj in enumerate(mr_objs):
                 if mr_obj.NumberLayers > 1 and not mr_obj.Internal:
@@ -287,6 +279,7 @@ class CfdMeshTools:
             # Match them up
             bl_matched_faces = CfdTools.matchFaces(bl_face_list, mesh_face_list)
 
+        # Check for and filter duplicates
         bl_match_per_shape_face = [-1] * len(mesh_face_list)
         for k in range(len(bl_matched_faces)):
             match = bl_matched_faces[k][1]
@@ -321,13 +314,36 @@ class CfdMeshTools:
                 nr, ref, rri = bl_matched_faces[l][0]
             self.patch_faces[nb+1][nr+1].append(i)
 
+        # For gmsh, match mesh refinement with vertices in original mesh
+        mr_matched_vertices = []
+        if self.mesh_obj.MeshUtility == 'gmsh':
+            # Make list of all vertices in meshed shape with original index
+            mesh_vertices_list = list(
+                zip(self.mesh_obj.Part.Shape.Vertexes, range(len(self.mesh_obj.Part.Shape.Vertexes))))
+
+            CfdTools.cfdMessage("Matching mesh refinements\n")
+            mr_vertices_list = []
+            for mr_id, mr_obj in enumerate(mr_objs):
+                if not mr_obj.Internal:
+                    for ri, r in enumerate(mr_obj.ShapeRefs):
+                        try:
+                            bf = CfdTools.resolveReference(r)
+                        except RuntimeError as re:
+                            raise RuntimeError("Error processing mesh refinement {}: {}".format(
+                                mr_obj.Label, str(re)))
+                        for si, s in enumerate(bf):
+                            mr_vertices_list += [(v, (mr_id, ri, si)) for v in s[0].Vertexes]
+
+            mr_matched_vertices = CfdTools.matchFaces(mr_vertices_list, mesh_vertices_list)
+            self.ele_length_map = {}
+            self.ele_node_map = {}
+
         # Additionally for snappy, match baffles to any surface mesh refinements
         # as well as matching each surface mesh refinement region to boundary conditions
-        mr_face_list = []
         bc_mr_matched_faces = []
+        mr_face_list = []
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
             CfdTools.cfdMessage("Matching surface geometries\n")
-
             for mr_id, mr_obj in enumerate(mr_objs):
                 if not mr_obj.Internal:
                     for ri, r in enumerate(mr_obj.ShapeRefs):
@@ -407,75 +423,82 @@ class CfdMeshTools:
                     "The mesh refinement region '{}' should not use a relative length smaller "
                     "than 0.001.\n".format(mr_obj.Name))
 
-            # Find any matches with boundary conditions; mark those matching baffles for removal
-            bc_matches = [m for m in bc_mr_matched_faces if m[1][0] == mr_id]
-            bc_match_per_mr_ref = []
-            for ri, r in enumerate(mr_obj.ShapeRefs):
-                bc_match_per_mr_ref.append([-1]*len(r[1]))
-            for m in bc_matches:
-                bc_match_per_mr_ref[m[1][1]][m[1][2]] = -2 if bc_group[m[0][0]].BoundaryType == 'baffle' else m[0][0]
+            if self.mesh_obj.MeshUtility == 'gmsh':
+                # Generate element maps for gmsh
+                if not Internal:
+                    mesh_vertex_idx = [mf[1] for mf in mr_matched_vertices if mf[0][0] == mr_id]
+                    self.ele_length_map[mr_obj.Name] = mr_rellen*self.clmax
+                    self.ele_node_map[mr_obj.Name] = mesh_vertex_idx
+            else:
+                # Find any matches with boundary conditions; mark those matching baffles for removal
+                bc_matches = [m for m in bc_mr_matched_faces if m[1][0] == mr_id]
+                bc_match_per_mr_ref = []
+                for ri, r in enumerate(mr_obj.ShapeRefs):
+                    bc_match_per_mr_ref.append([-1]*len(r[1]))
+                for m in bc_matches:
+                    bc_match_per_mr_ref[m[1][1]][m[1][2]] = -2 if bc_group[m[0][0]].BoundaryType == 'baffle' else m[0][0]
 
-            # Unmatch those in primary geometry
-            main_geom_matches = [m for m in mr_matched_faces if m[0][0] == mr_id]
-            for m in main_geom_matches:
-                bc_match_per_mr_ref[m[0][1]][m[0][2]] = -1
+                # Unmatch those in primary geometry
+                main_geom_matches = [m for m in mr_matched_faces if m[0][0] == mr_id]
+                for m in main_geom_matches:
+                    bc_match_per_mr_ref[m[0][1]][m[0][2]] = -1
 
-            # For each boundary, the refs that are part of this mesh region
-            mr_patch_refs = [[] for ri in range(len(bc_group)+1)]
-            for ri, m in enumerate(bc_match_per_mr_ref):
-                for si, bci in enumerate(m):
-                    if bci > -2:
-                        mr_patch_refs[bci+1].append((mr_obj.ShapeRefs[ri][0], (mr_obj.ShapeRefs[ri][1][si],)))
+                # For each boundary, the refs that are part of this mesh region
+                mr_patch_refs = [[] for ri in range(len(bc_group)+1)]
+                for ri, m in enumerate(bc_match_per_mr_ref):
+                    for si, bci in enumerate(m):
+                        if bci > -2:
+                            mr_patch_refs[bci+1].append((mr_obj.ShapeRefs[ri][0], (mr_obj.ShapeRefs[ri][1][si],)))
 
-            # Loop over and write the sub-sections of this mesh object
-            for bi in range(len(mr_patch_refs)):
-                if len(mr_patch_refs[bi]):
-                    if bi == 0:
-                        mr_patch_name = mr_obj.Name
-                    else:
-                        mr_patch_name = self.patch_names[bi][mr_id+1]
-
-                    CfdTools.cfdMessage("Triangulating mesh refinement region {}, section {} ...".format(
-                        mr_obj.Label, bi))
-
-                    try:
-                        shape = CfdTools.makeShapeFromReferences(mr_patch_refs[bi])
-                    except RuntimeError as re:
-                        raise RuntimeError("Error processing mesh refinement region {}: {}".format(
-                            mr_obj.Label, str(re)))
-                    if shape:
-                        facemesh = MeshPart.meshFromShape(shape, LinearDeflection=self.mesh_obj.STLLinearDeflection)
-
-                        CfdTools.cfdMessage(" writing to file\n")
-                        with open(os.path.join(self.triSurfaceDir, mr_patch_name + '.stl'), 'w') as fid:
-                            CfdTools.writePatchToStl(mr_patch_name, facemesh, fid, self.scale)
-
-                    if self.mesh_obj.MeshUtility == 'cfMesh':
-                        if not Internal:
-                            cf_settings['MeshRegions'][mr_patch_name] = {
-                                'RelativeLength': mr_rellen * self.clmax * self.scale,
-                                'RefinementThickness': self.scale * Units.Quantity(
-                                    mr_obj.RefinementThickness).Value,
-                            }
+                # Loop over and write the sub-sections of this mesh object
+                for bi in range(len(mr_patch_refs)):
+                    if len(mr_patch_refs[bi]):
+                        if bi == 0:
+                            mr_patch_name = mr_obj.Name
                         else:
-                            cf_settings['InternalRegions'][mr_obj.Name] = {
-                                'RelativeLength': mr_rellen * self.clmax * self.scale
-                            }
+                            mr_patch_name = self.patch_names[bi][mr_id+1]
 
-                    elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                        refinement_level = CfdTools.relLenToRefinementLevel(mr_obj.RelativeLength)
-                        if not Internal:
-                            edge_level = CfdTools.relLenToRefinementLevel(mr_obj.RegionEdgeRefinement)
-                            snappy_settings['MeshRegions'][mr_patch_name] = {
-                                'RefinementLevel': refinement_level,
-                                'EdgeRefinementLevel': edge_level,
-                                'MaxRefinementLevel': max(refinement_level, edge_level),
-                                'Baffle': False
-                            }
-                        else:
-                            snappy_settings['InternalRegions'][mr_patch_name] = {
-                                'RefinementLevel': refinement_level
-                            }
+                        CfdTools.cfdMessage("Triangulating mesh refinement region {}, section {} ...".format(
+                            mr_obj.Label, bi))
+
+                        try:
+                            shape = CfdTools.makeShapeFromReferences(mr_patch_refs[bi])
+                        except RuntimeError as re:
+                            raise RuntimeError("Error processing mesh refinement region {}: {}".format(
+                                mr_obj.Label, str(re)))
+                        if shape:
+                            facemesh = MeshPart.meshFromShape(shape, LinearDeflection=self.mesh_obj.STLLinearDeflection)
+
+                            CfdTools.cfdMessage(" writing to file\n")
+                            with open(os.path.join(self.triSurfaceDir, mr_patch_name + '.stl'), 'w') as fid:
+                                CfdTools.writePatchToStl(mr_patch_name, facemesh, fid, self.scale)
+
+                        if self.mesh_obj.MeshUtility == 'cfMesh':
+                            if not Internal:
+                                cf_settings['MeshRegions'][mr_patch_name] = {
+                                    'RelativeLength': mr_rellen * self.clmax * self.scale,
+                                    'RefinementThickness': self.scale * Units.Quantity(
+                                        mr_obj.RefinementThickness).Value,
+                                }
+                            else:
+                                cf_settings['InternalRegions'][mr_obj.Name] = {
+                                    'RelativeLength': mr_rellen * self.clmax * self.scale
+                                }
+
+                        elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
+                            refinement_level = CfdTools.relLenToRefinementLevel(mr_obj.RelativeLength)
+                            if not Internal:
+                                edge_level = CfdTools.relLenToRefinementLevel(mr_obj.RegionEdgeRefinement)
+                                snappy_settings['MeshRegions'][mr_patch_name] = {
+                                    'RefinementLevel': refinement_level,
+                                    'EdgeRefinementLevel': edge_level,
+                                    'MaxRefinementLevel': max(refinement_level, edge_level),
+                                    'Baffle': False
+                                }
+                            else:
+                                snappy_settings['InternalRegions'][mr_patch_name] = {
+                                    'RefinementLevel': refinement_level
+                                }
 
             # In addition, for cfMesh, record matched boundary layer patches
             if self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1 and not Internal:
@@ -491,61 +514,6 @@ class CfdMeshTools:
                             'FirstLayerHeight': self.scale *
                                                 Units.Quantity(mr_obj.FirstLayerHeight).Value
                         }
-
-        # For gmsh, generate element length maps
-        if self.mesh_obj.MeshUtility == "gmsh":
-            # mesh regions
-            self.ele_length_map = {}  # { 'ElementString' : element length }
-            self.ele_node_map = {}  # { 'ElementString' : [element nodes] }
-            if not mr_objs:
-                print ('  No mesh refinements')
-            else:
-                print ('  Mesh refinements found - getting elements')
-                if self.part_obj.Shape.ShapeType == 'Compound':
-                    # see http://forum.freecadweb.org/viewtopic.php?f=18&t=18780&start=40#p149467 and http://forum.freecadweb.org/viewtopic.php?f=18&t=18780&p=149520#p149520
-                    err = "GMSH may not work correctly with compounds. It is recommended to convert them to solids."
-                    FreeCAD.Console.PrintError(err + "\n")
-                for mr_obj in mr_objs:
-                    if mr_obj.RelativeLength:
-                        if mr_obj.References:
-                            for sub in mr_obj.References:
-                                # Check if the shape of the mesh region is an element of the Part to mesh;
-                                # if not try to find the element in the shape to mesh
-                                search_ele_in_shape_to_mesh = False
-                                ref = FreeCAD.ActiveDocument.getObject(sub[0])
-                                if not self.part_obj.Shape.isSame(ref.Shape):
-                                    search_ele_in_shape_to_mesh = True
-                                elems = sub[1]
-                                if search_ele_in_shape_to_mesh:
-                                    # Try to find the element in the Shape to mesh
-                                    ele_shape = FemGeomTools.get_element(ref, elems)  # the method getElement(element) does not return Solid elements
-                                    found_element = CfdTools.findElementInShape(self.part_obj.Shape, ele_shape)
-                                    if found_element:
-                                        elems = found_element
-                                    else:
-                                        FreeCAD.Console.PrintError("One element of the meshregion " + mr_obj.Name + " could not be found in the Part to mesh. It will be ignored.\n")
-                                        elems = None
-                                if elems:
-                                    if elems not in self.ele_length_map:
-                                        # self.ele_length_map[elems] = Units.Quantity(mr_obj.CharacteristicLength).Value
-                                        mr_rellen = mr_obj.RelativeLength
-                                        if mr_rellen > 1.0:
-                                            mr_rellen = 1.0
-                                            FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " should not use a relative length greater than unity.\n")
-                                        elif mr_rellen < 0.01:
-                                            mr_rellen = 0.01  # Relative length should not be less than 1/100 of base length
-                                            FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " should not use a relative length smaller than 0.01.\n")
-                                        self.ele_length_map[elems] = mr_rellen*self.clmax
-                                    else:
-                                        FreeCAD.Console.PrintError("The element " + elems + " of the mesh refinement " + mr_obj.Name + " has been added to another mesh refinement.\n")
-                        else:
-                            FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " is not used to create the mesh because the reference list is empty.\n")
-                    else:
-                        FreeCAD.Console.PrintError("The meshregion: " + mr_obj.Name + " is not used to create the mesh because the CharacteristicLength is 0.0 mm.\n")
-                for eleml in self.ele_length_map:
-                    ele_shape = FemGeomTools.get_element(self.part_obj, eleml)  # the method getElement(element) does not return Solid elements
-                    ele_vertexes = FemGeomTools.get_vertexes_by_element(self.part_obj.Shape, ele_shape)
-                    self.ele_node_map[eleml] = ele_vertexes
 
     def automaticInsidePointDetect(self):
         # Snappy requires that the chosen internal point must remain internal during the meshing process and therefore
@@ -608,6 +576,7 @@ class CfdMeshTools:
             # fem_mesh = Fem.read(os.path.join(self.meshCaseDir,'mesh_outside.stl'))
             # This is a temp work around to remove multiple solids, but is not very efficient
             import Mesh
+            import Fem
             stl = os.path.join(self.meshCaseDir, 'mesh_outside.stl')
             ast = os.path.join(self.meshCaseDir, 'mesh_outside.ast')
             mesh = Mesh.Mesh(stl)
@@ -695,6 +664,8 @@ class CfdMeshTools:
             self.gmsh_settings['HasLengthMap'] = False
             if self.ele_length_map:
                 self.gmsh_settings['HasLengthMap'] = True
+                print(self.ele_length_map)
+                print(self.ele_node_map)
                 self.gmsh_settings['LengthMap'] = self.ele_length_map
                 self.gmsh_settings['NodeMap'] = {}
                 for e in self.ele_length_map:
