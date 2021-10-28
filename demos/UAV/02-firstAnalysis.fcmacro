@@ -27,85 +27,16 @@ FreeCAD.ActiveDocument.Compound001_Mesh.PointInMesh = {'x': '0 mm', 'y': '0 mm',
 
 import CfdMeshRefinement
 CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound001_Mesh)
-FreeCAD.ActiveDocument.MeshRefinement.References = []
-referenceList = FreeCAD.ActiveDocument.MeshRefinement.References
-referenceList.append(('Cut','Face1'))
-referenceList.append(('Cut','Face2'))
-referenceList.append(('Cut','Face3'))
-referenceList.append(('Cut','Face4'))
-referenceList.append(('Cut','Face5'))
-referenceList.append(('Cut','Face6'))
-referenceList.append(('Cut','Face7'))
-referenceList.append(('Cut','Face8'))
-referenceList.append(('Cut','Face9'))
-referenceList.append(('Cut','Face10'))
-referenceList.append(('Cut','Face11'))
-referenceList.append(('Cut','Face12'))
-referenceList.append(('Cut','Face13'))
-referenceList.append(('Cut','Face14'))
-referenceList.append(('Cut','Face15'))
-referenceList.append(('Cut','Face16'))
-referenceList.append(('Cut','Face17'))
-referenceList.append(('Cut','Face18'))
-referenceList.append(('Cut','Face19'))
-referenceList.append(('Cut','Face20'))
-referenceList.append(('Cut','Face21'))
-referenceList.append(('Cut','Face22'))
-referenceList.append(('Cut','Face23'))
-referenceList.append(('Cut','Face24'))
-referenceList.append(('Cut','Face25'))
-referenceList.append(('Cut','Face26'))
-referenceList.append(('Cut','Face27'))
-referenceList.append(('Cut','Face28'))
-referenceList.append(('Cut','Face29'))
-referenceList.append(('Cut','Face30'))
-referenceList.append(('Cut','Face31'))
-referenceList.append(('Cut','Face32'))
-referenceList.append(('Cut','Face33'))
-referenceList.append(('Cut','Face34'))
-referenceList.append(('Cut','Face35'))
-referenceList.append(('Cut','Face36'))
-referenceList.append(('Cut','Face37'))
-referenceList.append(('Cut','Face38'))
-referenceList.append(('Cut','Face39'))
-referenceList.append(('Cut','Face40'))
-referenceList.append(('Cut','Face41'))
-referenceList.append(('Cut','Face42'))
-referenceList.append(('Cut','Face43'))
-referenceList.append(('Cut','Face44'))
-referenceList.append(('Cut','Face45'))
-referenceList.append(('Cut','Face46'))
-referenceList.append(('Cut','Face47'))
-referenceList.append(('Cut','Face48'))
-referenceList.append(('Cut','Face49'))
-referenceList.append(('Cut','Face50'))
-referenceList.append(('Cut','Face51'))
-referenceList.append(('Cut','Face52'))
-referenceList.append(('Cut','Face53'))
-referenceList.append(('Cut','Face54'))
-referenceList.append(('Cut','Face55'))
-referenceList.append(('Cut','Face56'))
-referenceList.append(('Cut','Face57'))
-referenceList.append(('Cut','Face58'))
-referenceList.append(('Cut','Face59'))
-referenceList.append(('Cut','Face60'))
-referenceList.append(('Cut','Face61'))
-referenceList.append(('Cut','Face62'))
-referenceList.append(('Cut','Face63'))
-referenceList.append(('Cut','Face64'))
-referenceList.append(('Cut','Face65'))
-referenceList.append(('Cut','Face66'))
-referenceList.append(('Cut','Face67'))
-referenceList.append(('Cut','Face68'))
-referenceList.append(('Cut','Face69'))
-referenceList.append(('Cut','Face70'))
-referenceList.append(('Cut','Face71'))
-referenceList.append(('Cut','Face72'))
-referenceList.append(('Cut','Face73'))
-referenceList.append(('Cut','Face74'))
-referenceList.append(('Cut','Face75'))
-referenceList.append(('Cut','Face76'))
-
+FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = []
+referenceList = FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), (
+'Face1', 'Face2', 'Face3', 'Face4', 'Face5', 'Face6', 'Face7', 'Face8', 'Face9', 'Face10', 'Face11', 'Face12', 'Face13', 
+'Face14', 'Face15', 'Face16', 'Face17', 'Face18', 'Face19', 'Face20', 'Face21', 'Face22', 'Face23', 'Face24', 'Face25', 
+'Face26', 'Face27', 'Face28', 'Face29', 'Face30', 'Face31', 'Face32', 'Face33', 'Face34', 'Face35', 'Face36', 'Face37', 
+'Face38', 'Face39', 'Face40', 'Face41', 'Face42', 'Face43', 'Face44', 'Face45', 'Face46', 'Face47', 'Face48', 'Face49', 
+'Face50', 'Face51', 'Face52', 'Face53', 'Face54', 'Face55', 'Face56', 'Face57', 'Face58', 'Face59', 'Face60', 'Face61', 
+'Face62', 'Face63', 'Face64', 'Face65', 'Face66', 'Face67', 'Face68', 'Face69', 'Face70', 'Face71', 'Face72', 'Face73', 
+'Face74', 'Face75', 'Face76'))]
 FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.25
 FreeCAD.ActiveDocument.MeshRefinement.RefinementThickness = '100 mm'
 FreeCAD.ActiveDocument.MeshRefinement.NumberLayers = 1
@@ -160,8 +91,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary.Label = 'constraint'
-FreeCAD.ActiveDocument.CfdFluidBoundary.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary.References.append(('Compound001', 'Face1'))
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Compound001'), ('Face1'))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -194,9 +125,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary001.Label = 'inlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary001.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary001.References.append(('Compound001', 'Face3'))
-FreeCAD.ActiveDocument.CfdFluidBoundary001.References.append(('Compound001', 'Face6'))
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Compound001'), ('Face3', 'Face6'))]
 FreeCAD.ActiveDocument.recompute()
 
 
@@ -230,8 +160,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary002.Label = 'slip'
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Compound001', 'Face2'))
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Compound001'), ('Face2'))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -264,9 +194,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary003.Label = 'outlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary003.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary003.References.append(('Compound001', 'Face4'))
-FreeCAD.ActiveDocument.CfdFluidBoundary003.References.append(('Compound001', 'Face5'))
+FreeCAD.ActiveDocument.CfdFluidBoundary003.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Compound001'), ('Face4', 'Face5'))]
 FreeCAD.ActiveDocument.recompute()
 
 Gui.ActiveDocument.getObject("Compound001").Visibility=True
@@ -302,84 +231,15 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary004.Label = 'wall'
-FreeCAD.ActiveDocument.CfdFluidBoundary004.References = []
-referenceList = FreeCAD.ActiveDocument.CfdFluidBoundary004.References
-referenceList.append(('Cut','Face1'))
-referenceList.append(('Cut','Face2'))
-referenceList.append(('Cut','Face3'))
-referenceList.append(('Cut','Face4'))
-referenceList.append(('Cut','Face5'))
-referenceList.append(('Cut','Face6'))
-referenceList.append(('Cut','Face7'))
-referenceList.append(('Cut','Face8'))
-referenceList.append(('Cut','Face9'))
-referenceList.append(('Cut','Face10'))
-referenceList.append(('Cut','Face11'))
-referenceList.append(('Cut','Face12'))
-referenceList.append(('Cut','Face13'))
-referenceList.append(('Cut','Face14'))
-referenceList.append(('Cut','Face15'))
-referenceList.append(('Cut','Face16'))
-referenceList.append(('Cut','Face17'))
-referenceList.append(('Cut','Face18'))
-referenceList.append(('Cut','Face19'))
-referenceList.append(('Cut','Face20'))
-referenceList.append(('Cut','Face21'))
-referenceList.append(('Cut','Face22'))
-referenceList.append(('Cut','Face23'))
-referenceList.append(('Cut','Face24'))
-referenceList.append(('Cut','Face25'))
-referenceList.append(('Cut','Face26'))
-referenceList.append(('Cut','Face27'))
-referenceList.append(('Cut','Face28'))
-referenceList.append(('Cut','Face29'))
-referenceList.append(('Cut','Face30'))
-referenceList.append(('Cut','Face31'))
-referenceList.append(('Cut','Face32'))
-referenceList.append(('Cut','Face33'))
-referenceList.append(('Cut','Face34'))
-referenceList.append(('Cut','Face35'))
-referenceList.append(('Cut','Face36'))
-referenceList.append(('Cut','Face37'))
-referenceList.append(('Cut','Face38'))
-referenceList.append(('Cut','Face39'))
-referenceList.append(('Cut','Face40'))
-referenceList.append(('Cut','Face41'))
-referenceList.append(('Cut','Face42'))
-referenceList.append(('Cut','Face43'))
-referenceList.append(('Cut','Face44'))
-referenceList.append(('Cut','Face45'))
-referenceList.append(('Cut','Face46'))
-referenceList.append(('Cut','Face47'))
-referenceList.append(('Cut','Face48'))
-referenceList.append(('Cut','Face49'))
-referenceList.append(('Cut','Face50'))
-referenceList.append(('Cut','Face51'))
-referenceList.append(('Cut','Face52'))
-referenceList.append(('Cut','Face53'))
-referenceList.append(('Cut','Face54'))
-referenceList.append(('Cut','Face55'))
-referenceList.append(('Cut','Face56'))
-referenceList.append(('Cut','Face57'))
-referenceList.append(('Cut','Face58'))
-referenceList.append(('Cut','Face59'))
-referenceList.append(('Cut','Face60'))
-referenceList.append(('Cut','Face61'))
-referenceList.append(('Cut','Face62'))
-referenceList.append(('Cut','Face63'))
-referenceList.append(('Cut','Face64'))
-referenceList.append(('Cut','Face65'))
-referenceList.append(('Cut','Face66'))
-referenceList.append(('Cut','Face67'))
-referenceList.append(('Cut','Face68'))
-referenceList.append(('Cut','Face69'))
-referenceList.append(('Cut','Face70'))
-referenceList.append(('Cut','Face71'))
-referenceList.append(('Cut','Face72'))
-referenceList.append(('Cut','Face73'))
-referenceList.append(('Cut','Face74'))
-referenceList.append(('Cut','Face75'))
-referenceList.append(('Cut','Face76'))
+FreeCAD.ActiveDocument.CfdFluidBoundary004.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), (
+'Face1', 'Face2', 'Face3', 'Face4', 'Face5', 'Face6', 'Face7', 'Face8', 'Face9', 'Face10', 'Face11', 'Face12', 'Face13',
+'Face14', 'Face15', 'Face16', 'Face17', 'Face18', 'Face19', 'Face20', 'Face21', 'Face22', 'Face23', 'Face24', 'Face25',
+'Face26', 'Face27', 'Face28', 'Face29', 'Face30', 'Face31', 'Face32', 'Face33', 'Face34', 'Face35', 'Face36', 'Face37',
+'Face38', 'Face39', 'Face40', 'Face41', 'Face42', 'Face43', 'Face44', 'Face45', 'Face46', 'Face47', 'Face48', 'Face49',
+'Face50', 'Face51', 'Face52', 'Face53', 'Face54', 'Face55', 'Face56', 'Face57', 'Face58', 'Face59', 'Face60', 'Face61',
+'Face62', 'Face63', 'Face64', 'Face65', 'Face66', 'Face67', 'Face68', 'Face69', 'Face70', 'Face71', 'Face72', 'Face73',
+'Face74', 'Face75', 'Face76'))]
 FreeCAD.ActiveDocument.recompute()
 
 init = FreeCAD.ActiveDocument.InitialiseFields

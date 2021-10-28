@@ -30,18 +30,8 @@ FreeCAD.ActiveDocument.Cut_Mesh.PointInMesh = {'x': '0 mm', 'y': '0 mm', 'z': '0
 
 import CfdMeshRefinement
 CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Cut_Mesh)
-referenceList = []
-referenceList.append(('Cut','Face7'))
-referenceList.append(('Cut','Face9'))
-referenceList.append(('Cut','Face11'))
-referenceList.append(('Cut','Face13'))
-referenceList.append(('Cut','Face15'))
-referenceList.append(('Cut','Face6'))
-referenceList.append(('Cut','Face25'))
-referenceList.append(('Cut','Face23'))
-referenceList.append(('Cut','Face21'))
-referenceList.append(('Cut','Face19'))
-FreeCAD.ActiveDocument.MeshRefinement.References = referenceList
+FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), ('Face7', 'Face9', 'Face11', 'Face13', 'Face15', 'Face6', 'Face25', 'Face23', 'Face21', 'Face19'))]
 
 FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.5
 FreeCAD.ActiveDocument.MeshRefinement.RefinementThickness = '5 mm'
@@ -97,8 +87,7 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary.Label = 'inlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary.References.append(('Cut', 'Face1'))
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [(FreeCAD.ActiveDocument.getObject('Cut'), ('Face1',))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -131,8 +120,7 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary001.Label = 'outlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary001.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary001.References.append(('Cut', 'Face17'))
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [(FreeCAD.ActiveDocument.getObject('Cut'), ('Face17'))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -165,17 +153,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary002.Label = 'wall'
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face7'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face9'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face11'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face13'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face15'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face6'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face25'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face23'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face21'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Cut', 'Face19'))
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), ('Face7', 'Face9', 'Face11', 'Face13', 'Face15', 'Face6', 'Face25', 'Face23', 'Face21', 'Face19'))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -208,8 +187,7 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary003.Label = 'front'
-FreeCAD.ActiveDocument.CfdFluidBoundary003.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary003.References.append(('Cut', 'Face3'))
+FreeCAD.ActiveDocument.CfdFluidBoundary003.ShapeRefs = [(FreeCAD.ActiveDocument.getObject('Cut'), ('Face3'))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -242,8 +220,7 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary004.Label = 'back'
-FreeCAD.ActiveDocument.CfdFluidBoundary004.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary004.References.append(('Cut', 'Face5'))
+FreeCAD.ActiveDocument.CfdFluidBoundary004.ShapeRefs = [(FreeCAD.ActiveDocument.getObject('Cut'), ('Face5'))]
 
 init = FreeCAD.ActiveDocument.InitialiseFields
 init.PotentialFlow = True

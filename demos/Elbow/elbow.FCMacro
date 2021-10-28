@@ -69,8 +69,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary.Label = 'inlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary.References.append(('Pad', 'Face2'))
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'),('Face2',))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -101,8 +101,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary001.Label = 'inlet2'
-FreeCAD.ActiveDocument.CfdFluidBoundary001.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary001.References.append(('Pad', 'Face10'))
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'),('Face10',))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -133,16 +133,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary002.Label = 'wall'
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Pad', 'Face1'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Pad', 'Face12'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Pad', 'Face11'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Pad', 'Face9'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Pad', 'Face8'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Pad', 'Face7'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Pad', 'Face5'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Pad', 'Face4'))
-FreeCAD.ActiveDocument.CfdFluidBoundary002.References.append(('Pad', 'Face3'))
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'),('Face1','Face3','Face4','Face5','Face7','Face8','Face9','Face11','Face12'))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -173,8 +165,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary003.Label = 'outlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary003.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary003.References.append(('Pad', 'Face6'))
+FreeCAD.ActiveDocument.CfdFluidBoundary003.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'),('Face6',))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -205,8 +197,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary004.Label = 'front'
-FreeCAD.ActiveDocument.CfdFluidBoundary004.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary004.References.append(('Pad', 'Face14'))
+FreeCAD.ActiveDocument.CfdFluidBoundary004.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'),('Face14',))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -237,8 +229,8 @@ bc.PressureDropCoeff = '0 '
 bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary005.Label = 'back'
-FreeCAD.ActiveDocument.CfdFluidBoundary005.References = []
-FreeCAD.ActiveDocument.CfdFluidBoundary005.References.append(('Pad', 'Face13'))
+FreeCAD.ActiveDocument.CfdFluidBoundary005.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'),('Face13',))]
 FreeCAD.ActiveDocument.recompute()
 
 init = FreeCAD.ActiveDocument.InitialiseFields

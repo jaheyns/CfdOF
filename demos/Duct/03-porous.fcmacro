@@ -28,4 +28,4 @@ p.TubeSpacing = '0 mm'
 p.SpacingDirection = (1.0, 0.0, 0.0)
 p.AspectRatio = '1.73 '
 p.VelocityEstimate = '0 mm/s'
-FreeCAD.ActiveDocument.PorousZone.References = [('Cylinder', 'Solid1')]
+FreeCAD.ActiveDocument.PorousZone.ShapeRefs = [(FreeCAD.ActiveDocument.getObject('Cylinder'), ('Solid1'),)]

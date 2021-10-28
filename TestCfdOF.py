@@ -145,9 +145,10 @@ class BlockTest(unittest.TestCase):
         physics_model = CfdTools.getPhysicsModel(self.analysis)
         material_objs = CfdTools.getMaterials(self.analysis)
         taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model, material_objs)
-        taskd.obj = vobj.Object
         taskd.selecting_references = True
-        taskd.faceSelector.addSelection(doc.Name, doc.getObject(self.__class__.__part_name).Name, 'Face1')
+        taskd.faceSelector.addSelection(doc.Name, self.__class__.__part_name, 'Face1')
+        # Give scheduled recompute a chance to happen
+        FreeCADGui.updateGui()
         taskd.accept()
 
     def createOutletBoundary(self):
@@ -157,7 +158,9 @@ class BlockTest(unittest.TestCase):
         bc_set.BoundaryType = 'outlet'
         bc_set.BoundarySubType = 'staticPressureOutlet'
         bc_set.Pressure = 0.0
-        self.outlet_boundary.References = [('Box', 'Face4')]
+        doc = FreeCAD.getDocument(self.__class__.__doc_name)
+        obj = doc.getObject('Box')
+        self.outlet_boundary.ShapeRefs = [(obj, ('Face4'))]
         FreeCADGui.doCommand("FreeCAD.getDocument('"+self.__class__.__doc_name+"').recompute()")
 
     def createWallBoundary(self):
@@ -166,7 +169,9 @@ class BlockTest(unittest.TestCase):
         bc_set = self.wall_boundary
         bc_set.BoundaryType = 'wall'
         bc_set.BoundarySubType = 'fixedWall'
-        self.wall_boundary.References = [('Box', 'Face2'), ('Box', 'Face3')]
+        doc = FreeCAD.getDocument(self.__class__.__doc_name)
+        obj = doc.getObject('Box')
+        self.wall_boundary.ShapeRefs = [(obj, ('Face2', 'Face3'))]
         FreeCADGui.doCommand("FreeCAD.getDocument('"+self.__class__.__doc_name+"').recompute()")
 
     def createSlipBoundary(self):
@@ -175,7 +180,9 @@ class BlockTest(unittest.TestCase):
         bc_set = self.slip_boundary
         bc_set.BoundaryType = 'wall'
         bc_set.BoundarySubType = 'slipWall'
-        self.slip_boundary.References = [('Box', 'Face5'), ('Box', 'Face6')]
+        doc = FreeCAD.getDocument(self.__class__.__doc_name)
+        obj = doc.getObject('Box')
+        self.slip_boundary.ShapeRefs = [(obj, ('Face5', 'Face6'))]
         FreeCADGui.doCommand("FreeCAD.getDocument('"+self.__class__.__doc_name+"').recompute()")
 
     def writeCaseFiles(self):

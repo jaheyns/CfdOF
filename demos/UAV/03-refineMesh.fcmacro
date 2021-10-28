@@ -9,9 +9,8 @@ Gui.activateWorkbench("CfdOFWorkbench")
 
 import CfdMeshRefinement
 CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound001_Mesh)
-FreeCAD.ActiveDocument.MeshRefinement001.References = []
-referenceList = FreeCAD.ActiveDocument.MeshRefinement001.References
-referenceList.append(('Sphere','Solid1'))
+FreeCAD.ActiveDocument.MeshRefinement001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Sphere'), ('Solid1'))]
 
 FreeCAD.ActiveDocument.MeshRefinement001.RelativeLength = 0.25
 FreeCAD.ActiveDocument.MeshRefinement001.RefinementThickness = '0 mm'
@@ -31,33 +30,10 @@ FreeCAD.ActiveDocument.MeshRefinement.Internal = False
 
 # Front wheel 
 CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound001_Mesh)
-FreeCAD.ActiveDocument.MeshRefinement002.References = []
-referenceList = FreeCAD.ActiveDocument.MeshRefinement002.References
-referenceList.append(('Cut','Face19'))
-referenceList.append(('Cut','Face20'))
-referenceList.append(('Cut','Face21'))
-referenceList.append(('Cut','Face22'))
-referenceList.append(('Cut','Face23'))
-referenceList.append(('Cut','Face24'))
-referenceList.append(('Cut','Face25'))
-referenceList.append(('Cut','Face26'))
-referenceList.append(('Cut','Face27'))
-referenceList.append(('Cut','Face28'))
-referenceList.append(('Cut','Face29'))
-referenceList.append(('Cut','Face30'))
-referenceList.append(('Cut','Face31'))
-referenceList.append(('Cut','Face32'))
-referenceList.append(('Cut','Face45'))
-referenceList.append(('Cut','Face46'))
-referenceList.append(('Cut','Face47'))
-referenceList.append(('Cut','Face48'))
-referenceList.append(('Cut','Face49'))
-referenceList.append(('Cut','Face50'))
-referenceList.append(('Cut','Face51'))
-referenceList.append(('Cut','Face52'))
-referenceList.append(('Cut','Face53'))
-referenceList.append(('Cut','Face75'))
-
+FreeCAD.ActiveDocument.MeshRefinement002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), ( 
+'Face19', 'Face20', 'Face21', 'Face22', 'Face23', 'Face24', 'Face25', 'Face26', 'Face27', 'Face28', 'Face29', 'Face30',
+'Face31', 'Face32', 'Face45', 'Face46', 'Face47', 'Face48', 'Face49', 'Face50', 'Face51', 'Face52', 'Face53', 'Face75'))]
 FreeCAD.ActiveDocument.MeshRefinement002.RelativeLength = 0.02
 FreeCAD.ActiveDocument.MeshRefinement002.RefinementThickness = '1 mm'
 FreeCAD.ActiveDocument.MeshRefinement002.NumberLayers = 1

@@ -2,7 +2,6 @@
 ; https://gist.github.com/luzpaz/5e12362f0771eec9e6e82ef0e4d1ba56
 
 [general]
-; None of this is actually used yet
 name=CfdOF
 FreeCADMinimumVersion=0.18.4.16146
 description=Computational Fluid Dynamics (CFD) analysis using OpenFOAM
