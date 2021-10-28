@@ -110,7 +110,7 @@ class _TaskPanelCfdMeshRefinement:
                                  "= {}".format(self.obj.Name, self.form.volumeRefinementToggle.isChecked()))
         refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
         refstr += ',\n'.join(
-            "(FreeCAD.ActiveDocument.getObject('{}'),{})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
+            "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
         refstr += "]"
         FreeCADGui.doCommand(refstr)
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")

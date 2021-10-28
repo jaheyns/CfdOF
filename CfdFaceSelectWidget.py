@@ -28,6 +28,7 @@ import os
 import os.path
 import CfdMeshRefinement
 import CfdFluidBoundary
+import CfdZone
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -114,7 +115,8 @@ class CfdFaceSelectWidget:
             if "Shape" in i.PropertiesList:
                 if not i.Shape.isNull() and \
                         not (hasattr(i, 'Proxy') and isinstance(i.Proxy, CfdFluidBoundary._CfdFluidBoundary)) and \
-                        not (hasattr(i, 'Proxy') and isinstance(i.Proxy, CfdMeshRefinement._CfdMeshRefinement)):
+                        not (hasattr(i, 'Proxy') and isinstance(i.Proxy, CfdMeshRefinement._CfdMeshRefinement)) and \
+                        not (hasattr(i, 'Proxy') and isinstance(i.Proxy, CfdZone._CfdZone)):
                     self.shapeNames.append(i.Name)
                     self.shapeLabels.append(i.Label)
 
@@ -254,6 +256,9 @@ class CfdFaceSelectWidget:
             selection = None
             if as_is:
                 selection = (selected_object, (sub if sub else '',))
+            elif self.allow_obj_sel and \
+                    (elt.ShapeType == 'Shell' or elt.ShapeType == 'Solid' or elt.ShapeType == 'Compound'):
+                selection = (selected_object, ('',))
             elif self.selection_mode_solid:
                 # in solid selection mode use edges and faces for selection of a solid
                 solid_to_add = None
@@ -285,7 +290,7 @@ class CfdFaceSelectWidget:
                     selection = (selected_object, (solid_to_add,))
                     print('Selection element changed to Solid: ' +
                           selected_object.Shape.ShapeType + '  ' +
-                          selection[0] + '  ' +
+                          selection[0].Name + '  ' +
                           selection[1][0])
             else:
                 # Allow Vertex, Edge, Face or just Face selection
@@ -293,16 +298,19 @@ class CfdFaceSelectWidget:
                         (elt.ShapeType == 'Edge' and self.allow_edge_sel) or \
                         (elt.ShapeType == 'Vertex' and self.allow_point_sel):
                     selection = (selected_object, (sub,))
-                elif self.allow_obj_sel and \
-                        (elt.ShapeType == 'Shell' or elt.ShapeType == 'Solid' or elt.ShapeType == 'Compound'):
-                    selection = (selected_object, ('',))
             if selection:
+                # Override sub-selections with whole-object selection
+                if not selection[1][0]:
+                    for ref in self.ShapeRefs:
+                        if ref[0] == selection[0] and ref[1] != ('',):
+                            self.ShapeRefs.remove(ref)
+                            break
                 if selection not in self.ShapeRefs:
                     self.ShapeRefs.append(selection)
                 else:
-                    if not selection[1]:
+                    if not selection[1][0]:
                         FreeCAD.Console.PrintMessage(
-                            selection[0] + ' already in reference list\n')
+                            selection[0].Name + ' already in reference list\n')
                     else:
                         FreeCAD.Console.PrintMessage(
                             selection[0].Name + ':' + selection[1][0] + ' already in reference list\n')
@@ -326,7 +334,7 @@ class CfdFaceSelectWidget:
         for ref in self.ShapeRefs:
             try:
                 idx = self.shapeNames.index(ref[0].Name)
-            except ValueError:  # If solid doesn't exist anymore
+            except ValueError:  # If shape doesn't exist anymore
                 remove_refs.append(ref)
             else:
                 listItem = self.form.objectListWidget.item(idx)
@@ -406,12 +414,15 @@ class CfdFaceSelectWidget:
                 self.form.faceListWidget.insertItem(i, item)
         if self.allow_solid_sel:
             self.listOfShapeSolids = self.shapeObj.Shape.Solids
-            selected_solids = [ref[1] for ref in refs if ref[0].Name == objectName]
+            selected_solids = []
+            for ref in refs:
+                if ref[0].Name == objectName:
+                    selected_solids += ref[1]
             for i in range(len(self.listOfShapeSolids)):
-                face_name = "Solid" + str(i + 1)
-                item = QtGui.QListWidgetItem(face_name, self.form.faceListWidget)
+                solid_name = "Solid" + str(i + 1)
+                item = QtGui.QListWidgetItem(solid_name, self.form.faceListWidget)
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-                checked = face_name in selected_solids
+                checked = solid_name in selected_solids
                 if checked:
                     item.setCheckState(QtCore.Qt.Checked)
                 else:

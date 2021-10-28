@@ -89,7 +89,7 @@ class CfdCaseWriterFoam:
             'porousZonesPresent': False,
             'initialisationZones': {o.Label: CfdTools.propsToDict(o) for o in self.initialisationZone_objs},
             'initialisationZonesPresent': len(self.initialisationZone_objs) > 0,
-            'zones': {o.Label: {'PartNameList': tuple(r[0] for r in o.References)} for o in self.zone_objs},
+            'zones': {o.Label: {'PartNameList': tuple(r[0].Name for r in o.ShapeRefs)} for o in self.zone_objs},
             'zonesPresent': len(self.zone_objs) > 0,
             'meshType': self.mesh_obj.Proxy.Type,
             'meshDimension': self.mesh_obj.ElementDimension,
@@ -258,7 +258,7 @@ class CfdCaseWriterFoam:
                 veloMag = bc['VelocityMag']
                 face = bc['DirectionFace'].split(':')
                 if not face[0]:
-                    face = bc['References'][0]
+                    face = bc['ShapeRefs'][0].Name
                 # See if entered face actually exists and is planar
                 try:
                     selected_object = self.analysis_obj.Document.getObject(face[0])
@@ -418,16 +418,16 @@ class CfdCaseWriterFoam:
 
     def exportZoneStlSurfaces(self):
         for zo in self.zone_objs:
-            for r in zo.References:
+            for r in zo.ShapeRefs:
                 path = os.path.join(self.working_dir,
                                     self.solver_obj.InputCaseName,
                                     "constant",
                                     "triSurface")
                 if not os.path.exists(path):
                     os.makedirs(path)
-                fname = os.path.join(path, r[0]+u".stl")
+                fname = os.path.join(path, r[0].Name+u".stl")
                 import MeshPart
-                sel_obj = self.analysis_obj.Document.getObject(r[0])
+                sel_obj = r[0]
                 shape = sel_obj.Shape
                 meshStl = MeshPart.meshFromShape(shape, LinearDeflection=self.mesh_obj.STLLinearDeflection)
                 meshStl.write(fname)
@@ -438,7 +438,7 @@ class CfdCaseWriterFoam:
         settings['porousZonesPresent'] = True
         porousZoneSettings = settings['porousZones']
         for po in self.porousZone_objs:
-            pd = {'PartNameList': tuple(r[0] for r in po.References)}
+            pd = {'PartNameList': tuple(r[0].Name for r in po.ShapeRefs)}
             po = CfdTools.propsToDict(po)
             if po['PorousCorrelation'] == 'DarcyForchheimer':
                 pd['D'] = (po['D1'], po['D2'], po['D3'])

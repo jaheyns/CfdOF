@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -106,6 +106,7 @@ class _CommandCfdInitialisationZone:
             "CfdTools.getActiveAnalysis().addObject(CfdZone.makeCfdInitialisationZone())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
+
 if FreeCAD.GuiUp:
     FreeCADGui.addCommand('Cfd_InitialisationZone', _CommandCfdInitialisationZone())
 
@@ -117,8 +118,18 @@ class _CfdZone:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, 'References', [], "App::PropertyPythonObject")
-        addObjectProperty(obj, 'LinkedObjects', [], 'App::PropertyLinkList', "", "Linked objects")
+        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "Boundary faces"):
+            # Backward compat
+            if 'References' in obj.PropertiesList:
+                doc = FreeCAD.getDocument(obj.Document.Name)
+                for r in obj.References:
+                    if not r[1]:
+                        obj.ShapeRefs += [doc.getObject(r[0])]
+                    else:
+                        obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
+                obj.removeProperty('References')
+                obj.removeProperty('LinkedObjects')
+
         if obj.Name.startswith('PorousZone'):
             if addObjectProperty(obj, 'PorousCorrelation', POROUS_CORRELATIONS, "App::PropertyEnumeration",
                                  "Porous zone", "Porous drag model"):
@@ -176,16 +187,12 @@ class _CfdZone:
 
     def execute(self, fp):
         listOfShapes = []
-        fp.LinkedObjects = []
-        for r in fp.References:
-            object = FreeCAD.ActiveDocument.getObject(r[0])
-            if object is not None:  # Could have been deleted
-                try:
-                    listOfShapes.append(object.Shape)
-                except Part.OCCError:  # In case solid deleted
-                    pass
-                if object not in fp.LinkedObjects:
-                    fp.LinkedObjects += [object]
+        for r in fp.ShapeRefs:
+            object = r[0]
+            try:
+                listOfShapes.append(object.Shape)
+            except Part.OCCError:  # In case solid deleted
+                pass
         if listOfShapes:
             fp.Shape = Part.makeCompound(listOfShapes)
         else:
