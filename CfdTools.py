@@ -1315,6 +1315,10 @@ def matchFaces(faces1, faces2):
                 j_match_start = j
             j += 1
             matching = True
+            if j == len(faces2):
+                i += 1
+                j = j_match_start
+                matching = False
         elif cmp < 0:
             i += 1
             if matching:
