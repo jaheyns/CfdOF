@@ -34,9 +34,9 @@ surfaceMeshRefinement
 {
     MeshRefinement
     {
-        cellSize  0.005;
+        cellSize  0.002;
         surfaceFile "constant/triSurface/MeshRefinement.stl";
-        refinementThickness 0.0;
+        refinementThickness 0.001;
     }
     MeshRefinement002
     {
@@ -54,7 +54,6 @@ boundaryLayers
         {
             nLayers 3;
             thicknessRatio 1.2;
-            maxFirstLayerThickness 0.0;
         }
     }
 
