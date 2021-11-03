@@ -72,13 +72,11 @@ boundaryLayers
         {
             nLayers 10;
             thicknessRatio 1.05;
-            maxFirstLayerThickness 0.0;
         }
         "patch_1_2"
         {
             nLayers 10;
             thicknessRatio 1.05;
-            maxFirstLayerThickness 0.0;
         }
     }
 

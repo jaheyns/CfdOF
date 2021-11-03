@@ -39,7 +39,6 @@ boundaryLayers
         {
             nLayers 16;
             thicknessRatio 1.2;
-            maxFirstLayerThickness 0.0;
         }
     }
 

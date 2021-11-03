@@ -40,7 +40,11 @@ surfaceMeshRefinement
     {
         cellSize  %(CfSettings/MeshRegions/%(0%)/RelativeLength%);
         surfaceFile "constant/triSurface/%(0%).stl";
+%{%(CfSettings/MeshRegions/%(0%)/RefinementThickness%)
+%:0.0
+%:default
         refinementThickness %(CfSettings/MeshRegions/%(0%)/RefinementThickness%);
+%}
     }
 %}
 }
@@ -56,7 +60,11 @@ boundaryLayers
         {
             nLayers %(CfSettings/BoundaryLayers/%(0%)/NumberLayers%);
             thicknessRatio %(CfSettings/BoundaryLayers/%(0%)/ExpansionRatio%);
+%{%(CfSettings/BoundaryLayers/%(0%)/FirstLayerHeight%)
+%:0.0
+%:default
             maxFirstLayerThickness %(CfSettings/BoundaryLayers/%(0%)/FirstLayerHeight%);
+%}
         }
 %}
     }
