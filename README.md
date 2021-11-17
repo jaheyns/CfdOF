@@ -42,10 +42,12 @@ Any system on which FreeCAD and the prerequisites listed below can be installed.
 
 Windows 7-10; 64-bit version is required.
 
-#### MacOSX
+#### macOS
 
-Not widely tested, but success has been reported. 
-      
+Not widely tested, but success has been reported. See 
+[the following forum post](https://forum.freecadweb.org/viewtopic.php?f=37&t=63782&p=547611#p547578)
+for instructions.
+
 ## Getting started
 
 ### Prerequisites
