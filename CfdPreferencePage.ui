@@ -70,6 +70,19 @@
        </property>
       </widget>
      </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_outputdir">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Default output directory</string>
+       </property>
+      </widget>
+     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_7b">
        <property name="font">
@@ -106,20 +119,17 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_outputdir">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
+     <item row="7" column="1">
+      <widget class="QToolButton" name="tb_choose_output_dir">
+       <property name="enabled">
+        <bool>true</bool>
        </property>
        <property name="text">
-        <string>Default output directory</string>
+        <string>...</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="7" column="0">
       <widget class="QLineEdit" name="le_output_dir">
        <property name="enabled">
         <bool>true</bool>
@@ -132,11 +142,24 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
-      <widget class="QToolButton" name="tb_choose_output_dir">
-       <property name="enabled">
-        <bool>true</bool>
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
        </property>
+       <property name="text">
+        <string>gmsh executable path</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLineEdit" name="le_gmsh_path"/>
+     </item>
+     <item row="5" column="1">
+      <widget class="QToolButton" name="tb_choose_gmsh_path">
        <property name="text">
         <string>...</string>
        </property>
@@ -444,12 +467,19 @@
  <tabstops>
   <tabstop>le_foam_dir</tabstop>
   <tabstop>tb_choose_foam_dir</tabstop>
+  <tabstop>le_paraview_path</tabstop>
+  <tabstop>tb_choose_paraview_path</tabstop>
+  <tabstop>le_gmsh_path</tabstop>
+  <tabstop>tb_choose_gmsh_path</tabstop>
   <tabstop>le_output_dir</tabstop>
   <tabstop>tb_choose_output_dir</tabstop>
   <tabstop>pb_run_dependency_checker</tabstop>
-  <tabstop>le_openfoam_url</tabstop>
   <tabstop>pb_download_install_openfoam</tabstop>
+  <tabstop>le_openfoam_url</tabstop>
   <tabstop>tb_pick_openfoam_file</tabstop>
+  <tabstop>le_paraview_url</tabstop>
+  <tabstop>pb_download_install_paraview</tabstop>
+  <tabstop>tb_pick_paraview_file</tabstop>
   <tabstop>le_cfmesh_url</tabstop>
   <tabstop>pb_download_install_cfMesh</tabstop>
   <tabstop>tb_pick_cfmesh_file</tabstop>

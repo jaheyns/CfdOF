@@ -656,10 +656,7 @@ class CfdMeshTools:
             else:
                 self.snappy_settings['InternalRefinementRegionsPresent'] = False
         elif self.mesh_obj.MeshUtility == "gmsh":
-            if platform.system() == "Windows":
-                exe = os.path.join(FreeCAD.getHomePath(), 'bin', 'gmsh.exe')
-            else:
-                exe = shutil.which("gmsh")
+            exe = CfdTools.getGmshExecutable()
             self.gmsh_settings['Executable'] = CfdTools.translatePath(exe)
             self.gmsh_settings['HasLengthMap'] = False
             if self.ele_length_map:

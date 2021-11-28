@@ -86,6 +86,8 @@ class CfdPreferencePage:
         self.form.le_foam_dir.textChanged.connect(self.foamDirChanged)
         self.form.tb_choose_paraview_path.clicked.connect(self.chooseParaviewPath)
         self.form.le_paraview_path.textChanged.connect(self.paraviewPathChanged)
+        self.form.tb_choose_gmsh_path.clicked.connect(self.chooseGmshPath)
+        self.form.le_gmsh_path.textChanged.connect(self.gmshPathChanged)
         self.form.pb_run_dependency_checker.clicked.connect(self.runDependencyChecker)
         self.form.pb_download_install_openfoam.clicked.connect(self.downloadInstallOpenFoam)
         self.form.tb_pick_openfoam_file.clicked.connect(self.pickOpenFoamFile)
@@ -113,6 +115,9 @@ class CfdPreferencePage:
         self.paraview_path = ""
         self.initial_paraview_path = ""
 
+        self.gmsh_path = ""
+        self.initial_gmsh_path = ""
+
         self.output_dir = ""
 
         self.form.gb_openfoam.setVisible(platform.system() == 'Windows')
@@ -132,6 +137,7 @@ class CfdPreferencePage:
     def saveSettings(self):
         CfdTools.setFoamDir(self.foam_dir)
         CfdTools.setParaviewPath(self.paraview_path)
+        CfdTools.setGmshPath(self.gmsh_path)
         prefs = CfdTools.getPreferencesLocation()
         FreeCAD.ParamGet(prefs).SetString("DefaultOutputPath", self.output_dir)
 
@@ -146,6 +152,10 @@ class CfdPreferencePage:
         self.paraview_path = CfdTools.getParaviewPath()
         self.initial_paraview_path = str(self.paraview_path)
         self.form.le_paraview_path.setText(self.paraview_path)
+
+        self.gmsh_path = CfdTools.getGmshPath()
+        self.initial_gmsh_path = str(self.gmsh_path)
+        self.form.le_gmsh_path.setText(self.gmsh_path)
 
         self.output_dir = CfdTools.getDefaultOutputPath()
         self.form.le_output_dir.setText(self.output_dir)
@@ -188,6 +198,9 @@ class CfdPreferencePage:
     def paraviewPathChanged(self, text):
         self.paraview_path = text
 
+    def gmshPathChanged(self, text):
+        self.gmsh_path = text
+
     def chooseFoamDir(self):
         d = QtGui.QFileDialog().getExistingDirectory(None, 'Choose OpenFOAM directory', self.foam_dir)
         if d and os.access(d, os.R_OK):
@@ -200,6 +213,13 @@ class CfdPreferencePage:
         if p and os.access(p, os.R_OK):
             self.paraview_path = p
         self.form.le_paraview_path.setText(self.paraview_path)
+
+    def chooseGmshPath(self):
+        p, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose gmsh executable', self.gmsh_path,
+                                                        filter="*.exe"  if platform.system() == 'Windows' else None)
+        if p and os.access(p, os.R_OK):
+            self.gmsh_path = p
+        self.form.le_gmsh_path.setText(self.gmsh_path)
 
     def outputDirChanged(self, text):
         self.output_dir = text
@@ -214,6 +234,7 @@ class CfdPreferencePage:
         # Temporarily apply the foam dir selection and paraview path selection
         CfdTools.setFoamDir(self.foam_dir)
         CfdTools.setParaviewPath(self.paraview_path)
+        CfdTools.setGmshPath(self.gmsh_path)
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.consoleMessage("Checking dependencies...")
         msg = CfdTools.checkCfdDependencies()
@@ -223,6 +244,7 @@ class CfdPreferencePage:
             self.consoleMessage(msg)
         CfdTools.setFoamDir(self.initial_foam_dir)
         CfdTools.setParaviewPath(self.initial_paraview_path)
+        CfdTools.setGmshPath(self.initial_gmsh_path)
         QApplication.restoreOverrideCursor()
 
     def showAdministratorWarningMessage(self):
