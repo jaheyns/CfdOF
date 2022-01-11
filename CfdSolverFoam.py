@@ -91,7 +91,7 @@ class _CfdSolverFoam(object):
 
         addObjectProperty(obj, "MaxIterations", 2000, "App::PropertyInteger", "IterationControl",
                           "Maximum number of iterations to run steady-state analysis")
-        addObjectProperty(obj, "SteadyWriteInterval", 100, "App::PropertyFloat", "IterationControl",
+        addObjectProperty(obj, "SteadyWriteInterval", 100, "App::PropertyInteger", "IterationControl",
                           "Iteration output interval")
         addObjectProperty(obj, "ConvergenceTol", 1e-4, "App::PropertyFloat", "IterationControl",
                           "Global absolute solution convergence criterion")
@@ -99,8 +99,8 @@ class _CfdSolverFoam(object):
                           "Total time to run transient solution")
         addObjectProperty(obj, "TimeStep", "0.001 s", "App::PropertyQuantity", "TimeStepControl",
                           "Time step increment")
-        addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "IterationControl",
-                          "Iteration output interval")
+        addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "TimeStepControl",
+                          "Output time interval")
 
     def execute(self, obj):
         return
@@ -125,7 +125,6 @@ class _ViewProviderCfdSolverFoam:
 
     def getIcon(self):
         # """after load from FCStd file, self.icon does not exist, return constant path instead"""
-        # return ":/icons/fem-solver.svg"
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.png")
         return icon_path
 

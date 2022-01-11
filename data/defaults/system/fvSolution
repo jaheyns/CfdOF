@@ -86,9 +86,9 @@ PIMPLE
     nNonOrthogonalCorrectors 2;
     nCorrectors         3;
 %:default
-    nOuterCorrectors 10;
+    nOuterCorrectors 1;
     nNonOrthogonalCorrectors 2;
-    nCorrectors         2;
+    nCorrectors         3;
     outerCorrectorResidualControl
     {
         U
@@ -188,6 +188,7 @@ solvers
         tolerance       1e-8;
         relTol          0;
     }
+
 %:buoyantSimpleFoam buoyantPimpleFoam
     h
     {
@@ -204,6 +205,17 @@ solvers
         relTol           0;
     }
 
+%{%(solver/SolverName%)
+%:buoyantPimpleFoam
+    "(rho|rhoFinal)"
+    {
+        solver PCG;
+        preconditioner DIC;
+        tolerance 0;
+        relTol 0;
+    }
+
+%}
 %}
 %{%(physics/Turbulence%)
 %:RANS
