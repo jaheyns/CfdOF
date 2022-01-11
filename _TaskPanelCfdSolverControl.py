@@ -198,7 +198,6 @@ class _TaskPanelCfdSolverControl:
             self.consoleMessage(print_err, "#FF0000")
 
     def openParaview(self):
-        self.Start = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
         case_path = os.path.abspath(os.path.join(self.working_dir, self.solver_object.InputCaseName))
         script_name = "pvScript.py"

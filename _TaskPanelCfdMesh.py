@@ -279,7 +279,6 @@ class _TaskPanelCfdMesh:
         self.updateUI()
 
     def openParaview(self):
-        self.Start = time.time()
         QApplication.setOverrideCursor(Qt.WaitCursor)
         case_path = os.path.abspath(self.cart_mesh.meshCaseDir)
         script_name = "pvScriptMesh.py"
