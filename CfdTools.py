@@ -1008,10 +1008,10 @@ def checkCfdDependencies():
 
         print("Checking for Plot module:")
         try:
-            from FreeCAD.Plot import Plot
+            from freecad.plot import Plot
         except ImportError:
             try:
-                from freecad.plot import Plot
+                from FreeCAD.Plot import Plot
             except ImportError:
                 plot_msg = "Could not load Plot module\nPlease install it using Tools | Addon manager"
                 message += plot_msg + '\n'
