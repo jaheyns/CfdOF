@@ -52,12 +52,12 @@ class _TaskPanelCfdMesh:
 
         self.console_message_cart = ''
         self.error_message = ''
-        self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
+        self.mesh_obj.Proxy.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
         self.paraviewScriptName = ""
 
-        self.mesh_process = CfdConsoleProcess(finishedHook=self.meshFinished,
-                                              stdoutHook=self.gotOutputLines,
-                                              stderrHook=self.gotErrorLines)
+        self.mesh_obj.Proxy.mesh_process = CfdConsoleProcess(finishedHook=self.meshFinished,
+                                                             stdoutHook=self.gotOutputLines,
+                                                             stderrHook=self.gotErrorLines)
 
         self.form.cb_utility.activated.connect(self.choose_utility)
 
@@ -102,8 +102,8 @@ class _TaskPanelCfdMesh:
     def reject(self):
         # There is no reject - only close
         self.store()
-        self.mesh_process.terminate()
-        self.mesh_process.waitForFinished()
+        self.mesh_obj.Proxy.mesh_process.terminate()
+        self.mesh_obj.Proxy.mesh_process.waitForFinished()
         self.open_paraview.terminate()
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
@@ -125,7 +125,7 @@ class _TaskPanelCfdMesh:
         self.form.cb_utility.setCurrentIndex(index_utility)
 
     def updateUI(self):
-        case_path = self.cart_mesh.meshCaseDir
+        case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
         self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
         self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(case_path, "pv.foam")))
@@ -152,7 +152,7 @@ class _TaskPanelCfdMesh:
                          'z': getQuantity(self.form.if_pointInMeshZ)}
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.PointInMesh "
                              "= {}".format(self.mesh_obj.Name, point_in_mesh))
-        self.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
+        self.mesh_obj.Proxy.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
 
     def consoleMessage(self, message="", color="#000000", timed=True):
         if timed:
@@ -169,7 +169,7 @@ class _TaskPanelCfdMesh:
             FreeCAD.Gui.updateGui()
 
     def update_timer_text(self):
-        if self.mesh_process.state() == QtCore.QProcess.ProcessState.Running:
+        if self.mesh_obj.Proxy.mesh_process.state() == QtCore.QProcess.ProcessState.Running:
             self.form.l_time.setText('Time: ' + CfdTools.formatTimer(time.time() - self.Start))
 
     def choose_utility(self, index):
@@ -190,9 +190,9 @@ class _TaskPanelCfdMesh:
         self.store()
         FreeCADGui.addModule("CfdMeshTools")
         FreeCADGui.addModule("CfdTools")
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy.cart_mesh = "
+        FreeCADGui.doCommand("cart_mesh = "
                              "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
-        FreeCADGui.doCommand("cart_mesh = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy.cart_mesh")
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy.cart_mesh = cart_mesh")
         cart_mesh = self.mesh_obj.Proxy.cart_mesh
         cart_mesh.progressCallback = self.progressCallback
         self.consoleMessage("Preparing meshing ...")
@@ -222,16 +222,29 @@ class _TaskPanelCfdMesh:
 
     def runMesh(self):
         self.Start = time.time()
-        cart_mesh = self.cart_mesh
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.consoleMessage("Running {} ...".format(self.mesh_obj.MeshUtility))
-            cart_mesh.error = False
-            cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
-            FreeCAD.Console.PrintMessage("Executing: " + ' '.join(cmd) + "\n")
-            env_vars = CfdTools.getRunEnvironment()
-            self.mesh_process.start(cmd, env_vars=env_vars)
-            if self.mesh_process.waitForStarted():
+            FreeCADGui.addModule("CfdMeshTools")
+            FreeCADGui.addModule("CfdTools")
+            FreeCADGui.addModule("CfdConsoleProcess")
+            FreeCADGui.doCommand("cart_mesh = "
+                                 "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
+            FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
+            FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
+            FreeCADGui.doCommand("cart_mesh.error = False")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)")
+            FreeCADGui.doCommand("FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\\n')")
+            FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
+            FreeCADGui.doCommand("proxy.running_from_macro = True")
+            self.mesh_obj.Proxy.running_from_macro = False
+            FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
+                                 "  mesh_process = CfdConsoleProcess.CfdConsoleProcess()\n" +
+                                 "  mesh_process.start(cmd, env_vars=env_vars)\n" +
+                                 "  mesh_process.waitForFinished()\n" +
+                                 "else:\n" +
+                                 "  proxy.mesh_process.start(cmd, env_vars=env_vars)")
+            if self.mesh_obj.Proxy.mesh_process.waitForStarted():
                 self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
                 self.form.pb_stop_mesh.setEnabled(True)
                 self.form.pb_paraview.setEnabled(False)
@@ -239,9 +252,9 @@ class _TaskPanelCfdMesh:
                 self.consoleMessage("Mesher started")
             else:
                 self.consoleMessage("Error starting meshing process", "#FF0000")
-                cart_mesh.error = True
+                self.mesh_obj.Proxy.cart_mesh.error = True
         except Exception as ex:
-            self.consoleMessage("Error " + type(e).__name__ + ": " + str(ex), '#FF0000')
+            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
             raise
         finally:
             QApplication.restoreOverrideCursor()
@@ -249,14 +262,14 @@ class _TaskPanelCfdMesh:
     def killMeshProcess(self):
         self.consoleMessage("Meshing manually stopped")
         self.error_message = 'Meshing interrupted'
-        self.mesh_process.terminate()
+        self.mesh_obj.Proxy.mesh_process.terminate()
         # Note: meshFinished will still be called
 
     def gotOutputLines(self, lines):
         pass
 
     def gotErrorLines(self, lines):
-        print_err = self.mesh_process.processErrorOutput(lines)
+        print_err = self.mesh_obj.Proxy.mesh_process.processErrorOutput(lines)
         if print_err is not None:
             self.consoleMessage(print_err, "#FF0000")
 
@@ -280,7 +293,7 @@ class _TaskPanelCfdMesh:
 
     def openParaview(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        case_path = os.path.abspath(self.cart_mesh.meshCaseDir)
+        case_path = os.path.abspath(self.mesh_obj.Proxy.cart_mesh.meshCaseDir)
         script_name = "pvScriptMesh.py"
         try:
             self.open_paraview = CfdTools.startParaview(case_path, script_name, self.consoleMessage)
@@ -289,7 +302,7 @@ class _TaskPanelCfdMesh:
 
     def pbLoadMeshClicked(self):
         self.consoleMessage("Reading mesh ...", timed=False)
-        self.cart_mesh.loadSurfMesh()
+        self.mesh_obj.Proxy.cart_mesh.loadSurfMesh()
         self.consoleMessage('Triangulated representation of the surface mesh is shown - ', timed=False)
         self.consoleMessage("Please view in Paraview for accurate display.\n", timed=False)
 
@@ -303,7 +316,7 @@ class _TaskPanelCfdMesh:
         print ("Searching for an internal vector point ...")
         # Apply latest mesh size
         self.store()
-        pointCheck = self.cart_mesh.automaticInsidePointDetect()
+        pointCheck = self.mesh_obj.Proxy.cart_mesh.automaticInsidePointDetect()
         if pointCheck is not None:
             iMPx, iMPy, iMPz = pointCheck
             setQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")
