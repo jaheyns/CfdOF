@@ -5,7 +5,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -52,9 +52,9 @@ class _TaskPanelCfdSolverControl:
         # update UI
         self.console_message = ''
 
-        self.solver_run_process = CfdConsoleProcess(finishedHook=self.solverFinished,
-                                                    stdoutHook=self.gotOutputLines,
-                                                    stderrHook=self.gotErrorLines)
+        self.solver_object.Proxy.solver_process = CfdConsoleProcess(finishedHook=self.solverFinished,
+                                                                    stdoutHook=self.gotOutputLines,
+                                                                    stderrHook=self.gotErrorLines)
         self.Timer = QtCore.QTimer()
         self.Timer.setInterval(1000)
         self.Timer.timeout.connect(self.updateText)
@@ -91,7 +91,7 @@ class _TaskPanelCfdSolverControl:
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
     def updateText(self):
-        if self.solver_run_process.state() == QtCore.QProcess.ProcessState.Running:
+        if self.solver_object.Proxy.solver_process.state() == QtCore.QProcess.ProcessState.Running:
             self.form.l_time.setText('Time: ' + CfdTools.formatTimer(time.time() - self.Start))
 
     def getStandardButtons(self):
@@ -101,8 +101,8 @@ class _TaskPanelCfdSolverControl:
         FreeCADGui.ActiveDocument.resetEdit()
 
     def reject(self):
-        self.solver_run_process.terminate()
-        self.solver_run_process.waitForFinished()
+        self.solver_object.Proxy.solver_process.terminate()
+        self.solver_object.Proxy.solver_process.waitForFinished()
         self.open_paraview.terminate()
         FreeCADGui.ActiveDocument.resetEdit()
 
@@ -155,15 +155,34 @@ class _TaskPanelCfdSolverControl:
 
     def runSolverProcess(self):
         self.Start = time.time()
-
-        solverDirectory = os.path.join(self.working_dir, self.solver_object.InputCaseName)
-        solverDirectory = os.path.abspath(solverDirectory)
-        cmd = self.solver_runner.get_solver_cmd(solverDirectory)
-        FreeCAD.Console.PrintMessage(' '.join(cmd) + '\n')
-        envVars = self.solver_runner.getRunEnvironment()
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.solver_run_process.start(cmd, env_vars=envVars)
-        if self.solver_run_process.waitForStarted():
+        FreeCADGui.addModule("CfdTools")
+        FreeCADGui.addModule("CfdConsoleProcess")
+        FreeCADGui.doCommand("analysis_object = FreeCAD.ActiveDocument."+self.analysis_object.Name)
+        FreeCADGui.doCommand("solver_object = FreeCAD.ActiveDocument."+self.solver_object.Name)
+        FreeCADGui.doCommand("working_dir = CfdTools.getOutputPath(analysis_object)")
+        FreeCADGui.doCommand("case_name = solver_object.InputCaseName")
+        FreeCADGui.doCommand("solver_directory = os.path.abspath(os.path.join(working_dir, case_name))")
+        self.solver_object.Proxy.solver_runner = self.solver_runner
+        FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.solver_object.Name + ".Proxy")
+        FreeCADGui.doCommand("proxy.running_from_macro = True")
+        self.solver_object.Proxy.running_from_macro = False
+        FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
+                             "  import CfdRunnableFoam\n" +
+                             "  solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)\n" +
+                             "else:\n" +
+                             "  solver_runner = proxy.solver_runner")
+        FreeCADGui.doCommand("cmd = solver_runner.get_solver_cmd(solver_directory)")
+        FreeCADGui.doCommand("FreeCAD.Console.PrintMessage(' '.join(cmd)+'\\n')")
+        FreeCADGui.doCommand("env_vars = solver_runner.getRunEnvironment()")
+        FreeCADGui.doCommand(
+            "if proxy.running_from_macro:\n" +
+            "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=solver_runner.process_output)\n" +
+            "  solver_process.start(cmd, env_vars=env_vars)\n" +
+            "  solver_process.waitForFinished()\n" +
+            "else:\n" +
+            "  proxy.solver_process.start(cmd, env_vars=env_vars)")
+        if self.solver_object.Proxy.solver_process.waitForStarted():
             # Setting solve button to inactive to ensure that two instances of the same simulation aren't started
             # simultaneously
             self.form.pb_write_inp.setEnabled(False)
@@ -177,7 +196,7 @@ class _TaskPanelCfdSolverControl:
 
     def killSolverProcess(self):
         self.consoleMessage("Solver manually stopped")
-        self.solver_run_process.terminate()
+        self.solver_object.Proxy.solver_process.terminate()
         # Note: solverFinished will still be called
 
     def solverFinished(self, exit_code):
@@ -193,7 +212,7 @@ class _TaskPanelCfdSolverControl:
         self.solver_runner.process_output(lines)
 
     def gotErrorLines(self, lines):
-        print_err = self.solver_run_process.processErrorOutput(lines)
+        print_err = self.solver_object.Proxy.solver_process.processErrorOutput(lines)
         if print_err is not None:
             self.consoleMessage(print_err, "#FF0000")
 

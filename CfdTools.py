@@ -5,7 +5,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -1006,16 +1006,7 @@ def checkCfdDependencies():
                 message += pv_msg + '\n'
                 print(pv_msg)
 
-        print("Checking for Plot module:")
-        try:
-            from freecad.plot import Plot
-        except ImportError:
-            try:
-                from FreeCAD.Plot import Plot
-            except ImportError:
-                plot_msg = "Could not load Plot module\nPlease install it using Tools | Addon manager"
-                message += plot_msg + '\n'
-                print(plot_msg)
+        print("Checking Plot module:")
 
         try:
             import matplotlib
@@ -1023,6 +1014,23 @@ def checkCfdDependencies():
             matplot_msg = "Could not load matplotlib package (required by Plot module)"
             message += matplot_msg + '\n'
             print(matplot_msg)
+
+        plot_ok = False
+        if major_ver > 0 or minor_ver >= 20:
+            try:
+                from FreeCAD.Plot import Plot  # Build-in plot module
+                plot_ok = True
+            except ImportError:
+                plot_msg = "Could not load Plot module\nAttempting to use Plot workbench instead"
+                message += plot_msg + "\n"
+                print(plot_msg)
+        if not plot_ok:
+            try:
+                from freecad.plot import Plot  # Plot workbench
+            except ImportError:
+                plot_msg = "Could not load Plot workbench\nPlease install it using Tools | Addon manager"
+                message += plot_msg + '\n'
+                print(plot_msg)
 
         print("Checking for gmsh:")
         # check that gmsh version 2.13 or greater is installed

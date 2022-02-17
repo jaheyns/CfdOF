@@ -25,10 +25,13 @@
 
 from PySide import QtCore
 import FreeCAD
-try:
-    from freecad.plot import Plot
-except ImportError:
-    from FreeCAD.Plot import Plot
+if int(FreeCAD.Version()[0]) == 0 and int(FreeCAD.Version()[1].split('.')[0]) < 20:
+    from freecad.plot import Plot  # Plot workbench
+else:
+    try:
+        from FreeCAD.Plot import Plot  # Inbuilt plot module
+    except ImportError:
+        from freecad.plot import Plot  # Fallback to workbench
 import math
 
 
@@ -42,6 +45,9 @@ class ResidualPlot:
         self.Timer = QtCore.QTimer()
         self.Timer.timeout.connect(self.refresh)
         self.Timer.start(2000)
+
+    def __del__(self):
+        self.refresh()
 
     def updateResiduals(self, residuals):
         self.updated = True
