@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -26,6 +26,7 @@
 from __future__ import print_function
 import platform
 import os
+import sys
 from PySide import QtCore
 from PySide.QtCore import QProcess, QTextStream
 import FreeCAD
@@ -111,7 +112,7 @@ class CfdConsoleProcess:
         if text:
             if self.stderrHook:
                 self.stderrHook(text)
-            FreeCAD.Console.PrintError(text)
+            print(text, end='', file=sys.stderr)  # Avoid displaying on FreeCAD status bar
             # Must be at the end as it can cause re-entrance
             if FreeCAD.GuiUp:
                 FreeCAD.Gui.updateGui()
