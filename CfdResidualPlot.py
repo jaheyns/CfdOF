@@ -47,7 +47,8 @@ class ResidualPlot:
         self.Timer.start(2000)
 
     def __del__(self):
-        self.refresh()
+        if FreeCAD.GuiUp:
+            self.refresh()
 
     def updateResiduals(self, residuals):
         self.updated = True
