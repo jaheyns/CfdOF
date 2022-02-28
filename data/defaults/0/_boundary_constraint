@@ -11,6 +11,8 @@
         type        cyclic;
         value       $internalField;
     }
-%:twoDBoundingPlane
+%:empty
 %[0/_boundary_empty%]
+%:wedge
+%[0/_boundary_wedge%]
 %}

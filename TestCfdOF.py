@@ -191,6 +191,7 @@ class BlockTest(unittest.TestCase):
         taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.mesh_object)
         taskd.obj = self.mesh_object.ViewObject
         taskd.writeMesh()
+        taskd.closed()
 
         print ('Write case files ...')
         import _TaskPanelCfdSolverControl
@@ -198,6 +199,7 @@ class BlockTest(unittest.TestCase):
         taskd = _TaskPanelCfdSolverControl._TaskPanelCfdSolverControl(solver_runner)
         taskd.obj = self.solver_object.ViewObject
         taskd.write_input_file_handler()
+        taskd.closed()
 
     def test_new_analysis(self):
         fccPrint('--------------- Start of CFD tests ---------------')

@@ -128,6 +128,9 @@ class _CfdMesh:
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
 
+    def execute(self, obj):
+        pass
+
     def __getstate__(self):
         return self.Type
 
@@ -140,6 +143,7 @@ class _ViewProviderCfdMesh:
     """ A View Provider for the CfdMesh object """
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.taskd = None
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
@@ -161,14 +165,16 @@ class _ViewProviderCfdMesh:
             if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdMesh):
                 obj.ViewObject.show()
         import _TaskPanelCfdMesh
-        taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.Object)
-        taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(taskd)
+        self.taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.Object)
+        self.taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def unsetEdit(self, vobj, mode):
+        if self.taskd:
+            self.taskd.closed()
+            self.taskd = None
         FreeCADGui.Control.closeDialog()
-        return
 
     def doubleClicked(self, vobj):
         if FreeCADGui.activeWorkbench().name() != 'CfdOFWorkbench':

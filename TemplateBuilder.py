@@ -232,7 +232,7 @@ class TemplateBuilder(object):
     def makeVarSubstitutions(self, contents, curr_file, params):
         """ Perform variable substitutions. Format:
         %(key/in/settings/dict%) key/in/settings/dict is the name of a variable 
-        in the settings dict, with subdicts separated by backslashes, or a numeric value on the
+        in the settings dict, with subdicts separated by slashes, or a numeric value on the
         parameter stack. If 
         key/in/settings/dict specifies a dictionary or a list, its keys/values 
         are outputted separated by white space """
@@ -249,8 +249,8 @@ class TemplateBuilder(object):
             if match and match.span() == (0, len(key)):
                 try:
                     replace = str(params[int(key)])
-                except IndexError:
-                    raise ValueError("Index " + key + " of stack variables is out of range")
+                except IndexError as ex:
+                    raise ValueError("Index " + key + " of stack variables is out of range") from ex
             # Otherwise, navigate the settings dict for the key
             else:
                 keys = key.split('/')

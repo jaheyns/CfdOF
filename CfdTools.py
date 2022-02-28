@@ -49,6 +49,8 @@ if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
     from PySide import QtCore
+    from PySide.QtGui import QFormLayout, QGridLayout
+
 
 # Some standard install locations that are searched if an install directory is not specified
 FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v2012",
@@ -333,6 +335,18 @@ def indexOrDefault(list, findItem, defaultIndex):
         return defaultIndex
 
 
+def storeIfChanged(obj, prop, val):
+    cur_val = getattr(obj, prop)
+    if isinstance(cur_val, Units.Quantity):
+        if str(cur_val) != str(val):
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
+    elif cur_val != val:
+        if isinstance(cur_val, str):
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
+        else:
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
+
+
 def hide_parts_show_meshes():
     if FreeCAD.GuiUp:
         for acnstrmesh in getActiveAnalysis().Group:
@@ -368,8 +382,6 @@ def getPatchType(bcType, bcSubType):
             return 'cyclic'
         elif bcSubType == 'wedge':
             return 'wedge'
-        elif bcSubType == 'twoDBoundingPlane':
-            return 'empty'
         elif bcSubType == 'empty':
             return 'empty'
         else:
@@ -1491,3 +1503,26 @@ def writePatchToStl(solid_name, facemesh, fid, scale=1):
         fid.write("  endloop\n")
         fid.write(" endfacet\n")
     fid.write("endsolid {}\n".format(solid_name))
+
+
+def enableLayoutRows(layout, selected_rows):
+    if isinstance(layout, QFormLayout):
+        for rowi in range(layout.count()):
+            for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
+                item = layout.itemAt(rowi, role)
+                if item:
+                    if isinstance(item, QtGui.QWidgetItem):
+                        item.widget().setVisible(selected_rows is None or rowi in selected_rows)
+    elif isinstance(layout, QGridLayout):
+        for rowi in range(layout.rowCount()):
+            for coli in range(layout.columnCount()):
+                item = layout.itemAtPosition(rowi, coli)
+                if item:
+                    if isinstance(item, QtGui.QWidgetItem):
+                        item.widget().setVisible(selected_rows is None or rowi in selected_rows)
+    else:
+        for rowi in range(layout.count()):
+            item = layout.itemAt(rowi)
+            if item:
+                if isinstance(item, QtGui.QWidgetItem):
+                    item.widget().setVisible(selected_rows is None or rowi in selected_rows)

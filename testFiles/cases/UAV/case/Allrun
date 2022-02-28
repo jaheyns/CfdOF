@@ -12,7 +12,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/opt/openfoam9"
+FOAMDIR="/opt/openfoam8"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -43,10 +43,12 @@ fi
 runCommand createPatch -overwrite
 
 PNAME=p
+# Parallel decomposition
+runCommand decomposePar -force
+
 # Initialise flow
-runCommand potentialFoam -initialiseUBCs -pName $PNAME
+runCommand mpiexec -np 4 potentialFoam -parallel -initialiseUBCs -pName $PNAME
 
 # Run application in parallel
-runCommand decomposePar -force
 runCommand mpiexec -np 4 simpleFoam -parallel
 

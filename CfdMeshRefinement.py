@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -33,6 +33,12 @@ from CfdTools import addObjectProperty
 from pivy import coin
 import Part
 import _TaskPanelCfdMeshRefinement
+
+# Constants
+
+EXTRUSION_NAMES = ["2D planar mesh", "2D wedge mesh", "Patch-normal", "Rotational"]
+EXTRUSION_TYPES = ["2DPlanar", "2DWedge", "PatchNormal", "Rotational"]
+EXTRUSION_UI = [[2], [6], [1, 2, 4, 5], [1, 3, 4, 5, 6]]
 
 
 def makeCfdMeshRefinement(base_mesh, name="MeshRefinement"):
@@ -97,28 +103,53 @@ class _CfdMeshRefinement:
                 obj.removeProperty('References')
                 obj.removeProperty('LinkedObjects')
 
-        addObjectProperty(obj, "RelativeLength", 0.75, "App::PropertyFloat", "",
-                          "Set relative length of the elements for this region")
-
         addObjectProperty(obj, "Internal", False, "App::PropertyBool", "",
                           "Whether the refinement region is a volume rather than surface")
 
-        #cfMesh:
-        addObjectProperty(obj, "RefinementThickness", "0 m", "App::PropertyLength", "cfMesh",
+        addObjectProperty(obj, "Extrusion", False, "App::PropertyBool", "",
+                          "Defines an extrusion from a patch")
+
+        addObjectProperty(obj, "RelativeLength", 0.75, "App::PropertyFloat", "Refinement",
+                          "Set relative length of the elements for this region")
+
+        addObjectProperty(obj, "RefinementThickness", "0 m", "App::PropertyLength", "Surface refinement",
                           "Set refinement region thickness")
 
-        addObjectProperty(obj, "NumberLayers", 0, "App::PropertyInteger", "cfMesh",
+        addObjectProperty(obj, "NumberLayers", 0, "App::PropertyInteger", "Surface refinement",
                           "Set number of boundary layers")
 
-        addObjectProperty(obj, "ExpansionRatio", 1.2, "App::PropertyFloat", "cfMesh",
+        addObjectProperty(obj, "ExpansionRatio", 1.0, "App::PropertyFloat", "Surface refinement",
                           "Set expansion ratio within boundary layers")
 
-        addObjectProperty(obj, "FirstLayerHeight", "0 m", "App::PropertyLength", "cfMesh",
+        addObjectProperty(obj, "FirstLayerHeight", "0 m", "App::PropertyLength", "Surface refinement",
                           "Set the maximum first layer height")
 
-        # snappy:
-        addObjectProperty(obj, "RegionEdgeRefinement", 1, "App::PropertyFloat", "snappyHexMesh",
+        addObjectProperty(obj, "RegionEdgeRefinement", 1, "App::PropertyFloat", "Surface refinement",
                           "Relative edge (feature) refinement")
+
+        addObjectProperty(obj, "ExtrusionType", EXTRUSION_TYPES[0], "App::PropertyString", "Extrusion",
+                          "Type of extrusion")
+
+        addObjectProperty(obj, "KeepExistingMesh", False, "App::PropertyBool", "Extrusion",
+                          "If true, then the extrusion extends the existing mesh rather than replacing it")
+
+        addObjectProperty(obj, "ExtrusionThickness", "1 mm", "App::PropertyLength", "Extrusion",
+                          "Total distance of the extruded layers")
+
+        addObjectProperty(obj, "ExtrusionAngle", 5, "App::PropertyAngle", "Extrusion",
+                          "Total angle through which the patch is extruded")
+
+        addObjectProperty(obj, "ExtrusionLayers", 1, "App::PropertyInteger", "Extrusion",
+                          "Number of extrusion layers to add")
+
+        addObjectProperty(obj, "ExtrusionRatio", 1.0, "App::PropertyFloat", "Extrusion",
+                          "Expansion ratio of extrusion layers")
+
+        addObjectProperty(obj, "ExtrusionAxisPoint", FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Extrusion",
+                          "Point on axis for sector extrusion")
+
+        addObjectProperty(obj, "ExtrusionAxisDirection", FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Extrusion",
+                          "Direction of axis for sector extrusion")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
@@ -170,6 +201,8 @@ class _ViewProviderCfdMeshRefinement:
         #for obj in FreeCAD.ActiveDocument.Objects:
         #    if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMesh) and (self.Object in obj.Group):
         #        obj.Part.ViewObject.show()
+        import importlib
+        importlib.reload(_TaskPanelCfdMeshRefinement)
         taskd = _TaskPanelCfdMeshRefinement._TaskPanelCfdMeshRefinement(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)

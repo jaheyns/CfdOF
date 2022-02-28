@@ -12,7 +12,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/opt/openfoam9"
+FOAMDIR="/opt/openfoam8"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -42,7 +42,9 @@ fi
 # Update patch name and type
 runCommand createPatch -overwrite
 
-# Run application in parallel
+# Parallel decomposition
 runCommand decomposePar -force
+
+# Run application in parallel
 runCommand mpiexec -np 4 hisa -parallel
 

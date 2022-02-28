@@ -80,12 +80,19 @@ else
 fi
 
 %}
-%{%(TwoDSettings/ConvertTo2D%)
+%{%(ExtrusionSettings/ExtrusionsPresent%)
 %:True
-runCommand changeDictionary
+runCommand createPatch -overwrite
+%{%(ExtrusionSettings/Extrusions%)
+cp system/extrudeMeshDict.%(0%) system/extrudeMeshDict
 runCommand extrudeMesh
+mv log.extrudeMesh log.extrudeMesh.%(0%)
+rm system/extrudeMeshDict
+%}
+%{%(ExtrusionSettings/Extrude2DPlanar%)
+%:True
 runCommand flattenMesh
-
+%}
 %}
 
 if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ] || [ $WM_PROJECT_VERSION == "v1906" ]

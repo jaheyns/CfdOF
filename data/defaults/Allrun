@@ -96,6 +96,39 @@ PNAME=p_rgh
 %:default
 PNAME=p
 %}
+%}
+%{%(solver/Parallel%)
+%:True
+# Parallel decomposition
+runCommand decomposePar -force
+
+%{%(initialValues/PotentialFlow%)
+%:True
+# Initialise flow
+%{%(bafflesPresent%)
+%:True
+# Baffle BC does not work with potentialFoam; do not initialise p
+runCommand mpiexec -np %(solver/ParallelCores%) potentialFoam -parallel -initialiseUBCs -pName $PNAME
+%:default
+%{%(initialValues/PotentialFlowP%)
+%:True
+runCommand mpiexec -np %(solver/ParallelCores%) potentialFoam -parallel -initialiseUBCs -pName $PNAME -writep
+%:default
+runCommand mpiexec -np %(solver/ParallelCores%) potentialFoam -parallel -initialiseUBCs -pName $PNAME
+%}
+%}
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
+# Remove phi with wrong units
+rm processor*/0/phi
+%}
+
+%}
+# Run application in parallel
+runCommand mpiexec -np %(solver/ParallelCores%) %(solver/SolverName%) -parallel
+%:False
+%{%(initialValues/PotentialFlow%)
+%:True
 # Initialise flow
 %{%(bafflesPresent%)
 %:True
@@ -116,12 +149,6 @@ rm 0/phi
 %}
 
 %}
-%{%(solver/Parallel%)
-%:True
-# Run application in parallel
-runCommand decomposePar -force
-runCommand mpiexec -np %(solver/ParallelCores%) %(solver/SolverName%) -parallel
-%:False
 # Run application
 runCommand %(solver/SolverName%)
 %}

@@ -122,6 +122,7 @@ class _ViewProviderCfdSolverFoam:
 
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.taskd = None
 
     def getIcon(self):
         # """after load from FCStd file, self.icon does not exist, return constant path instead"""
@@ -167,15 +168,17 @@ class _ViewProviderCfdSolverFoam:
             from CfdRunnableFoam import CfdRunnableFoam
             foamRunnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
             from _TaskPanelCfdSolverControl import _TaskPanelCfdSolverControl
-            taskd = _TaskPanelCfdSolverControl(foamRunnable)
-            taskd.obj = vobj.Object
+            self.taskd = _TaskPanelCfdSolverControl(foamRunnable)
+            self.taskd.obj = vobj.Object
 
-            FreeCADGui.Control.showDialog(taskd)
+            FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def unsetEdit(self, vobj, mode):
+        if self.taskd:
+            self.taskd.closed()
+            self.taskd = None
         FreeCADGui.Control.closeDialog()
-        return
 
     def __getstate__(self):
         return None

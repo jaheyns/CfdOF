@@ -6,29 +6,25 @@
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version     2.0;
+    version     4.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    object      boundary;
+    class       dictionary;
+    location    "system";
+    object      extrudeMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-(
-    wall
-    {
-        type        wall;
-    }
+sourceCase          "./";
+sourcePatches       (patch_0_1);
+constructFrom       patch;
+exposedPatchName    patch_0_1BackFace;
 
-    open
-    {
-        type        patch;
-    }
+flipNormals         false;
 
-    defaultFaces
-    {
-        type        wall;
-    }
+extrudeModel        plane;
+thickness           1.0;
 
-)
+mergeTol            1e-6;
+mergeFaces          false;
 
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

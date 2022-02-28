@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -59,7 +59,7 @@ class CfdMeshTools:
         self.cf_settings = {}
         self.snappy_settings = {}
         self.gmsh_settings = {}
-        self.two_d_settings = {}
+        self.extrusion_settings = {}
 
         self.error = False
 
@@ -79,7 +79,7 @@ class CfdMeshTools:
         if self.progressCallback:
             self.progressCallback("Exporting mesh refinement data ...")
         self.processRefinements()
-        self.processDimension()
+        self.processExtrusions()
         CfdTools.cfdMessage("Exporting the part surfaces ...\n")
         if self.progressCallback:
             self.progressCallback("Exporting the part surfaces ...")
@@ -89,93 +89,86 @@ class CfdMeshTools:
         if self.progressCallback:
             self.progressCallback("Mesh case written successfully")
 
-    def processDimension(self):
-        """ Additional checking/processing for 2D vs 3D """
-        # 3D cfMesh and snappyHexMesh, and 2D by conversion, while in future cfMesh may support 2D directly
-        if self.dimension != '3D' and self.dimension != '2D':
-            FreeCAD.Console.PrintError('Invalid element dimension. Setting to 3D.')
-            self.dimension = '3D'
-        print('  ElementDimension: ' + self.dimension)
+    def processExtrusions(self):
+        """ Find and process any extrusion objects """
 
-        # Check for 2D boundaries
-        twoDPlanes = []
-        analysis_obj = CfdTools.getParentAnalysisObject(self.mesh_obj)
-        if not analysis_obj:
-            analysis_obj = CfdTools.getActiveAnalysis()
-        if analysis_obj:
-            boundaries = CfdTools.getCfdBoundaryGroup(analysis_obj)
-            for b in boundaries:
-                if b.BoundaryType == 'constraint' and \
-                   b.BoundarySubType == 'twoDBoundingPlane':
-                    twoDPlanes.append(b.Name)
-
-        if self.dimension == '2D':
-            self.two_d_settings['ConvertTo2D'] = True
-            if len(twoDPlanes) != 2:
-                raise RuntimeError("For 2D meshing, two separate, parallel, 2D bounding planes must be present as "
-                                   "boundary conditions in the CFD analysis object.")
-            doc_name = str(analysis_obj.Document.Name)
-            fFObjName = twoDPlanes[0]
-            bFObjName = twoDPlanes[1]
-            frontObj = FreeCAD.getDocument(doc_name).getObject(fFObjName)
-            backObj = FreeCAD.getDocument(doc_name).getObject(bFObjName)
-            fShape = frontObj.Shape
-            bShape = backObj.Shape
-            if len(fShape.Faces) == 0 or len(bShape.Faces) == 0:
-                raise RuntimeError("A 2D bounding plane is empty.")
-            else:
-                allFFacesPlanar = True
-                allBFacesPlanar = True
-                for faces in fShape.Faces:
-                    if not isinstance(faces.Surface, Part.Plane):
-                        allFFacesPlanar = False
-                        break
-                for faces in bShape.Faces:
-                    if not isinstance(faces.Surface, Part.Plane):
-                        allBFacesPlanar = False
-                        break
-                if allFFacesPlanar and allBFacesPlanar:
-                    A1 = fShape.Faces[0].Surface.Axis
-                    A1.multiply(1.0/A1.Length)
-                    A2 = bShape.Faces[0].Surface.Axis
-                    A2.multiply(1.0/A2.Length)
-                    if (A1-A2).Length <= 1e-6 or (A1+A2).Length <= 1e-6:
-                        if len(frontObj.Shape.Vertexes) == len(backObj.Shape.Vertexes) and \
-                           len(frontObj.Shape.Vertexes) > 0 and \
-                           abs(frontObj.Shape.Area) > 0 and \
-                           abs(frontObj.Shape.Area - backObj.Shape.Area)/abs(frontObj.Shape.Area) < 1e-6:
-                            self.two_d_settings['Distance'] = fShape.distToShape(bShape)[0]/1000
-                        else:
-                            raise RuntimeError("2D bounding planes do not match up.")
-                    else:
-                        raise RuntimeError("2D bounding planes are not aligned.")
+        twoD_extrusion_objs = []
+        other_extrusion_objs = []
+        mesh_refinements = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+        self.extrusion_settings['ExtrusionsPresent'] = False
+        self.extrusion_settings['ExtrudeTo2D'] = False
+        self.extrusion_settings['Extrude2DPlanar'] = False
+        for mr in mesh_refinements:
+            if mr.Extrusion:
+                self.extrusion_settings['ExtrusionsPresent'] = True
+                if mr.ExtrusionType == '2DPlanar' or mr.ExtrusionType == '2DWedge':
+                    twoD_extrusion_objs.append(mr)
                 else:
-                    raise RuntimeError("2D bounding planes need to be flat surfaces.")
+                    other_extrusion_objs.append(mr)
+                if mr.ExtrusionType == '2DPlanar':
+                    self.extrusion_settings['Extrude2DPlanar'] = True
 
-            fbi = CfdTools.getCfdBoundaryGroup(analysis_obj).index(frontObj)
-            ffl = []
-            for l, f in enumerate(self.patch_faces[fbi+1]):
+        if len(twoD_extrusion_objs) > 1:
+            raise RuntimeError("For 2D meshing, there must be exactly one 2D mesh extrusion object.")
+        elif len(twoD_extrusion_objs) == 1:
+            self.extrusion_settings['ExtrudeTo2D'] = True
+        all_extrusion_objs = other_extrusion_objs + twoD_extrusion_objs  # Ensure 2D extrusion happens last
+
+        self.extrusion_settings['Extrusions'] = []
+        for extrusion_obj in all_extrusion_objs:
+            extrusion_shape = extrusion_obj.Shape
+            this_extrusion_settings = {}
+            if len(extrusion_shape.Faces) == 0:
+                raise RuntimeError("Extrusion object '{}' is empty.".format(extrusion_obj.Label))
+
+            this_extrusion_settings['KeepExistingMesh'] = extrusion_obj.KeepExistingMesh
+            if extrusion_obj.ExtrusionType == '2DPlanar' or extrusion_obj.ExtrusionType == '2DWedge':
+                this_extrusion_settings['KeepExistingMesh'] = False
+                all_faces_planar = True
+                for faces in extrusion_shape.Faces:
+                    if not isinstance(faces.Surface, Part.Plane):
+                        all_faces_planar = False
+                        break
+                if not all_faces_planar:
+                    raise RuntimeError("2D mesh extrusion surface must be a flat plane.")
+            normal = extrusion_shape.Faces[0].Surface.Axis
+            normal.multiply(1.0/normal.Length)
+            this_extrusion_settings['Normal'] = (normal.x, normal.y, normal.z)
+            this_extrusion_settings['ExtrusionType'] = extrusion_obj.ExtrusionType
+
+            # Get the names of the faces being extruded
+            mri = mesh_refinements.index(extrusion_obj)
+            efl = []
+            for l, ff in enumerate(self.patch_faces):
+                f = ff[mri+1]
                 if len(f):
-                    ffl.append(self.patch_names[fbi+1][l])
+                    efl.append(self.patch_names[l][mri+1])
 
-            self.two_d_settings['FrontFaceList'] = tuple(ffl)
+            if not efl:
+                raise RuntimeError("Extrusion patch for '{}' could not be found in the shape being meshed.".format(
+                    extrusion_obj.Label))
+            this_extrusion_settings['FrontFaceList'] = tuple(efl)
+            this_extrusion_settings['BackFace'] = efl[0]+'BackFace'
 
-            bbi = CfdTools.getCfdBoundaryGroup(analysis_obj).index(backObj)
-            bfl = []
-            for l, f in enumerate(self.patch_faces[bbi+1]):
-                if len(f):
-                    bfl.append(self.patch_names[bbi+1][l])
+            this_extrusion_settings['Distance'] = extrusion_obj.ExtrusionThickness.getValueAs('m')
+            this_extrusion_settings['Angle'] = extrusion_obj.ExtrusionAngle.getValueAs('deg')
+            this_extrusion_settings['NumLayers'] = extrusion_obj.ExtrusionLayers
+            this_extrusion_settings['ExpansionRatio'] = extrusion_obj.ExtrusionRatio
+            this_extrusion_settings['AxisPoint'] = tuple(p for p in extrusion_obj.ExtrusionAxisPoint)
 
-            self.two_d_settings['BackFaceList'] = tuple(bfl)
+            axis_direction = extrusion_obj.ExtrusionAxisDirection
 
-            if not self.two_d_settings['BackFaceList'] or not self.two_d_settings['FrontFaceList']:
-                raise RuntimeError("2D front and/or back plane(s) could not be found in the shape being meshed.")
+            # Flip axis if necessary to go in same direction as patch normal (otherwise negative volume cells result)
+            if len(extrusion_shape.Faces) > 0:
+                in_plane_vector = extrusion_shape.Faces[0].CenterOfMass-extrusion_obj.ExtrusionAxisPoint
+                extrusion_normal = extrusion_obj.ExtrusionAxisDirection.cross(in_plane_vector)
+                face_normal = extrusion_shape.Faces[0].normalAt(0.5, 0.5)
+                if extrusion_normal.dot(face_normal) < 0:
+                    axis_direction = -axis_direction
 
-            self.two_d_settings['BackFace'] = bfl[0]
-        else:
-            self.two_d_settings['ConvertTo2D'] = False
-            if len(twoDPlanes):
-                raise RuntimeError("2D bounding planes can not be used in 3D mesh")
+            this_extrusion_settings['AxisDirection'] = tuple(d for d in axis_direction)
+
+            self.extrusion_settings['Extrusions'].append(this_extrusion_settings)
 
     def getClmax(self):
         return Units.Quantity(self.clmax, Units.Length)
@@ -260,33 +253,33 @@ class CfdMeshTools:
             else:
                 bc_match_per_shape_face[match] = k
 
-        # Make list of all boundary layer mesh regions for cfMesh
-        bl_matched_faces = []
-        if self.mesh_obj.MeshUtility == 'cfMesh':
-            CfdTools.cfdMessage("Matching boundary layer regions\n")
-            bl_face_list = []
-            for mr_id, mr_obj in enumerate(mr_objs):
-                if mr_obj.NumberLayers > 1 and not mr_obj.Internal:
-                    for ri, r in enumerate(mr_obj.ShapeRefs):
-                        try:
-                            bf = CfdTools.resolveReference(r)
-                        except RuntimeError as re:
-                            raise RuntimeError("Error processing mesh refinement {}: {}".format(
-                                mr_obj.Label, str(re)))
-                        for si, s in enumerate(bf):
-                            bl_face_list += [(f, (mr_id, ri, si)) for f in s[0].Faces]
+        # Match relevant mesh regions to shape faces: boundary layer mesh regions for cfMesh, and extrusion patches
+        # Normal surface refinements are written as separate surfaces so need not be matched
+        CfdTools.cfdMessage("Matching mesh refinement regions\n")
+        mr_face_list = []
+        for mr_id, mr_obj in enumerate(mr_objs):
+            if mr_obj.Extrusion or (
+                    self.mesh_obj.MeshUtility == 'cfMesh' and not mr_obj.Internal and mr_obj.NumberLayers > 1):
+                for ri, r in enumerate(mr_obj.ShapeRefs):
+                    try:
+                        bf = CfdTools.resolveReference(r)
+                    except RuntimeError as re:
+                        raise RuntimeError("Error processing mesh refinement {}: {}".format(
+                            mr_obj.Label, str(re)))
+                    for si, s in enumerate(bf):
+                        mr_face_list += [(f, (mr_id, ri, si)) for f in s[0].Faces]
 
-            # Match them up
-            bl_matched_faces = CfdTools.matchFaces(bl_face_list, mesh_face_list)
+        # Match them up
+        mr_matched_faces = CfdTools.matchFaces(mr_face_list, mesh_face_list)
 
         # Check for and filter duplicates
         bl_match_per_shape_face = [-1] * len(mesh_face_list)
-        for k in range(len(bl_matched_faces)):
-            match = bl_matched_faces[k][1]
+        for k in range(len(mr_matched_faces)):
+            match = mr_matched_faces[k][1]
             prev_k = bl_match_per_shape_face[match]
             if prev_k >= 0:
-                nr, ri, si = bl_matched_faces[k][0]
-                nr2, ri2, si2 = bl_matched_faces[prev_k][0]
+                nr, ri, si = mr_matched_faces[k][0]
+                nr2, ri2, si2 = mr_matched_faces[prev_k][0]
                 CfdTools.cfdWarning(
                     "Mesh refinement '{}' reference {}:{} also assigned as "
                     "mesh refinement '{}' reference {}:{} - ignoring duplicate\n".format(
@@ -311,7 +304,7 @@ class CfdMeshTools:
             if k >= 0:
                 nb, bref, bri = bc_matched_faces[k][0]
             if l >= 0:
-                nr, ref, rri = bl_matched_faces[l][0]
+                nr, ref, rri = mr_matched_faces[l][0]
             self.patch_faces[nb+1][nr+1].append(i)
 
         # For gmsh, match mesh refinement with vertices in original mesh
@@ -452,7 +445,7 @@ class CfdMeshTools:
 
                 # Loop over and write the sub-sections of this mesh object
                 for bi in range(len(mr_patch_refs)):
-                    if len(mr_patch_refs[bi]):
+                    if len(mr_patch_refs[bi]) and not mr_obj.Extrusion:
                         if bi == 0:
                             mr_patch_name = mr_obj.Name
                         else:
@@ -501,7 +494,8 @@ class CfdMeshTools:
                                 }
 
             # In addition, for cfMesh, record matched boundary layer patches
-            if self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1 and not Internal:
+            if self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1 and \
+                    not Internal and not mr_obj.Extrusion:
                 for k in range(len(self.patch_faces)):
                     if len(self.patch_faces[k][mr_id+1]):
                         # Limit expansion ratio to greater than 1.0 and less than 1.2
@@ -697,7 +691,7 @@ class CfdMeshTools:
             'CfSettings': self.cf_settings,
             'SnappySettings': self.snappy_settings,
             'GmshSettings': self.gmsh_settings,
-            'TwoDSettings': self.two_d_settings
+            'ExtrusionSettings': self.extrusion_settings
         }
         if CfdTools.getFoamRuntime() != 'WindowsDocker':
             self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())

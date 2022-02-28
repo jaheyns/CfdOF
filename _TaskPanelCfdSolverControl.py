@@ -97,14 +97,15 @@ class _TaskPanelCfdSolverControl:
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)
 
-    def accept(self):
+    def reject(self):
         FreeCADGui.ActiveDocument.resetEdit()
 
-    def reject(self):
+    def closed(self):
+        # We call this from unsetEdit to ensure cleanup
         self.solver_object.Proxy.solver_process.terminate()
         self.solver_object.Proxy.solver_process.waitForFinished()
         self.open_paraview.terminate()
-        FreeCADGui.ActiveDocument.resetEdit()
+        self.Timer.stop()
 
     def write_input_file_handler(self):
         self.Start = time.time()

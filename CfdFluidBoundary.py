@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -43,14 +43,14 @@ SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translatin
             ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure"],
             ["Static pressure", "Uniform velocity", "Extrapolated"],
             ["Ambient pressure", "Far-field"],
-            ["Symmetry", "2D bounding plane"],
+            ["Symmetry"],
             ["Porous Baffle"]]
 
 SUBTYPES = [["fixedWall", "slipWall", "partialSlipWall", "translatingWall", "roughWall"],
             ["uniformVelocityInlet", "volumetricFlowRateInlet", "massFlowRateInlet", "totalPressureInlet", "staticPressureInlet"],
             ["staticPressureOutlet", "uniformVelocityOutlet", "outFlowOutlet"],
             ["totalPressureOpening", "farField"],
-            ["symmetry", "twoDBoundingPlane"],
+            ["symmetry"],
             ["porousBaffle"]]
 
 SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
@@ -68,8 +68,7 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                       "All fields extrapolated; possibly unstable"],
                      ["Boundary open to surroundings with total pressure specified",
                       "Characteristic-based non-reflecting boundary"],
-                     ["Symmetry of flow quantities about boundary face",
-                      "Bounding planes for 2D meshing and simulation"],
+                     ["Symmetry of flow quantities about boundary face"],
                      ["Permeable screen"]]
 
 # For each sub-type, whether the basic tab is enabled, the panel numbers to show (ignored if false), whether
@@ -91,8 +90,7 @@ BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                 [False, [], False, False, False, False, None]],  # Outflow
                [[True, [1], False, True, True, True, [2]],  # Opening
                 [True, [0, 1], False, True, False, True, [2]]],  # Far-field
-               [[False, [], False, False, False, False, None],  # Symmetry plane
-                [False, [], False, False, False, False, None]],  # 2D plane
+               [[False, [], False, False, False, False, None]],  # Symmetry plane
                [[True, [5], False, False, False, False, None]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows

@@ -12,7 +12,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/opt/openfoam9"
+FOAMDIR="/opt/openfoam8"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -22,10 +22,12 @@ fi
 # Extract feature edges
 runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/Cut_Geometry.stl" "Cut_Geometry.fms"
 runCommand cartesianMesh
-runCommand changeDictionary
+runCommand createPatch -overwrite
+cp system/extrudeMeshDict.0 system/extrudeMeshDict
 runCommand extrudeMesh
+mv log.extrudeMesh log.extrudeMesh.0
+rm system/extrudeMeshDict
 runCommand flattenMesh
-
 
 if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ] || [ $WM_PROJECT_VERSION == "v1906" ]
 then

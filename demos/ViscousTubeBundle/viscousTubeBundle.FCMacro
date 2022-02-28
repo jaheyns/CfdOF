@@ -41,6 +41,15 @@ FreeCAD.ActiveDocument.MeshRefinement.FirstLayerHeight = '0 mm'
 FreeCAD.ActiveDocument.MeshRefinement.RegionEdgeRefinement = 1.0
 FreeCAD.ActiveDocument.MeshRefinement.Internal = False
 
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Cut_Mesh)
+obj = FreeCAD.ActiveDocument.MeshRefinement001
+obj.Extrusion = True
+obj.ExtrusionType = '2DPlanar'
+obj.ExtrusionThickness = '1.0 mm'
+FreeCAD.ActiveDocument.MeshRefinement001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), ('Face3',))]
+FreeCAD.ActiveDocument.recompute()
+
 obj = FreeCAD.ActiveDocument.PhysicsModel
 obj.Time = 'Steady'
 obj.Flow = 'Incompressible'
@@ -54,7 +63,7 @@ obj.gz = '0 mm/s^2'
 FreeCAD.ActiveDocument.FluidProperties.Material = {'Name': 'Air', 'Description': 'Standard air properties at 20 Degrees Celsius and 1 atm', 'Density': '1.20 kg/m^3', 'DynamicViscosity': '1.80e-5 kg/m/s', 'MolarMass': '0.0289643897748887 kg/mol', 'Cp': '1004.703 J/kg/K', 'SutherlandConstant': '1.4579326545176254e-06 kg/m/s/K^0.5', 'SutherlandTemperature': '110.4 K'}
 
 FreeCAD.ActiveDocument.CfdSolver.MaxIterations = 500
-FreeCAD.ActiveDocument.CfdSolver.SteadyWriteInterval = 50.0000
+FreeCAD.ActiveDocument.CfdSolver.SteadyWriteInterval = 50
 
 import CfdFluidBoundary
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -156,71 +165,6 @@ FreeCAD.ActiveDocument.CfdFluidBoundary002.Label = 'wall'
 FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
 (FreeCAD.ActiveDocument.getObject('Cut'), ('Face7', 'Face9', 'Face11', 'Face13', 'Face15', 'Face6', 'Face25', 'Face23', 'Face21', 'Face19'))]
 FreeCAD.ActiveDocument.recompute()
-
-CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
-
-bc = FreeCAD.ActiveDocument.CfdFluidBoundary003
-bc.BoundaryType = 'constraint'
-bc.BoundarySubType = 'twoDBoundingPlane'
-bc.ThermalBoundaryType = 'fixedValue'
-bc.VelocityIsCartesian = True
-bc.Ux = '0 mm/s'
-bc.Uy = '0 mm/s'
-bc.Uz = '0 mm/s'
-bc.VelocityMag = '0 mm/s'
-bc.DirectionFace = ''
-bc.ReverseNormal = False
-bc.MassFlowRate = '0 kg/s'
-bc.VolFlowRate = '0 mm^3/s'
-bc.Pressure = '0 kg/(mm*s^2)'
-bc.SlipRatio = '0 '
-bc.Temperature = '293 K'
-bc.HeatFlux = '0 kg/s^3'
-bc.HeatTransferCoeff = '0 kg/(s^3*K)'
-bc.TurbulenceInletSpecification = 'intensityAndLengthScale'
-bc.TurbulentKineticEnergy = '10000 mm^2/s^2'
-bc.SpecificDissipationRate = '57.3 deg/s'
-bc.TurbulenceIntensity = '0.1 '
-bc.TurbulenceLengthScale = '100 mm'
-bc.PorousBaffleMethod = 'porousCoeff'
-bc.PressureDropCoeff = '0 '
-bc.ScreenWireDiameter = '0.1 mm'
-bc.ScreenSpacing = '0 mm'
-FreeCAD.ActiveDocument.CfdFluidBoundary003.Label = 'front'
-FreeCAD.ActiveDocument.CfdFluidBoundary003.ShapeRefs = [(FreeCAD.ActiveDocument.getObject('Cut'), ('Face3'))]
-FreeCAD.ActiveDocument.recompute()
-
-CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
-
-bc = FreeCAD.ActiveDocument.CfdFluidBoundary004
-bc.BoundaryType = 'constraint'
-bc.BoundarySubType = 'twoDBoundingPlane'
-bc.ThermalBoundaryType = 'fixedValue'
-bc.VelocityIsCartesian = True
-bc.Ux = '0 mm/s'
-bc.Uy = '0 mm/s'
-bc.Uz = '0 mm/s'
-bc.VelocityMag = '0 mm/s'
-bc.DirectionFace = ''
-bc.ReverseNormal = False
-bc.MassFlowRate = '0 kg/s'
-bc.VolFlowRate = '0 mm^3/s'
-bc.Pressure = '0 kg/(mm*s^2)'
-bc.SlipRatio = '0 '
-bc.Temperature = '293 K'
-bc.HeatFlux = '0 kg/s^3'
-bc.HeatTransferCoeff = '0 kg/(s^3*K)'
-bc.TurbulenceInletSpecification = 'intensityAndLengthScale'
-bc.TurbulentKineticEnergy = '10000 mm^2/s^2'
-bc.SpecificDissipationRate = '57.3 deg/s'
-bc.TurbulenceIntensity = '0.1 '
-bc.TurbulenceLengthScale = '100 mm'
-bc.PorousBaffleMethod = 'porousCoeff'
-bc.PressureDropCoeff = '0 '
-bc.ScreenWireDiameter = '0.1 mm'
-bc.ScreenSpacing = '0 mm'
-FreeCAD.ActiveDocument.CfdFluidBoundary004.Label = 'back'
-FreeCAD.ActiveDocument.CfdFluidBoundary004.ShapeRefs = [(FreeCAD.ActiveDocument.getObject('Cut'), ('Face5'))]
 
 init = FreeCAD.ActiveDocument.InitialiseFields
 init.PotentialFlow = True

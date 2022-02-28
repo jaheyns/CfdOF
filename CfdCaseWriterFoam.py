@@ -315,6 +315,28 @@ class CfdCaseWriterFoam:
                 'ThermalBoundaryType': 'zeroGradient'
             }
 
+        # Assign any extruded patches as the appropriate type
+        mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+        for mr_id, mr_obj in enumerate(mr_objs):
+            if mr_obj.Extrusion and mr_obj.ExtrusionType == "2DPlanar":
+                settings['boundaries'][mr_obj.Label] = {
+                    'BoundaryType': 'constraint',
+                    'BoundarySubType': 'empty'
+                }
+                settings['boundaries'][mr_obj.Label+"BackFace"] = {
+                    'BoundaryType': 'constraint',
+                    'BoundarySubType': 'empty'
+                }
+            if mr_obj.Extrusion and mr_obj.ExtrusionType == "2DWedge":
+                settings['boundaries'][mr_obj.Label] = {
+                    'BoundaryType': 'constraint',
+                    'BoundarySubType': 'wedge'
+                }
+                settings['boundaries'][mr_obj.Label+"BackFace"] = {
+                    'BoundaryType': 'constraint',
+                    'BoundarySubType': 'wedge'
+                }
+
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
         settings = self.settings
@@ -539,3 +561,25 @@ class CfdCaseWriterFoam:
             'PatchNamesList': '"patch_0_.*"',
             'PatchType': defaultPatchType
         }
+
+        # Assign any extruded patches as the appropriate type
+        mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+        for mr_id, mr_obj in enumerate(mr_objs):
+            if mr_obj.Extrusion and mr_obj.ExtrusionType == "2DPlanar":
+                settings['createPatches'][mr_obj.Label] = {
+                    'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'"',
+                    'PatchType': "empty"
+                }
+                settings['createPatches'][mr_obj.Label+'BackFace'] = {
+                    'PatchNamesList': '"patch_.*_' + str(mr_id + 1) + 'BackFace"',
+                    'PatchType': "empty"
+                }
+            if mr_obj.Extrusion and mr_obj.ExtrusionType == "2DWedge":
+                settings['createPatches'][mr_obj.Label] = {
+                    'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'"',
+                    'PatchType': "wedge"
+                }
+                settings['createPatches'][mr_obj.Label+'BackFace'] = {
+                    'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'BackFace"',
+                    'PatchType': "wedge"
+                }

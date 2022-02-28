@@ -32,7 +32,7 @@ from CfdMesh import _CfdMesh
 import time
 from datetime import timedelta
 import CfdTools
-from CfdTools import setQuantity, getQuantity
+from CfdTools import setQuantity, getQuantity, storeIfChanged
 import CfdMeshTools
 from CfdConsoleProcess import CfdConsoleProcess
 if FreeCAD.GuiUp:
@@ -79,7 +79,7 @@ class _TaskPanelCfdMesh:
         self.form.pb_paraview.setEnabled(False)
         self.form.snappySpecificProperties.setVisible(False)
 
-        self.form.cb_dimension.addItems(_CfdMesh.known_element_dimensions)
+        #self.form.cb_dimension.addItems(_CfdMesh.known_element_dimensions)
         self.form.cb_utility.addItems(_CfdMesh.known_mesh_utility)
 
         self.form.if_max.setToolTip("Enter 0 to use default value")
@@ -97,17 +97,19 @@ class _TaskPanelCfdMesh:
     def getStandardButtons(self):
         return int(QtGui.QDialogButtonBox.Close)
         # def reject() is called on close button
-        # def accept() in no longer needed, since there is no OK button
 
     def reject(self):
-        # There is no reject - only close
+        FreeCADGui.ActiveDocument.resetEdit()
+        return True
+
+    def closed(self):
+        # We call this from unsetEdit to ensure cleanup
         self.store()
         self.mesh_obj.Proxy.mesh_process.terminate()
         self.mesh_obj.Proxy.mesh_process.waitForFinished()
         self.open_paraview.terminate()
-        FreeCADGui.ActiveDocument.resetEdit()
+        self.Timer.stop()
         FreeCAD.ActiveDocument.recompute()
-        return True
 
     def load(self):
         """ Fills the widgets """
@@ -125,6 +127,8 @@ class _TaskPanelCfdMesh:
         self.form.cb_utility.setCurrentIndex(index_utility)
 
     def updateUI(self):
+        self.form.l_dimension.setVisible(False)
+        self.form.cb_dimension.setVisible(False)
         case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
         self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
         self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
@@ -137,21 +141,17 @@ class _TaskPanelCfdMesh:
             self.form.snappySpecificProperties.setVisible(False)
 
     def store(self):
-        FreeCADGui.doCommand("\nFreeCAD.ActiveDocument.{}.CharacteristicLengthMax "
-                             "= '{}'".format(self.mesh_obj.Name, getQuantity(self.form.if_max)))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.MeshUtility "
-                             "= '{}'".format(self.mesh_obj.Name, self.form.cb_utility.currentText()))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.ElementDimension "
-                             "= '{}'".format(self.mesh_obj.Name, self.form.cb_dimension.currentText()))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.CellsBetweenLevels "
-                             "= {}".format(self.mesh_obj.Name, self.form.if_cellsbetweenlevels.value()))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.EdgeRefinement "
-                             "= {}".format(self.mesh_obj.Name, self.form.if_edgerefine.value()))
+        storeIfChanged(self.mesh_obj, 'CharacteristicLengthMax', getQuantity(self.form.if_max))
+        storeIfChanged(self.mesh_obj, 'MeshUtility', self.form.cb_utility.currentText())
+        #storeIfChanged(self.mesh_obj, 'ElementDimension', self.form.cb_dimension.currentText())
+        storeIfChanged(self.mesh_obj, 'CellsBetweenLevels', self.form.if_cellsbetweenlevels.value())
+        storeIfChanged(self.mesh_obj, 'EdgeRefinement', self.form.if_edgerefine.value())
         point_in_mesh = {'x': getQuantity(self.form.if_pointInMeshX),
                          'y': getQuantity(self.form.if_pointInMeshY),
                          'z': getQuantity(self.form.if_pointInMeshZ)}
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.PointInMesh "
-                             "= {}".format(self.mesh_obj.Name, point_in_mesh))
+        if self.mesh_obj.MeshUtility == 'snappyHexMesh':
+            storeIfChanged(self.mesh_obj, 'PointInMesh', point_in_mesh)
+
         self.mesh_obj.Proxy.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
 
     def consoleMessage(self, message="", color="#000000", timed=True):

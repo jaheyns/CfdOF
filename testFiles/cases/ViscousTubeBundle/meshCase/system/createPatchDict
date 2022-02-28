@@ -6,52 +6,27 @@
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version     4.0;
+    version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      meshDict;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-surfaceFile       "Cut_Geometry.fms";
+pointSync false;
 
-maxCellSize       0.01;
-boundaryCellSize  0.01;
-
-
-surfaceMeshRefinement
-{
-    MeshRefinement
+patches
+(
     {
-        cellSize  0.005;
-        surfaceFile "constant/triSurface/MeshRefinement.stl";
-        refinementThickness 0.005;
-    }
-}
-
-boundaryLayers
-{
-    patchBoundaryLayers
-    {
-        "patch_3_1"
+        name patch_0_2BackFace;
+        patchInfo
         {
-            nLayers 16;
-            thicknessRatio 1.2;
+            type patch;
         }
+        constructFrom patches;
+        patches ( );
     }
+);
 
-    optimiseLayer 1;
-    untangleLayers 0;
-
-    optimisationParameters
-    {
-        nSmoothNormals 3;
-        maxNumIterations 5;
-        featureSizeFactor 0.4;
-        reCalculateNormals 1;
-        relThicknessTol 0.1;
-    }
-}
 
 // ************************************************************************* //
