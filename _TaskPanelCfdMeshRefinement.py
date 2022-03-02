@@ -31,6 +31,7 @@ import CfdTools
 from CfdTools import getQuantity, setQuantity, indexOrDefault
 import CfdFaceSelectWidget
 import CfdMeshRefinement
+from FreeCAD import Units
 
 
 class _TaskPanelCfdMeshRefinement:
@@ -168,9 +169,9 @@ class _TaskPanelCfdMeshRefinement:
         setQuantity(self.form.angleInput, self.obj.ExtrusionAngle)
         self.form.numLayersInput.setValue(self.obj.ExtrusionLayers)
         self.form.ratioInput.setValue(self.obj.ExtrusionRatio)
-        setQuantity(self.form.axisPointXEdit, self.obj.ExtrusionAxisPoint.x)
-        setQuantity(self.form.axisPointYEdit, self.obj.ExtrusionAxisPoint.y)
-        setQuantity(self.form.axisPointZEdit, self.obj.ExtrusionAxisPoint.z)
+        setQuantity(self.form.axisPointXEdit, "{} m".format(self.obj.ExtrusionAxisPoint.x))
+        setQuantity(self.form.axisPointYEdit, "{} m".format(self.obj.ExtrusionAxisPoint.y))
+        setQuantity(self.form.axisPointZEdit, "{} m".format(self.obj.ExtrusionAxisPoint.z))
         setQuantity(self.form.axisDirectionXEdit, self.obj.ExtrusionAxisDirection.x)
         setQuantity(self.form.axisDirectionYEdit, self.obj.ExtrusionAxisDirection.y)
         setQuantity(self.form.axisDirectionZEdit, self.obj.ExtrusionAxisDirection.z)
