@@ -330,11 +330,11 @@ class CfdCaseWriterFoam:
             if mr_obj.Extrusion and mr_obj.ExtrusionType == "2DWedge":
                 settings['boundaries'][mr_obj.Label] = {
                     'BoundaryType': 'constraint',
-                    'BoundarySubType': 'wedge'
+                    'BoundarySubType': 'symmetry'
                 }
                 settings['boundaries'][mr_obj.Label+"BackFace"] = {
                     'BoundaryType': 'constraint',
-                    'BoundarySubType': 'wedge'
+                    'BoundarySubType': 'symmetry'
                 }
 
     def processInitialConditions(self):
@@ -577,9 +577,9 @@ class CfdCaseWriterFoam:
             if mr_obj.Extrusion and mr_obj.ExtrusionType == "2DWedge":
                 settings['createPatches'][mr_obj.Label] = {
                     'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'"',
-                    'PatchType': "wedge"
+                    'PatchType': "symmetry"
                 }
                 settings['createPatches'][mr_obj.Label+'BackFace'] = {
                     'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'BackFace"',
-                    'PatchType': "wedge"
+                    'PatchType': "symmetry"
                 }

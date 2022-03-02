@@ -29,11 +29,14 @@ flipNormals         false;
 extrudeModel        plane;
 thickness           %(ExtrusionSettings/Extrusions/%(0%)/Distance%);
 %:2DWedge
-extrudeModel        wedge;
+extrudeModel        sector;
 nLayers             1;
-axisPt          ( %(ExtrusionSettings/Extrusions/%(0%)/AxisPoint%) );
-axis            ( %(ExtrusionSettings/Extrusions/%(0%)/AxisDirection%) );
-angle           %(ExtrusionSettings/Extrusions/%(0%)/Angle%);
+sectorCoeffs
+{
+    point           ( %(ExtrusionSettings/Extrusions/%(0%)/AxisPoint%) );
+    axis            ( %(ExtrusionSettings/Extrusions/%(0%)/AxisDirection%) );
+    angle           %(ExtrusionSettings/Extrusions/%(0%)/Angle%);
+}
 %:PatchNormal
 extrudeModel        linearNormal;
 nLayers             %(ExtrusionSettings/Extrusions/%(0%)/NumLayers%)
@@ -44,6 +47,7 @@ linearNormalCoeffs
 }
 %:Rotational
 extrudeModel        sector;
+nLayers             %(ExtrusionSettings/Extrusions/%(0%)/NumLayers%)
 sectorCoeffs
 {
     point           ( %(ExtrusionSettings/Extrusions/%(0%)/AxisPoint%) );
