@@ -28,7 +28,7 @@ pseudoTime
 
     localTimestepping             true;
     localTimesteppingBounding     true;
-    localTimesteppingLowerBound   0.85;
+    localTimesteppingLowerBound   0.95;
 
     // Last line of defense, in case of very poor grid
     rhoMin              0.01;  // TODO: Generalise
