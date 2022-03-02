@@ -81,7 +81,7 @@ boundaryField
         value       uniform %(boundaries/%(0%)/KinematicPressure%);
 %}
     }
-%:fixedVelocityInlet
+%:uniformVelocityInlet
 %{%(solver/SolverName%)
 %:hisa
     %(0%)

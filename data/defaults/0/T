@@ -65,7 +65,7 @@ boundaryField
 %:hisa
     %(0%)
     {
-%{%(boundaries/%(0%)/BoundarySubtype%)
+%{%(boundaries/%(0%)/BoundarySubType%)
 %:uniformVelocityInlet
         type        characteristicVelocityInletOutletTemperature;
         U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
@@ -95,7 +95,7 @@ boundaryField
 %:outlet
 %{%(solver/SolverName%)
 %:hisa
-%{%(boundaries/%(0%)/BoundarySubtype%)
+%{%(boundaries/%(0%)/BoundarySubType%)
 %:staticPressureOutlet
     %(0%)
     {
@@ -103,7 +103,7 @@ boundaryField
         U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
         p           %(boundaries/%(0%)/Pressure%);
         T           %(boundaries/%(0%)/Temperature%);
-        value       $internalValue;
+        value       $internalField;
     }
 %:uniformVelocityOutlet
     %(0%)
@@ -112,7 +112,7 @@ boundaryField
         U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
         p           %(boundaries/%(0%)/Pressure%);
         T           %(boundaries/%(0%)/Temperature%);
-        value       $internalValue;
+        value       $internalField;
     }
 %:default
     %(0%)
