@@ -50,7 +50,7 @@ runCommand createPatch -overwrite
 # Scaling .stl files exported from FreeCAD from mm to m
 %{%(zones%)
 %{%(zones/%(0%)/PartNameList%)
-if [ -z $FOAM_API ] && [ $WM_PROJECT_VERSION -ge 9 ]
+if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
 then
     runCommand surfaceTransformPoints "scale=(0.001 0.001 0.001)" "constant/triSurface/%(0%).stl" "constant/triSurface/%(0%)Scaled.stl"
 else

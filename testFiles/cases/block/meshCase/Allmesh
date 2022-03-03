@@ -11,11 +11,11 @@ runCommand()
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
-GMSH_EXE='None'
+GMSH_EXE='/usr/bin/gmsh'
 runCommand "$GMSH_EXE" - "gmsh/Box_Geometry.geo"
 
 # Unset and source bashrc
-FOAMDIR="/opt/openfoam8"
+FOAMDIR="/usr/lib/openfoam/openfoam2012"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -23,7 +23,7 @@ then
 fi
 
 runCommand gmshToFoam "gmsh/Box_Geometry.msh"
-if [ -z $FOAM_API ] && [ $WM_PROJECT_VERSION -ge 9 ]
+if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
 then
     runCommand transformPoints "scale=(0.001 0.001 0.001)"
 else
@@ -38,7 +38,7 @@ else
     runCommand surfaceMeshTriangulate mesh_outside.stl
 fi
 
-if [ -z $FOAM_API ] && [ $WM_PROJECT_VERSION -ge 9 ]
+if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
 then
     runCommand surfaceTransformPoints "scale=(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
 else
