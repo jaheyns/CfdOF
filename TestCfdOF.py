@@ -266,8 +266,8 @@ class BlockTest(unittest.TestCase):
         comparePaths(mesh_ref_dir, mesh_case_dir, self)
         comparePaths(ref_dir, case_dir, self)
 
-        shutil.rmtree(mesh_case_dir)
-        shutil.rmtree(case_dir)
+        #shutil.rmtree(mesh_case_dir)
+        #shutil.rmtree(case_dir)
 
         fccPrint('--------------- End of CFD tests ---------------')
 
@@ -319,8 +319,8 @@ class MacroTest:
         case_dir = self.writer.case_folder
         comparePaths(ref_dir, case_dir, self.child_instance)
 
-        shutil.rmtree(mesh_case_dir)
-        shutil.rmtree(case_dir)
+        #shutil.rmtree(mesh_case_dir)
+        #shutil.rmtree(case_dir)
 
         fccPrint('--------------- End of CFD tests ---------------')
 

@@ -55,23 +55,24 @@ if FreeCAD.GuiUp:
 # Some standard install locations that are searched if an install directory is not specified
 FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v2012",
                                  "~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v2012",
-                                 "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v2012",
-                                 "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v2006",
-                                 "C:\\Program Files (x86)\\ESI\\OpenFOAM\\v1912",
                                  "C:\\Program Files\\blueCFD-Core-2020\\OpenFOAM-8"],
-                     "Linux": ["/usr/lib/openfoam/openfoam2012", "/usr/lib/openfoam/openfoam2006",
-                               "/opt/openfoam8", "/opt/openfoam7", "/opt/openfoam6", "/opt/openfoam5",
+                     "Linux": ["/usr/lib/openfoam/openfoam2112", "/usr/lib/openfoam/openfoam2106",
+                               "/usr/lib/openfoam/openfoam2012", "/usr/lib/openfoam/openfoam2006",
+                               "/opt/openfoam9", "/opt/openfoam8", "/opt/openfoam7", "/opt/openfoam6",
+                               "/opt/openfoam5", "/opt/openfoam-dev"
+                               "~/openfoam/OpenFOAM-v2112", "~/openfoam/OpenFOAM-v2106",
+                               "~/openfoam/OpenFOAM-v2012", "~/openfoam/OpenFOAM-v2006",
+                               "~/OpenFOAM/OpenFOAM-9.x", "~/OpenFOAM/OpenFOAM-9.0",
                                "~/OpenFOAM/OpenFOAM-8.x", "~/OpenFOAM/OpenFOAM-8.0",
                                "~/OpenFOAM/OpenFOAM-7.x", "~/OpenFOAM/OpenFOAM-7.0",
                                "~/OpenFOAM/OpenFOAM-6.x", "~/OpenFOAM/OpenFOAM-6.0",
                                "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
-                               "~/OpenFOAM/OpenFOAM-4.x", "~/OpenFOAM/OpenFOAM-4.0", "~/OpenFOAM/OpenFOAM-4.1",
                                "~/OpenFOAM/OpenFOAM-dev"],
-                     "Darwin": ["~/OpenFOAM/OpenFOAM-8.x", "~/OpenFOAM/OpenFOAM-8.0",
+                     "Darwin": ["~/OpenFOAM/OpenFOAM-9.x", "~/OpenFOAM/OpenFOAM-9.0",
+                                "~/OpenFOAM/OpenFOAM-8.x", "~/OpenFOAM/OpenFOAM-8.0",
                                 "~/OpenFOAM/OpenFOAM-7.x", "~/OpenFOAM/OpenFOAM-7.0",
                                 "~/OpenFOAM/OpenFOAM-6.x", "~/OpenFOAM/OpenFOAM-6.0",
                                 "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
-                                "~/OpenFOAM/OpenFOAM-4.x", "~/OpenFOAM/OpenFOAM-4.0", "~/OpenFOAM/OpenFOAM-4.1",
                                 "~/OpenFOAM/OpenFOAM-dev"]
                      }
 PARAVIEW_PATH_DEFAULTS = {
@@ -932,9 +933,9 @@ def checkCfdDependencies():
                                              "Minimum version 1706 or 5 required"
                                     message += vermsg + "\n"
                                     print(vermsg)
-                                if foam_ver > 2106:
+                                if foam_ver > 2112:
                                     vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                             "Last tested version is 2106"
+                                             "Last tested version is 2112"
                                     message += vermsg + "\n"
                                     print(vermsg)
                             else:  # Foundation version

@@ -65,7 +65,7 @@ patches
             type patch;
         }
         constructFrom patches;
-        patches ( "patch_0_.*" );
+        patches ( "patch_0_0" );
     }
 
 

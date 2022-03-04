@@ -148,7 +148,7 @@ class CfdMeshTools:
                 raise RuntimeError("Extrusion patch for '{}' could not be found in the shape being meshed.".format(
                     extrusion_obj.Label))
             this_extrusion_settings['FrontFaceList'] = tuple(efl)
-            this_extrusion_settings['BackFace'] = efl[0]+'BackFace'
+            this_extrusion_settings['BackFace'] = efl[0]+'_back'
 
             this_extrusion_settings['Distance'] = extrusion_obj.ExtrusionThickness.getValueAs('m')
             this_extrusion_settings['Angle'] = extrusion_obj.ExtrusionAngle.getValueAs('deg')

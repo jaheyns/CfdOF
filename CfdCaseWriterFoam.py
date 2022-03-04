@@ -553,12 +553,12 @@ class CfdCaseWriterFoam:
             if bcType == 'baffle' and self.mesh_obj.MeshUtility == 'snappyHexMesh':
                 settings['createPatchesFromSnappyBaffles'] = True
                 settings['createPatchesSnappyBaffles'][bc_obj.Label] = {
-                    'PatchNamesList': '"'+bc_obj.Name+'_.*"',
+                    'PatchNamesList': '"'+bc_obj.Name+'_[^_]*"',
                     'PatchNamesListSlave': '"'+bc_obj.Name+'_.*_slave"'}
 
-        # Add default faces
+        # Set up default BC for unassigned faces
         settings['createPatches']['defaultFaces'] = {
-            'PatchNamesList': '"patch_0_.*"',
+            'PatchNamesList': '"patch_0_0"',
             'PatchType': defaultPatchType
         }
 
@@ -571,15 +571,18 @@ class CfdCaseWriterFoam:
                     'PatchType': "empty"
                 }
                 settings['createPatches'][mr_obj.Label+'BackFace'] = {
-                    'PatchNamesList': '"patch_.*_' + str(mr_id + 1) + 'BackFace"',
+                    'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'_back"',
                     'PatchType': "empty"
                 }
-            if mr_obj.Extrusion and mr_obj.ExtrusionType == "2DWedge":
+            elif mr_obj.Extrusion and mr_obj.ExtrusionType == "2DWedge":
                 settings['createPatches'][mr_obj.Label] = {
                     'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'"',
                     'PatchType': "symmetry"
                 }
                 settings['createPatches'][mr_obj.Label+'BackFace'] = {
-                    'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'BackFace"',
+                    'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'_back"',
                     'PatchType': "symmetry"
                 }
+            else:
+                # Add others to default faces list
+                settings['createPatches']['defaultFaces']['PatchNamesList'] += ' "patch_0_'+str(mr_id+1) + '"'

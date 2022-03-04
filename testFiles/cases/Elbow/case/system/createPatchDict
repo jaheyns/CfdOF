@@ -65,7 +65,7 @@ patches
             type patch;
         }
         constructFrom patches;
-        patches ( "patch_0_.*" );
+        patches ( "patch_0_0" );
     }
 
     {
@@ -85,7 +85,7 @@ patches
             type empty;
         }
         constructFrom patches;
-        patches ( "patch_.*_1BackFace" );
+        patches ( "patch_.*_1_back" );
     }
 
 

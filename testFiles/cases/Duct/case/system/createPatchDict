@@ -55,7 +55,7 @@ patches
             type patch;
         }
         constructFrom patches;
-        patches ( "patch_0_.*" );
+        patches ( "patch_0_0" "patch_0_1" );
     }
 
 
@@ -69,7 +69,7 @@ patches
         }
 
         constructFrom patches;
-        patches ( "CfdFluidBoundary003_.*" );
+        patches ( "CfdFluidBoundary003_[^_]*" );
     }
 
     {

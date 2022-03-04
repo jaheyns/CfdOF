@@ -18,7 +18,7 @@ pointSync false;
 patches
 (
     {
-        name patch_0_1BackFace;
+        name patch_0_1_back;
         patchInfo
         {
             type patch;
