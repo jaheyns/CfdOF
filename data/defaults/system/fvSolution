@@ -32,6 +32,7 @@ pseudoTime
 
     // Last line of defense, in case of very poor grid
     rhoMin              0.01;  // TODO: Generalise
+    TMin                10;
 }
 
 flowSolver
