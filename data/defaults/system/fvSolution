@@ -14,24 +14,26 @@ pseudoTime
 {
 %{%(physics/Time%)
 %:Steady
-    pseudoTol          1e-6 (1e-6 1e-6 1e-6) 1e-6;
+    pseudoTol          %(solver/ConvergenceTol%) (%(solver/ConvergenceTol%) %(solver/ConvergenceTol%) %(solver/ConvergenceTol%)) %(solver/ConvergenceTol%);
 %:Transient
     nPseudoCorr        100;
-    pseudoTol          1e-3 (1e-3 1e-3 1e-3) 1e-3;
+    pseudoTol          %(solver/ConvergenceTol%) (%(solver/ConvergenceTol%) %(solver/ConvergenceTol%) %(solver/ConvergenceTol%)) %(solver/ConvergenceTol%);
     pseudoTolRel       1e-2 (1e-2 1e-2 1e-2) 1e-2;
 %}
-    pseudoCoNum        0.1;
+    pseudoCoNum        1;
     pseudoCoNumMax     25.0;
 
-    pseudoCoNumMaxIncreaseFactor  1.5;
+    pseudoCoNumMaxIncreaseFactor  1.2;
     pseudoCoNumMin                0.1;
 
     localTimestepping             true;
     localTimesteppingBounding     true;
     localTimesteppingLowerBound   0.95;
+    localTimesteppingUpperBound   1.05;
 
     // Last line of defense, in case of very poor grid
-    rhoMin              0.01;  // TODO: Generalise
+    // TODO: Generalise
+    rhoMin              1e-3;
     TMin                10;
 }
 

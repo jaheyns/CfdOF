@@ -93,7 +93,7 @@ class _CfdSolverFoam(object):
                           "Maximum number of iterations to run steady-state analysis")
         addObjectProperty(obj, "SteadyWriteInterval", 100, "App::PropertyInteger", "IterationControl",
                           "Iteration output interval")
-        addObjectProperty(obj, "ConvergenceTol", 1e-4, "App::PropertyFloat", "IterationControl",
+        addObjectProperty(obj, "ConvergenceTol", 1e-3, "App::PropertyFloat", "IterationControl",
                           "Global absolute solution convergence criterion")
         addObjectProperty(obj, "EndTime", "1 s", "App::PropertyQuantity", "TimeStepControl",
                           "Total time to run transient solution")
