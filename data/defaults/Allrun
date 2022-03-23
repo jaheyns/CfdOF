@@ -57,7 +57,6 @@ else
     runCommand surfaceTransformPoints -scale "(0.001 0.001 0.001)" "constant/triSurface/%(0%).stl" "constant/triSurface/%(0%)Scaled.stl"
 fi
 
-
 %}
 %}
 # Set cell zones contained inside the .stl surfaces
@@ -96,11 +95,15 @@ PNAME=p_rgh
 %:default
 PNAME=p
 %}
+
 %}
 %{%(solver/Parallel%)
 %:True
 # Parallel decomposition
 runCommand decomposePar -force
+
+# Mesh renumbering
+runCommand mpiexec -np %(solver/ParallelCores%) renumberMesh -parallel -overwrite
 
 %{%(initialValues/PotentialFlow%)
 %:True
@@ -127,6 +130,9 @@ rm processor*/0/phi
 # Run application in parallel
 runCommand mpiexec -np %(solver/ParallelCores%) %(solver/SolverName%) -parallel
 %:False
+# Mesh renumbering
+runCommand renumberMesh -overwrite
+
 %{%(initialValues/PotentialFlow%)
 %:True
 # Initialise flow
