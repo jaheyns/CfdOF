@@ -251,7 +251,7 @@
 												<item row="1" column="0">
 													<widget class="QLabel" name="labelTurbulentDissapationRate">
 														<property name="text">
-															<string>Dissipation rate (epsilon)</string>
+															<string>Dissipation rate (ε)</string>
 														</property>
 													</widget>
 												</item>
