@@ -88,8 +88,10 @@ class _CfdInitialVariables:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, 'PotentialFlow', True, "App::PropertyBool", "Flow", "Initialise velocity with potential flow solution")
-        addObjectProperty(obj, 'PotentialFlowP', False, "App::PropertyBool", "Flow", "Initialise pressure with potential flow solution")
+        addObjectProperty(obj, 'PotentialFlow', True, "App::PropertyBool", "Flow",
+                          "Initialise velocity with potential flow solution")
+        addObjectProperty(obj, 'PotentialFlowP', False, "App::PropertyBool", "Flow",
+                          "Initialise pressure with potential flow solution")
         addObjectProperty(obj, 'UseInletUValues', False, "App::PropertyBool", "Flow",
                           "Initialise with flow values from inlet")
         addObjectProperty(obj, 'UseOutletPValue', True, "App::PropertyBool", "Flow",
@@ -106,6 +108,8 @@ class _CfdInitialVariables:
         addObjectProperty(obj, 'k', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence", "Turbulent kinetic energy")
         addObjectProperty(obj, 'omega', '1 rad/s', "App::PropertyQuantity", "Turbulence",
                           "Specific turbulent dissipation rate")
+        addObjectProperty(obj, 'epsilon', 'm^2/s^3', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent dissipation rate")
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
         addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary name")
         addObjectProperty(obj, 'BoundaryP', None, "App::PropertyLink", "", "P boundary name")

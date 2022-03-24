@@ -46,6 +46,7 @@ class TaskPanelCfdFluidBoundary:
         self.turbModel = (physics_model.TurbulenceModel
                           if physics_model.Turbulence == 'RANS' or physics_model.Turbulence == 'LES'
                           else None)
+
         self.material_objs = material_objs
 
         # Store values which are changed on the fly for visual update
@@ -121,8 +122,9 @@ class TaskPanelCfdFluidBoundary:
         else:
             self.form.comboFluid.clear()
 
-        setQuantity(self.form.inputKineticEnergy, self.obj.TurbulentKineticEnergy)
-        setQuantity(self.form.inputSpecificDissipationRate, self.obj.SpecificDissipationRate)
+        setQuantity(self.form.inputKineticEnergy, self.obj.TurbulentKineticEnergy)  # k
+        setQuantity(self.form.inputSpecificDissipationRate, self.obj.SpecificDissipationRate)   # omega
+        setQuantity(self.form.inputDissipationRate, self.obj.DissipationRate)   # epsilon
         setQuantity(self.form.inputIntensity, self.obj.TurbulenceIntensity)
         setQuantity(self.form.inputLengthScale, self.obj.TurbulenceLengthScale)
 
@@ -162,6 +164,7 @@ class TaskPanelCfdFluidBoundary:
                     # If user hasn't set a patch yet, initialise 'reverse' to default
                     if self.form.lineDirection.text() == "":
                         self.form.checkReverse.setChecked(reverse)
+
         turb_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][3]
         self.form.turbulenceFrame.setVisible(turb_enabled and self.turbModel is not None)
         alpha_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][4]
@@ -361,6 +364,8 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputKineticEnergy)))
         FreeCADGui.doCommand("bc.SpecificDissipationRate "
                              "= '{}'".format(getQuantity(self.form.inputSpecificDissipationRate)))
+        FreeCADGui.doCommand("bc.DissipationRate "
+                             "= '{}'".format(getQuantity(self.form.inputDissipationRate)))
         FreeCADGui.doCommand("bc.TurbulenceIntensity "
                              "= '{}'".format(getQuantity(self.form.inputIntensity)))
         FreeCADGui.doCommand("bc.TurbulenceLengthScale "

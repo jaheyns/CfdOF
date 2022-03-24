@@ -69,7 +69,6 @@ class CfdRunnableFoam(CfdRunnable):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
 
         self.initResiduals()
-
         self.residualPlot = None
 
     def check_prerequisites(self):
@@ -83,6 +82,7 @@ class CfdRunnableFoam(CfdRunnable):
         self.rhoResiduals = []
         self.EResiduals = []
         self.kResiduals = []
+        self.epsilonResiduals = []
         self.omegaResiduals = []
         self.niter = 0
 
@@ -131,6 +131,8 @@ class CfdRunnableFoam(CfdRunnable):
                 self.EResiduals.append(float(split[8]))
             if "k," in split and self.niter-1 > len(self.kResiduals):
                 self.kResiduals.append(float(split[7].split(',')[0]))
+            if "epsilon," in split and self.niter - 1 > len(self.epsilonResiduals):
+                self.epsilonResiduals.append(float(split[7].split(',')[0]))
             if "omega," in split and self.niter-1 > len(self.omegaResiduals):
                 self.omegaResiduals.append(float(split[7].split(',')[0]))
 
@@ -143,4 +145,5 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$p$', self.pResiduals),
                 ('$E$', self.EResiduals),
                 ('$k$', self.kResiduals),
+                ('$\\epsilon$', self.epsilonResiduals),
                 ('$\\omega$', self.omegaResiduals)]))

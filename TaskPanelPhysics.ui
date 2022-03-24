@@ -1,484 +1,484 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>435</width>
-    <height>732</height>
-   </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
-  <property name="windowTitle">
-   <string>Select physics model</string>
-  </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="4" column="0">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="0" column="0">
-    <widget class="QFrame" name="TimeFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::Panel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Time</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="radioButtonSteady">
-        <property name="text">
-         <string>Stead&amp;y</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QRadioButton" name="radioButtonTransient">
-        <property name="text">
-         <string>&amp;Transient</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QFrame" name="gravityFrame">
-     <property name="frameShape">
-      <enum>QFrame::Panel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_7">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Gravity</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>x:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="Gui::InputField" name="gx">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-        <property name="singleStep" stdset="0">
-         <double>1000.000000000000000</double>
-        </property>
-        <property name="unit" stdset="0">
-         <string notr="true">m/s^2</string>
-        </property>
-        <property name="format" stdset="0">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="Gui::InputField" name="gy">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-        <property name="singleStep" stdset="0">
-         <double>1000.000000000000000</double>
-        </property>
-        <property name="unit" stdset="0">
-         <string notr="true">m/s^2</string>
-        </property>
-        <property name="format" stdset="0">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="Gui::InputField" name="gz">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-        <property name="singleStep" stdset="0">
-         <double>1000.000000000000000</double>
-        </property>
-        <property name="unit" stdset="0">
-         <string notr="true">m/s^2</string>
-        </property>
-        <property name="format" stdset="0">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_7">
-        <property name="text">
-         <string>y:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>z:</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QFrame" name="FlowFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::Panel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="7" column="0" colspan="2">
-       <widget class="QFrame" name="frame_2">
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_11">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-        </layout>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QFrame" name="frame">
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_8">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="viscousCheckBox">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="text">
-            <string>Viscous</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-           <property name="tristate">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QRadioButton" name="radioButtonIncompressible">
-           <property name="text">
-            <string>Incompressible</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QCheckBox" name="checkBoxHighMach">
-           <property name="text">
-            <string>High Mach number</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QRadioButton" name="radioButtonCompressible">
-           <property name="text">
-            <string>Compressible</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Flow</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QFrame" name="frame_3">
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>6</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>6</number>
-         </property>
-         <item>
-          <widget class="QRadioButton" name="radioButtonSinglePhase">
-           <property name="text">
-            <string>Single phase</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QRadioButton" name="radioButtonFreeSurface">
-           <property name="text">
-            <string>Multiphase - free surface</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QFrame" name="turbulenceFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::Panel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
-     </property>
-     <property name="lineWidth">
-      <number>0</number>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="1">
-       <widget class="QLabel" name="label_4">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Turbulence</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1" colspan="4">
-       <widget class="QFrame" name="turbulenceChoiceFrame">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_5">
-         <item row="1" column="1">
-          <widget class="QRadioButton" name="radioButtonRANS">
-           <property name="text">
-            <string>RANS</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QRadioButton" name="radioButtonLaminar">
-           <property name="text">
-            <string>&amp;Laminar</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="3" column="1" colspan="4">
-       <widget class="QFrame" name="turbulenceModelFrame">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::NoFrame</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_6">
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="text">
-            <string>Model</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="turbulenceComboBox">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-  </layout>
- </widget>
- <customwidgets>
-  <customwidget>
-   <class>Gui::InputField</class>
-   <extends>QLineEdit</extends>
-   <header>Gui/InputField.h</header>
-  </customwidget>
- </customwidgets>
- <resources/>
- <connections/>
+	<class>Form</class>
+	<widget class="QWidget" name="Form">
+		<property name="geometry">
+			<rect>
+				<x>0</x>
+				<y>0</y>
+				<width>435</width>
+				<height>732</height>
+			</rect>
+		</property>
+		<property name="sizePolicy">
+			<sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+				<horstretch>0</horstretch>
+				<verstretch>0</verstretch>
+			</sizepolicy>
+		</property>
+		<property name="windowTitle">
+			<string>Select physics model</string>
+		</property>
+		<layout class="QGridLayout" name="gridLayout">
+			<item row="4" column="0">
+				<spacer name="verticalSpacer">
+					<property name="orientation">
+						<enum>Qt::Vertical</enum>
+					</property>
+					<property name="sizeHint" stdset="0">
+						<size>
+							<width>20</width>
+							<height>40</height>
+						</size>
+					</property>
+				</spacer>
+			</item>
+			<item row="0" column="0">
+				<widget class="QFrame" name="TimeFrame">
+					<property name="sizePolicy">
+						<sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+							<horstretch>0</horstretch>
+							<verstretch>0</verstretch>
+						</sizepolicy>
+					</property>
+					<property name="frameShape">
+						<enum>QFrame::Panel</enum>
+					</property>
+					<property name="frameShadow">
+						<enum>QFrame::Plain</enum>
+					</property>
+					<property name="lineWidth">
+						<number>0</number>
+					</property>
+					<layout class="QGridLayout" name="gridLayout_3">
+						<item row="0" column="0">
+							<widget class="QLabel" name="label_2">
+								<property name="font">
+									<font>
+										<weight>75</weight>
+										<bold>true</bold>
+									</font>
+								</property>
+								<property name="text">
+									<string>Time</string>
+								</property>
+							</widget>
+						</item>
+						<item row="1" column="0">
+							<widget class="QRadioButton" name="radioButtonSteady">
+								<property name="text">
+									<string>Stead&amp;y</string>
+								</property>
+							</widget>
+						</item>
+						<item row="1" column="1">
+							<widget class="QRadioButton" name="radioButtonTransient">
+								<property name="text">
+									<string>&amp;Transient</string>
+								</property>
+							</widget>
+						</item>
+					</layout>
+				</widget>
+			</item>
+			<item row="3" column="0">
+				<widget class="QFrame" name="gravityFrame">
+					<property name="frameShape">
+						<enum>QFrame::Panel</enum>
+					</property>
+					<property name="frameShadow">
+						<enum>QFrame::Plain</enum>
+					</property>
+					<property name="lineWidth">
+						<number>0</number>
+					</property>
+					<layout class="QGridLayout" name="gridLayout_7">
+						<item row="0" column="0">
+							<widget class="QLabel" name="label">
+								<property name="font">
+									<font>
+										<weight>75</weight>
+										<bold>true</bold>
+									</font>
+								</property>
+								<property name="text">
+									<string>Gravity</string>
+								</property>
+							</widget>
+						</item>
+						<item row="1" column="0">
+							<widget class="QLabel" name="label_6">
+								<property name="text">
+									<string>x:</string>
+								</property>
+							</widget>
+						</item>
+						<item row="1" column="1">
+							<widget class="Gui::InputField" name="gx">
+								<property name="sizePolicy">
+									<sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+										<horstretch>0</horstretch>
+										<verstretch>0</verstretch>
+									</sizepolicy>
+								</property>
+								<property name="text">
+									<string>0</string>
+								</property>
+								<property name="singleStep" stdset="0">
+									<double>1000.000000000000000</double>
+								</property>
+								<property name="unit" stdset="0">
+									<string notr="true">m/s^2</string>
+								</property>
+								<property name="format" stdset="0">
+									<number>0</number>
+								</property>
+							</widget>
+						</item>
+						<item row="2" column="1">
+							<widget class="Gui::InputField" name="gy">
+								<property name="sizePolicy">
+									<sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+										<horstretch>0</horstretch>
+										<verstretch>0</verstretch>
+									</sizepolicy>
+								</property>
+								<property name="text">
+									<string>0</string>
+								</property>
+								<property name="singleStep" stdset="0">
+									<double>1000.000000000000000</double>
+								</property>
+								<property name="unit" stdset="0">
+									<string notr="true">m/s^2</string>
+								</property>
+								<property name="format" stdset="0">
+									<number>0</number>
+								</property>
+							</widget>
+						</item>
+						<item row="3" column="1">
+							<widget class="Gui::InputField" name="gz">
+								<property name="sizePolicy">
+									<sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+										<horstretch>0</horstretch>
+										<verstretch>0</verstretch>
+									</sizepolicy>
+								</property>
+								<property name="text">
+									<string>0</string>
+								</property>
+								<property name="singleStep" stdset="0">
+									<double>1000.000000000000000</double>
+								</property>
+								<property name="unit" stdset="0">
+									<string notr="true">m/s^2</string>
+								</property>
+								<property name="format" stdset="0">
+									<number>0</number>
+								</property>
+							</widget>
+						</item>
+						<item row="2" column="0">
+							<widget class="QLabel" name="label_7">
+								<property name="text">
+									<string>y:</string>
+								</property>
+							</widget>
+						</item>
+						<item row="3" column="0">
+							<widget class="QLabel" name="label_8">
+								<property name="text">
+									<string>z:</string>
+								</property>
+							</widget>
+						</item>
+					</layout>
+				</widget>
+			</item>
+			<item row="1" column="0">
+				<widget class="QFrame" name="FlowFrame">
+					<property name="sizePolicy">
+						<sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+							<horstretch>0</horstretch>
+							<verstretch>0</verstretch>
+						</sizepolicy>
+					</property>
+					<property name="frameShape">
+						<enum>QFrame::Panel</enum>
+					</property>
+					<property name="frameShadow">
+						<enum>QFrame::Plain</enum>
+					</property>
+					<property name="lineWidth">
+						<number>0</number>
+					</property>
+					<layout class="QGridLayout" name="gridLayout_2">
+						<item row="7" column="0" colspan="2">
+							<widget class="QFrame" name="frame_2">
+								<property name="frameShape">
+									<enum>QFrame::NoFrame</enum>
+								</property>
+								<property name="frameShadow">
+									<enum>QFrame::Raised</enum>
+								</property>
+								<layout class="QGridLayout" name="gridLayout_11">
+									<property name="leftMargin">
+										<number>0</number>
+									</property>
+									<property name="topMargin">
+										<number>0</number>
+									</property>
+									<property name="rightMargin">
+										<number>0</number>
+									</property>
+									<property name="bottomMargin">
+										<number>0</number>
+									</property>
+								</layout>
+							</widget>
+						</item>
+						<item row="3" column="0" colspan="2">
+							<widget class="QFrame" name="frame">
+								<property name="frameShape">
+									<enum>QFrame::NoFrame</enum>
+								</property>
+								<property name="frameShadow">
+									<enum>QFrame::Raised</enum>
+								</property>
+								<layout class="QGridLayout" name="gridLayout_8">
+									<property name="leftMargin">
+										<number>0</number>
+									</property>
+									<property name="topMargin">
+										<number>0</number>
+									</property>
+									<property name="rightMargin">
+										<number>0</number>
+									</property>
+									<property name="bottomMargin">
+										<number>0</number>
+									</property>
+									<item row="4" column="0">
+										<widget class="QCheckBox" name="viscousCheckBox">
+											<property name="enabled">
+												<bool>true</bool>
+											</property>
+											<property name="text">
+												<string>Viscous</string>
+											</property>
+											<property name="checked">
+												<bool>false</bool>
+											</property>
+											<property name="tristate">
+												<bool>false</bool>
+											</property>
+										</widget>
+									</item>
+									<item row="2" column="0">
+										<widget class="QRadioButton" name="radioButtonIncompressible">
+											<property name="text">
+												<string>Incompressible</string>
+											</property>
+										</widget>
+									</item>
+									<item row="2" column="1">
+										<widget class="QRadioButton" name="radioButtonCompressible">
+											<property name="text">
+												<string>Compressible</string>
+											</property>
+										</widget>
+									</item>
+									<item row="3" column="1">
+										<widget class="QCheckBox" name="checkBoxHighMach">
+											<property name="text">
+												<string>High Mach number</string>
+											</property>
+										</widget>
+									</item>
+								</layout>
+							</widget>
+						</item>
+						<item row="1" column="0">
+							<widget class="QLabel" name="label_3">
+								<property name="font">
+									<font>
+										<weight>75</weight>
+										<bold>true</bold>
+									</font>
+								</property>
+								<property name="text">
+									<string>Flow</string>
+								</property>
+							</widget>
+						</item>
+						<item row="2" column="0" colspan="2">
+							<widget class="QFrame" name="frame_3">
+								<property name="frameShape">
+									<enum>QFrame::NoFrame</enum>
+								</property>
+								<property name="frameShadow">
+									<enum>QFrame::Raised</enum>
+								</property>
+								<layout class="QHBoxLayout" name="horizontalLayout">
+									<property name="leftMargin">
+										<number>0</number>
+									</property>
+									<property name="topMargin">
+										<number>6</number>
+									</property>
+									<property name="rightMargin">
+										<number>0</number>
+									</property>
+									<property name="bottomMargin">
+										<number>6</number>
+									</property>
+									<item>
+										<widget class="QRadioButton" name="radioButtonSinglePhase">
+											<property name="text">
+												<string>Single phase</string>
+											</property>
+										</widget>
+									</item>
+									<item>
+										<widget class="QRadioButton" name="radioButtonFreeSurface">
+											<property name="text">
+												<string>Multiphase - free surface</string>
+											</property>
+										</widget>
+									</item>
+								</layout>
+							</widget>
+						</item>
+					</layout>
+				</widget>
+			</item>
+			<item row="2" column="0">
+				<widget class="QFrame" name="turbulenceFrame">
+					<property name="sizePolicy">
+						<sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+							<horstretch>0</horstretch>
+							<verstretch>0</verstretch>
+						</sizepolicy>
+					</property>
+					<property name="frameShape">
+						<enum>QFrame::Panel</enum>
+					</property>
+					<property name="frameShadow">
+						<enum>QFrame::Plain</enum>
+					</property>
+					<property name="lineWidth">
+						<number>0</number>
+					</property>
+					<layout class="QGridLayout" name="gridLayout_4">
+						<item row="0" column="1">
+							<widget class="QLabel" name="label_4">
+								<property name="font">
+									<font>
+										<weight>75</weight>
+										<bold>true</bold>
+									</font>
+								</property>
+								<property name="text">
+									<string>Turbulence</string>
+								</property>
+							</widget>
+						</item>
+						<item row="2" column="1" colspan="4">
+							<widget class="QFrame" name="turbulenceChoiceFrame">
+								<property name="sizePolicy">
+									<sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+										<horstretch>0</horstretch>
+										<verstretch>0</verstretch>
+									</sizepolicy>
+								</property>
+								<property name="frameShape">
+									<enum>QFrame::NoFrame</enum>
+								</property>
+								<property name="frameShadow">
+									<enum>QFrame::Raised</enum>
+								</property>
+								<layout class="QGridLayout" name="gridLayout_5">
+									<item row="1" column="1">
+										<widget class="QRadioButton" name="radioButtonRANS">
+											<property name="text">
+												<string>RANS</string>
+											</property>
+										</widget>
+									</item>
+									<item row="1" column="0">
+										<widget class="QRadioButton" name="radioButtonLaminar">
+											<property name="text">
+												<string>&amp;Laminar</string>
+											</property>
+										</widget>
+									</item>
+								</layout>
+							</widget>
+						</item>
+						<item row="3" column="1" colspan="4">
+							<widget class="QFrame" name="turbulenceModelFrame">
+								<property name="sizePolicy">
+									<sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+										<horstretch>0</horstretch>
+										<verstretch>0</verstretch>
+									</sizepolicy>
+								</property>
+								<property name="frameShape">
+									<enum>QFrame::NoFrame</enum>
+								</property>
+								<property name="frameShadow">
+									<enum>QFrame::Raised</enum>
+								</property>
+								<property name="lineWidth">
+									<number>0</number>
+								</property>
+								<layout class="QGridLayout" name="gridLayout_6">
+									<item row="0" column="0">
+										<widget class="QLabel" name="label_5">
+											<property name="text">
+												<string>Model</string>
+											</property>
+										</widget>
+									</item>
+									<item row="0" column="1">
+										<widget class="QComboBox" name="turbulenceComboBox">
+											<property name="sizePolicy">
+												<sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+													<horstretch>0</horstretch>
+													<verstretch>0</verstretch>
+												</sizepolicy>
+											</property>
+										</widget>
+									</item>
+									<item row="0" column="2">
+										<spacer name="horizontalSpacer_3">
+											<property name="orientation">
+												<enum>Qt::Horizontal</enum>
+											</property>
+											<property name="sizeHint" stdset="0">
+												<size>
+													<width>40</width>
+													<height>20</height>
+												</size>
+											</property>
+										</spacer>
+									</item>
+								</layout>
+							</widget>
+						</item>
+					</layout>
+				</widget>
+			</item>
+		</layout>
+	</widget>
+	<customwidgets>
+		<customwidget>
+			<class>Gui::InputField</class>
+			<extends>QLineEdit</extends>
+			<header>Gui/InputField.h</header>
+		</customwidget>
+	</customwidgets>
+	<resources/>
+	<connections/>
 </ui>
