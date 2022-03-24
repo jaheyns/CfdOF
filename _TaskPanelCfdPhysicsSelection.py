@@ -90,6 +90,7 @@ class _TaskPanelCfdPhysicsSelection:
             self.form.viscousCheckBox.setChecked(True)
             self.form.radioButtonRANS.toggle()
         ti = CfdTools.indexOrDefault(RANS_MODELS, self.obj.TurbulenceModel, 0)
+        # TODO Jonathan debug, remove
         print(f'current model: {self.obj.TurbulenceModel}')
         print(f'current index: {ti}')
         self.form.turbulenceComboBox.setCurrentIndex(ti)
