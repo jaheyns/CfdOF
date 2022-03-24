@@ -32,7 +32,7 @@ if FreeCAD.GuiUp:
     import FreeCADGui
 
 
-RANS_MODELS = ["kOmegaSST", 'kEpsilon']
+RANS_MODELS = ["kOmegaSST", 'kEpsilon', 'SpalartAllmaras']
 
 
 class _TaskPanelCfdPhysicsSelection:
@@ -62,11 +62,14 @@ class _TaskPanelCfdPhysicsSelection:
         self.load()
 
     def load(self):
+
+        # Time
         if self.obj.Time == 'Steady':
             self.form.radioButtonSteady.toggle()
         elif self.obj.Time == 'Transient':
             self.form.radioButtonTransient.toggle()
 
+        # Solver
         if self.obj.Phase == 'Single':
             self.form.radioButtonSinglePhase.toggle()
         elif self.obj.Phase == 'FreeSurface':
@@ -80,6 +83,7 @@ class _TaskPanelCfdPhysicsSelection:
             self.form.radioButtonCompressible.toggle()
             self.form.checkBoxHighMach.setChecked(True)
 
+        # Turbulence
         if self.obj.Turbulence == 'Inviscid':
             self.form.viscousCheckBox.setChecked(False)
             self.form.radioButtonLaminar.toggle()
@@ -95,6 +99,7 @@ class _TaskPanelCfdPhysicsSelection:
         print(f'current index: {ti}')
         self.form.turbulenceComboBox.setCurrentIndex(ti)
 
+        # Gravity
         setQuantity(self.form.gx, self.obj.gx)
         setQuantity(self.form.gy, self.obj.gy)
         setQuantity(self.form.gz, self.obj.gz)
@@ -106,6 +111,7 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.FlowFrame.setVisible(True)
         self.form.turbulenceFrame.setVisible(True)
 
+        # Steady / transient
         if self.form.radioButtonSteady.isChecked():
             self.form.radioButtonFreeSurface.setEnabled(False)
             if self.form.radioButtonFreeSurface.isChecked():
@@ -113,10 +119,12 @@ class _TaskPanelCfdPhysicsSelection:
         else:
             self.form.radioButtonFreeSurface.setEnabled(True)
 
+        # Gravity
         self.form.gravityFrame.setEnabled(
             self.form.radioButtonFreeSurface.isChecked() or
             (self.form.radioButtonCompressible.isChecked() and not self.form.checkBoxHighMach.isChecked()))
 
+        # Free surface
         if self.form.radioButtonFreeSurface.isChecked():
             self.form.radioButtonCompressible.setEnabled(False)
             if self.form.radioButtonCompressible.isChecked():
@@ -124,8 +132,10 @@ class _TaskPanelCfdPhysicsSelection:
         else:
             self.form.radioButtonCompressible.setEnabled(True)
 
+        # High Mach capability
         self.form.checkBoxHighMach.setEnabled(self.form.radioButtonCompressible.isChecked())
 
+        # Viscous 
         if self.form.viscousCheckBox.isChecked():
             self.form.turbulenceFrame.setVisible(True)
             if self.form.radioButtonRANS.isChecked():
