@@ -32,7 +32,7 @@ if FreeCAD.GuiUp:
     import FreeCADGui
 
 
-RANS_MODELS = ["kOmegaSST"]
+RANS_MODELS = ["kOmegaSST", 'kEpsilon']
 
 
 class _TaskPanelCfdPhysicsSelection:
@@ -90,6 +90,8 @@ class _TaskPanelCfdPhysicsSelection:
             self.form.viscousCheckBox.setChecked(True)
             self.form.radioButtonRANS.toggle()
         ti = CfdTools.indexOrDefault(RANS_MODELS, self.obj.TurbulenceModel, 0)
+        print(f'current model: {self.obj.TurbulenceModel}')
+        print(f'current index: {ti}')
         self.form.turbulenceComboBox.setCurrentIndex(ti)
 
         setQuantity(self.form.gx, self.obj.gx)

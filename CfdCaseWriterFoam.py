@@ -24,15 +24,15 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
-import CfdTools
-from CfdTools import cfdMessage
 import os
 import os.path
 import shutil
+
 from FreeCAD import Units
+
+import CfdTools
 import TemplateBuilder
-import CfdMeshRefinement
+from CfdTools import cfdMessage
 
 
 class CfdCaseWriterFoam:
@@ -414,6 +414,9 @@ class CfdCaseWriterFoam:
                     if inlet_bc['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
                         initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
                         initial_values['omega'] = inlet_bc['SpecificDissipationRate']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'TKEAndDissipationRate':
+                        initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
+                        initial_values['epsilon'] = inlet_bc['DissipationRate']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
                         if inlet_bc['BoundarySubType'] == 'uniformVelocity' or \
                            inlet_bc['BoundarySubType'] == 'farField':
@@ -425,8 +428,10 @@ class CfdCaseWriterFoam:
                             Cmu = 0.09  # Standard turb model parameter
                             l = inlet_bc['TurbulenceLengthScale']
                             omega = k**0.5/(Cmu**0.25*l)
+                            epsilon = (k**(3.0/2.0) * Cmu**0.75) / l
                             initial_values['k'] = k
                             initial_values['omega'] = omega
+                            initial_values['epsilon'] = epsilon
                         else:
                             raise RuntimeError(
                                 "Inlet type currently unsupported for copying turbulence initial conditions.")

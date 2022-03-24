@@ -101,8 +101,18 @@ TURBULENT_INLET_SPEC = {"kOmegaSST":
                           "intensityAndLengthScale"],
                          ["k and omega specified",
                           "Turbulence intensity and eddy length scale"],
+                         [[0, 2],  # k, omega
+                          [3, 4]]],  # I, l
+                        "kEpsilon":
+                        [["Kinetic Energy & Dissipation Rate",
+                          "Intensity & Length Scale"],
+                         ["TKEAndDissipationRate",
+                          "intensityAndLengthScale"],
+                         ["k and epsilon specified",
+                          "Turbulence intensity and eddy length scale"],
                          [[0, 1],  # k, omega
-                          [2, 3]]]}  # I, l
+                          [3, 4]]]  # I, l
+                        }
 
 THERMAL_BOUNDARY_NAMES = ["Fixed temperature",
                           "Adiabatic",
@@ -229,6 +239,8 @@ class _CfdFluidBoundary:
         addObjectProperty(obj, 'TurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
         addObjectProperty(obj, 'SpecificDissipationRate', '1 rad/s', "App::PropertyQuantity", "Turbulence",
+                          "Temperature")
+        addObjectProperty(obj, 'DissipationRate', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
         addObjectProperty(obj, 'TurbulenceIntensity', '0.1', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
