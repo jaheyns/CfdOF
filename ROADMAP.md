@@ -23,4 +23,6 @@ This document is primarily for documenting new features by the developers but is
 ### Mesh
 * checkMesh capabilities
 
+### Internal
+* Update src to use Python module hierarchy
 
