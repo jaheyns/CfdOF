@@ -47,6 +47,9 @@ divSchemes
 %:kOmegaSST
     div(phi,k)      bounded Gauss upwind;
     div(phi,omega)  bounded Gauss upwind;
+%:kEpsilon
+    div(phi,k)      bounded Gauss upwind;
+    div(phi,epsilon)  bounded Gauss upwind;
 %:SpalartAllmaras
     div(phi,nuTilda) bounded Gauss upwind;
 %}
