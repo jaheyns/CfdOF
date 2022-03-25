@@ -84,6 +84,7 @@ class CfdRunnableFoam(CfdRunnable):
         self.kResiduals = []
         self.epsilonResiduals = []
         self.omegaResiduals = []
+        self.nuTildaResiduals = []
         self.niter = 0
 
     def get_solver_cmd(self, case_dir):
@@ -135,6 +136,8 @@ class CfdRunnableFoam(CfdRunnable):
                 self.epsilonResiduals.append(float(split[7].split(',')[0]))
             if "omega," in split and self.niter-1 > len(self.omegaResiduals):
                 self.omegaResiduals.append(float(split[7].split(',')[0]))
+            if "nuTilda," in split and self.niter-1 > len(self.nuTildaResiduals):
+                self.nuTildaResiduals.append(float(split[7].split(',')[0]))
 
         if self.niter > 1:
             self.residualPlot.updateResiduals(OrderedDict([
@@ -146,4 +149,5 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$E$', self.EResiduals),
                 ('$k$', self.kResiduals),
                 ('$\\epsilon$', self.epsilonResiduals),
+                ('$\\nuTilda$', self.nuTildaResiduals),
                 ('$\\omega$', self.omegaResiduals)]))

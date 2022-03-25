@@ -37,15 +37,14 @@ if FreeCAD.GuiUp:
 
 
 class TaskPanelCfdFluidBoundary:
-    """ Taskpanel for adding fluid boundary """
+    """ Task panel for adding fluid boundary """
     def __init__(self, obj, physics_model, material_objs):
         self.selecting_direction = False
         self.obj = obj
 
         self.physics_model = physics_model
         self.turbModel = (physics_model.TurbulenceModel
-                          if physics_model.Turbulence == 'RANS' or physics_model.Turbulence == 'LES'
-                          else None)
+                          if physics_model.Turbulence == 'RANS' or physics_model.Turbulence == 'LES' else None)
 
         self.material_objs = material_objs
 
@@ -64,17 +63,20 @@ class TaskPanelCfdFluidBoundary:
         self.form.buttonGroupPorous.setId(self.form.radioButtonPorousCoeff, 0)
         self.form.buttonGroupPorous.setId(self.form.radioButtonPorousScreen, 1)
 
+        # Boundary types
         self.form.comboBoundaryType.addItems(CfdFluidBoundary.BOUNDARY_NAMES)
         bi = indexOrDefault(CfdFluidBoundary.BOUNDARY_TYPES, self.obj.BoundaryType, 0)
         self.form.comboBoundaryType.currentIndexChanged.connect(self.comboBoundaryTypeChanged)
         self.form.comboBoundaryType.setCurrentIndex(bi)
         self.comboBoundaryTypeChanged()
 
+        # Boundary subtypes
         si = indexOrDefault(CfdFluidBoundary.SUBTYPES[bi], self.obj.BoundarySubType, 0)
         self.form.comboSubtype.currentIndexChanged.connect(self.comboSubtypeChanged)
         self.form.comboSubtype.setCurrentIndex(si)
         self.comboSubtypeChanged()
 
+        # Inputs
         cart = self.obj.VelocityIsCartesian
         self.form.radioButtonCart.setChecked(cart)
         self.form.radioButtonMagNormal.setChecked(not cart)
@@ -97,6 +99,7 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputWireDiameter, self.obj.ScreenWireDiameter)
         setQuantity(self.form.inputSpacing, self.obj.ScreenSpacing)
 
+        # Thermal
         self.form.comboThermalBoundaryType.addItems(CfdFluidBoundary.THERMAL_BOUNDARY_NAMES)
         thi = indexOrDefault(CfdFluidBoundary.THERMAL_BOUNDARY_TYPES, self.obj.ThermalBoundaryType, 0)
         self.form.comboThermalBoundaryType.setCurrentIndex(thi)
@@ -104,6 +107,7 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputHeatFlux, self.obj.HeatFlux)
         setQuantity(self.form.inputHeatTransferCoeff, self.obj.HeatTransferCoeff)
 
+        # Turbulence
         if self.turbModel is not None:
             self.form.comboTurbulenceSpecification.addItems(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][0])
             ti = indexOrDefault(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][1],
@@ -122,11 +126,12 @@ class TaskPanelCfdFluidBoundary:
         else:
             self.form.comboFluid.clear()
 
+        # Set the inputs for the turbulence models
         setQuantity(self.form.inputKineticEnergy, self.obj.TurbulentKineticEnergy)  # k
         setQuantity(self.form.inputSpecificDissipationRate, self.obj.SpecificDissipationRate)   # omega
         setQuantity(self.form.inputDissipationRate, self.obj.DissipationRate)   # epsilon
-        setQuantity(self.form.inputIntensity, self.obj.TurbulenceIntensity)
-        setQuantity(self.form.inputLengthScale, self.obj.TurbulenceLengthScale)
+        setQuantity(self.form.inputIntensity, self.obj.TurbulenceIntensity)     # intensity
+        setQuantity(self.form.inputLengthScale, self.obj.TurbulenceLengthScale) # length scale
 
         self.form.checkBoxDefaultBoundary.setChecked(self.obj.DefaultBoundary)
 
@@ -148,13 +153,17 @@ class TaskPanelCfdFluidBoundary:
         self.updateUI()
 
     def updateUI(self):
+        # Boundary type and subtype
         type_index = self.form.comboBoundaryType.currentIndex()
         subtype_index = self.form.comboSubtype.currentIndex()
         tab_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][0]
+
         self.form.basicFrame.setVisible(tab_enabled)
+
         for paneli in range(self.form.layoutBasicValues.count()):
             if isinstance(self.form.layoutBasicValues.itemAt(paneli), QtGui.QWidgetItem):
                 self.form.layoutBasicValues.itemAt(paneli).widget().setVisible(False)
+
         if tab_enabled:
             panel_numbers = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][1]
             for panel_number in panel_numbers:
@@ -193,6 +202,7 @@ class TaskPanelCfdFluidBoundary:
         method = self.form.buttonGroupPorous.checkedId()
         self.form.stackedWidgetPorous.setCurrentIndex(method)
 
+        # Turbulence model, set visible gui components
         if self.turbModel:
             index = self.form.comboTurbulenceSpecification.currentIndex()
             self.form.labelTurbulenceDescription.setText(
@@ -205,6 +215,7 @@ class TaskPanelCfdFluidBoundary:
                     if isinstance(item, QtGui.QWidgetItem):
                         item.widget().setVisible(rowi in panel_numbers)
 
+        # Thermal model, set visible gui components
         if CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6] is None:
             # Rows of thermal not stipulated - choose with dropdown
             index = self.form.comboThermalBoundaryType.currentIndex()
@@ -246,7 +257,9 @@ class TaskPanelCfdFluidBoundary:
                     if len(sel.SubElementNames) == 1:
                         sub = sel.SubElementNames[0]
                         self.addSelection(sel.DocumentName, sel.ObjectName, sub)
+
         FreeCADGui.Selection.clearSelection()
+
         # start SelectionObserver and parse the function to add the References to the widget
         if self.selecting_direction:
             FreeCAD.Console.PrintMessage("Select face to define direction\n")
@@ -260,14 +273,17 @@ class TaskPanelCfdFluidBoundary:
         if not self.selecting_direction:
             # Shouldn't be here
             return
+
         if FreeCADGui.activeDocument().Document.Name != self.obj.Document.Name:
             return
+
         selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
         # On double click on a vertex of a solid sub is None and obj is the solid
         print('Selection: ' +
               selected_object.Shape.ShapeType + '  ' +
               selected_object.Name + ':' +
               sub + " @ " + str(selectedPoint))
+
         if hasattr(selected_object, "Shape") and sub:
             elt = selected_object.Shape.getElement(sub)
             if elt.ShapeType == 'Face':
@@ -278,6 +294,7 @@ class TaskPanelCfdFluidBoundary:
                         self.form.lineDirection.setText(selection[0] + ':' + selection[1])  # TODO: Display label, not name
                     else:
                         FreeCAD.Console.PrintMessage('Face must be planar\n')
+
         self.form.buttonDirection.setChecked(self.selecting_direction)
 
     def lineDirectionChanged(self, value):
@@ -291,6 +308,7 @@ class TaskPanelCfdFluidBoundary:
                     return
         except SystemError:
             pass
+
         FreeCAD.Console.PrintMessage(value + " is not a valid, planar face\n")
 
     def getMaterialName(self, index):
@@ -338,7 +356,7 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputMassFlowRate)))
         FreeCADGui.doCommand("bc.VolFlowRate "
                              "= '{}'".format(getQuantity(self.form.inputVolFlowRate)))
-        # Presure
+        # Pressure
         FreeCADGui.doCommand("bc.Pressure "
                              "= '{}'".format(getQuantity(self.form.inputPressure)))
         # Wall
@@ -389,6 +407,7 @@ class TaskPanelCfdFluidBoundary:
         refstr += "]"
         FreeCADGui.doCommand(refstr)
 
+        # Default boundary
         defaultBoundary = self.form.checkBoxDefaultBoundary.isChecked()
         FreeCADGui.doCommand("bc.DefaultBoundary = {}".format(defaultBoundary))
         boundaries = CfdTools.getCfdBoundaryGroup(CfdTools.getParentAnalysisObject(self.obj))
