@@ -17,8 +17,9 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 ### Current:
 
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
-* Extension to turbulent flow using RANS (k-omega SST)
+* Extension to turbulent flow using RANS (k-omega SST, k-epsilon, and Spalart-Allmaras models supported)
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
+* Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
 * Basic material database
 * Flow initialisation with a potential solver
@@ -27,9 +28,9 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 * Tetrahedral meshing using Gmsh
 * Postprocessing using Paraview
 * Porous regions and porous baffles
-* Runs on Windows 7-10 and Linux
+* Runs on Windows 7-11 and Linux
 * Unit/regression testing
-* New case builder using an extensible template structure
+* Case builder using an extensible template structure
 * Macro scripting
 
 ### Platforms supported
@@ -40,7 +41,7 @@ Any system on which FreeCAD and the prerequisites listed below can be installed.
 
 #### Windows
 
-Windows 7-10; 64-bit version is required.
+Windows 7-11; 64-bit version is required.
 
 #### macOS
 
@@ -57,7 +58,7 @@ which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (at least version 0.18.4 / git commit 16146)](https://www.freecadweb.org/downloads.php)
  or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
-- OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2012](http://openfoam.com/download)  
+- OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2112](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
 - [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
@@ -305,6 +306,7 @@ We acknowledge significant contributions from
 * Michael Hindley (2016) - Initial concept
 * Klaus Sembritzki (2017) - Multiphase extension
 * Thomas Schrader (2017-) <info@schraderundschrader.de> - Testing and user assistance
+* Jonathan Bergh (2022) - Additional turbulence models
 
 ### Dedication
 
