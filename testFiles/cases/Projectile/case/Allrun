@@ -12,7 +12,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2012"
+FOAMDIR="/usr/lib/openfoam/openfoam2112"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -44,6 +44,9 @@ runCommand createPatch -overwrite
 
 # Parallel decomposition
 runCommand decomposePar -force
+
+# Mesh renumbering
+runCommand mpiexec -np 4 renumberMesh -parallel -overwrite
 
 # Run application in parallel
 runCommand mpiexec -np 4 hisa -parallel
