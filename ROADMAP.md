@@ -25,4 +25,6 @@ This document is primarily for documenting new features by the developers but is
 
 ### Internal
 * Update src to use Python module hierarchy
+* Improve edge detection for meshing
+* Export OF case / results
 
