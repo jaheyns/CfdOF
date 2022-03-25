@@ -75,6 +75,8 @@ class _TaskPanelCfdMesh:
         self.form.pb_load_mesh.clicked.connect(self.pbLoadMeshClicked)
         self.form.pb_clear_mesh.clicked.connect(self.pbClearMeshClicked)
         self.form.pb_searchPointInMesh.clicked.connect(self.searchPointInMesh)
+        self.form.pb_check_mesh.clicked.connect(self.checkMeshClicked)
+
         self.form.pb_stop_mesh.setEnabled(False)
         self.form.pb_paraview.setEnabled(False)
         self.form.snappySpecificProperties.setVisible(False)
@@ -87,6 +89,7 @@ class _TaskPanelCfdMesh:
                                                   "to try to automatically find a point")
         self.form.if_cellsbetweenlevels.setToolTip("Number of cells between each of level of refinement")
         self.form.if_edgerefine.setToolTip("Number of refinement levels for all edges")
+        self.form.checkbox_convert_tets.setToolTip("Convert cfMesh tetrahedral mesh to polyhedra")
 
         self.load()
         self.updateUI()
@@ -118,6 +121,8 @@ class _TaskPanelCfdMesh:
         setQuantity(self.form.if_pointInMeshX, point_in_mesh.get('x'))
         setQuantity(self.form.if_pointInMeshY, point_in_mesh.get('y'))
         setQuantity(self.form.if_pointInMeshZ, point_in_mesh.get('z'))
+
+        self.form.checkbox_convert_tets.setChecked(self.mesh_obj.ConvertTetrahedra)
         self.form.if_cellsbetweenlevels.setValue(self.mesh_obj.CellsBetweenLevels)
         self.form.if_edgerefine.setValue(self.mesh_obj.EdgeRefinement)
 
@@ -129,6 +134,7 @@ class _TaskPanelCfdMesh:
     def updateUI(self):
         self.form.l_dimension.setVisible(False)
         self.form.cb_dimension.setVisible(False)
+        self.form.checkbox_convert_tets.setEnabled(False)
         case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
         self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
         self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
@@ -139,6 +145,9 @@ class _TaskPanelCfdMesh:
             self.form.snappySpecificProperties.setVisible(True)
         elif utility == "cfMesh":
             self.form.snappySpecificProperties.setVisible(False)
+        elif utility == "gmsh":
+            self.form.snappySpecificProperties.setVisible(False)
+            self.form.checkbox_convert_tets.setEnabled(True)
 
     def store(self):
         storeIfChanged(self.mesh_obj, 'CharacteristicLengthMax', getQuantity(self.form.if_max))
@@ -146,9 +155,12 @@ class _TaskPanelCfdMesh:
         #storeIfChanged(self.mesh_obj, 'ElementDimension', self.form.cb_dimension.currentText())
         storeIfChanged(self.mesh_obj, 'CellsBetweenLevels', self.form.if_cellsbetweenlevels.value())
         storeIfChanged(self.mesh_obj, 'EdgeRefinement', self.form.if_edgerefine.value())
+        storeIfChanged(self.mesh_obj, 'ConvertTetrahedra', self.form.checkbox_convert_tets.isChecked())
+
         point_in_mesh = {'x': getQuantity(self.form.if_pointInMeshX),
                          'y': getQuantity(self.form.if_pointInMeshY),
                          'z': getQuantity(self.form.if_pointInMeshZ)}
+
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
             storeIfChanged(self.mesh_obj, 'PointInMesh', point_in_mesh)
 
@@ -178,8 +190,15 @@ class _TaskPanelCfdMesh:
         utility = self.form.cb_utility.currentText()
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
+            self.form.checkbox_convert_tets.setChecked(False)
+            self.form.checkbox_convert_tets.setEnabled(False)
+        elif utility == "gmsh":
+            self.form.checkbox_convert_tets.setEnabled(True)
+            self.form.snappySpecificProperties.setVisible(False)
         else:
             self.form.snappySpecificProperties.setVisible(False)
+            self.form.checkbox_convert_tets.setChecked(False)
+            self.form.checkbox_convert_tets.setEnabled(False)
 
     def writeMesh(self):
         import importlib
@@ -188,6 +207,7 @@ class _TaskPanelCfdMesh:
         self.Start = time.time()
         # Re-initialise CfdMeshTools with new parameters
         self.store()
+
         FreeCADGui.addModule("CfdMeshTools")
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.doCommand("cart_mesh = "
@@ -322,3 +342,6 @@ class _TaskPanelCfdMesh:
             setQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")
             setQuantity(self.form.if_pointInMeshY, str(iMPy) + "mm")
             setQuantity(self.form.if_pointInMeshZ, str(iMPz) + "mm")
+
+    def checkMeshClicked(selfself):
+        print('Running check mesh')
