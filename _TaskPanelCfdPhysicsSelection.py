@@ -93,11 +93,6 @@ class _TaskPanelCfdPhysicsSelection:
         elif self.obj.Turbulence == 'RANS':
             self.form.viscousCheckBox.setChecked(True)
             self.form.radioButtonRANS.toggle()
-        ti = CfdTools.indexOrDefault(RANS_MODELS, self.obj.TurbulenceModel, 0)
-        # TODO Jonathan debug, remove
-        print(f'current model: {self.obj.TurbulenceModel}')
-        print(f'current index: {ti}')
-        self.form.turbulenceComboBox.setCurrentIndex(ti)
 
         # Gravity
         setQuantity(self.form.gx, self.obj.gx)
@@ -141,6 +136,8 @@ class _TaskPanelCfdPhysicsSelection:
             if self.form.radioButtonRANS.isChecked():
                 self.form.turbulenceComboBox.clear()
                 self.form.turbulenceComboBox.addItems(RANS_MODELS)
+                ti = CfdTools.indexOrDefault(RANS_MODELS, self.obj.TurbulenceModel, 0)
+                self.form.turbulenceComboBox.setCurrentIndex(ti)
                 self.form.turbulenceModelFrame.setVisible(True)
             else:
                 self.form.turbulenceModelFrame.setVisible(False)
