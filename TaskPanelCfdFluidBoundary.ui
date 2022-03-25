@@ -108,6 +108,111 @@
 												<property name="bottomMargin">
 													<number>8</number>
 												</property>
+<item row="0" column="0">
+													<widget class="QLabel" name="labelTurbulentKineticEnergy">
+														<property name="text">
+															<string>Turbulent kinetic energy (k)</string>
+														</property>
+													</widget>
+												</item>
+												<item row="0" column="1">
+													<widget class="Gui::InputField" name="inputKineticEnergy">
+														<property name="sizePolicy">
+															<sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+																<horstretch>0</horstretch>
+																<verstretch>0</verstretch>
+															</sizepolicy>
+														</property>
+														<property name="text">
+															<string>0</string>
+														</property>
+														<property name="alignment">
+															<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+														</property>
+														<property name="singleStep" stdset="0">
+															<double>0.010000000000000</double>
+														</property>
+														<property name="minimum" stdset="0">
+															<double>0.000000000000000</double>
+														</property>
+														<property name="unit" stdset="0">
+															<string notr="true">m^2/s^2</string>
+														</property>
+														<property name="format" stdset="0">
+															<number>0</number>
+														</property>
+													</widget>
+												</item>
+												<item row="1" column="0">
+													<widget class="QLabel" name="labelTurbulentDissapationRate">
+														<property name="text">
+															<string>Dissipation rate (ε)</string>
+														</property>
+													</widget>
+												</item>
+												<item row="1" column="1">
+													<widget class="Gui::InputField" name="inputDissipationRate">
+														<property name="sizePolicy">
+															<sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+																<horstretch>0</horstretch>
+																<verstretch>0</verstretch>
+															</sizepolicy>
+														</property>
+														<property name="text">
+															<string>0</string>
+														</property>
+														<property name="alignment">
+															<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+														</property>
+														<property name="singleStep" stdset="0">
+															<double>0.010000000000000</double>
+														</property>
+														<property name="minimum" stdset="0">
+															<double>0.000000000000000</double>
+														</property>
+														<property name="unit" stdset="0">
+															<string notr="true">m^2/s^3</string>
+														</property>
+														<property name="format" stdset="0">
+															<number>0</number>
+														</property>
+													</widget>
+												</item>
+												<item row="2" column="0">
+													<widget class="QLabel" name="labelTurbulentSpecificDissapationRate">
+														<property name="text">
+															<string>Specific dissipation rate (ω)</string>
+														</property>
+													</widget>
+												</item>
+												<item row="2" column="1">
+													<widget class="Gui::InputField" name="inputSpecificDissipationRate">
+														<property name="sizePolicy">
+															<sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+																<horstretch>0</horstretch>
+																<verstretch>0</verstretch>
+															</sizepolicy>
+														</property>
+														<property name="text">
+															<string>0</string>
+														</property>
+														<property name="alignment">
+															<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+														</property>
+														<property name="singleStep" stdset="0">
+															<double>0.010000000000000</double>
+														</property>
+														<property name="minimum" stdset="0">
+															<double>0.000000000000000</double>
+														</property>
+														<property name="unit" stdset="0">
+															<string notr="true">rad/s</string>
+														</property>
+														<property name="format" stdset="0">
+															<number>0</number>
+														</property>
+													</widget>
+												</item>												
 												<item row="3" column="0">
 													<widget class="QLabel" name="labelTurbulentIntensityValue">
 														<property name="text">
@@ -178,15 +283,15 @@
 														</property>
 													</widget>
 												</item>
-												<item row="0" column="0">
-													<widget class="QLabel" name="labelTurbulentKineticEnergy">
+												<item row="5" column="0">
+													<widget class="QLabel" name="labelNuTildaValue">
 														<property name="text">
-															<string>Turbulent kinetic energy (k)</string>
+															<string>Nu Tilda (ṽ)</string>
 														</property>
 													</widget>
 												</item>
-												<item row="0" column="1">
-													<widget class="Gui::InputField" name="inputKineticEnergy">
+												<item row="5" column="1">
+													<widget class="Gui::InputField" name="inputNuTilda">
 														<property name="sizePolicy">
 															<sizepolicy hsizetype="Preferred" vsizetype="Fixed">
 																<horstretch>0</horstretch>
@@ -200,83 +305,13 @@
 															<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
 														</property>
 														<property name="singleStep" stdset="0">
-															<double>0.010000000000000</double>
+															<double>1.000000000000000</double>
 														</property>
 														<property name="minimum" stdset="0">
 															<double>0.000000000000000</double>
 														</property>
 														<property name="unit" stdset="0">
-															<string notr="true">m^2/s^2</string>
-														</property>
-														<property name="format" stdset="0">
-															<number>0</number>
-														</property>
-													</widget>
-												</item>
-												<item row="2" column="0">
-													<widget class="QLabel" name="labelTurbulentSpecificDissapationRate">
-														<property name="text">
-															<string>Specific dissipation rate (ω)</string>
-														</property>
-													</widget>
-												</item>
-												<item row="2" column="1">
-													<widget class="Gui::InputField" name="inputSpecificDissipationRate">
-														<property name="sizePolicy">
-															<sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-																<horstretch>0</horstretch>
-																<verstretch>0</verstretch>
-															</sizepolicy>
-														</property>
-														<property name="text">
-															<string>0</string>
-														</property>
-														<property name="alignment">
-															<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-														</property>
-														<property name="singleStep" stdset="0">
-															<double>0.010000000000000</double>
-														</property>
-														<property name="minimum" stdset="0">
-															<double>0.000000000000000</double>
-														</property>
-														<property name="unit" stdset="0">
-															<string notr="true">rad/s</string>
-														</property>
-														<property name="format" stdset="0">
-															<number>0</number>
-														</property>
-													</widget>
-												</item>
-												<item row="1" column="0">
-													<widget class="QLabel" name="labelTurbulentDissapationRate">
-														<property name="text">
-															<string>Dissipation rate (ε)</string>
-														</property>
-													</widget>
-												</item>
-												<item row="1" column="1">
-													<widget class="Gui::InputField" name="inputDissipationRate">
-														<property name="sizePolicy">
-															<sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-																<horstretch>0</horstretch>
-																<verstretch>0</verstretch>
-															</sizepolicy>
-														</property>
-														<property name="text">
-															<string>0</string>
-														</property>
-														<property name="alignment">
-															<set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-														</property>
-														<property name="singleStep" stdset="0">
-															<double>0.010000000000000</double>
-														</property>
-														<property name="minimum" stdset="0">
-															<double>0.000000000000000</double>
-														</property>
-														<property name="unit" stdset="0">
-															<string notr="true">m^2/s^3</string>
+															<string notr="true">m^2/s^1</string>
 														</property>
 														<property name="format" stdset="0">
 															<number>0</number>

@@ -417,6 +417,8 @@ class CfdCaseWriterFoam:
                     elif inlet_bc['TurbulenceInletSpecification'] == 'TKEAndDissipationRate':
                         initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
                         initial_values['epsilon'] = inlet_bc['DissipationRate']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'TransportedNuTilda':
+                        initial_values['nuTilda'] = inlet_bc['NuTilda']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
                         if inlet_bc['BoundarySubType'] == 'uniformVelocity' or \
                            inlet_bc['BoundarySubType'] == 'farField':
@@ -429,11 +431,11 @@ class CfdCaseWriterFoam:
                             l = inlet_bc['TurbulenceLengthScale']
                             omega = k**0.5/(Cmu**0.25*l)
                             epsilon = (k**(3.0/2.0) * Cmu**0.75) / l
-                            nuTilda = 0
+                            nuTilda = 0 # TODO Jonathan - currently setting to zero until a better calculation is found
                             initial_values['k'] = k
                             initial_values['omega'] = omega
                             initial_values['epsilon'] = epsilon
-                            initial_values['nuTilda'] = nuTilda # TODO Jonathan - currently setting to zero until a better calculation is found
+                            initial_values['nuTilda'] = nuTilda
                         else:
                             raise RuntimeError(
                                 "Inlet type currently unsupported for copying turbulence initial conditions.")
