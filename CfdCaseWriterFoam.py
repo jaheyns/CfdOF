@@ -421,7 +421,7 @@ class CfdCaseWriterFoam:
                     elif inlet_bc['TurbulenceInletSpecification'] == 'TransportedNuTilda':
                         initial_values['nuTilda'] = inlet_bc['NuTilda']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
-                        if inlet_bc['BoundarySubType'] == 'uniformVelocity' or \
+                        if inlet_bc['BoundarySubType'] == 'uniformVelocityInlet' or \
                            inlet_bc['BoundarySubType'] == 'farField':
                             Uin = (inlet_bc['Ux']**2 +
                                    inlet_bc['Uy']**2 +
