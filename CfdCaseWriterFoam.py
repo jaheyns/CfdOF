@@ -429,9 +429,11 @@ class CfdCaseWriterFoam:
                             l = inlet_bc['TurbulenceLengthScale']
                             omega = k**0.5/(Cmu**0.25*l)
                             epsilon = (k**(3.0/2.0) * Cmu**0.75) / l
+                            nuTilda = 0
                             initial_values['k'] = k
                             initial_values['omega'] = omega
                             initial_values['epsilon'] = epsilon
+                            initial_values['nuTilda'] = nuTilda # TODO Jonathan - currently setting to zero until a better calculation is found
                         else:
                             raise RuntimeError(
                                 "Inlet type currently unsupported for copying turbulence initial conditions.")

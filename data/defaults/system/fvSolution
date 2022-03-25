@@ -301,6 +301,8 @@ relaxationFactors
 %:kEpsilon
         k               0.5;
         epsilon         0.5;
+%:SpalartAllmaras
+        nuTilda         0.5;
 %}
 %}
     }
@@ -338,6 +340,7 @@ relaxationFactors
         epsilonFinal    1;
 %:SpalartAllmaras
         nuTilda         0.5;
+        nuTildaFinal    1;
 %}
 %}
 %{%(solver/SolverName%)

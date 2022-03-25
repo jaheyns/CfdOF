@@ -167,9 +167,12 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.kEpsilonFrame.setVisible(False)
         self.form.kOmegaSSTFrame.setVisible(False)
         self.form.SpalartAlmerasFrame.setVisible(False)
+
         if self.physicsModel.TurbulenceModel == 'kOmegaSST':
             self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
         elif self.physicsModel.TurbulenceModel == 'kEpsilon':
+            self.form.kEpsilonFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'SpalartAllmaras':
             self.form.kEpsilonFrame.setVisible(not use_inlet_turb)
 
     def radioChanged(self):
@@ -204,13 +207,16 @@ class _TaskPanelCfdInitialiseInternalFlowField:
                              "= '{}'".format(getQuantity(self.form.inputTemperature)))
         FreeCADGui.doCommand("init.UseInletTurbulenceValues "
                              "= {}".format(self.form.checkUseInletValuesTurb.isChecked()))
+        FreeCADGui.doCommand("init.nuTilda = '{}'".format(getQuantity(self.form.inputnuTilda)))
         FreeCADGui.doCommand("init.epsilon = '{}'".format(getQuantity(self.form.inputEpsilon)))
         FreeCADGui.doCommand("init.omega = '{}'".format(getQuantity(self.form.inputOmega)))
         FreeCADGui.doCommand("init.k = '{}'".format(getQuantity(self.form.inputk)))
+
         boundaryU = self.form.comboBoundaryU.currentData()
         boundaryP = self.form.comboBoundaryP.currentData()
         boundaryT = self.form.comboBoundaryT.currentData()
         boundaryTurb = self.form.comboBoundaryTurb.currentData()
+
         if boundaryU:
             FreeCADGui.doCommand("init.BoundaryU = FreeCAD.ActiveDocument.{}".format(boundaryU))
         else:
