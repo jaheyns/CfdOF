@@ -34,6 +34,13 @@ boundaryField
 %}
 %:inlet open
 %{%(boundaries/%(0%)/TurbulenceInletSpecification%)
+%:TransportedNuTilda
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/NuTilda%);
+        value       $internalField;
+    }
 %:intensityAndLengthScale
     %(0%)
     {
