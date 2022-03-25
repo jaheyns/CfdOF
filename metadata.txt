@@ -4,7 +4,7 @@
 [general]
 name=CfdOF
 FreeCADMinimumVersion=0.18.4.16146
-description=Computational Fluid Dynamics (CFD) analysis using OpenFOAM
+description=Computational Fluid Dynamics (CFD) analysis based on OpenFOAM
 about=Simple workflow to get started with CFD analysis.
       Supports incompressible laminar and turbulent flow, basic multiphase flow,
       and cut-cell cartesian meshing
