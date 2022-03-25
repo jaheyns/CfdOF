@@ -5,6 +5,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -111,7 +112,7 @@ class _CfdInitialVariables:
         addObjectProperty(obj, 'epsilon', 'm^2/s^3', "App::PropertyQuantity", "Turbulence",
                           "Turbulent dissipation rate")
         addObjectProperty(obj, 'nuTilda', 'm^2/s^1', "App::PropertyQuantity", "Turbulence",
-                          "Transported Nu Tilda")
+                          "Modified turbulent viscosity")
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
         addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary name")
         addObjectProperty(obj, 'BoundaryP', None, "App::PropertyLink", "", "P boundary name")

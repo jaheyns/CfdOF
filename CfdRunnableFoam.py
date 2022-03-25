@@ -5,6 +5,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -149,5 +150,5 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$E$', self.EResiduals),
                 ('$k$', self.kResiduals),
                 ('$\\epsilon$', self.epsilonResiduals),
-                ('$nuTilda$', self.nuTildaResiduals),
+                ('$\\tilde{\\nu}$', self.nuTildaResiduals),
                 ('$\\omega$', self.omegaResiduals)]))

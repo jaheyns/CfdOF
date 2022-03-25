@@ -28,7 +28,7 @@ boundaryField
     {
 %{%(physics/TurbulenceModel%)
 %:SpalartAllmaras
-        type        nutUSpaldingWallFunction; // Switched from nutUWallFunction to nutUSpaldingWallFunction
+        type        nutUSpaldingWallFunction;
 %:default
         type        nutkWallFunction;
 %}

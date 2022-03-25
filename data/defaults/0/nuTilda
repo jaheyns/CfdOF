@@ -46,9 +46,6 @@ boundaryField
     {
         type              fixedValue;
         value             $internalField;
-        //type            turbulentMixingLengthFrequencyInlet; // TODO Jonathan, check, currently setting inlet to interior field
-        //mixingLength    %(boundaries/%(0%)/TurbulenceLengthScale%);
-        //value           $internalField;
     }
 %}
 %:outlet
