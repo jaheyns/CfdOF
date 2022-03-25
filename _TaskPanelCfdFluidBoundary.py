@@ -4,6 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *

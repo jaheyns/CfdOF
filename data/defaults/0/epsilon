@@ -44,7 +44,7 @@ boundaryField
 %:intensityAndLengthScale
     %(0%)
     {
-        type            turbulentMixingLengthFrequencyInlet;
+        type            turbulentMixingLengthDissipationRateInlet;
         mixingLength    %(boundaries/%(0%)/TurbulenceLengthScale%);
         value           $internalField;
     }

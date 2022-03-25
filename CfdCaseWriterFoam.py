@@ -5,6 +5,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -426,12 +427,12 @@ class CfdCaseWriterFoam:
                                    inlet_bc['Uy']**2 +
                                    inlet_bc['Uz']**2)**0.5
                             I = inlet_bc['TurbulenceIntensity']
-                            k = 3/2*(Uin*I)**2
+                            k = 3.0/2.0*(Uin*I)**2
                             Cmu = 0.09  # Standard turb model parameter
                             l = inlet_bc['TurbulenceLengthScale']
                             omega = k**0.5/(Cmu**0.25*l)
                             epsilon = (k**(3.0/2.0) * Cmu**0.75) / l
-                            nuTilda = 0 # TODO Jonathan - currently setting to zero until a better calculation is found
+                            nuTilda = (3.0/2.0)**0.5 * Uin * I * l
                             initial_values['k'] = k
                             initial_values['omega'] = omega
                             initial_values['epsilon'] = epsilon
