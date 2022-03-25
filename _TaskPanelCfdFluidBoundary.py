@@ -384,6 +384,8 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputSpecificDissipationRate)))
         FreeCADGui.doCommand("bc.DissipationRate "
                              "= '{}'".format(getQuantity(self.form.inputDissipationRate)))
+        FreeCADGui.doCommand("bc.NuTilda "
+                             "= '{}'".format(getQuantity(self.form.inputNuTilda)))
         FreeCADGui.doCommand("bc.TurbulenceIntensity "
                              "= '{}'".format(getQuantity(self.form.inputIntensity)))
         FreeCADGui.doCommand("bc.TurbulenceLengthScale "
