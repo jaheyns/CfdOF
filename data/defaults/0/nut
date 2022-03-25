@@ -26,7 +26,12 @@ boundaryField
 %:fixedWall translatingWall partialSlipWall
     %(0%)
     {
+%{%(physics/TurbulenceModel%)
+%:SpalartAllmaras
+        type        nutUSpaldingWallFunction;
+%:default
         type        nutkWallFunction;
+%}
         value       uniform 0;
     }
 %:slipWall
@@ -34,7 +39,12 @@ boundaryField
 %:roughWall
     %(0%)
     {
+%{%(physics/TurbulenceModel%)
+%:SpalartAllmaras
+        type        nutURoughWallFunction;
+%:default
         type        nutkRoughWallFunction;
+%}
         Ks          %(boundaries/%(0%)/RoughnessHeight%); //TODO
         Cs          %(boundaries/%(0%)/RoughnessConstant%); //TODO
         value       uniform 0;

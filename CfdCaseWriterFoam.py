@@ -5,6 +5,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -24,15 +25,15 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
-import CfdTools
-from CfdTools import cfdMessage
 import os
 import os.path
 import shutil
+
 from FreeCAD import Units
+
+import CfdTools
 import TemplateBuilder
-import CfdMeshRefinement
+from CfdTools import cfdMessage
 
 
 class CfdCaseWriterFoam:
@@ -414,6 +415,11 @@ class CfdCaseWriterFoam:
                     if inlet_bc['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
                         initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
                         initial_values['omega'] = inlet_bc['SpecificDissipationRate']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'TKEAndDissipationRate':
+                        initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
+                        initial_values['epsilon'] = inlet_bc['DissipationRate']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'TransportedNuTilda':
+                        initial_values['nuTilda'] = inlet_bc['NuTilda']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
                         if inlet_bc['BoundarySubType'] == 'uniformVelocity' or \
                            inlet_bc['BoundarySubType'] == 'farField':
@@ -421,12 +427,16 @@ class CfdCaseWriterFoam:
                                    inlet_bc['Uy']**2 +
                                    inlet_bc['Uz']**2)**0.5
                             I = inlet_bc['TurbulenceIntensity']
-                            k = 3/2*(Uin*I)**2
+                            k = 3.0/2.0*(Uin*I)**2
                             Cmu = 0.09  # Standard turb model parameter
                             l = inlet_bc['TurbulenceLengthScale']
                             omega = k**0.5/(Cmu**0.25*l)
+                            epsilon = (k**(3.0/2.0) * Cmu**0.75) / l
+                            nuTilda = (3.0/2.0)**0.5 * Uin * I * l
                             initial_values['k'] = k
                             initial_values['omega'] = omega
+                            initial_values['epsilon'] = epsilon
+                            initial_values['nuTilda'] = nuTilda
                         else:
                             raise RuntimeError(
                                 "Inlet type currently unsupported for copying turbulence initial conditions.")

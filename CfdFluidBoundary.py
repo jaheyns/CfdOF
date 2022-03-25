@@ -4,6 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -101,8 +102,27 @@ TURBULENT_INLET_SPEC = {"kOmegaSST":
                           "intensityAndLengthScale"],
                          ["k and omega specified",
                           "Turbulence intensity and eddy length scale"],
-                         [[0, 1],  # k, omega
-                          [2, 3]]]}  # I, l
+                         [[0, 2],  # k, omega
+                          [3, 4]]],  # I, l
+                        "kEpsilon":
+                        [["Kinetic Energy & Dissipation Rate",
+                          "Intensity & Length Scale"],
+                         ["TKEAndDissipationRate",
+                          "intensityAndLengthScale"],
+                         ["k and epsilon specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 1],  # k, epsilon
+                          [3, 4]]],  # I, l
+                        "SpalartAllmaras":
+                        [["Modified Turbulent Viscosity",
+                          "Intensity & Length Scale"],
+                         ["TransportedNuTilda",
+                          "intensityAndLengthScale"],
+                         ["nu-tilde specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[5],  # nu tilda
+                          [3, 4]]]  # I, l
+                        }
 
 THERMAL_BOUNDARY_NAMES = ["Fixed temperature",
                           "Adiabatic",
@@ -176,9 +196,11 @@ class _CfdFluidBoundary:
 
         addObjectProperty(obj, 'DefaultBoundary', False, "App::PropertyBool", "Boundary faces")
         addObjectProperty(obj, 'BoundaryType', BOUNDARY_TYPES, "App::PropertyEnumeration", "", "Boundary condition category")
+
         all_subtypes = []
         for s in SUBTYPES:
             all_subtypes += s
+
         addObjectProperty(obj, 'BoundarySubType', all_subtypes, "App::PropertyEnumeration", "", "Boundary condition type")
         addObjectProperty(obj, 'VelocityIsCartesian', True, "App::PropertyBool", "Flow",
                           "Whether to use components of velocity")
@@ -189,7 +211,7 @@ class _CfdFluidBoundary:
         addObjectProperty(obj, 'Uz', '0 m/s', "App::PropertySpeed", "Flow",
                           "Velocity (z component)")
         addObjectProperty(obj, 'VelocityMag', '0 m/s', "App::PropertySpeed", "Flow",
-                          "Velocity magitude")
+                          "Velocity magnitude")
         addObjectProperty(obj, 'DirectionFace', '', "App::PropertyString", "Flow",
                           "Face describing direction (normal)")
         addObjectProperty(obj, 'ReverseNormal', False, "App::PropertyBool", "Flow",
@@ -202,15 +224,18 @@ class _CfdFluidBoundary:
                           "Volume flow rate")
         addObjectProperty(obj, 'MassFlowRate', '0 kg/s', "App::PropertyQuantity", "Flow",
                           "Mass flow rate")
+
         if addObjectProperty(obj, 'PorousBaffleMethod', POROUS_METHODS, "App::PropertyEnumeration",
                              "Baffle", "Baffle"):
             obj.PorousBaffleMethod = 'porousCoeff'
+
         addObjectProperty(obj, 'PressureDropCoeff', '0', "App::PropertyQuantity", "Baffle",
                           "Porous baffle pressure drop coefficient")
         addObjectProperty(obj, 'ScreenWireDiameter', '0.2 mm', "App::PropertyLength", "Baffle",
                           "Porous screen mesh diameter")
         addObjectProperty(obj, 'ScreenSpacing', '2 mm', "App::PropertyLength", "Baffle",
                           "Porous screen mesh spacing")
+
         addObjectProperty(obj, 'ThermalBoundaryType', THERMAL_BOUNDARY_TYPES, "App::PropertyEnumeration", "Thermal",
                           "Type of thermal boundary")
         addObjectProperty(obj, 'Temperature', '293 K', "App::PropertyQuantity", "Thermal",
@@ -219,16 +244,24 @@ class _CfdFluidBoundary:
                           "Temperature")
         addObjectProperty(obj, 'HeatTransferCoeff', '0 W/m^2/K', "App::PropertyQuantity", "Thermal",
                           "Temperature")
+
         all_turb_specs = []
         for k in TURBULENT_INLET_SPEC:
             all_turb_specs += TURBULENT_INLET_SPEC[k][1]
+
         all_turb_specs = list(set(all_turb_specs))  # Remove dups
+
         if addObjectProperty(obj, 'TurbulenceInletSpecification', all_turb_specs, "App::PropertyEnumeration",
                              "Turbulence", "Temperature"):
             obj.TurbulenceInletSpecification = 'intensityAndLengthScale'
+
         addObjectProperty(obj, 'TurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
         addObjectProperty(obj, 'SpecificDissipationRate', '1 rad/s', "App::PropertyQuantity", "Turbulence",
+                          "Temperature")
+        addObjectProperty(obj, 'DissipationRate', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
+                          "Temperature")
+        addObjectProperty(obj, 'NuTilda', '55 m^2/s^1', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
         addObjectProperty(obj, 'TurbulenceIntensity', '0.1', "App::PropertyQuantity", "Turbulence",
                           "Temperature")

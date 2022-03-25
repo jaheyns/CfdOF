@@ -5,6 +5,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -69,7 +70,6 @@ class CfdRunnableFoam(CfdRunnable):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
 
         self.initResiduals()
-
         self.residualPlot = None
 
     def check_prerequisites(self):
@@ -83,7 +83,9 @@ class CfdRunnableFoam(CfdRunnable):
         self.rhoResiduals = []
         self.EResiduals = []
         self.kResiduals = []
+        self.epsilonResiduals = []
         self.omegaResiduals = []
+        self.nuTildaResiduals = []
         self.niter = 0
 
     def get_solver_cmd(self, case_dir):
@@ -131,8 +133,12 @@ class CfdRunnableFoam(CfdRunnable):
                 self.EResiduals.append(float(split[8]))
             if "k," in split and self.niter-1 > len(self.kResiduals):
                 self.kResiduals.append(float(split[7].split(',')[0]))
+            if "epsilon," in split and self.niter - 1 > len(self.epsilonResiduals):
+                self.epsilonResiduals.append(float(split[7].split(',')[0]))
             if "omega," in split and self.niter-1 > len(self.omegaResiduals):
                 self.omegaResiduals.append(float(split[7].split(',')[0]))
+            if "nuTilda," in split and self.niter-1 > len(self.nuTildaResiduals):
+                self.nuTildaResiduals.append(float(split[7].split(',')[0]))
 
         if self.niter > 1:
             self.residualPlot.updateResiduals(OrderedDict([
@@ -143,4 +149,6 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$p$', self.pResiduals),
                 ('$E$', self.EResiduals),
                 ('$k$', self.kResiduals),
+                ('$\\epsilon$', self.epsilonResiduals),
+                ('$\\tilde{\\nu}$', self.nuTildaResiduals),
                 ('$\\omega$', self.omegaResiduals)]))

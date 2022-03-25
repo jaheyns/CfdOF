@@ -15,19 +15,22 @@ FoamFile
 
 pseudoTime
 {
-    pseudoTol          1e-6 (1e-6 1e-6 1e-6) 1e-6;
-    pseudoCoNum        0.1;
+    pseudoTol          0.001 (0.001 0.001 0.001) 0.001;
+    pseudoCoNum        1;
     pseudoCoNumMax     25.0;
 
-    pseudoCoNumMaxIncreaseFactor  1.5;
+    pseudoCoNumMaxIncreaseFactor  1.2;
     pseudoCoNumMin                0.1;
 
     localTimestepping             true;
     localTimesteppingBounding     true;
     localTimesteppingLowerBound   0.95;
+    localTimesteppingUpperBound   1.05;
 
     // Last line of defense, in case of very poor grid
-    rhoMin              0.01;  // TODO: Generalise
+    // TODO: Generalise
+    rhoMin              1e-3;
+    TMin                10;
 }
 
 flowSolver
@@ -39,7 +42,7 @@ flowSolver
         viscousJacobian   laplacian;
         preconditioner    LUSGS;
 
-        maxIter           20;
+        maxIter           5;
         nKrylov           8;
         solverTolRel      1e-1 (1e-1 1e-1 1e-1) 1e-1;
     }

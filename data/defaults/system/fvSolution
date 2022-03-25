@@ -222,7 +222,7 @@ solvers
 %}
 %{%(physics/Turbulence%)
 %:RANS
-    "(k|omega|nuTilda)"
+    "(k|omega|epsilon|nuTilda)"
     {
         solver           smoothSolver;
         smoother         GaussSeidel;
@@ -232,7 +232,7 @@ solvers
         minIter          1;
     }
 
-    "(k|omega|nuTilda)Final"
+    "(k|omega|epsilon|nuTilda)Final"
     {
         $k;
         relTol          0;
@@ -298,6 +298,11 @@ relaxationFactors
 %:kOmegaSST
         k               0.5;
         omega           0.5;
+%:kEpsilon
+        k               0.5;
+        epsilon         0.5;
+%:SpalartAllmaras
+        nuTilda         0.5;
 %}
 %}
     }
@@ -328,8 +333,14 @@ relaxationFactors
         kFinal          1;
         omega           0.5;
         omegaFinal      1;
+%:kEpsilon
+        k               0.5;
+        kFinal          1;
+        epsilon         0.5;
+        epsilonFinal    1;
 %:SpalartAllmaras
         nuTilda         0.5;
+        nuTildaFinal    1;
 %}
 %}
 %{%(solver/SolverName%)

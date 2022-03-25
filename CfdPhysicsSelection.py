@@ -4,6 +4,7 @@
 # *   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>        *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -127,8 +128,8 @@ class _CfdPhysicsModel:
                              "Physics modelling", "Type of turbulence modelling"):
             obj.Turbulence = ['Inviscid', 'Laminar', 'RANS']
 
-        addObjectProperty(obj, "TurbulenceModel", ['kOmegaSST'], "App::PropertyEnumeration", "Physics modelling",
-                          "Turbulence model")
+        addObjectProperty(obj, "TurbulenceModel", ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras'],
+                          "App::PropertyEnumeration", "Physics modelling", "Turbulence model")
 
         addObjectProperty(obj, "gx", '0 m/s^2', "App::PropertyAcceleration", "Physics modelling",
                           "Gravitational acceleration vector (x component)")
