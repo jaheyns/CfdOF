@@ -111,7 +111,7 @@ TURBULENT_INLET_SPEC = {"kOmegaSST":
                          ["k and epsilon specified",
                           "Turbulence intensity and eddy length scale"],
                          [[0, 1],  # k, epsilon
-                          [3, 4]]]  # I, l
+                          [3, 4]]],  # I, l
                         "SpalartAllmaras":
                         [["Intensity & Length Scale"],
                          ["intensityAndLengthScale"],

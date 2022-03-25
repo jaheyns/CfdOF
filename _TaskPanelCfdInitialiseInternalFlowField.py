@@ -101,10 +101,13 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         else:
             self.form.comboFluid.clear()
 
+        # Use INLET turbulence values (k, omega, epsilon etc)
         use_inlet_turb = self.obj.UseInletTurbulenceValues
         self.form.checkUseInletValuesTurb.setChecked(use_inlet_turb)
         setQuantity(self.form.inputk, self.obj.k)
         setQuantity(self.form.inputOmega, self.obj.omega)
+        setQuantity(self.form.inputEpsilon, self.obj.epsilon)
+        setQuantity(self.form.inputnuTilda, self.obj.nuTilda)
 
         use_inlet_temp = self.obj.UseInletTemperatureValue
         self.form.checkUseInletValuesThermal.setChecked(use_inlet_temp)
@@ -166,14 +169,14 @@ class _TaskPanelCfdInitialiseInternalFlowField:
 
         self.form.kEpsilonFrame.setVisible(False)
         self.form.kOmegaSSTFrame.setVisible(False)
-        self.form.SpalartAlmerasFrame.setVisible(False)
+        self.form.SpalartAllmarasFrame.setVisible(False)
 
         if self.physicsModel.TurbulenceModel == 'kOmegaSST':
             self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
         elif self.physicsModel.TurbulenceModel == 'kEpsilon':
             self.form.kEpsilonFrame.setVisible(not use_inlet_turb)
         elif self.physicsModel.TurbulenceModel == 'SpalartAllmaras':
-            self.form.kEpsilonFrame.setVisible(not use_inlet_turb)
+            self.form.SpalartAllmarasFrame.setVisible(not use_inlet_turb)
 
     def radioChanged(self):
         self.updateUi()
