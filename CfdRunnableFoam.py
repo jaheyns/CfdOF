@@ -149,5 +149,5 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$E$', self.EResiduals),
                 ('$k$', self.kResiduals),
                 ('$\\epsilon$', self.epsilonResiduals),
-                ('$\\nuTilda$', self.nuTildaResiduals),
+                ('$nuTilda$', self.nuTildaResiduals),
                 ('$\\omega$', self.omegaResiduals)]))

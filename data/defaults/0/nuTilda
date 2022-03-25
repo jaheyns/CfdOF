@@ -26,8 +26,8 @@ boundaryField
 %:fixedWall translatingWall partialSlipWall roughWall
     %(0%)
     {
-        type        nuTildaWallFunction;
-        value       $internalField;
+        type        fixedValue;
+        value       uniform 0;
     }
 %:slipWall
 %[0/_boundary_zeroGradient%]
@@ -37,9 +37,11 @@ boundaryField
 %:intensityAndLengthScale
     %(0%)
     {
-        type            turbulentMixingLengthFrequencyInlet;
-        mixingLength    %(boundaries/%(0%)/TurbulenceLengthScale%);
-        value           $internalField;
+        type              fixedValue;
+        value             $internalField;
+        //type            turbulentMixingLengthFrequencyInlet; // TODO Jonathan, check, currently setting inlet to interior field
+        //mixingLength    %(boundaries/%(0%)/TurbulenceLengthScale%);
+        //value           $internalField;
     }
 %}
 %:outlet
