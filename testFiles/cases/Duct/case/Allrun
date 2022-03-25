@@ -12,7 +12,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2012"
+FOAMDIR="/usr/lib/openfoam/openfoam2112"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -50,13 +50,16 @@ else
     runCommand surfaceTransformPoints -scale "(0.001 0.001 0.001)" "constant/triSurface/Cylinder.stl" "constant/triSurface/CylinderScaled.stl"
 fi
 
-
 # Set cell zones contained inside the .stl surfaces
 runCommand topoSet -dict system/topoSetZonesDict
 
 PNAME=p
+
 # Parallel decomposition
 runCommand decomposePar -force
+
+# Mesh renumbering
+runCommand mpiexec -np 4 renumberMesh -parallel -overwrite
 
 # Initialise flow
 # Baffle BC does not work with potentialFoam; do not initialise p
