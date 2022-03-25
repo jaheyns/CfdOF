@@ -22,10 +22,12 @@ This document is primarily for documenting new features by the developers but is
 
 ### Mesh
 * checkMesh capabilities
+* Convert tetra mesh to polyhedra mesh using poluDualMesh
 
 ### Internal
 * Update src to use Python module hierarchy
 * Improve edge detection for meshing
 * Export OF case / results
 * Move parallel run option to GUI for ease of use
+* Implement -parallel meshing for snappyHexMesh (and others if supported)
 
