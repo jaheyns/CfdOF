@@ -59,14 +59,13 @@ class _TaskPanelCfdMesh:
                                                              stdoutHook=self.gotOutputLines,
                                                              stderrHook=self.gotErrorLines)
 
-        self.form.cb_utility.activated.connect(self.choose_utility)
-
         self.Timer = QtCore.QTimer()
         self.Timer.setInterval(1000)
         self.Timer.timeout.connect(self.update_timer_text)
 
         self.open_paraview = QtCore.QProcess()
 
+        self.form.cb_utility.activated.connect(self.choose_utility)
         self.form.pb_write_mesh.clicked.connect(self.writeMesh)
         self.form.pb_edit_mesh.clicked.connect(self.editMesh)
         self.form.pb_run_mesh.clicked.connect(self.runMesh)
@@ -77,9 +76,9 @@ class _TaskPanelCfdMesh:
         self.form.pb_searchPointInMesh.clicked.connect(self.searchPointInMesh)
         self.form.pb_check_mesh.clicked.connect(self.checkMeshClicked)
 
+        self.form.snappySpecificProperties.setVisible(False)
         self.form.pb_stop_mesh.setEnabled(False)
         self.form.pb_paraview.setEnabled(False)
-        self.form.snappySpecificProperties.setVisible(False)
 
         #self.form.cb_dimension.addItems(_CfdMesh.known_element_dimensions)
         self.form.cb_utility.addItems(_CfdMesh.known_mesh_utility)
@@ -140,6 +139,7 @@ class _TaskPanelCfdMesh:
         self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(case_path, "pv.foam")))
         self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
+
         utility = self.form.cb_utility.currentText()
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)

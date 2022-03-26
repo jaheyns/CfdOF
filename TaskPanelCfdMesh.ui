@@ -272,13 +272,6 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="cb_utility">
-       <property name="toolTip">
-        <string/>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="1">
       <widget class="QCheckBox" name="checkbox_convert_tets">
        <property name="text">
