@@ -235,6 +235,47 @@ class _TaskPanelCfdMesh:
     def progressCallback(self, message):
         self.consoleMessage(message)
 
+    def checkMeshClicked(self):
+        self.Start = time.time()
+        try:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            self.consoleMessage('Running Mesh checks ...')
+            FreeCADGui.addModule("CfdTools")
+            FreeCADGui.addModule("CfdMeshTools")
+            FreeCADGui.addModule("CfdConsoleProcess")
+            FreeCADGui.doCommand("cart_mesh = "
+                                 "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
+            FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
+            FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
+            FreeCADGui.doCommand("cart_mesh.error = False")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh', cart_mesh.meshCaseDir)")
+            FreeCADGui.doCommand("FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\\n')")
+            FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
+            FreeCADGui.doCommand("proxy.running_from_macro = True")
+            self.mesh_obj.Proxy.running_from_macro = False
+            FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
+                                 "  mesh_process = CfdConsoleProcess.CfdConsoleProcess()\n" +
+                                 "  mesh_process.start(cmd, env_vars=env_vars)\n" +
+                                 "  mesh_process.waitForFinished()\n" +
+                                 "else:\n" +
+                                 "  proxy.mesh_process.start(cmd, env_vars=env_vars)")
+            if self.mesh_obj.Proxy.mesh_process.waitForStarted():
+                self.form.pb_check_mesh.setEnabled(False) # Prevent user running a second instance
+                self.form.pb_run_mesh.setEnabled(False)
+                self.form.pb_stop_mesh.setEnabled(False)
+                self.form.pb_paraview.setEnabled(False)
+                self.form.pb_load_mesh.setEnabled(False)
+                self.consoleMessage("Mesh check started")
+            else:
+                self.consoleMessage("Error starting mesh checker process", "#FF0000")
+                self.mesh_obj.Proxy.cart_mesh.error = True
+
+        except Exception as ex:
+            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
+        finally:
+            QApplication.restoreOverrideCursor()
+
+
     def editMesh(self):
         case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
         self.consoleMessage("Please edit the case input files externally at: {}\n".format(case_path))
@@ -267,6 +308,7 @@ class _TaskPanelCfdMesh:
             if self.mesh_obj.Proxy.mesh_process.waitForStarted():
                 self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
                 self.form.pb_stop_mesh.setEnabled(True)
+                self.form.pb_check_mesh.setEnabled(False)
                 self.form.pb_paraview.setEnabled(False)
                 self.form.pb_load_mesh.setEnabled(False)
                 self.consoleMessage("Mesher started")
@@ -342,6 +384,3 @@ class _TaskPanelCfdMesh:
             setQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")
             setQuantity(self.form.if_pointInMeshY, str(iMPy) + "mm")
             setQuantity(self.form.if_pointInMeshZ, str(iMPz) + "mm")
-
-    def checkMeshClicked(selfself):
-        print('Running check mesh')

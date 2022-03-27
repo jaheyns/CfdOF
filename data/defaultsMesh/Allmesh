@@ -77,7 +77,7 @@ runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 %{%(ConvertTetrahedra%)
 %:True
 # Convert to polyhedra
-runCommand polyDualMesh -overwrite 60
+runCommand polyDualMesh 10 -concaveMultiCells -overwrite
 %}
 
 if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
