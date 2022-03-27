@@ -62,7 +62,6 @@ class CfdCaseWriterFoam:
         self.case_folder = os.path.join(self.working_dir, self.solver_obj.InputCaseName)
         self.case_folder = os.path.expanduser(os.path.abspath(self.case_folder))
         self.mesh_file_name = os.path.join(self.case_folder, self.solver_obj.InputCaseName, u".unv")
-
         self.template_path = os.path.join(CfdTools.get_module_path(), "data", "defaults")
 
         # Collect settings into single dictionary
@@ -412,6 +411,22 @@ class CfdCaseWriterFoam:
             if initial_values['UseInletTurbulenceValues']:
                 if initial_values['BoundaryTurb']:
                     inlet_bc = settings['boundaries'][initial_values['BoundaryTurb'].Label]
+
+                    # Since Template builder does not write BC entries which are missing, we need to include a
+                    # %:default entry for all turbulence related volScalarFields in the field files for all inlet
+                    # types to ensure that an entry is written for each inlet, irrespective of whether the particular
+                    # solver uses it. This is because OpenFOAM will read all field fiels in the '0' directory
+                    # irrespective of whether that field is used by the solver, and missing boundary patches (inlets)
+                    # will cause a failure.
+
+                    # Initialise everything to zero to start with. 
+                    initial_values['k'] = 0
+                    initial_values['omega'] = 0
+                    initial_values['epsilon'] = 0
+                    initial_values['nuTilda'] = 0
+                    initial_values['gammaInt'] = 0
+                    initial_values['ReThetat'] = 0
+
                     if inlet_bc['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
                         initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
                         initial_values['omega'] = inlet_bc['SpecificDissipationRate']

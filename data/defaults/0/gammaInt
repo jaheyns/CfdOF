@@ -46,6 +46,12 @@ boundaryField
         type            fixedValue;
         value           uniform 1;
     }
+%:default
+    %(0%)
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
 %}
 %:outlet
     %(0%)

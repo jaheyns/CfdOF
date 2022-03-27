@@ -48,6 +48,12 @@ boundaryField
         intensity   %(boundaries/%(0%)/TurbulenceIntensity%);
         value       $internalField;
     }
+%:default
+    %(0%)
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
 %}
 %:outlet
     %(0%)

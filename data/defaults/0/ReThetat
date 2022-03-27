@@ -33,19 +33,12 @@ boundaryField
 %}
 %:inlet open
 %{%(boundaries/%(0%)/TurbulenceInletSpecification%)
-%:TKESpecDissipationRateGammaAndReThetat
+%:TKESpecDissipationRateGammaAndReThetat intensityAndLengthScale
     %(0%)
     {
         type        inletOutlet;
         inletValue  uniform %(boundaries/%(0%)/ReThetat%);
         value       $internalField;
-    }
-%:intensityAndLengthScale
-    %(0%)
-    {
-        type            turbulentMixingLengthDissipationRateInlet;
-        mixingLength    %(boundaries/%(0%)/TurbulenceLengthScale%); // todo Jonathan, fix all this
-        value           $internalField;
     }
 %}
 %:outlet
