@@ -139,7 +139,8 @@ class _TaskPanelCfdMesh:
         self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(case_path, "pv.foam")))
         self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
-
+        self.form.pb_check_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
+        
         utility = self.form.cb_utility.currentText()
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
@@ -262,6 +263,7 @@ class _TaskPanelCfdMesh:
             if self.mesh_obj.Proxy.mesh_process.waitForStarted():
                 self.form.pb_check_mesh.setEnabled(False)   # Prevent user running a second instance
                 self.form.pb_run_mesh.setEnabled(False)
+                self.form.pb_write_mesh.setEnabled(False)
                 self.form.pb_stop_mesh.setEnabled(False)
                 self.form.pb_paraview.setEnabled(False)
                 self.form.pb_load_mesh.setEnabled(False)
@@ -307,6 +309,7 @@ class _TaskPanelCfdMesh:
             if self.mesh_obj.Proxy.mesh_process.waitForStarted():
                 self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
                 self.form.pb_stop_mesh.setEnabled(True)
+                self.form.pb_write_mesh.setEnabled(False)
                 self.form.pb_check_mesh.setEnabled(False)
                 self.form.pb_paraview.setEnabled(False)
                 self.form.pb_load_mesh.setEnabled(False)
@@ -340,11 +343,15 @@ class _TaskPanelCfdMesh:
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(True)
+            self.form.pb_write_mesh.setEnabled(True)
+            self.form.pb_check_mesh.setEnabled(True)
             self.form.pb_load_mesh.setEnabled(True)
         else:
             self.consoleMessage("Meshing exited with error", "#FF0000")
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
+            self.form.pb_write_mesh.setEnabled(True)
+            self.form.pb_check_mesh(False)
             self.form.pb_paraview.setEnabled(False)
 
         self.error_message = ''
