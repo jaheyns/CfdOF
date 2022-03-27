@@ -260,7 +260,7 @@ class _TaskPanelCfdMesh:
                                  "else:\n" +
                                  "  proxy.mesh_process.start(cmd, env_vars=env_vars)")
             if self.mesh_obj.Proxy.mesh_process.waitForStarted():
-                self.form.pb_check_mesh.setEnabled(False) # Prevent user running a second instance
+                self.form.pb_check_mesh.setEnabled(False)   # Prevent user running a second instance
                 self.form.pb_run_mesh.setEnabled(False)
                 self.form.pb_stop_mesh.setEnabled(False)
                 self.form.pb_paraview.setEnabled(False)
