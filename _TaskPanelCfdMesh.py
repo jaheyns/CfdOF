@@ -275,7 +275,6 @@ class _TaskPanelCfdMesh:
         finally:
             QApplication.restoreOverrideCursor()
 
-
     def editMesh(self):
         case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
         self.consoleMessage("Please edit the case input files externally at: {}\n".format(case_path))
