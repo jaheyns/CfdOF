@@ -86,6 +86,8 @@ class CfdRunnableFoam(CfdRunnable):
         self.epsilonResiduals = []
         self.omegaResiduals = []
         self.nuTildaResiduals = []
+        self.gammaIntResiduals = []
+        self.ReThetatResiduals = []
         self.niter = 0
 
     def get_solver_cmd(self, case_dir):
@@ -139,6 +141,10 @@ class CfdRunnableFoam(CfdRunnable):
                 self.omegaResiduals.append(float(split[7].split(',')[0]))
             if "nuTilda," in split and self.niter-1 > len(self.nuTildaResiduals):
                 self.nuTildaResiduals.append(float(split[7].split(',')[0]))
+            if "gammaInt," in split and self.niter-1 > len(self.gammaIntResiduals):
+                self.gammaIntResiduals.append(float(split[7].split(',')[0]))
+            if "ReThetat," in split and self.niter-1 > len(self.ReThetatResiduals):
+                self.ReThetatResiduals.append(float(split[7].split(',')[0]))
 
         if self.niter > 1:
             self.residualPlot.updateResiduals(OrderedDict([
@@ -151,4 +157,6 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$k$', self.kResiduals),
                 ('$\\epsilon$', self.epsilonResiduals),
                 ('$\\tilde{\\nu}$', self.nuTildaResiduals),
-                ('$\\omega$', self.omegaResiduals)]))
+                ('$\\omega$', self.omegaResiduals),
+                ('$\\gamma$', self.gammaIntResiduals),
+                ('$Re_{\\theta}$', self.ReThetatResiduals)]))

@@ -420,23 +420,46 @@ class CfdCaseWriterFoam:
                         initial_values['epsilon'] = inlet_bc['DissipationRate']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'TransportedNuTilda':
                         initial_values['nuTilda'] = inlet_bc['NuTilda']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'TKESpecDissipationRateGammaAndReThetat':
+                        initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
+                        initial_values['omega'] = inlet_bc['SpecificDissipationRate']
+                        initial_values['gammaInt'] = inlet_bc['Intermittency']
+                        initial_values['ReThetat'] = inlet_bc['ReThetat']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
                         if inlet_bc['BoundarySubType'] == 'uniformVelocityInlet' or \
                            inlet_bc['BoundarySubType'] == 'farField':
                             Uin = (inlet_bc['Ux']**2 +
                                    inlet_bc['Uy']**2 +
                                    inlet_bc['Uz']**2)**0.5
+
+                            # Turb Intensity (or Tu) and length scale
                             I = inlet_bc['TurbulenceIntensity']
-                            k = 3.0/2.0*(Uin*I)**2
-                            Cmu = 0.09  # Standard turb model parameter
                             l = inlet_bc['TurbulenceLengthScale']
+                            Cmu = 0.09  # Standard turb model parameter
+
+                            # k omega, k epsilon
+                            k = 3.0/2.0*(Uin*I)**2
                             omega = k**0.5/(Cmu**0.25*l)
                             epsilon = (k**(3.0/2.0) * Cmu**0.75) / l
+
+                            # Spalart Allmaras
                             nuTilda = (3.0/2.0)**0.5 * Uin * I * l
+
+                            # k omega (transition)
+                            gammaInt = 1
+                            if I <= 1.3:
+                                ReThetat = 1173.51 - (589.428 * I) + (0.2196 / (I**2))
+                            else:
+                                ReThetat = 331.5 / ((I - 0.5658)**0.671)
+
+                            # Set the values
                             initial_values['k'] = k
                             initial_values['omega'] = omega
                             initial_values['epsilon'] = epsilon
                             initial_values['nuTilda'] = nuTilda
+                            initial_values['gammaInt'] = gammaInt
+                            initial_values['ReThetat'] = ReThetat
+
                         else:
                             raise RuntimeError(
                                 "Inlet type currently unsupported for copying turbulence initial conditions.")

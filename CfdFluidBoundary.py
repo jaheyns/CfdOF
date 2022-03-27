@@ -30,6 +30,7 @@ import CfdTools
 from CfdTools import addObjectProperty
 from pivy import coin
 import Part
+from TurbulenceModelsConsts import LANGTRY_MENTER_SST, SPALART, K_EPSILON, K_OMEGA_SST
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -95,7 +96,7 @@ BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                [[True, [5], False, False, False, False, None]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows
-TURBULENT_INLET_SPEC = {"kOmegaSST":
+TURBULENT_INLET_SPEC = {'kOmegaSST':
                         [["Kinetic Energy & Specific Dissipation Rate",
                           "Intensity & Length Scale"],
                          ["TKEAndSpecDissipationRate",
@@ -104,7 +105,7 @@ TURBULENT_INLET_SPEC = {"kOmegaSST":
                           "Turbulence intensity and eddy length scale"],
                          [[0, 2],  # k, omega
                           [3, 4]]],  # I, l
-                        "kEpsilon":
+                        'kEpsilon':
                         [["Kinetic Energy & Dissipation Rate",
                           "Intensity & Length Scale"],
                          ["TKEAndDissipationRate",
@@ -113,7 +114,7 @@ TURBULENT_INLET_SPEC = {"kOmegaSST":
                           "Turbulence intensity and eddy length scale"],
                          [[0, 1],  # k, epsilon
                           [3, 4]]],  # I, l
-                        "SpalartAllmaras":
+                        'SpalartAllmaras':
                         [["Modified Turbulent Viscosity",
                           "Intensity & Length Scale"],
                          ["TransportedNuTilda",
@@ -121,6 +122,15 @@ TURBULENT_INLET_SPEC = {"kOmegaSST":
                          ["nu-tilde specified",
                           "Turbulence intensity and eddy length scale"],
                          [[5],  # nu tilda
+                          [3, 4]]],  # I, l
+                        "kOmegaSSTLM":
+                        [["Kinetic Energy, Specific Dissipation Rate, Intermittency and ReThetat",
+                          "Intensity & Length Scale"],
+                         ["TKESpecDissipationRateGammaAndReThetat",
+                          "intensityAndLengthScale"],
+                         ["k, omega, gamma and reThetat specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
                           [3, 4]]]  # I, l
                         }
 
@@ -255,14 +265,27 @@ class _CfdFluidBoundary:
                              "Turbulence", "Temperature"):
             obj.TurbulenceInletSpecification = 'intensityAndLengthScale'
 
+        # k omega SST
         addObjectProperty(obj, 'TurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
         addObjectProperty(obj, 'SpecificDissipationRate', '1 rad/s', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
+
+        # k epsilon
         addObjectProperty(obj, 'DissipationRate', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
+
+        # Spalart Allmaras
         addObjectProperty(obj, 'NuTilda', '55 m^2/s^1', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
+
+        # Langtry Menter 4 eqn k omega SST
+        addObjectProperty(obj, 'Intermittency', '1 m^2/s^1', "App::PropertyQuantity", "Turbulence", # Todo Jon - check units and quantity
+                          "Temperature")
+        addObjectProperty(obj, 'ReThetat', '1 m^2/s^1', "App::PropertyQuantity", "Turbulence",       # todo Jon - check units and quantity
+                          "Temperature")
+
+        # General
         addObjectProperty(obj, 'TurbulenceIntensity', '0.1', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
         addObjectProperty(obj, 'TurbulenceLengthScale', '0.1 m', "App::PropertyLength", "Turbulence",

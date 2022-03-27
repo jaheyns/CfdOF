@@ -113,6 +113,11 @@ class _CfdInitialVariables:
                           "Turbulent dissipation rate")
         addObjectProperty(obj, 'nuTilda', 'm^2/s^1', "App::PropertyQuantity", "Turbulence",
                           "Modified turbulent viscosity")
+        addObjectProperty(obj, 'gammaInt', '', "App::PropertyQuantity", "Turbulence",
+                          "Intermittency")
+        addObjectProperty(obj, 'ReThetat', '', "App::PropertyQuantity", "Turbulence",
+                          "Transition Momentum Thickness Re Number")
+
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
         addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary name")
         addObjectProperty(obj, 'BoundaryP', None, "App::PropertyLink", "", "P boundary name")
