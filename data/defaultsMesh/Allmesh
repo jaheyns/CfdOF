@@ -51,6 +51,7 @@ export OMP_NUM_THREADS=%(NumberOfThreads%)
 %}
 runCommand cartesianMesh
 %}
+
 %:snappyHexMesh
 runCommand blockMesh
 which surfaceFeatures > /dev/null 2>&1
@@ -72,6 +73,13 @@ runCommand snappyHexMesh -overwrite
 
 %:gmsh
 runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
+
+%{%(ConvertTetrahedra%)
+%:True
+# Convert to polyhedra
+runCommand polyDualMesh 10 -concaveMultiCells -overwrite
+%}
+
 if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
 then
     runCommand transformPoints "scale=(0.001 0.001 0.001)"

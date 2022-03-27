@@ -121,6 +121,9 @@ class _CfdMesh:
         addObjectProperty(obj, 'EdgeRefinement', 1, "App::PropertyFloat", "Mesh Parameters",
                           "Relative edge (feature) refinement")
 
+        addObjectProperty(obj, 'ConvertTetrahedra', True, "App::PropertyBool", "Mesh Parameters",
+                          "Convert tetrahedral cells to polyhedra")
+
         if addObjectProperty(obj, 'ElementDimension', _CfdMesh.known_element_dimensions, "App::PropertyEnumeration",
                              "Mesh Parameters", "Dimension of mesh elements (Default 3D)"):
             obj.ElementDimension = '3D'

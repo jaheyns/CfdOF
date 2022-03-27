@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>466</width>
-    <height>774</height>
+    <width>510</width>
+    <height>856</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,7 +41,6 @@
        <widget class="QLabel" name="label_6">
         <property name="font">
          <font>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -88,7 +87,6 @@
       <widget class="QLabel" name="label_5">
        <property name="font">
         <font>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -137,7 +135,6 @@
       <widget class="QLabel" name="label_3">
        <property name="font">
         <font>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -150,6 +147,13 @@
       <widget class="QPushButton" name="pb_paraview">
        <property name="text">
         <string>Paraview</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="pb_check_mesh">
+       <property name="text">
+        <string>Check Mesh</string>
        </property>
       </widget>
      </item>
@@ -175,10 +179,27 @@
      <property name="verticalSpacing">
       <number>8</number>
      </property>
-     <item row="4" column="0">
+     <item row="5" column="0">
       <widget class="QLabel" name="l_max">
        <property name="text">
         <string>Base element size:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="l_dimension">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Element dimension:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QComboBox" name="cb_dimension">
+       <property name="toolTip">
+        <string/>
        </property>
       </widget>
      </item>
@@ -189,7 +210,26 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Mesh Parameters</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="cb_utility">
+       <property name="toolTip">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
       <widget class="Gui::InputField" name="if_max">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -224,7 +264,6 @@
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -233,27 +272,10 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="cb_utility">
-       <property name="toolTip">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="l_dimension">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Element dimension:</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="1">
-      <widget class="QComboBox" name="cb_dimension">
-       <property name="toolTip">
-        <string/>
+      <widget class="QCheckBox" name="checkbox_convert_tets">
+       <property name="text">
+        <string>Convert to polyhedra</string>
        </property>
       </widget>
      </item>
@@ -348,7 +370,6 @@
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
-          <weight>50</weight>
           <bold>false</bold>
          </font>
         </property>

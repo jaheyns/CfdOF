@@ -59,14 +59,13 @@ class _TaskPanelCfdMesh:
                                                              stdoutHook=self.gotOutputLines,
                                                              stderrHook=self.gotErrorLines)
 
-        self.form.cb_utility.activated.connect(self.choose_utility)
-
         self.Timer = QtCore.QTimer()
         self.Timer.setInterval(1000)
         self.Timer.timeout.connect(self.update_timer_text)
 
         self.open_paraview = QtCore.QProcess()
 
+        self.form.cb_utility.activated.connect(self.choose_utility)
         self.form.pb_write_mesh.clicked.connect(self.writeMesh)
         self.form.pb_edit_mesh.clicked.connect(self.editMesh)
         self.form.pb_run_mesh.clicked.connect(self.runMesh)
@@ -75,9 +74,11 @@ class _TaskPanelCfdMesh:
         self.form.pb_load_mesh.clicked.connect(self.pbLoadMeshClicked)
         self.form.pb_clear_mesh.clicked.connect(self.pbClearMeshClicked)
         self.form.pb_searchPointInMesh.clicked.connect(self.searchPointInMesh)
+        self.form.pb_check_mesh.clicked.connect(self.checkMeshClicked)
+
+        self.form.snappySpecificProperties.setVisible(False)
         self.form.pb_stop_mesh.setEnabled(False)
         self.form.pb_paraview.setEnabled(False)
-        self.form.snappySpecificProperties.setVisible(False)
 
         #self.form.cb_dimension.addItems(_CfdMesh.known_element_dimensions)
         self.form.cb_utility.addItems(_CfdMesh.known_mesh_utility)
@@ -87,6 +88,7 @@ class _TaskPanelCfdMesh:
                                                   "to try to automatically find a point")
         self.form.if_cellsbetweenlevels.setToolTip("Number of cells between each of level of refinement")
         self.form.if_edgerefine.setToolTip("Number of refinement levels for all edges")
+        self.form.checkbox_convert_tets.setToolTip("Convert cfMesh tetrahedral mesh to polyhedra")
 
         self.load()
         self.updateUI()
@@ -118,6 +120,8 @@ class _TaskPanelCfdMesh:
         setQuantity(self.form.if_pointInMeshX, point_in_mesh.get('x'))
         setQuantity(self.form.if_pointInMeshY, point_in_mesh.get('y'))
         setQuantity(self.form.if_pointInMeshZ, point_in_mesh.get('z'))
+
+        self.form.checkbox_convert_tets.setChecked(self.mesh_obj.ConvertTetrahedra)
         self.form.if_cellsbetweenlevels.setValue(self.mesh_obj.CellsBetweenLevels)
         self.form.if_edgerefine.setValue(self.mesh_obj.EdgeRefinement)
 
@@ -129,16 +133,21 @@ class _TaskPanelCfdMesh:
     def updateUI(self):
         self.form.l_dimension.setVisible(False)
         self.form.cb_dimension.setVisible(False)
+        self.form.checkbox_convert_tets.setEnabled(False)
         case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
         self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
         self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(case_path, "pv.foam")))
         self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
+
         utility = self.form.cb_utility.currentText()
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
         elif utility == "cfMesh":
             self.form.snappySpecificProperties.setVisible(False)
+        elif utility == "gmsh":
+            self.form.snappySpecificProperties.setVisible(False)
+            self.form.checkbox_convert_tets.setEnabled(True)
 
     def store(self):
         storeIfChanged(self.mesh_obj, 'CharacteristicLengthMax', getQuantity(self.form.if_max))
@@ -146,9 +155,12 @@ class _TaskPanelCfdMesh:
         #storeIfChanged(self.mesh_obj, 'ElementDimension', self.form.cb_dimension.currentText())
         storeIfChanged(self.mesh_obj, 'CellsBetweenLevels', self.form.if_cellsbetweenlevels.value())
         storeIfChanged(self.mesh_obj, 'EdgeRefinement', self.form.if_edgerefine.value())
+        storeIfChanged(self.mesh_obj, 'ConvertTetrahedra', self.form.checkbox_convert_tets.isChecked())
+
         point_in_mesh = {'x': getQuantity(self.form.if_pointInMeshX),
                          'y': getQuantity(self.form.if_pointInMeshY),
                          'z': getQuantity(self.form.if_pointInMeshZ)}
+
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
             storeIfChanged(self.mesh_obj, 'PointInMesh', point_in_mesh)
 
@@ -178,8 +190,15 @@ class _TaskPanelCfdMesh:
         utility = self.form.cb_utility.currentText()
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
+            self.form.checkbox_convert_tets.setChecked(False)
+            self.form.checkbox_convert_tets.setEnabled(False)
+        elif utility == "gmsh":
+            self.form.checkbox_convert_tets.setEnabled(True)
+            self.form.snappySpecificProperties.setVisible(False)
         else:
             self.form.snappySpecificProperties.setVisible(False)
+            self.form.checkbox_convert_tets.setChecked(False)
+            self.form.checkbox_convert_tets.setEnabled(False)
 
     def writeMesh(self):
         import importlib
@@ -188,6 +207,7 @@ class _TaskPanelCfdMesh:
         self.Start = time.time()
         # Re-initialise CfdMeshTools with new parameters
         self.store()
+
         FreeCADGui.addModule("CfdMeshTools")
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.doCommand("cart_mesh = "
@@ -214,6 +234,46 @@ class _TaskPanelCfdMesh:
 
     def progressCallback(self, message):
         self.consoleMessage(message)
+
+    def checkMeshClicked(self):
+        self.Start = time.time()
+        try:
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            self.consoleMessage('Running Mesh checks ...')
+            FreeCADGui.addModule("CfdTools")
+            FreeCADGui.addModule("CfdMeshTools")
+            FreeCADGui.addModule("CfdConsoleProcess")
+            FreeCADGui.doCommand("cart_mesh = "
+                                 "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
+            FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
+            FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
+            FreeCADGui.doCommand("cart_mesh.error = False")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh', cart_mesh.meshCaseDir)")
+            FreeCADGui.doCommand("FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\\n')")
+            FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
+            FreeCADGui.doCommand("proxy.running_from_macro = True")
+            self.mesh_obj.Proxy.running_from_macro = False
+            FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
+                                 "  mesh_process = CfdConsoleProcess.CfdConsoleProcess()\n" +
+                                 "  mesh_process.start(cmd, env_vars=env_vars)\n" +
+                                 "  mesh_process.waitForFinished()\n" +
+                                 "else:\n" +
+                                 "  proxy.mesh_process.start(cmd, env_vars=env_vars)")
+            if self.mesh_obj.Proxy.mesh_process.waitForStarted():
+                self.form.pb_check_mesh.setEnabled(False)   # Prevent user running a second instance
+                self.form.pb_run_mesh.setEnabled(False)
+                self.form.pb_stop_mesh.setEnabled(False)
+                self.form.pb_paraview.setEnabled(False)
+                self.form.pb_load_mesh.setEnabled(False)
+                self.consoleMessage("Mesh check started")
+            else:
+                self.consoleMessage("Error starting mesh checker process", "#FF0000")
+                self.mesh_obj.Proxy.cart_mesh.error = True
+
+        except Exception as ex:
+            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
+        finally:
+            QApplication.restoreOverrideCursor()
 
     def editMesh(self):
         case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
@@ -247,6 +307,7 @@ class _TaskPanelCfdMesh:
             if self.mesh_obj.Proxy.mesh_process.waitForStarted():
                 self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
                 self.form.pb_stop_mesh.setEnabled(True)
+                self.form.pb_check_mesh.setEnabled(False)
                 self.form.pb_paraview.setEnabled(False)
                 self.form.pb_load_mesh.setEnabled(False)
                 self.consoleMessage("Mesher started")

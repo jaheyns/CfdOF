@@ -591,7 +591,6 @@ class CfdMeshTools:
 
         if self.mesh_obj.MeshUtility == "cfMesh":
             self.cf_settings['ClMax'] = self.clmax*self.scale
-
             if len(self.cf_settings['BoundaryLayers']) > 0:
                 self.cf_settings['BoundaryLayerPresent'] = True
             else:
@@ -600,7 +599,6 @@ class CfdMeshTools:
                 self.cf_settings['InternalRefinementRegionsPresent'] = True
             else:
                 self.cf_settings['InternalRefinementRegionsPresent'] = False
-
         elif self.mesh_obj.MeshUtility == "snappyHexMesh":
             bound_box = self.part_obj.Shape.BoundBox
             bC = 5  # Number of background mesh buffer cells
@@ -691,7 +689,8 @@ class CfdMeshTools:
             'CfSettings': self.cf_settings,
             'SnappySettings': self.snappy_settings,
             'GmshSettings': self.gmsh_settings,
-            'ExtrusionSettings': self.extrusion_settings
+            'ExtrusionSettings': self.extrusion_settings,
+            'ConvertTetrahedra': self.mesh_obj.ConvertTetrahedra #TODO this might be the wrong place to send this data
         }
         if CfdTools.getFoamRuntime() != 'WindowsDocker':
             self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
