@@ -133,6 +133,8 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputDissipationRate, self.obj.DissipationRate)   # epsilon
         setQuantity(self.form.inputIntensity, self.obj.TurbulenceIntensity)     # intensity
         setQuantity(self.form.inputLengthScale, self.obj.TurbulenceLengthScale) # length scale
+        setQuantity(self.form.inputGammaInt, self.obj.Intermittency)   # gammaInt
+        setQuantity(self.form.inputReThetat, self.obj.ReThetat)  # ReThetat
 
         self.form.checkBoxDefaultBoundary.setChecked(self.obj.DefaultBoundary)
 
@@ -387,6 +389,10 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputDissipationRate)))
         FreeCADGui.doCommand("bc.NuTilda "
                              "= '{}'".format(getQuantity(self.form.inputNuTilda)))
+        FreeCADGui.doCommand("bc.Intermittency "
+                             "= '{}'".format(getQuantity(self.form.inputGammaInt)))
+        FreeCADGui.doCommand("bc.ReThetat "
+                             "= '{}'".format(getQuantity(self.form.inputReThetat)))
         FreeCADGui.doCommand("bc.TurbulenceIntensity "
                              "= '{}'".format(getQuantity(self.form.inputIntensity)))
         FreeCADGui.doCommand("bc.TurbulenceLengthScale "

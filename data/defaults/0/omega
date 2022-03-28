@@ -1,5 +1,7 @@
 %{%(physics/Turbulence%)
 %:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmega kOmegaSSTLM
 %[_header%]
 FoamFile
 {
@@ -48,6 +50,12 @@ boundaryField
         mixingLength    %(boundaries/%(0%)/TurbulenceLengthScale%);
         value           $internalField;
     }
+%:default
+    %(0%)
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
 %}
 %:outlet
     %(0%)
@@ -66,4 +74,5 @@ boundaryField
 }
 
 // ************************************************************************* //
+%}
 %}

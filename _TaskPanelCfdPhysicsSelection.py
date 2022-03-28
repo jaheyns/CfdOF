@@ -28,12 +28,13 @@ import FreeCAD
 import os
 import os.path
 import CfdTools
+from TurbulenceModelsConsts import K_OMEGA_SST, K_EPSILON, SPALART, LANGTRY_MENTER_SST
 from CfdTools import setQuantity
 if FreeCAD.GuiUp:
     import FreeCADGui
 
 
-RANS_MODELS = ["kOmegaSST", 'kEpsilon', 'SpalartAllmaras']
+RANS_MODELS = ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM']
 
 
 class _TaskPanelCfdPhysicsSelection:

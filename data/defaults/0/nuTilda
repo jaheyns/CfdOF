@@ -1,5 +1,7 @@
 %{%(physics/Turbulence%)
 %:RANS
+%{%(physics/TurbulenceModel%)
+%:SpalartAllmaras
 %[_header%]
 FoamFile
 {
@@ -47,6 +49,12 @@ boundaryField
         type              fixedValue;
         value             $internalField;
     }
+%:default
+    %(0%)
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
 %}
 %:outlet
     %(0%)
@@ -65,4 +73,5 @@ boundaryField
 }
 
 // ************************************************************************* //
+%}
 %}

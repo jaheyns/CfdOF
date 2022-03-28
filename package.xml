@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <package format="1">
-  <name>CfdOF</name>
-  <description>Computational Fluid Dynamics (CFD) for FreeCAD based on OpenFOAM</description>
-  <version>1.12.2</version>
-  <maintainer email="oliveroxtoby@gmail.com">Oliver Oxtoby</maintainer>
-  <license file="LICENSE">LGPL-2</license>
-  <url type="repository" branch="master">https://gitlab.com/opensimproject/CfdOF</url>
-  <url type="documentation">https://gitlab.com/opensimproject/CfdOF/README.md</url>
-  <freecadmin>0.18.4</freecadmin>
-  <content>
-    <workbench>
-      <classname>CfdOFWorkbench</classname>
-      <subdirectory>./</subdirectory>
-      <icon>Gui/Resources/icons/cfd.svg</icon>
-    </workbench>
-  </content>
+    <name>CfdOF</name>
+    <description>Computational Fluid Dynamics (CFD) for FreeCAD based on OpenFOAM</description>
+    <version>1.13.0</version>
+    <maintainer email="oliveroxtoby@gmail.com">Oliver Oxtoby</maintainer>
+    <license file="LICENSE">LGPL-2</license>
+    <url type="repository" branch="master">https://gitlab.com/opensimproject/CfdOF</url>
+    <url type="documentation">https://gitlab.com/opensimproject/CfdOF/README.md</url>
+    <freecadmin>0.18.4</freecadmin>
+    <content>
+        <workbench>
+            <classname>CfdOFWorkbench</classname>
+            <subdirectory>./</subdirectory>
+            <icon>Gui/Resources/icons/cfd.svg</icon>
+        </workbench>
+    </content>
 </package>

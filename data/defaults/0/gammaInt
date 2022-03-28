@@ -1,20 +1,20 @@
 %{%(physics/Turbulence%)
 %:RANS
 %{%(physics/TurbulenceModel%)
-%:kEpsilon
+%:kOmegaSSTLM
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      epsilon;
+    object      gammaInt;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
-internalField   uniform %(initialValues/epsilon%);
+internalField   uniform %(initialValues/gammaInt%);
 
 boundaryField
 {
@@ -28,27 +28,25 @@ boundaryField
 %:fixedWall translatingWall partialSlipWall roughWall
     %(0%)
     {
-        type        epsilonWallFunction;
-        value       $internalField;
+        type        zeroGradient;
     }
 %:slipWall
 %[0/_boundary_zeroGradient%]
 %}
 %:inlet open
 %{%(boundaries/%(0%)/TurbulenceInletSpecification%)
-%:TKEAndDissipationRate
+%:TKESpecDissipationRateGammaAndReThetat
     %(0%)
     {
         type        inletOutlet;
-        inletValue  uniform %(boundaries/%(0%)/DissipationRate%);
+        inletValue  uniform %(boundaries/%(0%)/Intermittency%);
         value       $internalField;
     }
 %:intensityAndLengthScale
     %(0%)
     {
-        type            turbulentMixingLengthDissipationRateInlet;
-        mixingLength    %(boundaries/%(0%)/TurbulenceLengthScale%);
-        value           $internalField;
+        type            fixedValue;
+        value           uniform 1;
     }
 %:default
     %(0%)
