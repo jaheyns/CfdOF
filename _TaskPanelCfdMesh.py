@@ -351,7 +351,7 @@ class _TaskPanelCfdMesh:
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_write_mesh.setEnabled(True)
-            self.form.pb_check_mesh(False)
+            self.form.pb_check_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(False)
 
         self.error_message = ''
