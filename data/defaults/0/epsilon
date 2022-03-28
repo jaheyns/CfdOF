@@ -1,5 +1,7 @@
 %{%(physics/Turbulence%)
 %:RANS
+%{%(physics/TurbulenceModel%)
+%:kEpsilon
 %[_header%]
 FoamFile
 {

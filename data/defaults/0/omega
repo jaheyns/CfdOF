@@ -1,5 +1,7 @@
 %{%(physics/Turbulence%)
 %:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmega kOmegaSSTLM
 %[_header%]
 FoamFile
 {
