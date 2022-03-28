@@ -8,26 +8,26 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trademarks.
 
 ## Roadmap
 
-The following features are being considered for addition to the Workbench. There are also a number of extensions to
-existing features which will be considered, such as inclusion of compressible variants of the standard turbulence modes 
-to ensure the correct formulations are used with the selected solver. 
-
-This document is primarily for documenting new features by the developers but is published for the information of users. 
+The following are items for discussion or items for which existing merges / PR's have been done.
 
 ## New features
-### Turbulence models
-* k-epsilon 
-* Spalart Allmaras
-* Langtry's transition models for k-omega
+### Turbulence models / boundary conditions / physics (solvers)
+* k-epsilon - DONE
+* Spalart Allmaras - DONE
+* Langtry's transition models for k-omega - DONE
+* cyclic boundary conditions
 
 ### Mesh
-* checkMesh capabilities
-* Convert tetra mesh to polyhedra mesh using poluDualMesh
+* checkMesh capabilities - DONE
+* Convert tetra mesh to polyhedra mesh using polyDualMesh - DONE
+* ability to import meshes from other formats? (CGNS, .msh (fluent), others?) [DISCUSS]
+
+### Cases
+* ability to import / export existing OF cases / results [DISCUSS]
 
 ### Internal
-* Update src to use Python module hierarchy
-* Improve edge detection for meshing
-* Export OF case / results
-* Move parallel run option to GUI for ease of use
+* Update src to use Python module hierarchy instead of flat package, will make reading / maintaining the code much easier
+* Improve edge detection for meshing?
+* Move parallel run option to GUI for ease of use [DISCUSS]
 * Implement -parallel meshing for snappyHexMesh (and others if supported)
 
