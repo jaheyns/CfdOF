@@ -1,5 +1,7 @@
 %{%(physics/Turbulence%)
 %:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST kEpsilon kOmegaSSTLM
 %[_header%]
 FoamFile
 {
@@ -72,4 +74,5 @@ boundaryField
 }
 
 // ************************************************************************* //
+%}
 %}
