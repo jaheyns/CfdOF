@@ -412,14 +412,7 @@ class CfdCaseWriterFoam:
                 if initial_values['BoundaryTurb']:
                     inlet_bc = settings['boundaries'][initial_values['BoundaryTurb'].Label]
 
-                    # Since Template builder does not write BC entries which are missing, we need to include a
-                    # %:default entry for all turbulence related volScalarFields in the field files for all inlet
-                    # types to ensure that an entry is written for each inlet, irrespective of whether the particular
-                    # solver uses it. This is because OpenFOAM will read all field fiels in the '0' directory
-                    # irrespective of whether that field is used by the solver, and missing boundary patches (inlets)
-                    # will cause a failure.
-
-                    # Initialise everything to zero to start with. 
+                    # Initialise everything to zero to start with.
                     initial_values['k'] = 0
                     initial_values['omega'] = 0
                     initial_values['epsilon'] = 0
@@ -448,9 +441,9 @@ class CfdCaseWriterFoam:
                                    inlet_bc['Uz']**2)**0.5
 
                             # Turb Intensity (or Tu) and length scale
-                            I = inlet_bc['TurbulenceIntensity']
+                            I = inlet_bc['TurbulenceIntensity'] / 100.0 # Convert from percent to fractional units
                             l = inlet_bc['TurbulenceLengthScale']
-                            Cmu = 0.09  # Standard turb model parameter
+                            Cmu = 0.09  # Standard turbulence model parameter
 
                             # k omega, k epsilon
                             k = 3.0/2.0*(Uin*I)**2

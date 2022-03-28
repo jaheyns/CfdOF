@@ -136,6 +136,14 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputGammaInt, self.obj.Intermittency)   # gammaInt
         setQuantity(self.form.inputReThetat, self.obj.ReThetat)  # ReThetat
 
+        self.form.inputKineticEnergy.setToolTip("Turbulent kinetic energy")
+        self.form.inputSpecificDissipationRate.setToolTip("Specific turbulence dissipation rate")
+        self.form.inputDissipationRate.setToolTip("Turbulence dissipation rate")
+        self.form.inputIntensity.setToolTip("Turbulence intensity (%)")
+        self.form.inputLengthScale.setToolTip("Turbulence length scale")
+        self.form.inputGammaInt.setToolTip("Turbulence intermittency")
+        self.form.inputReThetat.setToolTip("Momentum thickness Reynolds number")
+
         self.form.checkBoxDefaultBoundary.setChecked(self.obj.DefaultBoundary)
 
         self.form.radioButtonCart.toggled.connect(self.updateUI)
