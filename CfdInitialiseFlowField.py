@@ -109,14 +109,14 @@ class _CfdInitialVariables:
         addObjectProperty(obj, 'k', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence", "Turbulent kinetic energy")
         addObjectProperty(obj, 'omega', '1 rad/s', "App::PropertyQuantity", "Turbulence",
                           "Specific turbulent dissipation rate")
-        addObjectProperty(obj, 'epsilon', 'm^2/s^3', "App::PropertyQuantity", "Turbulence",
+        addObjectProperty(obj, 'epsilon', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
                           "Turbulent dissipation rate")
-        addObjectProperty(obj, 'nuTilda', 'm^2/s^1', "App::PropertyQuantity", "Turbulence",
+        addObjectProperty(obj, 'nuTilda', '55 m^2/s^1', "App::PropertyQuantity", "Turbulence",
                           "Modified turbulent viscosity")
-        addObjectProperty(obj, 'gammaInt', '', "App::PropertyQuantity", "Turbulence",
-                          "Intermittency")
-        addObjectProperty(obj, 'ReThetat', '', "App::PropertyQuantity", "Turbulence",
-                          "Transition Momentum Thickness Re Number")
+        addObjectProperty(obj, 'gammaInt', '1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent intermittency")
+        addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
+                          "Transition Momentum Thickness Reynolds Number")
 
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
         addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary name")
