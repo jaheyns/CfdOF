@@ -79,7 +79,7 @@ DOWNLOAD_HISA = 4
 
 class CfdPreferencePage:
     def __init__(self):
-        ui_path = os.path.join(os.path.dirname(__file__), "CfdPreferencePage.ui")
+        ui_path = os.path.join(os.path.dirname(__file__), "core/gui/preferences/CfdPreferencePage.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.form.tb_choose_foam_dir.clicked.connect(self.chooseFoamDir)

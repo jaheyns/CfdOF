@@ -51,7 +51,6 @@ class CfdOFWorkbench(Workbench):
         from CfdMeshImport import _CommandCfdMeshFromImport
         from CfdMeshRefinement import _CommandMeshRegion
 
-        # TODO @Oli - this looks like dead code, do we need it / remove it [JB]?
         from CfdPhysicsSelection import _CommandCfdPhysicsSelection
         from CfdFluidMaterial import _CommandCfdFluidMaterial
         from CfdSolverFoam import _CommandCfdSolverFoam

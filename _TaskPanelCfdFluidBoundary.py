@@ -56,7 +56,7 @@ class TaskPanelCfdFluidBoundary:
 
         self.alphas = {}
 
-        ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdFluidBoundary.ui")
+        ui_path = os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdFluidBoundary.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.form.buttonDirection.setCheckable(True)

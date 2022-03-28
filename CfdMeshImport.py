@@ -63,7 +63,7 @@ class _CommandCfdMeshFromImport:
                     # if sel[0].isDerivedFrom("Part::Feature"):
                     mesh_obj_name = "Imported_Mesh"
                     FreeCADGui.doCommand("")
-                    FreeCADGui.addModule("CfdMeshImport")
+                    FreeCADGui.addModule("CfdMeshImport as CfdMeshImport")
                     FreeCADGui.doCommand("CfdMeshImport.importCfdMesh('" + mesh_obj_name + "')")
                     # FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name) # TODO dont think we need this
                     if CfdTools.getActiveAnalysis():

@@ -40,7 +40,7 @@ if FreeCAD.GuiUp:
 class CfdFaceSelectWidget:
     def __init__(self, parent_widget, obj, allow_obj_sel, allow_face_sel, allow_solid_sel,
                  allow_point_sel=False, allow_edge_sel=False):
-        ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdListOfFaces.ui")
+        ui_path = os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdListOfFaces.ui")
         self.parent_widget = parent_widget
         self.form = FreeCADGui.PySideUic.loadUi(ui_path, self.parent_widget)
         self.parent_widget.layout().addWidget(self.form)
