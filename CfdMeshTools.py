@@ -690,7 +690,7 @@ class CfdMeshTools:
             'SnappySettings': self.snappy_settings,
             'GmshSettings': self.gmsh_settings,
             'ExtrusionSettings': self.extrusion_settings,
-            'ConvertTetrahedra': self.mesh_obj.ConvertTetrahedra #TODO this might be the wrong place to send this data
+            'ConvertToDualMesh': self.mesh_obj.ConvertTetrahedra
         }
         if CfdTools.getFoamRuntime() != 'WindowsDocker':
             self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())

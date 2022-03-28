@@ -88,7 +88,7 @@ class _TaskPanelCfdMesh:
                                                   "to try to automatically find a point")
         self.form.if_cellsbetweenlevels.setToolTip("Number of cells between each of level of refinement")
         self.form.if_edgerefine.setToolTip("Number of refinement levels for all edges")
-        self.form.checkbox_convert_tets.setToolTip("Convert cfMesh tetrahedral mesh to polyhedra")
+        self.form.checkbox_convert_tets.setToolTip("Convert to polyhedral dual mesh")
 
         self.load()
         self.updateUI()
@@ -121,7 +121,7 @@ class _TaskPanelCfdMesh:
         setQuantity(self.form.if_pointInMeshY, point_in_mesh.get('y'))
         setQuantity(self.form.if_pointInMeshZ, point_in_mesh.get('z'))
 
-        self.form.checkbox_convert_tets.setChecked(self.mesh_obj.ConvertTetrahedra)
+        self.form.checkbox_convert_tets.setChecked(self.mesh_obj.ConvertToDualMesh)
         self.form.if_cellsbetweenlevels.setValue(self.mesh_obj.CellsBetweenLevels)
         self.form.if_edgerefine.setValue(self.mesh_obj.EdgeRefinement)
 
@@ -156,7 +156,7 @@ class _TaskPanelCfdMesh:
         #storeIfChanged(self.mesh_obj, 'ElementDimension', self.form.cb_dimension.currentText())
         storeIfChanged(self.mesh_obj, 'CellsBetweenLevels', self.form.if_cellsbetweenlevels.value())
         storeIfChanged(self.mesh_obj, 'EdgeRefinement', self.form.if_edgerefine.value())
-        storeIfChanged(self.mesh_obj, 'ConvertTetrahedra', self.form.checkbox_convert_tets.isChecked())
+        storeIfChanged(self.mesh_obj, 'ConvertToDualMesh', self.form.checkbox_convert_tets.isChecked())
 
         point_in_mesh = {'x': getQuantity(self.form.if_pointInMeshX),
                          'y': getQuantity(self.form.if_pointInMeshY),

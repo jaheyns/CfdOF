@@ -74,7 +74,7 @@ runCommand snappyHexMesh -overwrite
 %:gmsh
 runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 
-%{%(ConvertTetrahedra%)
+%{%(ConvertToDualMesh%)
 %:True
 # Convert to polyhedra
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
