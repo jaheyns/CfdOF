@@ -48,6 +48,7 @@ class _TaskPanelCfdMeshImport:
         self.mesh_input_filename = None
 
         self.form.pb_select_mesh.clicked.connect(self.openSelectMeshDialog)
+        self.form.pb_clear_selection.clicked.connect(self.clearSelectedMeshFilename)
         self.form.pb_do_import.clicked.connect(self.doImport)
 
         self.Start = time.time()
@@ -56,24 +57,22 @@ class _TaskPanelCfdMeshImport:
     def closed(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
-        # doc = FreeCADGui.getDocument(self.obj.Document)
-        # doc.resetEdit()
-        # doc.Document.recompute()
-
-        # FreeCADGui.doCommand("\nFreeCAD.ActiveDocument." + self.obj.Name + ".MeshInputFilename = "
-        #                                                                    "{}".format(self.mesh_input_filename))
-        # return True    # We dont actually need to do anything, simply close as we have already imported the mesh
+        # return True  # TODO Jonathan - check this is correct
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
-        # return True
+        # return True  # TODO Jonathan - check this is correct
 
     def openSelectMeshDialog(self):
-        path = FreeCAD.ConfigGet("UserAppData")
+        path = FreeCAD.ConfigGet("UserHomePath")
         self.mesh_input_filename, Filter = QtGui.QFileDialog.getOpenFileName(None, "Read a mesh file", path, "")
         if self.mesh_input_filename is not None:
             self.form.labelInputMeshFilename.setText(self.mesh_input_filename)
+
+    def clearSelectedMeshFilename(self):
+        self.form.labelInputMeshFilename.setText("")
+        self.mesh_input_filename = None
 
     def doImport(self):
         FreeCADGui.addModule("CfdMeshImporterTools")
@@ -95,5 +94,6 @@ class _TaskPanelCfdMeshImport:
             FreeCAD.Gui.updateGui()
 
     def update_timer_text(self):
-        if self.mesh_obj.Proxy.mesh_process.state() == QtCore.QProcess.ProcessState.Running:
-            self.form.l_time.setText('Time: ' + CfdTools.formatTimer(time.time() - self.Start))
+        # if self.mesh_obj.Proxy.mesh_process.state() == QtCore.QProcess.ProcessState.Running: # todo Jonathan - fix this once we have a import_obj
+        #     self.form.l_time.setText('Time: ' + CfdTools.formatTimer(time.time() - self.Start))
+        pass

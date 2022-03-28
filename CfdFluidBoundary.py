@@ -272,11 +272,11 @@ class _CfdFluidBoundary:
                           "Temperature")
 
         # k epsilon
-        addObjectProperty(obj, 'DissipationRate', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
+        addObjectProperty(obj, 'DissipationRate', '1 m^2/s^3', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
 
         # Spalart Allmaras
-        addObjectProperty(obj, 'NuTilda', '55 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+        addObjectProperty(obj, 'NuTilda', '1 m^2/s^1', "App::PropertyQuantity", "Turbulence",
                           "Temperature")
 
         # Langtry Menter 4 eqn k omega SST

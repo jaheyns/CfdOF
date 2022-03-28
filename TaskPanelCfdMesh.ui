@@ -27,7 +27,14 @@
        <widget class="QPushButton" name="pb_write_mesh">
         <property name="text">
          <string>Write mesh case</string>
-		 </property>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="pb_edit_mesh">
+        <property name="text">
+         <string>Edit</string>
+        </property>
        </widget>
       </item>
       <item row="0" column="0">
@@ -512,32 +519,87 @@
           </widget>
          </item>
         </layout>
+       </widget>
+      </item>
+     </layout>
     </widget>
-    <customwidgets>
-        <customwidget>
-            <class>Gui::InputField</class>
-            <extends>QLineEdit</extends>
-            <header>Gui/InputField.h</header>
-        </customwidget>
-    </customwidgets>
-    <tabstops>
-        <tabstop>pb_write_mesh</tabstop>
-        <tabstop>pb_edit_mesh</tabstop>
-        <tabstop>pb_run_mesh</tabstop>
-        <tabstop>pb_stop_mesh</tabstop>
-        <tabstop>pb_paraview</tabstop>
-        <tabstop>pb_load_mesh</tabstop>
-        <tabstop>pb_clear_mesh</tabstop>
-        <tabstop>cb_utility</tabstop>
-        <tabstop>if_max</tabstop>
-        <tabstop>pb_searchPointInMesh</tabstop>
-        <tabstop>if_pointInMeshX</tabstop>
-        <tabstop>if_pointInMeshY</tabstop>
-        <tabstop>if_pointInMeshZ</tabstop>
-        <tabstop>if_cellsbetweenlevels</tabstop>
-        <tabstop>if_edgerefine</tabstop>
-        <tabstop>te_output</tabstop>
-    </tabstops>
-    <resources/>
-    <connections/>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_2">
+     <property name="leftMargin">
+      <number>8</number>
+     </property>
+     <property name="topMargin">
+      <number>8</number>
+     </property>
+     <property name="rightMargin">
+      <number>8</number>
+     </property>
+     <property name="bottomMargin">
+      <number>8</number>
+     </property>
+     <property name="spacing">
+      <number>8</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Status</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <layout class="QGridLayout" name="gl_actions">
+       <item row="1" column="0">
+        <widget class="QLabel" name="l_time">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QTextEdit" name="te_output">
+         <property name="lineWrapMode">
+          <enum>QTextEdit::NoWrap</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Gui::InputField</class>
+   <extends>QLineEdit</extends>
+   <header>Gui/InputField.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>pb_write_mesh</tabstop>
+  <tabstop>pb_edit_mesh</tabstop>
+  <tabstop>pb_run_mesh</tabstop>
+  <tabstop>pb_stop_mesh</tabstop>
+  <tabstop>pb_paraview</tabstop>
+  <tabstop>pb_load_mesh</tabstop>
+  <tabstop>pb_clear_mesh</tabstop>
+  <tabstop>cb_utility</tabstop>
+  <tabstop>if_max</tabstop>
+  <tabstop>pb_searchPointInMesh</tabstop>
+  <tabstop>if_pointInMeshX</tabstop>
+  <tabstop>if_pointInMeshY</tabstop>
+  <tabstop>if_pointInMeshZ</tabstop>
+  <tabstop>if_cellsbetweenlevels</tabstop>
+  <tabstop>if_edgerefine</tabstop>
+  <tabstop>te_output</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
 </ui>
