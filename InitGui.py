@@ -48,7 +48,10 @@ class CfdOFWorkbench(Workbench):
 
         from CfdAnalysis import _CommandCfdAnalysis
         from CfdMesh import _CommandCfdMeshFromShape
+        from CfdMeshImport import _CommandCfdMeshFromImport
         from CfdMeshRefinement import _CommandMeshRegion
+
+        # TODO @Oli - this looks like dead code, do we need it / remove it [JB]?
         from CfdPhysicsSelection import _CommandCfdPhysicsSelection
         from CfdFluidMaterial import _CommandCfdFluidMaterial
         from CfdSolverFoam import _CommandCfdSolverFoam
@@ -59,10 +62,11 @@ class CfdOFWorkbench(Workbench):
 
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
+        FreeCADGui.addCommand('Cfd_MeshFromImport', _CommandCfdMeshFromImport())
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
 
         cmdlst = ['Cfd_Analysis',
-                  'Cfd_MeshFromShape', 'Cfd_MeshRegion',
+                  'Cfd_MeshFromImport', 'Cfd_MeshFromShape', 'Cfd_MeshRegion',
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
