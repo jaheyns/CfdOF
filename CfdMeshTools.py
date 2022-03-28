@@ -589,6 +589,7 @@ class CfdMeshTools:
         """ Collect case settings, and finally build a runnable case. """
         CfdTools.cfdMessage("Populating mesh dictionaries in folder {}\n".format(self.meshCaseDir))
 
+        # cfMESH settings
         if self.mesh_obj.MeshUtility == "cfMesh":
             self.cf_settings['ClMax'] = self.clmax*self.scale
             if len(self.cf_settings['BoundaryLayers']) > 0:
@@ -599,6 +600,8 @@ class CfdMeshTools:
                 self.cf_settings['InternalRefinementRegionsPresent'] = True
             else:
                 self.cf_settings['InternalRefinementRegionsPresent'] = False
+
+        # SnappyHexMesh settings
         elif self.mesh_obj.MeshUtility == "snappyHexMesh":
             bound_box = self.part_obj.Shape.BoundBox
             bC = 5  # Number of background mesh buffer cells
@@ -625,6 +628,11 @@ class CfdMeshTools:
                 "cellsZ": cells_z
             }
 
+            if self.mesh_obj.ImplicitEdgeDetection:
+                snappy_settings['ImplicitEdgeDetection'] = True
+            else:
+                snappy_settings['ImplicitEdgeDetection'] = False
+
             inside_x = Units.Quantity(self.mesh_obj.PointInMesh.get('x')).Value*self.scale
             inside_y = Units.Quantity(self.mesh_obj.PointInMesh.get('y')).Value*self.scale
             inside_z = Units.Quantity(self.mesh_obj.PointInMesh.get('z')).Value*self.scale
@@ -647,6 +655,8 @@ class CfdMeshTools:
                 self.snappy_settings['InternalRefinementRegionsPresent'] = True
             else:
                 self.snappy_settings['InternalRefinementRegionsPresent'] = False
+
+        # GMSH settings
         elif self.mesh_obj.MeshUtility == "gmsh":
             exe = CfdTools.getGmshExecutable()
             self.gmsh_settings['Executable'] = CfdTools.translatePath(exe)
