@@ -28,11 +28,13 @@ renderView1.ResetCamera()
 # get animation scene
 animationScene1 = GetAnimationScene()
 
-# get the time-keeper
-timeKeeper1 = GetTimeKeeper()
+# get the final timestep of the simulation
+timesteps = pfoam.TimestepValues
+finalTime =  timesteps[-1]
 
 # update animation scene based on data timesteps
 animationScene1.UpdateAnimationUsingDataTimeSteps()
+animationScene1.AnimationTime = finalTime
 
 # update the view to ensure updated data information
 renderView1.Update()

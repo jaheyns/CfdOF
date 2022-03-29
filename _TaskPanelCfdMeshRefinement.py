@@ -32,7 +32,6 @@ import CfdTools
 from CfdTools import getQuantity, setQuantity, indexOrDefault
 import CfdFaceSelectWidget
 import CfdMeshRefinement
-from FreeCAD import Units
 
 
 class _TaskPanelCfdMeshRefinement:
