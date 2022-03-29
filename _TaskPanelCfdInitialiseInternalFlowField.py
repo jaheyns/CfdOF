@@ -171,6 +171,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.kEpsilonFrame.setVisible(False)
         self.form.kOmegaSSTFrame.setVisible(False)
         self.form.SpalartAllmarasFrame.setVisible(False)
+        self.form.kOmegaSSTLMFrame.setVisible(False)
 
         self.form.kOmegaSSTLMFrame.setVisible(False)
         if self.physicsModel.TurbulenceModel == 'kOmegaSST':

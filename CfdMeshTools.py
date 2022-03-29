@@ -203,8 +203,10 @@ class CfdMeshTools:
 
     def processRefinements(self):
         """ Process mesh refinements """
-
         mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+
+        # todo remove
+        print(f'*********** Mesh refinement objects {mr_objs}')
 
         cf_settings = self.cf_settings
         cf_settings['MeshRegions'] = {}
@@ -212,6 +214,7 @@ class CfdMeshTools:
         cf_settings['InternalRegions'] = {}
         snappy_settings = self.snappy_settings
         snappy_settings['MeshRegions'] = {}
+        snappy_settings['BoundaryLayers'] = {}
         snappy_settings['InternalRegions'] = {}
 
         # Make list of all faces in meshed shape with original index
@@ -253,7 +256,8 @@ class CfdMeshTools:
             else:
                 bc_match_per_shape_face[match] = k
 
-        # Match relevant mesh regions to shape faces: boundary layer mesh regions for cfMesh, and extrusion patches
+        # Match relevant mesh regions to shape faces: boundary layer mesh regions for cfMesh / snappyHexMesh
+        # and extrusion patches.
         # Normal surface refinements are written as separate surfaces so need not be matched
         CfdTools.cfdMessage("Matching mesh refinement regions\n")
         mr_face_list = []
@@ -331,7 +335,7 @@ class CfdMeshTools:
             self.ele_length_map = {}
             self.ele_node_map = {}
 
-        # Additionally for snappy, match baffles to any surface mesh refinements
+        # Additionally, for SnappyHexMesh, match baffles to any surface mesh refinements
         # as well as matching each surface mesh refinement region to boundary conditions
         bc_mr_matched_faces = []
         mr_face_list = []
@@ -493,21 +497,44 @@ class CfdMeshTools:
                                     'RefinementLevel': refinement_level
                                 }
 
-            # In addition, for cfMesh, record matched boundary layer patches
-            if self.mesh_obj.MeshUtility == 'cfMesh' and mr_obj.NumberLayers > 1 and \
-                    not Internal and not mr_obj.Extrusion:
+            # In addition, for cfMesh and SnappyHesMesh, record matched boundary layer patches
+
+            # todo remove
+            print(f'************ Starting BL addition')
+            if self.mesh_obj.MeshUtility == 'cfMesh' or self.mesh_obj.MeshUtility == 'snappyHexMesh' \
+                    and mr_obj.NumberLayers > 1 and not Internal and not mr_obj.Extrusion:
+
+                # todo remove
+                print(f'************ Running boundary layer addition checks')
+                print(f'patch_faces: {self.patch_faces}')
+                print(f'patch_name: {self.patch_names}')
+                print(f'mr_id: {mr_id}')
+
                 for k in range(len(self.patch_faces)):
-                    if len(self.patch_faces[k][mr_id+1]):
+                    if len(self.patch_faces[k][mr_id + 1]):
                         # Limit expansion ratio to greater than 1.0 and less than 1.2
                         expratio = mr_obj.ExpansionRatio
                         expratio = min(1.2, max(1.0, expratio))
 
-                        cf_settings['BoundaryLayers'][self.patch_names[k][mr_id+1]] = {
-                            'NumberLayers': mr_obj.NumberLayers,
-                            'ExpansionRatio': expratio,
-                            'FirstLayerHeight': self.scale *
-                                                Units.Quantity(mr_obj.FirstLayerHeight).Value
-                        }
+                        # todo remove
+                        print(f'************ Expansion ratio {expratio}')
+
+                        if self.mesh_obj.MeshUtility == 'cfMesh':
+                            cf_settings['BoundaryLayers'][self.patch_names[k][mr_id + 1]] = \
+                            {
+                                'NumberLayers': mr_obj.NumberLayers,
+                                'ExpansionRatio': expratio,
+                                'FirstLayerHeight': self.scale * Units.Quantity(mr_obj.FirstLayerHeight).Value
+                            }
+                        elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
+                            # todo remove
+                            print(f'************ Setting SHM boundary layers')
+                            snappy_settings['BoundaryLayers'][self.patch_names[k][mr_id + 1]] = \
+                            {
+                                'NumberLayers': mr_obj.NumberLayers,
+                                'ExpansionRatio': expratio,
+                                # 'FinalLayerHeight': self.scale * Units.Quantity(mr_obj.FinalLayerHeight).Value
+                            }
 
     def automaticInsidePointDetect(self):
         # Snappy requires that the chosen internal point must remain internal during the meshing process and therefore
@@ -518,6 +545,7 @@ class CfdMeshTools:
 
         bound_box = self.part_obj.Shape.BoundBox
         error_safety_factor = 2.0
+
         if (step_size*error_safety_factor >= bound_box.XLength or
                         step_size*error_safety_factor >= bound_box.YLength or
                         step_size*error_safety_factor >= bound_box.ZLength):
@@ -529,18 +557,21 @@ class CfdMeshTools:
         y2 = bound_box.YMax
         z1 = bound_box.ZMin
         z2 = bound_box.ZMax
+
         import random
         if not shape.isClosed():
             CfdTools.cfdErrorBox("Can not find an internal point as shape is not closed - please specify manually.")
             return None
+
         for i in range(100):
-            x = random.uniform(x1,x2)
-            y = random.uniform(y1,y2)
-            z = random.uniform(z1,z2)
-            pointCheck = FreeCAD.Vector(x,y,z)
+            x = random.uniform(x1, x2)
+            y = random.uniform(y1, y2)
+            z = random.uniform(z1, z2)
+            pointCheck = FreeCAD.Vector(x, y, z)
             result = shape.isInside(pointCheck, step_size, False)
             if result:
                 return pointCheck
+
         CfdTools.cfdErrorBox("Failed to find an internal point - please specify manually.")
         return None
 
@@ -589,6 +620,7 @@ class CfdMeshTools:
         """ Collect case settings, and finally build a runnable case. """
         CfdTools.cfdMessage("Populating mesh dictionaries in folder {}\n".format(self.meshCaseDir))
 
+        # cfMesh settings
         if self.mesh_obj.MeshUtility == "cfMesh":
             self.cf_settings['ClMax'] = self.clmax*self.scale
             if len(self.cf_settings['BoundaryLayers']) > 0:
@@ -599,6 +631,8 @@ class CfdMeshTools:
                 self.cf_settings['InternalRefinementRegionsPresent'] = True
             else:
                 self.cf_settings['InternalRefinementRegionsPresent'] = False
+
+        # SnappyHexMesh settings
         elif self.mesh_obj.MeshUtility == "snappyHexMesh":
             bound_box = self.part_obj.Shape.BoundBox
             bC = 5  # Number of background mesh buffer cells
@@ -625,6 +659,19 @@ class CfdMeshTools:
                 "cellsZ": cells_z
             }
 
+            # todo remove
+            print(f"BoundaryLayersPresent: {len(self.snappy_settings['BoundaryLayers']) > 0}")
+
+            if len(self.snappy_settings['BoundaryLayers']) > 0:
+                self.snappy_settings['BoundaryLayerPresent'] = True
+            else:
+                self.snappy_settings['BoundaryLayerPresent'] = False
+
+            if self.mesh_obj.ImplicitEdgeDetection:
+                snappy_settings['ImplicitEdgeDetection'] = True
+            else:
+                snappy_settings['ImplicitEdgeDetection'] = False
+
             inside_x = Units.Quantity(self.mesh_obj.PointInMesh.get('x')).Value*self.scale
             inside_y = Units.Quantity(self.mesh_obj.PointInMesh.get('y')).Value*self.scale
             inside_z = Units.Quantity(self.mesh_obj.PointInMesh.get('z')).Value*self.scale
@@ -634,13 +681,15 @@ class CfdMeshTools:
                 for j in range(len(self.patch_faces[k])):
                     if len(self.patch_faces[k][j]):
                         shape_patch_names_list.append(self.patch_names[k][j])
+
             snappy_settings['ShapePatchNames'] = tuple(shape_patch_names_list)
             snappy_settings['EdgeRefinementLevel'] = CfdTools.relLenToRefinementLevel(self.mesh_obj.EdgeRefinement)
-            snappy_settings['PointInMesh'] = {
-                "x": inside_x,
-                "y": inside_y,
-                "z": inside_z
-            }
+            snappy_settings['PointInMesh'] = \
+                {
+                    "x": inside_x,
+                    "y": inside_y,
+                    "z": inside_z
+                }
             snappy_settings['CellsBetweenLevels'] = self.mesh_obj.CellsBetweenLevels
 
             if len(self.snappy_settings["InternalRegions"]) > 0:
@@ -700,6 +749,7 @@ class CfdMeshTools:
             self.settings['ParallelMesh'] = False
         else:
             self.settings['ParallelMesh'] = True
+
         self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
         self.settings['NumberOfThreads'] = self.mesh_obj.NumberOfThreads
 

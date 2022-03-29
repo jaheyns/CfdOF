@@ -124,6 +124,13 @@ class _CfdMesh:
         addObjectProperty(obj, 'ConvertToDualMesh', True, "App::PropertyBool", "Mesh Parameters",
                           "Convert to polyhedral dual mesh")
 
+        # Edge detection, implicit / explicit
+        addObjectProperty(obj, 'ImplicitEdgeDetection', False, "App::PropertyBool", "Mesh Parameters",
+                          "Use implicit edge detection")
+
+        addObjectProperty(obj, 'ExplicitEdgeDetection', True, "App::PropertyBool", "Mesh Parameters",
+                          "Use explicit (eMesh) edge detection")
+
         if addObjectProperty(obj, 'ElementDimension', _CfdMesh.known_element_dimensions, "App::PropertyEnumeration",
                              "Mesh Parameters", "Dimension of mesh elements (Default 3D)"):
             obj.ElementDimension = '3D'

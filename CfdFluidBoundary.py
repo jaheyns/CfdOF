@@ -130,7 +130,7 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                           "intensityAndLengthScale"],
                          ["k, omega, gamma and reThetat specified",
                           "Turbulence intensity and eddy length scale"],
-                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
+                         [[0, 2, 6, 7],  # k, omega, gammaInt and reThetat
                           [3, 4]]]  # I, l
                         }
 

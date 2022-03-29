@@ -216,6 +216,8 @@ class _TaskPanelCfdMesh:
         FreeCADGui.doCommand("FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy.cart_mesh = cart_mesh")
         cart_mesh = self.mesh_obj.Proxy.cart_mesh
         cart_mesh.progressCallback = self.progressCallback
+
+        # Start writing the mesh files
         self.consoleMessage("Preparing meshing ...")
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -231,6 +233,8 @@ class _TaskPanelCfdMesh:
             raise
         finally:
             QApplication.restoreOverrideCursor()
+
+        # Update the UI
         self.updateUI()
 
     def progressCallback(self, message):
@@ -240,7 +244,7 @@ class _TaskPanelCfdMesh:
         self.Start = time.time()
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
-            self.consoleMessage('Running Mesh checks ...')
+            self.consoleMessage('Initializing mesh check ...')
             FreeCADGui.addModule("CfdTools")
             FreeCADGui.addModule("CfdMeshTools")
             FreeCADGui.addModule("CfdConsoleProcess")
@@ -267,9 +271,9 @@ class _TaskPanelCfdMesh:
                 self.form.pb_stop_mesh.setEnabled(False)
                 self.form.pb_paraview.setEnabled(False)
                 self.form.pb_load_mesh.setEnabled(False)
-                self.consoleMessage("Mesh check started")
+                self.consoleMessage("Mesh check started ...")
             else:
-                self.consoleMessage("Error starting mesh checker process", "#FF0000")
+                self.consoleMessage("Error starting mesh checke process", "#FF0000")
                 self.mesh_obj.Proxy.cart_mesh.error = True
 
         except Exception as ex:
@@ -286,7 +290,7 @@ class _TaskPanelCfdMesh:
         self.Start = time.time()
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
-            self.consoleMessage("Running {} ...".format(self.mesh_obj.MeshUtility))
+            self.consoleMessage("Initializing {} ...".format(self.mesh_obj.MeshUtility))
             FreeCADGui.addModule("CfdMeshTools")
             FreeCADGui.addModule("CfdTools")
             FreeCADGui.addModule("CfdConsoleProcess")
@@ -313,7 +317,7 @@ class _TaskPanelCfdMesh:
                 self.form.pb_check_mesh.setEnabled(False)
                 self.form.pb_paraview.setEnabled(False)
                 self.form.pb_load_mesh.setEnabled(False)
-                self.consoleMessage("Mesher started")
+                self.consoleMessage("Mesher started ...")
             else:
                 self.consoleMessage("Error starting meshing process", "#FF0000")
                 self.mesh_obj.Proxy.cart_mesh.error = True
