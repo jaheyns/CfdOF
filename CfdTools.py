@@ -59,7 +59,7 @@ FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v201
                      "Linux": ["/usr/lib/openfoam/openfoam2112", "/usr/lib/openfoam/openfoam2106",
                                "/usr/lib/openfoam/openfoam2012", "/usr/lib/openfoam/openfoam2006",
                                "/opt/openfoam9", "/opt/openfoam8", "/opt/openfoam7", "/opt/openfoam6",
-                               "/opt/openfoam5", "/opt/openfoam-dev"
+                               "/opt/openfoam5", "/opt/openfoam-dev",
                                "~/openfoam/OpenFOAM-v2112", "~/openfoam/OpenFOAM-v2106",
                                "~/openfoam/OpenFOAM-v2012", "~/openfoam/OpenFOAM-v2006",
                                "~/OpenFOAM/OpenFOAM-9.x", "~/OpenFOAM/OpenFOAM-9.0",
@@ -1442,7 +1442,6 @@ def importMaterials():
 
 def addMatDir(mat_dir, materials):
     import glob
-    import os
     import importFCMat
     mat_file_extension = ".FCMat"
     ext_len = len(mat_file_extension)

@@ -58,7 +58,7 @@ potentialFlow
 
 solvers
 {
-    "(k|omega|nuTilda)"
+    "(k|omega|epsilon|nuTilda|gammaInt|ReThetat)"
     {
         solver           smoothSolver;
         smoother         GaussSeidel;
@@ -68,7 +68,7 @@ solvers
         minIter          1;
     }
 
-    "(k|omega|nuTilda)Final"
+    "(k|omega|epsilon|nuTilda|gammaInt|ReThetat)Final"
     {
         $k;
         relTol          0;
