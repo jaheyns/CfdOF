@@ -244,12 +244,15 @@ class CfdMeshTools:
             match = bc_matched_faces[k][1]
             prev_k = bc_match_per_shape_face[match]
             if prev_k >= 0:
-                nb, bref, ri = bc_matched_faces[k][0]
-                nb2, bref2, ri2 = bc_matched_faces[prev_k][0]
+                nb, ri, si = bc_matched_faces[k][0]
+                nb2, ri2, si2 = bc_matched_faces[prev_k][0]
+                bc = bc_group[nb]
+                bc2 = bc_group[nb2]
                 CfdTools.cfdWarning(
                     "Boundary '{}' reference {}:{} also assigned as "
                     "boundary '{}' reference {}:{} - ignoring duplicate\n".format(
-                        bc_group[nb].Label, bref[0], bref[1], bc_group[nb2].Label, bref2[0], bref2[1]))
+                        bc.Label, bc.ShapeRefs[ri][0].Name, bc.ShapeRefs[ri][1][si],
+                        bc2.Label, bc.ShapeRefs[ri][0].Name, bc.ShapeRefs[ri][1][si]))
             else:
                 bc_match_per_shape_face[match] = k
 
@@ -283,8 +286,8 @@ class CfdMeshTools:
                 CfdTools.cfdWarning(
                     "Mesh refinement '{}' reference {}:{} also assigned as "
                     "mesh refinement '{}' reference {}:{} - ignoring duplicate\n".format(
-                        mr_objs[nr].Label, mr_objs[nr].ShapeRefs[ri][0], mr_objs[nr].ShapeRefs[ri][1][si],
-                        mr_objs[nr2].Label, mr_objs[nr2].ShapeRefs[ri2][0], mr_objs[nr2].ShapeRefs[ri2][1][si2]))
+                        mr_objs[nr].Label, mr_objs[nr].ShapeRefs[ri][0].Name, mr_objs[nr].ShapeRefs[ri][1][si],
+                        mr_objs[nr2].Label, mr_objs[nr2].ShapeRefs[ri2][0].Name, mr_objs[nr2].ShapeRefs[ri2][1][si2]))
             else:
                 bl_match_per_shape_face[match] = k
 
@@ -302,9 +305,9 @@ class CfdMeshTools:
             nb = -1
             nr = -1
             if k >= 0:
-                nb, bref, bri = bc_matched_faces[k][0]
+                nb, bri, bsi = bc_matched_faces[k][0]
             if l >= 0:
-                nr, ref, rri = mr_matched_faces[l][0]
+                nr, rri, ssi = mr_matched_faces[l][0]
             self.patch_faces[nb+1][nr+1].append(i)
 
         # For gmsh, match mesh refinement with vertices in original mesh
