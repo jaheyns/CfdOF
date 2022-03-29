@@ -26,7 +26,6 @@
 import FreeCAD
 from FreeCAD import Units
 import os
-import platform
 import shutil
 import CfdTools
 import math
