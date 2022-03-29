@@ -126,10 +126,11 @@ class _CfdPhysicsModel:
 
         if addObjectProperty(obj, "Turbulence", ['Inviscid', 'Laminar', 'RANS'], "App::PropertyEnumeration",
                              "Physics modelling", "Type of turbulence modelling"):
-            obj.Turbulence = ['Inviscid', 'Laminar', 'RANS']
+            obj.Turbulence = 'Laminar'
 
-        addObjectProperty(obj, "TurbulenceModel", ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM'],
-                          "App::PropertyEnumeration", "Physics modelling", "Turbulence model")
+        if addObjectProperty(obj, "TurbulenceModel", ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM'],
+                             "App::PropertyEnumeration", "Physics modelling", "Turbulence model"):
+            obj.TurbulenceModel = 'kOmegaSST'
 
         addObjectProperty(obj, "gx", '0 m/s^2', "App::PropertyAcceleration", "Physics modelling",
                           "Gravitational acceleration vector (x component)")
