@@ -251,9 +251,9 @@ class _CfdFluidBoundary:
         addObjectProperty(obj, 'Temperature', '293 K', "App::PropertyQuantity", "Thermal",
                           "Temperature")
         addObjectProperty(obj, 'HeatFlux', '0 W/m^2', "App::PropertyQuantity", "Thermal",
-                          "Temperature")
+                          "Wall heat flux")
         addObjectProperty(obj, 'HeatTransferCoeff', '0 W/m^2/K', "App::PropertyQuantity", "Thermal",
-                          "Temperature")
+                          "Wall heat transfer coefficient")
 
         all_turb_specs = []
         for k in TURBULENT_INLET_SPEC:
@@ -262,34 +262,34 @@ class _CfdFluidBoundary:
         all_turb_specs = list(set(all_turb_specs))  # Remove dups
 
         if addObjectProperty(obj, 'TurbulenceInletSpecification', all_turb_specs, "App::PropertyEnumeration",
-                             "Turbulence", "Temperature"):
+                             "Turbulence", "Turbulent quantities specified"):
             obj.TurbulenceInletSpecification = 'intensityAndLengthScale'
 
         # k omega SST
         addObjectProperty(obj, 'TurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
-                          "Temperature")
+                          "Turbulent kinetic energy")
         addObjectProperty(obj, 'SpecificDissipationRate', '1 rad/s', "App::PropertyQuantity", "Turbulence",
-                          "Temperature")
+                          "Specific turbulent dissipation rate")
 
         # k epsilon
-        addObjectProperty(obj, 'DissipationRate', '1 m^2/s^3', "App::PropertyQuantity", "Turbulence",
-                          "Temperature")
+        addObjectProperty(obj, 'DissipationRate', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent dissipation rate")
 
         # Spalart Allmaras
-        addObjectProperty(obj, 'NuTilda', '1 m^2/s^1', "App::PropertyQuantity", "Turbulence",
-                          "Temperature")
+        addObjectProperty(obj, 'NuTilda', '55 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Modified turbulent viscosity")
 
         # Langtry Menter 4 eqn k omega SST
-        addObjectProperty(obj, 'Intermittency', '1 m^2/s^1', "App::PropertyQuantity", "Turbulence", # Todo Jon - check units and quantity
-                          "Temperature")
-        addObjectProperty(obj, 'ReThetat', '1 m^2/s^1', "App::PropertyQuantity", "Turbulence",       # todo Jon - check units and quantity
-                          "Temperature")
+        addObjectProperty(obj, 'Intermittency', '1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent intermittency")
+        addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
+                          "Transition momentum thickness Reynolds number")
 
         # General
         addObjectProperty(obj, 'TurbulenceIntensity', '0.1', "App::PropertyQuantity", "Turbulence",
-                          "Temperature")
+                          "Turbulence intensity [0-1]")
         addObjectProperty(obj, 'TurbulenceLengthScale', '0.1 m', "App::PropertyLength", "Turbulence",
-                          "Temperature")
+                          "Length scale of turbulent eddies")
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume fraction",
                           "Volume fractions")
 

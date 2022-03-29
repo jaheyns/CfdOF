@@ -1414,15 +1414,15 @@ def addObjectProperty(obj, prop, init_val, type, *args):
     added = False
     if prop not in obj.PropertiesList:
         added = obj.addProperty(type, prop, *args)
-    if type == "App::PropertyQuantity":
+    if type == 'App::PropertyQuantity':
         # Set the unit so that the quantity will be accepted
         # Has to be repeated on load as unit gets lost
         setattr(obj, prop, Units.Unit(init_val))
-    if added:
+    if added or type == 'App::PropertyEnumeration':
+        # For enumeration, always re-assign the list of allowed values in case some were added
+        # The currently set value is unaffected by this
         setattr(obj, prop, init_val)
-        return True
-    else:
-        return False
+    return added
 
 
 def relLenToRefinementLevel(rel_len):
