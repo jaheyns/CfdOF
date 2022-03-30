@@ -178,6 +178,7 @@ class _TaskPanelCfdMeshRefinement:
     def updateUI(self):
         self.form.surfaceOrInernalVolume.setVisible(True)
         self.form.boundlayer_frame.setVisible(self.form.check_boundlayer.isChecked())
+        self.form.commonFrame.setVisible(True)
 
         if self.form.extrusionToggle.isChecked():
             self.form.extrusionFrame.setVisible(True)
