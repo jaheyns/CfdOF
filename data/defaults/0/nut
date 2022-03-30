@@ -14,7 +14,7 @@ dimensions      [0 2 -1 0 0 0 0];
 
 %{%(physics/TurbulenceModel%)
 %:kEqn
-internalField   uniform %(initialValues/kEqnk%);
+internalField   uniform %(initialValues/kEqnNut%);
 %:Smagorinsky WALE
 internalField   uniform %(initialValues/nut%);
 %:default
@@ -32,13 +32,13 @@ boundaryField
     %(0%)
     {
         type        fixedValue;
-        value       %(boundaries/%(0%)/kEqnTurbulentViscosity%);
+        value       uniform %(boundaries/%(0%)/kEqnTurbulentViscosity%);
     }
 %:Smagorinsky WALE
     %(0%)
     {
         type        fixedValue;
-        value       %(boundaries/%(0%)/TurbulentViscosity%);
+        value       uniform %(boundaries/%(0%)/TurbulentViscosity%);
     }
 %:default
     %(0%)

@@ -59,7 +59,7 @@ boundaryField
     %(0%)
     {
         type        fixedValue;
-        value       %(boundaries/%(0%)/kEqnTurbulentKineticEnergy%);
+        value       uniform %(boundaries/%(0%)/kEqnTurbulentKineticEnergy%);
     }
 %:default
     %(0%)
