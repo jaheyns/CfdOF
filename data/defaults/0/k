@@ -50,6 +50,12 @@ boundaryField
         intensity   %(boundaries/%(0%)/TurbulenceIntensity%);
         value       $internalField;
     }
+%:TurbulentViscosityAndK
+    %(0%)
+    {
+        type        fixedValue;
+        value       %(boundaries/%(0%)/TurbulentKineticEnergy%);
+    }
 %:default
     %(0%)
     {

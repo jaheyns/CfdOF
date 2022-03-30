@@ -131,33 +131,21 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                           "Turbulence intensity and eddy length scale"],
                          [[0, 2, 6, 7],  # k, omega, gamma and reThetat
                           [3, 4]]],  # I, l
-                        "kEqn": # todo fix me
-                        [["Turbulent viscosity & Kinetic Energy ",
-                          "Intensity & Length Scale"],
-                         ["TurbulentViscosityAndK",
-                          "intensityAndLengthScale"],
-                         ["turbulent viscosity specified",
-                          "Turbulence intensity and eddy length scale"],
-                         [[8, 9],  # nut
-                          [3, 4]]],  # I, l
-                        "Smagorinsky": # todo fix me
-                        [["Turbulent viscosity",
-                          "Intensity & Length Scale"],
-                         ["TurbulentViscosity",
-                          "intensityAndLengthScale"],
-                         ["turbulent viscosity specified",
-                          "Turbulence intensity and eddy length scale"],
-                         [[8, 9],  # nut
-                          [3, 4]]],  # I, l
-                        "WALE": # todo fix me
-                        [["Turbulent viscosity",
-                          "Intensity & Length Scale"],
-                         ["TurbulentViscosity",
-                          "intensityAndLengthScale"],
-                         ["turbulent viscosity specified",
-                          "Turbulence intensity and eddy length scale"],
-                         [[8, 9],  # nut
-                          [3, 4]]]  # I, l
+                        "kEqn":     # todo fix me
+                        [["Kinetic Energy & Turbulent viscosity"],
+                         ["TurbulentViscosityAndK"],
+                         ["k and turbulent viscosity specified"],
+                         [[0, 8]]],     # nut
+                        "Smagorinsky":  # todo fix me
+                        [["Turbulent viscosity"],
+                         ["TurbulentViscosity"],
+                         ["turbulent viscosity specified"],
+                         [[8]]],  # nut
+                        "WALE":     # todo fix me
+                        [["Turbulent viscosity"],
+                         ["TurbulentViscosity"],
+                         ["turbulent viscosity specified"],
+                         [[8]]]  # nut
                         }
 
 THERMAL_BOUNDARY_NAMES = ["Fixed temperature",
@@ -310,6 +298,10 @@ class _CfdFluidBoundary:
                           "Turbulent intermittency")
         addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
                           "Transition momentum thickness Reynolds number")
+
+        # LES models
+        addObjectProperty(obj, 'TurbulentViscosity', '1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
 
         # General
         addObjectProperty(obj, 'TurbulenceIntensity', '0.1', "App::PropertyQuantity", "Turbulence",

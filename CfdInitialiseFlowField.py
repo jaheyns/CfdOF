@@ -117,6 +117,8 @@ class _CfdInitialVariables:
                           "Turbulent intermittency")
         addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
                           "Transition Momentum Thickness Reynolds Number")
+        addObjectProperty(obj, 'nut', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
 
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
         addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary name")

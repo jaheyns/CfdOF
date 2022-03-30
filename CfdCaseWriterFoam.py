@@ -440,6 +440,11 @@ class CfdCaseWriterFoam:
                         initial_values['omega'] = inlet_bc['SpecificDissipationRate']
                         initial_values['gammaInt'] = inlet_bc['Intermittency']
                         initial_values['ReThetat'] = inlet_bc['ReThetat']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'TurbulentViscosity':
+                        initial_values['nut'] = inlet_bc['TurbulentViscosity']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'TurbulentViscosityAndK':
+                        initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
+                        initial_values['nut'] = inlet_bc['TurbulentViscosity']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
                         if inlet_bc['BoundarySubType'] == 'uniformVelocityInlet' or \
                            inlet_bc['BoundarySubType'] == 'farField':

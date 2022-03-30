@@ -12,13 +12,33 @@ FoamFile
 
 dimensions      [0 2 -1 0 0 0 0];
 
+%{%(physics/Turbulence%)
+%:LES
+internalField   uniform %(initialValues/nut%);
+%:default
 internalField   uniform 0;
+%}
 
 boundaryField
 {
 
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
+%:inlet
+%{%(physics/TurbulenceModel%)
+%:kEqn Smagorinsky WALE
+    %(0%)
+    {
+        type        fixedValue;
+        value       %(boundaries/%(0%)/TurbulentViscosity%);
+    }
+%:default
+    %(0%)
+    {
+        type        calculated;
+        value       $internalField;
+    }
+%}
 %:empty
 %[0/_boundary_empty%]
 %:wall

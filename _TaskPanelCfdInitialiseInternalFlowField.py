@@ -109,6 +109,11 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         setQuantity(self.form.inputOmega, self.obj.omega)
         setQuantity(self.form.inputEpsilon, self.obj.epsilon)
         setQuantity(self.form.inputnuTilda, self.obj.nuTilda)
+        setQuantity(self.form.inputReThetat, self.obj.ReThetat)
+        setQuantity(self.form.inputGammaInt, self.obj.gammaInt)
+        setQuantity(self.form.inputTurbulentViscosity, self.obj.nut)
+        setQuantity(self.form.inputkEqnTurbulentViscosity, self.obj.k)
+        setQuantity(self.form.inputkEqnTurbulentViscosity, self.obj.nut)
 
         use_inlet_temp = self.obj.UseInletTemperatureValue
         self.form.checkUseInletValuesThermal.setChecked(use_inlet_temp)
@@ -171,8 +176,10 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.kEpsilonFrame.setVisible(False)
         self.form.kOmegaSSTFrame.setVisible(False)
         self.form.SpalartAllmarasFrame.setVisible(False)
-
         self.form.kOmegaSSTLMFrame.setVisible(False)
+        self.form.lesModelsFrame.setVisible(False)
+        self.form.leskEqnFrame.setVisible(False)
+
         if self.physicsModel.TurbulenceModel == 'kOmegaSST':
             self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
         elif self.physicsModel.TurbulenceModel == 'kEpsilon':
@@ -182,6 +189,11 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         elif self.physicsModel.TurbulenceModel == 'kOmegaSSTLM':
             self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
             self.form.kOmegaSSTLMFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'Smagorinsky' or \
+            self.physicsModel.TurbulenceModel == 'WALE':
+            self.form.lesModelsFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'kEqn':
+            self.form.leskEqnFrame.setVisible(not use_inlet_turb)
 
     def radioChanged(self):
         self.updateUi()
@@ -221,6 +233,9 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         FreeCADGui.doCommand("init.k = '{}'".format(getQuantity(self.form.inputk)))
         FreeCADGui.doCommand("init.gammaInt = '{}'".format(getQuantity(self.form.inputGammaInt)))
         FreeCADGui.doCommand("init.ReThetat = '{}'".format(getQuantity(self.form.inputReThetat)))
+        FreeCADGui.doCommand("init.k = '{}'".format(getQuantity(self.form.inputkEqnKineticEnergy)))
+        FreeCADGui.doCommand("init.nut = '{}'".format(getQuantity(self.form.inputkEqnTurbulentViscosity)))
+        FreeCADGui.doCommand("init.nut = '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
 
         boundaryU = self.form.comboBoundaryU.currentData()
         boundaryP = self.form.comboBoundaryP.currentData()
