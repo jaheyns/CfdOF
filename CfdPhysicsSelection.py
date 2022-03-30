@@ -129,7 +129,7 @@ class _CfdPhysicsModel:
             obj.Turbulence = 'Laminar'
 
         if addObjectProperty(obj, "TurbulenceModel", ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM',
-                                                      'Smagorinsky', 'kEqn', 'WALE'],
+                                                      'kEqn', 'Smagorinsky', 'WALE'],
                              "App::PropertyEnumeration", "Physics modelling", "Turbulence model"):
             obj.TurbulenceModel = 'kOmegaSST'
 

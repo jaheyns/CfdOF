@@ -251,6 +251,7 @@ solvers
     }
 
 %}
+%}
 %{%(solver/SolverName%)
 %:hisa
     yPsi

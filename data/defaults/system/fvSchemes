@@ -65,6 +65,7 @@ divSchemes
 %:kEqn
     div(phi, k)     bounded Gauss upwind;
 %}
+%}
 %{%(solver/SolverName%)
 %:hisa
     div(tauMC)      Gauss linear;

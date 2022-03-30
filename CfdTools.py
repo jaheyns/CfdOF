@@ -1418,11 +1418,14 @@ def addObjectProperty(obj, prop, init_val, type, *args):
         # Set the unit so that the quantity will be accepted
         # Has to be repeated on load as unit gets lost
         setattr(obj, prop, Units.Unit(init_val))
-    if added or type == 'App::PropertyEnumeration':
+    if added: # or type == 'App::PropertyEnumeration':
         # For enumeration, always re-assign the list of allowed values in case some were added
         # The currently set value is unaffected by this
         setattr(obj, prop, init_val)
-    return added
+        return True
+    else:
+        return False
+    # return added
 
 
 def relLenToRefinementLevel(rel_len):

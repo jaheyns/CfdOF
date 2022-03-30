@@ -27,7 +27,7 @@ boundaryField
     %(0%)
     {
 %{%(physics/TurbulenceModel%)
-%:SpalartAllmaras
+%:SpalartAllmaras Smagorinsky
         type        nutUSpaldingWallFunction;
 %:default
         type        nutkWallFunction;
@@ -40,7 +40,7 @@ boundaryField
     %(0%)
     {
 %{%(physics/TurbulenceModel%)
-%:SpalartAllmaras
+%:SpalartAllmaras Smagorinsky
         type        nutURoughWallFunction;
 %:default
         type        nutkRoughWallFunction;

@@ -31,7 +31,7 @@ LES
 
     printCoeffs         on;
 
-%{(physics/TurbulenceModel%)
+%{%(physics/TurbulenceModel%)
 %:Smagorinsky kEqn WALE
 	delta           vanDriest;
 
