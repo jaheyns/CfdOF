@@ -1418,10 +1418,14 @@ def addObjectProperty(obj, prop, init_val, type, *args):
         # Set the unit so that the quantity will be accepted
         # Has to be repeated on load as unit gets lost
         setattr(obj, prop, Units.Unit(init_val))
-    if added or type == 'App::PropertyEnumeration':
-        # For enumeration, always re-assign the list of allowed values in case some were added
-        # The currently set value is unaffected by this
+    if added:
         setattr(obj, prop, init_val)
+    elif type == 'App::PropertyEnumeration':
+        # For enumeration, re-assign the list of allowed values anyway in case some were added
+        # Make sure the currently set value is unaffected by this
+        curr_item = getattr(obj, prop)
+        setattr(obj, prop, init_val)
+        setattr(obj, prop, curr_item)
     return added
 
 

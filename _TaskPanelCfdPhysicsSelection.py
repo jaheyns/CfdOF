@@ -39,9 +39,6 @@ RANS_MODELS = ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM']
 
 class _TaskPanelCfdPhysicsSelection:
     def __init__(self, obj):
-        # Update object with latest properties for backward-compatibility
-        obj.Proxy.initProperties(obj)
-
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
         self.obj = obj
