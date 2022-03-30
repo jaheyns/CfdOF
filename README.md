@@ -21,15 +21,15 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
 * Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
+* Porous regions and porous baffles
 * Basic material database
 * Flow initialisation with a potential solver
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
-* Cut-cell Cartesian meshing with baffles (snappyHexMesh)
+* Cut-cell Cartesian meshing with baffles (snappyHexMesh) and implicit / explicit snapping
 * Tetrahedral meshing using Gmsh
 * Conversion to poly dual mesh from existing meshes
 * Post meshing check mesh
 * Postprocessing using Paraview
-* Porous regions and porous baffles
 * Runs on Windows 7-11 and Linux
 * Unit/regression testing
 * Case builder using an extensible template structure
