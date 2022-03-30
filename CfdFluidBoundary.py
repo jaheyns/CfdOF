@@ -132,31 +132,31 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                          [[0, 2, 6, 7],  # k, omega, gamma and reThetat
                           [3, 4]]],  # I, l
                         "kEqn": # todo fix me
-                        [["Kinetic Energy, Specific Dissipation Rate, Intermittency and ReThetat",
+                        [["Turbulent viscosity",
                           "Intensity & Length Scale"],
-                         ["TKESpecDissipationRateGammaAndReThetat",
+                         ["TurbulentViscosity",
                           "intensityAndLengthScale"],
                          ["k, omega, gamma and reThetat specified",
                           "Turbulence intensity and eddy length scale"],
-                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
+                         [[8, 9],  # nut
                           [3, 4]]],  # I, l
                         "Smagorinsky": # todo fix me
-                        [["Kinetic Energy, Specific Dissipation Rate, Intermittency and ReThetat",
+                        [["Turbulent viscosity",
                           "Intensity & Length Scale"],
-                         ["TKESpecDissipationRateGammaAndReThetat",
+                         ["TurbulentViscosity",
                           "intensityAndLengthScale"],
                          ["k, omega, gamma and reThetat specified",
                           "Turbulence intensity and eddy length scale"],
-                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
+                         [[8, 9],  # nut
                           [3, 4]]],  # I, l
                         "WALE": # todo fix me
-                        [["Kinetic Energy, Specific Dissipation Rate, Intermittency and ReThetat",
+                        [["Turbulent viscosity",
                           "Intensity & Length Scale"],
-                         ["TKESpecDissipationRateGammaAndReThetat",
+                         ["TurbulentViscosity",
                           "intensityAndLengthScale"],
                          ["k, omega, gamma and reThetat specified",
                           "Turbulence intensity and eddy length scale"],
-                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
+                         [[8, 9],  # nut
                           [3, 4]]]  # I, l
                         }
 

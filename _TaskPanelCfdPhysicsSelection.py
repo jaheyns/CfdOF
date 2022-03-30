@@ -149,8 +149,6 @@ class _TaskPanelCfdPhysicsSelection:
                 self.form.turbulenceComboBox.clear()
                 self.form.turbulenceComboBox.addItems(RANS_MODELS)
                 ti = CfdTools.indexOrDefault(RANS_MODELS, self.obj.TurbulenceModel, 0)
-                # ti = CfdTools.indexOrDefault(RANS_MODELS + LES_MODELS, self.obj.TurbulenceModel, 0)
-                print(f'ti: {ti}')
                 self.form.turbulenceComboBox.setCurrentIndex(ti)
                 self.form.turbulenceModelFrame.setVisible(True)
             # LES
@@ -158,8 +156,6 @@ class _TaskPanelCfdPhysicsSelection:
                 self.form.turbulenceComboBox.clear()
                 self.form.turbulenceComboBox.addItems(LES_MODELS)
                 ti = CfdTools.indexOrDefault(LES_MODELS, self.obj.TurbulenceModel, 0)
-                # ti = CfdTools.indexOrDefault(RANS_MODELS + LES_MODELS, self.obj.TurbulenceModel, 0)
-                print(f'ti: {ti}')
                 self.form.turbulenceComboBox.setCurrentIndex(ti)
                 self.form.turbulenceModelFrame.setVisible(True)
             else:
