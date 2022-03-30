@@ -131,7 +131,7 @@ class _TaskPanelCfdMesh:
         self.form.if_cellsbetweenlevels.setValue(self.mesh_obj.CellsBetweenLevels)
         self.form.if_edgerefine.setValue(self.mesh_obj.EdgeRefinement)
         self.form.radio_implicit_edge_detection.setChecked(self.mesh_obj.ImplicitEdgeDetection)
-        self.form.radio_explicit_edge_detection.setChecked(self.mesh_obj.ExplicitEdgeDetection)
+        self.form.radio_explicit_edge_detection.setChecked(not self.mesh_obj.ImplicitEdgeDetection)
 
         index_dimension = self.form.cb_dimension.findText(self.mesh_obj.ElementDimension)
         self.form.cb_dimension.setCurrentIndex(index_dimension)
@@ -166,7 +166,7 @@ class _TaskPanelCfdMesh:
         storeIfChanged(self.mesh_obj, 'EdgeRefinement', self.form.if_edgerefine.value())
         storeIfChanged(self.mesh_obj, 'ConvertToDualMesh', self.form.checkbox_convert_tets.isChecked())
         storeIfChanged(self.mesh_obj, 'ImplicitEdgeDetection', self.form.radio_implicit_edge_detection.isChecked())
-        storeIfChanged(self.mesh_obj, 'ExplicitEdgeDetection', self.form.radio_explicit_edge_detection.isChecked())
+        # storeIfChanged(self.mesh_obj, 'ExplicitEdgeDetection', self.form.radio_explicit_edge_detection.isChecked())
 
         point_in_mesh = {'x': getQuantity(self.form.if_pointInMeshX),
                          'y': getQuantity(self.form.if_pointInMeshY),
