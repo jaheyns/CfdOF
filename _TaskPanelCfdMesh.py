@@ -76,6 +76,10 @@ class _TaskPanelCfdMesh:
         self.form.pb_searchPointInMesh.clicked.connect(self.searchPointInMesh)
         self.form.pb_check_mesh.clicked.connect(self.checkMeshClicked)
 
+        self.radioGroup = QtGui.QButtonGroup()
+        self.radioGroup.addButton(self.form.radio_explicit_edge_detection)
+        self.radioGroup.addButton(self.form.radio_implicit_edge_detection)
+
         self.form.snappySpecificProperties.setVisible(False)
         self.form.pb_stop_mesh.setEnabled(False)
         self.form.pb_paraview.setEnabled(False)
@@ -89,6 +93,8 @@ class _TaskPanelCfdMesh:
         self.form.if_cellsbetweenlevels.setToolTip("Number of cells between each of level of refinement")
         self.form.if_edgerefine.setToolTip("Number of refinement levels for all edges")
         self.form.checkbox_convert_tets.setToolTip("Convert to polyhedral dual mesh")
+        self.form.radio_explicit_edge_detection.setToolTip("Find surface edges using explicit (eMesh) detection")
+        self.form.radio_implicit_edge_detection.setToolTip("Find surface edges using implicit detection")
 
         self.load()
         self.updateUI()
@@ -124,6 +130,8 @@ class _TaskPanelCfdMesh:
         self.form.checkbox_convert_tets.setChecked(self.mesh_obj.ConvertToDualMesh)
         self.form.if_cellsbetweenlevels.setValue(self.mesh_obj.CellsBetweenLevels)
         self.form.if_edgerefine.setValue(self.mesh_obj.EdgeRefinement)
+        self.form.radio_implicit_edge_detection.setChecked(self.mesh_obj.ImplicitEdgeDetection)
+        self.form.radio_explicit_edge_detection.setChecked(not self.mesh_obj.ImplicitEdgeDetection)
 
         index_dimension = self.form.cb_dimension.findText(self.mesh_obj.ElementDimension)
         self.form.cb_dimension.setCurrentIndex(index_dimension)
@@ -157,6 +165,8 @@ class _TaskPanelCfdMesh:
         storeIfChanged(self.mesh_obj, 'CellsBetweenLevels', self.form.if_cellsbetweenlevels.value())
         storeIfChanged(self.mesh_obj, 'EdgeRefinement', self.form.if_edgerefine.value())
         storeIfChanged(self.mesh_obj, 'ConvertToDualMesh', self.form.checkbox_convert_tets.isChecked())
+        storeIfChanged(self.mesh_obj, 'ImplicitEdgeDetection', self.form.radio_implicit_edge_detection.isChecked())
+        # storeIfChanged(self.mesh_obj, 'ExplicitEdgeDetection', self.form.radio_explicit_edge_detection.isChecked())
 
         point_in_mesh = {'x': getQuantity(self.form.if_pointInMeshX),
                          'y': getQuantity(self.form.if_pointInMeshY),
