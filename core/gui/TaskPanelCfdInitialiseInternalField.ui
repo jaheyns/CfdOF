@@ -378,10 +378,10 @@
 												<double>0.000000000000000</double>
 											</property>
 											<property name="unit" stdset="0">
-												<string notr="true"/>
-											</property>
+											<string notr="true">m^2/s^1</string>
+												</property>
 											<property name="format" stdset="0">
-												<string>g</string>
+												<number>0</number>
 											</property>
 										</widget>
 									</item>
@@ -425,10 +425,10 @@
 												<double>0.000000000000000</double>
 											</property>
 											<property name="unit" stdset="0">
-												<string notr="true"/>
+												<string notr="true">m^2/s^2</string>
 											</property>
 											<property name="format" stdset="0">
-												<string>g</string>
+												<number>0</number>
 											</property>
 										</widget>
 									</item>
@@ -460,10 +460,10 @@
 												<double>0.000000000000000</double>
 											</property>
 											<property name="unit" stdset="0">
-												<string notr="true"/>
+												<string notr="true">m^2/s^1</string>
 											</property>
 											<property name="format" stdset="0">
-												<string>g</string>
+												<number>0</number>
 											</property>
 										</widget>
 									</item>

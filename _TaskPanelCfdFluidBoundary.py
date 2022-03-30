@@ -413,10 +413,10 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputReThetat)))
         FreeCADGui.doCommand("bc.TurbulentViscosity "
                              "= '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
-        # FreeCADGui.doCommand("bc.TurbulentKineticEnergy "
-        #                      "= '{}'".format(getQuantity(self.form.inputKineticEnergy)))
-        # FreeCADGui.doCommand("bc.TurbulentViscosity "
-        #                      "= '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
+        FreeCADGui.doCommand("bc.kEqnTurbulentKineticEnergy "
+                             "= '{}'".format(getQuantity(self.form.inputKineticEnergy)))
+        FreeCADGui.doCommand("bc.kEqnTurbulentViscosity "
+                             "= '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
         FreeCADGui.doCommand("bc.TurbulenceIntensity "
                              "= '{}'".format(getQuantity(self.form.inputIntensity)))
         FreeCADGui.doCommand("bc.TurbulenceLengthScale "

@@ -119,6 +119,10 @@ class _CfdInitialVariables:
                           "Transition Momentum Thickness Reynolds Number")
         addObjectProperty(obj, 'nut', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
                           "Turbulent viscosity")
+        addObjectProperty(obj, 'kEqnk', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent kinetic energy")
+        addObjectProperty(obj, 'kEqnNut', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
 
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
         addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary name")

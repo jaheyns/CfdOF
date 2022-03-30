@@ -273,7 +273,7 @@ class _CfdFluidBoundary:
         for k in TURBULENT_INLET_SPEC:
             all_turb_specs += TURBULENT_INLET_SPEC[k][1]
 
-        all_turb_specs = list(set(all_turb_specs))  # Remove dups
+        all_turb_specs = list(set(all_turb_specs))  # Remove duplicates
 
         if addObjectProperty(obj, 'TurbulenceInletSpecification', all_turb_specs, "App::PropertyEnumeration",
                              "Turbulence", "Turbulent quantities specified"):
@@ -300,7 +300,11 @@ class _CfdFluidBoundary:
                           "Transition momentum thickness Reynolds number")
 
         # LES models
-        addObjectProperty(obj, 'TurbulentViscosity', '1', "App::PropertyQuantity", "Turbulence",
+        addObjectProperty(obj, 'TurbulentViscosity', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+        addObjectProperty(obj, 'kEqnTurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+        addObjectProperty(obj, 'kEqnTurbulentViscosity', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
                           "Turbulent viscosity")
 
         # General
