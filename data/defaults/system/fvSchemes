@@ -57,8 +57,13 @@ divSchemes
     div(phi,omega)  bounded Gauss upwind;
     div(phi,gammaInt)   bounded Gauss upwind;
     div(phi,ReThetat)   bounded Gauss upwind;
-
 %}
+%:LES
+%{%(physics/TurbulenceModel%)
+%:Smagorinsky WALE
+    // Nothing required for Smagorinsky and WALE
+%:kEqn
+    div(phi, k)     bounded Gauss upwind;
 %}
 %{%(solver/SolverName%)
 %:hisa

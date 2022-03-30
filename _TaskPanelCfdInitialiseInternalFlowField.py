@@ -42,7 +42,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.material_objs = material_objs
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
-                                                "TaskPanelCfdInitialiseInternalField.ui"))
+                                                             "core/gui/TaskPanelCfdInitialiseInternalField.ui"))
 
         self.form.velocityFrame.setVisible(False)
         self.form.pressureFrame.setVisible(False)

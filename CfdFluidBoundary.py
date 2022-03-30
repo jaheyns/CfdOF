@@ -30,7 +30,6 @@ import CfdTools
 from CfdTools import addObjectProperty
 from pivy import coin
 import Part
-from TurbulenceModelsConsts import LANGTRY_MENTER_SST, SPALART, K_EPSILON, K_OMEGA_SST
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -124,6 +123,33 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                          [[5],  # nu tilda
                           [3, 4]]],  # I, l
                         "kOmegaSSTLM":
+                        [["Kinetic Energy, Specific Dissipation Rate, Intermittency and ReThetat",
+                          "Intensity & Length Scale"],
+                         ["TKESpecDissipationRateGammaAndReThetat",
+                          "intensityAndLengthScale"],
+                         ["k, omega, gamma and reThetat specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
+                          [3, 4]]],  # I, l
+                        "kEqn": # todo fix me
+                        [["Kinetic Energy, Specific Dissipation Rate, Intermittency and ReThetat",
+                          "Intensity & Length Scale"],
+                         ["TKESpecDissipationRateGammaAndReThetat",
+                          "intensityAndLengthScale"],
+                         ["k, omega, gamma and reThetat specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
+                          [3, 4]]],  # I, l
+                        "Smagorinsky": # todo fix me
+                        [["Kinetic Energy, Specific Dissipation Rate, Intermittency and ReThetat",
+                          "Intensity & Length Scale"],
+                         ["TKESpecDissipationRateGammaAndReThetat",
+                          "intensityAndLengthScale"],
+                         ["k, omega, gamma and reThetat specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
+                          [3, 4]]],  # I, l
+                        "WALE": # todo fix me
                         [["Kinetic Energy, Specific Dissipation Rate, Intermittency and ReThetat",
                           "Intensity & Length Scale"],
                          ["TKESpecDissipationRateGammaAndReThetat",

@@ -124,11 +124,12 @@ class _CfdPhysicsModel:
                              "Type of phases present"):
             obj.Phase = 'Single'
 
-        if addObjectProperty(obj, "Turbulence", ['Inviscid', 'Laminar', 'RANS'], "App::PropertyEnumeration",
+        if addObjectProperty(obj, "Turbulence", ['Inviscid', 'Laminar', 'RANS', 'LES'], "App::PropertyEnumeration",
                              "Physics modelling", "Type of turbulence modelling"):
             obj.Turbulence = 'Laminar'
 
-        if addObjectProperty(obj, "TurbulenceModel", ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM'],
+        if addObjectProperty(obj, "TurbulenceModel", ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM',
+                                                      'Smagorinsky', 'kEqn', 'WALE'],
                              "App::PropertyEnumeration", "Physics modelling", "Turbulence model"):
             obj.TurbulenceModel = 'kOmegaSST'
 

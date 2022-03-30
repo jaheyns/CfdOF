@@ -1,5 +1,5 @@
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS LES
 %[_header%]
 FoamFile
 {

@@ -238,6 +238,18 @@ solvers
         relTol          0;
     }
 
+%:LES
+%{%(physics/TurbulenceModel%)
+%:Smagorinsky WALE
+    // Nothing required for Smagorinsky and WALE
+%:kEqn
+
+    "(k)Final"
+    {
+        $k;
+        relTol          0;
+    }
+
 %}
 %{%(solver/SolverName%)
 %:hisa

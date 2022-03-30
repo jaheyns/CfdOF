@@ -1,5 +1,5 @@
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS LES
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST kEpsilon kOmegaSSTLM
 %[_header%]
