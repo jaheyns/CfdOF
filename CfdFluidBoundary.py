@@ -132,11 +132,11 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                          [[0, 2, 6, 7],  # k, omega, gamma and reThetat
                           [3, 4]]],  # I, l
                         "kEqn": # todo fix me
-                        [["Turbulent viscosity",
+                        [["Turbulent viscosity & Kinetic Energy ",
                           "Intensity & Length Scale"],
-                         ["TurbulentViscosity",
+                         ["TurbulentViscosityAndK",
                           "intensityAndLengthScale"],
-                         ["k, omega, gamma and reThetat specified",
+                         ["turbulent viscosity specified",
                           "Turbulence intensity and eddy length scale"],
                          [[8, 9],  # nut
                           [3, 4]]],  # I, l
@@ -145,7 +145,7 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                           "Intensity & Length Scale"],
                          ["TurbulentViscosity",
                           "intensityAndLengthScale"],
-                         ["k, omega, gamma and reThetat specified",
+                         ["turbulent viscosity specified",
                           "Turbulence intensity and eddy length scale"],
                          [[8, 9],  # nut
                           [3, 4]]],  # I, l
@@ -154,7 +154,7 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                           "Intensity & Length Scale"],
                          ["TurbulentViscosity",
                           "intensityAndLengthScale"],
-                         ["k, omega, gamma and reThetat specified",
+                         ["turbulent viscosity specified",
                           "Turbulence intensity and eddy length scale"],
                          [[8, 9],  # nut
                           [3, 4]]]  # I, l
