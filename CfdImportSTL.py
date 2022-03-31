@@ -44,12 +44,12 @@ def open(filename):
     return insert(filename, doc.Name)
 
 
-def insert(filename, docname):
+def insert(filename, doc_name):
     """ Called to import a file """
     try:
-        doc = FreeCAD.getDocument(docname)
+        doc = FreeCAD.getDocument(doc_name)
     except NameError:
-        doc = FreeCAD.newDocument(docname)
+        doc = FreeCAD.newDocument(doc_name)
     FreeCAD.ActiveDocument = doc
 
     with pythonopen(filename) as infile:
@@ -72,7 +72,7 @@ def insert(filename, docname):
                         tmp_file.write(line)
                         if line.startswith('endsolid'):
                             break
-                Mesh.insert(filename, docname)
+                Mesh.insert(filename, doc_name)
 
     FreeCAD.Console.PrintMessage("Imported " + filename + "\n")
     return doc

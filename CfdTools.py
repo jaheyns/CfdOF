@@ -795,7 +795,7 @@ def runFoamCommand(cmdline, case=None):
     return proc.output, proc.outputErr, proc.outputAll
 
 
-def startFoamApplication(cmd, case, log_name='', finishedHook=None, stdoutHook=None, stderrHook=None):
+def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook=None, stderr_hook=None):
     """
     Run command cmd in OpenFOAM environment, sending output to log file.
         Returns a CfdConsoleProcess object after launching
@@ -826,7 +826,7 @@ def startFoamApplication(cmd, case, log_name='', finishedHook=None, stdoutHook=N
         # paths may be specified using variables only available in foam runtime environment.
         cmdline = "{{ rm {}; {}; }}".format(logFile, cmdline)
 
-    proc = CfdConsoleProcess.CfdConsoleProcess(finishedHook=finishedHook, stdoutHook=stdoutHook, stderrHook=stderrHook)
+    proc = CfdConsoleProcess.CfdConsoleProcess(finished_hook=finished_hook, stdout_hook=stdout_hook, stderr_hook=stderr_hook)
     if logFile:
         print("Running ", ' '.join(cmds), " -> ", logFile)
     else:
@@ -1146,7 +1146,7 @@ def getGmshExecutable():
     return gmsh_cmd
 
 
-def startParaview(case_path, script_name, consoleMessageFn):
+def startParaview(case_path, script_name, console_message_fn):
     proc = QtCore.QProcess()
     paraview_cmd = getParaviewExecutable()
     arg = '--script={}'.format(script_name)
@@ -1155,13 +1155,13 @@ def startParaview(case_path, script_name, consoleMessageFn):
         # If not found, try to run from the OpenFOAM environment, in case a bundled version is available from there
         paraview_cmd = "$(which paraview)"  # 'which' required due to mingw weirdness(?) on Windows
         try:
-            consoleMessageFn("Running " + paraview_cmd + " " + arg)
+            console_message_fn("Running " + paraview_cmd + " " + arg)
             proc = startFoamApplication([paraview_cmd, arg], case_path, log_name=None)
-            consoleMessageFn("Paraview started")
+            console_message_fn("Paraview started")
         except QtCore.QProcess.ProcessError:
-            consoleMessageFn("Error starting paraview")
+            console_message_fn("Error starting paraview")
     else:
-        consoleMessageFn("Running " + paraview_cmd + " " + arg)
+        console_message_fn("Running " + paraview_cmd + " " + arg)
         proc.setWorkingDirectory(case_path)
 
         env = QtCore.QProcessEnvironment.systemEnvironment()
@@ -1170,9 +1170,9 @@ def startParaview(case_path, script_name, consoleMessageFn):
 
         proc.start(paraview_cmd, [arg])
         if proc.waitForStarted():
-            consoleMessageFn("Paraview started")
+            console_message_fn("Paraview started")
         else:
-            consoleMessageFn("Error starting paraview")
+            console_message_fn("Error starting paraview")
     return proc
 
 
@@ -1238,45 +1238,45 @@ def isSameGeometry(shape1, shape2):
             return False
 
 
-def findElementInShape(aShape, anElement):
+def findElementInShape(a_shape, an_element):
     """
     Copy of FemMeshTools.find_element_in_shape, but calling isSameGeometry
     """
     # import Part
-    ele_st = anElement.ShapeType
+    ele_st = an_element.ShapeType
     if ele_st == 'Solid' or ele_st == 'CompSolid':
-        for index, solid in enumerate(aShape.Solids):
+        for index, solid in enumerate(a_shape.Solids):
             # print(is_same_geometry(solid, anElement))
-            if isSameGeometry(solid, anElement):
+            if isSameGeometry(solid, an_element):
                 # print(index)
                 # Part.show(aShape.Solids[index])
                 ele = ele_st + str(index + 1)
                 return ele
-        FreeCAD.Console.PrintError('Solid ' + str(anElement) + ' not found in: ' + str(aShape) + '\n')
-        if ele_st == 'Solid' and aShape.ShapeType == 'Solid':
+        FreeCAD.Console.PrintError('Solid ' + str(an_element) + ' not found in: ' + str(a_shape) + '\n')
+        if ele_st == 'Solid' and a_shape.ShapeType == 'Solid':
             print('We have been searching for a Solid in a Solid and we have not found it. In most cases this should be searching for a Solid inside a CompSolid. Check the ShapeType of your Part to mesh.')
         # Part.show(anElement)
         # Part.show(aShape)
     elif ele_st == 'Face' or ele_st == 'Shell':
-        for index, face in enumerate(aShape.Faces):
+        for index, face in enumerate(a_shape.Faces):
             # print(is_same_geometry(face, anElement))
-            if isSameGeometry(face, anElement):
+            if isSameGeometry(face, an_element):
                 # print(index)
                 # Part.show(aShape.Faces[index])
                 ele = ele_st + str(index + 1)
                 return ele
     elif ele_st == 'Edge' or ele_st == 'Wire':
-        for index, edge in enumerate(aShape.Edges):
+        for index, edge in enumerate(a_shape.Edges):
             # print(is_same_geometry(edge, anElement))
-            if isSameGeometry(edge, anElement):
+            if isSameGeometry(edge, an_element):
                 # print(index)
                 # Part.show(aShape.Edges[index])
                 ele = ele_st + str(index + 1)
                 return ele
     elif ele_st == 'Vertex':
-        for index, vertex in enumerate(aShape.Vertexes):
+        for index, vertex in enumerate(a_shape.Vertexes):
             # print(is_same_geometry(vertex, anElement))
-            if isSameGeometry(vertex, anElement):
+            if isSameGeometry(vertex, an_element):
                 # print(index)
                 # Part.show(aShape.Vertexes[index])
                 ele = ele_st + str(index + 1)
@@ -1531,9 +1531,9 @@ def openFileManager(case_path):
         subprocess.Popen(['explorer', case_path])
 
 
-def writePatchToStl(solid_name, facemesh, fid, scale=1):
+def writePatchToStl(solid_name, face_mesh, fid, scale=1):
     fid.write("solid {}\n".format(solid_name))
-    for face in facemesh.Facets:
+    for face in face_mesh.Facets:
         n = face.Normal
         fid.write(" facet normal {} {} {}\n".format(n[0], n[1], n[2]))
         fid.write("  outer loop\n")
@@ -1570,7 +1570,7 @@ def enableLayoutRows(layout, selected_rows):
 
 class CfdSynchronousFoamProcess:
     def __init__(self):
-        self.process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=self.readOutput, stderrHook=self.readError)
+        self.process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=self.readOutput, stderr_hook=self.readError)
         self.output = ""
         self.outputErr = ""
         self.outputAll = ""

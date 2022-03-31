@@ -55,9 +55,9 @@ class _TaskPanelCfdMesh:
         self.mesh_obj.Proxy.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
         self.paraviewScriptName = ""
 
-        self.mesh_obj.Proxy.mesh_process = CfdConsoleProcess(finishedHook=self.meshFinished,
-                                                             stdoutHook=self.gotOutputLines,
-                                                             stderrHook=self.gotErrorLines)
+        self.mesh_obj.Proxy.mesh_process = CfdConsoleProcess(finished_hook=self.meshFinished,
+                                                             stdout_hook=self.gotOutputLines,
+                                                             stderr_hook=self.gotErrorLines)
 
         self.Timer = QtCore.QTimer()
         self.Timer.setInterval(1000)

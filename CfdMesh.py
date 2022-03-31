@@ -80,7 +80,8 @@ class _CommandCfdMeshFromShape:
 class _CfdMesh:
     """ CFD mesh properties """
 
-    # they will be used from the task panel too, thus they need to be outside of the __init__
+    # Variables that need to be used outside this class and therefore are included outside of
+    # the constructor
     known_element_dimensions = ['2D', '3D']
     known_mesh_utility = ['cfMesh', 'snappyHexMesh', 'gmsh']
 
