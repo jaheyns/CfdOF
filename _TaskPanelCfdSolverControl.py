@@ -41,7 +41,7 @@ if FreeCAD.GuiUp:
 
 class _TaskPanelCfdSolverControl:
     def __init__(self, solver_runner_obj):
-        ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdSolverControl.ui")
+        ui_path = os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdSolverControl.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.analysis_object = CfdTools.getActiveAnalysis()

@@ -42,7 +42,7 @@ class _TaskPanelCfdPhysicsSelection:
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
         self.obj = obj
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelPhysics.ui"))
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelPhysics.ui"))
 
         self.form.radioButtonSteady.toggled.connect(self.updateUI)
         self.form.radioButtonTransient.toggled.connect(self.updateUI)

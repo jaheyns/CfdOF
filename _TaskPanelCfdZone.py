@@ -44,7 +44,7 @@ class _TaskPanelCfdZone:
 
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
 
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdZone.ui"))
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdZone.ui"))
 
         self.form.framePorousZone.setVisible(False)
         self.form.frameInitialisationZone.setVisible(False)

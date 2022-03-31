@@ -42,7 +42,7 @@ class _TaskPanelCfdMeshRefinement:
         self.mesh_obj = self.getMeshObject()
 
         self.form = FreeCADGui.PySideUic.loadUi(
-            os.path.join(os.path.dirname(__file__), "TaskPanelCfdMeshRefinement.ui"))
+            os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdMeshRefinement.ui"))
 
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
 
