@@ -71,10 +71,6 @@ class _CommandCfdSolverFoam:
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_SolverControl', _CommandCfdSolverFoam())
-
-
 class _CfdSolverFoam(object):
     """ Solver-specific properties """
     def __init__(self, obj):
@@ -186,3 +182,6 @@ class _ViewProviderCfdSolverFoam:
     def __setstate__(self, state):
         return None
 
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_SolverControl', _CommandCfdSolverFoam())

@@ -20,16 +20,16 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD, Part, Mesh, os, tempfile
+import FreeCAD
+import Part
+import CfdMesh
+import os
+import tempfile
 
-
-""" 
-This module provides tools to import multi-patch
-ascii STL files. It is an alternative to the standard Mesh STL
-importer, but supports reading multiple patches
-in a single STL file
-"""
-
+# This module provides tools to import multi-patch
+# ascii STL files. It is an alternative to the standard Mesh STL
+# importer, but supports reading multiple patches
+# in a single STL file
 
 # Python's open is masked by the function below
 if open.__module__ in ['__builtin__','io']:

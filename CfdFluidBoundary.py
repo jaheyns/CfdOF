@@ -77,6 +77,7 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
 # whether volume fraction panel is shown, whether thermal GUI is shown,
 # rows of thermal UI to show (all shown if None)
+
 BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                 [False, [], False, False, False, True, None],  # Slip
                 [True, [2], False, False, False, True, None],  # Partial slip
@@ -177,10 +178,6 @@ class _CommandCfdFluidBoundary:
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
-
-
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_FluidBoundary', _CommandCfdFluidBoundary())
 
 
 class _CfdFluidBoundary:
@@ -398,3 +395,7 @@ class _ViewProviderCfdFluidBoundary:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_FluidBoundary', _CommandCfdFluidBoundary())

@@ -76,10 +76,6 @@ class _CommandCfdPhysicsSelection:
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_PhysicsModel', _CommandCfdPhysicsSelection())
-
-
 class _CfdPhysicsModel:
     """ The CFD Physics Model """
     def __init__(self, obj):
@@ -187,3 +183,7 @@ class _ViewProviderPhysicsSelection:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_PhysicsModel', _CommandCfdPhysicsSelection())

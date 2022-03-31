@@ -75,12 +75,24 @@ FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v201
                                 "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
                                 "~/OpenFOAM/OpenFOAM-dev"]
                      }
+
 PARAVIEW_PATH_DEFAULTS = {
                     "Windows": ["C:\\Program Files\\ParaView 5.5.2-Qt5-Windows-64bit\\bin\\paraview.exe",
                                 "C:\\Program Files\\ParaView 5.5.2-Qt5-MPI-Windows-64bit\\bin\\paraview.exe"],
                     "Linux": [],
                     "Darwin": []
                     }
+
+QUANTITY_PROPERTIES = ['App::PropertyQuantity',
+                       'App::PropertyLength',
+                       'App::PropertyDistance',
+                       'App::PropertyAngle',
+                       'App::PropertyArea',
+                       'App::PropertyVolume',
+                       'App::PropertySpeed',
+                       'App::PropertyAcceleration',
+                       'App::PropertyForce',
+                       'App::PropertyPressure']
 
 
 def getDefaultOutputPath():
@@ -118,7 +130,9 @@ if FreeCAD.GuiUp:
 
 
 def getParentAnalysisObject(obj):
-    """ Return CfdAnalysis object to which this obj belongs in the tree """
+    """
+    Return CfdAnalysis object to which this obj belongs in the tree
+    """
     return obj.getParentGroup()
 
 
@@ -186,7 +200,9 @@ def getSolver(analysis_object):
 
 
 def getSolverSettings(solver):
-    """ Convert properties into python dict, while key must begin with lower letter. """
+    """
+    Convert properties into python dict, while key must begin with lower letter.
+    """
     dict = {}
     f = lambda s: s[0].lower() + s[1:]
     for prop in solver.PropertiesList:
@@ -204,7 +220,9 @@ def getCfdBoundaryGroup(analysis_object):
 
 
 def is_planar(shape):
-    """ Return whether the shape is a planar face """
+    """
+    Return whether the shape is a planar face
+    """
     n = shape.normalAt(0.5, 0.5)
     if len(shape.Vertexes) <= 3:
         return True
@@ -241,7 +259,8 @@ def getResult(analysis_object):
 
 
 def get_module_path():
-    """ Returns the current Cfd module path.
+    """
+    Returns the current Cfd module path.
     Determines where this file is running from, so works regardless of whether
     the module is installed in the app's module directory or the user's app data folder.
     (The second overrides the first.)
@@ -252,7 +271,9 @@ def get_module_path():
 # Set functions
 
 def setCompSolid(vobj):
-    """ To enable correct mesh refinement, boolean fragments are set to compSolid mode """
+    """
+    To enable correct mesh refinement, boolean fragments are set to compSolid mode
+    """
     doc_name = str(vobj.Object.Document.Name)
     doc = FreeCAD.getDocument(doc_name)
     for obj in doc.Objects:
@@ -270,7 +291,9 @@ def normalise(v):
 
 
 def cfdMessage(msg):
-    """ Print a message to console and refresh GUI """
+    """
+    Print a message to console and refresh GUI
+    """
     FreeCAD.Console.PrintMessage(msg)
     if FreeCAD.GuiUp:
         FreeCAD.Gui.updateGui()
@@ -278,7 +301,9 @@ def cfdMessage(msg):
 
 
 def cfdWarning(msg):
-    """ Print a message to console and refresh GUI """
+    """
+    Print a message to console and refresh GUI
+    """
     FreeCAD.Console.PrintWarning(msg)
     if FreeCAD.GuiUp:
         FreeCAD.Gui.updateGui()
@@ -286,7 +311,9 @@ def cfdWarning(msg):
 
 
 def cfdError(msg):
-    """ Print a message to console and refresh GUI """
+    """
+    Print a message to console and refresh GUI
+    """
     FreeCAD.Console.PrintError(msg)
     if FreeCAD.GuiUp:
         FreeCAD.Gui.updateGui()
@@ -294,7 +321,9 @@ def cfdError(msg):
 
 
 def cfdErrorBox(msg):
-    """ Show message for an expected error """
+    """
+    Show message for an expected error
+    """
     QtGui.QApplication.restoreOverrideCursor()
     if FreeCAD.GuiUp:
         QtGui.QMessageBox.critical(None, "CfdOF Workbench", msg)
@@ -303,12 +332,16 @@ def cfdErrorBox(msg):
 
 
 def formatTimer(seconds):
-    """ Put the elapsed time printout into a nice format """
+    """
+    Put the elapsed time printout into a nice format
+    """
     return str(timedelta(seconds=seconds)).split('.', 2)[0].lstrip('0').lstrip(':')
 
 
 def setQuantity(inputField, quantity):
-    """ Set the quantity (quantity object or unlocalised string) into the inputField correctly """
+    """
+    Set the quantity (quantity object or unlocalised string) into the inputField correctly
+    """
     # Must set in the correctly localised value as the user would enter it.
     # A bit painful because the python locale settings seem to be based on language,
     # not input settings as the FreeCAD settings are. So can't use that; hence
@@ -323,13 +356,17 @@ def setQuantity(inputField, quantity):
 
 
 def getQuantity(inputField):
-    """ Get the quantity as an unlocalised string from an inputField """
+    """
+    Get the quantity as an unlocalised string from an inputField
+    """
     q = inputField.property("quantity")
     return str(q)
 
 
 def indexOrDefault(list, findItem, defaultIndex):
-    """ Look for findItem in list, and return defaultIndex if not found """
+    """
+    Look for findItem in list, and return defaultIndex if not found
+    """
     try:
         return list.index(findItem)
     except ValueError:
@@ -360,7 +397,9 @@ def hide_parts_show_meshes():
 
 
 def copyFilesRec(src, dst, symlinks=False, ignore=None):
-    """ Recursively copy files from src dir to dst dir """
+    """
+    Recursively copy files from src dir to dst dir
+    """
     if not os.path.exists(dst):
         os.makedirs(dst)
     for item in os.listdir(src):
@@ -371,7 +410,9 @@ def copyFilesRec(src, dst, symlinks=False, ignore=None):
 
 
 def getPatchType(bcType, bcSubType):
-    """ Get the boundary type based on selected BC condition """
+    """
+    Get the boundary type based on selected BC condition
+    """
     if bcType == 'wall':
         return 'wall'
     elif bcType == 'empty':
@@ -392,7 +433,9 @@ def getPatchType(bcType, bcSubType):
 
 
 def movePolyMesh(case):
-    """ Move polyMesh to polyMesh.org to ensure availability if cleanCase is ran from the terminal. """
+    """
+    Move polyMesh to polyMesh.org to ensure availability if cleanCase is ran from the terminal.
+    """
     meshOrg_dir = case + os.path.sep + "constant/polyMesh.org"
     mesh_dir = case + os.path.sep + "constant/polyMesh"
     if os.path.isdir(meshOrg_dir):
@@ -459,7 +502,9 @@ def getFoamRuntime():
 
 
 def detectFoamDir():
-    """ Try to guess Foam install dir from WM_PROJECT_DIR or, failing that, various defaults """
+    """
+    Try to guess Foam install dir from WM_PROJECT_DIR or, failing that, various defaults
+    """
     foam_dir = None
     if platform.system() == "Linux":
         # Detect pre-loaded environment
@@ -515,7 +560,9 @@ def getGmshPath():
 
 
 def translatePath(p):
-    """ Transform path to the perspective of the Linux subsystem in which OpenFOAM is run (e.g. mingw) """
+    """
+    Transform path to the perspective of the Linux subsystem in which OpenFOAM is run (e.g. mingw)
+    """
     if platform.system() == 'Windows':
         return fromWindowsPath(p)
     else:
@@ -523,7 +570,9 @@ def translatePath(p):
 
 
 def reverseTranslatePath(p):
-    """ Transform path from the perspective of the OpenFOAM subsystem to the host system """
+    """
+    Transform path from the perspective of the OpenFOAM subsystem to the host system
+    """
     if platform.system() == 'Windows':
         return toWindowsPath(p)
     else:
@@ -606,8 +655,7 @@ def toWindowsPath(p):
 
 def getShortWindowsPath(long_name):
     """
-    Gets the short path name of a given long path.
-    http://stackoverflow.com/a/23598461/200291
+    Gets the short path name of a given long path. http://stackoverflow.com/a/23598461/200291
     """
     import ctypes
     from ctypes import wintypes
@@ -626,7 +674,9 @@ def getShortWindowsPath(long_name):
 
 
 def getRunEnvironment():
-    """ Return native environment settings necessary for running on relevant platform """
+    """
+    Return native environment settings necessary for running on relevant platform
+    """
     if getFoamRuntime() == "MinGW":
         return {"MSYSTEM": "MSYS",
                 "USERNAME": "ofuser",
@@ -642,8 +692,9 @@ def getRunEnvironment():
 
 
 def makeRunCommand(cmd, dir, source_env=True):
-    """ Generate native command to run the specified Linux command in the relevant environment,
-        including changing to the specified working directory if applicable
+    """
+    Generate native command to run the specified Linux command in the relevant environment,
+    including changing to the specified working directory if applicable
     """
     installation_path = getFoamDir()
     if installation_path is None:
@@ -729,7 +780,8 @@ def makeRunCommand(cmd, dir, source_env=True):
 
 
 def runFoamCommand(cmdline, case=None):
-    """ Run a command in the OpenFOAM environment and wait until finished. Return output as (stdout, stderr, combined)
+    """
+    Run a command in the OpenFOAM environment and wait until finished. Return output as (stdout, stderr, combined)
         Also print output as we go.
         cmdline - The command line to run as a string
               e.g. transformPoints -scale "(0.001 0.001 0.001)"
@@ -743,31 +795,9 @@ def runFoamCommand(cmdline, case=None):
     return proc.output, proc.outputErr, proc.outputAll
 
 
-class CfdSynchronousFoamProcess:
-    def __init__(self):
-        self.process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=self.readOutput, stderrHook=self.readError)
-        self.output = ""
-        self.outputErr = ""
-        self.outputAll = ""
-
-    def run(self, cmdline, case=None):
-        print("Running ", cmdline)
-        self.process.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
-        if not self.process.waitForFinished():
-            raise Exception("Unable to run command " + cmdline)
-        return self.process.exitCode()
-
-    def readOutput(self, output):
-        self.output += output
-        self.outputAll += output
-
-    def readError(self, output):
-        self.outputErr += output
-        self.outputAll += output
-
-
 def startFoamApplication(cmd, case, log_name='', finishedHook=None, stdoutHook=None, stderrHook=None):
-    """ Run command cmd in OpenFOAM environment, sending output to log file.
+    """
+    Run command cmd in OpenFOAM environment, sending output to log file.
         Returns a CfdConsoleProcess object after launching
         cmd  - List or string with the application being the first entry followed by the options.
               e.g. ['transformPoints', '-scale', '"(0.001 0.001 0.001)"']
@@ -808,15 +838,19 @@ def startFoamApplication(cmd, case, log_name='', finishedHook=None, stdoutHook=N
 
 
 def runFoamApplication(cmd, case, log_name=''):
-    """ Same as startFoamApplication, but waits until complete. Returns exit code. """
+    """
+    Same as startFoamApplication, but waits until complete. Returns exit code.
+    """
     proc = startFoamApplication(cmd, case, log_name)
     proc.waitForFinished()
     return proc.exitCode()
 
 
 def convertMesh(case, mesh_file, scale):
-    """ Convert gmsh created UNV mesh to FOAM. A scaling of 1e-3 is prescribed as the CAD is always in mm while FOAM
-    uses SI units (m). """
+    """
+    Convert gmsh created UNV mesh to FOAM. A scaling of 1e-3 is prescribed as the CAD is always in mm while FOAM
+    uses SI units (m).
+    """
 
     if mesh_file.find(".unv") > 0:
         mesh_file = translatePath(mesh_file)
@@ -1143,8 +1177,10 @@ def startParaview(case_path, script_name, consoleMessageFn):
 
 
 def removeAppimageEnvironment(env):
-    """ When running from an AppImage, the changes to the system environment can interfere with the running of
-        external commands. This tries to remove them. """
+    """
+    When running from an AppImage, the changes to the system environment can interfere with the running of
+    external commands. This tries to remove them.
+    """
     if env.contains("APPIMAGE"):
         # Strip any value starting with the appimage directory, to attempt to revert to the system environment
         appdir = env.value("APPDIR")
@@ -1163,14 +1199,18 @@ def removeAppimageEnvironment(env):
 
 
 def floatEqual(a, b):
-    """ Test whether a and b are equal within an absolute and relative tolerance """
+    """
+    Test whether a and b are equal within an absolute and relative tolerance
+    """
     reltol = 10*sys.float_info.epsilon
     abstol = 1e-12  # Seems to be necessary on file read/write
     return abs(a-b) < abstol or abs(a - b) <= reltol*max(abs(a), abs(b))
 
 
 def isSameGeometry(shape1, shape2):
-    """ Copy of FemMeshTools.is_same_geometry, with fixes """
+    """
+    Copy of FemMeshTools.is_same_geometry, with fixes
+    """
     # Check Area, CenterOfMass because non-planar shapes might not have more than one vertex defined
     same_Vertexes = 0
     # Bugfix: below was 1 - did not work for non-planar shapes
@@ -1199,7 +1239,9 @@ def isSameGeometry(shape1, shape2):
 
 
 def findElementInShape(aShape, anElement):
-    """ Copy of FemMeshTools.find_element_in_shape, but calling isSameGeometry"""
+    """
+    Copy of FemMeshTools.find_element_in_shape, but calling isSameGeometry
+    """
     # import Part
     ele_st = anElement.ShapeType
     if ele_st == 'Solid' or ele_st == 'CompSolid':
@@ -1244,7 +1286,8 @@ def findElementInShape(aShape, anElement):
 
 
 def matchFaces(faces1, faces2):
-    """ This function does a geometric matching of face lists much faster than doing face-by-face search
+    """
+    This function does a geometric matching of face lists much faster than doing face-by-face search
     :param faces1: List of tuples - first item is face object, second is any user data
     :param faces2: List of tuples - first item is face object, second is any user data
     :return:  A list of (data1, data2) containing the user data for any/all matching faces
@@ -1410,7 +1453,9 @@ def getActiveAnalysis():
 
 
 def addObjectProperty(obj, prop, init_val, type, *args):
-    """ Call addProperty on the object if it does not yet exist """
+    """
+    Call addProperty on the object if it does not yet exist
+    """
     added = False
     if prop not in obj.PropertiesList:
         added = obj.addProperty(type, prop, *args)
@@ -1460,20 +1505,11 @@ def addMatDir(mat_dir, materials):
     return material_name_path_list
 
 
-QUANTITY_PROPERTIES = ['App::PropertyQuantity',
-                       'App::PropertyLength',
-                       'App::PropertyDistance',
-                       'App::PropertyAngle',
-                       'App::PropertyArea',
-                       'App::PropertyVolume',
-                       'App::PropertySpeed',
-                       'App::PropertyAcceleration',
-                       'App::PropertyForce',
-                       'App::PropertyPressure']
-
-
 def propsToDict(obj):
-    """ Convert an object's properties to dictionary entries, converting any PropertyQuantity to float in SI units """
+    """
+    Convert an object's properties to dictionary entries, converting any PropertyQuantity to float in SI units
+    """
+
     d = {}
     for k in obj.PropertiesList:
         if obj.getTypeIdOfProperty(k) in QUANTITY_PROPERTIES:
@@ -1530,3 +1566,26 @@ def enableLayoutRows(layout, selected_rows):
             if item:
                 if isinstance(item, QtGui.QWidgetItem):
                     item.widget().setVisible(selected_rows is None or rowi in selected_rows)
+
+
+class CfdSynchronousFoamProcess:
+    def __init__(self):
+        self.process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=self.readOutput, stderrHook=self.readError)
+        self.output = ""
+        self.outputErr = ""
+        self.outputAll = ""
+
+    def run(self, cmdline, case=None):
+        print("Running ", cmdline)
+        self.process.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
+        if not self.process.waitForFinished():
+            raise Exception("Unable to run command " + cmdline)
+        return self.process.exitCode()
+
+    def readOutput(self, output):
+        self.output += output
+        self.outputAll += output
+
+    def readError(self, output):
+        self.outputErr += output
+        self.outputAll += output
