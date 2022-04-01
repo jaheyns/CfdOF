@@ -31,7 +31,7 @@ import CfdTools
 from CfdTools import addObjectProperty
 import os
 
-OBJECT_NAMES = ["force", "coefficients"]
+OBJECT_NAMES = ["Force", "Force Coefficients"]
 OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches"]
 
 # For each sub-type, whether the basic tab is enabled, the panel numbers to show (ignored if false), whether

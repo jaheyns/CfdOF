@@ -66,4 +66,14 @@ libs
 %}
 );
 
+functions
+{
+    %{%(functionobjects/DefinedName%)
+        %:forces
+        type                forces;
+        libs                ("libforces.so");
+        patches             (%(functionobjects/patches //TODO finish me
+    %}
+
+}
 // ************************************************************************* //

@@ -111,22 +111,20 @@ class TaskPanelCfdFunctionObjects:
     def updateUI(self):
         # Function object type
         type_index = self.form.comboFunctionObjectType.currentIndex()
-        type_name = self.form.comboFunctionObjectType.currentText()
-        force_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][0]
+        field_name_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][0]
         coefficient_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][1]
-        bin_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][2]
+        spatial_bin_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][2]
 
-        self.form.fieldNamesFrame.setVisible(force_frame_enabled)
-        self.form.spatialFrame.setVisible(bin_frame_enabled)
-
-        if type_name == 'Force coefficients':
-            self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
+        self.form.fieldNamesFrame.setVisible(field_name_frame_enabled)
+        self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
+        self.form.spatialFrame.setVisible(spatial_bin_frame_enabled)
 
     def comboFunctionObjectTypeChanged(self):
         index = self.form.comboFunctionObjectType.currentIndex()
         self.obj.FunctionObjectType = CfdFunctionObjects.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()]
         self.form.functionObjectDescription.setText(CfdFunctionObjects.OBJECT_DESCRIPTIONS[index])
 
+        self.updateUI()
         # # Change the color of the boundary condition as the selection is made
         # doc_name = str(self.obj.Document.Name)
         # FreeCAD.getDocument(doc_name).recompute()
@@ -227,7 +225,6 @@ class TaskPanelCfdFunctionObjects:
                              "= '{}'".format(getQuantity(self.form.inputDirection)))
         FreeCADGui.doCommand("fo.Cumulative "
                              "= {}".format(self.form.inputCumulative.isChecked()))
-
 
         refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
         refstr += ',\n'.join(
