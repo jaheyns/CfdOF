@@ -55,7 +55,7 @@ class _CommandCfdSolverFoam:
         return CfdTools.getActiveAnalysis() is not None
 
     def Activated(self):
-        CfdTools.hide_parts_show_meshes()
+        CfdTools.hidePartsShowMeshes()
         is_present = False
         members = CfdTools.getActiveAnalysis().Group
         for i in members:

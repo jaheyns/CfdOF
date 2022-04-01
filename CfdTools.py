@@ -385,7 +385,7 @@ def storeIfChanged(obj, prop, val):
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
 
 
-def hide_parts_show_meshes():
+def hidePartsShowMeshes():
     if FreeCAD.GuiUp:
         for acnstrmesh in getActiveAnalysis().Group:
             if "Mesh" in acnstrmesh.TypeId:

@@ -57,42 +57,50 @@ class TaskPanelCfdFunctionObjects:
 
         # Set the inputs for various function objects
         # Force fo
-        setQuantity(self.form.inputPressure, self.obj.Pressure)
-        setQuantity(self.form.inputVelocity, self.obj.Velocity)
-        setQuantity(self.form.inputDensity, self.obj.Density)
+        self.form.inputPressure.setText(self.obj.Pressure)
+        self.form.inputVelocity.setText(self.obj.Velocity)
         setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
+        setQuantity(self.form.inputDensity, self.obj.Density)
         setQuantity(self.form.inputPorosity, self.obj.IncludePorosity)
         setQuantity(self.form.inputWriteFields, self.obj.WriteFields)
-        setQuantity(self.form.inputCentreOfRotation, self.obj.CentreOfRotation)
+        setQuantity(self.form.inputCentreOfRotationx, self.obj.CoRx)
+        setQuantity(self.form.inputCentreOfRotationy, self.obj.CoRy)
+        setQuantity(self.form.inputCentreOfRotationz, self.obj.CoRz)
         self.form.inputPressure.setToolTip("Pressure field name")
         self.form.inputVelocity.setToolTip("Velocity field name")
         self.form.inputDensity.setToolTip("Density field name")
-        self.form.inputRefencePressure.setToolTip("Reference pressure")
+        self.form.inputReferencePressure.setToolTip("Reference pressure")
         self.form.inputPorosity.setToolTip("Porosity")
         self.form.inputWriteFields.setToolTip("Write output fields")
-        self.form.inputCentreOfRotation.setToolTip("Centre of rotation vector for moments")
+        self.form.inputCentreOfRotationx.setToolTip("Centre of rotation vector for moments")
 
         # Force coefficients fo
-        setQuantity(self.form.inputLiftDirection, self.obj.LiftDirection)
-        setQuantity(self.form.inputDragDirection, self.obj.DragDirection)
-        setQuantity(self.form.inputPitchAxis, self.obj.PitchAxis)
-        setQuantity(self.form.inputMagnitudeURef, self.obj.MagnitudeURef)
+        setQuantity(self.form.inputLiftDirectionx, self.obj.Liftx)
+        setQuantity(self.form.inputLiftDirectiony, self.obj.Lifty)
+        setQuantity(self.form.inputLiftDirectionz, self.obj.Liftz)
+        setQuantity(self.form.inputDragDirectionx, self.obj.Dragx)
+        setQuantity(self.form.inputDragDirectiony, self.obj.Dragy)
+        setQuantity(self.form.inputDragDirectionz, self.obj.Dragz)
+        setQuantity(self.form.inputPitchAxisx, self.obj.Pitchx)
+        setQuantity(self.form.inputPitchAxisy, self.obj.Pitchy)
+        setQuantity(self.form.inputPitchAxisz, self.obj.Pitchz)
+        setQuantity(self.form.inputMagnitudeUInf, self.obj.MagnitudeUInf)
         setQuantity(self.form.inputLengthRef, self.obj.LengthRef)
         setQuantity(self.form.inputAreaRef, self.obj.AreaRef)
-        self.form.inputLiftDirection.setToolTip("Lift direction vector")
-        self.form.inputDragDirection.setToolTip("Drag direction vector")
-        self.form.inputPitchAxis.setToolTip("Pitch axis for moment coefficient")
-        self.form.inputMagnitudeURef.setToolTip("Velocity magnitude reference")
+        self.form.inputLiftDirectionx.setToolTip("Lift direction vector")
+        self.form.inputDragDirectionx.setToolTip("Drag direction vector")
+        self.form.inputPitchAxisx.setToolTip("Pitch axis for moment coefficient")
+        self.form.inputMagnitudeUInf.setToolTip("Velocity magnitude reference")
         self.form.inputLengthRef.setToolTip("Length reference")
         self.form.inputAreaRef.setToolTip("Area reference")
 
         # Spatial binning
-        setQuantity(self.form.NBins, self.obj.NBins)
-        setQuantity(self.form.Direction, self.obj.Direction)
-        setQuantity(self.form.Cumulative, self.obj.Cumulative)
-        self.form.NBins.setToolTip("Number of bins")
-        self.form.Direction.setToolTip("Direction")
-        self.form.Cumulative.setToolTip("Cumulative")
+        setQuantity(self.form.inputNBins, self.obj.NBins)
+        setQuantity(self.form.inputDirection, self.obj.Direction)
+        setQuantity(self.form.inputCumulative, self.obj.Cumulative)
+        self.form.inputNBins.setToolTip("Number of bins")
+        self.form.inputDirection.setToolTip("Direction")
+        self.form.inputCumulative.setToolTip("Cumulative")
 
         # Face list selection panel - modifies obj.ShapeRefs passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
@@ -108,8 +116,8 @@ class TaskPanelCfdFunctionObjects:
         coefficient_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][1]
         bin_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][2]
 
-        self.form.forceFrame.setVisible(force_frame_enabled)
-        self.form.binFrame.setVisible(bin_frame_enabled)
+        self.form.fieldNamesFrame.setVisible(force_frame_enabled)
+        self.form.spatialFrame.setVisible(bin_frame_enabled)
 
         if type_name == 'Force coefficients':
             self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
@@ -186,14 +194,26 @@ class TaskPanelCfdFunctionObjects:
                              "= '{}'".format(getQuantity(self.form.inputCartZ)))
 
         # Coefficient object
-        FreeCADGui.doCommand("fo.LiftDirection "
-                             "= '{}'".format(getQuantity(self.form.inputLiftDirection)))
-        FreeCADGui.doCommand("fo.DragDirection "
-                             "= '{}'".format(getQuantity(self.form.inputDragDirection)))
-        FreeCADGui.doCommand("fo.PitchAxis "
-                             "= '{}'".format(getQuantity(self.form.inputPitchAxis)))
-        FreeCADGui.doCommand("fo.MagnitudeURef "
-                             "= '{}'".format(getQuantity(self.form.inputMagnitudeURef)))
+        FreeCADGui.doCommand("fo.Liftx "
+                             "= '{}'".format(getQuantity(self.form.inputLiftDirectionx)))
+        FreeCADGui.doCommand("fo.Lifty "
+                             "= '{}'".format(getQuantity(self.form.inputLiftDirectiony)))
+        FreeCADGui.doCommand("fo.Liftz "
+                             "= '{}'".format(getQuantity(self.form.inputLiftDirectionz)))
+        FreeCADGui.doCommand("fo.Dragx "
+                             "= '{}'".format(getQuantity(self.form.inputDragDirectionx)))
+        FreeCADGui.doCommand("fo.Dragy "
+                             "= '{}'".format(getQuantity(self.form.inputDragDirectiony)))
+        FreeCADGui.doCommand("fo.Dragz "
+                             "= '{}'".format(getQuantity(self.form.inputDragDirectionz)))
+        FreeCADGui.doCommand("fo.Pitchx "
+                             "= '{}'".format(getQuantity(self.form.inputPitchAxisx)))
+        FreeCADGui.doCommand("fo.Pitchy "
+                             "= '{}'".format(getQuantity(self.form.inputPitchAxisy)))
+        FreeCADGui.doCommand("fo.Pitchz "
+                             "= '{}'".format(getQuantity(self.form.inputPitchAxisz)))
+        FreeCADGui.doCommand("fo.MagnitudeUInf "
+                             "= '{}'".format(getQuantity(self.form.inputMagnitudeUInf)))
         FreeCADGui.doCommand("fo.LengthRef "
                              "= '{}'".format(getQuantity(self.form.inputLengthRef)))
         FreeCADGui.doCommand("fo.AreaRef "

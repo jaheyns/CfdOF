@@ -1,7 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -39,23 +38,8 @@ OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficie
 # rows of thermal UI to show (all shown if None)
 
 # todo adapt all this
-BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip            # Wall
-                [False, [], False, False, False, True, None],  # Slip
-                [True, [2], False, False, False, True, None],  # Partial slip
-                [True, [0], False, False, False, True, None],  # Translating wall
-                [True, [0], False, False, False, True, None]],  # Rough
-               [[True, [0, 1], True, True, True, True, [2]],  # Velocity            # Velocity
-                [True, [3], False, True, True, True, [2]],  # Vol flow rate
-                [True, [4], False, True, True, True, [2]],  # Mass Flow rate
-                [True, [1], False, True, True, True, [2]],  # Total pressure
-                [True, [0, 1], False, True, True, True, [2]]],  # Static pressure
-               [[True, [0, 1], False, False, True, True, [2]],  # Static pressure   # Outlet
-                [True, [0, 1], False, False, True, True, [2]],  # Uniform velocity
-                [False, [], False, False, False, False, None]],  # Outflow
-               [[True, [1], False, True, True, True, [2]],  # Opening               # Open
-                [True, [0, 1], False, True, False, True, [2]]],  # Far-field
-               [[False, [], False, False, False, False, None]],  # Symmetry plane   # Constraint
-               [[True, [5], False, False, False, False, None]]]  # Permeable screen # Baffle
+BOUNDARY_UI = [[True, False, True],     # Forces
+               [True, True, True, ]]   # Force coefficients
 
 
 def makeCfdFunctionObject(name="CFDFunctionObject"):
@@ -118,33 +102,60 @@ class _CfdFunctionObjects:
 
         # Forces
         # Field names
-        addObjectProperty(obj, 'Pressure', '', "App::PropertyString", "Function object",
+        addObjectProperty(obj, 'Pressure', 'p', "App::PropertyString", "Function object",
                           "Pressure field name")
-        addObjectProperty(obj, 'Density', '', "App::PropertyString", "Function object",
-                          "Density field name")
-        addObjectProperty(obj, 'Velocity', '', "App::PropertyString", "Function object",
+        addObjectProperty(obj, 'Velocity', 'U', "App::PropertyString", "Function object",
                           "Velocity field name")
         addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Function object",
                           "Reference pressure")
-        addObjectProperty(obj, 'CentreOfRotation', '0, 0, 0', "App::PropertyString", "Function object",
-                          "Centre of Rotation (x, y, z)")
+        addObjectProperty(obj, 'Density', '100000 kg/m^3', "App::PropertyQuantity", "Function object",
+                          "Reference density")
+        # addObjectProperty(obj, 'CentreOfRotation', '0, 0, 0', "App::PropertyString", "Function object",
+        #                   "Centre of Rotation (x, y, z)")
+        addObjectProperty(obj, 'CoRx', '0', "App::PropertyQuantity", "Function objects",
+                          "Centre of rotation (x component)")
+        addObjectProperty(obj, 'CoRy', '0', "App::PropertyQuantity", "Function objects",
+                          "Centre of rotation (y component)")
+        addObjectProperty(obj, 'CoRz', '0', "App::PropertyQuantity", "Function objects",
+                          "Centre of rotation (z component)")
         addObjectProperty(obj, 'IncludePorosity', False, "App::PropertyBool", "Function objects",
                           "Whether to include porosity effects")
         addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Function objects",
                           "Whether to write output fields")
 
         # Force coefficients
-        addObjectProperty(obj, 'LiftDirection', '0, 0, 0', "App::PropertyString", "Function object",
-                          "Lift Direction vector (x, y, z)")
-        addObjectProperty(obj, 'DragDirection', '0, 0, 0', "App::PropertyString", "Function object",
-                          "Drag direction vector (x, y, z)")
-        addObjectProperty(obj, 'PitchAxis', '0, 0, 0', "App::PropertyString", "Function object",
-                          "Pitch axis for moment coefficient")
-        addObjectProperty(obj, 'MagUInf', '1 m/s', "App::PropertyQuantity", "Function object",
+        # addObjectProperty(obj, 'LiftDirection', '0, 0, 0', "App::PropertyString", "Function object",
+        #                   "Lift Direction vector (x, y, z)")
+        addObjectProperty(obj, 'Liftx', '0', "App::PropertyQuantity", "Function objects",
+                          "Lift direction (x component)")
+        addObjectProperty(obj, 'Lifty', '0', "App::PropertyQuantity", "Function objects",
+                          "Lift direction (y component)")
+        addObjectProperty(obj, 'Liftz', '0', "App::PropertyQuantity", "Function objects",
+                          "Lift direction (z component)")
+
+        # addObjectProperty(obj, 'DragDirection', '0, 0, 0', "App::PropertyString", "Function object",
+        #                   "Drag direction vector (x, y, z)")
+        addObjectProperty(obj, 'Dragx', '0', "App::PropertyQuantity", "Function objects",
+                          "Drag direction (x component)")
+        addObjectProperty(obj, 'Dragy', '0', "App::PropertyQuantity", "Function objects",
+                          "Drag direction (y component)")
+        addObjectProperty(obj, 'Dragz', '0', "App::PropertyQuantity", "Function objects",
+                          "Drag direction (z component)")
+
+        # addObjectProperty(obj, 'PitchAxis', '0, 0, 0', "App::PropertyString", "Function object",
+        #                   "Pitch axis for moment coefficient")
+        addObjectProperty(obj, 'Pitchx', '0', "App::PropertyQuantity", "Function objects",
+                          "Centre of pitch (x component)")
+        addObjectProperty(obj, 'Pitchy', '0', "App::PropertyQuantity", "Function objects",
+                          "Centre of pitch (y component)")
+        addObjectProperty(obj, 'Pitchz', '0', "App::PropertyQuantity", "Function objects",
+                          "Centre of pitch (z component)")
+
+        addObjectProperty(obj, 'MagnitudeUInf', '1 m/s', "App::PropertyQuantity", "Function object",
                           "Freestream velocity magnitude")
-        addObjectProperty(obj, 'LengthReference', '1 m', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'LengthRef', '1 m', "App::PropertyQuantity", "Function object",
                           "Coefficient length reference")
-        addObjectProperty(obj, 'AreaReference', '1 m^2', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'AreaRef', '1 m^2', "App::PropertyQuantity", "Function object",
                           "Coefficient area reference")
 
         # Spatial binning
@@ -203,10 +214,8 @@ class _ViewProviderCfdFunctionObjects:
         return True
 
     def unsetEdit(self, vobj, mode):
-        if self.taskd:
-            self.taskd.closed()
-            self.taskd = None
         FreeCADGui.Control.closeDialog()
+        return
 
     def doubleClicked(self, vobj):
         if FreeCADGui.activeWorkbench().name() != 'CfdOFWorkbench':
