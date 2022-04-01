@@ -168,32 +168,32 @@ class TaskPanelCfdFunctionObjects:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-        FreeCADGui.doCommand("\nfc = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
+        FreeCADGui.doCommand("\nfo = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
         # Type
         FreeCADGui.doCommand("fo.FunctionObjectType "
                              "= '{}'".format(self.obj.FunctionObjectType))
 
         # Force object
         FreeCADGui.doCommand("fo.Pressure "
-                             "= '{}'".format(getQuantity(self.form.inputPressure)))
+                             "= '{}'".format(self.form.inputPressure))
         FreeCADGui.doCommand("fo.Velocity "
-                             "= '{}'".format(getQuantity(self.form.inputVelocity)))
+                             "= '{}'".format(self.form.inputVelocity))
         FreeCADGui.doCommand("fo.Density "
                              "= '{}'".format(getQuantity(self.form.inputDensity)))
         FreeCADGui.doCommand("fo.ReferencePressure "
-                             "= '{}'".format(getQuantity(self.form.inputRefencePressure)))
-        FreeCADGui.doCommand("fo.IncludePorosity "
-                             "= '{}'".format(getQuantity(self.form.inputPorosity)))
-        FreeCADGui.doCommand("fo.WriteFields "
-                             "= '{}'".format(getQuantity(self.form.inputWriteFields)))
+                             "= '{}'".format(getQuantity(self.form.inputReferencePressure)))
+        # FreeCADGui.doCommand("fo.IncludePorosity "
+        #                      "= '{}'".format(self.form.inputPorosity.isChecked()))
+        # FreeCADGui.doCommand("fo.WriteFields "
+        #                      "= '{}'".format(self.form.inputWriteFields.isChecked()))
         FreeCADGui.doCommand("fo.CoRx "
-                             "= '{}'".format(getQuantity(self.form.inputCartX)))
+                             "= '{}'".format(getQuantity(self.form.inputCentreOfRotationx)))
         FreeCADGui.doCommand("fo.CoRy "
-                             "= '{}'".format(getQuantity(self.form.inputCartY)))
+                             "= '{}'".format(getQuantity(self.form.inputCentreOfRotationy)))
         FreeCADGui.doCommand("fo.CoRz "
-                             "= '{}'".format(getQuantity(self.form.inputCartZ)))
+                             "= '{}'".format(getQuantity(self.form.inputCentreOfRotationz)))
 
-        # Coefficient object
+        # # Coefficient object
         FreeCADGui.doCommand("fo.Liftx "
                              "= '{}'".format(getQuantity(self.form.inputLiftDirectionx)))
         FreeCADGui.doCommand("fo.Lifty "
@@ -219,13 +219,13 @@ class TaskPanelCfdFunctionObjects:
         FreeCADGui.doCommand("fo.AreaRef "
                              "= '{}'".format(getQuantity(self.form.inputAreaRef)))
 
-        # Spatial binning
+        # # Spatial binning
         FreeCADGui.doCommand("fo.NBins "
                              "= '{}'".format(getQuantity(self.form.inputNBins)))
         FreeCADGui.doCommand("fo.Direction "
                              "= '{}'".format(getQuantity(self.form.inputDirection)))
         FreeCADGui.doCommand("fo.Cumulative "
-                             "= '{}'".format(getQuantity(self.form.inputCumulative)))
+                             "= '{}'".format(self.form.inputCumulative.isChecked()))
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
