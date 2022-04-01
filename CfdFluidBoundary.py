@@ -352,6 +352,7 @@ class _CfdFluidBoundary:
 class _ViewProviderCfdFluidBoundary:
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.taskd = None
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.png")

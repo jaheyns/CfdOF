@@ -152,9 +152,10 @@ class TaskPanelCfdFunctionObjects:
             if elt.ShapeType == 'Face':
                 selection = (selected_object.Name, sub)
                 if self.selecting_direction:
-                    if CfdTools.is_planar(elt):
+                    if CfdTools.isPlanar(elt):
                         self.selecting_direction = False
-                        self.form.lineDirection.setText(selection[0] + ':' + selection[1])  # TODO: Display label, not name
+                        self.form.lineDirection.setText(
+                            selection[0] + ':' + selection[1])  # TODO: Display label, not name
                     else:
                         FreeCAD.Console.PrintMessage('Face must be planar\n')
 
@@ -182,10 +183,10 @@ class TaskPanelCfdFunctionObjects:
                              "= '{}'".format(getQuantity(self.form.inputDensity)))
         FreeCADGui.doCommand("fo.ReferencePressure "
                              "= '{}'".format(getQuantity(self.form.inputReferencePressure)))
-        # FreeCADGui.doCommand("fo.IncludePorosity "
-        #                      "= '{}'".format(self.form.inputPorosity.isChecked()))
-        # FreeCADGui.doCommand("fo.WriteFields "
-        #                      "= '{}'".format(self.form.inputWriteFields.isChecked()))
+        FreeCADGui.doCommand("fo.IncludePorosity "
+                             "= {}".format(self.form.inputPorosity.isChecked()))
+        FreeCADGui.doCommand("fo.WriteFields "
+                             "= {}".format(self.form.inputWriteFields.isChecked()))
         FreeCADGui.doCommand("fo.CoRx "
                              "= '{}'".format(getQuantity(self.form.inputCentreOfRotationx)))
         FreeCADGui.doCommand("fo.CoRy "
@@ -225,7 +226,14 @@ class TaskPanelCfdFunctionObjects:
         FreeCADGui.doCommand("fo.Direction "
                              "= '{}'".format(getQuantity(self.form.inputDirection)))
         FreeCADGui.doCommand("fo.Cumulative "
-                             "= '{}'".format(self.form.inputCumulative.isChecked()))
+                             "= {}".format(self.form.inputCumulative.isChecked()))
+
+
+        refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
+        refstr += ',\n'.join(
+            "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
+        refstr += "]"
+        FreeCADGui.doCommand(refstr)
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
@@ -233,7 +241,7 @@ class TaskPanelCfdFunctionObjects:
 
     def reject(self):
         self.obj.ShapeRefs = self.ShapeRefsOrig
-        self.obj.FunctionObjectTypeType = self.FunctionObjectTypeOrig
+        self.obj.FunctionObjectType = self.FunctionObjectTypeOrig
         FreeCADGui.Selection.removeObserver(self)
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)

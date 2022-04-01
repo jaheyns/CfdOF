@@ -24,7 +24,9 @@ from __future__ import print_function
 
 import FreeCAD
 import FreeCADGui
+from pivy import coin
 from PySide import QtCore
+import Part
 import CfdTools
 from CfdTools import addObjectProperty
 import os
@@ -43,7 +45,7 @@ BOUNDARY_UI = [[True, False, True],     # Forces
 
 
 def makeCfdFunctionObject(name="CFDFunctionObject"):
-    obj = FreeCAD.ActiveDocument.addObject("App::DocumentObjectGroupPython", name)
+    obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdFunctionObjects(obj)
     if FreeCAD.GuiUp:
         _ViewProviderCfdFunctionObjects(obj.ViewObject)
@@ -82,7 +84,7 @@ class _CfdFunctionObjects:
 
     def initProperties(self, obj):
         if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "Boundary faces"):
-            # Backward compat
+            # Backward compatible
             if 'References' in obj.PropertiesList:
                 doc = FreeCAD.getDocument(obj.Document.Name)
                 for r in obj.References:
@@ -170,14 +172,38 @@ class _CfdFunctionObjects:
         self.initProperties(obj)
 
     def execute(self, obj):
+        """ Create compound part at recompute. """
+        shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
+        if shape is None:
+            obj.Shape = Part.Shape()
+        else:
+            obj.Shape = shape
+        self.updateBoundaryColors(obj)
+
+    def updateBoundaryColors(self, obj): # todo come back and fix me
         pass
+        # if FreeCAD.GuiUp:
+        #     vobj = obj.ViewObject
+        #     vobj.Transparency = 20
+        #     if obj.BoundaryType == 'wall':
+        #         vobj.ShapeColor = (0.1, 0.1, 0.1)  # Dark grey
+        #     elif obj.BoundaryType == 'inlet':
+        #         vobj.ShapeColor = (0.0, 0.0, 1.0)  # Blue
+        #     elif obj.BoundaryType == 'outlet':
+        #         vobj.ShapeColor = (1.0, 0.0, 0.0)  # Red
+        #     elif obj.BoundaryType == 'open':
+        #         vobj.ShapeColor = (0.0, 1.0, 1.0)  # Cyan
+        #     elif (obj.BoundaryType == 'constraint') or \
+        #          (obj.BoundaryType == 'baffle'):
+        #         vobj.ShapeColor = (0.5, 0.0, 1.0)  # Purple
+        #     else:
+        #         vobj.ShapeColor = (1.0, 1.0, 1.0)  # White
 
     def __getstate__(self):
-        return self.Type
+        return None
 
     def __setstate__(self, state):
-        if state:
-            self.Type = state
+        return None
 
 
 class _ViewProviderCfdFunctionObjects:
@@ -195,6 +221,20 @@ class _ViewProviderCfdFunctionObjects:
     def attach(self, vobj):
         self.ViewObject = vobj
         self.Object = vobj.Object
+        self.standard = coin.SoGroup()
+        vobj.addDisplayMode(self.standard, "Standard")
+        #self.ViewObject.Transparency = 95
+        return
+
+    def getDisplayModes(self, obj):
+        modes = []
+        return modes
+
+    def getDefaultDisplayMode(self):
+        return "Shaded"
+
+    def setDisplayMode(self,mode):
+        return mode
 
     def updateData(self, obj, prop):
         return
@@ -203,37 +243,43 @@ class _ViewProviderCfdFunctionObjects:
         CfdTools.setCompSolid(vobj)
         return
 
+    def doubleClicked(self, vobj):
+        doc = FreeCADGui.getDocument(vobj.Object.Document)
+        if not doc.getInEdit():
+            doc.setEdit(vobj.Object.Name)
+        else:
+            FreeCAD.Console.PrintError('Task dialog already active\n')
+        return True
+
     def setEdit(self, vobj, mode):
-        for obj in FreeCAD.ActiveDocument.Objects:
-            if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdFunctionObjects):
-                obj.ViewObject.show()
-        from core.functionobjects import TaskPanelCfdFunctionObjects
-        self.taskd = TaskPanelCfdFunctionObjects.TaskPanelCfdFunctionObjects(self.Object)
-        self.taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(self.taskd)
+        analysis_object = CfdTools.getParentAnalysisObject(self.Object)
+        if analysis_object is None:
+            CfdTools.cfdErrorBox("Boundary must have a parent analysis object")
+            return False
+        # physics_model = CfdTools.getPhysicsModel(analysis_object)
+        # if not physics_model:
+        #     CfdTools.cfdErrorBox("Analysis object must have a physics object")
+        #     return False
+        # material_objs = CfdTools.getMaterials(analysis_object)
+
+        import core.functionobjects.TaskPanelCfdFunctionObjects as TaskPanelCfdFunctionObjects
+        taskd = TaskPanelCfdFunctionObjects.TaskPanelCfdFunctionObjects(self.Object)
+        self.Object.ViewObject.show()
+        taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(taskd)
         return True
 
     def unsetEdit(self, vobj, mode):
         FreeCADGui.Control.closeDialog()
         return
 
-    def doubleClicked(self, vobj):
-        if FreeCADGui.activeWorkbench().name() != 'CfdOFWorkbench':
-            FreeCADGui.activateWorkbench("CfdOFWorkbench")
-        gui_doc = FreeCADGui.getDocument(vobj.Object.Document)
-        if not gui_doc.getInEdit():
-            gui_doc.setEdit(vobj.Object.Name)
-        else:
-            FreeCAD.Console.PrintError('Task dialog already open\n')
-        return True
-
-    def onDelete(self, feature, sub_elements):
-        try:
-            for obj in self.Object.Group:
-                obj.ViewObject.show()
-        except Exception as err:
-            FreeCAD.Console.PrintError("Error in onDelete: " + str(err))
-        return True
+    # def onDelete(self, feature, sub_elements):
+    #     try:
+    #         for obj in self.Object.Group:
+    #             obj.ViewObject.show()
+    #     except Exception as err:
+    #         FreeCAD.Console.PrintError("Error in onDelete: " + str(err))
+    #     return True
 
     def __getstate__(self):
         return None

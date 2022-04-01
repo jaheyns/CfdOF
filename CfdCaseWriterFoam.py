@@ -264,7 +264,7 @@ class CfdCaseWriterFoam:
                     selected_object = self.analysis_obj.Document.getObject(face[0])
                     if hasattr(selected_object, "Shape"):
                         elt = selected_object.Shape.getElement(face[1])
-                        if elt.ShapeType == 'Face' and CfdTools.is_planar(elt):
+                        if elt.ShapeType == 'Face' and CfdTools.isPlanar(elt):
                             n = elt.normalAt(0.5, 0.5)
                             if bc['ReverseNormal']:
                                n = [-ni for ni in n]

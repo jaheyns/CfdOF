@@ -219,7 +219,7 @@ def getCfdBoundaryGroup(analysis_object):
     return group
 
 
-def is_planar(shape):
+def isPlanar(shape):
     """
     Return whether the shape is a planar face
     """
