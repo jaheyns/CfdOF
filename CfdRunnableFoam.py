@@ -36,8 +36,10 @@ from collections import OrderedDict
 
 
 class CfdRunnable(QObject, object):
+
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnable, self).__init__()
+
         if analysis and isinstance(analysis.Proxy, CfdAnalysis._CfdAnalysis):
             self.analysis = analysis
         else:
@@ -104,8 +106,8 @@ class CfdRunnableFoam(CfdRunnable):
         return CfdTools.getRunEnvironment()
 
     def process_output(self, text):
-        loglines = text.split('\n')
-        for line in loglines:
+        log_lines = text.split('\n')
+        for line in log_lines:
             # print line,
             split = line.split()
 

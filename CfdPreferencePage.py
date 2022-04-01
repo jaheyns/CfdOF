@@ -79,7 +79,7 @@ DOWNLOAD_HISA = 4
 
 class CfdPreferencePage:
     def __init__(self):
-        ui_path = os.path.join(os.path.dirname(__file__), "core/gui/preferences/CfdPreferencePage.ui")
+        ui_path = os.path.join(os.path.dirname(__file__), "core/gui/prefs/CfdPreferencePage.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.form.tb_choose_foam_dir.clicked.connect(self.chooseFoamDir)
@@ -238,11 +238,13 @@ class CfdPreferencePage:
         CfdTools.setGmshPath(self.gmsh_path)
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.consoleMessage("Checking dependencies...")
+
         msg = CfdTools.checkCfdDependencies()
         if not msg:
             self.consoleMessage("No missing dependencies detected")
         else:
             self.consoleMessage(msg)
+
         CfdTools.setFoamDir(self.initial_foam_dir)
         CfdTools.setParaviewPath(self.initial_paraview_path)
         CfdTools.setGmshPath(self.initial_gmsh_path)

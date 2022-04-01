@@ -32,6 +32,7 @@ fi
 %:cfMesh
 # Extract feature edges
 runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/%(Name%)_Geometry.stl" "%(Name%)_Geometry.fms"
+
 %{%(ParallelMesh%)
 %:True
 %{%(NumberOfThreads%)
@@ -51,9 +52,10 @@ export OMP_NUM_THREADS=%(NumberOfThreads%)
 %}
 runCommand cartesianMesh
 %}
-
 %:snappyHexMesh
 runCommand blockMesh
+
+# Extract feature edges
 which surfaceFeatures > /dev/null 2>&1
 if [ $? == 0 ]
 then
@@ -70,7 +72,6 @@ runCommand reconstructParMesh -constant
 %:False
 runCommand snappyHexMesh -overwrite
 %}
-
 %:gmsh
 runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 
@@ -78,18 +79,19 @@ runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 %:True
 # Convert to polyhedra
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
-%}
 
+%}
 if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
 then
     runCommand transformPoints "scale=(0.001 0.001 0.001)"
 else
     runCommand transformPoints -scale "(0.001 0.001 0.001)"
 fi
-
 %}
+
 %{%(ExtrusionSettings/ExtrusionsPresent%)
 %:True
+# Create extrusions
 runCommand createPatch -overwrite
 %{%(ExtrusionSettings/Extrusions%)
 cp system/extrudeMeshDict.%(0%) system/extrudeMeshDict
@@ -101,15 +103,15 @@ rm system/extrudeMeshDict
 %:True
 runCommand flattenMesh
 %}
-%}
 
+%}
+# Extract surface mesh and convert to mm for visualisation in FreeCAD
 if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ] || [ $WM_PROJECT_VERSION == "v1906" ]
 then
     runCommand surfaceMeshExtract mesh_outside.stl
 else
     runCommand surfaceMeshTriangulate mesh_outside.stl
 fi
-
 if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
 then
     runCommand surfaceTransformPoints "scale=(1000 1000 1000)" mesh_outside.stl mesh_outside.stl

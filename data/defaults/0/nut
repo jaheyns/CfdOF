@@ -1,5 +1,5 @@
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS LES
 %[_header%]
 FoamFile
 {
@@ -12,13 +12,41 @@ FoamFile
 
 dimensions      [0 2 -1 0 0 0 0];
 
+%{%(physics/TurbulenceModel%)
+%:kEqn
+internalField   uniform %(initialValues/kEqnNut%);
+%:Smagorinsky WALE
+internalField   uniform %(initialValues/nut%);
+%:default
 internalField   uniform 0;
+%}
 
 boundaryField
 {
 
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
+%:inlet
+%{%(physics/TurbulenceModel%)
+%:kEqn
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/kEqnTurbulentViscosity%);
+    }
+%:Smagorinsky WALE
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/TurbulentViscosity%);
+    }
+%:default
+    %(0%)
+    {
+        type        calculated;
+        value       $internalField;
+    }
+%}
 %:empty
 %[0/_boundary_empty%]
 %:wall
@@ -27,7 +55,7 @@ boundaryField
     %(0%)
     {
 %{%(physics/TurbulenceModel%)
-%:SpalartAllmaras
+%:SpalartAllmaras Smagorinsky
         type        nutUSpaldingWallFunction;
 %:default
         type        nutkWallFunction;
@@ -40,7 +68,7 @@ boundaryField
     %(0%)
     {
 %{%(physics/TurbulenceModel%)
-%:SpalartAllmaras
+%:SpalartAllmaras Smagorinsky
         type        nutURoughWallFunction;
 %:default
         type        nutkRoughWallFunction;

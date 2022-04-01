@@ -24,7 +24,7 @@ SIMPLE
     {
         p 0.001;
         U 0.001;
-        "(k|epsilon|omega|f|v2|nuTilda)" 0.001;
+        "(k|epsilon|omega|f|v2|nuTilda|gammaInt|ReThetat)" 0.001;
     }
     pRefValue   0;
     pRefCell    0;
@@ -76,7 +76,7 @@ solvers
         relTol           0;
     }
 
-    "(k|omega|nuTilda)"
+    "(k|omega|epsilon|nuTilda|gammaInt|ReThetat)"
     {
         solver           smoothSolver;
         smoother         GaussSeidel;
@@ -86,7 +86,7 @@ solvers
         minIter          1;
     }
 
-    "(k|omega|nuTilda)Final"
+    "(k|omega|epsilon|nuTilda|gammaInt|ReThetat)Final"
     {
         $k;
         relTol          0;

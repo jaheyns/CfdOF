@@ -23,8 +23,9 @@
 # *                                                                         *
 # ***************************************************************************
 
-from PySide import QtCore
 import FreeCAD
+from PySide import QtCore
+
 if int(FreeCAD.Version()[0]) == 0 and int(FreeCAD.Version()[1].split('.')[0]) < 20:
     from freecad.plot import Plot  # Plot workbench
 else:

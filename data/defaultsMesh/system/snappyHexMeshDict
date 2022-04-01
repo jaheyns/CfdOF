@@ -134,6 +134,16 @@ snapControls
     nSolveIter 100;
     nRelaxIter 5;
     nFeatureSnapIter 10;
+
+%{%(SnappySettings/ImplicitEdgeDetection%)
+%:True
+    implicitFeatureSnap true;
+    explicitFeatureSnap false;
+
+%:False
+    implicitFeatureSnap false;
+    explicitFeatureSnap true;
+%}
 }
 
 addLayersControls

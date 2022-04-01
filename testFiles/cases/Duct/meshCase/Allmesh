@@ -12,7 +12,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2012"
+FOAMDIR="/usr/lib/openfoam/openfoam2112"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -20,6 +20,8 @@ then
 fi
 
 runCommand blockMesh
+
+# Extract feature edges
 which surfaceFeatures > /dev/null 2>&1
 if [ $? == 0 ]
 then
@@ -30,14 +32,13 @@ fi
 
 runCommand snappyHexMesh -overwrite
 
-
+# Extract surface mesh and convert to mm for visualisation in FreeCAD
 if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ] || [ $WM_PROJECT_VERSION == "v1906" ]
 then
     runCommand surfaceMeshExtract mesh_outside.stl
 else
     runCommand surfaceMeshTriangulate mesh_outside.stl
 fi
-
 if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
 then
     runCommand surfaceTransformPoints "scale=(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
