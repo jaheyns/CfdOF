@@ -37,12 +37,14 @@ if FreeCAD.GuiUp:
 # Constants
 POROUS_CORRELATIONS = ['DarcyForchheimer', 'Jakob']
 POROUS_CORRELATION_NAMES = ["Darcy-Forchheimer coefficients", "Staggered tube bundle (Jakob)"]
-POROUS_CORRELATION_TIPS = ["Specify viscous and inertial drag tensors by giving their principal components and directions (these will be made orthogonal)",
-                           "Specify geometry of parallel tube bundle with staggered layers."]
+POROUS_CORRELATION_TIPS = ["Specify viscous and inertial drag tensors by giving their principal components and "
+                           "directions (these will be made orthogonal)", "Specify geometry of parallel tube bundle "
+                                                                         "with staggered layers."]
 
 ASPECT_RATIOS = ["1.0", "1.73", "1.0"]
 ASPECT_RATIO_NAMES = ["User defined", "Equilateral", "Rotated square"]
-ASPECT_RATIO_TIPS = ["", "Equilateral triangles pointing perpendicular to spacing direction", "45 degree angles; isotropic"]
+ASPECT_RATIO_TIPS = ["", "Equilateral triangles pointing perpendicular to spacing direction",
+                     "45 degree angles; isotropic"]
 
 
 def makeCfdPorousZone(name='PorousZone'):
@@ -81,10 +83,6 @@ class _CommandCfdPorousZone:
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_PorousZone', _CommandCfdPorousZone())
-
-
 class _CommandCfdInitialisationZone:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.svg")
@@ -105,10 +103,6 @@ class _CommandCfdInitialisationZone:
         FreeCADGui.doCommand(
             "CfdTools.getActiveAnalysis().addObject(CfdZone.makeCfdInitialisationZone())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
-
-
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_InitialisationZone', _CommandCfdInitialisationZone())
 
 
 class _CfdZone:
@@ -225,14 +219,14 @@ class _ViewProviderCfdZone:
 
     def getDisplayModes(self, obj):
         """ Return a list of display modes. """
-        modes=[]
+        modes = []
         return modes
 
     def getDefaultDisplayMode(self):
         """ Return the name of the default display mode. It must be defined in getDisplayModes. """
         return "Shaded"
 
-    def setDisplayMode(self,mode):
+    def setDisplayMode(self, mode):
         """ Map the display mode defined in attach with those defined in getDisplayModes. Since they have the same
         names nothing needs to be done. This method is optional.
         """
@@ -274,3 +268,8 @@ class _ViewProviderCfdZone:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_PorousZone', _CommandCfdPorousZone())
+    FreeCADGui.addCommand('Cfd_InitialisationZone', _CommandCfdInitialisationZone())

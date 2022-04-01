@@ -59,25 +59,21 @@ class _CommandCfdPhysicsSelection:
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Choose appropriate physics model")
-        isPresent = False
+        is_present = False
         members = CfdTools.getActiveAnalysis().Group
         for i in members:
             if isinstance(i.Proxy, _CfdPhysicsModel):
                 FreeCADGui.activeDocument().setEdit(i.Name)
-                isPresent = True
+                is_present = True
 
         # Allow to re-create if deleted
-        if not isPresent:
+        if not is_present:
             FreeCADGui.doCommand("")
             FreeCADGui.addModule("CfdPhysicsSelection")
             FreeCADGui.addModule("CfdTools")
             FreeCADGui.doCommand(
                 "CfdTools.getActiveAnalysis().addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())")
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
-
-
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_PhysicsModel', _CommandCfdPhysicsSelection())
 
 
 class _CfdPhysicsModel:
@@ -188,3 +184,7 @@ class _ViewProviderPhysicsSelection:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_PhysicsModel', _CommandCfdPhysicsSelection())

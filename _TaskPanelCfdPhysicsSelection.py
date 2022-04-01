@@ -43,11 +43,6 @@ class _TaskPanelCfdPhysicsSelection:
         self.obj = obj
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelPhysics.ui"))
 
-        # viscousButtonGroup = QtGui.QButtonGroup()
-        # viscousButtonGroup.addButton(self.form.radioButtonLaminar)
-        # viscousButtonGroup.addButton(self.form.radioButtonRANS)
-        # viscousButtonGroup.addButton(self.form.radioButtonLES)
-
         self.form.radioButtonSteady.toggled.connect(self.updateUI)
         self.form.radioButtonTransient.toggled.connect(self.updateUI)
         self.form.radioButtonSinglePhase.toggled.connect(self.updateUI)

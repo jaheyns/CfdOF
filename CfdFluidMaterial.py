@@ -79,10 +79,6 @@ class _CommandCfdFluidMaterial:
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_FluidMaterial', _CommandCfdFluidMaterial())
-
-
 class _CfdMaterial:
     """ CFD material properties object. Compatible with FreeCAD material object. """
     def __init__(self, obj):
@@ -166,3 +162,7 @@ class _ViewProviderCfdFluidMaterial:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_FluidMaterial', _CommandCfdFluidMaterial())

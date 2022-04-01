@@ -289,7 +289,7 @@ class TaskPanelCfdFluidBoundary:
             FreeCADGui.Selection.removeObserver(self)
         self.form.buttonDirection.setChecked(self.selecting_direction)
 
-    def addSelection(self, doc_name, obj_name, sub, selectedPoint=None):
+    def addSelection(self, doc_name, obj_name, sub, selected_point=None):
         # This is the direction selection
         if not self.selecting_direction:
             # Shouldn't be here
@@ -303,7 +303,7 @@ class TaskPanelCfdFluidBoundary:
         print('Selection: ' +
               selected_object.Shape.ShapeType + '  ' +
               selected_object.Name + ':' +
-              sub + " @ " + str(selectedPoint))
+              sub + " @ " + str(selected_point))
 
         if hasattr(selected_object, "Shape") and sub:
             elt = selected_object.Shape.getElement(sub)

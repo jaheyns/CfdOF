@@ -77,10 +77,6 @@ class _CommandCfdInitialiseInternalFlowField:
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_InitialiseInternal', _CommandCfdInitialiseInternalFlowField())
-
-
 class _CfdInitialVariables:
     """ The field initialisation object """
     def __init__(self, obj):
@@ -196,3 +192,7 @@ class _ViewProviderCfdInitialseInternalFlowField:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_InitialiseInternal', _CommandCfdInitialiseInternalFlowField())

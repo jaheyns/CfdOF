@@ -238,11 +238,13 @@ class CfdPreferencePage:
         CfdTools.setGmshPath(self.gmsh_path)
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.consoleMessage("Checking dependencies...")
+
         msg = CfdTools.checkCfdDependencies()
         if not msg:
             self.consoleMessage("No missing dependencies detected")
         else:
             self.consoleMessage(msg)
+
         CfdTools.setFoamDir(self.initial_foam_dir)
         CfdTools.setParaviewPath(self.initial_paraview_path)
         CfdTools.setGmshPath(self.initial_gmsh_path)
