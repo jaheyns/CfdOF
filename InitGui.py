@@ -49,6 +49,8 @@ class CfdOFWorkbench(Workbench):
         from CfdAnalysis import _CommandCfdAnalysis
         from CfdMesh import _CommandCfdMeshFromShape
         from CfdMeshRefinement import _CommandMeshRegion
+        from core.functionobjects.CfdFunctionObjects import _CommandCfdFunctionObjects
+
         from CfdPhysicsSelection import _CommandCfdPhysicsSelection
         from CfdFluidMaterial import _CommandCfdFluidMaterial
         from CfdSolverFoam import _CommandCfdSolverFoam
@@ -60,12 +62,14 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
+        FreeCADGui.addCommand('Cfd_FunctionObjects',_CommandCfdFunctionObjects())
 
         cmdlst = ['Cfd_Analysis',
                   'Cfd_MeshFromShape', 'Cfd_MeshRegion',
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
+                  'Cfd_FunctionObjects',
                   'Cfd_SolverControl']
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)

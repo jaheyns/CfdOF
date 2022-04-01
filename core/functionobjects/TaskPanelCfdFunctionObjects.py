@@ -1,0 +1,223 @@
+# ***************************************************************************
+# *                                                                         *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *                                                                         *
+# *   This program is free software; you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
+# *   as published by the Free Software Foundation; either version 2 of     *
+# *   the License, or (at your option) any later version.                   *
+# *   for detail see the LICENCE text file.                                 *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Library General Public License for more details.                  *
+# *                                                                         *
+# *   You should have received a copy of the GNU Library General Public     *
+# *   License along with this program; if not, write to the Free Software   *
+# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
+# *   USA                                                                   *
+# *                                                                         *
+# ***************************************************************************
+
+import FreeCAD
+import os
+import os.path
+import CfdTools
+from CfdTools import getQuantity, setQuantity, indexOrDefault
+import CfdFaceSelectWidget
+from core.functionobjects import CfdFunctionObjects
+if FreeCAD.GuiUp:
+    import FreeCADGui
+    from PySide import QtGui
+    from PySide.QtGui import QFormLayout
+
+
+class TaskPanelCfdFunctionObjects:
+    """
+    Task panel for adding solver function objects
+    """
+    def __init__(self, obj):
+        self.selecting_direction = False
+        self.obj = obj
+
+        # Store values which are changed on the fly for visual update
+        self.ShapeRefsOrig = list(self.obj.ShapeRefs)
+        self.FunctionObjectTypeOrig = str(self.obj.FunctionObjectType)
+
+        ui_path = os.path.join(os.path.dirname(__file__), "../gui/TaskPanelCfdFunctionObjects.ui")
+        self.form = FreeCADGui.PySideUic.loadUi(ui_path)
+
+        # Function Object types
+        self.form.comboFunctionObjectType.addItems(CfdFunctionObjects.OBJECT_NAMES)
+        bi = indexOrDefault(CfdFunctionObjects.OBJECT_NAMES, self.obj.FunctionObjectType, 0)
+        self.form.comboFunctionObjectType.currentIndexChanged.connect(self.comboFunctionObjectTypeChanged)
+        self.form.comboFunctionObjectType.setCurrentIndex(bi)
+        self.comboFunctionObjectTypeChanged()
+
+        # Set the inputs for various function objects
+        # Force fo
+        setQuantity(self.form.inputPressure, self.obj.Pressure)
+        setQuantity(self.form.inputVelocity, self.obj.Velocity)
+        setQuantity(self.form.inputDensity, self.obj.Density)
+        setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
+        setQuantity(self.form.inputPorosity, self.obj.IncludePorosity)
+        setQuantity(self.form.inputWriteFields, self.obj.WriteFields)
+        setQuantity(self.form.inputCentreOfRotation, self.obj.CentreOfRotation)
+        self.form.inputPressure.setToolTip("Pressure field name")
+        self.form.inputVelocity.setToolTip("Velocity field name")
+        self.form.inputDensity.setToolTip("Density field name")
+        self.form.inputRefencePressure.setToolTip("Reference pressure")
+        self.form.inputPorosity.setToolTip("Porosity")
+        self.form.inputWriteFields.setToolTip("Write output fields")
+        self.form.inputCentreOfRotation.setToolTip("Centre of rotation vector for moments")
+
+        # Force coefficients fo
+        setQuantity(self.form.inputLiftDirection, self.obj.LiftDirection)
+        setQuantity(self.form.inputDragDirection, self.obj.DragDirection)
+        setQuantity(self.form.inputPitchAxis, self.obj.PitchAxis)
+        setQuantity(self.form.inputMagnitudeURef, self.obj.MagnitudeURef)
+        setQuantity(self.form.inputLengthRef, self.obj.LengthRef)
+        setQuantity(self.form.inputAreaRef, self.obj.AreaRef)
+        self.form.inputLiftDirection.setToolTip("Lift direction vector")
+        self.form.inputDragDirection.setToolTip("Drag direction vector")
+        self.form.inputPitchAxis.setToolTip("Pitch axis for moment coefficient")
+        self.form.inputMagnitudeURef.setToolTip("Velocity magnitude reference")
+        self.form.inputLengthRef.setToolTip("Length reference")
+        self.form.inputAreaRef.setToolTip("Area reference")
+
+        # Spatial binning
+        setQuantity(self.form.NBins, self.obj.NBins)
+        setQuantity(self.form.Direction, self.obj.Direction)
+        setQuantity(self.form.Cumulative, self.obj.Cumulative)
+        self.form.NBins.setToolTip("Number of bins")
+        self.form.Direction.setToolTip("Direction")
+        self.form.Cumulative.setToolTip("Cumulative")
+
+        # Face list selection panel - modifies obj.ShapeRefs passed to it
+        self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
+                                                                    self.obj, True, True, False)
+
+        self.updateUI()
+
+    def updateUI(self):
+        # Function object type
+        type_index = self.form.comboFunctionObjectType.currentIndex()
+        type_name = self.form.comboFunctionObjectType.currentText()
+        force_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][0]
+        coefficient_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][1]
+        bin_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][2]
+
+        self.form.forceFrame.setVisible(force_frame_enabled)
+        self.form.binFrame.setVisible(bin_frame_enabled)
+
+        if type_name == 'Force coefficients':
+            self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
+
+    def comboFunctionObjectTypeChanged(self):
+        index = self.form.comboFunctionObjectType.currentIndex()
+        self.obj.FunctionObjectType = CfdFunctionObjects.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()]
+        self.form.functionObjectDescription.setText(CfdFunctionObjects.OBJECT_DESCRIPTIONS[index])
+
+        # # Change the color of the boundary condition as the selection is made
+        # doc_name = str(self.obj.Document.Name)
+        # FreeCAD.getDocument(doc_name).recompute()
+
+    def addSelection(self, doc_name, obj_name, sub, selected_point=None):
+        # This is the direction selection
+        if not self.selecting_direction:
+            # Shouldn't be here
+            return
+
+        if FreeCADGui.activeDocument().Document.Name != self.obj.Document.Name:
+            return
+
+        selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
+        # On double click on a vertex of a solid sub is None and obj is the solid
+        print('Selection: ' +
+              selected_object.Shape.ShapeType + '  ' +
+              selected_object.Name + ':' +
+              sub + " @ " + str(selected_point))
+
+        if hasattr(selected_object, "Shape") and sub:
+            elt = selected_object.Shape.getElement(sub)
+            if elt.ShapeType == 'Face':
+                selection = (selected_object.Name, sub)
+                if self.selecting_direction:
+                    if CfdTools.is_planar(elt):
+                        self.selecting_direction = False
+                        self.form.lineDirection.setText(selection[0] + ':' + selection[1])  # TODO: Display label, not name
+                    else:
+                        FreeCAD.Console.PrintMessage('Face must be planar\n')
+
+        self.form.buttonDirection.setChecked(self.selecting_direction)
+
+    def accept(self):
+        if self.obj.Label.startswith("CfdFunctionObjects"):
+            self.obj.Label = self.obj.BoundaryType
+        FreeCADGui.Selection.removeObserver(self)
+
+        doc = FreeCADGui.getDocument(self.obj.Document)
+        doc.resetEdit()
+
+        FreeCADGui.doCommand("\nfc = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
+        # Type
+        FreeCADGui.doCommand("fo.FunctionObjectType "
+                             "= '{}'".format(self.obj.FunctionObjectType))
+
+        # Force object
+        FreeCADGui.doCommand("fo.Pressure "
+                             "= '{}'".format(getQuantity(self.form.inputPressure)))
+        FreeCADGui.doCommand("fo.Velocity "
+                             "= '{}'".format(getQuantity(self.form.inputVelocity)))
+        FreeCADGui.doCommand("fo.Density "
+                             "= '{}'".format(getQuantity(self.form.inputDensity)))
+        FreeCADGui.doCommand("fo.ReferencePressure "
+                             "= '{}'".format(getQuantity(self.form.inputRefencePressure)))
+        FreeCADGui.doCommand("fo.IncludePorosity "
+                             "= '{}'".format(getQuantity(self.form.inputPorosity)))
+        FreeCADGui.doCommand("fo.WriteFields "
+                             "= '{}'".format(getQuantity(self.form.inputWriteFields)))
+        FreeCADGui.doCommand("fo.CoRx "
+                             "= '{}'".format(getQuantity(self.form.inputCartX)))
+        FreeCADGui.doCommand("fo.CoRy "
+                             "= '{}'".format(getQuantity(self.form.inputCartY)))
+        FreeCADGui.doCommand("fo.CoRz "
+                             "= '{}'".format(getQuantity(self.form.inputCartZ)))
+
+        # Coefficient object
+        FreeCADGui.doCommand("fo.LiftDirection "
+                             "= '{}'".format(getQuantity(self.form.inputLiftDirection)))
+        FreeCADGui.doCommand("fo.DragDirection "
+                             "= '{}'".format(getQuantity(self.form.inputDragDirection)))
+        FreeCADGui.doCommand("fo.PitchAxis "
+                             "= '{}'".format(getQuantity(self.form.inputPitchAxis)))
+        FreeCADGui.doCommand("fo.MagnitudeURef "
+                             "= '{}'".format(getQuantity(self.form.inputMagnitudeURef)))
+        FreeCADGui.doCommand("fo.LengthRef "
+                             "= '{}'".format(getQuantity(self.form.inputLengthRef)))
+        FreeCADGui.doCommand("fo.AreaRef "
+                             "= '{}'".format(getQuantity(self.form.inputAreaRef)))
+
+        # Spatial binning
+        FreeCADGui.doCommand("fo.NBins "
+                             "= '{}'".format(getQuantity(self.form.inputNBins)))
+        FreeCADGui.doCommand("fo.Direction "
+                             "= '{}'".format(getQuantity(self.form.inputDirection)))
+        FreeCADGui.doCommand("fo.Cumulative "
+                             "= '{}'".format(getQuantity(self.form.inputCumulative)))
+
+        # Finalise
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
+        self.faceSelector.closing()
+
+    def reject(self):
+        self.obj.ShapeRefs = self.ShapeRefsOrig
+        self.obj.FunctionObjectTypeType = self.FunctionObjectTypeOrig
+        FreeCADGui.Selection.removeObserver(self)
+        doc = FreeCADGui.getDocument(self.obj.Document)
+        doc_name = str(self.obj.Document.Name)
+        FreeCAD.getDocument(doc_name).recompute()
+        doc.resetEdit()
+        self.faceSelector.closing()
+        return True
