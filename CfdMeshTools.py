@@ -130,6 +130,7 @@ class CfdMeshTools:
                         break
                 if not all_faces_planar:
                     raise RuntimeError("2D mesh extrusion surface must be a flat plane.")
+
             normal = extrusion_shape.Faces[0].Surface.Axis
             normal.multiply(1.0/normal.Length)
             this_extrusion_settings['Normal'] = (normal.x, normal.y, normal.z)

@@ -28,34 +28,31 @@ import FreeCAD
 import os
 import os.path
 import CfdTools
-from TurbulenceModelsConsts import K_OMEGA_SST, K_EPSILON, SPALART, LANGTRY_MENTER_SST
 from CfdTools import setQuantity
 if FreeCAD.GuiUp:
     import FreeCADGui
-
+    from PySide import QtCore, QtGui
 
 RANS_MODELS = ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM']
-
+LES_MODELS = ['kEqn', 'Smagorinsky', 'WALE']
 
 class _TaskPanelCfdPhysicsSelection:
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
         self.obj = obj
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelPhysics.ui"))
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelPhysics.ui"))
 
         self.form.radioButtonSteady.toggled.connect(self.updateUI)
         self.form.radioButtonTransient.toggled.connect(self.updateUI)
-
         self.form.radioButtonSinglePhase.toggled.connect(self.updateUI)
         self.form.radioButtonFreeSurface.toggled.connect(self.updateUI)
-
         self.form.radioButtonIncompressible.toggled.connect(self.updateUI)
         self.form.radioButtonCompressible.toggled.connect(self.updateUI)
-
         self.form.viscousCheckBox.stateChanged.connect(self.updateUI)
         self.form.radioButtonLaminar.toggled.connect(self.updateUI)
         self.form.radioButtonRANS.toggled.connect(self.updateUI)
+        self.form.radioButtonLES.toggled.connect(self.updateUI)
         #self.form.radioButtonLES_DES.toggled.connect(self.updateUI)
 
         self.load()
@@ -68,11 +65,13 @@ class _TaskPanelCfdPhysicsSelection:
         elif self.obj.Time == 'Transient':
             self.form.radioButtonTransient.toggle()
 
-        # Solver
+        # Phase
         if self.obj.Phase == 'Single':
             self.form.radioButtonSinglePhase.toggle()
         elif self.obj.Phase == 'FreeSurface':
             self.form.radioButtonFreeSurface.toggle()
+
+        # Flow
         if self.obj.Flow == 'Incompressible':
             self.form.radioButtonIncompressible.toggle()
         elif self.obj.Flow == 'Compressible':
@@ -92,6 +91,9 @@ class _TaskPanelCfdPhysicsSelection:
         elif self.obj.Turbulence == 'RANS':
             self.form.viscousCheckBox.setChecked(True)
             self.form.radioButtonRANS.toggle()
+        elif self.obj.Turbulence == 'LES':
+            self.form.viscousCheckBox.setChecked(True)
+            self.form.radioButtonLES.toggle()
 
         # Gravity
         setQuantity(self.form.gx, self.obj.gx)
@@ -108,10 +110,12 @@ class _TaskPanelCfdPhysicsSelection:
         # Steady / transient
         if self.form.radioButtonSteady.isChecked():
             self.form.radioButtonFreeSurface.setEnabled(False)
+            self.form.radioButtonLES.setEnabled(False)
             if self.form.radioButtonFreeSurface.isChecked():
-                self.form.radioButtonSinglePhase.toggle()
+                self.form.radioButtonSinglePhase.toggle() # TODO This is quite hacky, this should really be done with a ButtonGroup
         else:
             self.form.radioButtonFreeSurface.setEnabled(True)
+            self.form.radioButtonLES.setEnabled(True)
 
         # Gravity
         self.form.gravityFrame.setEnabled(
@@ -132,10 +136,18 @@ class _TaskPanelCfdPhysicsSelection:
         # Viscous 
         if self.form.viscousCheckBox.isChecked():
             self.form.turbulenceFrame.setVisible(True)
+            # RANS
             if self.form.radioButtonRANS.isChecked():
                 self.form.turbulenceComboBox.clear()
                 self.form.turbulenceComboBox.addItems(RANS_MODELS)
                 ti = CfdTools.indexOrDefault(RANS_MODELS, self.obj.TurbulenceModel, 0)
+                self.form.turbulenceComboBox.setCurrentIndex(ti)
+                self.form.turbulenceModelFrame.setVisible(True)
+            # LES
+            elif self.form.radioButtonLES.isChecked():
+                self.form.turbulenceComboBox.clear()
+                self.form.turbulenceComboBox.addItems(LES_MODELS)
+                ti = CfdTools.indexOrDefault(LES_MODELS, self.obj.TurbulenceModel, 0)
                 self.form.turbulenceComboBox.setCurrentIndex(ti)
                 self.form.turbulenceModelFrame.setVisible(True)
             else:
@@ -175,6 +187,10 @@ class _TaskPanelCfdPhysicsSelection:
                 FreeCADGui.doCommand("obj.Turbulence = 'Laminar'")
             elif self.form.radioButtonRANS.isChecked():
                 FreeCADGui.doCommand("obj.Turbulence = 'RANS'")
+                FreeCADGui.doCommand("obj.TurbulenceModel = '{}'".format(
+                    self.form.turbulenceComboBox.currentText()))
+            elif self.form.radioButtonLES.isChecked():
+                FreeCADGui.doCommand("obj.Turbulence = 'LES'")
                 FreeCADGui.doCommand("obj.TurbulenceModel = '{}'".format(
                     self.form.turbulenceComboBox.currentText()))
         else:

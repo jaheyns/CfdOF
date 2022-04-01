@@ -57,7 +57,6 @@ divSchemes
     div(phi,omega)  bounded Gauss upwind;
     div(phi,gammaInt)   bounded Gauss upwind;
     div(phi,ReThetat)   bounded Gauss upwind;
-
 %}
 %}
 %{%(solver/SolverName%)
@@ -99,7 +98,7 @@ divSchemes
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 %}
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS LES
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST
     div(phi,k)      Gauss upwind;
@@ -114,6 +113,8 @@ divSchemes
     div(phi,omega)  Gauss upwind;
     div(phi,gammaInt)   bounded Gauss upwind;
     div(phi,ReThetat)   bounded Gauss upwind;
+%:kEqn
+    div(phi,k)     bounded Gauss upwind;
 %}
 %}
 %{%(solver/SolverName%)

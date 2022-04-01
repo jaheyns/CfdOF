@@ -48,16 +48,16 @@ class _TaskPanelCfdMesh:
     """ The TaskPanel for editing References property of CfdMesh objects and creation of new CFD mesh """
     def __init__(self, obj):
         self.mesh_obj = obj
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "TaskPanelCfdMesh.ui"))
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdMesh.ui"))
 
         self.console_message_cart = ''
         self.error_message = ''
         self.mesh_obj.Proxy.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
         self.paraviewScriptName = ""
 
-        self.mesh_obj.Proxy.mesh_process = CfdConsoleProcess(finishedHook=self.meshFinished,
-                                                             stdoutHook=self.gotOutputLines,
-                                                             stderrHook=self.gotErrorLines)
+        self.mesh_obj.Proxy.mesh_process = CfdConsoleProcess(finished_hook=self.meshFinished,
+                                                             stdout_hook=self.gotOutputLines,
+                                                             stderr_hook=self.gotErrorLines)
 
         self.Timer = QtCore.QTimer()
         self.Timer.setInterval(1000)

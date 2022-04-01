@@ -77,10 +77,6 @@ class _CommandCfdInitialiseInternalFlowField:
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_InitialiseInternal', _CommandCfdInitialiseInternalFlowField())
-
-
 class _CfdInitialVariables:
     """ The field initialisation object """
     def __init__(self, obj):
@@ -117,6 +113,12 @@ class _CfdInitialVariables:
                           "Turbulent intermittency")
         addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
                           "Transition Momentum Thickness Reynolds Number")
+        addObjectProperty(obj, 'nut', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+        addObjectProperty(obj, 'kEqnk', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent kinetic energy")
+        addObjectProperty(obj, 'kEqnNut', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
 
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
         addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary name")
@@ -190,3 +192,7 @@ class _ViewProviderCfdInitialseInternalFlowField:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_InitialiseInternal', _CommandCfdInitialiseInternalFlowField())

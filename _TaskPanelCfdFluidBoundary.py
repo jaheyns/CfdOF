@@ -56,7 +56,7 @@ class TaskPanelCfdFluidBoundary:
 
         self.alphas = {}
 
-        ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdFluidBoundary.ui")
+        ui_path = os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdFluidBoundary.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.form.buttonDirection.setCheckable(True)
@@ -128,6 +128,7 @@ class TaskPanelCfdFluidBoundary:
             self.form.comboFluid.clear()
 
         # Set the inputs for the turbulence models
+        # RANS
         setQuantity(self.form.inputKineticEnergy, self.obj.TurbulentKineticEnergy)  # k
         setQuantity(self.form.inputSpecificDissipationRate, self.obj.SpecificDissipationRate)   # omega
         setQuantity(self.form.inputDissipationRate, self.obj.DissipationRate)   # epsilon
@@ -135,6 +136,23 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputLengthScale, self.obj.TurbulenceLengthScale) # length scale
         setQuantity(self.form.inputGammaInt, self.obj.Intermittency)   # gammaInt
         setQuantity(self.form.inputReThetat, self.obj.ReThetat)  # ReThetat
+        setQuantity(self.form.inputNuTilda, self.obj.NuTilda) # Modified nu tilde
+        # LES models
+        setQuantity(self.form.inputTurbulentViscosity, self.obj.TurbulentViscosity) # nu tilde
+        setQuantity(self.form.inputKineticEnergy, self.obj.TurbulentKineticEnergy)  # nu tilde
+
+        # RANS models
+        self.form.inputKineticEnergy.setToolTip("Turbulent kinetic energy")
+        self.form.inputSpecificDissipationRate.setToolTip("Specific turbulence dissipation rate")
+        self.form.inputDissipationRate.setToolTip("Turbulence dissipation rate")
+        self.form.inputIntensity.setToolTip("Turbulence intensity")
+        self.form.inputLengthScale.setToolTip("Turbulence length scale")
+        self.form.inputGammaInt.setToolTip("Turbulence intermittency")
+        self.form.inputReThetat.setToolTip("Momentum thickness Reynolds number")
+        self.form.inputNuTilda.setToolTip("Modified turbulent viscosity")
+        # LES models
+        self.form.inputTurbulentViscosity.setToolTip("Turbulent viscosity")
+
 
         self.form.checkBoxDefaultBoundary.setChecked(self.obj.DefaultBoundary)
 
@@ -271,7 +289,7 @@ class TaskPanelCfdFluidBoundary:
             FreeCADGui.Selection.removeObserver(self)
         self.form.buttonDirection.setChecked(self.selecting_direction)
 
-    def addSelection(self, doc_name, obj_name, sub, selectedPoint=None):
+    def addSelection(self, doc_name, obj_name, sub, selected_point=None):
         # This is the direction selection
         if not self.selecting_direction:
             # Shouldn't be here
@@ -285,7 +303,7 @@ class TaskPanelCfdFluidBoundary:
         print('Selection: ' +
               selected_object.Shape.ShapeType + '  ' +
               selected_object.Name + ':' +
-              sub + " @ " + str(selectedPoint))
+              sub + " @ " + str(selected_point))
 
         if hasattr(selected_object, "Shape") and sub:
             elt = selected_object.Shape.getElement(sub)
@@ -393,10 +411,18 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputGammaInt)))
         FreeCADGui.doCommand("bc.ReThetat "
                              "= '{}'".format(getQuantity(self.form.inputReThetat)))
+        FreeCADGui.doCommand("bc.TurbulentViscosity "
+                             "= '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
+        FreeCADGui.doCommand("bc.kEqnTurbulentKineticEnergy "
+                             "= '{}'".format(getQuantity(self.form.inputKineticEnergy)))
+        FreeCADGui.doCommand("bc.kEqnTurbulentViscosity "
+                             "= '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
         FreeCADGui.doCommand("bc.TurbulenceIntensity "
                              "= '{}'".format(getQuantity(self.form.inputIntensity)))
         FreeCADGui.doCommand("bc.TurbulenceLengthScale "
                              "= '{}'".format(getQuantity(self.form.inputLengthScale)))
+
+        # Multiphase
         FreeCADGui.doCommand("bc.VolumeFractions = {}".format(self.alphas))
 
         # Porous
