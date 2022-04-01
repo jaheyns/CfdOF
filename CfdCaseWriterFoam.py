@@ -426,6 +426,9 @@ class CfdCaseWriterFoam:
                     initial_values['nuTilda'] = 0
                     initial_values['gammaInt'] = 0
                     initial_values['ReThetat'] = 0
+                    initial_values['nut'] = 0
+                    initial_values['kEqnk'] = 0
+                    initial_values['kEqnNut'] = 0
 
                     if inlet_bc['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
                         initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
@@ -440,6 +443,11 @@ class CfdCaseWriterFoam:
                         initial_values['omega'] = inlet_bc['SpecificDissipationRate']
                         initial_values['gammaInt'] = inlet_bc['Intermittency']
                         initial_values['ReThetat'] = inlet_bc['ReThetat']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'TurbulentViscosity':
+                        initial_values['nut'] = inlet_bc['TurbulentViscosity']
+                    elif inlet_bc['TurbulenceInletSpecification'] == 'TurbulentViscosityAndK':
+                        initial_values['kEqnk'] = inlet_bc['kEqnTurbulentKineticEnergy']
+                        initial_values['kEqnNut'] = inlet_bc['kEqnTurbulentViscosity']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
                         if inlet_bc['BoundarySubType'] == 'uniformVelocityInlet' or \
                            inlet_bc['BoundarySubType'] == 'farField':

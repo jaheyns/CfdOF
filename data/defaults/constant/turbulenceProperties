@@ -20,6 +20,24 @@ RAS
 
     printCoeffs         on;
 }
+%:LES
+simulationType LES;
+
+LES
+{
+    LESModel            %(physics/TurbulenceModel%);
+
+    turbulence          on;
+
+    printCoeffs         on;
+
+%{%(physics/TurbulenceModel%)
+%:Smagorinsky kEqn WALE
+	delta           vanDriest;
+
+    %[constant/_turbulenceProperties_LES%]
+%}
+}
 %:default
 simulationType laminar;
 %}

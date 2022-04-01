@@ -30,7 +30,6 @@ import CfdTools
 from CfdTools import addObjectProperty
 from pivy import coin
 import Part
-from TurbulenceModelsConsts import LANGTRY_MENTER_SST, SPALART, K_EPSILON, K_OMEGA_SST
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -77,6 +76,7 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
 # whether volume fraction panel is shown, whether thermal GUI is shown,
 # rows of thermal UI to show (all shown if None)
+
 BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                 [False, [], False, False, False, True, None],  # Slip
                 [True, [2], False, False, False, True, None],  # Partial slip
@@ -130,8 +130,23 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                           "intensityAndLengthScale"],
                          ["k, omega, gamma and reThetat specified",
                           "Turbulence intensity and eddy length scale"],
-                         [[0, 2, 6, 7],  # k, omega, gammaInt and reThetat
-                          [3, 4]]]  # I, l
+                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
+                          [3, 4]]],  # I, l
+                        "kEqn":     # todo fix me
+                        [["Kinetic Energy & Turbulent viscosity"],
+                         ["TurbulentViscosityAndK"],
+                         ["k and turbulent viscosity specified"],
+                         [[0, 8]]],     # nut
+                        "Smagorinsky":  # todo fix me
+                        [["Turbulent viscosity"],
+                         ["TurbulentViscosity"],
+                         ["turbulent viscosity specified"],
+                         [[8]]],  # nut
+                        "WALE":     # todo fix me
+                        [["Turbulent viscosity"],
+                         ["TurbulentViscosity"],
+                         ["turbulent viscosity specified"],
+                         [[8]]]  # nut
                         }
 
 THERMAL_BOUNDARY_NAMES = ["Fixed temperature",
@@ -177,10 +192,6 @@ class _CommandCfdFluidBoundary:
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
-
-
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_FluidBoundary', _CommandCfdFluidBoundary())
 
 
 class _CfdFluidBoundary:
@@ -259,7 +270,7 @@ class _CfdFluidBoundary:
         for k in TURBULENT_INLET_SPEC:
             all_turb_specs += TURBULENT_INLET_SPEC[k][1]
 
-        all_turb_specs = list(set(all_turb_specs))  # Remove dups
+        all_turb_specs = list(set(all_turb_specs))  # Remove duplicates
 
         if addObjectProperty(obj, 'TurbulenceInletSpecification', all_turb_specs, "App::PropertyEnumeration",
                              "Turbulence", "Turbulent quantities specified"):
@@ -284,6 +295,14 @@ class _CfdFluidBoundary:
                           "Turbulent intermittency")
         addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
                           "Transition momentum thickness Reynolds number")
+
+        # LES models
+        addObjectProperty(obj, 'TurbulentViscosity', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+        addObjectProperty(obj, 'kEqnTurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+        addObjectProperty(obj, 'kEqnTurbulentViscosity', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
 
         # General
         addObjectProperty(obj, 'TurbulenceIntensity', '0.1', "App::PropertyQuantity", "Turbulence",
@@ -398,3 +417,7 @@ class _ViewProviderCfdFluidBoundary:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_FluidBoundary', _CommandCfdFluidBoundary())

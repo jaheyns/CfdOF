@@ -17,19 +17,20 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 ### Current:
 
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
-* Extension to turbulent flow using RANS (k-omega SST (incl. transistion), k-epsilon, and Spalart-Allmaras models supported)
+* Extension to RANS turbulent flow (k-omega SST (incl. transistion), k-epsilon, and Spalart-Allmaras models supported)
+* Extension to LES turbulent flow (k-Equation, Smagorinsky and WALE (Wall bounded) models)
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
 * Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
+* Porous regions and porous baffles
 * Basic material database
 * Flow initialisation with a potential solver
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
-* Cut-cell Cartesian meshing with baffles (snappyHexMesh)
+* Cut-cell Cartesian meshing with baffles (snappyHexMesh) and implicit / explicit snapping
 * Tetrahedral meshing using Gmsh
 * Conversion to poly dual mesh from existing meshes
 * Post meshing check mesh
 * Postprocessing using Paraview
-* Porous regions and porous baffles
 * Runs on Windows 7-11 and Linux
 * Unit/regression testing
 * Case builder using an extensible template structure

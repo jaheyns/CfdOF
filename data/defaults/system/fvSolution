@@ -221,7 +221,7 @@ solvers
 %}
 %}
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS LES
     "(k|omega|epsilon|nuTilda|gammaInt|ReThetat)"
     {
         solver           smoothSolver;
@@ -311,6 +311,7 @@ relaxationFactors
 %}
 %}
     }
+
     fields
     {
         p               0.3;
@@ -331,7 +332,7 @@ relaxationFactors
         hFinal          1;
 %}
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS LES
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST
         k               0.5;
@@ -355,6 +356,9 @@ relaxationFactors
         gammaIntFinal          1;
         ReThetat               0.5;
         ReThetatFinal          1;
+%:kEqn
+        k               0.5;
+        kFinal          1;
 %}
 %}
 %{%(solver/SolverName%)
