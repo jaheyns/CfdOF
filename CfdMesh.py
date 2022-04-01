@@ -80,7 +80,8 @@ class _CommandCfdMeshFromShape:
 class _CfdMesh:
     """ CFD mesh properties """
 
-    # they will be used from the task panel too, thus they need to be outside of the __init__
+    # Variables that need to be used outside this class and therefore are included outside of
+    # the constructor
     known_element_dimensions = ['2D', '3D']
     known_mesh_utility = ['cfMesh', 'snappyHexMesh', 'gmsh']
 
@@ -94,6 +95,7 @@ class _CfdMesh:
         addObjectProperty(obj, 'CaseName', "meshCase", "App::PropertyString", "",
                           "Name of directory in which the mesh is created")
 
+        # Setup and utility
         addObjectProperty(obj, 'STLLinearDeflection', 0.05, "App::PropertyFloat", "", "STL linear deflection")
 
         addObjectProperty(obj, 'NumberOfProcesses', 1, "App::PropertyInteger", "", "Number of parallel processes")
@@ -108,6 +110,7 @@ class _CfdMesh:
                              "Mesh Parameters", "Meshing utilities"):
             obj.MeshUtility = 'cfMesh'
 
+        # Refinement
         addObjectProperty(obj, "CharacteristicLengthMax", "0 m", "App::PropertyLength", "Mesh Parameters",
                           "Max mesh element size (0.0 = infinity)")
 
@@ -121,9 +124,15 @@ class _CfdMesh:
         addObjectProperty(obj, 'EdgeRefinement', 1, "App::PropertyFloat", "Mesh Parameters",
                           "Relative edge (feature) refinement")
 
+        # PolyDualMesh
         addObjectProperty(obj, 'ConvertToDualMesh', True, "App::PropertyBool", "Mesh Parameters",
                           "Convert to polyhedral dual mesh")
 
+        # Edge detection, implicit / explicit (NB Implicit = False implies Explicit = True)
+        addObjectProperty(obj, 'ImplicitEdgeDetection', False, "App::PropertyBool", "Mesh Parameters",
+                          "Use implicit edge detection")
+
+        # Mesh dimension
         if addObjectProperty(obj, 'ElementDimension', _CfdMesh.known_element_dimensions, "App::PropertyEnumeration",
                              "Mesh Parameters", "Dimension of mesh elements (Default 3D)"):
             obj.ElementDimension = '3D'

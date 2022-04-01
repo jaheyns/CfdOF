@@ -49,8 +49,8 @@ laplacianSchemes
     // for stability in highly non-orthogonal cells.
     // (0 = uncorrected, fully implicit; 1 = full correction)
     default                     Gauss linear limited 0.3;
-    laplacian(DomegaEff,omega)  Gauss linear uncorrected;
     laplacian(DkEff,k)          Gauss linear uncorrected;
+    laplacian(DomegaEff,omega)  Gauss linear uncorrected;
 }
 
 interpolationSchemes

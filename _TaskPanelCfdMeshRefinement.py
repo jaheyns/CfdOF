@@ -43,7 +43,7 @@ class _TaskPanelCfdMeshRefinement:
         self.mesh_obj = self.getMeshObject()
 
         self.form = FreeCADGui.PySideUic.loadUi(
-            os.path.join(os.path.dirname(__file__), "TaskPanelCfdMeshRefinement.ui"))
+            os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdMeshRefinement.ui"))
 
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
 
@@ -179,6 +179,7 @@ class _TaskPanelCfdMeshRefinement:
     def updateUI(self):
         self.form.surfaceOrInernalVolume.setVisible(True)
         self.form.boundlayer_frame.setVisible(self.form.check_boundlayer.isChecked())
+        self.form.commonFrame.setVisible(True)
 
         if self.form.extrusionToggle.isChecked():
             self.form.extrusionFrame.setVisible(True)
