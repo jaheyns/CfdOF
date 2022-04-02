@@ -174,9 +174,9 @@ class TaskPanelCfdFunctionObjects:
 
         # Force object
         FreeCADGui.doCommand("fo.Pressure "
-                             "= '{}'".format(self.form.inputPressure))
+                             "= '{}'".format(self.form.inputPressure.text()))
         FreeCADGui.doCommand("fo.Velocity "
-                             "= '{}'".format(self.form.inputVelocity))
+                             "= '{}'".format(self.form.inputVelocity.text()))
         FreeCADGui.doCommand("fo.Density "
                              "= '{}'".format(getQuantity(self.form.inputDensity)))
         FreeCADGui.doCommand("fo.ReferencePressure "

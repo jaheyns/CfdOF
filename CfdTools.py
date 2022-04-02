@@ -187,9 +187,17 @@ def getInitialConditions(analysis_object):
     return None
 
 
+def getFunctionObjectsGroup(analysis_object):
+    group = []
+    from core.functionobjects.CfdFunctionObjects import _CfdFunctionObjects
+    for i in analysis_object.Group:
+        if isinstance(i.Proxy, _CfdFunctionObjects):
+            group.append(i)
+    return group
+
+
 def getMaterials(analysis_object):
-    return [i for i in analysis_object.Group
-            if i.isDerivedFrom('App::MaterialObjectPython')]
+    return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
 
 
 def getSolver(analysis_object):

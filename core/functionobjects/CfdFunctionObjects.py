@@ -114,43 +114,43 @@ class _CfdFunctionObjects:
                           "Reference density")
         # addObjectProperty(obj, 'CentreOfRotation', '0, 0, 0', "App::PropertyString", "Function object",
         #                   "Centre of Rotation (x, y, z)")
-        addObjectProperty(obj, 'CoRx', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'CoRx', '0', "App::PropertyQuantity", "Function object",
                           "Centre of rotation (x component)")
-        addObjectProperty(obj, 'CoRy', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'CoRy', '0', "App::PropertyQuantity", "Function object",
                           "Centre of rotation (y component)")
-        addObjectProperty(obj, 'CoRz', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'CoRz', '0', "App::PropertyQuantity", "Function object",
                           "Centre of rotation (z component)")
-        addObjectProperty(obj, 'IncludePorosity', False, "App::PropertyBool", "Function objects",
+        addObjectProperty(obj, 'IncludePorosity', False, "App::PropertyBool", "Function object",
                           "Whether to include porosity effects")
-        addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Function objects",
+        addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Function object",
                           "Whether to write output fields")
 
         # Force coefficients
         # addObjectProperty(obj, 'LiftDirection', '0, 0, 0', "App::PropertyString", "Function object",
         #                   "Lift Direction vector (x, y, z)")
-        addObjectProperty(obj, 'Liftx', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Liftx', '0', "App::PropertyQuantity", "Function object",
                           "Lift direction (x component)")
-        addObjectProperty(obj, 'Lifty', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Lifty', '0', "App::PropertyQuantity", "Function object",
                           "Lift direction (y component)")
-        addObjectProperty(obj, 'Liftz', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Liftz', '0', "App::PropertyQuantity", "Function object",
                           "Lift direction (z component)")
 
         # addObjectProperty(obj, 'DragDirection', '0, 0, 0', "App::PropertyString", "Function object",
         #                   "Drag direction vector (x, y, z)")
-        addObjectProperty(obj, 'Dragx', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Dragx', '0', "App::PropertyQuantity", "Function object",
                           "Drag direction (x component)")
-        addObjectProperty(obj, 'Dragy', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Dragy', '0', "App::PropertyQuantity", "Function object",
                           "Drag direction (y component)")
-        addObjectProperty(obj, 'Dragz', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Dragz', '0', "App::PropertyQuantity", "Function object",
                           "Drag direction (z component)")
 
         # addObjectProperty(obj, 'PitchAxis', '0, 0, 0', "App::PropertyString", "Function object",
         #                   "Pitch axis for moment coefficient")
-        addObjectProperty(obj, 'Pitchx', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Pitchx', '0', "App::PropertyQuantity", "Function object",
                           "Centre of pitch (x component)")
-        addObjectProperty(obj, 'Pitchy', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Pitchy', '0', "App::PropertyQuantity", "Function object",
                           "Centre of pitch (y component)")
-        addObjectProperty(obj, 'Pitchz', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Pitchz', '0', "App::PropertyQuantity", "Function object",
                           "Centre of pitch (z component)")
 
         addObjectProperty(obj, 'MagnitudeUInf', '1 m/s', "App::PropertyQuantity", "Function object",
@@ -161,11 +161,11 @@ class _CfdFunctionObjects:
                           "Coefficient area reference")
 
         # Spatial binning
-        addObjectProperty(obj, 'NBins', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'NBins', '0', "App::PropertyQuantity", "Function object",
                           "Number of bins")
-        addObjectProperty(obj, 'Direction', '0', "App::PropertyQuantity", "Function objects",
+        addObjectProperty(obj, 'Direction', '0', "App::PropertyQuantity", "Function object",
                           "Direction")
-        addObjectProperty(obj, 'Cumulative', True, "App::PropertyBool", "Function objects",
+        addObjectProperty(obj, 'Cumulative', True, "App::PropertyBool", "Function object",
                           "Cumulative")
 
     def onDocumentRestored(self, obj):
