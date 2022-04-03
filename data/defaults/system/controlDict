@@ -66,14 +66,26 @@ libs
 %}
 );
 
-//functions
-//{
-//    %{%(functionobjects/DefinedName%)
-//        %:forces
-//        type                forces;
-//        libs                ("libforces.so");
-//        patches             (%(functionobjects/patches%)) //TODO finish me
-//    %}
-//
-//}
+functions
+{
+
+%{%(functionObjects%)
+%{%(functionObjects/%(0%)/FunctionObjectType%)
+%:Force
+    %(0%)
+    {
+        type                forces;
+        libs                ("libforces.so");
+        patches             ( %(functionObjects/%(0%)/ShapeRefs%) );
+    }
+%:ForceCoefficients
+    %(0%)
+    {
+        type                forcesCoeffs;
+        libs                ("libforces.so");
+        patches             ( %(functionObjects/%(0%)/ShapeRefs%) );
+    }
+%}
+%}
+}
 // ************************************************************************* //

@@ -86,6 +86,8 @@ class CfdCaseWriterFoam:
                 if bc_labels[j] == l:
                     raise ValueError("Boundary condition label '" + bc_labels[i] + "' is duplicated")
 
+        print(f'{self.function_objects}')
+
         self.settings = {
             'physics': phys_settings,
             'fluidProperties': [],  # Order is important, so use a list
@@ -114,6 +116,8 @@ class CfdCaseWriterFoam:
         self.processFunctionObjects()
         self.processInitialConditions()
         self.clearCase()
+
+        print(f'{self.settings["functionObjects"]["Function_object_number1"]["ShapeRefs"]}')
 
         self.exportZoneStlSurfaces()
         if self.porous_zone_objs:
@@ -353,7 +357,10 @@ class CfdCaseWriterFoam:
         fo_names = list(settings['functionObjects'].keys())
         for fo_name in fo_names:
             fo = settings['functionObjects'][fo_name]
-            print(f'functionObject: {fo}')
+            fo['ShapeRefs'] = ' '.join(list(fo['ShapeRefs'][0][1]))
+
+    def parseFaces(self, shape_refs):
+        pass
 
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
