@@ -29,12 +29,9 @@
 
 from __future__ import print_function
 
-import FreeCAD
-from FreeCAD import Units
-import CfdConsoleProcess
-import Part
 import os
 import os.path
+import glob
 import shutil
 import tempfile
 import numbers
@@ -43,6 +40,9 @@ import subprocess
 import sys
 import math
 from datetime import timedelta
+import FreeCAD
+from FreeCAD import Units
+import Part
 import BOPTools
 from BOPTools import SplitFeatures
 if FreeCAD.GuiUp:
@@ -50,35 +50,23 @@ if FreeCAD.GuiUp:
     from PySide import QtGui
     from PySide import QtCore
     from PySide.QtGui import QFormLayout, QGridLayout
+import CfdConsoleProcess
 
 
 # Some standard install locations that are searched if an install directory is not specified
-FOAM_DIR_DEFAULTS = {"Windows": ["C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v2012",
-                                 "~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v2012",
-                                 "C:\\Program Files\\blueCFD-Core-2020\\OpenFOAM-8"],
-                     "Linux": ["/usr/lib/openfoam/openfoam2112", "/usr/lib/openfoam/openfoam2106",
-                               "/usr/lib/openfoam/openfoam2012", "/usr/lib/openfoam/openfoam2006",
-                               "/opt/openfoam9", "/opt/openfoam8", "/opt/openfoam7", "/opt/openfoam6",
-                               "/opt/openfoam5", "/opt/openfoam-dev",
-                               "~/openfoam/OpenFOAM-v2112", "~/openfoam/OpenFOAM-v2106",
-                               "~/openfoam/OpenFOAM-v2012", "~/openfoam/OpenFOAM-v2006",
-                               "~/OpenFOAM/OpenFOAM-9.x", "~/OpenFOAM/OpenFOAM-9.0",
-                               "~/OpenFOAM/OpenFOAM-8.x", "~/OpenFOAM/OpenFOAM-8.0",
-                               "~/OpenFOAM/OpenFOAM-7.x", "~/OpenFOAM/OpenFOAM-7.0",
-                               "~/OpenFOAM/OpenFOAM-6.x", "~/OpenFOAM/OpenFOAM-6.0",
-                               "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
-                               "~/OpenFOAM/OpenFOAM-dev"],
-                     "Darwin": ["~/OpenFOAM/OpenFOAM-9.x", "~/OpenFOAM/OpenFOAM-9.0",
-                                "~/OpenFOAM/OpenFOAM-8.x", "~/OpenFOAM/OpenFOAM-8.0",
-                                "~/OpenFOAM/OpenFOAM-7.x", "~/OpenFOAM/OpenFOAM-7.0",
-                                "~/OpenFOAM/OpenFOAM-6.x", "~/OpenFOAM/OpenFOAM-6.0",
-                                "~/OpenFOAM/OpenFOAM-5.x", "~/OpenFOAM/OpenFOAM-5.0",
-                                "~/OpenFOAM/OpenFOAM-dev"]
+# Supports variable expansion and Unix-style globs (in which case the last lexically-sorted match will be used)
+FOAM_DIR_DEFAULTS = {'Windows': ['C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v*',
+                                 '~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v*',
+                                 'C:\\Program Files\\blueCFD-Core-2020\\OpenFOAM-*'],
+                     'Linux': ['/usr/lib/openfoam/openfoam*',  # ESI official packages
+                               '/opt/openfoam*', '/opt/openfoam-dev',  # Foundation official packages
+                               '~/openfoam/OpenFOAM-v*',
+                               '~/OpenFOAM/OpenFOAM-*.*', '~/OpenFOAM/OpenFOAM-dev'],  # Typical self-built locations
+                     "Darwin": ['~/OpenFOAM/OpenFOAM-*.*', '~/OpenFOAM/OpenFOAM-dev']
                      }
 
 PARAVIEW_PATH_DEFAULTS = {
-                    "Windows": ["C:\\Program Files\\ParaView 5.5.2-Qt5-Windows-64bit\\bin\\paraview.exe",
-                                "C:\\Program Files\\ParaView 5.5.2-Qt5-MPI-Windows-64bit\\bin\\paraview.exe"],
+                    "Windows": ["C:\\Program Files\\ParaView *\\bin\\paraview.exe"],
                     "Linux": [],
                     "Darwin": []
                     }
@@ -501,6 +489,13 @@ def getFoamRuntime():
     return runtime
 
 
+def findInDefaultPaths(paths):
+    for d in paths.get(platform.system(), []):
+        d = glob.glob(os.path.expandvars(os.path.expanduser(d)))
+        d = sorted(d)[-1] if len(d) else None
+        return d if os.path.exists(d) else None
+
+
 def detectFoamDir():
     """
     Try to guess Foam install dir from WM_PROJECT_DIR or, failing that, various defaults
@@ -520,12 +515,7 @@ def detectFoamDir():
             foam_dir = None
 
     if foam_dir is None:
-        for d in FOAM_DIR_DEFAULTS[platform.system()]:
-            foam_dir = os.path.expanduser(d)
-            if foam_dir and not os.path.exists(foam_dir):
-                foam_dir = None
-            else:
-                break
+        foam_dir = findInDefaultPaths(FOAM_DIR_DEFAULTS)
     return foam_dir
 
 
@@ -871,242 +861,269 @@ def convertMesh(case, mesh_file, scale):
 
 
 def checkCfdDependencies():
-        FC_MAJOR_VER_REQUIRED = 0
-        FC_MINOR_VER_REQUIRED = 18
-        FC_PATCH_VER_REQUIRED = 4
-        FC_COMMIT_REQUIRED = 16146
+    FC_MAJOR_VER_REQUIRED = 0
+    FC_MINOR_VER_REQUIRED = 18
+    FC_PATCH_VER_REQUIRED = 4
+    FC_COMMIT_REQUIRED = 16146
 
-        CF_MAJOR_VER_REQUIRED = 1
-        CF_MINOR_VER_REQUIRED = 12
+    CF_MAJOR_VER_REQUIRED = 1
+    CF_MINOR_VER_REQUIRED = 12
 
-        HISA_MAJOR_VER_REQUIRED = 1
-        HISA_MINOR_VER_REQUIRED = 6
-        HISA_PATCH_VER_REQUIRED = 3
+    HISA_MAJOR_VER_REQUIRED = 1
+    HISA_MINOR_VER_REQUIRED = 6
+    HISA_PATCH_VER_REQUIRED = 3
 
-        message = ""
-        FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
+    message = ""
+    FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
 
-        # Check FreeCAD version
-        print("Checking FreeCAD version")
-        ver = FreeCAD.Version()
-        major_ver = int(ver[0])
-        minor_vers = ver[1].split('.')
-        minor_ver = int(minor_vers[0])
-        if minor_vers[1:] and minor_vers[1]:
-            patch_ver = int(minor_vers[1])
-        else:
-            patch_ver = 0
-        gitver = ver[2].split()
-        if gitver:
-            gitver = gitver[0]
-        if gitver and gitver != 'Unknown':
-            gitver = int(gitver)
-        else:
-            # If we don't have the git version, assume it's OK.
-            gitver = FC_COMMIT_REQUIRED
+    # Check FreeCAD version
+    print("Checking FreeCAD version")
+    ver = FreeCAD.Version()
+    major_ver = int(ver[0])
+    minor_vers = ver[1].split('.')
+    minor_ver = int(minor_vers[0])
+    if minor_vers[1:] and minor_vers[1]:
+        patch_ver = int(minor_vers[1])
+    else:
+        patch_ver = 0
+    gitver = ver[2].split()
+    if gitver:
+        gitver = gitver[0]
+    if gitver and gitver != 'Unknown':
+        gitver = int(gitver)
+    else:
+        # If we don't have the git version, assume it's OK.
+        gitver = FC_COMMIT_REQUIRED
 
-        if (major_ver < FC_MAJOR_VER_REQUIRED or
-            (major_ver == FC_MAJOR_VER_REQUIRED and
-             (minor_ver < FC_MINOR_VER_REQUIRED or
-              (minor_ver == FC_MINOR_VER_REQUIRED and
-               (patch_ver < FC_PATCH_VER_REQUIRED or
-                (patch_ver == FC_PATCH_VER_REQUIRED and
-                 gitver < FC_COMMIT_REQUIRED)))))):
-            fc_msg = "FreeCAD version ({}.{}.{}) ({}) must be at least {}.{}.{} ({})".format(
-                int(ver[0]), minor_ver, patch_ver, gitver,
-                FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED)
-            print(fc_msg)
-            message += fc_msg + '\n'
+    if (major_ver < FC_MAJOR_VER_REQUIRED or
+        (major_ver == FC_MAJOR_VER_REQUIRED and
+         (minor_ver < FC_MINOR_VER_REQUIRED or
+          (minor_ver == FC_MINOR_VER_REQUIRED and
+           (patch_ver < FC_PATCH_VER_REQUIRED or
+            (patch_ver == FC_PATCH_VER_REQUIRED and
+             gitver < FC_COMMIT_REQUIRED)))))):
+        fc_msg = "FreeCAD version ({}.{}.{}) ({}) must be at least {}.{}.{} ({})".format(
+            int(ver[0]), minor_ver, patch_ver, gitver,
+            FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED)
+        print(fc_msg)
+        message += fc_msg + '\n'
 
-        # check openfoam
-        print("Checking for OpenFOAM:")
-        try:
-            foam_dir = getFoamDir()
-            print("OpenFOAM directory: " + (foam_dir if len(foam_dir) else "(system installation)"))
-            print("System: {}".format(platform.system()))
-            print("Runtime: {}".format(getFoamRuntime()))
-        except IOError as e:
-            ofmsg = "Could not find OpenFOAM installation: " + str(e)
+    # check openfoam
+    print("Checking for OpenFOAM:")
+    try:
+        foam_dir = getFoamDir()
+        sys_msg = "System: {}\nRuntime: {}\nOpenFOAM directory: {}".format(
+            platform.system(), getFoamRuntime(), foam_dir if len(foam_dir) else "(system installation)")
+        print(sys_msg)
+        message += sys_msg + '\n'
+    except IOError as e:
+        ofmsg = "Could not find OpenFOAM installation: " + str(e)
+        print(ofmsg)
+        message += ofmsg + '\n'
+    else:
+        if foam_dir is None:
+            ofmsg = "OpenFOAM installation path not set and OpenFOAM environment neither pre-loaded before " + \
+                    "running FreeCAD nor detected in standard locations"
             print(ofmsg)
             message += ofmsg + '\n'
         else:
-            if foam_dir is None:
-                ofmsg = "OpenFOAM installation path not set and OpenFOAM environment neither pre-loaded before " + \
-                        "running FreeCAD nor detected in standard locations"
-                print(ofmsg)
-                message += ofmsg + '\n'
-            else:
-                try:
-                    if getFoamRuntime() == "MinGW":
-                        foam_ver = runFoamCommand("echo $FOAM_API")[0]
-                    else:
-                        foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")[0]
-                except Exception as e:
-                    runmsg = "OpenFOAM installation found, but unable to run command: " + str(e)
-                    message += runmsg + '\n'
-                    print(runmsg)
-                    raise
+            try:
+                if getFoamRuntime() == "MinGW":
+                    foam_ver = runFoamCommand("echo $FOAM_API")[0]
                 else:
-                    foam_ver = foam_ver.rstrip()
-                    if foam_ver:
-                        foam_ver = foam_ver.split()[-1]
-                    if foam_ver and foam_ver != 'dev' and foam_ver != 'plus':
-                        try:
-                            # Isolate major version number
-                            foam_ver = foam_ver.lstrip('v')
-                            foam_ver = int(foam_ver.split('.')[0])
-                            if getFoamRuntime() == "MinGW":
-                                if foam_ver != 2012:
-                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is not supported:\n" + \
-                                             "Only version 2012 supported for MinGW installation"
-                                    message += vermsg + "\n"
-                                    print(vermsg)
-                            if foam_ver >= 1000:  # Plus version
-                                if foam_ver < 1706:
-                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                             "Minimum version 1706 or 5 required"
-                                    message += vermsg + "\n"
-                                    print(vermsg)
-                                if foam_ver > 2112:
-                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                             "Last tested version is 2112"
-                                    message += vermsg + "\n"
-                                    print(vermsg)
-                            else:  # Foundation version
-                                if foam_ver < 5:
-                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                             "Minimum version 5 or 1706 required"
-                                    message += vermsg + "\n"
-                                    print(vermsg)
-                                if foam_ver > 9:
-                                    vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                             "Last tested version is 9"
-                                    message += vermsg + "\n"
-                                    print(vermsg)
-                        except ValueError:
-                            vermsg = "Error parsing OpenFOAM version string " + foam_ver
-                            message += vermsg + "\n"
-                            print(vermsg)
-                    # Check for wmake
-                    if getFoamRuntime() != "MinGW":
-                        try:
-                            runFoamCommand("wmake -help")
-                        except subprocess.CalledProcessError:
-                            wmakemsg = "OpenFOAM installation does not include 'wmake'. " + \
-                                       "Installation of cfMesh and HiSA will not be possible."
-                            message += wmakemsg + "\n"
-                            print(wmakemsg)
-
-                    # Check for cfMesh
+                    foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")[0]
+            except Exception as e:
+                runmsg = "OpenFOAM installation found, but unable to run command: " + str(e)
+                message += runmsg + '\n'
+                print(runmsg)
+                raise
+            else:
+                foam_ver = foam_ver.rstrip()
+                if foam_ver:
+                    foam_ver = foam_ver.split()[-1]
+                if foam_ver and foam_ver != 'dev' and foam_ver != 'plus':
                     try:
-                        cfmesh_ver = runFoamCommand("cartesianMesh -version")[0]
-                        cfmesh_ver = cfmesh_ver.rstrip().split()[-1]
-                        cfmesh_ver = cfmesh_ver.split('.')
-                        if (not cfmesh_ver or len(cfmesh_ver) != 2 or
-                            int(cfmesh_ver[0]) < CF_MAJOR_VER_REQUIRED or
-                            (int(cfmesh_ver[0]) == CF_MAJOR_VER_REQUIRED and
-                             int(cfmesh_ver[1]) < CF_MINOR_VER_REQUIRED)):
-                            vermsg = "cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
-                                                                                  CF_MINOR_VER_REQUIRED)
-                            message += vermsg + "\n"
-                            print(vermsg)
-                    except subprocess.CalledProcessError:
-                        cfmesh_msg = "cfMesh (CfdOF version) not found"
-                        message += cfmesh_msg + '\n'
-                        print(cfmesh_msg)
-
-                    # Check for HiSA
+                        # Isolate major version number
+                        foam_ver = foam_ver.lstrip('v')
+                        foam_ver = int(foam_ver.split('.')[0])
+                        if getFoamRuntime() == "MinGW":
+                            if foam_ver != 2012:
+                                vermsg = "OpenFOAM version " + str(foam_ver) + " is not supported:\n" + \
+                                         "Only version 2012 supported for MinGW installation"
+                                message += vermsg + "\n"
+                                print(vermsg)
+                        if foam_ver >= 1000:  # Plus version
+                            if foam_ver < 1706:
+                                vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
+                                         "Minimum version 1706 or 5 required"
+                                message += vermsg + "\n"
+                                print(vermsg)
+                            if foam_ver > 2112:
+                                vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
+                                         "Last tested version is 2112"
+                                message += vermsg + "\n"
+                                print(vermsg)
+                        else:  # Foundation version
+                            if foam_ver < 5:
+                                vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
+                                         "Minimum version 5 or 1706 required"
+                                message += vermsg + "\n"
+                                print(vermsg)
+                            if foam_ver > 9:
+                                vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
+                                         "Last tested version is 9"
+                                message += vermsg + "\n"
+                                print(vermsg)
+                    except ValueError:
+                        vermsg = "Error parsing OpenFOAM version string " + foam_ver
+                        message += vermsg + "\n"
+                        print(vermsg)
+                # Check for wmake
+                if getFoamRuntime() != "MinGW":
                     try:
-                        hisa_ver = runFoamCommand("hisa -version")[0]
-                        hisa_ver = hisa_ver.rstrip().split()[-1]
-                        hisa_ver = hisa_ver.split('.')
-                        if (not hisa_ver or len(hisa_ver) != 3 or
-                            int(hisa_ver[0]) < HISA_MAJOR_VER_REQUIRED or
-                            (int(hisa_ver[0]) == HISA_MAJOR_VER_REQUIRED and
-                             (int(hisa_ver[1]) < HISA_MINOR_VER_REQUIRED or
-                              (int(hisa_ver[1]) == HISA_MINOR_VER_REQUIRED and
-                               int(hisa_ver[2]) < HISA_PATCH_VER_REQUIRED)))):
-                            vermsg = "HiSA version {}.{}.{} required".format(HISA_MAJOR_VER_REQUIRED,
-                                                                             HISA_MINOR_VER_REQUIRED,
-                                                                             HISA_PATCH_VER_REQUIRED)
-                            message += vermsg + "\n"
-                            print(vermsg)
+                        runFoamCommand("wmake -help")
                     except subprocess.CalledProcessError:
-                        hisa_msg = "HiSA not found"
-                        message += hisa_msg + '\n'
-                        print(hisa_msg)
+                        wmakemsg = "OpenFOAM installation does not include 'wmake'. " + \
+                                   "Installation of cfMesh and HiSA will not be possible."
+                        message += wmakemsg + "\n"
+                        print(wmakemsg)
 
-            # Check for paraview
-            print("Checking for paraview:")
-            paraview_cmd = getParaviewExecutable()
+                # Check for cfMesh
+                try:
+                    cfmesh_ver = runFoamCommand("cartesianMesh -version")[0]
+                    cfmesh_ver = cfmesh_ver.rstrip().split()[-1]
+                    cfmesh_ver = cfmesh_ver.split('.')
+                    if (not cfmesh_ver or len(cfmesh_ver) != 2 or
+                        int(cfmesh_ver[0]) < CF_MAJOR_VER_REQUIRED or
+                        (int(cfmesh_ver[0]) == CF_MAJOR_VER_REQUIRED and
+                         int(cfmesh_ver[1]) < CF_MINOR_VER_REQUIRED)):
+                        vermsg = "cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
+                                                                              CF_MINOR_VER_REQUIRED)
+                        message += vermsg + "\n"
+                        print(vermsg)
+                except subprocess.CalledProcessError:
+                    cfmesh_msg = "cfMesh (CfdOF version) not found"
+                    message += cfmesh_msg + '\n'
+                    print(cfmesh_msg)
+
+                # Check for HiSA
+                try:
+                    hisa_ver = runFoamCommand("hisa -version")[0]
+                    hisa_ver = hisa_ver.rstrip().split()[-1]
+                    hisa_ver = hisa_ver.split('.')
+                    if (not hisa_ver or len(hisa_ver) != 3 or
+                        int(hisa_ver[0]) < HISA_MAJOR_VER_REQUIRED or
+                        (int(hisa_ver[0]) == HISA_MAJOR_VER_REQUIRED and
+                         (int(hisa_ver[1]) < HISA_MINOR_VER_REQUIRED or
+                          (int(hisa_ver[1]) == HISA_MINOR_VER_REQUIRED and
+                           int(hisa_ver[2]) < HISA_PATCH_VER_REQUIRED)))):
+                        vermsg = "HiSA version {}.{}.{} required".format(HISA_MAJOR_VER_REQUIRED,
+                                                                         HISA_MINOR_VER_REQUIRED,
+                                                                         HISA_PATCH_VER_REQUIRED)
+                        message += vermsg + "\n"
+                        print(vermsg)
+                except subprocess.CalledProcessError:
+                    hisa_msg = "HiSA not found"
+                    message += hisa_msg + '\n'
+                    print(hisa_msg)
+
+        # Check for paraview
+        print("Checking for paraview:")
+        paraview_cmd = getParaviewExecutable()
+        failed = False
+        if not paraview_cmd:
+            paraview_cmd = 'paraview'
+            # If not found, try to run from the OpenFOAM environment, in case a bundled version is
+            # available from there
+            try:
+                runFoamCommand('which paraview')
+            except subprocess.CalledProcessError:
+                failed = True
+        if failed or not os.path.exists(paraview_cmd):
+            pv_msg = "Paraview executable '" + paraview_cmd + "' not found."
+            message += pv_msg + '\n'
+            print(pv_msg)
+        else:
+            pv_msg = "Paraview executable: {}".format(paraview_cmd)
+            message += pv_msg + '\n'
+            print(pv_msg)
+
+        # Check for paraview python support
+        if not failed:
             failed = False
+            paraview_cmd = getParaviewExecutable()
             if not paraview_cmd:
-                paraview_cmd = 'paraview'
+                pvpython_cmd = 'pvpython'
                 # If not found, try to run from the OpenFOAM environment, in case a bundled version is
                 # available from there
                 try:
-                    runFoamCommand("which paraview")
+                    runFoamCommand('which pvpython')
                 except subprocess.CalledProcessError:
                     failed = True
-            if failed or not os.path.exists(paraview_cmd):
-                pv_msg = "Paraview executable '" + paraview_cmd + "' not found."
+            else:
+                pvpython_cmd = paraview_cmd.rstrip('paraview')+'pvpython'
+            if failed or not os.path.exists(pvpython_cmd):
+                pv_msg = "Python support in paraview not found. Please install paraview python packages."
                 message += pv_msg + '\n'
                 print(pv_msg)
 
-        print("Checking Plot module:")
+    print("Checking Plot module:")
 
+    try:
+        import matplotlib
+    except ImportError:
+        matplot_msg = "Could not load matplotlib package (required by Plot module)"
+        message += matplot_msg + '\n'
+        print(matplot_msg)
+
+    plot_ok = False
+    if major_ver > 0 or minor_ver >= 20:
         try:
-            import matplotlib
+            from FreeCAD.Plot import Plot  # Build-in plot module
+            plot_ok = True
         except ImportError:
-            matplot_msg = "Could not load matplotlib package (required by Plot module)"
-            message += matplot_msg + '\n'
-            print(matplot_msg)
+            plot_msg = "Could not load Plot module\nAttempting to use Plot workbench instead"
+            message += plot_msg + "\n"
+            print(plot_msg)
+    if not plot_ok:
+        try:
+            from freecad.plot import Plot  # Plot workbench
+        except ImportError:
+            plot_msg = "Could not load Plot workbench\nPlease install it using Tools | Addon manager"
+            message += plot_msg + '\n'
+            print(plot_msg)
 
-        plot_ok = False
-        if major_ver > 0 or minor_ver >= 20:
-            try:
-                from FreeCAD.Plot import Plot  # Build-in plot module
-                plot_ok = True
-            except ImportError:
-                plot_msg = "Could not load Plot module\nAttempting to use Plot workbench instead"
-                message += plot_msg + "\n"
-                print(plot_msg)
-        if not plot_ok:
-            try:
-                from freecad.plot import Plot  # Plot workbench
-            except ImportError:
-                plot_msg = "Could not load Plot workbench\nPlease install it using Tools | Addon manager"
-                message += plot_msg + '\n'
-                print(plot_msg)
-
-        print("Checking for gmsh:")
-        # check that gmsh version 2.13 or greater is installed
-        gmshversion = ""
-        gmsh_exe = getGmshExecutable()
-        if gmsh_exe is None:
-            gmsh_msg = "gmsh not found (optional)"
+    print("Checking for gmsh:")
+    # check that gmsh version 2.13 or greater is installed
+    gmshversion = ""
+    gmsh_exe = getGmshExecutable()
+    if gmsh_exe is None:
+        gmsh_msg = "gmsh not found (optional)"
+        message += gmsh_msg + '\n'
+        print(gmsh_msg)
+    else:
+        gmsh_msg = "gmsh executable: " + gmsh_exe
+        message += gmsh_msg + '\n'
+        print(gmsh_msg)
+        try:
+            # Needs to be runnable from OpenFOAM environment
+            gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")[2]
+        except (OSError, subprocess.CalledProcessError):
+            gmsh_msg = "gmsh could not be run from OpenFOAM environment"
             message += gmsh_msg + '\n'
             print(gmsh_msg)
-        else:
-            try:
-                # Needs to be runnable from OpenFOAM environment
-                gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")[2]
-            except (OSError, subprocess.CalledProcessError):
-                gmsh_msg = "gmsh could not be run from OpenFOAM environment"
-                message += gmsh_msg + '\n'
-                print(gmsh_msg)
-            if len(gmshversion) > 1:
-                # Only the last line contains gmsh version number
-                gmshversion = gmshversion.rstrip().split()
-                gmshversion = gmshversion[-1]
-                versionlist = gmshversion.split(".")
-                if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
-                    gmsh_ver_msg = "gmsh version is older than minimum required (2.13)"
-                    message += gmsh_ver_msg + '\n'
-                    print(gmsh_ver_msg)
+        if len(gmshversion) > 1:
+            # Only the last line contains gmsh version number
+            gmshversion = gmshversion.rstrip().split()
+            gmshversion = gmshversion[-1]
+            versionlist = gmshversion.split(".")
+            if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
+                gmsh_ver_msg = "gmsh version is older than minimum required (2.13)"
+                message += gmsh_ver_msg + '\n'
+                print(gmsh_ver_msg)
 
-        print("Completed CFD dependency check")
-        return message
+    print("Completed CFD dependency check")
+    return message
 
 
 def getParaviewExecutable():
@@ -1119,16 +1136,11 @@ def getParaviewExecutable():
         elif getFoamRuntime() == 'BlueCFD2':
             paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
         else:
-            # Go through the defaults and see if any are found
-            for d in PARAVIEW_PATH_DEFAULTS[platform.system()]:
-                paraview_cmd = os.path.expanduser(d)
-                if paraview_cmd and not os.path.exists(paraview_cmd):
-                    paraview_cmd = None
-                else:
-                    break
+            # Check the defaults
+            paraview_cmd = findInDefaultPaths(PARAVIEW_PATH_DEFAULTS)
     if not paraview_cmd:
         # Otherwise, see if the command 'paraview' is in the path.
-        paraview_cmd = shutil.which("paraview")
+        paraview_cmd = shutil.which('paraview')
     return paraview_cmd
 
 
