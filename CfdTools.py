@@ -449,8 +449,11 @@ def getFoamRuntime():
 def findInDefaultPaths(paths):
     for d in paths.get(platform.system(), []):
         d = glob.glob(os.path.expandvars(os.path.expanduser(d)))
-        d = sorted(d)[-1] if len(d) else None
-        return d if os.path.exists(d) else None
+        if len(d):
+            d = sorted(d)[-1]
+            if os.path.exists(d):
+                return d
+    return None
 
 
 def detectFoamDir():
