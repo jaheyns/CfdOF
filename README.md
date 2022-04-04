@@ -287,8 +287,10 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
     - CONSTANTS_USE_CAPITALS (Uppercase)
     - functionsWithCapitals (Although not following PEP8, Camel-case instead of underscore is preferred as it is widely used within FreeCAD)
     - __class_attribute (Double leading underscore)
-
-
+9. Python allows both single quotes ('...') and double quotes ("...") for strings. As a convention, please use single quotes for internal string constants and double quotes for 
+   user-facing communication. The rule of thumb is that if it should be translated, use double quotes.
+   This is not a hard-and-fast rule and can be broken for convenience e.g. when quotes are contained in a string.
+   
 ## Acknowledgements
 
 ### Funding
