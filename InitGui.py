@@ -48,28 +48,20 @@ class CfdOFWorkbench(Workbench):
 
         from CfdAnalysis import _CommandCfdAnalysis
         from CfdMesh import _CommandCfdMeshFromShape
-        from CfdMeshImport import _CommandCfdMeshFromImport
+        from core.mesh.thirdparty.CfdMeshImport import _CommandCfdMeshFromImport
         from CfdMeshRefinement import _CommandMeshRegion
-
-        from CfdPhysicsSelection import _CommandCfdPhysicsSelection
-        from CfdFluidMaterial import _CommandCfdFluidMaterial
-        from CfdSolverFoam import _CommandCfdSolverFoam
-        from CfdInitialiseFlowField import _CommandCfdInitialiseInternalFlowField
-        from CfdFluidBoundary import _CommandCfdFluidBoundary
-        from CfdZone import _CommandCfdPorousZone
-        from CfdZone import _CommandCfdInitialisationZone
 
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
         FreeCADGui.addCommand('Cfd_MeshFromImport', _CommandCfdMeshFromImport())
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
 
-        cmdlst = ['Cfd_Analysis',
-                  'Cfd_MeshFromImport', 'Cfd_MeshFromShape', 'Cfd_MeshRegion',
-                  'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
-                  'Cfd_InitialiseInternal',
-                  'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
-                  'Cfd_SolverControl']
+        cmdlst = ['Cfd_Analysis',   # Analysis
+                  'Cfd_MeshFromShape', 'Cfd_MeshFromImport', 'Cfd_MeshRegion',  # Meshing
+                  'Cfd_PhysicsModel', 'Cfd_FluidMaterial',  # Physics and materials
+                  'Cfd_InitialiseInternal', # Variables
+                  'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',  # Setup
+                  'Cfd_SolverControl']  # Solver
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)
         self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), cmdlst)

@@ -24,8 +24,9 @@ import FreeCAD
 import os
 import os.path
 import time
+
 import CfdTools
-from CfdTools import setQuantity, getQuantity
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui, QtCore
@@ -35,9 +36,11 @@ class _TaskPanelCfdMeshImport:
     """ Task Panel for CFD mesh importing tasks """
     def __init__(self, obj):
         self.obj = obj
+        self.analysis_object = CfdTools.getActiveAnalysis()
+        self.mesh_obj = CfdTools.getMeshObject(self.analysis_object)
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
-                                                             "core/gui/TaskPanelCfdMeshImport.ui"))
+                                                             "../../gui/TaskPanelCfdMeshImport.ui"))
 
         self.console_message_cart = ''
         self.error_message = ''
@@ -96,7 +99,7 @@ class _TaskPanelCfdMeshImport:
     def convert(self):
         self.Start = time.time()
         try:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
+            QtGui.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
             FreeCADGui.addModule("CfdMeshTools")
             FreeCADGui.addModule("CfdTools")
             FreeCADGui.addModule("CfdConsoleProcess")
@@ -105,8 +108,8 @@ class _TaskPanelCfdMeshImport:
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
-            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand(f'{" + self._foam_convert_command + "} ' "
-                                    "{" + self._input_mesh_filename + "}, cart_mesh.meshCaseDir, source_env=False)")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand(" + self._foam_convert_command + " " + self.mesh_input_filename +
+                                 ", cart_mesh.meshCaseDir, source_env=False)")
             FreeCADGui.doCommand("FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\\n')")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             FreeCADGui.doCommand("proxy.running_from_macro = True")
@@ -126,7 +129,7 @@ class _TaskPanelCfdMeshImport:
             self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
             raise
         finally:
-            QApplication.restoreOverrideCursor()
+            QtGui.QApplication.restoreOverrideCursor()
 
     def consoleMessage(self, message="", color="#000000", timed=True):
         if timed:

@@ -24,23 +24,25 @@ from __future__ import print_function
 
 import FreeCAD
 import FreeCADGui
-from PySide import QtCore
+from PySide import QtCore, QtGui
 import CfdTools
+from CfdMesh import _CfdMesh
 from CfdTools import addObjectProperty
 import os
 
 
-def importCfdMesh(name="CFDMeshImport"):
+def makeCfdMeshImport(base_mesh, name="CFDMeshImport"):
     obj = FreeCAD.ActiveDocument.addObject("App::DocumentObjectGroupPython", name)
     _CfdMeshImport(obj)
     if FreeCAD.GuiUp:
         _ViewProviderCfdMeshImport(obj.ViewObject)
+    base_mesh.addObject(obj)
     return obj
 
 
 class _CommandCfdMeshFromImport:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "meshimport.png") # todo find a nice import icon
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "meshimport.png")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromImport",
                                                      "CFD mesh import"),
@@ -49,30 +51,24 @@ class _CommandCfdMeshFromImport:
 
     def IsActive(self):
         sel = FreeCADGui.Selection.getSelection()
-        analysis = CfdTools.getActiveAnalysis()
-        return analysis is not None and sel and len(sel) == 1 #TODO Jonathan check, this might be wrong
+        return sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, _CfdMesh)
 
     def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Import CFD mesh")
+        sel = FreeCADGui.Selection.getSelection()
         analysis_obj = CfdTools.getActiveAnalysis()
         if analysis_obj:
-            meshObj = CfdTools.getMesh(analysis_obj)
-            if not meshObj:
-                sel = FreeCADGui.Selection.getSelection()
-                if len(sel) == 1:
-                    # if sel[0].isDerivedFrom("Part::Feature"):
-                    mesh_obj_name = "Imported_Mesh"
+            if len(sel) == 1:
+                sobj = sel[0]
+                if len(sel) == 1 and hasattr(sobj, "Proxy") and isinstance(sobj.Proxy, _CfdMesh):
+                    FreeCAD.ActiveDocument.openTransaction("Create MeshImport")
                     FreeCADGui.doCommand("")
-                    FreeCADGui.addModule("CfdMeshImport as CfdMeshImport")
-                    FreeCADGui.doCommand("CfdMeshImport.importCfdMesh('" + mesh_obj_name + "')")
-                    # FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name) # TODO dont think we need this
-                    if CfdTools.getActiveAnalysis():
-                        FreeCADGui.addModule("CfdTools")
-                        FreeCADGui.doCommand(
-                            "CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
+                    FreeCADGui.addModule("core.mesh.thirdparty.CfdMeshImport as CfdMeshImport")
+                    FreeCADGui.doCommand(
+                        "CfdMeshImport.makeCfdMeshImport(App.ActiveDocument.{})".format(sobj.Name))
                     FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
         else:
             print("ERROR: You cannot have more than one mesh object")
+
         FreeCADGui.Selection.clearSelection()
 
 
@@ -140,7 +136,7 @@ class _ViewProviderCfdMeshImport:
         for obj in FreeCAD.ActiveDocument.Objects:
             if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdMeshImport):
                 obj.ViewObject.show()
-        import _TaskPanelCfdMeshImport
+        from core.mesh.thirdparty import _TaskPanelCfdMeshImport
         self.taskd = _TaskPanelCfdMeshImport._TaskPanelCfdMeshImport(self.Object)
         self.taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(self.taskd)
