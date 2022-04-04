@@ -57,7 +57,7 @@ import CfdConsoleProcess
 # Supports variable expansion and Unix-style globs (in which case the last lexically-sorted match will be used)
 FOAM_DIR_DEFAULTS = {'Windows': ['C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v*',
                                  '~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v*',
-                                 'C:\\Program Files\\blueCFD-Core-2020\\OpenFOAM-*'],
+                                 'C:\\Program Files\\blueCFD-Core-*\\OpenFOAM-*'],
                      'Linux': ['/usr/lib/openfoam/openfoam*',  # ESI official packages
                                '/opt/openfoam*', '/opt/openfoam-dev',  # Foundation official packages
                                '~/openfoam/OpenFOAM-v*',
@@ -1027,7 +1027,10 @@ def checkCfdDependencies():
                 except subprocess.CalledProcessError:
                     failed = True
             else:
-                pvpython_cmd = paraview_cmd.rstrip('paraview')+'pvpython'
+                if platform.system() == 'Windows':
+                    pvpython_cmd = paraview_cmd.rstrip('paraview.exe')+'pvpython.exe'
+                else:
+                    pvpython_cmd = paraview_cmd.rstrip('paraview')+'pvpython'
             if failed or not os.path.exists(pvpython_cmd):
                 pv_msg = "Python support in paraview not found. Please install paraview python packages."
                 message += pv_msg + '\n'
