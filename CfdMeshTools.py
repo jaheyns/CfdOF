@@ -259,14 +259,16 @@ class CfdMeshTools:
             else:
                 bc_match_per_shape_face[match] = k
 
-        # Match relevant mesh regions to shape faces: boundary layer mesh regions for cfMesh / snappyHexMesh
-        # and extrusion patches.
-        # Normal surface refinements are written as separate surfaces so need not be matched
+        # Match relevant mesh regions to the shape being meshed: boundary layer mesh regions for cfMesh,
+        # all surface mesh refinements for snappyHexMesh, and extrusion patches for all meshers.
+        # For cfMesh, surface mesh refinements are written as separate surfaces so need not be matched
         CfdTools.cfdMessage("Matching mesh refinement regions\n")
         mr_face_list = []
         for mr_id, mr_obj in enumerate(mr_objs):
             if mr_obj.Extrusion or (
-                    self.mesh_obj.MeshUtility == 'cfMesh' and not mr_obj.Internal and mr_obj.NumberLayers > 1):
+                self.mesh_obj.MeshUtility == 'cfMesh' and not mr_obj.Internal and mr_obj.NumberLayers > 1) or (
+                self.mesh_obj.MeshUtility == 'snappyHexMesh' and not mr_obj.Internal
+            ):
                 for ri, r in enumerate(mr_obj.ShapeRefs):
                     try:
                         bf = CfdTools.resolveReference(r)
@@ -276,14 +278,14 @@ class CfdMeshTools:
                     for si, s in enumerate(bf):
                         mr_face_list += [(f, (mr_id, ri, si)) for f in s[0].Faces]
 
-        # Match them up
+        # Match them up to the primary geometry
         mr_matched_faces = CfdTools.matchFaces(mr_face_list, mesh_face_list)
 
         # Check for and filter duplicates
-        bl_match_per_shape_face = [-1] * len(mesh_face_list)
+        mr_match_per_shape_face = [-1] * len(mesh_face_list)
         for k in range(len(mr_matched_faces)):
             match = mr_matched_faces[k][1]
-            prev_k = bl_match_per_shape_face[match]
+            prev_k = mr_match_per_shape_face[match]
             if prev_k >= 0:
                 nr, ri, si = mr_matched_faces[k][0]
                 nr2, ri2, si2 = mr_matched_faces[prev_k][0]
@@ -293,7 +295,7 @@ class CfdMeshTools:
                         mr_objs[nr].Label, mr_objs[nr].ShapeRefs[ri][0].Name, mr_objs[nr].ShapeRefs[ri][1][si],
                         mr_objs[nr2].Label, mr_objs[nr2].ShapeRefs[ri2][0].Name, mr_objs[nr2].ShapeRefs[ri2][1][si2]))
             else:
-                bl_match_per_shape_face[match] = k
+                mr_match_per_shape_face[match] = k
 
         self.patch_faces = []
         self.patch_names = []
@@ -305,7 +307,7 @@ class CfdMeshTools:
                 self.patch_names[k].append("patch_"+str(k)+"_"+str(l))
         for i in range(len(mesh_face_list)):
             k = bc_match_per_shape_face[i]
-            l = bl_match_per_shape_face[i]
+            l = mr_match_per_shape_face[i]
             nb = -1
             nr = -1
             if k >= 0:
@@ -338,27 +340,14 @@ class CfdMeshTools:
             self.ele_length_map = {}
             self.ele_node_map = {}
 
-        # Additionally, for SnappyHexMesh, match baffles to any surface mesh refinements
-        # as well as matching each surface mesh refinement region to boundary conditions
+        # For snappyHexMesh, also match surface mesh refinements to the boundary conditions, to identify boundary
+        # conditions on supplementary geometry defined by the surface mesh refinements
+        # Also matches baffles to surface mesh refinements
         bc_mr_matched_faces = []
-        mr_face_list = []
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
-            CfdTools.cfdMessage("Matching surface geometries\n")
-            for mr_id, mr_obj in enumerate(mr_objs):
-                if not mr_obj.Internal:
-                    for ri, r in enumerate(mr_obj.ShapeRefs):
-                        try:
-                            bf = CfdTools.resolveReference(r)
-                        except RuntimeError as re:
-                            raise RuntimeError("Error processing mesh refinement {}: {}".format(
-                                mr_obj.Label, str(re)))
-                        for si, s in enumerate(bf):
-                            mr_face_list += [(f, (mr_id, ri, si)) for f in s[0].Faces]
-
-            # Match mesh regions to the boundary conditions, to identify boundary conditions on supplementary
-            # geometry (including on baffles)
             bc_mr_matched_faces = CfdTools.matchFaces(boundary_face_list, mr_face_list)
 
+        # Handle baffles
         for bc_id, bc_obj in enumerate(bc_group):
             if bc_obj.BoundaryType == 'baffle':
                 baffle_matches = [m for m in bc_mr_matched_faces if m[0][0] == bc_id]
@@ -403,11 +392,6 @@ class CfdMeshTools:
                             'MaxRefinementLevel': max(refinement_level, edge_level),
                             'Baffle': True
                         }
-
-        mr_matched_faces = []
-        if self.mesh_obj.MeshUtility == 'snappyHexMesh':
-            # Match mesh regions to the primary geometry
-            mr_matched_faces = CfdTools.matchFaces(mr_face_list, mesh_face_list)
 
         for mr_id, mr_obj in enumerate(mr_objs):
             Internal = mr_obj.Internal
