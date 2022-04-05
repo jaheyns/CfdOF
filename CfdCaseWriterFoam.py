@@ -304,6 +304,8 @@ class CfdCaseWriterFoam:
                         sum_alpha += alpha
                 bc['VolumeFractions'] = alphas_new
 
+            bc['TurbulenceIntensity'] = bc['TurbulenceIntensityPercentage']/100.0
+
             if bc['DefaultBoundary']:
                 if settings['boundaries'].get('defaultFaces'):
                     raise ValueError("More than one default boundary defined")
@@ -449,7 +451,7 @@ class CfdCaseWriterFoam:
                                    inlet_bc['Uz']**2)**0.5
 
                             # Turb Intensity (or Tu) and length scale
-                            I = inlet_bc['TurbulenceIntensity'] / 100.0 # Convert from percent to fractional units
+                            I = inlet_bc['TurbulenceIntensityPercentage'] / 100.0  # Convert from percent to fraction
                             l = inlet_bc['TurbulenceLengthScale']
                             Cmu = 0.09  # Standard turbulence model parameter
 
