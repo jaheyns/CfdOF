@@ -14,7 +14,13 @@ runCommand()
 %{%(MeshUtility%)
 %:gmsh
 GMSH_EXE='%(GmshSettings/Executable%)'
-runCommand "$GMSH_EXE" - "gmsh/%(Name%)_Geometry.geo"
+%{%(NumberOfThreads%)
+%:0
+export NTHREADS=$(nproc)
+%:default
+export NTHREADS=%(NumberOfThreads%)
+%}
+runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/%(Name%)_Geometry.geo"
 
 %}
 # Unset and source bashrc
