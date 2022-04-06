@@ -224,8 +224,9 @@ class _TaskPanelCfdMeshRefinement:
                 if self.mesh_obj.MeshUtility == 'cfMesh':
                     self.form.cf_frame.setVisible(True)
                     self.form.snappy_frame.setVisible(False)
+                    self.form.if_firstlayerheight.setEnabled(True)
                 elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                    self.form.cf_frame.setVisible(True) 
+                    self.form.cf_frame.setVisible(True)
                     self.form.snappy_frame.setVisible(True)
                     self.form.snappySurfaceFrame.setVisible(True)
                     self.form.if_firstlayerheight.setEnabled(False)
