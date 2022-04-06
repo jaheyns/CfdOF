@@ -131,9 +131,9 @@ class TaskPanelCfdFluidBoundary:
         # RANS
         setQuantity(self.form.inputKineticEnergy, self.obj.TurbulentKineticEnergy)  # k
         setQuantity(self.form.inputSpecificDissipationRate, self.obj.SpecificDissipationRate)   # omega
-        setQuantity(self.form.inputDissipationRate, self.obj.DissipationRate)   # epsilon
-        setQuantity(self.form.inputIntensity, self.obj.TurbulenceIntensity)     # intensity
-        setQuantity(self.form.inputLengthScale, self.obj.TurbulenceLengthScale) # length scale
+        setQuantity(self.form.inputDissipationRate, self.obj.DissipationRate)    # epsilon
+        setQuantity(self.form.inputIntensity, self.obj.TurbulenceIntensityPercentage)      # intensity
+        setQuantity(self.form.inputLengthScale, self.obj.TurbulenceLengthScale)  # length scale
         setQuantity(self.form.inputGammaInt, self.obj.Intermittency)   # gammaInt
         setQuantity(self.form.inputReThetat, self.obj.ReThetat)  # ReThetat
         setQuantity(self.form.inputNuTilda, self.obj.NuTilda) # Modified nu tilde
@@ -152,7 +152,6 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputNuTilda.setToolTip("Modified turbulent viscosity")
         # LES models
         self.form.inputTurbulentViscosity.setToolTip("Turbulent viscosity")
-
 
         self.form.checkBoxDefaultBoundary.setChecked(self.obj.DefaultBoundary)
 
@@ -417,7 +416,7 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputKineticEnergy)))
         FreeCADGui.doCommand("bc.kEqnTurbulentViscosity "
                              "= '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
-        FreeCADGui.doCommand("bc.TurbulenceIntensity "
+        FreeCADGui.doCommand("bc.TurbulenceIntensityPercentage "
                              "= '{}'".format(getQuantity(self.form.inputIntensity)))
         FreeCADGui.doCommand("bc.TurbulenceLengthScale "
                              "= '{}'".format(getQuantity(self.form.inputLengthScale)))

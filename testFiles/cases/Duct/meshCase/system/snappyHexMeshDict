@@ -105,6 +105,9 @@ snapControls
     nSolveIter 100;
     nRelaxIter 5;
     nFeatureSnapIter 10;
+
+    implicitFeatureSnap false;
+    explicitFeatureSnap true;
 }
 
 addLayersControls
