@@ -160,7 +160,7 @@ addLayersControls
         "%(0%)"
         {
             nSurfaceLayers %(SnappySettings/BoundaryLayers/%(0%)/NumberLayers%);
-            //expansionRatio %(SnappySettings/BoundaryLayers/%(0%)/ExpansionRatio%);
+            expansionRatio %(SnappySettings/BoundaryLayers/%(0%)/ExpansionRatio%);
         }
 %}
     }
@@ -169,8 +169,7 @@ addLayersControls
     finalLayerThickness 0.3;
     minThickness 0.1;
     nGrow 0;
-    featureAngle 60;
-    slipFeatureAngle 30;
+    featureAngle 120;
     nRelaxIter 3;
     nSmoothSurfaceNormals 1;
     nSmoothNormals 3;
