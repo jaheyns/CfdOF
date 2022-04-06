@@ -49,6 +49,8 @@ class CfdOFWorkbench(Workbench):
         from CfdAnalysis import _CommandCfdAnalysis
         from CfdMesh import _CommandCfdMeshFromShape
         from CfdMeshRefinement import _CommandMeshRegion
+        from core.mesh.dynamic import _CommandDynamicMesh
+        
         from CfdPhysicsSelection import _CommandCfdPhysicsSelection
         from CfdFluidMaterial import _CommandCfdFluidMaterial
         from CfdSolverFoam import _CommandCfdSolverFoam
@@ -60,9 +62,10 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
+        FreeCADGui.addCommand('Cfd_DynamicMesh', _CommandDynamicMesh())
 
         cmdlst = ['Cfd_Analysis',
-                  'Cfd_MeshFromShape', 'Cfd_MeshRegion',
+                  'Cfd_MeshFromShape', 'Cfd_MeshRegion', 'CfdDynamicMesh',
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
