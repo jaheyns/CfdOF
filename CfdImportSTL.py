@@ -22,7 +22,7 @@
 
 import FreeCAD
 import Part
-import CfdMesh
+import Mesh
 import os
 import tempfile
 

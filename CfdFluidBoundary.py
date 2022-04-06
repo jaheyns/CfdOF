@@ -24,15 +24,16 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
 import os
-import CfdTools
-from CfdTools import addObjectProperty
+import FreeCAD
 from pivy import coin
 import Part
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
+    import _TaskPanelCfdFluidBoundary
+import CfdTools
+from CfdTools import addObjectProperty
 
 # Constants
 
@@ -305,8 +306,14 @@ class _CfdFluidBoundary:
                           "Turbulent viscosity")
 
         # General
-        addObjectProperty(obj, 'TurbulenceIntensity', '0.1', "App::PropertyQuantity", "Turbulence",
-                          "Turbulence intensity [0-1]")
+
+        addObjectProperty(obj, 'TurbulenceIntensityPercentage', '1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulence intensity (percent)")
+        # Backward compat
+        if 'TurbulenceIntensity' in obj.PropertiesList:
+            obj.TurbulenceIntensityPercentage = obj.TurbulenceIntensity*100.0
+            obj.removeProperty('TurbulenceIntensity')
+
         addObjectProperty(obj, 'TurbulenceLengthScale', '0.1 m', "App::PropertyLength", "Turbulence",
                           "Length scale of turbulent eddies")
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume fraction",
@@ -402,15 +409,17 @@ class _ViewProviderCfdFluidBoundary:
             return False
         material_objs = CfdTools.getMaterials(analysis_object)
 
-        import _TaskPanelCfdFluidBoundary
-        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
+        import importlib
+        importlib.reload(_TaskPanelCfdFluidBoundary)
+        self.taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
         self.Object.ViewObject.show()
-        taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(taskd)
+        self.taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def unsetEdit(self, vobj, mode):
         FreeCADGui.Control.closeDialog()
+        self.taskd = None
         return
 
     def __getstate__(self):
