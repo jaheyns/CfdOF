@@ -202,6 +202,7 @@ class _TaskPanelCfdMeshRefinement:
             selected_rows = CfdMeshRefinement.EXTRUSION_UI[type_index]
             CfdTools.enableLayoutRows(self.form.extrusionLayout, selected_rows + [0])
 
+        # Volume or surface refinement
         else:
             if self.mesh_obj.MeshUtility == 'gmsh':
                 self.form.cartesianInternalVolumeFrame.setVisible(False)
@@ -224,9 +225,11 @@ class _TaskPanelCfdMeshRefinement:
                     self.form.cf_frame.setVisible(True)
                     self.form.snappy_frame.setVisible(False)
                 elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                    self.form.cf_frame.setVisible(True) # cf_frame includes boundarylayer_frame so we need to turn this on
+                    self.form.cf_frame.setVisible(True) 
                     self.form.snappy_frame.setVisible(True)
                     self.form.snappySurfaceFrame.setVisible(True)
+                    self.form.if_firstlayerheight.setEnabled(False)
+
             self.form.extrusionFrame.setVisible(False)
         self.updateSelectionButtonUI()
 
