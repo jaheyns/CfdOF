@@ -156,19 +156,13 @@ addLayersControls
     relativeSizes true;
     layers
     {
-    %{%(SnappySettings/BoundaryLayers%)
+%{%(SnappySettings/BoundaryLayers%)
         "%(0%)"
         {
             nSurfaceLayers %(SnappySettings/BoundaryLayers/%(0%)/NumberLayers%);
             expansionRatio %(SnappySettings/BoundaryLayers/%(0%)/ExpansionRatio%);
-            %{%(SnappySettings/BoundaryLayers/%(0%)/FirstLayerHeight%)
-            %:0.0
-            %:default
-            //finalLayerThickness %(SnappySettings/BoundaryLayers/%(0%)/FinalLayerHeight%);
-            //minThickness %(SnappySettings/BoundaryLayers/%(0%)/minHeight%);
-            %}
-    %}
         }
+%}
     }
 
     expansionRatio 1.3;
