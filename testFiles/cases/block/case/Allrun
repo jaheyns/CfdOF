@@ -12,7 +12,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2012"
+FOAMDIR="/usr/lib/openfoam/openfoam2112"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -43,6 +43,10 @@ fi
 runCommand createPatch -overwrite
 
 PNAME=p
+
+# Mesh renumbering
+runCommand renumberMesh -overwrite
+
 # Initialise flow
 runCommand potentialFoam -initialiseUBCs -pName $PNAME -writep
 

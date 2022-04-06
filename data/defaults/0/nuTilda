@@ -1,0 +1,77 @@
+%{%(physics/Turbulence%)
+%:RANS
+%{%(physics/TurbulenceModel%)
+%:SpalartAllmaras
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      omega;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -1 0 0 0 0];
+
+internalField   uniform %(initialValues/nuTilda%);
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:empty
+%[0/_boundary_empty%]
+%:wall
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall translatingWall partialSlipWall roughWall
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform 0;
+    }
+%:slipWall
+%[0/_boundary_zeroGradient%]
+%}
+%:inlet open
+%{%(boundaries/%(0%)/TurbulenceInletSpecification%)
+%:TransportedNuTilda
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/NuTilda%);
+        value       $internalField;
+    }
+%:intensityAndLengthScale
+    %(0%)
+    {
+        type              fixedValue;
+        value             $internalField;
+    }
+%:default
+    %(0%)
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+%}
+%:outlet
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  $internalField;
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
+%}
+
+%}
+}
+
+// ************************************************************************* //
+%}
+%}

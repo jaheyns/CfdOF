@@ -17,7 +17,7 @@ pLUT = GetColorTransferFunction('p')
 # show data in view
 pfoamDisplay = Show(pfoam, renderView1)
 # trace defaults for the display properties.
-pfoamDisplay.ColorArrayName = ['CELLS', 'p']
+pfoamDisplay.ColorArrayName = ['POINTS', 'U']
 pfoamDisplay.LookupTable = pLUT
 pfoamDisplay.EdgeColor = [0.0, 0.0, 0.5]
 pfoamDisplay.ScalarOpacityUnitDistance = 0.05
@@ -28,11 +28,16 @@ renderView1.ResetCamera()
 # get animation scene
 animationScene1 = GetAnimationScene()
 
-# get the time-keeper
-timeKeeper1 = GetTimeKeeper()
-
 # update animation scene based on data timesteps
 animationScene1.UpdateAnimationUsingDataTimeSteps()
+
+# go to the final timestep of the simulation
+timesteps = pfoam.TimestepValues
+finalTime =  timesteps[-1]
+animationScene1.AnimationTime = finalTime
+
+# rescale color and/or opacity maps used to exactly fit the current data range
+pfoamDisplay.RescaleTransferFunctionToDataRange(False, True)
 
 # update the view to ensure updated data information
 renderView1.Update()

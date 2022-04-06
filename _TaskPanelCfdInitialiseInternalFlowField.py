@@ -5,6 +5,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -41,7 +42,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.material_objs = material_objs
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__),
-                                                "TaskPanelCfdInitialiseInternalField.ui"))
+                                                             "core/gui/TaskPanelCfdInitialiseInternalField.ui"))
 
         self.form.velocityFrame.setVisible(False)
         self.form.pressureFrame.setVisible(False)
@@ -101,10 +102,18 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         else:
             self.form.comboFluid.clear()
 
+        # Use INLET turbulence values (k, omega, epsilon etc)
         use_inlet_turb = self.obj.UseInletTurbulenceValues
         self.form.checkUseInletValuesTurb.setChecked(use_inlet_turb)
         setQuantity(self.form.inputk, self.obj.k)
+        setQuantity(self.form.inputEpsilon, self.obj.epsilon)
         setQuantity(self.form.inputOmega, self.obj.omega)
+        setQuantity(self.form.inputnuTilda, self.obj.nuTilda)
+        setQuantity(self.form.inputGammaInt, self.obj.gammaInt)
+        setQuantity(self.form.inputReThetat, self.obj.ReThetat)
+        setQuantity(self.form.inputTurbulentViscosity, self.obj.nut)
+        setQuantity(self.form.inputkEqnKineticEnergy, self.obj.kEqnk)
+        setQuantity(self.form.inputkEqnTurbulentViscosity, self.obj.kEqnNut)
 
         use_inlet_temp = self.obj.UseInletTemperatureValue
         self.form.checkUseInletValuesThermal.setChecked(use_inlet_temp)
@@ -130,6 +139,8 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.updateUi()
 
     def updateUi(self):
+
+        # General
         potential_flow = self.form.radioButtonPotentialFlowU.isChecked()
         potential_flow_P = self.form.radioButtonPotentialFlowP.isChecked()
         use_inlet_U = self.form.radioButtonUseInletValuesU.isChecked()
@@ -139,16 +150,19 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.velocityFrame.setVisible(not (potential_flow or use_inlet_U))
         self.form.pressureFrame.setVisible(not (potential_flow_P or use_outlet_P))
 
+        # Multiphase
         if self.physicsModel.Phase != 'Single':
             self.form.volumeFractionsFrame.setVisible(True)
         else:
             self.form.volumeFractionsFrame.setVisible(False)
 
+        # Turbulence
         if self.physicsModel.Turbulence in ['RANS', 'LES']:
             self.form.turbulencePropertiesFrame.setVisible(True)
         else:
             self.form.turbulencePropertiesFrame.setVisible(False)
 
+        # Thermal / energy
         if self.physicsModel.Thermal == 'Energy':
             self.form.energyFrame.setVisible(not use_inlet_temp)
         else:
@@ -166,9 +180,25 @@ class _TaskPanelCfdInitialiseInternalFlowField:
 
         self.form.kEpsilonFrame.setVisible(False)
         self.form.kOmegaSSTFrame.setVisible(False)
-        self.form.SpalartAlmerasFrame.setVisible(False)
+        self.form.SpalartAllmarasFrame.setVisible(False)
+        self.form.kOmegaSSTLMFrame.setVisible(False)
+        self.form.lesModelsFrame.setVisible(False)
+        self.form.leskEqnFrame.setVisible(False)
+
         if self.physicsModel.TurbulenceModel == 'kOmegaSST':
             self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'kEpsilon':
+            self.form.kEpsilonFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'SpalartAllmaras':
+            self.form.SpalartAllmarasFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'kOmegaSSTLM':
+            self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
+            self.form.kOmegaSSTLMFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'Smagorinsky' or \
+            self.physicsModel.TurbulenceModel == 'WALE':
+            self.form.lesModelsFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'kEqn':
+            self.form.leskEqnFrame.setVisible(not use_inlet_turb)
 
     def radioChanged(self):
         self.updateUi()
@@ -187,27 +217,49 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         doc.resetEdit()
 
         FreeCADGui.doCommand("\ninit = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
+
+        # Potential flow
         FreeCADGui.doCommand("init.PotentialFlow = {}".format(self.form.radioButtonPotentialFlowU.isChecked()))
+
+        # Velocity
         FreeCADGui.doCommand("init.UseInletUValues = {}".format(self.form.radioButtonUseInletValuesU.isChecked()))
         FreeCADGui.doCommand("init.Ux = '{}'".format(getQuantity(self.form.Ux)))
         FreeCADGui.doCommand("init.Uy = '{}'".format(getQuantity(self.form.Uy)))
         FreeCADGui.doCommand("init.Uz = '{}'".format(getQuantity(self.form.Uz)))
+
+        # Pressure
         FreeCADGui.doCommand("init.UseOutletPValue = {}".format(self.form.radioButtonUseInletValuesP.isChecked()))
         FreeCADGui.doCommand("init.PotentialFlowP = {}".format(self.form.radioButtonPotentialFlowP.isChecked()))
         FreeCADGui.doCommand("init.Pressure = '{}'".format(getQuantity(self.form.pressure)))
+
+        # Multiphase
         FreeCADGui.doCommand("init.VolumeFractions = {}".format(self.alphas))
+
+        # Thermal
         FreeCADGui.doCommand("init.UseInletTemperatureValue "
                              "= {}".format(self.form.checkUseInletValuesThermal.isChecked()))
         FreeCADGui.doCommand("init.Temperature "
                              "= '{}'".format(getQuantity(self.form.inputTemperature)))
+
+        # Turbulence
         FreeCADGui.doCommand("init.UseInletTurbulenceValues "
                              "= {}".format(self.form.checkUseInletValuesTurb.isChecked()))
-        FreeCADGui.doCommand("init.omega = '{}'".format(getQuantity(self.form.inputOmega)))
         FreeCADGui.doCommand("init.k = '{}'".format(getQuantity(self.form.inputk)))
+        FreeCADGui.doCommand("init.epsilon = '{}'".format(getQuantity(self.form.inputEpsilon)))
+        FreeCADGui.doCommand("init.omega = '{}'".format(getQuantity(self.form.inputOmega)))
+        FreeCADGui.doCommand("init.nuTilda = '{}'".format(getQuantity(self.form.inputnuTilda)))
+        FreeCADGui.doCommand("init.gammaInt = '{}'".format(getQuantity(self.form.inputGammaInt)))
+        FreeCADGui.doCommand("init.ReThetat = '{}'".format(getQuantity(self.form.inputReThetat)))
+        # LES
+        FreeCADGui.doCommand("init.nut = '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
+        FreeCADGui.doCommand("init.kEqnk = '{}'".format(getQuantity(self.form.inputkEqnKineticEnergy)))
+        FreeCADGui.doCommand("init.kEqnNut = '{}'".format(getQuantity(self.form.inputkEqnTurbulentViscosity)))
+
         boundaryU = self.form.comboBoundaryU.currentData()
         boundaryP = self.form.comboBoundaryP.currentData()
         boundaryT = self.form.comboBoundaryT.currentData()
         boundaryTurb = self.form.comboBoundaryTurb.currentData()
+
         if boundaryU:
             FreeCADGui.doCommand("init.BoundaryU = FreeCAD.ActiveDocument.{}".format(boundaryU))
         else:

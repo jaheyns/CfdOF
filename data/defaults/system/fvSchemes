@@ -47,8 +47,16 @@ divSchemes
 %:kOmegaSST
     div(phi,k)      bounded Gauss upwind;
     div(phi,omega)  bounded Gauss upwind;
+%:kEpsilon
+    div(phi,k)      bounded Gauss upwind;
+    div(phi,epsilon)  bounded Gauss upwind;
 %:SpalartAllmaras
     div(phi,nuTilda) bounded Gauss upwind;
+%:kOmegaSSTLM
+    div(phi,k)      bounded Gauss upwind;
+    div(phi,omega)  bounded Gauss upwind;
+    div(phi,gammaInt)   bounded Gauss upwind;
+    div(phi,ReThetat)   bounded Gauss upwind;
 %}
 %}
 %{%(solver/SolverName%)
@@ -90,11 +98,23 @@ divSchemes
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 %}
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS LES
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST
     div(phi,k)      Gauss upwind;
     div(phi,omega)  Gauss upwind;
+%:kEpsilon
+    div(phi,k)      Gauss upwind;
+    div(phi,epsilon)  Gauss upwind;
+%:SpalartAllmaras
+    div(phi,nuTilda)  Gauss upwind;
+%:kOmegaSSTLM
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+    div(phi,gammaInt)   bounded Gauss upwind;
+    div(phi,ReThetat)   bounded Gauss upwind;
+%:kEqn
+    div(phi,k)     bounded Gauss upwind;
 %}
 %}
 %{%(solver/SolverName%)
@@ -124,8 +144,16 @@ gradSchemes
 %:kOmegaSST
     grad(k)         cellLimited Gauss linear 0.9;
     grad(omega)     cellLimited Gauss linear 0.9;
+%:kEpsilon
+    grad(k)         cellLimited Gauss linear 0.9;
+    grad(epsilon)     cellLimited Gauss linear 0.9;
 %:SpalartAllmaras
     grad(nuTilda)   cellLimited Gauss linear 0.9;
+%:kOmegaSSTLM
+    grad(k)         cellLimited Gauss linear 0.9;
+    grad(omega)     cellLimited Gauss linear 0.9;
+    grad(gammaInt)   cellLimited Gauss linear 0.9;
+    grad(ReThetat)   cellLimited Gauss linear 0.9;
 %}
 %}
 }
@@ -147,8 +175,11 @@ laplacianSchemes
 %:RANS
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST
-    laplacian(DomegaEff,omega)  Gauss linear uncorrected;
     laplacian(DkEff,k)          Gauss linear uncorrected;
+    laplacian(DomegaEff,omega)  Gauss linear uncorrected;
+%:kEpsilon
+    laplacian(DkEff,k)          Gauss linear uncorrected;
+    laplacian(DepsilonEff,epsilon)  Gauss linear uncorrected;
 %:SpalartAllmaras
     laplacian(DnuTildaEff,nuTilda)  Gauss linear uncorrected;
 %}

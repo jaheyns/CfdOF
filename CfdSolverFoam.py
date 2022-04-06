@@ -56,23 +56,19 @@ class _CommandCfdSolverFoam:
 
     def Activated(self):
         CfdTools.hide_parts_show_meshes()
-        isPresent = False
+        is_present = False
         members = CfdTools.getActiveAnalysis().Group
         for i in members:
             if isinstance(i.Proxy, _CfdSolverFoam):
                 FreeCADGui.activeDocument().setEdit(i.Name)
-                isPresent = True
+                is_present = True
 
         # Allowing user to re-create if CFDSolver was deleted.
-        if not isPresent:
+        if not is_present:
             FreeCADGui.addModule("CfdTools")
             FreeCADGui.addModule("CfdSolverFoam")
             FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdSolverFoam.makeCfdSolverFoam())")
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
-
-
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_SolverControl', _CommandCfdSolverFoam())
 
 
 class _CfdSolverFoam(object):
@@ -186,3 +182,6 @@ class _ViewProviderCfdSolverFoam:
     def __setstate__(self, state):
         return None
 
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_SolverControl', _CommandCfdSolverFoam())

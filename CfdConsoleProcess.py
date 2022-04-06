@@ -37,11 +37,11 @@ class CfdConsoleProcess:
     """ Class to run a console process asynchronously, printing output and
     errors to the FreeCAD console and allowing clean termination in Linux
     and Windows """
-    def __init__(self, finishedHook=None, stdoutHook=None, stderrHook=None):
+    def __init__(self, finished_hook=None, stdout_hook=None, stderr_hook=None):
         self.process = QProcess()
-        self.finishedHook = finishedHook
-        self.stdoutHook = stdoutHook
-        self.stderrHook = stderrHook
+        self.finishedHook = finished_hook
+        self.stdoutHook = stdout_hook
+        self.stderrHook = stderr_hook
         self.process.finished.connect(self.finished)
         self.process.readyReadStandardOutput.connect(self.readStdout)
         self.process.readyReadStandardError.connect(self.readStderr)

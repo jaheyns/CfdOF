@@ -41,7 +41,7 @@ if FreeCAD.GuiUp:
 
 class _TaskPanelCfdSolverControl:
     def __init__(self, solver_runner_obj):
-        ui_path = os.path.join(os.path.dirname(__file__), "TaskPanelCfdSolverControl.ui")
+        ui_path = os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdSolverControl.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.analysis_object = CfdTools.getActiveAnalysis()
@@ -52,9 +52,9 @@ class _TaskPanelCfdSolverControl:
         # update UI
         self.console_message = ''
 
-        self.solver_object.Proxy.solver_process = CfdConsoleProcess(finishedHook=self.solverFinished,
-                                                                    stdoutHook=self.gotOutputLines,
-                                                                    stderrHook=self.gotErrorLines)
+        self.solver_object.Proxy.solver_process = CfdConsoleProcess(finished_hook=self.solverFinished,
+                                                                    stdout_hook=self.gotOutputLines,
+                                                                    stderr_hook=self.gotErrorLines)
         self.Timer = QtCore.QTimer()
         self.Timer.setInterval(1000)
         self.Timer.timeout.connect(self.updateText)

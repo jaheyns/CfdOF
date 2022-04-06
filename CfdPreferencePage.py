@@ -79,7 +79,7 @@ DOWNLOAD_HISA = 4
 
 class CfdPreferencePage:
     def __init__(self):
-        ui_path = os.path.join(os.path.dirname(__file__), "CfdPreferencePage.ui")
+        ui_path = os.path.join(os.path.dirname(__file__), "core/gui/prefs/CfdPreferencePage.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.form.tb_choose_foam_dir.clicked.connect(self.chooseFoamDir)
@@ -123,8 +123,6 @@ class CfdPreferencePage:
         self.form.gb_openfoam.setVisible(platform.system() == 'Windows')
         self.form.gb_paraview.setVisible(platform.system() == 'Windows')
 
-        self.setDownloadURLs()
-
     def __del__(self):
         if self.thread and self.thread.isRunning():
             FreeCAD.Console.PrintMessage("Terminating a pending install task")
@@ -160,6 +158,8 @@ class CfdPreferencePage:
         self.output_dir = CfdTools.getDefaultOutputPath()
         self.form.le_output_dir.setText(self.output_dir)
 
+        self.setDownloadURLs()
+
     def consoleMessage(self, message="", color="#000000"):
         message = message.replace('\n', '<br>')
         self.console_message = self.console_message + \
@@ -174,8 +174,6 @@ class CfdPreferencePage:
 
     def testGetRuntime(self, disable_exception=True):
         """ Set the foam dir temporarily and see if we can detect the runtime """
-        prefs = CfdTools.getPreferencesLocation()
-        prev_foam_dir = FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
         CfdTools.setFoamDir(self.foam_dir)
         try:
             runtime = CfdTools.getFoamRuntime()
@@ -183,14 +181,17 @@ class CfdPreferencePage:
             runtime = None
             if not disable_exception:
                 raise
-        CfdTools.setFoamDir(prev_foam_dir)
+        CfdTools.setFoamDir(self.initial_foam_dir)
         return runtime
 
     def setDownloadURLs(self):
         if self.testGetRuntime() == "MinGW":
+            # Temporarily apply the foam dir selection
+            CfdTools.setFoamDir(self.foam_dir)
             foam_ver = os.path.split(CfdTools.getFoamDir())[-1]
             self.form.le_cfmesh_url.setText(CFMESH_URL_MINGW.format(foam_ver))
             self.form.le_hisa_url.setText(HISA_URL_MINGW.format(foam_ver))
+            CfdTools.setFoamDir(self.initial_foam_dir)
         else:
             self.form.le_cfmesh_url.setText(CFMESH_URL)
             self.form.le_hisa_url.setText(HISA_URL)
@@ -238,10 +239,7 @@ class CfdPreferencePage:
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.consoleMessage("Checking dependencies...")
         msg = CfdTools.checkCfdDependencies()
-        if not msg:
-            self.consoleMessage("No missing dependencies detected")
-        else:
-            self.consoleMessage(msg)
+        self.consoleMessage(msg)
         CfdTools.setFoamDir(self.initial_foam_dir)
         CfdTools.setParaviewPath(self.initial_paraview_path)
         CfdTools.setGmshPath(self.initial_gmsh_path)

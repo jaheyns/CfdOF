@@ -4,6 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -23,15 +24,16 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
 import os
-import CfdTools
-from CfdTools import addObjectProperty
+import FreeCAD
 from pivy import coin
 import Part
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
+    import _TaskPanelCfdFluidBoundary
+import CfdTools
+from CfdTools import addObjectProperty
 
 # Constants
 
@@ -75,6 +77,7 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
 # whether volume fraction panel is shown, whether thermal GUI is shown,
 # rows of thermal UI to show (all shown if None)
+
 BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                 [False, [], False, False, False, True, None],  # Slip
                 [True, [2], False, False, False, True, None],  # Partial slip
@@ -94,15 +97,58 @@ BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                [[True, [5], False, False, False, False, None]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows
-TURBULENT_INLET_SPEC = {"kOmegaSST":
+TURBULENT_INLET_SPEC = {'kOmegaSST':
                         [["Kinetic Energy & Specific Dissipation Rate",
                           "Intensity & Length Scale"],
                          ["TKEAndSpecDissipationRate",
                           "intensityAndLengthScale"],
                          ["k and omega specified",
                           "Turbulence intensity and eddy length scale"],
-                         [[0, 1],  # k, omega
-                          [2, 3]]]}  # I, l
+                         [[0, 2],  # k, omega
+                          [3, 4]]],  # I, l
+                        'kEpsilon':
+                        [["Kinetic Energy & Dissipation Rate",
+                          "Intensity & Length Scale"],
+                         ["TKEAndDissipationRate",
+                          "intensityAndLengthScale"],
+                         ["k and epsilon specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 1],  # k, epsilon
+                          [3, 4]]],  # I, l
+                        'SpalartAllmaras':
+                        [["Modified Turbulent Viscosity",
+                          "Intensity & Length Scale"],
+                         ["TransportedNuTilda",
+                          "intensityAndLengthScale"],
+                         ["nu-tilde specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[5],  # nu tilda
+                          [3, 4]]],  # I, l
+                        "kOmegaSSTLM":
+                        [["Kinetic Energy, Specific Dissipation Rate, Intermittency and ReThetat",
+                          "Intensity & Length Scale"],
+                         ["TKESpecDissipationRateGammaAndReThetat",
+                          "intensityAndLengthScale"],
+                         ["k, omega, gamma and reThetat specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 2, 6, 7],  # k, omega, gamma and reThetat
+                          [3, 4]]],  # I, l
+                        "kEqn":     # todo fix me
+                        [["Kinetic Energy & Turbulent viscosity"],
+                         ["TurbulentViscosityAndK"],
+                         ["k and turbulent viscosity specified"],
+                         [[0, 8]]],     # nut
+                        "Smagorinsky":  # todo fix me
+                        [["Turbulent viscosity"],
+                         ["TurbulentViscosity"],
+                         ["turbulent viscosity specified"],
+                         [[8]]],  # nut
+                        "WALE":     # todo fix me
+                        [["Turbulent viscosity"],
+                         ["TurbulentViscosity"],
+                         ["turbulent viscosity specified"],
+                         [[8]]]  # nut
+                        }
 
 THERMAL_BOUNDARY_NAMES = ["Fixed temperature",
                           "Adiabatic",
@@ -149,10 +195,6 @@ class _CommandCfdFluidBoundary:
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_FluidBoundary', _CommandCfdFluidBoundary())
-
-
 class _CfdFluidBoundary:
     def __init__(self, obj):
 
@@ -176,9 +218,11 @@ class _CfdFluidBoundary:
 
         addObjectProperty(obj, 'DefaultBoundary', False, "App::PropertyBool", "Boundary faces")
         addObjectProperty(obj, 'BoundaryType', BOUNDARY_TYPES, "App::PropertyEnumeration", "", "Boundary condition category")
+
         all_subtypes = []
         for s in SUBTYPES:
             all_subtypes += s
+
         addObjectProperty(obj, 'BoundarySubType', all_subtypes, "App::PropertyEnumeration", "", "Boundary condition type")
         addObjectProperty(obj, 'VelocityIsCartesian', True, "App::PropertyBool", "Flow",
                           "Whether to use components of velocity")
@@ -189,7 +233,7 @@ class _CfdFluidBoundary:
         addObjectProperty(obj, 'Uz', '0 m/s', "App::PropertySpeed", "Flow",
                           "Velocity (z component)")
         addObjectProperty(obj, 'VelocityMag', '0 m/s', "App::PropertySpeed", "Flow",
-                          "Velocity magitude")
+                          "Velocity magnitude")
         addObjectProperty(obj, 'DirectionFace', '', "App::PropertyString", "Flow",
                           "Face describing direction (normal)")
         addObjectProperty(obj, 'ReverseNormal', False, "App::PropertyBool", "Flow",
@@ -202,38 +246,76 @@ class _CfdFluidBoundary:
                           "Volume flow rate")
         addObjectProperty(obj, 'MassFlowRate', '0 kg/s', "App::PropertyQuantity", "Flow",
                           "Mass flow rate")
+
         if addObjectProperty(obj, 'PorousBaffleMethod', POROUS_METHODS, "App::PropertyEnumeration",
                              "Baffle", "Baffle"):
             obj.PorousBaffleMethod = 'porousCoeff'
+
         addObjectProperty(obj, 'PressureDropCoeff', '0', "App::PropertyQuantity", "Baffle",
                           "Porous baffle pressure drop coefficient")
         addObjectProperty(obj, 'ScreenWireDiameter', '0.2 mm', "App::PropertyLength", "Baffle",
                           "Porous screen mesh diameter")
         addObjectProperty(obj, 'ScreenSpacing', '2 mm', "App::PropertyLength", "Baffle",
                           "Porous screen mesh spacing")
+
         addObjectProperty(obj, 'ThermalBoundaryType', THERMAL_BOUNDARY_TYPES, "App::PropertyEnumeration", "Thermal",
                           "Type of thermal boundary")
         addObjectProperty(obj, 'Temperature', '293 K', "App::PropertyQuantity", "Thermal",
                           "Temperature")
         addObjectProperty(obj, 'HeatFlux', '0 W/m^2', "App::PropertyQuantity", "Thermal",
-                          "Temperature")
+                          "Wall heat flux")
         addObjectProperty(obj, 'HeatTransferCoeff', '0 W/m^2/K', "App::PropertyQuantity", "Thermal",
-                          "Temperature")
+                          "Wall heat transfer coefficient")
+
         all_turb_specs = []
         for k in TURBULENT_INLET_SPEC:
             all_turb_specs += TURBULENT_INLET_SPEC[k][1]
-        all_turb_specs = list(set(all_turb_specs))  # Remove dups
+
+        all_turb_specs = list(set(all_turb_specs))  # Remove duplicates
+
         if addObjectProperty(obj, 'TurbulenceInletSpecification', all_turb_specs, "App::PropertyEnumeration",
-                             "Turbulence", "Temperature"):
+                             "Turbulence", "Turbulent quantities specified"):
             obj.TurbulenceInletSpecification = 'intensityAndLengthScale'
+
+        # k omega SST
         addObjectProperty(obj, 'TurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
-                          "Temperature")
+                          "Turbulent kinetic energy")
         addObjectProperty(obj, 'SpecificDissipationRate', '1 rad/s', "App::PropertyQuantity", "Turbulence",
-                          "Temperature")
-        addObjectProperty(obj, 'TurbulenceIntensity', '0.1', "App::PropertyQuantity", "Turbulence",
-                          "Temperature")
+                          "Specific turbulent dissipation rate")
+
+        # k epsilon
+        addObjectProperty(obj, 'DissipationRate', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent dissipation rate")
+
+        # Spalart Allmaras
+        addObjectProperty(obj, 'NuTilda', '55 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Modified turbulent viscosity")
+
+        # Langtry Menter 4 eqn k omega SST
+        addObjectProperty(obj, 'Intermittency', '1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent intermittency")
+        addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
+                          "Transition momentum thickness Reynolds number")
+
+        # LES models
+        addObjectProperty(obj, 'TurbulentViscosity', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+        addObjectProperty(obj, 'kEqnTurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+        addObjectProperty(obj, 'kEqnTurbulentViscosity', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+
+        # General
+
+        addObjectProperty(obj, 'TurbulenceIntensityPercentage', '1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulence intensity (percent)")
+        # Backward compat
+        if 'TurbulenceIntensity' in obj.PropertiesList:
+            obj.TurbulenceIntensityPercentage = obj.TurbulenceIntensity*100.0
+            obj.removeProperty('TurbulenceIntensity')
+
         addObjectProperty(obj, 'TurbulenceLengthScale', '0.1 m', "App::PropertyLength", "Turbulence",
-                          "Temperature")
+                          "Length scale of turbulent eddies")
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume fraction",
                           "Volume fractions")
 
@@ -326,15 +408,17 @@ class _ViewProviderCfdFluidBoundary:
             return False
         material_objs = CfdTools.getMaterials(analysis_object)
 
-        import _TaskPanelCfdFluidBoundary
-        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
+        import importlib
+        importlib.reload(_TaskPanelCfdFluidBoundary)
+        self.taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
         self.Object.ViewObject.show()
-        taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(taskd)
+        self.taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def unsetEdit(self, vobj, mode):
         FreeCADGui.Control.closeDialog()
+        self.taskd = None
         return
 
     def __getstate__(self):
@@ -342,3 +426,7 @@ class _ViewProviderCfdFluidBoundary:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_FluidBoundary', _CommandCfdFluidBoundary())

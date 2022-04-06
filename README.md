@@ -17,19 +17,23 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 ### Current:
 
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
-* Extension to turbulent flow using RANS (k-omega SST)
+* Extension to RANS turbulent flow (k-omega SST (incl. transistion), k-epsilon, and Spalart-Allmaras models supported)
+* Extension to LES turbulent flow (k-Equation, Smagorinsky and WALE (Wall bounded) models)
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
+* Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
+* Porous regions and porous baffles
 * Basic material database
 * Flow initialisation with a potential solver
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
-* Cut-cell Cartesian meshing with baffles (snappyHexMesh)
+* Cut-cell Cartesian meshing with baffles (snappyHexMesh) and implicit / explicit snapping
 * Tetrahedral meshing using Gmsh
+* Conversion to poly dual mesh from existing meshes
+* Post meshing check mesh
 * Postprocessing using Paraview
-* Porous regions and porous baffles
-* Runs on Windows 7-10 and Linux
+* Runs on Windows 7-11 and Linux
 * Unit/regression testing
-* New case builder using an extensible template structure
+* Case builder using an extensible template structure
 * Macro scripting
 
 ### Platforms supported
@@ -40,7 +44,7 @@ Any system on which FreeCAD and the prerequisites listed below can be installed.
 
 #### Windows
 
-Windows 7-10; 64-bit version is required.
+Windows 7-11; 64-bit version is required.
 
 #### macOS
 
@@ -57,7 +61,7 @@ which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (at least version 0.18.4 / git commit 16146)](https://www.freecadweb.org/downloads.php)
  or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
-- OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2012](http://openfoam.com/download)  
+- OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2112](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
 - [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
@@ -284,8 +288,10 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
     - CONSTANTS_USE_CAPITALS (Uppercase)
     - functionsWithCapitals (Although not following PEP8, Camel-case instead of underscore is preferred as it is widely used within FreeCAD)
     - __class_attribute (Double leading underscore)
-
-
+9. Python allows both single quotes ('...') and double quotes ("...") for strings. As a convention, please use single quotes for internal string constants and double quotes for 
+   user-facing communication. The rule of thumb is that if it should be translated, use double quotes.
+   This is not a hard-and-fast rule and can be broken for convenience e.g. when quotes are contained in a string.
+   
 ## Acknowledgements
 
 ### Funding
@@ -305,6 +311,7 @@ We acknowledge significant contributions from
 * Michael Hindley (2016) - Initial concept
 * Klaus Sembritzki (2017) - Multiphase extension
 * Thomas Schrader (2017-) <info@schraderundschrader.de> - Testing and user assistance
+* Jonathan Bergh (2022) - Additional turbulence models
 
 ### Dedication
 

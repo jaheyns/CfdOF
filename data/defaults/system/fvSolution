@@ -74,7 +74,7 @@ SIMPLE
 %:buoyantSimpleFoam
         h %(solver/ConvergenceTol%);
 %}
-        "(k|epsilon|omega|f|v2|nuTilda)" %(solver/ConvergenceTol%);
+        "(k|epsilon|omega|f|v2|nuTilda|gammaInt|ReThetat)" %(solver/ConvergenceTol%);
     }
     pRefValue   0;
     pRefCell    0;
@@ -221,8 +221,8 @@ solvers
 %}
 %}
 %{%(physics/Turbulence%)
-%:RANS
-    "(k|omega|nuTilda)"
+%:RANS LES
+    "(k|omega|epsilon|nuTilda|gammaInt|ReThetat)"
     {
         solver           smoothSolver;
         smoother         GaussSeidel;
@@ -232,7 +232,7 @@ solvers
         minIter          1;
     }
 
-    "(k|omega|nuTilda)Final"
+    "(k|omega|epsilon|nuTilda|gammaInt|ReThetat)Final"
     {
         $k;
         relTol          0;
@@ -298,9 +298,20 @@ relaxationFactors
 %:kOmegaSST
         k               0.5;
         omega           0.5;
+%:kEpsilon
+        k               0.5;
+        epsilon         0.5;
+%:SpalartAllmaras
+        nuTilda         0.5;
+%:kOmegaSSTLM
+        k               0.5;
+        omega           0.5;
+        gammaInt        0.5;
+        ReThetat        0.5;
 %}
 %}
     }
+
     fields
     {
         p               0.3;
@@ -321,15 +332,33 @@ relaxationFactors
         hFinal          1;
 %}
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS LES
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST
         k               0.5;
         kFinal          1;
         omega           0.5;
         omegaFinal      1;
+%:kEpsilon
+        k               0.5;
+        kFinal          1;
+        epsilon         0.5;
+        epsilonFinal    1;
 %:SpalartAllmaras
         nuTilda         0.5;
+        nuTildaFinal    1;
+%:kOmegaSSTLM
+        k               0.5;
+        kFinal          1;
+        omega           0.5;
+        omegaFinal      1;
+        gammaInt               0.5;
+        gammaIntFinal          1;
+        ReThetat               0.5;
+        ReThetatFinal          1;
+%:kEqn
+        k               0.5;
+        kFinal          1;
 %}
 %}
 %{%(solver/SolverName%)

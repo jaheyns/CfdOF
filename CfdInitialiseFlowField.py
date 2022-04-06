@@ -5,6 +5,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -76,10 +77,6 @@ class _CommandCfdInitialiseInternalFlowField:
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_InitialiseInternal', _CommandCfdInitialiseInternalFlowField())
-
-
 class _CfdInitialVariables:
     """ The field initialisation object """
     def __init__(self, obj):
@@ -88,8 +85,10 @@ class _CfdInitialVariables:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, 'PotentialFlow', True, "App::PropertyBool", "Flow", "Initialise velocity with potential flow solution")
-        addObjectProperty(obj, 'PotentialFlowP', False, "App::PropertyBool", "Flow", "Initialise pressure with potential flow solution")
+        addObjectProperty(obj, 'PotentialFlow', True, "App::PropertyBool", "Flow",
+                          "Initialise velocity with potential flow solution")
+        addObjectProperty(obj, 'PotentialFlowP', False, "App::PropertyBool", "Flow",
+                          "Initialise pressure with potential flow solution")
         addObjectProperty(obj, 'UseInletUValues', False, "App::PropertyBool", "Flow",
                           "Initialise with flow values from inlet")
         addObjectProperty(obj, 'UseOutletPValue', True, "App::PropertyBool", "Flow",
@@ -106,6 +105,21 @@ class _CfdInitialVariables:
         addObjectProperty(obj, 'k', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence", "Turbulent kinetic energy")
         addObjectProperty(obj, 'omega', '1 rad/s', "App::PropertyQuantity", "Turbulence",
                           "Specific turbulent dissipation rate")
+        addObjectProperty(obj, 'epsilon', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent dissipation rate")
+        addObjectProperty(obj, 'nuTilda', '55 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Modified turbulent viscosity")
+        addObjectProperty(obj, 'gammaInt', '1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent intermittency")
+        addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
+                          "Transition Momentum Thickness Reynolds Number")
+        addObjectProperty(obj, 'nut', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+        addObjectProperty(obj, 'kEqnk', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent kinetic energy")
+        addObjectProperty(obj, 'kEqnNut', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
+                          "Turbulent viscosity")
+
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
         addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary name")
         addObjectProperty(obj, 'BoundaryP', None, "App::PropertyLink", "", "P boundary name")
@@ -178,3 +192,7 @@ class _ViewProviderCfdInitialseInternalFlowField:
 
     def __setstate__(self, state):
         return None
+
+
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('Cfd_InitialiseInternal', _CommandCfdInitialiseInternalFlowField())

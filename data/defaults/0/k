@@ -1,5 +1,7 @@
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS LES
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST kEpsilon kOmegaSSTLM kEqn
 %[_header%]
 FoamFile
 {
@@ -12,7 +14,12 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
+%{%(physics/TurbulenceModel%)
+%:kEqn
+internalField   uniform %(initialValues/kEqnk%);
+%:default
 internalField   uniform %(initialValues/k%);
+%}
 
 boundaryField
 {
@@ -48,6 +55,18 @@ boundaryField
         intensity   %(boundaries/%(0%)/TurbulenceIntensity%);
         value       $internalField;
     }
+%:TurbulentViscosityAndK
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/kEqnTurbulentKineticEnergy%);
+    }
+%:default
+    %(0%)
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
 %}
 %:outlet
     %(0%)
@@ -66,4 +85,5 @@ boundaryField
 }
 
 // ************************************************************************* //
+%}
 %}
