@@ -201,6 +201,8 @@ class _CfdFluidBoundary:
         obj.Proxy = self
         self.Type = "CfdFluidBoundary"
 
+        self.old_shape = Part.Shape()
+
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -326,8 +328,9 @@ class _CfdFluidBoundary:
         """ Create compound part at recompute. """
         shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
-            obj.Shape = Part.Shape()
-        else:
+            shape = Part.Shape()
+        if shape != self.old_shape:
+            self.old_shape = obj.Shape
             obj.Shape = shape
         self.updateBoundaryColors(obj)
 
@@ -359,6 +362,7 @@ class _CfdFluidBoundary:
 class _ViewProviderCfdFluidBoundary:
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.taskd = None
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.png")
@@ -379,23 +383,21 @@ class _ViewProviderCfdFluidBoundary:
     def getDefaultDisplayMode(self):
         return "Shaded"
 
-    def setDisplayMode(self,mode):
+    def setDisplayMode(self, mode):
         return mode
 
     def updateData(self, obj, prop):
-        return
+        print("Boundary update data: " + prop + " " + str(getattr(obj, prop)))
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        if prop == 'ShapeRefs' or prop == '_GroupTouched':
+            # Only change to shape allocation or geometry affects mesh
+            if 'NeedsMeshRewrite' in analysis_obj.PropertiesList:
+                analysis_obj.NeedsMeshRewrite = True
+        # TODO: Else mark case itself as needing updating
 
     def onChanged(self, vobj, prop):
+        print("onChanged: " + prop)
         CfdTools.setCompSolid(vobj)
-        return
-
-    def doubleClicked(self, vobj):
-        doc = FreeCADGui.getDocument(vobj.Object.Document)
-        if not doc.getInEdit():
-            doc.setEdit(vobj.Object.Name)
-        else:
-            FreeCAD.Console.PrintError('Task dialog already active\n')
-        return True
 
     def setEdit(self, vobj, mode):
         analysis_object = CfdTools.getParentAnalysisObject(self.Object)
@@ -408,6 +410,7 @@ class _ViewProviderCfdFluidBoundary:
             return False
         material_objs = CfdTools.getMaterials(analysis_object)
 
+        import _TaskPanelCfdFluidBoundary
         import importlib
         importlib.reload(_TaskPanelCfdFluidBoundary)
         self.taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
@@ -416,10 +419,20 @@ class _ViewProviderCfdFluidBoundary:
         FreeCADGui.Control.showDialog(self.taskd)
         return True
 
+    def doubleClicked(self, vobj):
+        doc = FreeCADGui.getDocument(vobj.Object.Document)
+        if not doc.getInEdit():
+            doc.setEdit(vobj.Object.Name)
+        else:
+            FreeCAD.Console.PrintError('Task dialog already active\n')
+            FreeCADGui.Control.showDialog(self.taskd)
+        return True
+
     def unsetEdit(self, vobj, mode):
+        if self.taskd:
+            self.taskd.closing()
+            self.taskd = None
         FreeCADGui.Control.closeDialog()
-        self.taskd = None
-        return
 
     def __getstate__(self):
         return None

@@ -414,17 +414,6 @@ class CfdCaseWriterFoam:
                 if initial_values['BoundaryTurb']:
                     inlet_bc = settings['boundaries'][initial_values['BoundaryTurb'].Label]
 
-                    # Initialise everything to zero to start with.
-                    initial_values['k'] = 0
-                    initial_values['omega'] = 0
-                    initial_values['epsilon'] = 0
-                    initial_values['nuTilda'] = 0
-                    initial_values['gammaInt'] = 0
-                    initial_values['ReThetat'] = 0
-                    initial_values['nut'] = 0
-                    initial_values['kEqnk'] = 0
-                    initial_values['kEqnNut'] = 0
-
                     if inlet_bc['TurbulenceInletSpecification'] == 'TKEAndSpecDissipationRate':
                         initial_values['k'] = inlet_bc['TurbulentKineticEnergy']
                         initial_values['omega'] = inlet_bc['SpecificDissipationRate']
@@ -486,6 +475,7 @@ class CfdCaseWriterFoam:
                             "Turbulence inlet specification currently unsupported for copying turbulence initial conditions")
                 else:
                     raise RuntimeError("No boundary selected to copy initial turbulence values from.")
+            #TODO: Check that the required values have actually been set for each turbulent model
 
     # Zones
 

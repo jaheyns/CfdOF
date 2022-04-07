@@ -55,6 +55,7 @@ class _CfdAnalysis:
                           "Path to which cases are written (blank to use system default)")
         addObjectProperty(obj, "IsActiveAnalysis", False, "App::PropertyBool", "", "Active analysis object in document")
         obj.setEditorMode("IsActiveAnalysis", 1)  # Make read-only (2 = hidden)
+        addObjectProperty(obj, 'NeedsMeshRewrite', True, "App::PropertyBool", "", "Mesh case needs to be re-written")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

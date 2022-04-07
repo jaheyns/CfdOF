@@ -691,8 +691,6 @@ class CfdMeshTools:
             self.gmsh_settings['HasLengthMap'] = False
             if self.ele_length_map:
                 self.gmsh_settings['HasLengthMap'] = True
-                print(self.ele_length_map)
-                print(self.ele_node_map)
                 self.gmsh_settings['LengthMap'] = self.ele_length_map
                 self.gmsh_settings['NodeMap'] = {}
                 for e in self.ele_length_map:
@@ -734,12 +732,11 @@ class CfdMeshTools:
             self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
 
         if self.mesh_obj.NumberOfProcesses <= 1:
-            self.mesh_obj.NumberOfProcesses = 1
             self.settings['ParallelMesh'] = False
+            self.settings['NumberOfProcesses'] = 1
         else:
             self.settings['ParallelMesh'] = True
-
-        self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
+            self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
         self.settings['NumberOfThreads'] = self.mesh_obj.NumberOfThreads
 
         TemplateBuilder.TemplateBuilder(self.meshCaseDir, self.template_path, self.settings)
@@ -750,4 +747,5 @@ class CfdMeshTools:
         s = os.stat(fname)
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
 
+        self.analysis.NeedsMeshRewrite = False
         CfdTools.cfdMessage("Successfully wrote meshCase to folder {}\n".format(self.meshCaseDir))

@@ -283,6 +283,22 @@ class _TaskPanelCfdMesh:
 
     def runMesh(self):
         self.Start = time.time()
+
+        # Check for changes that require mesh re-write
+        self.store()
+        analysis_obj = CfdTools.getParentAnalysisObject(self.mesh_obj)
+        if analysis_obj.NeedsMeshRewrite:
+            if FreeCAD.GuiUp:
+                if QtGui.QMessageBox.question(
+                    None,
+                    "CfdOF Workbench",
+                    "The case setup for the mesher may need to be re-written based on changes you have made to the "
+                    "model.\n\nWrite mesh case first?", defaultButton=QtGui.QMessageBox.Yes
+                ) == QtGui.QMessageBox.Yes:
+                    self.writeMesh()
+                else:
+                    self.Start = time.time()
+
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.consoleMessage("Initializing {} ...".format(self.mesh_obj.MeshUtility))
