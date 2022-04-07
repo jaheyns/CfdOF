@@ -60,7 +60,7 @@ class _CommandDynamicMesh:
         return sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, _CfdMesh)
 
     def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Set up a dynamic mesh refinement")
+        # FreeCAD.ActiveDocument.openTransaction("Set up a dynamic mesh refinement")
         is_present = False
         members = CfdTools.getActiveAnalysis().Group
         for i in members:
