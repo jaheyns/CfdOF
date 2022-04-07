@@ -142,7 +142,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Dynamic mesh controls</string>
+         <string>Refinement controls</string>
         </property>
        </widget>
       </item>
@@ -264,6 +264,9 @@
        <widget class="QComboBox" name="cb_refinement_field">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Solver field on which to base dynamic mesh refinements&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

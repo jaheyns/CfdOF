@@ -23,9 +23,12 @@
 import FreeCAD
 import FreeCADGui
 import os
+
+from gitdb.exc import ParseError
+
 from CfdTools import setQuantity, getQuantity
 
-PERMISSIBLE_SOLVER_FIELDS = ['gradP', 'gradU']
+PERMISSIBLE_SOLVER_FIELDS = ['p', 'U']
 
 
 class _TaskPanelCfdDynamicMeshRefinement:
@@ -53,7 +56,8 @@ class _TaskPanelCfdDynamicMeshRefinement:
         setQuantity(self.form.if_max_cells, self.obj.MaxRefinementCells)
 
         # Trigger field
-        # self.form.cb_refinement_field.setValue(self.obj.RefinementField) # leave for now, find index etc
+        self.form.cb_refinement_field.addItems(PERMISSIBLE_SOLVER_FIELDS)
+        self.form.cb_refinement_field.setCurrentText(self.obj.RefinementField)
         setQuantity(self.form.if_unrefine_level, self.obj.UnRefinementLevel)
         setQuantity(self.form.if_lower_refinement, self.obj.LowerRefinementLevel)
         setQuantity(self.form.if_upper_refinement, self.obj.UpperRefinementLevel)
