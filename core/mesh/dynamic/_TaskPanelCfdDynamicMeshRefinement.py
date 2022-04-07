@@ -23,6 +23,7 @@
 import FreeCAD
 import FreeCADGui
 import os
+from CfdTools import setQuantity, getQuantity
 
 PERMISSIBLE_SOLVER_FIELDS = ['gradP', 'gradU']
 
@@ -38,18 +39,6 @@ class _TaskPanelCfdDynamicMeshRefinement:
         self.form = FreeCADGui.PySideUic.loadUi(
             os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdDynamicMeshRefinement.ui"))
 
-        self.ShapeRefsOrig = list(self.obj.ShapeRefs)
-
-        self.form.cb_write_refinement_volscalarfield.stateChanged.connect(self.updateUI)
-        self.form.sb_max_refinement_levels.stateChanged.connect(self.updateUI)
-        self.form.sb_no_buffer_layers.stateChanged.connect(self.updateUI)
-        self.form.sb_refinement_interval.stateChanged.connect(self.updateUI)
-
-        self.form.cb_refinement_field.stateChanged.connect(self.updateUI)
-        self.form.if_lower_refinement.stateChanged.connect(self.updateUI)
-        self.form.if_upper_refinement.stateChanged.connect(self.updateUI)
-        self.form.if_unrefine_level.stateChanged.connect(self.updateUI)
-
         self.load()
 
         FreeCADGui.Selection.addObserver(self)
@@ -63,21 +52,20 @@ class _TaskPanelCfdDynamicMeshRefinement:
 
         # Macro script
         FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-        FreeCADGui.doCommand("obj.RefinementInterval = {}".format(self.form.sb_refinement_interval))
-        FreeCADGui.doCommand("obj.MaxRefinementLevel = {}".format(self.form.sb_max_refinement_levels))
-        FreeCADGui.doCommand("obj.BufferLayers = {}".format(self.form.sb_no_buffer_layers))
-        FreeCADGui.doCommand("obj.MaxRefinementCells = {}".format(self.form.if_max_cells))
-        FreeCADGui.doCommand("obj.RefinementField = {}".format(self.form.cb_refinement_field))
-        FreeCADGui.doCommand("obj.LowerRefinementLevel = {}".format(self.form.if_lower_refinement))
-        FreeCADGui.doCommand("obj.UpperRefinementLevel = {}".format(self.form.if_upper_refinement))
-        FreeCADGui.doCommand("obj.UnRefinementLevel = {}".format(self.form.if_unrefine_level))
-        FreeCADGui.doCommand("obj.WriteFields = {}".format(self.form.cb_write_refinement_volscalarfield))
+        FreeCADGui.doCommand("obj.RefinementInterval = {}".format(self.form.sb_refinement_interval.value()))
+        FreeCADGui.doCommand("obj.MaxRefinementLevel = {}".format(self.form.sb_max_refinement_levels.value()))
+        FreeCADGui.doCommand("obj.BufferLayers = {}".format(self.form.sb_no_buffer_layers.value()))
+        FreeCADGui.doCommand("obj.MaxRefinementCells = {}".format(self.form.if_max_cells.text()))
+        FreeCADGui.doCommand("obj.RefinementField = '{}'".format(self.form.cb_refinement_field.currentText()))
+        FreeCADGui.doCommand("obj.LowerRefinementLevel = {}".format(getQuantity(self.form.if_lower_refinement)))
+        FreeCADGui.doCommand("obj.UpperRefinementLevel = {}".format(getQuantity(self.form.if_upper_refinement)))
+        FreeCADGui.doCommand("obj.UnRefinementLevel = {}".format(getQuantity(self.form.if_unrefine_level)))
+        FreeCADGui.doCommand("obj.WriteFields = {}".format(self.form.cb_write_refinement_volscalarfield.isChecked()))
 
         return True
 
     def reject(self):
         FreeCADGui.Selection.removeObserver(self)
-        self.obj.ShapeRefs = self.ShapeRefsOrig
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
         return True
@@ -88,13 +76,13 @@ class _TaskPanelCfdDynamicMeshRefinement:
         self.form.sb_refinement_interval.setValue(self.obj.RefinementInterval)
         self.form.sb_max_refinement_levels.setValue(self.obj.MaxRefinementLevel)
         self.form.sb_no_buffer_layers.setValue(self.obj.BufferLayers)
-        self.form.if_max_cells.setText(self.obj.MaxRefinementCells)
+        setQuantity(self.form.if_max_cells, self.obj.MaxRefinementCells)
 
         # Trigger field
         # self.form.cb_refinement_field.setValue(self.obj.RefinementField) # leave for now, find index etc
-        self.form.if_unrefine_level.setValue(self.obj.UnRefinementLevel)
-        self.form.if_lower_refinement.setValue(self.obj.LowerRefinementLevel)
-        self.form.if_upper_refinement.setValue(self.obj.UpperRefinementLevel)
+        setQuantity(self.form.if_unrefine_level, self.obj.UnRefinementLevel)
+        setQuantity(self.form.if_lower_refinement, self.obj.LowerRefinementLevel)
+        setQuantity(self.form.if_upper_refinement, self.obj.UpperRefinementLevel)
 
         self.form.cb_write_refinement_volscalarfield.setChecked(self.obj.WriteFields)
 

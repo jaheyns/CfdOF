@@ -87,16 +87,16 @@ class _CfdDynamicMeshRefinement:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, "RefinementInterval", 1, "App::PropertyInteger", "DynamicMeshRefinement",
+        addObjectProperty(obj, "RefinementInterval", 1, "App::PropertyFloat", "DynamicMeshRefinement",
                           "Set the interval at which to run the dynamic mesh refinement")
 
-        addObjectProperty(obj, "MaxRefinementLevel", 1, "App::PropertyInteger", "DynamicMeshRefinement",
+        addObjectProperty(obj, "MaxRefinementLevel", 1, "App::PropertyFloat", "DynamicMeshRefinement",
                           "Set the maximum dynamic mesh refinement level")
 
-        addObjectProperty(obj, "BufferLayers", 1, "App::PropertyInteger", "DynamicMeshRefinement",
+        addObjectProperty(obj, "BufferLayers", 1, "App::PropertyFloat", "DynamicMeshRefinement",
                           "Set the number of buffer layers between refined and existing cells")
 
-        addObjectProperty(obj, "MaxRefinementCells", 20000, "App::PropertyInteger", "DynamicMeshRefinement",
+        addObjectProperty(obj, "MaxRefinementCells", 20000, "App::PropertyFloat", "DynamicMeshRefinement",
                           "Set the maximum number of cells added during dynamic mesh refinement")
 
         addObjectProperty(obj, "RefinementField", "", "App::PropertyString", "DynamicMeshRefinement",

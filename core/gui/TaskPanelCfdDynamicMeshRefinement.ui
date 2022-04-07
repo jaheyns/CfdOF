@@ -36,7 +36,7 @@
        <number>6</number>
       </property>
       <item row="1" column="2">
-       <widget class="QDoubleSpinBox" name="input_refinement_interval">
+       <widget class="QDoubleSpinBox" name="sb_refinement_interval">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Solver intervals at which to initiate dynamic mesh refinement&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -58,7 +58,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QLabel" name="label_refinement_interval">
+       <widget class="QLabel" name="label_1">
         <property name="text">
          <string>Refinement interval</string>
         </property>
@@ -72,7 +72,7 @@
        </widget>
       </item>
       <item row="4" column="2">
-       <widget class="QDoubleSpinBox" name="doubleSpinBox">
+       <widget class="QDoubleSpinBox" name="sb_no_buffer_layers">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of cells layers between refinement and existing cells&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -85,14 +85,14 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QLabel" name="thicknessLabel">
+       <widget class="QLabel" name="label_9">
         <property name="text">
          <string>Max cells</string>
         </property>
        </widget>
       </item>
       <item row="3" column="2">
-       <widget class="QDoubleSpinBox" name="if_edgerefinement">
+       <widget class="QDoubleSpinBox" name="sb_max_refinement_levels">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum cell refinement level to use during dynamic mesh refinement&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -118,7 +118,7 @@
        </widget>
       </item>
       <item row="5" column="2">
-       <widget class="Gui::InputField" name="thicknessInput">
+       <widget class="Gui::InputField" name="if_max_cells">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum number of cells to add during dynamic mesh refinement&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -126,7 +126,7 @@
          <double>1.000000000000000</double>
         </property>
         <property name="unit" stdset="0">
-         <string notr="true">mm</string>
+         <string notr="true"/>
         </property>
         <property name="format" stdset="0">
          <string>g</string>
@@ -194,7 +194,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string extracomment="Select 0 to use default value"/>
+         <string extracomment="Select 0 to use default value">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower field variable level below which the mesh is refined&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string>0.0</string>
@@ -209,7 +209,7 @@
          <double>1000000000.000000000000000</double>
         </property>
         <property name="unit" stdset="0">
-         <string notr="true">mm</string>
+         <string notr="true"/>
         </property>
         <property name="format" stdset="0">
          <string>g</string>
@@ -225,7 +225,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string extracomment="Select 0 to use default value"/>
+         <string extracomment="Select 0 to use default value">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Field variable level above which the mesh is refined&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string>0.0</string>
@@ -240,7 +240,7 @@
          <double>1000000000.000000000000000</double>
         </property>
         <property name="unit" stdset="0">
-         <string notr="true">mm</string>
+         <string notr="true"/>
         </property>
         <property name="format" stdset="0">
          <string>g</string>
@@ -283,7 +283,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string extracomment="Select 0 to use default value"/>
+         <string extracomment="Select 0 to use default value">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Field variable level at which the mesh is unrefined&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string>0.0</string>
@@ -298,7 +298,7 @@
          <double>1000000000.000000000000000</double>
         </property>
         <property name="unit" stdset="0">
-         <string notr="true">mm</string>
+         <string notr="true"/>
         </property>
         <property name="format" stdset="0">
          <string>g</string>
@@ -359,7 +359,7 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>input_refinement_interval</tabstop>
+  <tabstop>sb_refinement_interval</tabstop>
  </tabstops>
  <resources/>
  <connections/>
