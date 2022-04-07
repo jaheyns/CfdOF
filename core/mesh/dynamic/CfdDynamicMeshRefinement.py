@@ -101,3 +101,59 @@ class _CfdDynamicMeshRefinement:
                 obj.removeProperty('References')
                 obj.removeProperty('LinkedObjects')
 
+
+class _ViewProviderCfdDynamicMeshRefinement:
+    def __init__(self, vobj):
+        vobj.Proxy = self
+
+    def getIcon(self):
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "meshdynamic.png")
+        return icon_path
+
+    def attach(self, vobj):
+        self.ViewObject = vobj
+        self.Object = vobj.Object
+        self.standard = coin.SoGroup()
+        vobj.addDisplayMode(self.standard, "Standard")
+
+    def getDisplayModes(self, obj):
+        modes = []
+        return modes
+
+    def getDefaultDisplayMode(self):
+        return "Shaded"
+
+    def setDisplayMode(self, mode):
+        return mode
+
+    def updateData(self, obj, prop):
+        return
+
+    def onChanged(self, vobj, prop):
+        return
+
+    def setEdit(self, vobj, mode=0):
+        import importlib
+        importlib.reload(_TaskPanelCfdDynamicMeshRefinement)
+        taskd = _TaskPanelCfdDynamicMeshRefinement._TaskPanelCfdDynamicMeshRefinement(self.Object)
+        taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(taskd)
+        return True
+
+    def unsetEdit(self, vobj, mode=0):
+        FreeCADGui.Control.closeDialog()
+        return
+
+    def doubleClicked(self, vobj):
+        doc = FreeCADGui.getDocument(vobj.Object.Document)
+        if not doc.getInEdit():
+            doc.setEdit(vobj.Object.Name)
+        else:
+            FreeCAD.Console.PrintError('Task dialog already open\n')
+        return True
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

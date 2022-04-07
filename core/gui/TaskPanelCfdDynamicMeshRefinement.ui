@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>TaskPanelCfdDynamicMeshRefinement</class>
+ <widget class="QWidget" name="TaskPanelCfdDynamicMeshRefinement">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -37,9 +37,6 @@
       </property>
       <item row="1" column="2">
        <widget class="QDoubleSpinBox" name="input_refinement_interval">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Solver iteration interval at which to trigger refinement&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
         <property name="decimals">
          <number>0</number>
         </property>
@@ -73,9 +70,6 @@
       </item>
       <item row="4" column="2">
        <widget class="QDoubleSpinBox" name="doubleSpinBox">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of buffer layers between refined and existing cells&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
         <property name="decimals">
          <number>0</number>
         </property>
@@ -93,9 +87,6 @@
       </item>
       <item row="3" column="2">
        <widget class="QDoubleSpinBox" name="if_edgerefinement">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum refinement level permissible during dynamic refinement&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
         <property name="decimals">
          <number>0</number>
         </property>
@@ -119,9 +110,6 @@
       </item>
       <item row="5" column="2">
        <widget class="Gui::InputField" name="thicknessInput">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Maximum number of additional cells which may be added&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
         <property name="singleStep" stdset="0">
          <double>1.000000000000000</double>
         </property>
@@ -262,9 +250,6 @@
       </item>
       <item row="1" column="2" colspan="2">
        <widget class="QComboBox" name="cb_refinement_field">
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Field to trigger the dynamic mesh refinement on&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
        </widget>
       </item>
      </layout>
