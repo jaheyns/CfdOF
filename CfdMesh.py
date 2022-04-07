@@ -31,6 +31,12 @@ from CfdTools import addObjectProperty
 import os
 
 
+MESHER_DESCRIPTIONS = ['cfMesh', 'snappyHexMesh', 'gmsh (tetrahedral)', 'gmsh (polyhedral dual mesh)']
+MESHERS = ['cfMesh', 'snappyHexMesh', 'gmsh', 'gmsh']
+DIMENSION = ['3D', '3D', '3D', '3D']
+DUAL_CONVERSION = [False, False, False, True]
+
+
 def makeCfdMesh(name="CFDMesh"):
     obj = FreeCAD.ActiveDocument.addObject("App::DocumentObjectGroupPython", name)
     _CfdMesh(obj)
@@ -83,7 +89,6 @@ class _CfdMesh:
     # Variables that need to be used outside this class and therefore are included outside of
     # the constructor
     known_element_dimensions = ['2D', '3D']
-    known_mesh_utility = ['cfMesh', 'snappyHexMesh', 'gmsh']
 
     def __init__(self, obj):
         self.Type = "CfdMesh"
@@ -107,9 +112,9 @@ class _CfdMesh:
 
         addObjectProperty(obj, "Part", None, "App::PropertyLink", "Mesh Parameters", "Part object to mesh")
 
-        if addObjectProperty(obj, "MeshUtility", _CfdMesh.known_mesh_utility, "App::PropertyEnumeration",
+        if addObjectProperty(obj, "MeshUtility", MESHERS, "App::PropertyEnumeration",
                              "Mesh Parameters", "Meshing utilities"):
-            obj.MeshUtility = 'cfMesh'
+            obj.MeshUtility = MESHERS[0]
 
         # Refinement
         addObjectProperty(obj, "CharacteristicLengthMax", "0 m", "App::PropertyLength", "Mesh Parameters",
