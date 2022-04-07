@@ -58,6 +58,10 @@ class ResidualPlot:
         self.updated = True
         self.residuals = residuals
 
+    def reInitialise(self, analysis_obj):
+        # TODO: Set behaviour based on steady/transient settings
+        self.residuals = {}
+
     def refresh(self):
         if self.updated:
             self.updated = False

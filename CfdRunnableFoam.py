@@ -89,6 +89,7 @@ class CfdRunnableFoam(CfdRunnable):
         self.gammaIntResiduals = []
         self.ReThetatResiduals = []
         self.niter = 0
+        self.solver.Proxy.residual_plot.reInitialise(self.analysis)
 
     def get_solver_cmd(self, case_dir):
         self.initResiduals()
