@@ -28,6 +28,7 @@ from __future__ import print_function
 import FreeCAD
 import os
 import os.path
+import CfdMesh
 from CfdMesh import _CfdMesh
 import time
 from datetime import timedelta
@@ -84,15 +85,13 @@ class _TaskPanelCfdMesh:
         self.form.pb_stop_mesh.setEnabled(False)
         self.form.pb_paraview.setEnabled(False)
 
-        #self.form.cb_dimension.addItems(_CfdMesh.known_element_dimensions)
-        self.form.cb_utility.addItems(_CfdMesh.known_mesh_utility)
+        self.form.cb_utility.addItems(CfdMesh.MESHER_DESCRIPTIONS)
 
         self.form.if_max.setToolTip("Enter 0 to use default value")
         self.form.pb_searchPointInMesh.setToolTip("Specify below a point vector inside of the mesh or press 'Search' "
                                                   "to try to automatically find a point")
         self.form.if_cellsbetweenlevels.setToolTip("Number of cells between each of level of refinement")
         self.form.if_edgerefine.setToolTip("Number of refinement levels for all edges")
-        self.form.checkbox_convert_tets.setToolTip("Convert to polyhedral dual mesh")
         self.form.radio_explicit_edge_detection.setToolTip("Find surface edges using explicit (eMesh) detection")
         self.form.radio_implicit_edge_detection.setToolTip("Find surface edges using implicit detection")
 
@@ -127,21 +126,17 @@ class _TaskPanelCfdMesh:
         setQuantity(self.form.if_pointInMeshY, point_in_mesh.get('y'))
         setQuantity(self.form.if_pointInMeshZ, point_in_mesh.get('z'))
 
-        self.form.checkbox_convert_tets.setChecked(self.mesh_obj.ConvertToDualMesh)
         self.form.if_cellsbetweenlevels.setValue(self.mesh_obj.CellsBetweenLevels)
         self.form.if_edgerefine.setValue(self.mesh_obj.EdgeRefinement)
         self.form.radio_implicit_edge_detection.setChecked(self.mesh_obj.ImplicitEdgeDetection)
         self.form.radio_explicit_edge_detection.setChecked(not self.mesh_obj.ImplicitEdgeDetection)
 
-        index_dimension = self.form.cb_dimension.findText(self.mesh_obj.ElementDimension)
-        self.form.cb_dimension.setCurrentIndex(index_dimension)
-        index_utility = self.form.cb_utility.findText(self.mesh_obj.MeshUtility)
+        index_utility = CfdTools.indexOrDefault(list(zip(
+                CfdMesh.MESHERS, CfdMesh.DIMENSION, CfdMesh.DUAL_CONVERSION)), 
+                (self.mesh_obj.MeshUtility, self.mesh_obj.ElementDimension, self.mesh_obj.ConvertToDualMesh), 0)
         self.form.cb_utility.setCurrentIndex(index_utility)
 
     def updateUI(self):
-        self.form.l_dimension.setVisible(False)
-        self.form.cb_dimension.setVisible(False)
-        self.form.checkbox_convert_tets.setEnabled(False)
         case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
         self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
         self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
@@ -149,24 +144,21 @@ class _TaskPanelCfdMesh:
         self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
         self.form.pb_check_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
         
-        utility = self.form.cb_utility.currentText()
+        utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
-        elif utility == "cfMesh":
+        else:
             self.form.snappySpecificProperties.setVisible(False)
-        elif utility == "gmsh":
-            self.form.snappySpecificProperties.setVisible(False)
-            self.form.checkbox_convert_tets.setEnabled(True)
 
     def store(self):
+        mesher_idx = self.form.cb_utility.currentIndex()
         storeIfChanged(self.mesh_obj, 'CharacteristicLengthMax', getQuantity(self.form.if_max))
-        storeIfChanged(self.mesh_obj, 'MeshUtility', self.form.cb_utility.currentText())
-        #storeIfChanged(self.mesh_obj, 'ElementDimension', self.form.cb_dimension.currentText())
+        storeIfChanged(self.mesh_obj, 'MeshUtility', CfdMesh.MESHERS[mesher_idx])
+        storeIfChanged(self.mesh_obj, 'ElementDimension', CfdMesh.DIMENSION[mesher_idx])
         storeIfChanged(self.mesh_obj, 'CellsBetweenLevels', self.form.if_cellsbetweenlevels.value())
         storeIfChanged(self.mesh_obj, 'EdgeRefinement', self.form.if_edgerefine.value())
-        storeIfChanged(self.mesh_obj, 'ConvertToDualMesh', self.form.checkbox_convert_tets.isChecked())
+        storeIfChanged(self.mesh_obj, 'ConvertToDualMesh', CfdMesh.DUAL_CONVERSION[mesher_idx])
         storeIfChanged(self.mesh_obj, 'ImplicitEdgeDetection', self.form.radio_implicit_edge_detection.isChecked())
-        # storeIfChanged(self.mesh_obj, 'ExplicitEdgeDetection', self.form.radio_explicit_edge_detection.isChecked())
 
         point_in_mesh = {'x': getQuantity(self.form.if_pointInMeshX),
                          'y': getQuantity(self.form.if_pointInMeshY),
@@ -198,18 +190,11 @@ class _TaskPanelCfdMesh:
     def choose_utility(self, index):
         if index < 0:
             return
-        utility = self.form.cb_utility.currentText()
+        utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
-            self.form.checkbox_convert_tets.setChecked(False)
-            self.form.checkbox_convert_tets.setEnabled(False)
-        elif utility == "gmsh":
-            self.form.checkbox_convert_tets.setEnabled(True)
-            self.form.snappySpecificProperties.setVisible(False)
         else:
             self.form.snappySpecificProperties.setVisible(False)
-            self.form.checkbox_convert_tets.setChecked(False)
-            self.form.checkbox_convert_tets.setEnabled(False)
 
     def writeMesh(self):
         import importlib
