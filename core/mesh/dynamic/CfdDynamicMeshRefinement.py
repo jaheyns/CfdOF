@@ -87,19 +87,37 @@ class _CfdDynamicMeshRefinement:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        # Common to all
-        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList",
-                             "", "List of mesh refinement objects"):
-            # Backward compat
-            if 'References' in obj.PropertiesList:
-                doc = FreeCAD.getDocument(obj.Document.Name)
-                for r in obj.References:
-                    if not r[1]:
-                        obj.ShapeRefs += [doc.getObject(r[0])]
-                    else:
-                        obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
-                obj.removeProperty('References')
-                obj.removeProperty('LinkedObjects')
+        addObjectProperty(obj, "RefinementInterval", 1, "App::PropertyInteger", "DynamicMeshRefinement",
+                          "Set the interval at which to run the dynamic mesh refinement")
+
+        addObjectProperty(obj, "MaxRefinementLevel", 1, "App::PropertyInteger", "DynamicMeshRefinement",
+                          "Set the maximum dynamic mesh refinement level")
+
+        addObjectProperty(obj, "BufferLayers", 1, "App::PropertyInteger", "DynamicMeshRefinement",
+                          "Set the number of buffer layers between refined and existing cells")
+
+        addObjectProperty(obj, "MaxRefinementCells", 20000, "App::PropertyInteger", "DynamicMeshRefinement",
+                          "Set the maximum number of cells added during dynamic mesh refinement")
+
+        addObjectProperty(obj, "RefinementField", "", "App::PropertyString", "DynamicMeshRefinement",
+                          "Set the target refinement field")
+
+        addObjectProperty(obj, "LowerRefinementLevel", 0.001, "App::PropertyFloat", "DynamicMeshRefinement",
+                          "Set the lower mesh refinement")
+
+        addObjectProperty(obj, "UpperRefinementLevel", 0.999, "App::PropertyFloat", "DynamicMeshRefinement",
+                          "Set the upper mesh refinement")
+
+        addObjectProperty(obj, "UnRefinementLevel", 10.0, "App::PropertyFloat", "DynamicMeshRefinement",
+                          "Set the unrefinement level below which the mesh will be unrefined")
+
+        addObjectProperty(obj, "WriteFields", False, "App::PropertyBool", "DynamicMeshRefinement",
+                          "Whether to write the dynamic mesh refinement fields after refinement")
+
+    def onDocumentRestored(self, obj):
+        self.initProperties(obj)
+
+
 
 
 class _ViewProviderCfdDynamicMeshRefinement:
