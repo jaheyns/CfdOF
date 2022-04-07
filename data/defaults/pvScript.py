@@ -17,13 +17,13 @@ pfoam.Decomposepolyhedra = 0
 renderView1 = GetActiveViewOrCreate('RenderView')
 
 # get color transfer function/color map for 'p'
-pLUT = GetColorTransferFunction('p')
+ULUT = GetColorTransferFunction('U')
 
 # show data in view
 pfoamDisplay = Show(pfoam, renderView1)
 # trace defaults for the display properties.
 pfoamDisplay.ColorArrayName = ['POINTS', 'U']
-pfoamDisplay.LookupTable = pLUT
+pfoamDisplay.LookupTable = ULUT
 pfoamDisplay.EdgeColor = [0.0, 0.0, 0.5]
 pfoamDisplay.ScalarOpacityUnitDistance = 0.05
 
