@@ -129,7 +129,7 @@
          <string notr="true"/>
         </property>
         <property name="format" stdset="0">
-         <string>g</string>
+         <string>d</string>
         </property>
        </widget>
       </item>
@@ -174,7 +174,7 @@
       <item row="4" column="1">
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Refine level (lower)</string>
+         <string>Refine level (upper)</string>
         </property>
        </widget>
       </item>
@@ -212,7 +212,7 @@
          <string notr="true"/>
         </property>
         <property name="format" stdset="0">
-         <string>g</string>
+         <string>d</string>
         </property>
        </widget>
       </item>
@@ -243,7 +243,7 @@
          <string notr="true"/>
         </property>
         <property name="format" stdset="0">
-         <string>g</string>
+         <string>d</string>
         </property>
        </widget>
       </item>
@@ -301,7 +301,7 @@
          <string notr="true"/>
         </property>
         <property name="format" stdset="0">
-         <string>g</string>
+         <string>d</string>
         </property>
        </widget>
       </item>

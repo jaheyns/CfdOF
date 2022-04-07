@@ -34,7 +34,6 @@ class _TaskPanelCfdDynamicMeshRefinement:
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.obj = obj
-        # self.mesh_obj = self.getMeshObject()
 
         self.form = FreeCADGui.PySideUic.loadUi(
             os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdDynamicMeshRefinement.ui"))
@@ -42,33 +41,8 @@ class _TaskPanelCfdDynamicMeshRefinement:
         self.load()
 
         FreeCADGui.Selection.addObserver(self)
-        self.last_selected_edge = None
 
         self.updateUI()
-
-    def accept(self):
-        FreeCADGui.Selection.removeObserver(self)
-        FreeCADGui.ActiveDocument.resetEdit()
-
-        # Macro script
-        FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-        FreeCADGui.doCommand("obj.RefinementInterval = {}".format(self.form.sb_refinement_interval.value()))
-        FreeCADGui.doCommand("obj.MaxRefinementLevel = {}".format(self.form.sb_max_refinement_levels.value()))
-        FreeCADGui.doCommand("obj.BufferLayers = {}".format(self.form.sb_no_buffer_layers.value()))
-        FreeCADGui.doCommand("obj.MaxRefinementCells = {}".format(self.form.if_max_cells.text()))
-        FreeCADGui.doCommand("obj.RefinementField = '{}'".format(self.form.cb_refinement_field.currentText()))
-        FreeCADGui.doCommand("obj.LowerRefinementLevel = {}".format(getQuantity(self.form.if_lower_refinement)))
-        FreeCADGui.doCommand("obj.UpperRefinementLevel = {}".format(getQuantity(self.form.if_upper_refinement)))
-        FreeCADGui.doCommand("obj.UnRefinementLevel = {}".format(getQuantity(self.form.if_unrefine_level)))
-        FreeCADGui.doCommand("obj.WriteFields = {}".format(self.form.cb_write_refinement_volscalarfield.isChecked()))
-
-        return True
-
-    def reject(self):
-        FreeCADGui.Selection.removeObserver(self)
-        FreeCADGui.ActiveDocument.resetEdit()
-        FreeCAD.ActiveDocument.recompute()
-        return True
 
     def load(self):
         """ fills the widgets """
@@ -90,9 +64,25 @@ class _TaskPanelCfdDynamicMeshRefinement:
         # We dont need to do anything to the UI at this stage
         pass
 
-    def changeInternal(self):
-        self.obj.ShapeRefs.clear()
-        self.faceSelector.rebuildReferenceList()
-        self.solidSelector.rebuildReferenceList()
-        self.updateUI()
+    def accept(self):
+        doc = FreeCADGui.getDocument(self.obj.Document)
+        doc.resetEdit()
+
+        # Macro script
+        FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
+        FreeCADGui.doCommand("obj.RefinementInterval = {}".format(int(self.form.sb_refinement_interval.value())))
+        FreeCADGui.doCommand("obj.MaxRefinementLevel = {}".format(int(self.form.sb_max_refinement_levels.value())))
+        FreeCADGui.doCommand("obj.BufferLayers = {}".format(int(self.form.sb_no_buffer_layers.value())))
+        FreeCADGui.doCommand("obj.MaxRefinementCells = {}".format(int(float(self.form.if_max_cells.text()))))
+        FreeCADGui.doCommand("obj.RefinementField = '{}'".format(self.form.cb_refinement_field.currentText()))
+        FreeCADGui.doCommand("obj.LowerRefinementLevel = {}".format(getQuantity(self.form.if_lower_refinement)))
+        FreeCADGui.doCommand("obj.UpperRefinementLevel = {}".format(getQuantity(self.form.if_upper_refinement)))
+        FreeCADGui.doCommand("obj.UnRefinementLevel = {}".format(int(float(getQuantity(self.form.if_unrefine_level)))))
+        FreeCADGui.doCommand("obj.WriteFields = {}".format(self.form.cb_write_refinement_volscalarfield.isChecked()))
+
+        return True
+
+    def reject(self):
+        doc = FreeCADGui.getDocument(self.obj.Document)
+        doc.resetEdit()
 

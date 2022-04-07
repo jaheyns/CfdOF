@@ -48,6 +48,7 @@ class CfdCaseWriterFoam:
         self.porousZone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisationZone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
+        self.dynamic_mesh_obj = CfdTools.getDynamicMeshAdaptation(analysis_obj)
         self.mesh_generated = False
         self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
         self.progressCallback = None
@@ -93,9 +94,11 @@ class CfdCaseWriterFoam:
             'zonesPresent': len(self.zone_objs) > 0,
             'meshType': self.mesh_obj.Proxy.Type,
             'meshDimension': self.mesh_obj.ElementDimension,
-            'meshDir': "../"+self.mesh_obj.CaseName,
+            'meshDir': "../" + self.mesh_obj.CaseName,
             'solver': CfdTools.propsToDict(self.solver_obj),
             'system': {},
+            'dynamicMeshAdaptationEnabled': self.dynamic_mesh_obj is not None,
+            'dynamicMeshAdaptation': CfdTools.propsToDict(self.dynamic_mesh_obj),
             'runChangeDictionary': False
             }
 

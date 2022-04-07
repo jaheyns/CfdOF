@@ -62,7 +62,8 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
-        FreeCADGui.addCommand('Cfd_DynamicMesh', _CommandDynamicMesh())
+        FreeCADGui.addCommand('Cfd_DynamicMesh', _CommandDynamicMesh()) # TODO some of these commands appear to be added
+                                                                        # in the individual model files, and some here?
 
         cmdlst = ['Cfd_Analysis',
                   'Cfd_MeshFromShape', 'Cfd_MeshRegion', 'Cfd_DynamicMesh',

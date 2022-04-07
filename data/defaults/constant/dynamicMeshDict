@@ -1,4 +1,4 @@
-%{%(meshAdaptationEnabled%)
+%{%(dynamicMeshAdaptationEnabled%)
 %:True
 %[_header%]
 FoamFile
@@ -9,33 +9,19 @@ FoamFile
     object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-dynamicFvMesh       dynamicRefineMesh;
+dynamicFvMesh       dynamicRefineFvMesh;
 
-// How often to refine
-refineInterval  1;
+refineInterval  %(dynamicMeshAdaptation/RefinementInterval%);
+field           %(dynamicMeshAdaptation/RefinementField%);
 
-// Field to be refinement on
-field           alpha.water;
+lowerRefineLevel %(dynamicMeshAdaptation/LowerRefinementLevel%);
+upperRefineLevel %(dynamicMeshAdaptation/UpperRefinementLevel%);
 
-// Refine field inbetween lower..upper
-lowerRefineLevel 0.001;
-upperRefineLevel 0.999;
+unrefineLevel   %(dynamicMeshAdaptation/UnRefinementLevel%);
+nBufferLayers   %(dynamicMeshAdaptation/BufferLayers%);
+maxRefinement   %(dynamicMeshAdaptation/MaxRefinementLevel%);
+maxCells        %(dynamicMeshAdaptation/MaxRefinementCells%);
 
-// If value < unrefineLevel unrefine
-unrefineLevel   10;
-
-// Have slower than 2:1 refinement
-nBufferLayers   1;
-
-// Refine cells only up to maxRefinement levels
-maxRefinement   2;
-
-// Stop refinement if maxCells reached
-maxCells        200000;
-
-// Flux field and corresponding velocity field. Fluxes on changed
-// faces get recalculated by interpolating the velocity. Use 'none'
-// on surfaceScalarFields that do not need to be reinterpolated.
 correctFluxes
 (
     (phi none)
@@ -46,8 +32,7 @@ correctFluxes
     (alphaPhiUn none)
 );
 
-// Write the refinement level as a volScalarField
-dumpLevel       true;
+dumpLevel       %(dynamicMeshAdaptation/WriteFields%);
 
 //************************************************************************ //
 %}

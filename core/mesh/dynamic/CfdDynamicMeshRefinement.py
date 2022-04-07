@@ -28,10 +28,10 @@ import os
 import CfdTools
 from CfdTools import addObjectProperty
 from pivy import coin
-import Part
 from core.mesh.dynamic import _TaskPanelCfdDynamicMeshRefinement
 
-def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshRefinement"):
+
+def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshAdaptationModel"):
     """ makeCfdDynamicMeshRefinement([name]):
         Creates an object to define dynamic mesh refinement properties and existing mesh if the solver supports it
     """
@@ -60,43 +60,49 @@ class _CommandDynamicMesh:
         return sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, _CfdMesh)
 
     def Activated(self):
-        sel = FreeCADGui.Selection.getSelection()
-        if len(sel) == 1:
-            sobj = sel[0]
-            if len(sel) == 1 and hasattr(sobj, "Proxy") and isinstance(sobj.Proxy, _CfdMesh):
-                FreeCAD.ActiveDocument.openTransaction("Create DynamicMesh")
-                FreeCADGui.doCommand("")
-                FreeCADGui.addModule("core.mesh.dynamic.CfdDynamicMeshRefinement as CfdDynamicMeshRefinement")
-                FreeCADGui.doCommand(
-                    "CfdDynamicMeshRefinement.makeCfdDynamicMeshRefinement(App.ActiveDocument.{})".format(sobj.Name))
-                FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
+        FreeCAD.ActiveDocument.openTransaction("Set up a dynamic mesh refinement")
+        is_present = False
+        members = CfdTools.getActiveAnalysis().Group
+        for i in members:
+            if isinstance(i.Proxy, _CfdDynamicMeshRefinement):
+                FreeCADGui.activeDocument().setEdit(i.Name)
+                is_present = True
 
-        FreeCADGui.Selection.clearSelection()
+        # Allow to re-create if deleted
+        if not is_present:
+            sel = FreeCADGui.Selection.getSelection()
+            if len(sel) == 1:
+                sobj = sel[0]
+                if len(sel) == 1 and hasattr(sobj, "Proxy") and isinstance(sobj.Proxy, _CfdMesh):
+                    FreeCAD.ActiveDocument.openTransaction("Create DynamicMesh")
+                    FreeCADGui.doCommand("")
+                    FreeCADGui.addModule("core.mesh.dynamic.CfdDynamicMeshRefinement as CfdDynamicMeshRefinement")
+                    FreeCADGui.addModule("CfdTools")
+                    FreeCADGui.doCommand(
+                        "CfdTools.getActiveAnalysis().addObject(CfdDynamicMeshRefinement.makeCfdDynamicMeshRefinement(App.ActiveDocument.{}))".format(sobj.Name))
+                    FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
-
-
-
-
+            FreeCADGui.Selection.clearSelection()
 
 
 class _CfdDynamicMeshRefinement:
 
     def __init__(self, obj):
         obj.Proxy = self
-        self.Type = "_CfdDynamicMeshRefinement"
+        self.Type = "DynamicMeshAdaptationModel"
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, "RefinementInterval", 1, "App::PropertyFloat", "DynamicMeshRefinement",
+        addObjectProperty(obj, "RefinementInterval", 1, "App::PropertyInteger", "DynamicMeshRefinement",
                           "Set the interval at which to run the dynamic mesh refinement")
 
-        addObjectProperty(obj, "MaxRefinementLevel", 1, "App::PropertyFloat", "DynamicMeshRefinement",
+        addObjectProperty(obj, "MaxRefinementLevel", 1, "App::PropertyInteger", "DynamicMeshRefinement",
                           "Set the maximum dynamic mesh refinement level")
 
-        addObjectProperty(obj, "BufferLayers", 1, "App::PropertyFloat", "DynamicMeshRefinement",
+        addObjectProperty(obj, "BufferLayers", 1, "App::PropertyInteger", "DynamicMeshRefinement",
                           "Set the number of buffer layers between refined and existing cells")
 
-        addObjectProperty(obj, "MaxRefinementCells", 20000, "App::PropertyFloat", "DynamicMeshRefinement",
+        addObjectProperty(obj, "MaxRefinementCells", 20000, "App::PropertyInteger", "DynamicMeshRefinement",
                           "Set the maximum number of cells added during dynamic mesh refinement")
 
         addObjectProperty(obj, "RefinementField", "", "App::PropertyString", "DynamicMeshRefinement",
@@ -108,7 +114,7 @@ class _CfdDynamicMeshRefinement:
         addObjectProperty(obj, "UpperRefinementLevel", 0.999, "App::PropertyFloat", "DynamicMeshRefinement",
                           "Set the upper mesh refinement")
 
-        addObjectProperty(obj, "UnRefinementLevel", 10.0, "App::PropertyFloat", "DynamicMeshRefinement",
+        addObjectProperty(obj, "UnRefinementLevel", 10, "App::PropertyInteger", "DynamicMeshRefinement",
                           "Set the unrefinement level below which the mesh will be unrefined")
 
         addObjectProperty(obj, "WriteFields", False, "App::PropertyBool", "DynamicMeshRefinement",

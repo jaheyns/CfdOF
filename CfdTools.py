@@ -135,6 +135,17 @@ def getPhysicsModel(analysis_object):
     return physicsModel
 
 
+def getDynamicMeshAdaptation(analysis_object):
+    isPresent = False
+    for i in analysis_object.Group:
+        if "DynamicMeshAdaptationModel" in i.Name:
+            dynamicMeshAdaptionModel = i
+            isPresent = True
+    if not isPresent:
+        dynamicMeshAdaptionModel = None
+    return dynamicMeshAdaptionModel
+
+
 def getMeshObject(analysis_object):
     isPresent = False
     meshObj = []
