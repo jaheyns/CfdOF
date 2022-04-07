@@ -73,7 +73,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
+     <item row="0" column="0" colspan="2">
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
@@ -82,7 +82,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Case</string>
+        <string>Case setup</string>
        </property>
       </widget>
      </item>
@@ -128,7 +128,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="1" column="0" colspan="2">
       <widget class="QLabel" name="label_2">
        <property name="font">
         <font>
@@ -163,19 +163,6 @@
      <property name="verticalSpacing">
       <number>8</number>
      </property>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Results</string>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="0">
       <widget class="QPushButton" name="pb_paraview">
        <property name="enabled">
@@ -196,6 +183,19 @@
        </property>
        <property name="text">
         <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QLabel" name="label_3">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Results</string>
        </property>
       </widget>
      </item>
