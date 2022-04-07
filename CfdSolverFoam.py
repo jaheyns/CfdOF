@@ -5,7 +5,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -25,14 +25,15 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
-import CfdTools
-from CfdTools import addObjectProperty
 import os
 import os.path
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
+import CfdTools
+from CfdTools import addObjectProperty
+from CfdResidualPlot import ResidualPlot
 
 
 def makeCfdSolverFoam(name="CfdSolver"):
@@ -97,6 +98,8 @@ class _CfdSolverFoam(object):
                           "Time step increment")
         addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "TimeStepControl",
                           "Output time interval")
+
+        self.residual_plot = ResidualPlot()
 
     def execute(self, obj):
         return

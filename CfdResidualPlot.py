@@ -38,7 +38,7 @@ import math
 
 class ResidualPlot:
     def __init__(self):
-        self.fig = Plot.figure(FreeCAD.ActiveDocument.Name + "Residuals")
+        self.fig = None
 
         self.updated = False
         self.residuals = {}
@@ -51,6 +51,9 @@ class ResidualPlot:
         if FreeCAD.GuiUp:
             self.refresh()
 
+    def figureClosed(self):
+        self.fig = None
+
     def updateResiduals(self, residuals):
         self.updated = True
         self.residuals = residuals
@@ -58,6 +61,9 @@ class ResidualPlot:
     def refresh(self):
         if self.updated:
             self.updated = False
+            if self.fig is None:
+                self.fig = Plot.figure("Residuals for " + FreeCAD.ActiveDocument.Name)
+                self.fig.destroyed.connect(self.figureClosed)
             ax = self.fig.axes
             ax.cla()
             ax.set_title("Simulation residuals")
@@ -78,6 +84,8 @@ class ResidualPlot:
             ax.set_ylim([10**(math.floor(math.log10(last_residuals_min))), 1])
             # Increase in increments of 100
             ax.set_xlim([0, math.ceil(float(iter_max)/100)*100])
-            ax.legend(loc='lower left')
+
+            if len(self.residuals):
+                ax.legend(loc='lower left')
 
             self.fig.canvas.draw()

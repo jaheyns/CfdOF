@@ -31,7 +31,6 @@ import FreeCAD
 import CfdTools
 import CfdAnalysis
 from PySide.QtCore import QObject, Signal
-from CfdResidualPlot import ResidualPlot
 from collections import OrderedDict
 
 
@@ -72,7 +71,6 @@ class CfdRunnableFoam(CfdRunnable):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
 
         self.initResiduals()
-        self.residualPlot = None
 
     def check_prerequisites(self):
         return ""
@@ -94,8 +92,6 @@ class CfdRunnableFoam(CfdRunnable):
 
     def get_solver_cmd(self, case_dir):
         self.initResiduals()
-
-        self.residualPlot = ResidualPlot()
 
         # Environment is sourced in run script, so no need to include in run command
         cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
@@ -149,7 +145,7 @@ class CfdRunnableFoam(CfdRunnable):
                 self.ReThetatResiduals.append(float(split[7].split(',')[0]))
 
         if self.niter > 1:
-            self.residualPlot.updateResiduals(OrderedDict([
+            self.solver.Proxy.residual_plot.updateResiduals(OrderedDict([
                 ('$\\rho$', self.rhoResiduals),
                 ('$U_x$', self.UxResiduals),
                 ('$U_y$', self.UyResiduals),
