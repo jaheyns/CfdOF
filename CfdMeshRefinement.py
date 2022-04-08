@@ -87,6 +87,7 @@ class _CfdMeshRefinement:
     def __init__(self, obj):
         obj.Proxy = self
         self.Type = "CfdMeshRefinement"
+        self.old_shape = Part.Shape()
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -159,8 +160,9 @@ class _CfdMeshRefinement:
         """ Create compound part at recompute. """
         shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
-            obj.Shape = Part.Shape()
-        else:
+            shape = Part.Shape()
+        if shape != self.old_shape:
+            self.old_shape = obj.Shape
             obj.Shape = shape
         if FreeCAD.GuiUp:
             vobj = obj.ViewObject
@@ -171,6 +173,7 @@ class _CfdMeshRefinement:
 class _ViewProviderCfdMeshRefinement:
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.taskd = None
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "meshRegion.png")
@@ -193,7 +196,10 @@ class _ViewProviderCfdMeshRefinement:
         return mode
 
     def updateData(self, obj, prop):
-        return
+        print("Mesh refinement update data: " + prop + " " + str(getattr(obj, prop)))
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        if 'NeedsMeshRewrite' in analysis_obj.PropertiesList:
+            analysis_obj.NeedsMeshRewrite = True
 
     def onChanged(self, vobj, prop):
         return
@@ -204,14 +210,10 @@ class _ViewProviderCfdMeshRefinement:
         #        obj.Part.ViewObject.show()
         import importlib
         importlib.reload(_TaskPanelCfdMeshRefinement)
-        taskd = _TaskPanelCfdMeshRefinement._TaskPanelCfdMeshRefinement(self.Object)
-        taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(taskd)
+        self.taskd = _TaskPanelCfdMeshRefinement._TaskPanelCfdMeshRefinement(self.Object)
+        self.taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(self.taskd)
         return True
-
-    def unsetEdit(self, vobj, mode=0):
-        FreeCADGui.Control.closeDialog()
-        return
 
     def doubleClicked(self, vobj):
         doc = FreeCADGui.getDocument(vobj.Object.Document)
@@ -219,7 +221,14 @@ class _ViewProviderCfdMeshRefinement:
             doc.setEdit(vobj.Object.Name)
         else:
             FreeCAD.Console.PrintError('Task dialog already open\n')
+            FreeCADGui.Control.showDialog(self.taskd)
         return True
+
+    def unsetEdit(self, vobj, mode):
+        if self.taskd:
+            self.taskd.closing()
+            self.taskd = None
+        FreeCADGui.Control.closeDialog()
 
     def __getstate__(self):
         return None

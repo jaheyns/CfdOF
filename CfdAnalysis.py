@@ -56,6 +56,8 @@ class _CfdAnalysis:
         addObjectProperty(obj, "IsActiveAnalysis", False, "App::PropertyBool", "", "Active analysis object in document")
         obj.setEditorMode("IsActiveAnalysis", 1)  # Make read-only (2 = hidden)
         addObjectProperty(obj, 'NeedsMeshRewrite', True, "App::PropertyBool", "", "Mesh case needs to be re-written")
+        addObjectProperty(obj, 'NeedsCaseRewrite', True, "App::PropertyBool", "", "Mesh case needs to be re-written")
+        addObjectProperty(obj, 'NeedsMeshRerun', True, "App::PropertyBool", "", "Mesher needs to be re-run before running solver")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

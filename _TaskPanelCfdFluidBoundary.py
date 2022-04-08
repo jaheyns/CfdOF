@@ -48,12 +48,12 @@ class TaskPanelCfdFluidBoundary:
                           if physics_model.Turbulence == 'RANS' or physics_model.Turbulence == 'LES' else None)
 
         self.material_objs = material_objs
+        self.analysis_obj = CfdTools.getParentAnalysisObject(obj)
 
         # Store values which are changed on the fly for visual update
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
         self.BoundaryTypeOrig = str(self.obj.BoundaryType)
         self.BoundarySubTypeOrig = str(self.obj.BoundarySubType)
-        self.analysis_obj = CfdTools.getParentAnalysisObject(obj)
         self.NeedsMeshRewriteOrig = self.analysis_obj.NeedsMeshRewrite
 
         self.alphas = {}
@@ -343,10 +343,10 @@ class TaskPanelCfdFluidBoundary:
         self.alphas[self.form.comboFluid.currentText()] = getQuantity(self.form.inputVolumeFraction)
 
     def accept(self):
-        if self.obj.Label.startswith("CfdFluidBoundary"):
-            self.obj.Label = self.obj.BoundaryType
-
         self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
+
+        if self.obj.Label.startswith("CfdFluidBoundary"):
+            storeIfChanged(self.obj, 'Label', self.obj.BoundaryType)
 
         # Type
         if self.obj.BoundaryType != self.BoundaryTypeOrig:
@@ -408,7 +408,6 @@ class TaskPanelCfdFluidBoundary:
         storeIfChanged(self.obj, 'PressureDropCoeff', getQuantity(self.form.inputPressureDropCoeff))
         storeIfChanged(self.obj, 'ScreenWireDiameter', getQuantity(self.form.inputWireDiameter))
         storeIfChanged(self.obj, 'ScreenSpacing', getQuantity(self.form.inputSpacing))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Label = '{}'".format(self.obj.Name, self.obj.Label))
 
         # Only update references if changed
         if self.obj.ShapeRefs != self.ShapeRefsOrig:
@@ -436,6 +435,7 @@ class TaskPanelCfdFluidBoundary:
         self.obj.ShapeRefs = self.ShapeRefsOrig
         self.obj.BoundaryType = self.BoundaryTypeOrig
         self.obj.BoundarySubType = self.BoundarySubTypeOrig
+        self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
         FreeCAD.getDocument(doc_name).recompute()
