@@ -23,8 +23,8 @@ Mesh.ElementOrder = 1;
 
 // 2D mesh algorithm (1=MeshAdapt, 2=Automatic, 5=Delaunay, 6=Frontal, 7=BAMG, 8=DelQuad)
 Mesh.Algorithm = 2;
-// 3D mesh algorithm (1=Delaunay, 2=New Delaunay, 4=Frontal, 5=Frontal Delaunay, 6=Frontal Hex, 7=MMG3D, 9=R-tree)
-Mesh.Algorithm3D = 1;
+// 3D mesh algorithm (1=Delaunay, 2=New Delaunay, 4=Frontal, 5=Frontal Delaunay, 6=Frontal Hex, 7=MMG3D, 9=R-tree, 10=hxtDelaunay)
+Mesh.Algorithm3D = 10;
 
 // Internal mesh
 Physical Volume ("Internal") = {1};

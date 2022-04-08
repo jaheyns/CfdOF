@@ -1,0 +1,52 @@
+#!/bin/bash
+
+runCommand()
+{
+    if [ "$1" == "mpiexec" ]; then sol="$4"; else sol="$1"; fi
+    sol=$(basename -- "$sol")
+    sol="${sol%.*}"
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+# Unset and source bashrc
+if [ ! -z "$FOAMDIR" ]
+then
+    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+    source "$FOAMDIR/etc/bashrc"
+fi
+
+# Copy mesh from mesh case dir if available
+MESHDIR="../meshCaseLESStep"
+if [ -f "$MESHDIR"/constant/polyMesh/faces ]
+then
+    rm -r constant/polyMesh 2> /dev/null
+    cp -r "$MESHDIR"/constant/polyMesh constant/polyMesh
+elif [ ! -f constant/polyMesh/faces ]
+then
+    echo "Fatal error: Unable to find mesh in directory $MESHDIR" 1>&2
+    exit 1
+fi
+
+# Detect available turbulence lib
+if [ -f "$FOAM_LIBBIN/libmomentumTransportModels.so" ] || [ -f "$FOAM_LIBBIN/libmomentumTransportModels.dll" ]
+then
+    echo \"libmomentumTransportModels.so\" > system/turbulenceLib
+else
+    echo \"libturbulenceModels.so\" > system/turbulenceLib
+fi
+
+# Update patch name and type
+runCommand createPatch -overwrite
+
+# Parallel decomposition
+runCommand decomposePar -force
+
+# Mesh renumbering
+runCommand mpiexec -np 4 renumberMesh -parallel -overwrite
+
+# Run application in parallel
+runCommand mpiexec -np 4 pimpleFoam -parallel
+

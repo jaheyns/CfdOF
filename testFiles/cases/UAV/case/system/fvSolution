@@ -117,6 +117,7 @@ relaxationFactors
         k               0.5;
         omega           0.5;
     }
+
     fields
     {
         p               0.3;
