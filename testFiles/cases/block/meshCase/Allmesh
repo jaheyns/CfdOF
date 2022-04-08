@@ -11,8 +11,9 @@ runCommand()
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
-GMSH_EXE='/usr/bin/gmsh'
-runCommand "$GMSH_EXE" - "gmsh/Box_Geometry.geo"
+GMSH_EXE='/home/oliver/software/gmsh-4.8.4-Linux64/bin/gmsh'
+export NTHREADS=$(nproc)
+runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Box_Geometry.geo"
 
 # Unset and source bashrc
 FOAMDIR="/usr/lib/openfoam/openfoam2112"
