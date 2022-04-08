@@ -11,19 +11,18 @@ runCommand()
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
-GMSH_EXE='/home/oliver/software/gmsh-4.8.4-Linux64/bin/gmsh'
+GMSH_EXE='/c/Program Files/FreeCAD 0.19/bin/gmsh.exe'
 export NTHREADS=$(nproc)
-runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Box_Geometry.geo"
+runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Pad_Geometry.geo"
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2112"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
     source "$FOAMDIR/etc/bashrc"
 fi
 
-runCommand gmshToFoam "gmsh/Box_Geometry.msh"
+runCommand gmshToFoam "gmsh/Pad_Geometry.msh"
 
 # Convert to polyhedra
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
