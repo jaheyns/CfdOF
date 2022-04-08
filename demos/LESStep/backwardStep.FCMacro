@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-FreeCAD.open(os.path.join(os.path.dirname(__file__), "backwardStep.fcstd"))
+FreeCAD.open(os.path.join(os.path.dirname(__file__), "backwardStep.FCStd"))
 Gui.SendMsgToActiveView("ViewFit")
 
 Gui.activateWorkbench("CfdOFWorkbench")
