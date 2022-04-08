@@ -242,55 +242,7 @@ in order to provide sufficient information.
 ## Development
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/alerts/)[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/context:python)
 
-It is asked that developers should only add functionality or code that is working and can be tested. Dead code, even
-portions included for possible future functionality, reduces function clarity and increases the maintenance overhead. 
-Our philosophy is 'Do the basics well' and therefore robust operation takes precedence over extended functionality.
-
-### Testing
-
-Unit and regression testing is supported. Where possible, it is asked that new functionality be included
-in the unit test framework.
-
-In order to run the tests, the following command can be used from the terminal:
-```
-FreeCAD -t TestCfdOF
-```
-Alternatively, from FreeCAD, select the 'Testing framework' workbench, choose the 'Self-test' button,
-select the 'TestCfdOF' test name and click 'Start'.
-
-
-### Style guide
-
-For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
-1. Use 4 spaces per indentation level (spaces are preferred over tabs).
-2. Limit all lines to a maximum of 120 characters.
-3. Break lines before binary operators.
-4. Blank lines 
-    
-    - Surround top-level function and class definitions with two lines.
-
-    - Definitions inside a class are surrounded by a single line.
-    
-5. Imports should usually be on separate lines.
-6. Comments
-    - Docstrings always use """ triple double-quotes """
-    
-    - Block comment starts with a # and a single space and are indented to the same level as that code
-    
-    - Use inline comments sparingly. They are on the same line as a statement and should be separated by at least two
- spaces from the statement. 
-
-7. Avoid trailing whitespaces
-8. Naming convention
-
-    - ClassNames (Camel)
-    - variable_names_without_capitals (Underscore)
-    - CONSTANTS_USE_CAPITALS (Uppercase)
-    - functionsWithCapitals (Although not following PEP8, Camel-case instead of underscore is preferred as it is widely used within FreeCAD)
-    - __class_attribute (Double leading underscore)
-9. Python allows both single quotes ('...') and double quotes ("...") for strings. As a convention, please use single quotes for internal string constants and double quotes for 
-   user-facing communication. The rule of thumb is that if it should be translated, use double quotes.
-   This is not a hard-and-fast rule and can be broken for convenience e.g. when quotes are contained in a string.
+If you'd like to get involved in the development of CfdOF, please check out our [Contribution guidelines](CONTRIBUTING.md). 
    
 ## Acknowledgements
 
@@ -317,3 +269,5 @@ We acknowledge significant contributions from
 
 CfdOF is dedicated to the memory of Michael Hindley. It is thanks to his irrepressible enthusiasm for 
 FreeCAD and open source software that this workbench exists. Rest in peace.
+
+_Last Updated 07/04/2022_

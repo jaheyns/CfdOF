@@ -5,6 +5,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2021 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -253,7 +254,7 @@ class BlockTest(unittest.TestCase):
         self.analysis.addObject(self.solver_object)
 
         fccPrint('Writing {} case files ...'.format(self.__class__.__doc_name))
-        self.analysis.OutputPath = tempfile.gettempdir()
+        self.analysis.OutputPath = temp_dir
         self.solver_object.InputCaseName = "case" + self.__class__.__doc_name
         self.mesh_object.CaseName = "meshCase" + self.__class__.__doc_name
         self.writeCaseFiles()
@@ -305,7 +306,7 @@ class MacroTest:
 
         fccPrint('Writing {} case files ...'.format(dir_name))
         analysis = CfdTools.getActiveAnalysis()
-        analysis.OutputPath = tempfile.gettempdir()
+        analysis.OutputPath = temp_dir
         CfdTools.getSolver(analysis).InputCaseName = "case" + dir_name
         CfdTools.getMeshObject(analysis).CaseName = "meshCase" + dir_name
         self.writeCaseFiles()
@@ -391,6 +392,21 @@ class UAVTest(unittest.TestCase, MacroTest):
 class ProjectileTest(unittest.TestCase, MacroTest):
     __dir_name = 'Projectile'
     __macros = ['01-geometry.FCMacro', '02-mesh.FCMacro', '03-boundaries.FCMacro']
+
+    def __init__(self, var):
+        super().__init__(var)
+        MacroTest.child_instance = self
+
+    def test_run(self):
+        self.runTest(self.__class__.__dir_name, self.__class__.__macros)
+
+    def tearDown(self):
+        self.closeDoc()
+
+
+class LESStepTest(unittest.TestCase, MacroTest):
+    __dir_name = 'LESStep'
+    __macros = ['backwardStep.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
