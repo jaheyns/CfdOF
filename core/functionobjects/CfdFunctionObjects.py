@@ -83,24 +83,27 @@ class _CfdFunctionObjects:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "Boundary faces"):
-            # Backward compatible
-            if 'References' in obj.PropertiesList:
-                doc = FreeCAD.getDocument(obj.Document.Name)
-                for r in obj.References:
-                    if not r[1]:
-                        obj.ShapeRefs += [doc.getObject(r[0])]
-                    else:
-                        obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
-                obj.removeProperty('References')
-                obj.removeProperty('LinkedObjects')
+        # if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "Boundary faces"): # TODO check if we need this, otherwise remove
+        #     # Backward compatible
+        #     if 'References' in obj.PropertiesList:
+        #         doc = FreeCAD.getDocument(obj.Document.Name)
+        #         for r in obj.References:
+        #             if not r[1]:
+        #                 obj.ShapeRefs += [doc.getObject(r[0])]
+        #             else:
+        #                 obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
+        #         obj.removeProperty('References')
+        #         obj.removeProperty('LinkedObjects')
 
         addObjectProperty(obj, 'CaseName', "meshCase", "App::PropertyString", "",
                           "Name of directory in which the mesh is created")
 
         # Setup and utility
-        addObjectProperty(obj, 'FunctionObjectType', "functionObjectType", "App::PropertyString", "",
+        addObjectProperty(obj, 'FunctionObjectType', "functionObjectType", "App::PropertyString", "Function object",
                           "Name of the function object to be created")
+
+        addObjectProperty(obj, 'PatchName', "", "App::PropertyString", "Function object",
+                          "Name of the patch on which to create the function object")
 
         # Forces
         # Field names
@@ -110,7 +113,7 @@ class _CfdFunctionObjects:
                           "Velocity field name")
         addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Function object",
                           "Reference pressure")
-        addObjectProperty(obj, 'Density', '100000 kg/m^3', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'Density', '99999 kg/m^3', "App::PropertyQuantity", "Function object",
                           "Reference density")
         # addObjectProperty(obj, 'CentreOfRotation', '0, 0, 0', "App::PropertyString", "Function object",
         #                   "Centre of Rotation (x, y, z)")
@@ -178,7 +181,7 @@ class _CfdFunctionObjects:
             obj.Shape = Part.Shape()
         else:
             obj.Shape = shape
-        self.updateBoundaryColors(obj)
+        # self.updateBoundaryColors(obj)
 
     def updateBoundaryColors(self, obj): # todo come back and fix me
         pass

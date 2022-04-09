@@ -76,14 +76,58 @@ functions
     {
         type                forces;
         libs                ("libforces.so");
-        patches             ( %(functionObjects/%(0%)/ShapeRefs%) );
+        patches             ( %(functionObjects/%(0%)/PatchName%) );
+
+		p               %(functionObjects/%(0%)/Pressure%);
+		U               %(functionObjects/%(0%)/Velocity%);
+        rho             %(functionObjects/%(0%)/Density%);
+
+		pRef            %(functionObjects/%(0%)/ReferencePressure%);
+
+		porosity        %(functionObjects/%(0%)/IncludePorosity%);
+		writeFields     %(functionObjects/%(0%)/WriteFields%);
+
+		CofR            (%(functionObjects/%(0%)/CoRx%) %(functionObjects/%(0%)/CoRy%) %(functionObjects/%(0%)/CoRz%));
+
+        //binData
+        //{
+        //    nBin        %(functionObjects/%(0%)/NBins%);
+        //    direction   ( %(functionObjects/%(0%)/Direction%) );
+        //   cumulative  %(functionObjects/%(0%)/Cumulative%);
+        //}
     }
 %:ForceCoefficients
     %(0%)
     {
         type                forcesCoeffs;
         libs                ("libforces.so");
-        patches             ( %(functionObjects/%(0%)/ShapeRefs%) );
+        patches             ( %(functionObjects/%(0%)/PatchName%) );
+
+        p               %(functionObjects/%(0%)/Pressure%);
+		U               %(functionObjects/%(0%)/Velocity%);
+        rho             %(functionObjects/%(0%)/Density%);
+
+		pRef            %(functionObjects/%(0%)/ReferencePressure%);
+
+		porosity        %(functionObjects/%(0%)/IncludePorosity%);
+		writeFields     %(functionObjects/%(0%)/WriteFields%);
+
+		CofR            ( %(functionObjects/%(0%)/CoRx%) %(functionObjects/%(0%)/CoRy%) %(functionObjects/%(0%)/CoRz%) );
+        liftDir         ( %(functionObjects/%(0%)/Liftx%) %(functionObjects/%(0%)/Lifty%) %(functionObjects/%(0%)/Liftz%));
+        dragDir         ( %(functionObjects/%(0%)/Dragx%) %(functionObjects/%(0%)/Dragy%) %(functionObjects/%(0%)/Dragz%) )
+        pitchAxis       ( %(functionObjects/%(0%)/Pitchx%) %(functionObjects/%(0%)/Pitchy%) %(functionObjects/%(0%)/Pitchz%) );
+
+        magUInf         %(functionObjects/%(0%)/MagnitudeUInf%);
+
+        lRef            %(functionObjects/%(0%)/LengthRef%);
+        Aref            %(functionObjects/%(0%)/AreaRef%);
+
+        //binData
+        //{
+        //    nBin        %(functionObjects/%(0%)/NBins%);
+        //    direction   ( %(functionObjects/%(0%)/Direction%) );
+        //    cumulative  %(functionObjects/%(0%)/Cumulative%);
+        //}
     }
 %}
 %}

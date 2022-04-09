@@ -40,6 +40,7 @@ class TaskPanelCfdFunctionObjects:
     def __init__(self, obj):
         self.selecting_direction = False
         self.obj = obj
+        self.analysis_obj = CfdTools.getActiveAnalysis()
 
         # Store values which are changed on the fly for visual update
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
@@ -101,12 +102,57 @@ class TaskPanelCfdFunctionObjects:
         self.form.inputNBins.setToolTip("Number of bins")
         self.form.inputDirection.setToolTip("Direction")
         self.form.inputCumulative.setToolTip("Cumulative")
+        self.form.cb_patch_list.setToolTip("Patch (BC) group to monitor")
 
-        # Face list selection panel - modifies obj.ShapeRefs passed to it
-        self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
-                                                                    self.obj, True, True, False)
+        # # Face list selection panel - modifies obj.ShapeRefs passed to it
+        # self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
+        #                                                             self.obj, True, True, False)
 
+        self.list_of_bcs = [bc.Label for bc in CfdTools.getCfdBoundaryGroup(self.analysis_obj)]
+        self.form.cb_patch_list.addItems(self.list_of_bcs)
+
+        self.load()
         self.updateUI()
+
+    def load(self):
+        try:
+            previous_index = self.list_of_bcs.index(self.obj.PatchName)
+            self.form.cb_patch_list.setCurrentIndex(previous_index)
+        except:
+            pass
+
+        self.form.inputPressure.setText(self.obj.Pressure)
+        self.form.inputVelocity.setText(self.obj.Velocity)
+        setQuantity(self.form.inputDensity, self.obj.Density)
+        setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
+        self.form.inputPorosity.setChecked(self.obj.IncludePorosity)
+        self.form.inputWriteFields.setChecked(self.obj.WriteFields)
+
+        setQuantity(self.form.inputCentreOfRotationx, self.obj.CoRx)
+        setQuantity(self.form.inputCentreOfRotationy, self.obj.CoRy)
+        setQuantity(self.form.inputCentreOfRotationz, self.obj.CoRz)
+
+        setQuantity(self.form.inputLiftDirectionx, self.obj.Liftx)
+        setQuantity(self.form.inputLiftDirectiony, self.obj.Lifty)
+        setQuantity(self.form.inputLiftDirectionz, self.obj.Liftz)
+
+        setQuantity(self.form.inputDragDirectionx, self.obj.Dragx)
+        setQuantity(self.form.inputDragDirectiony, self.obj.Dragy)
+        setQuantity(self.form.inputDragDirectionz, self.obj.Dragz)
+
+        setQuantity(self.form.inputPitchAxisx, self.obj.Pitchx)
+        setQuantity(self.form.inputPitchAxisy, self.obj.Pitchy)
+        setQuantity(self.form.inputPitchAxisz, self.obj.Pitchz)
+
+        setQuantity(self.form.inputMagnitudeUInf, self.obj.MagnitudeUInf)
+        setQuantity(self.form.inputLengthRef, self.obj.LengthRef)
+        setQuantity(self.form.inputAreaRef, self.obj.AreaRef)
+
+        setQuantity(self.form.inputNBins, self.obj.NBins)
+        setQuantity(self.form.inputDirection, self.obj.Direction)
+        self.form.inputCumulative.setChecked(self.obj.Cumulative)
+
+
 
     def updateUI(self):
         # Function object type
@@ -125,9 +171,6 @@ class TaskPanelCfdFunctionObjects:
         self.form.functionObjectDescription.setText(CfdFunctionObjects.OBJECT_DESCRIPTIONS[index])
 
         self.updateUI()
-        # # Change the color of the boundary condition as the selection is made
-        # doc_name = str(self.obj.Document.Name)
-        # FreeCAD.getDocument(doc_name).recompute()
 
     def addSelection(self, doc_name, obj_name, sub, selected_point=None):
         # This is the direction selection
@@ -171,6 +214,8 @@ class TaskPanelCfdFunctionObjects:
         # Type
         FreeCADGui.doCommand("fo.FunctionObjectType "
                              "= '{}'".format(self.obj.FunctionObjectType))
+        FreeCADGui.doCommand("fo.PatchName "
+                             "= '{}'".format(self.form.cb_patch_list.currentText()))
 
         # Force object
         FreeCADGui.doCommand("fo.Pressure "
@@ -234,7 +279,7 @@ class TaskPanelCfdFunctionObjects:
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
-        self.faceSelector.closing()
+        # self.faceSelector.closing()
 
     def reject(self):
         self.obj.ShapeRefs = self.ShapeRefsOrig
@@ -244,5 +289,5 @@ class TaskPanelCfdFunctionObjects:
         doc_name = str(self.obj.Document.Name)
         FreeCAD.getDocument(doc_name).recompute()
         doc.resetEdit()
-        self.faceSelector.closing()
+        # self.faceSelector.closing()
         return True

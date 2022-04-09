@@ -113,11 +113,9 @@ class CfdCaseWriterFoam:
         self.processSolverSettings()
         self.processFluidProperties()
         self.processBoundaryConditions()
-        self.processFunctionObjects()
+        # self.processFunctionObjects()
         self.processInitialConditions()
         self.clearCase()
-
-        print(f'{self.settings["functionObjects"]["Function_object_number1"]["ShapeRefs"]}')
 
         self.exportZoneStlSurfaces()
         if self.porous_zone_objs:
@@ -353,6 +351,7 @@ class CfdCaseWriterFoam:
                 }
 
     def processFunctionObjects(self):
+        # TODO remove if we dont need this to split up PatchName(s)
         """ Compute any Function objects required before case build """
         settings = self.settings
         # Copy keys so that we can delete while iterating
