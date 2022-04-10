@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>395</width>
+    <width>410</width>
     <height>1078</height>
    </rect>
   </property>
@@ -235,7 +235,7 @@
              </layout>
             </item>
             <item row="2" column="0">
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <layout class="QHBoxLayout" name="first_layer_frame">
               <item>
                <widget class="QLabel" name="label_firstlayerheight">
                 <property name="text">
@@ -692,7 +692,6 @@
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -748,7 +747,6 @@
        <widget class="QLabel" name="label">
         <property name="font">
          <font>
-          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
