@@ -33,7 +33,7 @@ import CfdAnalysis
 from PySide.QtCore import QObject, Signal
 from CfdResidualPlot import ResidualPlot
 from collections import OrderedDict
-from core.plotters.CfdMonitorPlot import MonitorPlot
+from core.plotters.CfdForcesPlot import ForcesPlot
 
 
 class CfdRunnable(QObject, object):
@@ -115,7 +115,7 @@ class CfdRunnableFoam(CfdRunnable):
 
         self.residualPlot = ResidualPlot()
         if self.function_objects:
-            self.monitorsPlot = MonitorPlot()
+            self.monitorsPlot = ForcesPlot()
 
         # Environment is sourced in run script, so no need to include in run command
         cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)

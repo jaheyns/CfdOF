@@ -37,13 +37,12 @@ else:
         from freecad.plot import Plot  # Fallback to workbench
 
 
-class MonitorPlot:
+class ForceCoeffPlot:
     def __init__(self):
-        self.fig = Plot.figure(FreeCAD.ActiveDocument.Name + "Monitors")
+        self.fig = Plot.figure(FreeCAD.ActiveDocument.Name + "ForceCoeffs")
 
         self.updated = False
         self.residuals_forces = {}
-        self.residuals_coeffs = {}
 
         self.Timer = QtCore.QTimer()
         self.Timer.timeout.connect(self.refresh)
@@ -64,7 +63,7 @@ class MonitorPlot:
             # Forces
             ax1 = self.fig.axes
             ax1.cla()
-            ax1.set_title("Force Monitors")
+            ax1.set_title("Force Coefficient Monitors")
             ax1.set_xlabel("Iteration")
             ax1.set_ylabel("Monitor")
 
