@@ -113,8 +113,8 @@ class _CfdFunctionObjects:
                           "Velocity field name")
         addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Function object",
                           "Reference pressure")
-        addObjectProperty(obj, 'Density', '99999 kg/m^3', "App::PropertyQuantity", "Function object",
-                          "Reference density")
+        addObjectProperty(obj, 'Density', 'rho', "App::PropertyString", "Function object",
+                          "Density field name")
         # addObjectProperty(obj, 'CentreOfRotation', '0, 0, 0', "App::PropertyString", "Function object",
         #                   "Centre of Rotation (x, y, z)")
         addObjectProperty(obj, 'CoRx', '0', "App::PropertyQuantity", "Function object",
@@ -131,7 +131,7 @@ class _CfdFunctionObjects:
         # Force coefficients
         # addObjectProperty(obj, 'LiftDirection', '0, 0, 0', "App::PropertyString", "Function object",
         #                   "Lift Direction vector (x, y, z)")
-        addObjectProperty(obj, 'Liftx', '0', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'Liftx', '1', "App::PropertyQuantity", "Function object",
                           "Lift direction (x component)")
         addObjectProperty(obj, 'Lifty', '0', "App::PropertyQuantity", "Function object",
                           "Lift direction (y component)")
@@ -142,7 +142,7 @@ class _CfdFunctionObjects:
         #                   "Drag direction vector (x, y, z)")
         addObjectProperty(obj, 'Dragx', '0', "App::PropertyQuantity", "Function object",
                           "Drag direction (x component)")
-        addObjectProperty(obj, 'Dragy', '0', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'Dragy', '1', "App::PropertyQuantity", "Function object",
                           "Drag direction (y component)")
         addObjectProperty(obj, 'Dragz', '0', "App::PropertyQuantity", "Function object",
                           "Drag direction (z component)")
@@ -153,7 +153,7 @@ class _CfdFunctionObjects:
                           "Centre of pitch (x component)")
         addObjectProperty(obj, 'Pitchy', '0', "App::PropertyQuantity", "Function object",
                           "Centre of pitch (y component)")
-        addObjectProperty(obj, 'Pitchz', '0', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'Pitchz', '1', "App::PropertyQuantity", "Function object",
                           "Centre of pitch (z component)")
 
         addObjectProperty(obj, 'MagnitudeUInf', '1 m/s', "App::PropertyQuantity", "Function object",
@@ -176,11 +176,12 @@ class _CfdFunctionObjects:
 
     def execute(self, obj):
         """ Create compound part at recompute. """
-        shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
-        if shape is None:
-            obj.Shape = Part.Shape()
-        else:
-            obj.Shape = shape
+        pass
+        # shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
+        # if shape is None:
+        #     obj.Shape = Part.Shape()
+        # else:
+        #     obj.Shape = shape
         # self.updateBoundaryColors(obj)
 
     def updateBoundaryColors(self, obj): # todo come back and fix me

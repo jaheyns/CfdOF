@@ -33,6 +33,7 @@ import CfdAnalysis
 from PySide.QtCore import QObject, Signal
 from CfdResidualPlot import ResidualPlot
 from collections import OrderedDict
+from core.plotters.CfdMonitorPlot import MonitorPlot
 
 
 class CfdRunnable(QObject, object):
@@ -71,8 +72,16 @@ class CfdRunnableFoam(CfdRunnable):
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
 
-        self.initResiduals()
         self.residualPlot = None
+        self.monitorsPlot = None
+        self.function_objects = False
+
+        analysis_obj = CfdTools.getActiveAnalysis()
+        if CfdTools.getFunctionObjectsGroup(analysis_obj) is not None:
+            self.function_objects = True
+
+        self.initResiduals()
+        self.initMonitors()
 
     def check_prerequisites(self):
         return ""
@@ -92,10 +101,21 @@ class CfdRunnableFoam(CfdRunnable):
         self.ReThetatResiduals = []
         self.niter = 0
 
+    def initMonitors(self):
+        self.pressureXResiduals = []
+        self.pressureYResiduals = []
+        self.pressureZResiduals = []
+
+        self.viscousXResiduals = []
+        self.viscousYResiduals = []
+        self.viscousZResiduals = []
+
     def get_solver_cmd(self, case_dir):
         self.initResiduals()
 
         self.residualPlot = ResidualPlot()
+        if self.function_objects:
+            self.monitorsPlot = MonitorPlot()
 
         # Environment is sourced in run script, so no need to include in run command
         cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
@@ -148,6 +168,19 @@ class CfdRunnableFoam(CfdRunnable):
             if "ReThetat," in split and self.niter-1 > len(self.ReThetatResiduals):
                 self.ReThetatResiduals.append(float(split[7].split(',')[0]))
 
+            # Force monitors
+            if "Pressure" in split and self.niter-1 > len(self.pressureXResiduals):
+                self.pressureXResiduals.append(float(split[2].replace("(", "")))
+                self.pressureYResiduals.append(float(split[3]))
+                self.pressureZResiduals.append(float(split[4].replace(")", "")))
+
+            if "Viscous" in split and self.niter-1 > len(self.viscousXResiduals):
+                self.viscousXResiduals.append(float(split[2].replace("(", "")))
+                self.viscousYResiduals.append(float(split[3]))
+                self.viscousZResiduals.append(float(split[4].replace(")", "")))
+
+            # Force monitors
+
         if self.niter > 1:
             self.residualPlot.updateResiduals(OrderedDict([
                 ('$\\rho$', self.rhoResiduals),
@@ -162,3 +195,11 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$\\omega$', self.omegaResiduals),
                 ('$\\gamma$', self.gammaIntResiduals),
                 ('$Re_{\\theta}$', self.ReThetatResiduals)]))
+
+            self.monitorsPlot.updateResiduals(OrderedDict([
+                ('$Pressure_x$', self.pressureXResiduals),
+                ('$Pressure_y$', self.pressureYResiduals),
+                ('$Pressure_z$', self.pressureZResiduals),
+                ('$Viscous_x$', self.viscousXResiduals),
+                ('$Viscous_y$', self.viscousYResiduals),
+                ('$Viscous_z$', self.viscousZResiduals)]))

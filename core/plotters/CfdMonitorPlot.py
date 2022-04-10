@@ -4,6 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -31,17 +32,18 @@ if int(FreeCAD.Version()[0]) == 0 and int(FreeCAD.Version()[1].split('.')[0]) < 
     from freecad.plot import Plot  # Plot workbench
 else:
     try:
-        from FreeCAD.Plot import Plot  # Inbuilt plot module
+        from FreeCAD.Plot import Plot  # Builtin plot module
     except ImportError:
         from freecad.plot import Plot  # Fallback to workbench
 
 
-class ResidualPlot:
+class MonitorPlot:
     def __init__(self):
-        self.fig = Plot.figure(FreeCAD.ActiveDocument.Name + "Residuals")
+        self.fig = Plot.figure(FreeCAD.ActiveDocument.Name + "Monitors")
 
         self.updated = False
-        self.residuals = {}
+        self.residuals_forces = {}
+        self.residuals_coeffs = {}
 
         self.Timer = QtCore.QTimer()
         self.Timer.timeout.connect(self.refresh)
@@ -51,33 +53,30 @@ class ResidualPlot:
         if FreeCAD.GuiUp:
             self.refresh()
 
-    def updateResiduals(self, residuals):
+    def updateResiduals(self, residuals_forces):
         self.updated = True
-        self.residuals = residuals
+        self.residuals_forces = residuals_forces
 
     def refresh(self):
         if self.updated:
             self.updated = False
-            ax = self.fig.axes
-            ax.cla()
-            ax.set_title("Simulation residuals")
-            ax.set_xlabel("Iteration")
-            ax.set_ylabel("Residual")
+
+            # Forces
+            ax1 = self.fig.axes
+            ax1.cla()
+            ax1.set_title("Force Monitors")
+            ax1.set_xlabel("Iteration")
+            ax1.set_ylabel("Monitor")
 
             last_residuals_min = 1e-2
             iter_max = 100
-            for k in self.residuals:
-                if self.residuals[k]:
-                    ax.plot(self.residuals[k], label=k, linewidth=1)
-                    last_residuals_min = min([last_residuals_min]+self.residuals[k][1:-1])
-                    iter_max = max(iter_max, len(self.residuals[k]))
+            for k in self.residuals_forces:
+                if self.residuals_forces[k]:
+                    ax1.plot(self.residuals_forces[k], label=k, linewidth=1)
+                    last_residuals_min = min([last_residuals_min] + self.residuals_forces[k][1:-1])
+                    iter_max = max(iter_max, len(self.residuals_forces[k]))
 
-            ax.grid()
-            ax.set_yscale('log')
-            # Decrease in increments of 10
-            ax.set_ylim([10**(math.floor(math.log10(last_residuals_min))), 1])
+            ax1.grid()
             # Increase in increments of 100
-            ax.set_xlim([0, math.ceil(float(iter_max)/100)*100])
-            ax.legend(loc='lower left')
-
-            self.fig.canvas.draw()
+            ax1.set_xlim([0, math.ceil(float(iter_max)/100)*100])
+            ax1.legend(loc='lower left')

@@ -78,55 +78,85 @@ functions
         libs                ("libforces.so");
         patches             ( %(functionObjects/%(0%)/PatchName%) );
 
-		p               %(functionObjects/%(0%)/Pressure%);
-		U               %(functionObjects/%(0%)/Velocity%);
-        rho             %(functionObjects/%(0%)/Density%);
+		p                   %(functionObjects/%(0%)/Pressure%);
+		U                   %(functionObjects/%(0%)/Velocity%);
+%{%(physics/Flow%)
+%:Compressible HighMachCompressible
+        rho                 %(functionObjects/%(0%)/Density%);
+%:default
+        rho                 rhoInf;
+%}
+        rhoInf              100000;
 
-		pRef            %(functionObjects/%(0%)/ReferencePressure%);
-
-		porosity        %(functionObjects/%(0%)/IncludePorosity%);
-		writeFields     %(functionObjects/%(0%)/WriteFields%);
-
-		CofR            (%(functionObjects/%(0%)/CoRx%) %(functionObjects/%(0%)/CoRy%) %(functionObjects/%(0%)/CoRz%));
+		pRef                %(functionObjects/%(0%)/ReferencePressure%);
+%{%(functionObjects/%(0%)/IncludePorosity%)
+%:True
+		porosity            true;
+%:False
+        porosity            false;
+%}
+%{%(functionObjects/%(0%)/WriteFields%)
+%:True
+		writeFields         true;
+%:False
+		writeFields         false;
+%}
+		CofR                (%(functionObjects/%(0%)/CoRx%) %(functionObjects/%(0%)/CoRy%) %(functionObjects/%(0%)/CoRz%));
 
         //binData
         //{
-        //    nBin        %(functionObjects/%(0%)/NBins%);
-        //    direction   ( %(functionObjects/%(0%)/Direction%) );
-        //   cumulative  %(functionObjects/%(0%)/Cumulative%);
+        //    nBin          %(functionObjects/%(0%)/NBins%);
+        //    direction     ( %(functionObjects/%(0%)/Direction%) );
+        //   cumulative     %(functionObjects/%(0%)/Cumulative%);
         //}
     }
 %:ForceCoefficients
     %(0%)
     {
-        type                forcesCoeffs;
+        type                forceCoeffs;
         libs                ("libforces.so");
         patches             ( %(functionObjects/%(0%)/PatchName%) );
 
-        p               %(functionObjects/%(0%)/Pressure%);
-		U               %(functionObjects/%(0%)/Velocity%);
-        rho             %(functionObjects/%(0%)/Density%);
+        p                   %(functionObjects/%(0%)/Pressure%);
+		U                   %(functionObjects/%(0%)/Velocity%);
+%{%(physics/Flow%)
+%:Compressible HighMachCompressible
+        rho                 %(functionObjects/%(0%)/Density%);
+%:default
+        rho                 rhoInf;
+%}
+        rhoInf              100000;
 
-		pRef            %(functionObjects/%(0%)/ReferencePressure%);
+		pRef                %(functionObjects/%(0%)/ReferencePressure%);
 
-		porosity        %(functionObjects/%(0%)/IncludePorosity%);
-		writeFields     %(functionObjects/%(0%)/WriteFields%);
+%{%(functionObjects/%(0%)/IncludePorosity%)
+%:True
+		porosity            true;
+%:False
+        porosity            false;
+%}
+%{%(functionObjects/%(0%)/WriteFields%)
+%:True
+		writeFields         true;
+%:False
+		writeFields         false;
+%}
 
-		CofR            ( %(functionObjects/%(0%)/CoRx%) %(functionObjects/%(0%)/CoRy%) %(functionObjects/%(0%)/CoRz%) );
-        liftDir         ( %(functionObjects/%(0%)/Liftx%) %(functionObjects/%(0%)/Lifty%) %(functionObjects/%(0%)/Liftz%));
-        dragDir         ( %(functionObjects/%(0%)/Dragx%) %(functionObjects/%(0%)/Dragy%) %(functionObjects/%(0%)/Dragz%) )
-        pitchAxis       ( %(functionObjects/%(0%)/Pitchx%) %(functionObjects/%(0%)/Pitchy%) %(functionObjects/%(0%)/Pitchz%) );
+		CofR                ( %(functionObjects/%(0%)/CoRx%) %(functionObjects/%(0%)/CoRy%) %(functionObjects/%(0%)/CoRz%) );
+        liftDir             ( %(functionObjects/%(0%)/Liftx%) %(functionObjects/%(0%)/Lifty%) %(functionObjects/%(0%)/Liftz%));
+        dragDir             ( %(functionObjects/%(0%)/Dragx%) %(functionObjects/%(0%)/Dragy%) %(functionObjects/%(0%)/Dragz%) );
+        pitchAxis           ( %(functionObjects/%(0%)/Pitchx%) %(functionObjects/%(0%)/Pitchy%) %(functionObjects/%(0%)/Pitchz%) );
 
-        magUInf         %(functionObjects/%(0%)/MagnitudeUInf%);
+        magUInf             %(functionObjects/%(0%)/MagnitudeUInf%);
 
-        lRef            %(functionObjects/%(0%)/LengthRef%);
-        Aref            %(functionObjects/%(0%)/AreaRef%);
+        lRef                %(functionObjects/%(0%)/LengthRef%);
+        Aref                %(functionObjects/%(0%)/AreaRef%);
 
         //binData
         //{
-        //    nBin        %(functionObjects/%(0%)/NBins%);
-        //    direction   ( %(functionObjects/%(0%)/Direction%) );
-        //    cumulative  %(functionObjects/%(0%)/Cumulative%);
+        //    nBin          %(functionObjects/%(0%)/NBins%);
+        //    direction     ( %(functionObjects/%(0%)/Direction%) );
+        //    cumulative    %(functionObjects/%(0%)/Cumulative%);
         //}
     }
 %}

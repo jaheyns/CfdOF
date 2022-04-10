@@ -43,7 +43,7 @@ class TaskPanelCfdFunctionObjects:
         self.analysis_obj = CfdTools.getActiveAnalysis()
 
         # Store values which are changed on the fly for visual update
-        self.ShapeRefsOrig = list(self.obj.ShapeRefs)
+        # self.ShapeRefsOrig = list(self.obj.ShapeRefs)
         self.FunctionObjectTypeOrig = str(self.obj.FunctionObjectType)
 
         ui_path = os.path.join(os.path.dirname(__file__), "../gui/TaskPanelCfdFunctionObjects.ui")
@@ -60,8 +60,8 @@ class TaskPanelCfdFunctionObjects:
         # Force fo
         self.form.inputPressure.setText(self.obj.Pressure)
         self.form.inputVelocity.setText(self.obj.Velocity)
+        self.form.inputDensity.setText(self.obj.Density)
         setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
-        setQuantity(self.form.inputDensity, self.obj.Density)
         setQuantity(self.form.inputPorosity, self.obj.IncludePorosity)
         setQuantity(self.form.inputWriteFields, self.obj.WriteFields)
         setQuantity(self.form.inputCentreOfRotationx, self.obj.CoRx)
@@ -123,7 +123,7 @@ class TaskPanelCfdFunctionObjects:
 
         self.form.inputPressure.setText(self.obj.Pressure)
         self.form.inputVelocity.setText(self.obj.Velocity)
-        setQuantity(self.form.inputDensity, self.obj.Density)
+        self.form.inputDensity.setText(self.obj.Density)
         setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
         self.form.inputPorosity.setChecked(self.obj.IncludePorosity)
         self.form.inputWriteFields.setChecked(self.obj.WriteFields)
@@ -152,8 +152,6 @@ class TaskPanelCfdFunctionObjects:
         setQuantity(self.form.inputDirection, self.obj.Direction)
         self.form.inputCumulative.setChecked(self.obj.Cumulative)
 
-
-
     def updateUI(self):
         # Function object type
         type_index = self.form.comboFunctionObjectType.currentIndex()
@@ -171,36 +169,6 @@ class TaskPanelCfdFunctionObjects:
         self.form.functionObjectDescription.setText(CfdFunctionObjects.OBJECT_DESCRIPTIONS[index])
 
         self.updateUI()
-
-    def addSelection(self, doc_name, obj_name, sub, selected_point=None):
-        # This is the direction selection
-        if not self.selecting_direction:
-            # Shouldn't be here
-            return
-
-        if FreeCADGui.activeDocument().Document.Name != self.obj.Document.Name:
-            return
-
-        selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
-        # On double click on a vertex of a solid sub is None and obj is the solid
-        print('Selection: ' +
-              selected_object.Shape.ShapeType + '  ' +
-              selected_object.Name + ':' +
-              sub + " @ " + str(selected_point))
-
-        if hasattr(selected_object, "Shape") and sub:
-            elt = selected_object.Shape.getElement(sub)
-            if elt.ShapeType == 'Face':
-                selection = (selected_object.Name, sub)
-                if self.selecting_direction:
-                    if CfdTools.isPlanar(elt):
-                        self.selecting_direction = False
-                        self.form.lineDirection.setText(
-                            selection[0] + ':' + selection[1])  # TODO: Display label, not name
-                    else:
-                        FreeCAD.Console.PrintMessage('Face must be planar\n')
-
-        self.form.buttonDirection.setChecked(self.selecting_direction)
 
     def accept(self):
         if self.obj.Label.startswith("CfdFunctionObjects"):
@@ -223,7 +191,7 @@ class TaskPanelCfdFunctionObjects:
         FreeCADGui.doCommand("fo.Velocity "
                              "= '{}'".format(self.form.inputVelocity.text()))
         FreeCADGui.doCommand("fo.Density "
-                             "= '{}'".format(getQuantity(self.form.inputDensity)))
+                             "= '{}'".format(self.form.inputDensity.text()))
         FreeCADGui.doCommand("fo.ReferencePressure "
                              "= '{}'".format(getQuantity(self.form.inputReferencePressure)))
         FreeCADGui.doCommand("fo.IncludePorosity "
@@ -271,11 +239,11 @@ class TaskPanelCfdFunctionObjects:
         FreeCADGui.doCommand("fo.Cumulative "
                              "= {}".format(self.form.inputCumulative.isChecked()))
 
-        refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
-        refstr += ',\n'.join(
-            "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
-        refstr += "]"
-        FreeCADGui.doCommand(refstr)
+        # refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
+        # refstr += ',\n'.join(
+        #     "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
+        # refstr += "]"
+        # FreeCADGui.doCommand(refstr)
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
