@@ -97,8 +97,8 @@ class CfdCaseWriterFoam:
             'meshDir': "../" + self.mesh_obj.CaseName,
             'solver': CfdTools.propsToDict(self.solver_obj),
             'system': {},
-            'dynamicMeshAdaptationEnabled': self.dynamic_mesh_obj is not None,
-            'dynamicMeshAdaptation': CfdTools.propsToDict(self.dynamic_mesh_obj),
+            'dynamicMeshAdaptationEnabled': False,
+            'dynamicMeshAdaptation': {},
             'runChangeDictionary': False
             }
 
@@ -113,6 +113,9 @@ class CfdCaseWriterFoam:
         if self.porousZone_objs:
             self.processPorousZoneProperties()
         self.processInitialisationZoneProperties()
+
+        if self.dynamic_mesh_obj:
+            self.processDynamicAdaptationMesh()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         cfdMessage("Matching boundary conditions ...\n")
@@ -550,6 +553,11 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("Unrecognised method for porous baffle resistance")
             porousZoneSettings[po['Label']] = pd
+
+    def processDynamicAdaptationMesh(self):
+        settings = self.settings
+        settings['dynamicMeshAdaptationEnabled'] = True
+        settings['dynamicMeshAdaptation'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
 
     def processInitialisationZoneProperties(self):
         settings = self.settings
