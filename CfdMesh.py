@@ -78,8 +78,8 @@ class _CommandCfdMeshFromShape:
                             FreeCADGui.doCommand(
                                 "CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
                         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
-        else:
-            print("ERROR: You cannot have more than one mesh object")
+            else:
+                print("ERROR: You cannot have more than one mesh object")
         FreeCADGui.Selection.clearSelection()
 
 

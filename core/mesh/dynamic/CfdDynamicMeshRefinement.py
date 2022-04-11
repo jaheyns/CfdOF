@@ -31,7 +31,7 @@ from pivy import coin
 from core.mesh.dynamic import _TaskPanelCfdDynamicMeshRefinement
 
 
-def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshAdaptationModel"):
+def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshModel"):
     """ makeCfdDynamicMeshRefinement([name]):
         Creates an object to define dynamic mesh refinement properties and existing mesh if the solver supports it
     """
@@ -60,7 +60,6 @@ class _CommandDynamicMesh:
         return sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, _CfdMesh)
 
     def Activated(self):
-        # FreeCAD.ActiveDocument.openTransaction("Set up a dynamic mesh refinement")
         is_present = False
         members = CfdTools.getActiveAnalysis().Group
         for i in members:
@@ -82,14 +81,14 @@ class _CommandDynamicMesh:
                         "CfdTools.getActiveAnalysis().addObject(CfdDynamicMeshRefinement.makeCfdDynamicMeshRefinement(App.ActiveDocument.{}))".format(sobj.Name))
                     FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
-            FreeCADGui.Selection.clearSelection()
+        FreeCADGui.Selection.clearSelection()
 
 
 class _CfdDynamicMeshRefinement:
 
     def __init__(self, obj):
         obj.Proxy = self
-        self.Type = "DynamicMeshAdaptationModel"
+        self.Type = "DynamicMeshModel"
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -105,7 +104,7 @@ class _CfdDynamicMeshRefinement:
         addObjectProperty(obj, "MaxRefinementCells", 20000, "App::PropertyInteger", "DynamicMeshRefinement",
                           "Set the maximum number of cells added during dynamic mesh refinement")
 
-        addObjectProperty(obj, "RefinementField", "", "App::PropertyString", "DynamicMeshRefinement",
+        addObjectProperty(obj, "RefinementField", "p", "App::PropertyString", "DynamicMeshRefinement",
                           "Set the target refinement field")
 
         addObjectProperty(obj, "LowerRefinementLevel", 0.001, "App::PropertyFloat", "DynamicMeshRefinement",
