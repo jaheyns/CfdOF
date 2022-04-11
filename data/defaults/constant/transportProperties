@@ -32,7 +32,7 @@ phases
 }
 
 %}
-sigma           [1 0 -2 0 0 0 0] 0.0; //TODO
+sigma           [1 0 -2 0 0 0 0] 0.0;
 %:multiphaseInterFoam
 phases
 (
@@ -51,7 +51,7 @@ sigmas
 (
 %{%(fluidProperties%)
 %{%(fluidProperties%)
-    (%(fluidProperties/%(0%)/Name%) %(fluidProperties/%(1%)/Name%)) 0.0  //TODO
+    (%(fluidProperties/%(0%)/Name%) %(fluidProperties/%(1%)/Name%)) 0.0
 %}
 %}
 );
