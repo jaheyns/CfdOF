@@ -31,7 +31,7 @@ from CfdTools import addObjectProperty
 import os
 
 
-MESHER_DESCRIPTIONS = ['cfMesh', 'snappyHexMesh', 'gmsh (tetrahedral)', 'gmsh (polyhedral dual mesh)']
+MESHER_DESCRIPTIONS = ['cfMesh', 'snappyHexMesh', 'gmsh (tetrahedral)', 'gmsh (polyhedral)']
 MESHERS = ['cfMesh', 'snappyHexMesh', 'gmsh', 'gmsh']
 DIMENSION = ['3D', '3D', '3D', '3D']
 DUAL_CONVERSION = [False, False, False, True]
