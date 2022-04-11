@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -23,9 +23,9 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
+import math
 from PySide import QtCore
-
+import FreeCAD
 if int(FreeCAD.Version()[0]) == 0 and int(FreeCAD.Version()[1].split('.')[0]) < 20:
     from freecad.plot import Plot  # Plot workbench
 else:
@@ -33,7 +33,8 @@ else:
         from FreeCAD.Plot import Plot  # Inbuilt plot module
     except ImportError:
         from freecad.plot import Plot  # Fallback to workbench
-import math
+from FreeCAD import Units
+import CfdTools
 
 
 class ResidualPlot:
@@ -41,7 +42,9 @@ class ResidualPlot:
         self.fig = None
 
         self.updated = False
+        self.times = []
         self.residuals = {}
+        self.transient = False
 
         self.Timer = QtCore.QTimer()
         self.Timer.timeout.connect(self.refresh)
@@ -54,13 +57,17 @@ class ResidualPlot:
     def figureClosed(self):
         self.fig = None
 
-    def updateResiduals(self, residuals):
+    def updateResiduals(self, times, residuals):
         self.updated = True
+        self.times = times
         self.residuals = residuals
 
     def reInitialise(self, analysis_obj):
-        # TODO: Set behaviour based on steady/transient settings
+        phys_model = CfdTools.getPhysicsModel(analysis_obj)
+        solver_obj = CfdTools.getSolver(analysis_obj)
+        self.transient = (phys_model.Time == 'Transient')
         self.residuals = {}
+        self.times = [solver_obj.TimeStep.getValueAs(Units.TimeSpan) if self.transient else 1]
 
     def refresh(self):
         if self.updated:
@@ -71,25 +78,26 @@ class ResidualPlot:
             ax = self.fig.axes
             ax.cla()
             ax.set_title("Simulation residuals")
-            ax.set_xlabel("Iteration")
+            time_unit = str(Units.Quantity(1, Units.TimeSpan)).split()[-1]
+            ax.set_xlabel("Time [{}]".format(time_unit) if self.transient else "Iteration")
             ax.set_ylabel("Residual")
 
             last_residuals_min = 1e-2
-            iter_max = 100
+            time_max = max(10*self.times[0] if self.transient else 100, self.times[-1])
             for k in self.residuals:
                 if self.residuals[k]:
-                    ax.plot(self.residuals[k], label=k, linewidth=1)
+                    ax.plot(self.times[0:len(self.residuals[k])], self.residuals[k], label=k, linewidth=1)
                     last_residuals_min = min([last_residuals_min]+self.residuals[k][1:-1])
-                    iter_max = max(iter_max, len(self.residuals[k]))
 
             ax.grid()
             ax.set_yscale('log')
             # Decrease in increments of 10
             ax.set_ylim([10**(math.floor(math.log10(last_residuals_min))), 1])
             # Increase in increments of 100
-            ax.set_xlim([0, math.ceil(float(iter_max)/100)*100])
+            time_incr = 10.0*self.times[0] if self.transient else 100
+            ax.set_xlim([0, math.ceil(float(time_max)/time_incr)*time_incr])
 
-            if len(self.residuals):
+            if len(self.times):
                 ax.legend(loc='lower left')
 
             self.fig.canvas.draw()
