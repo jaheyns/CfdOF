@@ -4,6 +4,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -68,9 +69,8 @@ class _TaskPanelCfdMeshRefinement:
         self.form.extrusionTypeCombo.currentIndexChanged.connect(self.updateUI)
         self.form.pickAxisButton.clicked.connect(self.pickFromSelection)
 
-        tool_tip_mes = "Cell size relative to base cell size"
-        self.form.if_rellen.setToolTip(tool_tip_mes)
-        self.form.label_rellen.setToolTip(tool_tip_mes)
+        self.form.if_rellen.setToolTip("Cell size relative to base cell size")
+        self.form.label_rellen.setToolTip("Cell size relative to base cell size")
 
         self.load()
 
@@ -95,10 +95,11 @@ class _TaskPanelCfdMeshRefinement:
         FreeCADGui.Selection.removeObserver(self)
         FreeCADGui.ActiveDocument.resetEdit()
         FreeCAD.ActiveDocument.recompute()
+
         # Macro script
         FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
         FreeCADGui.doCommand("obj.RelativeLength = {}".format(self.form.if_rellen.value()))
-        if self.mesh_obj.MeshUtility != 'gmsh':
+        if not self.mesh_obj.MeshUtility == 'gmsh':
             FreeCADGui.doCommand("obj.RefinementThickness = '{}'".format(getQuantity(self.form.if_refinethick)))
             if self.form.check_boundlayer.isChecked():
                 num_layers = self.form.if_numlayer.value()
@@ -150,6 +151,8 @@ class _TaskPanelCfdMeshRefinement:
     def load(self):
         """ fills the widgets """
         self.form.if_rellen.setValue(self.obj.RelativeLength)
+
+        # Boundary layer refinement (SnappyHexMesh and CfMesh only)
         if not self.mesh_obj.MeshUtility == "gmsh":
             setQuantity(self.form.if_refinethick, self.obj.RefinementThickness)
             self.form.check_boundlayer.setChecked(self.obj.NumberLayers > 1)
@@ -160,13 +163,18 @@ class _TaskPanelCfdMeshRefinement:
             self.form.if_edgerefinement.setValue(self.obj.RegionEdgeRefinement)
             if self.obj.Internal:
                 self.form.volumeRefinementToggle.toggle()
+
+        # Extrusion refinement
         if self.obj.Extrusion:
             self.form.extrusionToggle.toggle()
+
         self.form.extrusionTypeCombo.setCurrentIndex(
             indexOrDefault(CfdMeshRefinement.EXTRUSION_TYPES, self.obj.ExtrusionType, 0))
+
         self.form.keepExistingMeshCheck.setChecked(self.obj.KeepExistingMesh)
         setQuantity(self.form.thicknessInput, self.obj.ExtrusionThickness)
         setQuantity(self.form.angleInput, self.obj.ExtrusionAngle)
+
         self.form.numLayersInput.setValue(self.obj.ExtrusionLayers)
         self.form.ratioInput.setValue(self.obj.ExtrusionRatio)
         setQuantity(self.form.axisPointXEdit, "{} m".format(self.obj.ExtrusionAxisPoint.x))
@@ -181,6 +189,7 @@ class _TaskPanelCfdMeshRefinement:
         self.form.boundlayer_frame.setVisible(self.form.check_boundlayer.isChecked())
         self.form.commonFrame.setVisible(True)
 
+        # Extrusion refinement
         if self.form.extrusionToggle.isChecked():
             self.form.extrusionFrame.setVisible(True)
             self.form.commonFrame.setVisible(False)
@@ -193,6 +202,7 @@ class _TaskPanelCfdMeshRefinement:
             selected_rows = CfdMeshRefinement.EXTRUSION_UI[type_index]
             CfdTools.enableLayoutRows(self.form.extrusionLayout, selected_rows + [0])
 
+        # Volume or surface refinement
         else:
             if self.mesh_obj.MeshUtility == 'gmsh':
                 self.form.cartesianInternalVolumeFrame.setVisible(False)
@@ -214,10 +224,13 @@ class _TaskPanelCfdMeshRefinement:
                 if self.mesh_obj.MeshUtility == 'cfMesh':
                     self.form.cf_frame.setVisible(True)
                     self.form.snappy_frame.setVisible(False)
+                    self.form.if_firstlayerheight.setEnabled(True)
                 elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                    self.form.cf_frame.setVisible(False)
+                    self.form.cf_frame.setVisible(True)
                     self.form.snappy_frame.setVisible(True)
                     self.form.snappySurfaceFrame.setVisible(True)
+                    self.form.if_firstlayerheight.setEnabled(False)
+
             self.form.extrusionFrame.setVisible(False)
         self.updateSelectionButtonUI()
 
