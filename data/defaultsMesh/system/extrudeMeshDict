@@ -40,7 +40,7 @@ sectorCoeffs
 }
 %:PatchNormal
 extrudeModel        linearNormal;
-nLayers             %(ExtrusionSettings/Extrusions/%(0%)/NumLayers%)
+nLayers             %(ExtrusionSettings/Extrusions/%(0%)/NumLayers%);
 expansionRatio      %(ExtrusionSettings/Extrusions/%(0%)/ExpansionRatio%);
 linearNormalCoeffs
 {
@@ -48,7 +48,7 @@ linearNormalCoeffs
 }
 %:Rotational
 extrudeModel        sector;
-nLayers             %(ExtrusionSettings/Extrusions/%(0%)/NumLayers%)
+nLayers             %(ExtrusionSettings/Extrusions/%(0%)/NumLayers%);
 sectorCoeffs
 {
     point           ( %(ExtrusionSettings/Extrusions/%(0%)/AxisPoint%) );
