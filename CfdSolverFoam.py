@@ -78,7 +78,9 @@ class _CfdSolverFoam(object):
         self.Type = "CfdSolverFoam"
         self.Object = obj  # keep a ref to the DocObj for nonGui usage
         obj.Proxy = self  # link between App::DocumentObject to  this object
+        self.initProperties(obj)
 
+    def initProperties(self, obj):
         addObjectProperty(obj, "InputCaseName", "case", "App::PropertyFile", "Solver",
                           "Name of case directory where the input files are written")
         addObjectProperty(obj, "Parallel", True, "App::PropertyBool", "Solver",
@@ -100,6 +102,9 @@ class _CfdSolverFoam(object):
                           "Output time interval")
 
         self.residual_plot = ResidualPlot()
+
+    def onDocumentRestored(self, obj):
+        self.initProperties(obj)
 
     def execute(self, obj):
         return
