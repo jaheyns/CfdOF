@@ -20,14 +20,15 @@ The following are items for discussion or items for which existing merges / PR's
 ### Mesh
 * checkMesh capabilities - DONE
 * Convert tetra mesh to polyhedra mesh using polyDualMesh - DONE
-* ability to import meshes from other formats? (CGNS, .msh (fluent), others?) [DISCUSS]
+* ability to import meshes from other formats? (CGNS, .msh (fluent), others?) [TODO]
+* adaptive mesh refinement [DONE]
 
 ### Cases
-* ability to import / export existing OF cases / results [DISCUSS]
+* ability to import / export existing OF cases / results [TODO]
 
 ### Internal
-* Update src to use Python module hierarchy instead of flat package, will make reading / maintaining the code much easier
+* Update src to use Python module hierarchy instead of flat package, will make reading / maintaining the code much easier [IN PROGRESS]
 * Improve edge detection for meshing?
 * Move parallel run option to GUI for ease of use [DISCUSS]
-* Implement -parallel meshing for snappyHexMesh (and others if supported)
+* Implement -parallel meshing for snappyHexMesh (and others if supported) [DONE]
 
