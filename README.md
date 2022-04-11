@@ -17,7 +17,7 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 ### Current:
 
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
-* Extension to RANS turbulent flow (k-omega SST (incl. transistion), k-epsilon, and Spalart-Allmaras models supported)
+* Extension to RANS turbulent flow (k-omega SST (incl. transition), k-epsilon, and Spalart-Allmaras models supported)
 * Extension to LES turbulent flow (k-Equation, Smagorinsky and WALE (Wall bounded) models)
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
 * Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
