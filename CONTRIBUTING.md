@@ -6,7 +6,7 @@ Disclaimer:
 This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 
 ## Contributing
-![screenshot](website\resources\drone.png)
+![screenshot](website/resources/drone.png)
 
 We welcome contributions to CfdOF from all sources: users (bug reports and feature suggestions / improvements) and developers (bug fixes, merge requests). 
 
