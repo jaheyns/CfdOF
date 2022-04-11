@@ -69,11 +69,21 @@ divSchemes
 %:Transient
 ddtSchemes
 {
+%{%(physics/Turbulence%)
+%:LES
+%{%(solver/SolverName%)
+%:hisa
+    default         dualTime rPseudoDeltaT backward;
+%:default
+    default         backward;
+%}
+%:default
 %{%(solver/SolverName%)
 %:hisa
     default         dualTime rPseudoDeltaT Euler;
 %:default
     default         Euler;
+%}
 %}
 }
 
@@ -82,7 +92,12 @@ divSchemes
     // Use second-order accurate convection
 %{%(solver/SolverName%)
 %:pimpleFoam
+%{%(physics/Turbulence%)
+%:LES
+    div(phi,U)      Gauss LUST grad(U);
+%:default
     div(phi,U)      Gauss linearUpwindV grad(U);
+%}
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
     div(div(phi,U)) Gauss linear;
 %:interFoam multiphaseInterFoam
@@ -91,9 +106,16 @@ divSchemes
     div(phirb,alpha) Gauss linear;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 %:buoyantPimpleFoam
+%{%(physics/Turbulence%)
+%:LES
+    div(phi,U)      Gauss LUST grad(U);
+    div(phi,h)      Gauss LUST grad(U);
+    div(phi,K)      Gauss LUST grad(K);
+%:default
     div(phi,U)      Gauss linearUpwindV grad(U);
     div(phi,h)      Gauss upwind;
     div(phi,K)      Gauss upwind;
+%}
     div(phi,Ekp)     Gauss linear;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 %}
@@ -114,7 +136,7 @@ divSchemes
     div(phi,gammaInt)   bounded Gauss upwind;
     div(phi,ReThetat)   bounded Gauss upwind;
 %:kEqn
-    div(phi,k)     bounded Gauss upwind;
+    div(phi,k)     Gauss limitedLinear 1;
 %}
 %}
 %{%(solver/SolverName%)
