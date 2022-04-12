@@ -37,7 +37,7 @@ else:
         from freecad.plot import Plot  # Fallback to workbench
 
 
-class ForceCoeffPlot:
+class ForceCoeffsPlot:
     def __init__(self):
         self.fig = Plot.figure(FreeCAD.ActiveDocument.Name + "ForceCoeffs")
 

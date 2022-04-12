@@ -34,7 +34,7 @@ from PySide.QtCore import QObject, Signal
 from CfdResidualPlot import ResidualPlot
 from collections import OrderedDict
 from core.plotters.CfdForcesPlot import ForcesPlot
-
+from core.plotters.CfdForceCoeffPlot import ForceCoeffsPlot
 
 class CfdRunnable(QObject, object):
 
@@ -72,13 +72,20 @@ class CfdRunnableFoam(CfdRunnable):
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
 
-        self.residualPlot = None
-        self.monitorsPlot = None
-        self.function_objects = False
+        self.residual_plotter = None
+        self.forces_plotter = None
+        self.force_coeffs_plotter = None
+        self.forces_plot = False
+        self.force_coeffs_plot = False
 
         analysis_obj = CfdTools.getActiveAnalysis()
-        if CfdTools.getFunctionObjectsGroup(analysis_obj) is not None:
-            self.function_objects = True
+        function_objs = CfdTools.getFunctionObjectsGroup(analysis_obj)
+        if function_objs is not None:
+            for fo_type in function_objs:
+                if fo_type.FunctionObjectType == "Force":
+                    self.forces_plot = True
+                elif fo_type.FunctionObjectType == "ForceCoefficients":
+                    self.force_coeffs_plot = True
 
         self.initResiduals()
         self.initMonitors()
@@ -110,12 +117,20 @@ class CfdRunnableFoam(CfdRunnable):
         self.viscousYResiduals = []
         self.viscousZResiduals = []
 
+        self.cdResiduals = []
+        self.clResiduals = []
+
     def get_solver_cmd(self, case_dir):
         self.initResiduals()
+        self.initMonitors()
 
-        self.residualPlot = ResidualPlot()
-        if self.function_objects:
-            self.monitorsPlot = ForcesPlot()
+        self.residual_plotter = ResidualPlot()
+
+        if self.forces_plot:
+            self.forces_plotter = ForcesPlot()
+
+        if self.force_coeffs_plot:
+            self.force_coeffs_plotter = ForceCoeffsPlot()
 
         # Environment is sourced in run script, so no need to include in run command
         cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
@@ -179,10 +194,14 @@ class CfdRunnableFoam(CfdRunnable):
                 self.viscousYResiduals.append(float(split[3]))
                 self.viscousZResiduals.append(float(split[4].replace(")", "")))
 
-            # Force monitors
+            # Force coefficient monitors
+            if "Cd" in split and self.niter-1 > len(self.cdResiduals):
+                self.cdResiduals.append(float(split[2]))
+            if "Cl" in split and self.niter-1 > len(self.clResiduals):
+                self.clResiduals.append(float(split[2]))
 
         if self.niter > 1:
-            self.residualPlot.updateResiduals(OrderedDict([
+            self.residual_plotter.updateResiduals(OrderedDict([
                 ('$\\rho$', self.rhoResiduals),
                 ('$U_x$', self.UxResiduals),
                 ('$U_y$', self.UyResiduals),
@@ -196,10 +215,15 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$\\gamma$', self.gammaIntResiduals),
                 ('$Re_{\\theta}$', self.ReThetatResiduals)]))
 
-            self.monitorsPlot.updateResiduals(OrderedDict([
+            self.forces_plotter.updateResiduals(OrderedDict([
                 ('$Pressure_x$', self.pressureXResiduals),
                 ('$Pressure_y$', self.pressureYResiduals),
                 ('$Pressure_z$', self.pressureZResiduals),
                 ('$Viscous_x$', self.viscousXResiduals),
                 ('$Viscous_y$', self.viscousYResiduals),
                 ('$Viscous_z$', self.viscousZResiduals)]))
+
+            self.force_coeffs_plotter.updateResiduals(OrderedDict([
+                ('$C_D$', self.cdResiduals),
+                ('$C_L$', self.clResiduals)
+            ]))
