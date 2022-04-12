@@ -125,9 +125,6 @@ class _CfdMeshRefinement:
         addObjectProperty(obj, "FirstLayerHeight", "0 m", "App::PropertyLength", "Surface refinement",
                           "Set the maximum first layer height")
 
-        addObjectProperty(obj, "FinalLayerHeight", "0 m", "App::PropertyLength", "Surface refinement",
-                          "Set the maximum final layer height")
-
         addObjectProperty(obj, "RegionEdgeRefinement", 1, "App::PropertyFloat", "Surface refinement",
                           "Relative edge (feature) refinement")
 
