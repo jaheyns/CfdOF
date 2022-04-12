@@ -244,7 +244,7 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$\\gamma$', self.gammaIntResiduals),
                 ('$Re_{\\theta}$', self.ReThetatResiduals)]))
 
-            self.solver.Proxy.forces_plotter.updateResiduals(self.time, OrderedDict([
+            self.solver.Proxy.forces_plotter.updateResiduals(OrderedDict([
                 ('$Pressure_x$', self.pressureXResiduals),
                 ('$Pressure_y$', self.pressureYResiduals),
                 ('$Pressure_z$', self.pressureZResiduals),
@@ -252,7 +252,7 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$Viscous_y$', self.viscousYResiduals),
                 ('$Viscous_z$', self.viscousZResiduals)]))
 
-            self.solver.Proxy.force_coeffs_plotter.updateResiduals(self.time, OrderedDict([
+            self.solver.Proxy.force_coeffs_plotter.updateResiduals(OrderedDict([
                 ('$C_D$', self.cdResiduals),
                 ('$C_L$', self.clResiduals)
             ]))
