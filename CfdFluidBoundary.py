@@ -31,7 +31,6 @@ import Part
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
-    import _TaskPanelCfdFluidBoundary
 import CfdTools
 from CfdTools import addObjectProperty
 

@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -24,17 +24,17 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
 import os
 import os.path
-import CfdTools
-from CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
-import CfdFaceSelectWidget
-import CfdFluidBoundary
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
     from PySide.QtGui import QFormLayout
+import CfdTools
+from CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
+import CfdFaceSelectWidget
+import CfdFluidBoundary
 
 
 class TaskPanelCfdFluidBoundary:
