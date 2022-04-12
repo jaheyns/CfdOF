@@ -39,7 +39,12 @@ writeInterval   %(solver/TransientWriteInterval%);
 
 purgeWrite      0;
 
+%{%(solver/SolverName%)
+%:hisa
+adjustTimeStep  no;
+%:default
 adjustTimeStep  yes;
+%}
 
 maxCo           5;
 
