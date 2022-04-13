@@ -39,7 +39,6 @@ OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficie
 # whether volume fraction panel is shown, whether thermal GUI is shown,
 # rows of thermal UI to show (all shown if None)
 
-# todo adapt all this
 BOUNDARY_UI = [[True, False, True],     # Forces
                [True, True, True, ]]   # Force coefficients
 

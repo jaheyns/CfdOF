@@ -77,7 +77,7 @@ class ResidualPlot:
         if self.updated:
             self.updated = False
             if self.fig is None:
-                self.fig = Plot.figure("Residuals for " + FreeCAD.ActiveDocument.Name)
+                self.fig = Plot.figure(self.title + " for " + FreeCAD.ActiveDocument.Name)
                 self.fig.destroyed.connect(self.figureClosed)
             ax = self.fig.axes
             ax.cla()
@@ -94,9 +94,11 @@ class ResidualPlot:
                     last_residuals_min = min([last_residuals_min]+self.residuals[k][1:-1])
 
             ax.grid()
-            ax.set_yscale('log')
-            # Decrease in increments of 10
-            ax.set_ylim([10**(math.floor(math.log10(last_residuals_min))), 1])
+            if self.is_logarithmic:
+                ax.set_yscale('log')
+                # Decrease in increments of 10
+                ax.set_ylim([10**(math.floor(math.log10(last_residuals_min))), 1])
+
             # Increase in increments of 100
             time_incr = 10.0*self.times[0] if self.transient else 100
             ax.set_xlim([0, math.ceil(float(time_max)/time_incr)*time_incr])

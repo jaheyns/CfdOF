@@ -78,6 +78,11 @@ class _CfdSolverFoam(object):
         self.Type = "CfdSolverFoam"
         self.Object = obj  # keep a ref to the DocObj for nonGui usage
         obj.Proxy = self  # link between App::DocumentObject to  this object
+
+        self.residual_plotter = None
+        self.forces_plotter = None
+        self.force_coeffs_plotter = None
+
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -101,7 +106,15 @@ class _CfdSolverFoam(object):
         addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "TimeStepControl",
                           "Output time interval")
 
-        self.residual_plot = ResidualPlot(title="Simulation residuals")
+        self.residual_plotter = ResidualPlot(title="Simulation residuals")
+
+        function_objs = CfdTools.getFunctionObjectsGroup(CfdTools.getActiveAnalysis())
+        if function_objs is not None:
+            for fo_type in function_objs:
+                if fo_type.FunctionObjectType == "Force":
+                    self.forces_plotter = ResidualPlot(title="Forces", is_log=False)
+                elif fo_type.FunctionObjectType == "ForceCoefficients":
+                    self.force_coeffs_plotter = ResidualPlot(title="Force Coefficients", is_log=False)
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
