@@ -113,7 +113,7 @@ class CfdCaseWriterFoam:
         self.processSolverSettings()
         self.processFluidProperties()
         self.processBoundaryConditions()
-        # self.processFunctionObjects()
+        self.processFunctionObjects()
         self.processInitialConditions()
         self.clearCase()
 
@@ -351,14 +351,19 @@ class CfdCaseWriterFoam:
                 }
 
     def processFunctionObjects(self):
-        # TODO remove if we dont need this to split up PatchName(s)
         """ Compute any Function objects required before case build """
         settings = self.settings
         # Copy keys so that we can delete while iterating
-        fo_names = list(settings['functionObjects'].keys())
-        for fo_name in fo_names:
-            fo = settings['functionObjects'][fo_name]
-            fo['ShapeRefs'] = ' '.join(list(fo['ShapeRefs'][0][1]))
+        fo_name = list(settings['functionObjects'].keys())
+
+        for name in fo_name:
+            settings['functionObjects'][name]['CoR'] = tuple(p for p in settings['functionObjects'][name]['CoR'])
+            settings['functionObjects'][name]['Direction'] = tuple(p for p in settings['functionObjects'][name]['Direction'])
+
+            if settings['functionObjects'][name]['FunctionObjectType'] == 'ForceCoefficients':
+                settings['functionObjects'][name]['Lift'] = tuple(p for p in settings['functionObjects'][name]['Lift'])
+                settings['functionObjects'][name]['Drag'] = tuple(p for p in settings['functionObjects'][name]['Drag'])
+                settings['functionObjects'][name]['Pitch'] = tuple(p for p in settings['functionObjects'][name]['Pitch'])
 
     def parseFaces(self, shape_refs):
         pass

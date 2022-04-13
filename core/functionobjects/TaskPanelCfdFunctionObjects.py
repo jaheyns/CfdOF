@@ -126,9 +126,9 @@ class TaskPanelCfdFunctionObjects:
         self.form.inputPorosity.setChecked(self.obj.IncludePorosity)
         self.form.inputWriteFields.setChecked(self.obj.WriteFields)
 
-        setQuantity(self.form.inputCentreOfRotationx, self.obj.CoR.x)
-        setQuantity(self.form.inputCentreOfRotationy, self.obj.CoR.y)
-        setQuantity(self.form.inputCentreOfRotationz, self.obj.CoR.z)
+        setQuantity(self.form.inputCentreOfRotationx, "{} m".format(self.obj.CoR.x))
+        setQuantity(self.form.inputCentreOfRotationy, "{} m".format(self.obj.CoR.y))
+        setQuantity(self.form.inputCentreOfRotationz, "{} m".format(self.obj.CoR.z))
 
         setQuantity(self.form.inputLiftDirectionx, self.obj.Lift.x)
         setQuantity(self.form.inputLiftDirectiony, self.obj.Lift.y)
@@ -199,11 +199,11 @@ class TaskPanelCfdFunctionObjects:
         FreeCADGui.doCommand("fo.WriteFields "
                              "= {}".format(self.form.inputWriteFields.isChecked()))
         FreeCADGui.doCommand("fo.CoR.x "
-                             "= '{}'".format(self.form.inputCentreOfRotationx.property("quantity").Value))
+                             "= '{}'".format(self.form.inputCentreOfRotationx.property("quantity").getValueAs("m")))
         FreeCADGui.doCommand("fo.CoR.y "
-                             "= '{}'".format(self.form.inputCentreOfRotationy.property("quantity").Value))
+                             "= '{}'".format(self.form.inputCentreOfRotationy.property("quantity").getValueAs("m")))
         FreeCADGui.doCommand("fo.CoR.z "
-                             "= '{}'".format(self.form.inputCentreOfRotationz.property("quantity").Value))
+                             "= '{}'".format(self.form.inputCentreOfRotationz.property("quantity").getValueAs("m")))
 
         # # Coefficient object
         FreeCADGui.doCommand("fo.Lift.x "

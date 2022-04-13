@@ -106,14 +106,19 @@ functions
 %:False
 		writeFields         false;
 %}
-		CofR                (%(functionObjects/%(0%)/CoRx%) %(functionObjects/%(0%)/CoRy%) %(functionObjects/%(0%)/CoRz%));
+		CofR                ( %(functionObjects/%(0%)/CoR%) );
 
-        //binData
-        //{
-        //    nBin          %(functionObjects/%(0%)/NBins%);
-        //    direction     ( %(functionObjects/%(0%)/Direction%) );
-        //   cumulative     %(functionObjects/%(0%)/Cumulative%);
-        //}
+        binData
+        {
+            nBin          %(functionObjects/%(0%)/NBins%);
+            direction     ( %(functionObjects/%(0%)/Direction%) );
+%{%(functionObjects/%(0%)/Cumulative%)
+%:True
+            cumulative         true;
+%:False
+            cumulative         false;
+%}
+        }
     }
 %:ForceCoefficients
     %(0%)
@@ -147,22 +152,27 @@ functions
 		writeFields         false;
 %}
 
-		CofR                ( %(functionObjects/%(0%)/CoRx%) %(functionObjects/%(0%)/CoRy%) %(functionObjects/%(0%)/CoRz%) );
-        liftDir             ( %(functionObjects/%(0%)/Liftx%) %(functionObjects/%(0%)/Lifty%) %(functionObjects/%(0%)/Liftz%));
-        dragDir             ( %(functionObjects/%(0%)/Dragx%) %(functionObjects/%(0%)/Dragy%) %(functionObjects/%(0%)/Dragz%) );
-        pitchAxis           ( %(functionObjects/%(0%)/Pitchx%) %(functionObjects/%(0%)/Pitchy%) %(functionObjects/%(0%)/Pitchz%) );
+		CofR                ( %(functionObjects/%(0%)/CoR%) );
+        liftDir             ( %(functionObjects/%(0%)/Lift%) );
+        dragDir             ( %(functionObjects/%(0%)/Drag%) );
+        pitchAxis           ( %(functionObjects/%(0%)/Pitch%) );
 
         magUInf             %(functionObjects/%(0%)/MagnitudeUInf%);
 
         lRef                %(functionObjects/%(0%)/LengthRef%);
         Aref                %(functionObjects/%(0%)/AreaRef%);
 
-        //binData
-        //{
-        //    nBin          %(functionObjects/%(0%)/NBins%);
-        //    direction     ( %(functionObjects/%(0%)/Direction%) );
-        //    cumulative    %(functionObjects/%(0%)/Cumulative%);
-        //}
+        binData
+        {
+            nBin          %(functionObjects/%(0%)/NBins%);
+            direction     ( %(functionObjects/%(0%)/Direction%) );
+%{%(functionObjects/%(0%)/Cumulative%)
+%:True
+            cumulative         true;
+%:False
+            cumulative         false;
+%}
+        }
     }
 %}
 %}
