@@ -132,13 +132,15 @@ class CfdRunnableFoam(CfdRunnable):
         self.initResiduals()
         self.initMonitors()
 
-        self.residual_plotter = ResidualPlot()
+        self.residual_plotter = ResidualPlot(title="Simulation residuals")
 
         if self.forces_plot:
-            self.forces_plotter = ForcesPlot()
+            # self.forces_plotter = ForcesPlot()
+            self.forces_plotter = ResidualPlot(title="Forces", is_log=False)
 
         if self.force_coeffs_plot:
-            self.force_coeffs_plotter = ForceCoeffsPlot()
+            # self.force_coeffs_plotter = ForceCoeffsPlot()
+            self.forces_plotter = ResidualPlot(title="Force Coefficients", is_log=False)
 
         # Environment is sourced in run script, so no need to include in run command
         cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)

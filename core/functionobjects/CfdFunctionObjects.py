@@ -83,17 +83,6 @@ class _CfdFunctionObjects:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        # if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "Boundary faces"): # TODO check if we need this, otherwise remove
-        #     # Backward compatible
-        #     if 'References' in obj.PropertiesList:
-        #         doc = FreeCAD.getDocument(obj.Document.Name)
-        #         for r in obj.References:
-        #             if not r[1]:
-        #                 obj.ShapeRefs += [doc.getObject(r[0])]
-        #             else:
-        #                 obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
-        #         obj.removeProperty('References')
-        #         obj.removeProperty('LinkedObjects')
 
         addObjectProperty(obj, 'CaseName', "meshCase", "App::PropertyString", "",
                           "Name of directory in which the mesh is created")
@@ -115,46 +104,22 @@ class _CfdFunctionObjects:
                           "Reference pressure")
         addObjectProperty(obj, 'Density', 'rho', "App::PropertyString", "Function object",
                           "Density field name")
-        # addObjectProperty(obj, 'CentreOfRotation', '0, 0, 0', "App::PropertyString", "Function object",
-        #                   "Centre of Rotation (x, y, z)")
-        addObjectProperty(obj, 'CoRx', '0', "App::PropertyQuantity", "Function object",
-                          "Centre of rotation (x component)")
-        addObjectProperty(obj, 'CoRy', '0', "App::PropertyQuantity", "Function object",
-                          "Centre of rotation (y component)")
-        addObjectProperty(obj, 'CoRz', '0', "App::PropertyQuantity", "Function object",
-                          "Centre of rotation (z component)")
+        addObjectProperty(obj, 'CoR', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Function object",
+                          "Centre of rotation")
         addObjectProperty(obj, 'IncludePorosity', False, "App::PropertyBool", "Function object",
                           "Whether to include porosity effects")
         addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Function object",
                           "Whether to write output fields")
 
         # Force coefficients
-        # addObjectProperty(obj, 'LiftDirection', '0, 0, 0', "App::PropertyString", "Function object",
-        #                   "Lift Direction vector (x, y, z)")
-        addObjectProperty(obj, 'Liftx', '1', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'Lift', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Function object",
                           "Lift direction (x component)")
-        addObjectProperty(obj, 'Lifty', '0', "App::PropertyQuantity", "Function object",
-                          "Lift direction (y component)")
-        addObjectProperty(obj, 'Liftz', '0', "App::PropertyQuantity", "Function object",
-                          "Lift direction (z component)")
 
-        # addObjectProperty(obj, 'DragDirection', '0, 0, 0', "App::PropertyString", "Function object",
-        #                   "Drag direction vector (x, y, z)")
-        addObjectProperty(obj, 'Dragx', '0', "App::PropertyQuantity", "Function object",
-                          "Drag direction (x component)")
-        addObjectProperty(obj, 'Dragy', '1', "App::PropertyQuantity", "Function object",
-                          "Drag direction (y component)")
-        addObjectProperty(obj, 'Dragz', '0', "App::PropertyQuantity", "Function object",
-                          "Drag direction (z component)")
+        addObjectProperty(obj, 'Drag', FreeCAD.Vector(0, 1, 0), "App::PropertyVector", "Function object",
+                          "Drag direction")
 
-        # addObjectProperty(obj, 'PitchAxis', '0, 0, 0', "App::PropertyString", "Function object",
-        #                   "Pitch axis for moment coefficient")
-        addObjectProperty(obj, 'Pitchx', '0', "App::PropertyQuantity", "Function object",
-                          "Centre of pitch (x component)")
-        addObjectProperty(obj, 'Pitchy', '0', "App::PropertyQuantity", "Function object",
-                          "Centre of pitch (y component)")
-        addObjectProperty(obj, 'Pitchz', '1', "App::PropertyQuantity", "Function object",
-                          "Centre of pitch (z component)")
+        addObjectProperty(obj, 'Pitch', FreeCAD.Vector(0, 0, 1), "App::PropertyVector", "Function object",
+                          "Centre of pitch")
 
         addObjectProperty(obj, 'MagnitudeUInf', '1 m/s', "App::PropertyQuantity", "Function object",
                           "Freestream velocity magnitude")
@@ -166,8 +131,8 @@ class _CfdFunctionObjects:
         # Spatial binning
         addObjectProperty(obj, 'NBins', '0', "App::PropertyQuantity", "Function object",
                           "Number of bins")
-        addObjectProperty(obj, 'Direction', '0', "App::PropertyQuantity", "Function object",
-                          "Direction")
+        addObjectProperty(obj, 'Direction', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Function object",
+                          "Binning direction")
         addObjectProperty(obj, 'Cumulative', True, "App::PropertyBool", "Function object",
                           "Cumulative")
 

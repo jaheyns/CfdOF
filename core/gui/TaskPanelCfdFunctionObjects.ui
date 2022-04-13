@@ -62,7 +62,7 @@
            </widget>
           </item>
           <item>
-           <layout class="QFormLayout" name="layoutForceParameters">
+           <layout class="QGridLayout" name="layoutForceParameters">
             <property name="topMargin">
              <number>8</number>
             </property>
@@ -79,16 +79,10 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="inputPressure">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            <item row="3" column="0">
+             <widget class="QLabel" name="labelRefPressure">
+              <property name="text">
+               <string>Reference pressure</string>
               </property>
              </widget>
             </item>
@@ -99,19 +93,6 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="inputVelocity">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="0">
              <widget class="QLabel" name="labelDensity">
               <property name="text">
@@ -119,15 +100,8 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="labelRefPressure">
-              <property name="text">
-               <string>Reference pressure</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="Gui::InputField" name="inputReferencePressure">
+            <item row="5" column="1">
+             <widget class="QCheckBox" name="inputWriteFields">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -135,22 +109,14 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string/>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.010000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true"/>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="labelWriteFields">
+              <property name="text">
+               <string>Write Fields</string>
               </property>
              </widget>
             </item>
@@ -171,33 +137,6 @@
               </property>
               <property name="text">
                <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="labelWriteFields">
-              <property name="text">
-               <string>Write Fields</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QCheckBox" name="inputWriteFields">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="labelCentreOfRotation">
-              <property name="text">
-               <string>Centre of rotation (x, y, z)</string>
               </property>
              </widget>
             </item>
@@ -229,7 +168,14 @@
               </property>
              </widget>
             </item>
-            <item row="7" column="1">
+            <item row="6" column="0">
+             <widget class="QLabel" name="labelCentreOfRotation">
+              <property name="text">
+               <string>Centre of rotation (x, y, z)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="2">
              <widget class="Gui::InputField" name="inputCentreOfRotationy">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -257,7 +203,7 @@
               </property>
              </widget>
             </item>
-            <item row="8" column="1">
+            <item row="6" column="3">
              <widget class="Gui::InputField" name="inputCentreOfRotationz">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -285,10 +231,64 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="1" column="1" colspan="2">
+             <widget class="QLineEdit" name="inputVelocity">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" colspan="2">
              <widget class="QLineEdit" name="inputDensity">
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="2">
+             <widget class="QLineEdit" name="inputPressure">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" colspan="2">
+             <widget class="Gui::InputField" name="inputReferencePressure">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true"/>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
               </property>
              </widget>
             </item>
@@ -326,7 +326,7 @@
            </widget>
           </item>
           <item>
-           <layout class="QFormLayout" name="layoutForceParameters">
+           <layout class="QGridLayout" name="layoutForceParameters">
             <property name="topMargin">
              <number>8</number>
             </property>
@@ -336,10 +336,73 @@
             <property name="bottomMargin">
              <number>8</number>
             </property>
+            <item row="0" column="2">
+             <widget class="Gui::InputField" name="inputLiftDirectiony">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true"/>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="labelLiftDirection">
               <property name="text">
                <string>Lift Direction (x, y, z)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="labelDragDirection">
+              <property name="text">
+               <string>Drag Direction (x, y, z)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="labelPitchAxis">
+              <property name="text">
+               <string>Pitch Axis (x, y, z)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0">
+             <widget class="QLabel" name="labelMagUInf">
+              <property name="text">
+               <string>Magnitude U Inf</string>
+              </property>
+             </widget>
+            </item>
+            <item row="10" column="0">
+             <widget class="QLabel" name="labelLengthRef">
+              <property name="text">
+               <string>Length ref</string>
+              </property>
+             </widget>
+            </item>
+            <item row="11" column="0">
+             <widget class="QLabel" name="labelAreaRef">
+              <property name="text">
+               <string>Area ref</string>
               </property>
              </widget>
             </item>
@@ -371,35 +434,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="Gui::InputField" name="inputLiftDirectiony">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.010000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true"/>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
+            <item row="0" column="3">
              <widget class="Gui::InputField" name="inputLiftDirectionz">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -424,13 +459,6 @@
               </property>
               <property name="format" stdset="0">
                <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="labelDragDirection">
-              <property name="text">
-               <string>Drag Direction (x, y, z)</string>
               </property>
              </widget>
             </item>
@@ -462,7 +490,7 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
+            <item row="3" column="2">
              <widget class="Gui::InputField" name="inputDragDirectiony">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -490,7 +518,7 @@
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
+            <item row="3" column="3">
              <widget class="Gui::InputField" name="inputDragDirectionz">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -515,13 +543,6 @@
               </property>
               <property name="format" stdset="0">
                <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="labelPitchAxis">
-              <property name="text">
-               <string>Pitch Axis (x, y, z)</string>
               </property>
              </widget>
             </item>
@@ -553,7 +574,7 @@
               </property>
              </widget>
             </item>
-            <item row="7" column="1">
+            <item row="6" column="2">
              <widget class="Gui::InputField" name="inputPitchAxisy">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -581,7 +602,7 @@
               </property>
              </widget>
             </item>
-            <item row="8" column="1">
+            <item row="6" column="3">
              <widget class="Gui::InputField" name="inputPitchAxisz">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -609,14 +630,7 @@
               </property>
              </widget>
             </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="labelMagUInf">
-              <property name="text">
-               <string>Magnitude U Inf</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
+            <item row="9" column="1" colspan="2">
              <widget class="Gui::InputField" name="inputMagnitudeUInf">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -644,14 +658,7 @@
               </property>
              </widget>
             </item>
-            <item row="10" column="0">
-             <widget class="QLabel" name="labelLengthRef">
-              <property name="text">
-               <string>Length ref</string>
-              </property>
-             </widget>
-            </item>
-            <item row="10" column="1">
+            <item row="10" column="1" colspan="2">
              <widget class="Gui::InputField" name="inputLengthRef">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -679,14 +686,7 @@
               </property>
              </widget>
             </item>
-            <item row="11" column="0">
-             <widget class="QLabel" name="labelAreaRef">
-              <property name="text">
-               <string>Area ref</string>
-              </property>
-             </widget>
-            </item>
-            <item row="11" column="1">
+            <item row="11" column="1" colspan="2">
              <widget class="Gui::InputField" name="inputAreaRef">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -748,7 +748,7 @@
            </widget>
           </item>
           <item>
-           <layout class="QFormLayout" name="layoutForceParameters">
+           <layout class="QGridLayout" name="layoutForceParameters">
             <property name="topMargin">
              <number>8</number>
             </property>
@@ -765,8 +765,15 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="Gui::InputField" name="inputNBins">
+            <item row="1" column="0">
+             <widget class="QLabel" name="labelDirection">
+              <property name="text">
+               <string>Binning direction (x, y, z)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="Gui::InputField" name="inputDirectionx">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -786,22 +793,43 @@
                <double>0.000000000000000</double>
               </property>
               <property name="unit" stdset="0">
-               <string notr="true"/>
+               <string notr="true">FIX</string>
               </property>
               <property name="format" stdset="0">
                <number>0</number>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="labelDirection">
+            <item row="1" column="2">
+             <widget class="Gui::InputField" name="inputDirectiony">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text">
-               <string>Direction</string>
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true">FIX</string>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="Gui::InputField" name="inputDirection">
+            <item row="1" column="3">
+             <widget class="Gui::InputField" name="inputDirectionz">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -845,6 +873,34 @@
               </property>
               <property name="text">
                <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" colspan="2">
+             <widget class="Gui::InputField" name="inputNBins">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true"/>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
               </property>
              </widget>
             </item>

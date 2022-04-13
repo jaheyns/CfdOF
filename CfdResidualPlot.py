@@ -81,7 +81,7 @@ class ResidualPlot:
                 self.fig.destroyed.connect(self.figureClosed)
             ax = self.fig.axes
             ax.cla()
-            ax.set_title("Simulation residuals")
+            ax.set_title(self.title)
             time_unit = str(Units.Quantity(1, Units.TimeSpan)).split()[-1]
             ax.set_xlabel("Time [{}]".format(time_unit) if self.transient else "Iteration")
             ax.set_ylabel("Residual")

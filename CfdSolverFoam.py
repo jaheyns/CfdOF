@@ -101,7 +101,7 @@ class _CfdSolverFoam(object):
         addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "TimeStepControl",
                           "Output time interval")
 
-        self.residual_plot = ResidualPlot()
+        self.residual_plot = ResidualPlot(title="Simulation residuals")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
