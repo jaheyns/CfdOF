@@ -178,7 +178,7 @@ class _TaskPanelCfdSolverControl:
         FreeCADGui.doCommand("env_vars = solver_runner.getRunEnvironment()")
         FreeCADGui.doCommand(
             "if proxy.running_from_macro:\n" +
-            "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=solver_runner.process_output)\n" +
+            "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=solver_runner.process_output)\n" +
             "  solver_process.start(cmd, env_vars=env_vars)\n" +
             "  solver_process.waitForFinished()\n" +
             "else:\n" +
