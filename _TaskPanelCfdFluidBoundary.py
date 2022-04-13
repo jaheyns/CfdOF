@@ -190,7 +190,7 @@ class TaskPanelCfdFluidBoundary:
             panel_numbers = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][1]
             for panel_number in panel_numbers:
                 self.form.layoutBasicValues.itemAt(panel_number).widget().setVisible(True)
-                if panel_number == 0:
+                if panel_number == 0 and self.form.radioButtonMagNormal.isChecked():
                     reverse = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][2]
                     # If user hasn't set a patch yet, initialise 'reverse' to default
                     if self.form.lineDirection.text() == "":

@@ -394,7 +394,8 @@ class _ViewProviderCfdFluidBoundary:
                 analysis_obj.NeedsMeshRewrite = True
         else:
             # Else mark case itself as needing updating
-            analysis_obj.NeedsCaseRewrite = True
+            if analysis_obj and 'NeedsCaseRewrite' in analysis_obj.PropertiesList:
+                analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         CfdTools.setCompSolid(vobj)

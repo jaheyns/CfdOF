@@ -253,24 +253,28 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         boundaryT = self.form.comboBoundaryT.currentData()
         boundaryTurb = self.form.comboBoundaryTurb.currentData()
 
-        if boundaryU and boundaryU != self.obj.BoundaryU.Name:
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryU = FreeCAD.ActiveDocument.{}".format(
-                self.obj.Name, boundaryU))
+        if boundaryU:
+            if self.obj.BoundaryU and boundaryU != self.obj.BoundaryU.Name:
+                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryU = FreeCAD.ActiveDocument.{}".format(
+                    self.obj.Name, boundaryU))
         else:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryU = None".format(self.obj.Name))
-        if boundaryP and boundaryP != self.obj.BoundaryP.Name:
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryP = FreeCAD.ActiveDocument.{}".format(
-                self.obj.Name, boundaryP))
+        if boundaryP:
+            if self.obj.BoundaryP and boundaryP != self.obj.BoundaryP.Name:
+                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryP = FreeCAD.ActiveDocument.{}".format(
+                    self.obj.Name, boundaryP))
         else:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryP = None".format(self.obj.Name))
-        if boundaryT and boundaryT != self.obj.BoundaryT.Name:
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryT = FreeCAD.ActiveDocument.{}".format(
-                self.obj.Name, boundaryT))
+        if boundaryT:
+            if self.obj.BoundaryT and boundaryT != self.obj.BoundaryT.Name:
+                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryT = FreeCAD.ActiveDocument.{}".format(
+                    self.obj.Name, boundaryT))
         else:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryT = None".format(self.obj.Name))
-        if boundaryTurb and boundaryTurb != self.obj.BoundaryTurb.Name:
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryTurb = FreeCAD.ActiveDocument.{}".format(
-                self.obj.Name, boundaryTurb))
+        if boundaryTurb:
+            if self.obj.BoundaryTurb and boundaryTurb != self.obj.BoundaryTurb.Name:
+                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryTurb = FreeCAD.ActiveDocument.{}".format(
+                    self.obj.Name, boundaryTurb))
         else:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryTurb = None".format(self.obj.Name))
 
