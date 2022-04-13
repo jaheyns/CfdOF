@@ -384,17 +384,6 @@ def storeIfChanged(obj, prop, val):
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
 
 
-def hide_parts_show_meshes():
-    if FreeCAD.GuiUp:
-        for acnstrmesh in getActiveAnalysis().Group:
-            if "Mesh" in acnstrmesh.TypeId:
-                aparttoshow = acnstrmesh.Name.replace("_Mesh", "")
-                for apart in FreeCAD.activeDocument().Objects:
-                    if aparttoshow == apart.Name:
-                        apart.ViewObject.Visibility = False
-                acnstrmesh.ViewObject.Visibility = True
-
-
 def copyFilesRec(src, dst, symlinks=False, ignore=None):
     """
     Recursively copy files from src dir to dst dir

@@ -100,7 +100,7 @@ class _TaskPanelCfdSolverControl:
     def reject(self):
         FreeCADGui.ActiveDocument.resetEdit()
 
-    def closed(self):
+    def closing(self):
         # We call this from unsetEdit to ensure cleanup
         self.solver_object.Proxy.solver_process.terminate()
         self.solver_object.Proxy.solver_process.waitForFinished()

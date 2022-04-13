@@ -56,7 +56,6 @@ class _CommandCfdSolverFoam:
         return CfdTools.getActiveAnalysis() is not None
 
     def Activated(self):
-        CfdTools.hide_parts_show_meshes()
         is_present = False
         members = CfdTools.getActiveAnalysis().Group
         for i in members:
@@ -138,49 +137,51 @@ class _ViewProviderCfdSolverFoam:
         self.Object = vobj.Object
 
     def updateData(self, obj, prop):
-        return
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         return
+
+    def setEdit(self, vobj, mode):
+        if CfdTools.getActiveAnalysis():
+            from CfdRunnableFoam import CfdRunnableFoam
+            foamRunnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
+            import _TaskPanelCfdSolverControl
+            import importlib
+            importlib.reload(_TaskPanelCfdSolverControl)
+            self.taskd = _TaskPanelCfdSolverControl._TaskPanelCfdSolverControl(foamRunnable)
+            self.taskd.obj = vobj.Object
+            FreeCADGui.Control.showDialog(self.taskd)
+        return True
 
     def doubleClicked(self, vobj):
         if FreeCADGui.activeWorkbench().name() != 'CfdOFWorkbench':
             FreeCADGui.activateWorkbench("CfdOFWorkbench")
         doc = FreeCADGui.getDocument(vobj.Object.Document)
-        # it should be possible to find the AnalysisObject although it is not a documentObjectGroup
         if not CfdTools.getActiveAnalysis():
             analysis_obj = CfdTools.getParentAnalysisObject(self.Object)
             if analysis_obj:
                 CfdTools.setActiveAnalysis(analysis_obj)
             else:
                 FreeCAD.Console.PrintError(
-                    'No Active Analysis is detected from solver object in the active Document!\n')
+                    'No Active Analysis detected from Solver object in the active Document\n')
         if not doc.getInEdit():
             if CfdTools.getActiveAnalysis().Document is FreeCAD.ActiveDocument:
                 if self.Object in CfdTools.getActiveAnalysis().Group:
                     doc.setEdit(vobj.Object.Name)
                 else:
-                    FreeCAD.Console.PrintError('Activate the analysis this solver belongs to!\n')
+                    FreeCAD.Console.PrintError('Please activate the Analysis this solver belongs to.\n')
             else:
-                FreeCAD.Console.PrintError('Active Analysis is not in active Document!\n')
+                FreeCAD.Console.PrintError('Active Analysis is not in active Document\n')
         else:
-            FreeCAD.Console.PrintError('Task dialog already open\n')
-        return True
-
-    def setEdit(self, vobj, mode):
-        if CfdTools.getActiveAnalysis():
-            from CfdRunnableFoam import CfdRunnableFoam
-            foamRunnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
-            from _TaskPanelCfdSolverControl import _TaskPanelCfdSolverControl
-            self.taskd = _TaskPanelCfdSolverControl(foamRunnable)
-            self.taskd.obj = vobj.Object
-
+            FreeCAD.Console.PrintError('Task dialog already active\n')
             FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def unsetEdit(self, vobj, mode):
         if self.taskd:
-            self.taskd.closed()
+            self.taskd.closing()
             self.taskd = None
         FreeCADGui.Control.closeDialog()
 

@@ -229,7 +229,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         storeIfChanged(self.obj, 'Pressure', getQuantity(self.form.pressure))
 
         # Multiphase
-        storeIfChanged(self.obj, 'VolumeFractions', self.form.alphas)
+        storeIfChanged(self.obj, 'VolumeFractions', self.alphas)
 
         # Thermal
         storeIfChanged(self.obj, 'UseInletTemperatureValue', self.form.checkUseInletValuesThermal.isChecked())
@@ -244,7 +244,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         storeIfChanged(self.obj, 'gammaInt', getQuantity(self.form.inputGammaInt))
         storeIfChanged(self.obj, 'ReThetat', getQuantity(self.form.inputReThetat))
         # LES
-        storeIfChanged(self.obj, 'nut' getQuantity(self.form.inputTurbulentViscosity))
+        storeIfChanged(self.obj, 'nut', getQuantity(self.form.inputTurbulentViscosity))
         storeIfChanged(self.obj, 'kEqnk', getQuantity(self.form.inputkEqnKineticEnergy))
         storeIfChanged(self.obj, 'kEqnNut', getQuantity(self.form.inputkEqnTurbulentViscosity))
 

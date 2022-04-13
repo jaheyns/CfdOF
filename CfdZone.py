@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -23,15 +23,15 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
-import Part
-import CfdTools
-from CfdTools import addObjectProperty
 import os
 import os.path
+import FreeCAD
+import Part
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
+import CfdTools
+from CfdTools import addObjectProperty
 
 
 # Constants
@@ -204,6 +204,7 @@ class _ViewProviderCfdZone:
     def __init__(self, vobj):
         """ Set this object to the proxy object of the actual view provider """
         vobj.Proxy = self
+        self.taskd = None
 
     def attach(self, vobj):
         self.ViewObject = vobj
@@ -213,9 +214,9 @@ class _ViewProviderCfdZone:
         # Setup the scene sub-graph of the view provider, this method is mandatory
         return
 
-    def updateData(self, fp, prop):
-        """ If a property of the handled feature has changed we have the chance to handle this here """
-        return
+    def updateData(self, obj, prop):
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        analysis_obj.NeedsCaseRewrite = True
 
     def getDisplayModes(self, obj):
         """ Return a list of display modes. """
@@ -244,14 +245,12 @@ class _ViewProviderCfdZone:
 
     def setEdit(self, vobj, mode):
         import _TaskPanelCfdZone
+        import importlib
+        importlib.reload(_TaskPanelCfdZone)
         taskd = _TaskPanelCfdZone._TaskPanelCfdZone(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True
-
-    def unsetEdit(self, vobj, mode):
-        FreeCADGui.Control.closeDialog()
-        return
 
     def doubleClicked(self, vobj):
         doc = FreeCADGui.getDocument(vobj.Object.Document)
@@ -260,8 +259,16 @@ class _ViewProviderCfdZone:
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:
-            FreeCAD.Console.PrintError('Task dialog already open\n')
+            FreeCAD.Console.PrintError('Task dialog already active\n')
+            FreeCADGui.Control.showDialog(self.taskd)
         return True
+
+    def unsetEdit(self, vobj, mode):
+        if self.taskd:
+            self.taskd.closing()
+            self.taskd = None
+        FreeCADGui.Control.closeDialog()
+        return
 
     def __getstate__(self):
         return None

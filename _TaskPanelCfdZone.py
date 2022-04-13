@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -23,16 +23,16 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
 import os
 import os.path
-import CfdTools
-from CfdTools import getQuantity, setQuantity, indexOrDefault
 import numpy
-import CfdZone
-import CfdFaceSelectWidget
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
+import CfdTools
+from CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
+import CfdZone
+import CfdFaceSelectWidget
 
 
 class _TaskPanelCfdZone:
@@ -43,6 +43,7 @@ class _TaskPanelCfdZone:
         self.obj = obj
 
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
+        self.NeedsCaseRewriteOrig = self.analysis_obj.NeedsCaseRewrite
 
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdZone.ui"))
 
@@ -247,57 +248,63 @@ class _TaskPanelCfdZone:
         self.alphas[alphaName] = getQuantity(self.form.inputVolumeFraction)
 
     def accept(self):
+        self.analysis_obj.NeedsCaseRewrite = self.NeedsCaseRewriteOrig
+
         if self.obj.Name.startswith('PorousZone'):
-            FreeCADGui.doCommand("p = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-            FreeCADGui.doCommand("p.PorousCorrelation = '{}'".format(
-                CfdZone.POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()]))
-            FreeCADGui.doCommand("p.D1 = '{}'".format(getQuantity(self.form.dx)))
-            FreeCADGui.doCommand("p.D2 = '{}'".format(getQuantity(self.form.dy)))
-            FreeCADGui.doCommand("p.D3 = '{}'".format(getQuantity(self.form.dz)))
-            FreeCADGui.doCommand("p.F1 = '{}'".format(getQuantity(self.form.fx)))
-            FreeCADGui.doCommand("p.F2 = '{}'".format(getQuantity(self.form.fy)))
-            FreeCADGui.doCommand("p.F3 = '{}'".format(getQuantity(self.form.fz)))
-            FreeCADGui.doCommand("p.e1 = ({}, {}, {})".format(
+            storeIfChanged(self.obj, 'PorousCorrelation',
+                CfdZone.POROUS_CORRELATIONS[self.form.comboBoxCorrelation.currentIndex()])
+            storeIfChanged(self.obj, 'D1', getQuantity(self.form.dx))
+            storeIfChanged(self.obj, 'D2', getQuantity(self.form.dy))
+            storeIfChanged(self.obj, 'D3', getQuantity(self.form.dz))
+            storeIfChanged(self.obj, 'F1', getQuantity(self.form.fx))
+            storeIfChanged(self.obj, 'F2', getQuantity(self.form.fy))
+            storeIfChanged(self.obj, 'F3', getQuantity(self.form.fz))
+            e1 = FreeCAD.Vector(
                 self.form.e1x.property('quantity').getValueAs("1").Value,
                 self.form.e1y.property('quantity').getValueAs("1").Value,
-                self.form.e1z.property('quantity').getValueAs("1").Value))
-            FreeCADGui.doCommand("p.e2 = ({}, {}, {})".format(
+                self.form.e1z.property('quantity').getValueAs("1").Value)
+            e2 = FreeCAD.Vector(
                 self.form.e2x.property('quantity').getValueAs("1").Value,
                 self.form.e2y.property('quantity').getValueAs("1").Value,
-                self.form.e2z.property('quantity').getValueAs("1").Value))
-            FreeCADGui.doCommand("p.e3 = ({}, {}, {})".format(
+                self.form.e2z.property('quantity').getValueAs("1").Value)
+            e3 = FreeCAD.Vector(
                 self.form.e3x.property('quantity').getValueAs("1").Value,
                 self.form.e3y.property('quantity').getValueAs("1").Value,
-                self.form.e3z.property('quantity').getValueAs("1").Value))
-            FreeCADGui.doCommand("p.OuterDiameter = '{}'".format(getQuantity(self.form.inputOuterDiameter)))
-            FreeCADGui.doCommand("p.TubeAxis = ({}, {}, {} )".format(
+                self.form.e3z.property('quantity').getValueAs("1").Value)
+            storeIfChanged(self.obj, 'e1', e1)
+            storeIfChanged(self.obj, 'e2', e2)
+            storeIfChanged(self.obj, 'e3', e3)
+            storeIfChanged(self.obj, 'OuterDiameter', getQuantity(self.form.inputOuterDiameter))
+            tube_axis = FreeCAD.Vector(
                 self.form.inputTubeAxisX.property('quantity').getValueAs("1").Value,
                 self.form.inputTubeAxisY.property('quantity').getValueAs("1").Value,
-                self.form.inputTubeAxisZ.property('quantity').getValueAs("1").Value))
-            FreeCADGui.doCommand("p.TubeSpacing = '{}'".format(getQuantity(self.form.inputTubeSpacing)))
-            FreeCADGui.doCommand("p.SpacingDirection = ({}, {}, {})".format(
+                self.form.inputTubeAxisZ.property('quantity').getValueAs("1").Value)
+            storeIfChanged(self.obj, 'TubeAxis', tube_axis)
+            storeIfChanged(self.obj, 'TubeSpacing', getQuantity(self.form.inputTubeSpacing))
+            spacing_direction = FreeCAD.Vector(
                 self.form.inputBundleLayerNormalX.property('quantity').getValueAs("1").Value,
                 self.form.inputBundleLayerNormalY.property('quantity').getValueAs("1").Value,
-                self.form.inputBundleLayerNormalZ.property('quantity').getValueAs("1").Value))
-            FreeCADGui.doCommand("p.AspectRatio = '{}'".format(getQuantity(self.form.inputAspectRatio)))
-            FreeCADGui.doCommand("p.VelocityEstimate = '{}'".format(getQuantity(self.form.inputVelocityEstimate)))
+                self.form.inputBundleLayerNormalZ.property('quantity').getValueAs("1").Value)
+            storeIfChanged(self.obj, 'SpacingDirection', spacing_direction)
+            storeIfChanged(self.obj, 'AspectRatio', getQuantity(self.form.inputAspectRatio))
+            storeIfChanged(self.obj, 'VelocityEstimate', getQuantity(self.form.inputVelocityEstimate))
 
         elif self.obj.Name.startswith('InitialisationZone'):
-            FreeCADGui.doCommand("p = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-            FreeCADGui.doCommand("p.VelocitySpecified = {}".format(self.form.checkVelocity.isChecked()))
-            FreeCADGui.doCommand("p.Ux = '{}'".format(getQuantity(self.form.inputUx)))
-            FreeCADGui.doCommand("p.Uy = '{}'".format(getQuantity(self.form.inputUy)))
-            FreeCADGui.doCommand("p.Uz = '{}'".format(getQuantity(self.form.inputUz)))
-            FreeCADGui.doCommand("p.PressureSpecified = {}".format(self.form.checkPressure.isChecked()))
-            FreeCADGui.doCommand("p.Pressure = '{}'".format(getQuantity(self.form.inputPressure)))
-            FreeCADGui.doCommand("p.VolumeFractionSpecified = {}".format(self.form.checkAlpha.isChecked()))
-            FreeCADGui.doCommand("p.VolumeFractions = {}".format(self.alphas))
+            storeIfChanged(self.obj, 'VelocitySpecified', self.form.checkVelocity.isChecked())
+            storeIfChanged(self.obj, 'Ux', getQuantity(self.form.inputUx))
+            storeIfChanged(self.obj, 'Uy', getQuantity(self.form.inputUy))
+            storeIfChanged(self.obj, 'Uz', getQuantity(self.form.inputUz))
+            storeIfChanged(self.obj, 'PressureSpecified', self.form.checkPressure.isChecked())
+            storeIfChanged(self.obj, 'Pressure', getQuantity(self.form.inputPressure))
+            storeIfChanged(self.obj, 'VolumeFractionSpecified', self.form.checkAlpha.isChecked())
+            storeIfChanged(self.obj, 'VolumeFractionSpecified', self.alphas)
 
-        refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
-        refstr += ',\n'.join(
-            "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
-        refstr += "]"
-        FreeCADGui.doCommand(refstr)
+        if self.obj.ShapeRefs != self.ShapeRefsOrig:
+            refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
+            refstr += ',\n'.join(
+                "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
+            refstr += "]"
+            FreeCADGui.doCommand(refstr)
 
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
@@ -307,3 +314,7 @@ class _TaskPanelCfdZone:
         FreeCADGui.doCommand("App.activeDocument().recompute()")
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
+
+    def closing(self):
+        # We call this from unsetEdit to ensure cleanup
+        self.faceSelector.closing()
