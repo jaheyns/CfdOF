@@ -6,6 +6,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -125,19 +126,30 @@ def getParentAnalysisObject(obj):
 
 
 def getPhysicsModel(analysis_object):
-    isPresent = False
+    is_present = False
     for i in analysis_object.Group:
         if "PhysicsModel" in i.Name:
-            physicsModel = i
-            isPresent = True
-    if not isPresent:
-        physicsModel = None
-    return physicsModel
+            physics_model = i
+            is_present = True
+    if not is_present:
+        physics_model = None
+    return physics_model
+
+
+def getDynamicMeshAdaptation(analysis_object):
+    is_present = False
+    for i in getMesh(analysis_object).Group:
+        if "DynamicMeshModel" in i.Name:
+            dynamic_mesh_adaption_model = i
+            is_present = True
+    if not is_present:
+        dynamic_mesh_adaption_model = None
+    return dynamic_mesh_adaption_model
 
 
 def getMeshObject(analysis_object):
-    isPresent = False
-    meshObj = []
+    is_present = False
+    mesh_obj = []
     if analysis_object:
         members = analysis_object.Group
     else:
@@ -145,14 +157,14 @@ def getMeshObject(analysis_object):
     from CfdMesh import _CfdMesh
     for i in members:
         if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
-            if isPresent:
+            if is_present:
                 FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
             else:
-                meshObj.append(i)
-                isPresent = True
-    if not isPresent:
-        meshObj = [None]
-    return meshObj[0]
+                mesh_obj.append(i)
+                is_present = True
+    if not is_present:
+        mesh_obj = [None]
+    return mesh_obj[0]
 
 
 def getPorousZoneObjects(analysis_object):
@@ -175,9 +187,17 @@ def getInitialConditions(analysis_object):
     return None
 
 
+def getReportingFunctionsGroup(analysis_object):
+    group = []
+    from core.functionobjects.reporting.CfdReportingFunctions import _CfdReportingFunctions
+    for i in analysis_object.Group:
+        if isinstance(i.Proxy, _CfdReportingFunctions):
+            group.append(i)
+    return group
+
+
 def getMaterials(analysis_object):
-    return [i for i in analysis_object.Group
-            if i.isDerivedFrom('App::MaterialObjectPython')]
+    return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
 
 
 def getSolver(analysis_object):
@@ -207,7 +227,7 @@ def getCfdBoundaryGroup(analysis_object):
     return group
 
 
-def is_planar(shape):
+def isPlanar(shape):
     """
     Return whether the shape is a planar face
     """
@@ -373,7 +393,7 @@ def storeIfChanged(obj, prop, val):
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
 
 
-def hide_parts_show_meshes():
+def hidePartsShowMeshes():
     if FreeCAD.GuiUp:
         for acnstrmesh in getActiveAnalysis().Group:
             if "Mesh" in acnstrmesh.TypeId:

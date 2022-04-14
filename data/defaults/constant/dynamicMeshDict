@@ -1,0 +1,43 @@
+%{%(dynamicMeshAdaptationEnabled%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+dynamicFvMesh       dynamicRefineFvMesh;
+
+refineInterval  %(dynamicMeshAdaptation/RefinementInterval%);
+field           %(dynamicMeshAdaptation/RefinementField%);
+
+lowerRefineLevel %(dynamicMeshAdaptation/LowerRefinementLevel%);
+upperRefineLevel %(dynamicMeshAdaptation/UpperRefinementLevel%);
+
+unrefineLevel   %(dynamicMeshAdaptation/UnRefinementLevel%);
+nBufferLayers   %(dynamicMeshAdaptation/BufferLayers%);
+maxRefinement   %(dynamicMeshAdaptation/MaxRefinementLevel%);
+maxCells        %(dynamicMeshAdaptation/MaxRefinementCells%);
+
+correctFluxes
+(
+    (phi none)
+    (nHatf none)
+    (rhoPhi none)
+    (alphaPhi0.water none)
+    (ghf none)
+    (alphaPhiUn none)
+);
+
+%{%(dynamicMeshAdaptation/WriteFields%)
+%:True
+dumpLevel       true;
+%:False
+dumpLevel       false;
+%}
+
+//************************************************************************ //
+%}

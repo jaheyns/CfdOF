@@ -65,7 +65,7 @@ def makeCfdInitialisationZone(name='InitialisationZone'):
 
 class _CommandCfdPorousZone:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "porous.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "porous.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_PorousZone", "Porous zone"),
                 'Accel': "",
@@ -237,7 +237,7 @@ class _ViewProviderCfdZone:
 
     def getIcon(self):
         if self.Object.Name.startswith('PorousZone'):
-            icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "porous.png")
+            icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "porous.svg")
         else:
             icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "alpha.svg")
         return icon_path

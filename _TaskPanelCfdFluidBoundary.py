@@ -309,7 +309,7 @@ class TaskPanelCfdFluidBoundary:
             if elt.ShapeType == 'Face':
                 selection = (selected_object.Name, sub)
                 if self.selecting_direction:
-                    if CfdTools.is_planar(elt):
+                    if CfdTools.isPlanar(elt):
                         self.selecting_direction = False
                         self.form.lineDirection.setText(selection[0] + ':' + selection[1])  # TODO: Display label, not name
                     else:
@@ -324,7 +324,7 @@ class TaskPanelCfdFluidBoundary:
             selected_object = self.obj.Document.getObject(selection[0])
             if hasattr(selected_object, "Shape"):
                 elt = selected_object.Shape.getElement(selection[1])
-                if elt.ShapeType == 'Face' and CfdTools.is_planar(elt):
+                if elt.ShapeType == 'Face' and CfdTools.isPlanar(elt):
                     return
         except SystemError:
             pass

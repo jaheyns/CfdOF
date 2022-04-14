@@ -46,7 +46,7 @@ def makeCfdSolverFoam(name="CfdSolver"):
 
 class _CommandCfdSolverFoam:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Solver job control"),
                 'Accel': "S, C",
@@ -56,7 +56,7 @@ class _CommandCfdSolverFoam:
         return CfdTools.getActiveAnalysis() is not None
 
     def Activated(self):
-        CfdTools.hide_parts_show_meshes()
+        CfdTools.hidePartsShowMeshes()
         is_present = False
         members = CfdTools.getActiveAnalysis().Group
         for i in members:
@@ -78,6 +78,11 @@ class _CfdSolverFoam(object):
         self.Type = "CfdSolverFoam"
         self.Object = obj  # keep a ref to the DocObj for nonGui usage
         obj.Proxy = self  # link between App::DocumentObject to  this object
+
+        self.residual_plotter = None
+        self.forces_plotter = None
+        self.force_coeffs_plotter = None
+
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -101,7 +106,7 @@ class _CfdSolverFoam(object):
         addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "TimeStepControl",
                           "Output time interval")
 
-        self.residual_plot = ResidualPlot()
+        self.residual_plotter = ResidualPlot(title="Simulation residuals")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
@@ -130,7 +135,7 @@ class _ViewProviderCfdSolverFoam:
 
     def getIcon(self):
         # """after load from FCStd file, self.icon does not exist, return constant path instead"""
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.svg")
         return icon_path
 
     def attach(self, vobj):

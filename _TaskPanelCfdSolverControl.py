@@ -159,8 +159,8 @@ class _TaskPanelCfdSolverControl:
         QApplication.setOverrideCursor(Qt.WaitCursor)
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.addModule("CfdConsoleProcess")
-        FreeCADGui.doCommand("analysis_object = FreeCAD.ActiveDocument."+self.analysis_object.Name)
-        FreeCADGui.doCommand("solver_object = FreeCAD.ActiveDocument."+self.solver_object.Name)
+        FreeCADGui.doCommand("analysis_object = FreeCAD.ActiveDocument." + self.analysis_object.Name)
+        FreeCADGui.doCommand("solver_object = FreeCAD.ActiveDocument." + self.solver_object.Name)
         FreeCADGui.doCommand("working_dir = CfdTools.getOutputPath(analysis_object)")
         FreeCADGui.doCommand("case_name = solver_object.InputCaseName")
         FreeCADGui.doCommand("solver_directory = os.path.abspath(os.path.join(working_dir, case_name))")
@@ -174,11 +174,11 @@ class _TaskPanelCfdSolverControl:
                              "else:\n" +
                              "  solver_runner = proxy.solver_runner")
         FreeCADGui.doCommand("cmd = solver_runner.get_solver_cmd(solver_directory)")
-        FreeCADGui.doCommand("FreeCAD.Console.PrintMessage(' '.join(cmd)+'\\n')")
+        FreeCADGui.doCommand("FreeCAD.Console.PrintMessage(' '.join(cmd) + '\\n')")
         FreeCADGui.doCommand("env_vars = solver_runner.getRunEnvironment()")
         FreeCADGui.doCommand(
             "if proxy.running_from_macro:\n" +
-            "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdoutHook=solver_runner.process_output)\n" +
+            "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=solver_runner.process_output)\n" +
             "  solver_process.start(cmd, env_vars=env_vars)\n" +
             "  solver_process.waitForFinished()\n" +
             "else:\n" +

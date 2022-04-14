@@ -23,9 +23,10 @@
 # *                                                                         *
 # ***************************************************************************
 
-import math
 from PySide import QtCore
+import math
 import FreeCAD
+
 if int(FreeCAD.Version()[0]) == 0 and int(FreeCAD.Version()[1].split('.')[0]) < 20:
     from freecad.plot import Plot  # Plot workbench
 else:
@@ -33,13 +34,16 @@ else:
         from FreeCAD.Plot import Plot  # Inbuilt plot module
     except ImportError:
         from freecad.plot import Plot  # Fallback to workbench
+
 from FreeCAD import Units
 import CfdTools
 
 
 class ResidualPlot:
-    def __init__(self):
+    def __init__(self, title, is_log=True):
         self.fig = None
+        self.title = title
+        self.is_logarithmic = is_log
 
         self.updated = False
         self.times = []
@@ -73,11 +77,11 @@ class ResidualPlot:
         if self.updated:
             self.updated = False
             if self.fig is None:
-                self.fig = Plot.figure("Residuals for " + FreeCAD.ActiveDocument.Name)
+                self.fig = Plot.figure(self.title + " for " + FreeCAD.ActiveDocument.Name)
                 self.fig.destroyed.connect(self.figureClosed)
             ax = self.fig.axes
             ax.cla()
-            ax.set_title("Simulation residuals")
+            ax.set_title(self.title)
             time_unit = str(Units.Quantity(1, Units.TimeSpan)).split()[-1]
             ax.set_xlabel("Time [{}]".format(time_unit) if self.transient else "Iteration")
             ax.set_ylabel("Residual")
@@ -90,9 +94,11 @@ class ResidualPlot:
                     last_residuals_min = min([last_residuals_min]+self.residuals[k][1:-1])
 
             ax.grid()
-            ax.set_yscale('log')
-            # Decrease in increments of 10
-            ax.set_ylim([10**(math.floor(math.log10(last_residuals_min))), 1])
+            if self.is_logarithmic:
+                ax.set_yscale('log')
+                # Decrease in increments of 10
+                ax.set_ylim([10**(math.floor(math.log10(last_residuals_min))), 1])
+
             # Increase in increments of 100
             time_incr = 10.0*self.times[0] if self.transient else 100
             ax.set_xlim([0, math.ceil(float(time_max)/time_incr)*time_incr])

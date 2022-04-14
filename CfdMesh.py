@@ -31,7 +31,7 @@ from CfdTools import addObjectProperty
 import os
 
 
-MESHER_DESCRIPTIONS = ['cfMesh', 'snappyHexMesh', 'gmsh (tetrahedral)', 'gmsh (polyhedral dual mesh)']
+MESHER_DESCRIPTIONS = ['cfMesh', 'snappyHexMesh', 'gmsh (tetrahedral)', 'gmsh (polyhedral)']
 MESHERS = ['cfMesh', 'snappyHexMesh', 'gmsh', 'gmsh']
 DIMENSION = ['3D', '3D', '3D', '3D']
 DUAL_CONVERSION = [False, False, False, True]
@@ -47,7 +47,7 @@ def makeCfdMesh(name="CFDMesh"):
 
 class _CommandCfdMeshFromShape:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
                                                      "CFD mesh"),
@@ -78,8 +78,8 @@ class _CommandCfdMeshFromShape:
                             FreeCADGui.doCommand(
                                 "CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
                         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
-        else:
-            print("ERROR: You cannot have more than one mesh object")
+            else:
+                print("ERROR: You cannot have more than one mesh object")
         FreeCADGui.Selection.clearSelection()
 
 
@@ -164,7 +164,7 @@ class _ViewProviderCfdMesh:
         self.taskd = None
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.svg")
         return icon_path
 
     def attach(self, vobj):

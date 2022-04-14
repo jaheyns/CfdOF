@@ -112,7 +112,7 @@ class _TaskPanelCfdPhysicsSelection:
             self.form.radioButtonFreeSurface.setEnabled(False)
             self.form.radioButtonLES.setEnabled(False)
             if self.form.radioButtonFreeSurface.isChecked():
-                self.form.radioButtonSinglePhase.toggle() # TODO This is quite hacky, this should really be done with a ButtonGroup
+                self.form.radioButtonSinglePhase.toggle()
         else:
             self.form.radioButtonFreeSurface.setEnabled(True)
             self.form.radioButtonLES.setEnabled(True)

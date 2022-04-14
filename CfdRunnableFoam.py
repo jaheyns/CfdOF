@@ -33,6 +33,8 @@ import CfdAnalysis
 from PySide.QtCore import QObject, Signal
 from collections import OrderedDict
 
+from CfdResidualPlot import ResidualPlot
+
 
 class CfdRunnable(QObject, object):
 
@@ -70,7 +72,13 @@ class CfdRunnableFoam(CfdRunnable):
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
 
+        self.plot_forces = False
+        self.plot_force_coefficients = False
+
+        self.constructAncillaryPlotters()
+
         self.initResiduals()
+        self.initMonitors()
 
     def check_prerequisites(self):
         return ""
@@ -88,16 +96,44 @@ class CfdRunnableFoam(CfdRunnable):
         self.nuTildaResiduals = []
         self.gammaIntResiduals = []
         self.ReThetatResiduals = []
+
         self.time = []
         self.niter = 0
         self.latest_time = 0
         self.prev_time = 0
         self.latest_outer_iter = 0
         self.prev_num_outer_iters = 0
-        self.solver.Proxy.residual_plot.reInitialise(self.analysis)
+
+        self.solver.Proxy.residual_plotter.reInitialise(self.analysis)
+
+    def initMonitors(self):
+
+        if self.plot_forces:
+            self.pressureXResiduals = []
+            self.pressureYResiduals = []
+            self.pressureZResiduals = []
+
+            self.viscousXResiduals = []
+            self.viscousYResiduals = []
+            self.viscousZResiduals = []
+
+            self.solver.Proxy.forces_plotter.reInitialise(self.analysis)
+
+        if self.plot_force_coefficients:
+            self.cdResiduals = []
+            self.clResiduals = []
+
+            self.solver.Proxy.force_coeffs_plotter.reInitialise(self.analysis)
+
+        # if hasattr(self.solver.Proxy, 'forces_plotter') and self.solver.Proxy.forces_plotter is not None:
+        #     self.solver.Proxy.forces_plotter.reInitialise(self.analysis)
+        #
+        # if hasattr(self.solver.Proxy, 'forces_coeffs_plotter') and self.solver.Proxy.force_coeffs_plotter is not None:
+        #     self.solver.Proxy.force_coeffs_plotter.reInitialise(self.analysis)
 
     def get_solver_cmd(self, case_dir):
         self.initResiduals()
+        self.initMonitors()
 
         # Environment is sourced in run script, so no need to include in run command
         cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
@@ -106,6 +142,17 @@ class CfdRunnableFoam(CfdRunnable):
 
     def getRunEnvironment(self):
         return CfdTools.getRunEnvironment()
+
+    def constructAncillaryPlotters(self):
+        reporting_functions = CfdTools.getReportingFunctionsGroup(CfdTools.getActiveAnalysis())
+        if reporting_functions is not None:
+            for rf_type in reporting_functions:
+                if rf_type.FunctionObjectType == "Force":
+                    self.plot_forces = True
+                    self.solver.Proxy.forces_plotter = ResidualPlot(title="Forces", is_log=False)
+                elif rf_type.FunctionObjectType == "ForceCoefficients":
+                    self.plot_force_coefficients = True
+                    self.solver.Proxy.force_coeffs_plotter = ResidualPlot(title="Force Coefficients", is_log=False)
 
     def process_output(self, text):
         log_lines = text.split('\n')
@@ -171,8 +218,25 @@ class CfdRunnableFoam(CfdRunnable):
             if "ReThetat," in split and self.niter > len(self.ReThetatResiduals):
                 self.ReThetatResiduals.append(float(split[7].split(',')[0]))
 
+            # Force monitors
+            if "Pressure" in split and self.niter-1 > len(self.pressureXResiduals):
+                self.pressureXResiduals.append(float(split[2].replace("(", "")))
+                self.pressureYResiduals.append(float(split[3]))
+                self.pressureZResiduals.append(float(split[4].replace(")", "")))
+
+            if "Viscous" in split and self.niter-1 > len(self.viscousXResiduals):
+                self.viscousXResiduals.append(float(split[2].replace("(", "")))
+                self.viscousYResiduals.append(float(split[3]))
+                self.viscousZResiduals.append(float(split[4].replace(")", "")))
+
+            # Force coefficient monitors
+            if "Cd" in split and self.niter-1 > len(self.cdResiduals):
+                self.cdResiduals.append(float(split[2]))
+            if "Cl" in split and self.niter-1 > len(self.clResiduals):
+                self.clResiduals.append(float(split[2]))
+
         if self.niter > 1 and self.niter > prev_niter:
-            self.solver.Proxy.residual_plot.updateResiduals(self.time, OrderedDict([
+            self.solver.Proxy.residual_plotter.updateResiduals(self.time, OrderedDict([
                 ('$\\rho$', self.rhoResiduals),
                 ('$U_x$', self.UxResiduals),
                 ('$U_y$', self.UyResiduals),
@@ -185,3 +249,18 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$\\omega$', self.omegaResiduals),
                 ('$\\gamma$', self.gammaIntResiduals),
                 ('$Re_{\\theta}$', self.ReThetatResiduals)]))
+
+            if self.plot_forces:
+                self.solver.Proxy.forces_plotter.updateResiduals(self.time, OrderedDict([
+                    ('$Pressure_x$', self.pressureXResiduals),
+                    ('$Pressure_y$', self.pressureYResiduals),
+                    ('$Pressure_z$', self.pressureZResiduals),
+                    ('$Viscous_x$', self.viscousXResiduals),
+                    ('$Viscous_y$', self.viscousYResiduals),
+                    ('$Viscous_z$', self.viscousZResiduals)]))
+
+            if self.plot_force_coefficients:
+                self.solver.Proxy.force_coeffs_plotter.updateResiduals(self.time, OrderedDict([
+                    ('$C_D$', self.cdResiduals),
+                    ('$C_L$', self.clResiduals)
+                ]))
