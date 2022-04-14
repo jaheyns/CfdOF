@@ -358,7 +358,7 @@ class CfdCaseWriterFoam:
             settings['reportingFunctions'][name]['CoR'] = tuple(p for p in settings['reportingFunctions'][name]['CoR'])
             settings['reportingFunctions'][name]['Direction'] = tuple(p for p in settings['reportingFunctions'][name]['Direction'])
 
-            if settings['reportingFunctions'][name]['reportingFunctions'] == 'ForceCoefficients':
+            if settings['reportingFunctions'][name]['FunctionObjectType'] == 'ForceCoefficients':
                 settings['reportingFunctions'][name]['Lift'] = tuple(p for p in settings['reportingFunctions'][name]['Lift'])
                 settings['reportingFunctions'][name]['Drag'] = tuple(p for p in settings['reportingFunctions'][name]['Drag'])
                 settings['reportingFunctions'][name]['Pitch'] = tuple(p for p in settings['reportingFunctions'][name]['Pitch'])

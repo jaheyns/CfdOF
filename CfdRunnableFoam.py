@@ -111,10 +111,10 @@ class CfdRunnableFoam(CfdRunnable):
         self.cdResiduals = []
         self.clResiduals = []
 
-        if self.solver.Proxy.forces_plotter is not None:
+        if hasattr(self.solver.Proxy, 'forces_plotter'):
             self.solver.Proxy.forces_plotter.reInitialise(self.analysis)
 
-        if self.solver.Proxy.force_coeffs_plotter is not None:
+        if hasattr(self.solver.Proxy, 'forces_coeffs_plotter'):
             self.solver.Proxy.force_coeffs_plotter.reInitialise(self.analysis)
 
     def get_solver_cmd(self, case_dir):

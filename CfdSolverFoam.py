@@ -112,11 +112,13 @@ class _CfdSolverFoam(object):
         if reporting_functions is not None:
 
             #TODO remove
-            print(f'*************** NOT GETTING HERE')
+            print(f'*************** AAAAA')
             for rf_type in reporting_functions:
                 if rf_type.FunctionObjectType == "Force":
+                    print(f'*************** BBBBB')
                     self.forces_plotter = ResidualPlot(title="Forces", is_log=False)
                 elif rf_type.FunctionObjectType == "ForceCoefficients":
+                    print(f'*************** CCCCC')
                     self.force_coeffs_plotter = ResidualPlot(title="Force Coefficients", is_log=False)
 
     def onDocumentRestored(self, obj):
