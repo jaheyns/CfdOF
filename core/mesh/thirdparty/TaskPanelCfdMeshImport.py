@@ -32,8 +32,10 @@ if FreeCAD.GuiUp:
     from PySide import QtGui, QtCore
 
 
-class _TaskPanelCfdMeshImport:
-    """ Task Panel for CFD mesh importing tasks """
+class TaskPanelCfdMeshImport:
+    """
+    Task Panel for CFD mesh importing tasks
+    """
     def __init__(self, obj):
         self.obj = obj
         self.analysis_object = CfdTools.getActiveAnalysis()
@@ -62,16 +64,6 @@ class _TaskPanelCfdMeshImport:
         self.Start = time.time()
         self.Timer.start()
 
-    def closed(self):
-        doc = FreeCADGui.getDocument(self.obj.Document)
-        doc.resetEdit()
-        # return True  # TODO Jonathan - check this is correct
-
-    def reject(self):
-        doc = FreeCADGui.getDocument(self.obj.Document)
-        doc.resetEdit()
-        # return True  # TODO Jonathan - check this is correct
-
     def openSelectMeshDialog(self):
         path = FreeCAD.ConfigGet("UserHomePath")
         self.mesh_input_filename, Filter = QtGui.QFileDialog.getOpenFileName(None, "Read a mesh file", path, "")
@@ -93,7 +85,6 @@ class _TaskPanelCfdMeshImport:
             raise RuntimeError(f'Import of mesh type {self.mesh_type} not supported or check your file extension')
 
         self._output_mesh = self.convert()
-
         return self._output_mesh
 
     def convert(self):
@@ -108,8 +99,8 @@ class _TaskPanelCfdMeshImport:
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
-            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand(" + self._foam_convert_command + " " + self.mesh_input_filename +
-                                 ", cart_mesh.meshCaseDir, source_env=False)")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand(" + self._foam_convert_command + " "
+                                 + self.mesh_input_filename + ", cart_mesh.meshCaseDir, source_env=False)")
             FreeCADGui.doCommand("FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\\n')")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             FreeCADGui.doCommand("proxy.running_from_macro = True")
@@ -146,11 +137,22 @@ class _TaskPanelCfdMeshImport:
             FreeCAD.Gui.updateGui()
 
     def update_timer_text(self):
-        # if self.mesh_obj.Proxy.mesh_process.state() == QtCore.QProcess.ProcessState.Running: # todo Jonathan - fix this once we have a import_obj
+        # TODO Jonathan - fix this once we have a import_obj
+        # if self.mesh_obj.Proxy.mesh_process.state() == QtCore.QProcess.ProcessState.Running:
         #     self.form.l_time.setText('Time: ' + CfdTools.formatTimer(time.time() - self.Start))
         pass
+
+    def accept(self):
+        doc = FreeCADGui.getDocument(self.obj.Document)
+        doc.resetEdit()
+
+    def reject(self):
+        doc = FreeCADGui.getDocument(self.obj.Document)
+        doc.resetEdit()
 
     @staticmethod
     def getMeshType(input_filename):
         filename, file_extension = os.path.splitext(input_filename)
         return file_extension
+
+
