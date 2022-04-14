@@ -165,15 +165,11 @@ class TaskPanelCfdReportingFunctions:
         self.updateUI()
 
     def accept(self):
-        # if self.obj.Label.startswith("CfdReportingFunctions"):
-        #     self.obj.Label = self.obj.BoundaryType
         FreeCADGui.Selection.removeObserver(self)
 
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-        #TODO remove
-        print(f'MY NAME IS:: {self.obj.Name}')
         FreeCADGui.doCommand("\nfo = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
         # Type
         FreeCADGui.doCommand("fo.FunctionObjectType "
