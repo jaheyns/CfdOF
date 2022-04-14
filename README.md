@@ -31,6 +31,7 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 * Conversion to poly dual mesh from existing meshes
 * Post meshing check mesh
 * Postprocessing using Paraview
+* Basic support for force-based function objects (Forces, Force Coefficients)
 * Runs on Windows 7-11 and Linux
 * Unit/regression testing
 * Case builder using an extensible template structure
@@ -270,4 +271,4 @@ We acknowledge significant contributions from
 CfdOF is dedicated to the memory of Michael Hindley. It is thanks to his irrepressible enthusiasm for
 FreeCAD and open source software that this workbench exists. Rest in peace.
 
-_Last Updated 07/04/2022_
+_Last Updated 14/04/2022_
