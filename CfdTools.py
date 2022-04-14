@@ -126,30 +126,30 @@ def getParentAnalysisObject(obj):
 
 
 def getPhysicsModel(analysis_object):
-    isPresent = False
+    is_present = False
     for i in analysis_object.Group:
         if "PhysicsModel" in i.Name:
-            physicsModel = i
-            isPresent = True
-    if not isPresent:
-        physicsModel = None
-    return physicsModel
+            physics_model = i
+            is_present = True
+    if not is_present:
+        physics_model = None
+    return physics_model
 
 
 def getDynamicMeshAdaptation(analysis_object):
-    isPresent = False
-    for i in analysis_object.Group:
-        if "DynamicMeshAdaptationModel" in i.Name:
-            dynamicMeshAdaptionModel = i
-            isPresent = True
-    if not isPresent:
-        dynamicMeshAdaptionModel = None
-    return dynamicMeshAdaptionModel
+    is_present = False
+    for i in getMesh(analysis_object).Group:
+        if "DynamicMeshModel" in i.Name:
+            dynamic_mesh_adaption_model = i
+            is_present = True
+    if not is_present:
+        dynamic_mesh_adaption_model = None
+    return dynamic_mesh_adaption_model
 
 
 def getMeshObject(analysis_object):
-    isPresent = False
-    meshObj = []
+    is_present = False
+    mesh_obj = []
     if analysis_object:
         members = analysis_object.Group
     else:
@@ -157,14 +157,14 @@ def getMeshObject(analysis_object):
     from CfdMesh import _CfdMesh
     for i in members:
         if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
-            if isPresent:
+            if is_present:
                 FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
             else:
-                meshObj.append(i)
-                isPresent = True
-    if not isPresent:
-        meshObj = [None]
-    return meshObj[0]
+                mesh_obj.append(i)
+                is_present = True
+    if not is_present:
+        mesh_obj = [None]
+    return mesh_obj[0]
 
 
 def getPorousZoneObjects(analysis_object):

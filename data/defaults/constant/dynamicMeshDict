@@ -32,7 +32,12 @@ correctFluxes
     (alphaPhiUn none)
 );
 
-dumpLevel       %(dynamicMeshAdaptation/WriteFields%);
+%{%(dynamicMeshAdaptation/WriteFields%)
+%:True
+dumpLevel       true;
+%:False
+dumpLevel       false;
+%}
 
 //************************************************************************ //
 %}

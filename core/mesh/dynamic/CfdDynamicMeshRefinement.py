@@ -52,7 +52,7 @@ class _CommandDynamicMesh:
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_dynamic.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Dynamic mesh refinement"),
-                'Accel': "M, R",
+                'Accel': "M, D",
                 'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Creates a dynamic mesh refinement rule")}
 
     def IsActive(self):
@@ -61,7 +61,7 @@ class _CommandDynamicMesh:
 
     def Activated(self):
         is_present = False
-        members = CfdTools.getActiveAnalysis().Group
+        members = CfdTools.getMesh(CfdTools.getActiveAnalysis()).Group
         for i in members:
             if isinstance(i.Proxy, _CfdDynamicMeshRefinement):
                 FreeCADGui.activeDocument().setEdit(i.Name)
@@ -77,8 +77,11 @@ class _CommandDynamicMesh:
                     FreeCADGui.doCommand("")
                     FreeCADGui.addModule("core.mesh.dynamic.CfdDynamicMeshRefinement as CfdDynamicMeshRefinement")
                     FreeCADGui.addModule("CfdTools")
+                    # FreeCADGui.doCommand(
+                    #     "CfdTools.getActiveAnalysis().addObject(CfdDynamicMeshRefinement" +
+                    #     ".makeCfdDynamicMeshRefinement(App.ActiveDocument.{}))".format(sobj.Name))
                     FreeCADGui.doCommand(
-                        "CfdTools.getActiveAnalysis().addObject(CfdDynamicMeshRefinement.makeCfdDynamicMeshRefinement(App.ActiveDocument.{}))".format(sobj.Name))
+                        "CfdDynamicMeshRefinement.makeCfdDynamicMeshRefinement(App.ActiveDocument.{})".format(sobj.Name))
                     FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
         FreeCADGui.Selection.clearSelection()
@@ -121,8 +124,6 @@ class _CfdDynamicMeshRefinement:
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
-
-
 
 
 class _ViewProviderCfdDynamicMeshRefinement:
