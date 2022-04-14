@@ -110,20 +110,13 @@ class _CfdSolverFoam(object):
 
         reporting_functions = CfdTools.getReportingFunctionsGroup(CfdTools.getActiveAnalysis())
         if reporting_functions is not None:
-
-            #TODO remove
-            print(f'*************** AAAAA')
             for rf_type in reporting_functions:
                 if rf_type.FunctionObjectType == "Force":
-                    print(f'*************** BBBBB')
                     self.forces_plotter = ResidualPlot(title="Forces", is_log=False)
                 elif rf_type.FunctionObjectType == "ForceCoefficients":
-                    print(f'*************** CCCCC')
                     self.force_coeffs_plotter = ResidualPlot(title="Force Coefficients", is_log=False)
 
     def onDocumentRestored(self, obj):
-        # TODO remove
-        print(f'*************** CALLING RESTORED')
         self.initProperties(obj)
 
     def execute(self, obj):

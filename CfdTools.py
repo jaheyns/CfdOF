@@ -180,11 +180,7 @@ def getReportingFunctionsGroup(analysis_object):
     group = []
     from core.functionobjects.reporting.CfdReportingFunctions import _CfdReportingFunctions
     for i in analysis_object.Group:
-        #TODO remove
-        print(f'I FOUND: {i.Name}')
         if isinstance(i.Proxy, _CfdReportingFunctions):
-            # TODO remove
-            print(f'Found a reporting function')
             group.append(i)
     return group
 
