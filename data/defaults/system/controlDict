@@ -73,7 +73,6 @@ libs
 
 functions
 {
-
 %{%(reportingFunctions%)
 %{%(reportingFunctions/%(0%)/FunctionObjectType%)
 %:Force
@@ -175,6 +174,8 @@ functions
         }
     }
 %}
+%:default
+        // No functions configured
 %}
 }
 // ************************************************************************* //
