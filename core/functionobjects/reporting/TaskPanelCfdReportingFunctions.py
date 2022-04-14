@@ -25,33 +25,27 @@ import os
 import os.path
 import CfdTools
 from CfdTools import getQuantity, setQuantity, indexOrDefault
-import CfdFaceSelectWidget
-from core.functionobjects import CfdFunctionObjects
+from core.functionobjects.reporting import CfdReportingFunctions
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtGui
-    from PySide.QtGui import QFormLayout
 
 
-class TaskPanelCfdFunctionObjects:
+class TaskPanelCfdReportingFunctions:
     """
     Task panel for adding solver function objects
     """
     def __init__(self, obj):
-        self.selecting_direction = False
         self.obj = obj
         self.analysis_obj = CfdTools.getActiveAnalysis()
 
-        # Store values which are changed on the fly for visual update
-        # self.ShapeRefsOrig = list(self.obj.ShapeRefs)
         self.FunctionObjectTypeOrig = str(self.obj.FunctionObjectType)
 
-        ui_path = os.path.join(os.path.dirname(__file__), "../gui/TaskPanelCfdFunctionObjects.ui")
+        ui_path = os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdReportingFunctions.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         # Function Object types
-        self.form.comboFunctionObjectType.addItems(CfdFunctionObjects.OBJECT_NAMES)
-        bi = indexOrDefault(CfdFunctionObjects.OBJECT_NAMES, self.obj.FunctionObjectType, 0)
+        self.form.comboFunctionObjectType.addItems(CfdReportingFunctions.OBJECT_NAMES)
+        bi = indexOrDefault(CfdReportingFunctions.OBJECT_NAMES, self.obj.FunctionObjectType, 0)
         self.form.comboFunctionObjectType.currentIndexChanged.connect(self.comboFunctionObjectTypeChanged)
         self.form.comboFunctionObjectType.setCurrentIndex(bi)
         self.comboFunctionObjectTypeChanged()
@@ -155,9 +149,9 @@ class TaskPanelCfdFunctionObjects:
     def updateUI(self):
         # Function object type
         type_index = self.form.comboFunctionObjectType.currentIndex()
-        field_name_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][0]
-        coefficient_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][1]
-        spatial_bin_frame_enabled = CfdFunctionObjects.BOUNDARY_UI[type_index][2]
+        field_name_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][0]
+        coefficient_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][1]
+        spatial_bin_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][2]
 
         self.form.fieldNamesFrame.setVisible(field_name_frame_enabled)
         self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
@@ -165,19 +159,21 @@ class TaskPanelCfdFunctionObjects:
 
     def comboFunctionObjectTypeChanged(self):
         index = self.form.comboFunctionObjectType.currentIndex()
-        self.obj.FunctionObjectType = CfdFunctionObjects.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()]
-        self.form.functionObjectDescription.setText(CfdFunctionObjects.OBJECT_DESCRIPTIONS[index])
+        self.obj.FunctionObjectType = CfdReportingFunctions.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()]
+        self.form.functionObjectDescription.setText(CfdReportingFunctions.OBJECT_DESCRIPTIONS[index])
 
         self.updateUI()
 
     def accept(self):
-        if self.obj.Label.startswith("CfdFunctionObjects"):
-            self.obj.Label = self.obj.BoundaryType
+        # if self.obj.Label.startswith("CfdReportingFunctions"):
+        #     self.obj.Label = self.obj.BoundaryType
         FreeCADGui.Selection.removeObserver(self)
 
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
+        #TODO remove
+        print(f'MY NAME IS:: {self.obj.Name}')
         FreeCADGui.doCommand("\nfo = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
         # Type
         FreeCADGui.doCommand("fo.FunctionObjectType "
@@ -245,7 +241,6 @@ class TaskPanelCfdFunctionObjects:
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
-        # self.faceSelector.closing()
 
     def reject(self):
         self.obj.FunctionObjectType = self.FunctionObjectTypeOrig

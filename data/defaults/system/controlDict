@@ -74,45 +74,45 @@ libs
 functions
 {
 
-%{%(functionObjects%)
-%{%(functionObjects/%(0%)/FunctionObjectType%)
+%{%(reportingFunctions%)
+%{%(reportingFunctions/%(0%)/FunctionObjectType%)
 %:Force
     %(0%)
     {
         type                forces;
         libs                ("libforces.so");
-        patches             ( %(functionObjects/%(0%)/PatchName%) );
+        patches             ( %(reportingFunctions/%(0%)/PatchName%) );
 
-		p                   %(functionObjects/%(0%)/Pressure%);
-		U                   %(functionObjects/%(0%)/Velocity%);
+		p                   %(reportingFunctions/%(0%)/Pressure%);
+		U                   %(reportingFunctions/%(0%)/Velocity%);
 %{%(physics/Flow%)
 %:Compressible HighMachCompressible
-        rho                 %(functionObjects/%(0%)/Density%);
+        rho                 %(reportingFunctions/%(0%)/Density%);
 %:default
         rho                 rhoInf;
 %}
         rhoInf              100000;
 
-		pRef                %(functionObjects/%(0%)/ReferencePressure%);
-%{%(functionObjects/%(0%)/IncludePorosity%)
+		pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
+%{%(reportingFunctions/%(0%)/IncludePorosity%)
 %:True
 		porosity            true;
 %:False
         porosity            false;
 %}
-%{%(functionObjects/%(0%)/WriteFields%)
+%{%(reportingFunctions/%(0%)/WriteFields%)
 %:True
 		writeFields         true;
 %:False
 		writeFields         false;
 %}
-		CofR                ( %(functionObjects/%(0%)/CoR%) );
+		CofR                ( %(reportingFunctions/%(0%)/CoR%) );
 
         binData
         {
-            nBin          %(functionObjects/%(0%)/NBins%);
-            direction     ( %(functionObjects/%(0%)/Direction%) );
-%{%(functionObjects/%(0%)/Cumulative%)
+            nBin          %(reportingFunctions/%(0%)/NBins%);
+            direction     ( %(reportingFunctions/%(0%)/Direction%) );
+%{%(reportingFunctions/%(0%)/Cumulative%)
 %:True
             cumulative         true;
 %:False
@@ -125,48 +125,48 @@ functions
     {
         type                forceCoeffs;
         libs                ("libforces.so");
-        patches             ( %(functionObjects/%(0%)/PatchName%) );
+        patches             ( %(reportingFunctions/%(0%)/PatchName%) );
 
-        p                   %(functionObjects/%(0%)/Pressure%);
-		U                   %(functionObjects/%(0%)/Velocity%);
+        p                   %(reportingFunctions/%(0%)/Pressure%);
+		U                   %(reportingFunctions/%(0%)/Velocity%);
 %{%(physics/Flow%)
 %:Compressible HighMachCompressible
-        rho                 %(functionObjects/%(0%)/Density%);
+        rho                 %(reportingFunctions/%(0%)/Density%);
 %:default
         rho                 rhoInf;
 %}
         rhoInf              100000;
 
-		pRef                %(functionObjects/%(0%)/ReferencePressure%);
+		pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
 
-%{%(functionObjects/%(0%)/IncludePorosity%)
+%{%(reportingFunctions/%(0%)/IncludePorosity%)
 %:True
 		porosity            true;
 %:False
         porosity            false;
 %}
-%{%(functionObjects/%(0%)/WriteFields%)
+%{%(reportingFunctions/%(0%)/WriteFields%)
 %:True
 		writeFields         true;
 %:False
 		writeFields         false;
 %}
 
-		CofR                ( %(functionObjects/%(0%)/CoR%) );
-        liftDir             ( %(functionObjects/%(0%)/Lift%) );
-        dragDir             ( %(functionObjects/%(0%)/Drag%) );
-        pitchAxis           ( %(functionObjects/%(0%)/Pitch%) );
+		CofR                ( %(reportingFunctions/%(0%)/CoR%) );
+        liftDir             ( %(reportingFunctions/%(0%)/Lift%) );
+        dragDir             ( %(reportingFunctions/%(0%)/Drag%) );
+        pitchAxis           ( %(reportingFunctions/%(0%)/Pitch%) );
 
-        magUInf             %(functionObjects/%(0%)/MagnitudeUInf%);
+        magUInf             %(reportingFunctions/%(0%)/MagnitudeUInf%);
 
-        lRef                %(functionObjects/%(0%)/LengthRef%);
-        Aref                %(functionObjects/%(0%)/AreaRef%);
+        lRef                %(reportingFunctions/%(0%)/LengthRef%);
+        Aref                %(reportingFunctions/%(0%)/AreaRef%);
 
         binData
         {
-            nBin          %(functionObjects/%(0%)/NBins%);
-            direction     ( %(functionObjects/%(0%)/Direction%) );
-%{%(functionObjects/%(0%)/Cumulative%)
+            nBin          %(reportingFunctions/%(0%)/NBins%);
+            direction     ( %(reportingFunctions/%(0%)/Direction%) );
+%{%(reportingFunctions/%(0%)/Cumulative%)
 %:True
             cumulative         true;
 %:False

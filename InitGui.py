@@ -3,6 +3,7 @@
 # *  (c) qingfeng xia @ iesensor.com 2016                                  *
 # *  Copyright (c) 2017 Andrew Gill (CSIR) <agill@csir.co.za>              *
 # *  Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *  Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                        *
 # *  this file is part of the freecad cax development system.              *
 # *                                                                        *
@@ -42,40 +43,31 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addPreferencePage(CfdPreferencePage, "CfdOF")
 
     def Initialize(self):
-        # must import QtCore in this function,
-        # not at the beginning of this file for translation support
+        # Must import QtCore in this function, not at the beginning of this file for translation support
         from PySide import QtCore
 
         from CfdAnalysis import _CommandCfdAnalysis
         from CfdMesh import _CommandCfdMeshFromShape
         from CfdMeshRefinement import _CommandMeshRegion
-        from core.functionobjects.CfdFunctionObjects import _CommandCfdFunctionObjects
-
-        from CfdPhysicsSelection import _CommandCfdPhysicsSelection
-        from CfdFluidMaterial import _CommandCfdFluidMaterial
-        from CfdSolverFoam import _CommandCfdSolverFoam
-        from CfdInitialiseFlowField import _CommandCfdInitialiseInternalFlowField
-        from CfdFluidBoundary import _CommandCfdFluidBoundary
-        from CfdZone import _CommandCfdPorousZone
-        from CfdZone import _CommandCfdInitialisationZone
+        from core.functionobjects.reporting.CfdReportingFunctions import _CommandCfdReportingFunctions
 
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
-        FreeCADGui.addCommand('Cfd_FunctionObjects',_CommandCfdFunctionObjects())
+        FreeCADGui.addCommand('Cfd_ReportingFunctions', _CommandCfdReportingFunctions())
 
         cmdlst = ['Cfd_Analysis',
                   'Cfd_MeshFromShape', 'Cfd_MeshRegion',
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
-                  'Cfd_FunctionObjects',
+                  'Cfd_ReportingFunctions',
                   'Cfd_SolverControl']
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)
         self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), cmdlst)
 
-        # enable QtCore translation here, todo
+        # TODO enable QtCore translation here
 
     def GetClassName(self):
         return "Gui::PythonWorkbench"

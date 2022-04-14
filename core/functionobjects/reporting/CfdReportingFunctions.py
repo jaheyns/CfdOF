@@ -26,7 +26,6 @@ import FreeCAD
 import FreeCADGui
 from pivy import coin
 from PySide import QtCore
-import Part
 import CfdTools
 from CfdTools import addObjectProperty
 import os
@@ -34,49 +33,44 @@ import os
 OBJECT_NAMES = ["Force", "ForceCoefficients"]
 OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches"]
 
-# For each sub-type, whether the basic tab is enabled, the panel numbers to show (ignored if false), whether
-# direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
-# whether volume fraction panel is shown, whether thermal GUI is shown,
-# rows of thermal UI to show (all shown if None)
-
-BOUNDARY_UI = [[True, False, True],     # Forces
-               [True, True, True, ]]   # Force coefficients
+FUNCTIONS_UI = [[True, False, True],  # Forces
+                [True, True, True, ]]    # Force coefficients
 
 
-def makeCfdFunctionObject(name="CFDFunctionObject"):
+def makeCfdReportingFunctions(name="CfdReportingFunctions"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdFunctionObjects(obj)
+    _CfdReportingFunctions(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdFunctionObjects(obj.ViewObject)
+        _ViewProviderCfdReportingFunctions(obj.ViewObject)
     return obj
 
 
-class _CommandCfdFunctionObjects:
+class _CommandCfdReportingFunctions:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "monitor.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_FunctionObjects",
-                                                     "CFD function object"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_FunctionObjects",
-                                                    "Create a function object for the current case")}
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
+                                                     "Cfd reporting functions"),
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
+                                                    "Create a reporting function for the current case")}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None     # Same as for boundary condition commands
 
     def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Create CfdFunctionObjects object")
+        FreeCAD.ActiveDocument.openTransaction("Create CfdReportingFunctions object")
         FreeCADGui.doCommand("")
-        FreeCADGui.addModule("core.functionobjects.CfdFunctionObjects as CfdFunctionObjects")
+        FreeCADGui.addModule("core.functionobjects.reporting.CfdReportingFunctions as CfdReportingFunctions")
         FreeCADGui.addModule("CfdTools")
-        FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdFunctionObjects.makeCfdFunctionObject())")
+        FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdReportingFunctions.makeCfdReportingFunctions())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-class _CfdFunctionObjects:
+class _CfdReportingFunctions:
     """ CFD Function objects properties """
 
     def __init__(self, obj):
-        self.Type = "CfdFunctionObjects"
+        self.Type = "CfdReportingFunctions"
         self.Object = obj
         obj.Proxy = self
         self.initProperties(obj)
@@ -139,33 +133,7 @@ class _CfdFunctionObjects:
         self.initProperties(obj)
 
     def execute(self, obj):
-        """ Create compound part at recompute. """
         pass
-        # shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
-        # if shape is None:
-        #     obj.Shape = Part.Shape()
-        # else:
-        #     obj.Shape = shape
-        # self.updateBoundaryColors(obj)
-
-    def updateBoundaryColors(self, obj): # todo come back and fix me
-        pass
-        # if FreeCAD.GuiUp:
-        #     vobj = obj.ViewObject
-        #     vobj.Transparency = 20
-        #     if obj.BoundaryType == 'wall':
-        #         vobj.ShapeColor = (0.1, 0.1, 0.1)  # Dark grey
-        #     elif obj.BoundaryType == 'inlet':
-        #         vobj.ShapeColor = (0.0, 0.0, 1.0)  # Blue
-        #     elif obj.BoundaryType == 'outlet':
-        #         vobj.ShapeColor = (1.0, 0.0, 0.0)  # Red
-        #     elif obj.BoundaryType == 'open':
-        #         vobj.ShapeColor = (0.0, 1.0, 1.0)  # Cyan
-        #     elif (obj.BoundaryType == 'constraint') or \
-        #          (obj.BoundaryType == 'baffle'):
-        #         vobj.ShapeColor = (0.5, 0.0, 1.0)  # Purple
-        #     else:
-        #         vobj.ShapeColor = (1.0, 1.0, 1.0)  # White
 
     def __getstate__(self):
         return None
@@ -174,9 +142,9 @@ class _CfdFunctionObjects:
         return None
 
 
-class _ViewProviderCfdFunctionObjects:
+class _ViewProviderCfdReportingFunctions:
     """
-    A View Provider for the CfdFunctionObjects object
+    A View Provider for the CfdReportingFunctions object
     """
     def __init__(self, vobj):
         vobj.Proxy = self
@@ -222,16 +190,11 @@ class _ViewProviderCfdFunctionObjects:
     def setEdit(self, vobj, mode):
         analysis_object = CfdTools.getParentAnalysisObject(self.Object)
         if analysis_object is None:
-            CfdTools.cfdErrorBox("Boundary must have a parent analysis object")
+            CfdTools.cfdErrorBox("Reporting function must have a parent analysis object")
             return False
-        # physics_model = CfdTools.getPhysicsModel(analysis_object)
-        # if not physics_model:
-        #     CfdTools.cfdErrorBox("Analysis object must have a physics object")
-        #     return False
-        # material_objs = CfdTools.getMaterials(analysis_object)
 
-        import core.functionobjects.TaskPanelCfdFunctionObjects as TaskPanelCfdFunctionObjects
-        taskd = TaskPanelCfdFunctionObjects.TaskPanelCfdFunctionObjects(self.Object)
+        import core.functionobjects.reporting.TaskPanelCfdReportingFunctions as TaskPanelCfdReportingFunctions
+        taskd = TaskPanelCfdReportingFunctions.TaskPanelCfdReportingFunctions(self.Object)
         self.Object.ViewObject.show()
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
@@ -240,14 +203,6 @@ class _ViewProviderCfdFunctionObjects:
     def unsetEdit(self, vobj, mode):
         FreeCADGui.Control.closeDialog()
         return
-
-    # def onDelete(self, feature, sub_elements):
-    #     try:
-    #         for obj in self.Object.Group:
-    #             obj.ViewObject.show()
-    #     except Exception as err:
-    #         FreeCAD.Console.PrintError("Error in onDelete: " + str(err))
-    #     return True
 
     def __getstate__(self):
         return None

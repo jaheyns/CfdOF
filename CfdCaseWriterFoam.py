@@ -49,7 +49,7 @@ class CfdCaseWriterFoam:
         self.material_objs = CfdTools.getMaterials(analysis_obj)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
-        self.function_objects = CfdTools.getFunctionObjectsGroup(analysis_obj)
+        self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
@@ -86,14 +86,12 @@ class CfdCaseWriterFoam:
                 if bc_labels[j] == l:
                     raise ValueError("Boundary condition label '" + bc_labels[i] + "' is duplicated")
 
-        print(f'{self.function_objects}')
-
         self.settings = {
             'physics': phys_settings,
             'fluidProperties': [],  # Order is important, so use a list
             'initialValues': CfdTools.propsToDict(self.initial_conditions),
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
-            'functionObjects': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.function_objects),
+            'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
@@ -113,7 +111,7 @@ class CfdCaseWriterFoam:
         self.processSolverSettings()
         self.processFluidProperties()
         self.processBoundaryConditions()
-        self.processFunctionObjects()
+        self.processReportingFunctions()
         self.processInitialConditions()
         self.clearCase()
 
@@ -350,20 +348,20 @@ class CfdCaseWriterFoam:
                     'BoundarySubType': 'symmetry'
                 }
 
-    def processFunctionObjects(self):
+    def processReportingFunctions(self):
         """ Compute any Function objects required before case build """
         settings = self.settings
         # Copy keys so that we can delete while iterating
-        fo_name = list(settings['functionObjects'].keys())
+        rf_name = list(settings['reportingFunctions'].keys())
 
-        for name in fo_name:
-            settings['functionObjects'][name]['CoR'] = tuple(p for p in settings['functionObjects'][name]['CoR'])
-            settings['functionObjects'][name]['Direction'] = tuple(p for p in settings['functionObjects'][name]['Direction'])
+        for name in rf_name:
+            settings['reportingFunctions'][name]['CoR'] = tuple(p for p in settings['reportingFunctions'][name]['CoR'])
+            settings['reportingFunctions'][name]['Direction'] = tuple(p for p in settings['reportingFunctions'][name]['Direction'])
 
-            if settings['functionObjects'][name]['FunctionObjectType'] == 'ForceCoefficients':
-                settings['functionObjects'][name]['Lift'] = tuple(p for p in settings['functionObjects'][name]['Lift'])
-                settings['functionObjects'][name]['Drag'] = tuple(p for p in settings['functionObjects'][name]['Drag'])
-                settings['functionObjects'][name]['Pitch'] = tuple(p for p in settings['functionObjects'][name]['Pitch'])
+            if settings['reportingFunctions'][name]['reportingFunctions'] == 'ForceCoefficients':
+                settings['reportingFunctions'][name]['Lift'] = tuple(p for p in settings['reportingFunctions'][name]['Lift'])
+                settings['reportingFunctions'][name]['Drag'] = tuple(p for p in settings['reportingFunctions'][name]['Drag'])
+                settings['reportingFunctions'][name]['Pitch'] = tuple(p for p in settings['reportingFunctions'][name]['Pitch'])
 
     def parseFaces(self, shape_refs):
         pass

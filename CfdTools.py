@@ -6,6 +6,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -175,11 +176,13 @@ def getInitialConditions(analysis_object):
     return None
 
 
-def getFunctionObjectsGroup(analysis_object):
+def getReportingFunctionsGroup(analysis_object):
     group = []
-    from core.functionobjects.CfdFunctionObjects import _CfdFunctionObjects
+    from core.functionobjects.reporting.CfdReportingFunctions import _CfdReportingFunctions
     for i in analysis_object.Group:
-        if isinstance(i.Proxy, _CfdFunctionObjects):
+        if isinstance(i.Proxy, _CfdReportingFunctions):
+            # TODO remove
+            print(f'Didnt find a reporting function')
             group.append(i)
     return group
 

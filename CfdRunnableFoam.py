@@ -33,10 +33,6 @@ import CfdAnalysis
 from PySide.QtCore import QObject, Signal
 from collections import OrderedDict
 
-from CfdResidualPlot import ResidualPlot
-from core.plotters.CfdForcesPlot import ForcesPlot
-from core.plotters.CfdForceCoeffPlot import ForceCoeffsPlot
-
 
 class CfdRunnable(QObject, object):
 

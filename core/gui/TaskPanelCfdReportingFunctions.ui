@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TaskPanelCfdFluidBoundary</class>
- <widget class="QWidget" name="TaskPanelCfdFluidBoundary">
+ <class>TaskPanelCfdReportingFunctions</class>
+ <widget class="QWidget" name="TaskPanelCfdReportingFunctions">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -986,7 +986,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Function object</string>
+            <string>Reporting function</string>
            </property>
           </widget>
          </item>
