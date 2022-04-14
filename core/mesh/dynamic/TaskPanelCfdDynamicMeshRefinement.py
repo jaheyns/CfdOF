@@ -31,7 +31,7 @@ from CfdTools import setQuantity, getQuantity
 PERMISSIBLE_SOLVER_FIELDS = ['p', 'U']
 
 
-class _TaskPanelCfdDynamicMeshRefinement:
+class TaskPanelCfdDynamicMeshRefinement:
     """ The TaskPanel for editing References property of MeshRefinement objects """
 
     def __init__(self, obj):

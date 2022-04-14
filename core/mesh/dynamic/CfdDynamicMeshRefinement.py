@@ -28,7 +28,7 @@ import os
 import CfdTools
 from CfdTools import addObjectProperty
 from pivy import coin
-from core.mesh.dynamic import _TaskPanelCfdDynamicMeshRefinement
+from core.mesh.dynamic import TaskPanelCfdDynamicMeshRefinement
 
 
 def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshModel"):
@@ -49,7 +49,7 @@ class _CommandDynamicMesh:
         pass
 
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "meshdynamic.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_dynamic.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Dynamic mesh refinement"),
                 'Accel': "M, R",
@@ -130,7 +130,7 @@ class _ViewProviderCfdDynamicMeshRefinement:
         vobj.Proxy = self
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "meshdynamic.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_dynamic.svg")
         return icon_path
 
     def attach(self, vobj):
@@ -157,8 +157,8 @@ class _ViewProviderCfdDynamicMeshRefinement:
 
     def setEdit(self, vobj, mode=0):
         import importlib
-        importlib.reload(_TaskPanelCfdDynamicMeshRefinement)
-        taskd = _TaskPanelCfdDynamicMeshRefinement._TaskPanelCfdDynamicMeshRefinement(self.Object)
+        importlib.reload(TaskPanelCfdDynamicMeshRefinement)
+        taskd = TaskPanelCfdDynamicMeshRefinement.TaskPanelCfdDynamicMeshRefinement(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True

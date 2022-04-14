@@ -6,6 +6,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -186,9 +187,17 @@ def getInitialConditions(analysis_object):
     return None
 
 
+def getReportingFunctionsGroup(analysis_object):
+    group = []
+    from core.functionobjects.reporting.CfdReportingFunctions import _CfdReportingFunctions
+    for i in analysis_object.Group:
+        if isinstance(i.Proxy, _CfdReportingFunctions):
+            group.append(i)
+    return group
+
+
 def getMaterials(analysis_object):
-    return [i for i in analysis_object.Group
-            if i.isDerivedFrom('App::MaterialObjectPython')]
+    return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
 
 
 def getSolver(analysis_object):
@@ -218,7 +227,7 @@ def getCfdBoundaryGroup(analysis_object):
     return group
 
 
-def is_planar(shape):
+def isPlanar(shape):
     """
     Return whether the shape is a planar face
     """
@@ -384,7 +393,7 @@ def storeIfChanged(obj, prop, val):
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
 
 
-def hide_parts_show_meshes():
+def hidePartsShowMeshes():
     if FreeCAD.GuiUp:
         for acnstrmesh in getActiveAnalysis().Group:
             if "Mesh" in acnstrmesh.TypeId:

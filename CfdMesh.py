@@ -47,7 +47,7 @@ def makeCfdMesh(name="CFDMesh"):
 
 class _CommandCfdMeshFromShape:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
                                                      "CFD mesh"),
@@ -164,7 +164,7 @@ class _ViewProviderCfdMesh:
         self.taskd = None
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.svg")
         return icon_path
 
     def attach(self, vobj):
