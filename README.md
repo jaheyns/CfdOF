@@ -15,7 +15,7 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 ## Features
 
 ### Current:
-
+#### Flow and physics
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
 * Extension to RANS turbulent flow (k-omega SST (incl. transition), k-epsilon, and Spalart-Allmaras models supported)
 * Extension to LES turbulent flow (k-Equation, Smagorinsky and WALE (Wall bounded) models)
@@ -25,11 +25,14 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 * Porous regions and porous baffles
 * Basic material database
 * Flow initialisation with a potential solver
+#### Mesh
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
 * Cut-cell Cartesian meshing with baffles (snappyHexMesh) and implicit / explicit snapping
 * Tetrahedral meshing using Gmsh
 * Conversion to poly dual mesh from existing meshes
 * Post meshing check mesh
+* Support for dynamic mesh adaptation for supported solvers
+#### Post processing, monitoring and platform support
 * Postprocessing using Paraview
 * Basic support for force-based function objects (Forces, Force Coefficients)
 * Runs on Windows 7-11 and Linux
@@ -168,7 +171,6 @@ installed into FreeCAD using the Addon manager:
 * Restart FreeCAD
 * Repeat the above for the "CfdOF" workbench
 * For installation of dependencies, see below
-
 
 ##### Dependency installation
 
