@@ -176,7 +176,7 @@ def makeCfdFluidBoundary(name="CfdFluidBoundary"):
 
 class _CommandCfdFluidBoundary:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.svg")
         return {
             'Pixmap': icon_path,
             'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_FluidBoundary", "Fluid boundary"),
@@ -362,7 +362,7 @@ class _ViewProviderCfdFluidBoundary:
         self.taskd = None
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.svg")
         return icon_path
 
     def attach(self, vobj):

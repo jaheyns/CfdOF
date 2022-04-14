@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 33.866666 33.866668"
+   version="1.1"
+   id="svg32610"
+   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
+   sodipodi:docname="cfd_analysis.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview32612"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="px"
+     inkscape:zoom="4.0718557"
+     inkscape:cx="95.165454"
+     inkscape:cy="69.378686"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs32607" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:31.7697px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#4aa02c;fill-opacity:1;stroke:none;stroke-width:0.794244"
+       x="4.117528"
+       y="24.28079"
+       id="text47959"
+       transform="scale(1.0351076,0.96608314)"><tspan
+         sodipodi:role="line"
+         id="tspan47957"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:31.7697px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#4aa02c;fill-opacity:1;stroke-width:0.794244"
+         x="4.117528"
+         y="24.28079">A</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.4879px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#3a3a3a;fill-opacity:1;stroke:none;stroke-width:1.3;stroke-miterlimit:4;stroke-dasharray:none"
+       x="3.075068"
+       y="35.125397"
+       id="text59887"
+       transform="scale(1.0854799,0.92125152)"><tspan
+         sodipodi:role="line"
+         id="tspan59885"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.4879px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#3a3a3a;fill-opacity:1;stroke-width:1.3;stroke-miterlimit:4;stroke-dasharray:none"
+         x="3.075068"
+         y="35.125397">CFD</tspan></text>
+  </g>
+</svg>

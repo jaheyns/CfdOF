@@ -46,7 +46,7 @@ def makeCfdSolverFoam(name="CfdSolver"):
 
 class _CommandCfdSolverFoam:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Solver job control"),
                 'Accel': "S, C",
@@ -108,15 +108,15 @@ class _CfdSolverFoam(object):
 
         self.residual_plotter = ResidualPlot(title="Simulation residuals")
 
-        reporting_functions = CfdTools.getReportingFunctionsGroup(CfdTools.getActiveAnalysis())
-        if reporting_functions is not None:
-            for rf_type in reporting_functions:
-                if rf_type.FunctionObjectType == "Force":
-                    print(f'Making a FORCE PLOTTER')
-                    self.forces_plotter = ResidualPlot(title="Forces", is_log=False)
-                elif rf_type.FunctionObjectType == "ForceCoefficients":
-                    print(f'Making a FORCE COEFFICIENTS PLOTTER')
-                    self.force_coeffs_plotter = ResidualPlot(title="Force Coefficients", is_log=False)
+        # reporting_functions = CfdTools.getReportingFunctionsGroup(CfdTools.getActiveAnalysis())
+        # if reporting_functions is not None:
+        #     for rf_type in reporting_functions:
+        #         if rf_type.FunctionObjectType == "Force":
+        #             print(f'Making a FORCE PLOTTER')
+        #             self.forces_plotter = ResidualPlot(title="Forces", is_log=False)
+        #         elif rf_type.FunctionObjectType == "ForceCoefficients":
+        #             print(f'Making a FORCE COEFFICIENTS PLOTTER')
+        #             self.force_coeffs_plotter = ResidualPlot(title="Force Coefficients", is_log=False)
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
@@ -145,7 +145,7 @@ class _ViewProviderCfdSolverFoam:
 
     def getIcon(self):
         # """after load from FCStd file, self.icon does not exist, return constant path instead"""
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.svg")
         return icon_path
 
     def attach(self, vobj):

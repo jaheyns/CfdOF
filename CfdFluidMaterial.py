@@ -45,7 +45,7 @@ def makeCfdFluidMaterial(name):
 class _CommandCfdFluidMaterial:
 
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.svg")
         return {
             'Pixmap': icon_path,
             'MenuText': 'Add fluid properties',
@@ -117,7 +117,7 @@ class _ViewProviderCfdFluidMaterial:
         vobj.Proxy = self
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.svg")
         return icon_path
 
     def attach(self, vobj):
