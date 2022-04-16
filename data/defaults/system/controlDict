@@ -74,108 +74,11 @@ libs
 functions
 {
 %{%(reportingFunctions%)
-%{%(reportingFunctions/%(0%)/FunctionObjectType%)
-%:Force
-    %(0%)
-    {
-        type                forces;
-        libs                ("libforces.so");
-        patches             ( %(reportingFunctions/%(0%)/PatchName%) );
-
-		p                   %(reportingFunctions/%(0%)/Pressure%);
-		U                   %(reportingFunctions/%(0%)/Velocity%);
-%{%(physics/Flow%)
-%:Compressible HighMachCompressible
-        rho                 %(reportingFunctions/%(0%)/Density%);
-%:default
-        rho                 rhoInf;
-%}
-        rhoInf              100000;
-
-		pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
-%{%(reportingFunctions/%(0%)/IncludePorosity%)
-%:True
-		porosity            true;
-%:False
-        porosity            false;
-%}
-%{%(reportingFunctions/%(0%)/WriteFields%)
-%:True
-		writeFields         true;
-%:False
-		writeFields         false;
-%}
-		CofR                ( %(reportingFunctions/%(0%)/CoR%) );
-
-        binData
-        {
-            nBin          %(reportingFunctions/%(0%)/NBins%);
-            direction     ( %(reportingFunctions/%(0%)/Direction%) );
-%{%(reportingFunctions/%(0%)/Cumulative%)
-%:True
-            cumulative         true;
-%:False
-            cumulative         false;
-%}
-        }
-    }
-%:ForceCoefficients
-    %(0%)
-    {
-        type                forceCoeffs;
-        libs                ("libforces.so");
-        patches             ( %(reportingFunctions/%(0%)/PatchName%) );
-
-        p                   %(reportingFunctions/%(0%)/Pressure%);
-		U                   %(reportingFunctions/%(0%)/Velocity%);
-%{%(physics/Flow%)
-%:Compressible HighMachCompressible
-        rho                 %(reportingFunctions/%(0%)/Density%);
-%:default
-        rho                 rhoInf;
-%}
-        rhoInf              100000;
-
-		pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
-
-%{%(reportingFunctions/%(0%)/IncludePorosity%)
-%:True
-		porosity            true;
-%:False
-        porosity            false;
-%}
-%{%(reportingFunctions/%(0%)/WriteFields%)
-%:True
-		writeFields         true;
-%:False
-		writeFields         false;
+%[system/_functions_reporting%]
 %}
 
-		CofR                ( %(reportingFunctions/%(0%)/CoR%) );
-        liftDir             ( %(reportingFunctions/%(0%)/Lift%) );
-        dragDir             ( %(reportingFunctions/%(0%)/Drag%) );
-        pitchAxis           ( %(reportingFunctions/%(0%)/Pitch%) );
-
-        magUInf             %(reportingFunctions/%(0%)/MagnitudeUInf%);
-
-        lRef                %(reportingFunctions/%(0%)/LengthRef%);
-        Aref                %(reportingFunctions/%(0%)/AreaRef%);
-
-        binData
-        {
-            nBin          %(reportingFunctions/%(0%)/NBins%);
-            direction     ( %(reportingFunctions/%(0%)/Direction%) );
-%{%(reportingFunctions/%(0%)/Cumulative%)
-%:True
-            cumulative         true;
-%:False
-            cumulative         false;
-%}
-        }
-    }
-%:default
-        // No functions configured
-%}
+%{%(scalarTransportFunctions%)
+%[system/_functions_scalarTransport%]
 %}
 }
 // ************************************************************************* //

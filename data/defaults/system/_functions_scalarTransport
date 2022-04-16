@@ -1,0 +1,39 @@
+    %(0%)
+    {
+        type            scalarTransport;
+        libs            ("libsolverFunctionObjects.so");
+
+        // Optional entries
+        // Name of scalar field to transport, default = 's'
+        field           %(scalarTransportFunctions/%(0%)/FieldName%);
+
+        // Name of flux field, default = 'phi'
+        phi             %(scalarTransportFunctions/%(0%)/FluxFieldName%);
+
+        // Name of density field for compressible cases, default = 'rho'
+        rho             %(scalarTransportFunctions/%(0%)/DensityFieldName%);
+
+        // Name of phase field to constrain scalar to, default = 'none'
+        phase           %(scalarTransportFunctions/%(0%)/PhaseFieldName%);
+
+        // Set the scalar to zero on start/re-start
+        resetOnStartUp  %(scalarTransportFunctions/%(0%)/ResetOnStartup%);
+
+        // Name of field to use when looking up schemes from fvSchemes
+        // default = <field>
+        schemesField    %(scalarTransportFunctions/%(0%)/SchemeFieldName%);
+
+        // Diffusivity
+        // Fixed value diffusivity
+        D               %(scalarTransportFunctions/%(0%)/DiffusivityFixedValue%);
+
+        // Name of field to use as diffusivity, default = 'none'
+        nut             %(scalarTransportFunctions/%(0%)/DiffusivityFieldName%);
+
+        // Run-time selectable sources
+        fvOptions
+        {
+            // TODO come back to this
+        }
+    }
+
