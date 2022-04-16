@@ -3,6 +3,9 @@
         type            probes;
         libs            ("libsampling.so");
 
+        writeControl    timeStep;
+        writeInterval   1;
+
         fields
         (
             %(reportingProbes/%(0%)/FieldName%)
@@ -10,6 +13,6 @@
 
         probeLocations
         (
-            ( %(reportingProbes/%(0%)/ProbeLocation%) )
+            ( %(reportingProbes/%(0%)/ProbePosition%) )
         );
     }

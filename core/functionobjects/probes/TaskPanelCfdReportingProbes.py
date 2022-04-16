@@ -39,7 +39,7 @@ class TaskPanelCfdReportingProbes:
 
         self.load()
         self.updateUI()
-        
+
     def load(self):
         self.form.inputFieldName.setText(self.obj.FieldName)
         setQuantity(self.form.inputProbeLocx, self.obj.ProbePosition.x)

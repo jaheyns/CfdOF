@@ -117,6 +117,7 @@ class CfdCaseWriterFoam:
         self.processFluidProperties()
         self.processBoundaryConditions()
         self.processReportingFunctions()
+        self.processReportingProbes()
         self.processInitialConditions()
         self.clearCase()
 
@@ -370,6 +371,14 @@ class CfdCaseWriterFoam:
                 settings['reportingFunctions'][name]['Lift'] = tuple(p for p in settings['reportingFunctions'][name]['Lift'])
                 settings['reportingFunctions'][name]['Drag'] = tuple(p for p in settings['reportingFunctions'][name]['Drag'])
                 settings['reportingFunctions'][name]['Pitch'] = tuple(p for p in settings['reportingFunctions'][name]['Pitch'])
+
+    def processReportingProbes(self):
+        settings = self.settings
+        # Copy keys so that we can delete while iterating
+        rf_name = list(settings['reportingProbes'].keys())
+
+        for name in rf_name:
+            settings['reportingProbes'][name]['ProbePosition'] = tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
 
     def parseFaces(self, shape_refs):
         pass

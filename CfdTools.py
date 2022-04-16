@@ -198,7 +198,7 @@ def getReportingFunctionsGroup(analysis_object):
 
 def getReportingProbesGroup(analysis_object):
     group = []
-    from core.functionobjects.reporting.CfdReportingFunctions import CfdReportingProbes
+    from core.functionobjects.probes.CfdReportingProbes import CfdReportingProbes
     for i in analysis_object.Group:
         if isinstance(i.Proxy, CfdReportingProbes):
             group.append(i)
