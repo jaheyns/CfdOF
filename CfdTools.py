@@ -167,6 +167,14 @@ def getMeshObject(analysis_object):
     return mesh_obj[0]
 
 
+def getMesh(analysis_object):   # TODO @Oli this method and the above are to a large extent duplicates?
+    from CfdMesh import _CfdMesh
+    for i in analysis_object.Group:
+        if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
+            return i
+    return None
+
+
 def getPorousZoneObjects(analysis_object):
     return [i for i in analysis_object.Group if i.Name.startswith('PorousZone')]
 
@@ -240,14 +248,6 @@ def isPlanar(shape):
         if c / t.Length > 1e-8:
             return False
     return True
-
-
-def getMesh(analysis_object):
-    from CfdMesh import _CfdMesh
-    for i in analysis_object.Group:
-        if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
-            return i
-    return None
 
 
 def getMeshRefinementObjs(mesh_obj):

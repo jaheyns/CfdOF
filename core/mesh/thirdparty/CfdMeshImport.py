@@ -38,7 +38,7 @@ def makeCfdMeshImport(base_mesh, name="CFDMeshImport"):
     _CfdMeshImport(obj)
     if FreeCAD.GuiUp:
         _ViewProviderCfdMeshImport(obj.ViewObject)
-    base_mesh.addObject(obj)
+    # base_mesh.addObject(obj)
     return obj
 
 
@@ -55,8 +55,15 @@ class _CommandCfdMeshFromImport:
                 'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromImport", "Import an existing CFD mesh")}
 
     def IsActive(self):
-        sel = FreeCADGui.Selection.getSelection()
-        return sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, _CfdMesh)
+        analysis_obj = CfdTools.getActiveAnalysis()
+        mesh_obj = CfdTools.getMesh(analysis_obj)
+
+        # No import is mesh already exists
+        if mesh_obj is not None:
+            return False
+        else:
+            sel = FreeCADGui.Selection.getSelection()
+            return sel and len(sel) == 1 and hasattr(sel[0], "Proxy") #and isinstance(sel[0].Proxy, _CfdMesh)
 
     def Activated(self):
         is_present = False
