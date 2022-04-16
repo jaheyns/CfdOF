@@ -33,8 +33,8 @@ import os
 OBJECT_NAMES = ["Force", "ForceCoefficients"]
 OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches"]
 
-FUNCTIONS_UI = [[True, False, True],  # Forces
-                [True, True, True, ]]    # Force coefficients
+FUNCTIONS_UI = [[True, False, True],    # Forces
+                [True, True, True, ]]   # Force coefficients
 
 
 def makeCfdReportingFunctions(name="CfdReportingFunctions"):

@@ -1,0 +1,15 @@
+    %(0%)
+    {
+        type            probes;
+        libs            ("libsampling.so");
+
+        fields
+        (
+            %(reportingProbes/%(0%)/FieldName%)
+        );
+
+        probeLocations
+        (
+            ( %(reportingProbes/%(0%)/ProbeLocation%) )
+        );
+    }

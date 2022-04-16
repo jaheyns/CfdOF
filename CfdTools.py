@@ -196,6 +196,15 @@ def getReportingFunctionsGroup(analysis_object):
     return group
 
 
+def getReportingProbesGroup(analysis_object):
+    group = []
+    from core.functionobjects.reporting.CfdReportingFunctions import CfdReportingProbes
+    for i in analysis_object.Group:
+        if isinstance(i.Proxy, CfdReportingProbes):
+            group.append(i)
+    return group
+
+
 def getMaterials(analysis_object):
     return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
 
