@@ -71,11 +71,23 @@ class CfdReportingProbes:
 
     def initProperties(self, obj):
 
-        addObjectProperty(obj, 'FieldName', "", "App::PropertyString", "Function object",
+        addObjectProperty(obj, 'FieldName', "p", "App::PropertyString", "Function object",
                           "Name of the field to sample")
 
         addObjectProperty(obj, 'ProbePosition', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Function object",
                           "Location of the probe sample location")
+
+    def onDocumentRestored(self, obj):
+        self.initProperties(obj)
+
+    def execute(self, obj):
+        pass
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
 
 
 class ViewProviderCfdReportingProbes:

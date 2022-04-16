@@ -23,6 +23,7 @@
 import FreeCAD
 import CfdTools
 import os
+from CfdTools import setQuantity
 if FreeCAD.GuiUp:
     import FreeCADGui
 
@@ -36,8 +37,14 @@ class TaskPanelCfdReportingProbes:
         ui_path = os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdReportingProbes.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
+        self.load()
+        self.updateUI()
+        
     def load(self):
-        pass
+        self.form.inputFieldName.setText(self.obj.FieldName)
+        setQuantity(self.form.inputProbeLocx, self.obj.ProbePosition.x)
+        setQuantity(self.form.inputProbeLocy, self.obj.ProbePosition.y)
+        setQuantity(self.form.inputProbeLocz, self.obj.ProbePosition.z)
 
     def updateUI(self):
         pass
@@ -48,19 +55,22 @@ class TaskPanelCfdReportingProbes:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
+        FreeCADGui.doCommand("\nfo = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
 
-
-
-
-
-
-
+        # Probe info
+        FreeCADGui.doCommand("fo.FieldName "
+                             "= '{}'".format(self.form.inputFieldName.text()))
+        FreeCADGui.doCommand("fo.ProbePosition.x "
+                             "= '{}'".format(self.form.inputProbeLocx.property("quantity").getValueAs("m")))
+        FreeCADGui.doCommand("fo.ProbePosition.y "
+                             "= '{}'".format(self.form.inputProbeLocy.property("quantity").getValueAs("m")))
+        FreeCADGui.doCommand("fo.ProbePosition.z "
+                             "= '{}'".format(self.form.inputProbeLocz.property("quantity").getValueAs("m")))
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
 
     def reject(self):
-        self.obj.FunctionObjectType = self.FunctionObjectTypeOrig
         FreeCADGui.Selection.removeObserver(self)
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
