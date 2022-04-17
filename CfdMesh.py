@@ -131,7 +131,7 @@ class _CfdMesh:
                           "Relative edge (feature) refinement")
 
         # PolyDualMesh
-        addObjectProperty(obj, 'ConvertToDualMesh', True, "App::PropertyBool", "Mesh Parameters",
+        addObjectProperty(obj, 'ConvertToDualMesh', False, "App::PropertyBool", "Mesh Parameters",
                           "Convert to polyhedral dual mesh")
 
         # Edge detection, implicit / explicit (NB Implicit = False implies Explicit = True)
