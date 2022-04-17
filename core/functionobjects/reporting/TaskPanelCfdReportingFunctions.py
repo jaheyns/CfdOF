@@ -38,6 +38,7 @@ class TaskPanelCfdReportingFunctions:
     def __init__(self, obj):
         self.obj = obj
         self.analysis_obj = CfdTools.getActiveAnalysis()
+        self.physics_obj = CfdTools.getPhysicsModel(self.analysis_obj)
 
         self.FunctionObjectTypeOrig = str(self.obj.FunctionObjectType)
 
@@ -53,6 +54,7 @@ class TaskPanelCfdReportingFunctions:
 
         # Set the inputs for various function objects
         # Force fo
+        setQuantity(self.form.inputReferenceDensity, self.obj.ReferenceDensity)
         setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
         setQuantity(self.form.inputWriteFields, self.obj.WriteFields)
         setQuantity(self.form.inputCentreOfRotationx, self.obj.CoR.x)
@@ -106,6 +108,7 @@ class TaskPanelCfdReportingFunctions:
         except:
             pass
 
+        setQuantity(self.form.inputReferenceDensity, self.obj.ReferenceDensity)
         setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
         self.form.inputWriteFields.setChecked(self.obj.WriteFields)
 
@@ -142,6 +145,17 @@ class TaskPanelCfdReportingFunctions:
         coefficient_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][1]
         spatial_bin_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][2]
 
+        self.form.inputReferenceDensity.setVisible(True)
+        self.form.labelRefDensity.setVisible(True)
+        if coefficient_frame_enabled:
+            self.form.inputReferenceDensity.setToolTip("Free-stream density")
+        elif field_name_frame_enabled:
+            if self.physics_obj.Flow == 'Incompressible':
+                self.form.inputReferenceDensity.setToolTip("Incompressible density")
+            else:
+                self.form.inputReferenceDensity.setVisible(False)
+                self.form.labelRefDensity.setVisible(False)
+
         self.form.fieldNamesFrame.setVisible(field_name_frame_enabled)
         self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
         self.form.spatialFrame.setVisible(spatial_bin_frame_enabled)
@@ -167,6 +181,8 @@ class TaskPanelCfdReportingFunctions:
                              "= '{}'".format(self.form.cb_patch_list.currentText()))
 
         # Force object
+        FreeCADGui.doCommand("fo.ReferenceDensity "
+                             "= '{}'".format(getQuantity(self.form.inputReferenceDensity)))
         FreeCADGui.doCommand("fo.ReferencePressure "
                              "= '{}'".format(getQuantity(self.form.inputReferencePressure)))
         FreeCADGui.doCommand("fo.WriteFields "

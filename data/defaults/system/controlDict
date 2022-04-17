@@ -100,7 +100,7 @@ functions
 %:default
         rho                 rho;
 %}
-        rhoInf              100000;
+        rhoInf              %(reportingFunctions/%(0%)/ReferenceDensity%);
 
 		pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
 %{%(porousZonesPresent%)

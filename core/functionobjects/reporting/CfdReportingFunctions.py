@@ -89,6 +89,8 @@ class _CfdReportingFunctions:
                           "Name of the patch on which to create the function object")
 
         # Forces
+        addObjectProperty(obj, 'ReferenceDensity', '1 kg/m^3', "App::PropertyQuantity", "Function object",
+                          "Reference density")
         addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Function object",
                           "Reference pressure")
         addObjectProperty(obj, 'CoR', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Function object",
