@@ -1,3 +1,4 @@
+%{%(reportingProbes%)
     %(0%)
     {
         type            probes;
@@ -16,3 +17,4 @@
             ( %(reportingProbes/%(0%)/ProbePosition%) )
         );
     }
+%}

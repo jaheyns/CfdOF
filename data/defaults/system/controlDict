@@ -73,11 +73,13 @@ libs
 
 functions
 {
-%{%(reportingFunctions%)
+%{%(reportingFunctionsEnabled%)
+%:True
 %[system/_functions_reporting%]
 %}
 
-%{%(reportingProbes%)
+%{%(reportingProbesEnabled%)
+%:True
 %[system/_functions_probes%]
 %}
 }
