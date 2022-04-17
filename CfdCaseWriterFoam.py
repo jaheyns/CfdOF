@@ -332,7 +332,26 @@ class CfdCaseWriterFoam:
                         sum_alpha += alpha
                 bc['VolumeFractions'] = alphas_new
 
+            # Copy turbulence settings
             bc['TurbulenceIntensity'] = bc['TurbulenceIntensityPercentage']/100.0
+            physics = settings['physics']
+            if physics['Turbulence'] == 'RANS' and physics['TurbulenceModel'] == 'SpalartAllmaras':
+                if (bc['BoundaryType'] == 'inlet' or bc['BoundaryType'] == 'open') and \
+                        bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
+                    if bc['BoundarySubType'] == 'uniformVelocityInlet' or bc['BoundarySubType'] == 'farField':
+                        Uin = (bc['Ux']**2 + bc['Uy']**2 + bc['Uz']**2)**0.5
+
+                        # Turb Intensity and length scale
+                        I = bc['TurbulenceIntensity']
+                        l = bc['TurbulenceLengthScale']
+
+                        # Spalart Allmaras
+                        bc['NuTilda'] = (3.0/2.0)**0.5 * Uin * I * l
+
+                    else:
+                        raise RuntimeError(
+                            "Inlet type currently unsupported for calculating turbulence inlet conditions from "
+                            "intensity and length scale.")
 
             if bc['DefaultBoundary']:
                 if settings['boundaries'].get('defaultFaces'):
@@ -517,7 +536,7 @@ class CfdCaseWriterFoam:
                             epsilon = (k**(3.0/2.0) * Cmu**0.75) / l
 
                             # Spalart Allmaras
-                            nuTilda = (3.0/2.0)**0.5 * Uin * I * l
+                            nuTilda = inlet_bc['NuTilda']
 
                             # k omega (transition)
                             gammaInt = 1
