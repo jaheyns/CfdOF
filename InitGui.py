@@ -60,6 +60,7 @@ class CfdOFWorkbench(Workbench):
         from core.functionobjects.reporting.CfdReportingFunctions import _CommandCfdReportingFunctions
         from core.functionobjects.scalartransport.CommandCfdScalarTransportFunctions \
             import CommandCfdScalarTransportFunction
+        from core.functionobjects.probes.CfdReportingProbes import CommandCfdReportingProbes
 
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
@@ -67,13 +68,14 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_DynamicMesh', _CommandDynamicMesh())
         FreeCADGui.addCommand('Cfd_ReportingFunctions', _CommandCfdReportingFunctions())
         FreeCADGui.addCommand('Cfd_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
+        FreeCADGui.addCommand('Cfd_ReportingProbes', CommandCfdReportingProbes())
 
         cmdlst = ['Cfd_Analysis',
                   'Cfd_MeshFromShape', 'Cfd_MeshRegion', 'Cfd_DynamicMesh',
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
-                  'Cfd_ReportingFunctions', 'Cfd_ScalarTransportFunctions',
+                  'Cfd_ReportingFunctions', 'Cfd_ReportingProbes', 'Cfd_ScalarTransportFunctions',
                   'Cfd_SolverControl']
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)

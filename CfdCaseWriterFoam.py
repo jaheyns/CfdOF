@@ -51,6 +51,7 @@ class CfdCaseWriterFoam:
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
         self.reporting_functions_objs = CfdTools.getReportingFunctionsGroup(analysis_obj)
         self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
+        self.reporting_probes = CfdTools.getReportingProbesGroup(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
@@ -95,6 +96,7 @@ class CfdCaseWriterFoam:
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions_objs),
             'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
+            'reportingProbes': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_probes),
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
@@ -117,6 +119,7 @@ class CfdCaseWriterFoam:
         self.processFluidProperties()
         self.processBoundaryConditions()
         self.processReportingFunctions()
+        self.processReportingProbes()
         self.processInitialConditions()
         self.clearCase()
 
@@ -370,6 +373,14 @@ class CfdCaseWriterFoam:
                 settings['reportingFunctions'][name]['Lift'] = tuple(p for p in settings['reportingFunctions'][name]['Lift'])
                 settings['reportingFunctions'][name]['Drag'] = tuple(p for p in settings['reportingFunctions'][name]['Drag'])
                 settings['reportingFunctions'][name]['Pitch'] = tuple(p for p in settings['reportingFunctions'][name]['Pitch'])
+
+    def processReportingProbes(self):
+        settings = self.settings
+        # Copy keys so that we can delete while iterating
+        rf_name = list(settings['reportingProbes'].keys())
+
+        for name in rf_name:
+            settings['reportingProbes'][name]['ProbePosition'] = tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
 
     def parseFaces(self, shape_refs):
         pass

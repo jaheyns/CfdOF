@@ -80,5 +80,9 @@ functions
 %{%(scalarTransportFunctions%)
 %[system/_functions_scalarTransport%]
 %}
+
+%{%(reportingProbes%)
+%[system/_functions_probes%]
+%}
 }
 // ************************************************************************* //
