@@ -78,7 +78,8 @@ functions
 %[system/_functions_reporting%]
 %}
 
-%{%(scalarTransportFunctions%)
+%{%(scalarTransportFunctionsEnabled%)
+%:True
 %[system/_functions_scalarTransport%]
 %}
 

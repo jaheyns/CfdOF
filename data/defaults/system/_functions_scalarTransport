@@ -1,3 +1,4 @@
+%{%(scalarTransportFunctions%)
     %(0%)
     {
         type            scalarTransport;
@@ -36,4 +37,4 @@
             // TODO come back to this
         }
     }
-
+%}
