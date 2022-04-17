@@ -75,10 +75,15 @@ functions
 {
 %{%(reportingFunctions%)
 %{%(reportingFunctions/%(0%)/FunctionObjectType%)
-%:Force
+%:Force ForceCoefficients
     %(0%)
     {
+%{%(reportingFunctions/%(0%)/FunctionObjectType%)
+%:Force
         type                forces;
+%:ForceCoefficients
+        type                forceCoeffs;
+%}
         libs                ("libforces.so");
         patches             ( %(reportingFunctions/%(0%)/PatchName%) );
 
@@ -111,6 +116,17 @@ functions
 		writeFields         false;
 %}
 		CofR                ( %(reportingFunctions/%(0%)/CoR%) );
+%{%(reportingFunctions/%(0%)/FunctionObjectType%)
+%:ForceCoefficients
+        liftDir             ( %(reportingFunctions/%(0%)/Lift%) );
+        dragDir             ( %(reportingFunctions/%(0%)/Drag%) );
+        pitchAxis           ( %(reportingFunctions/%(0%)/Pitch%) );
+
+        magUInf             %(reportingFunctions/%(0%)/MagnitudeUInf%);
+
+        lRef                %(reportingFunctions/%(0%)/LengthRef%);
+        Aref                %(reportingFunctions/%(0%)/AreaRef%);
+%}
 
         binData
         {
@@ -124,63 +140,11 @@ functions
 %}
         }
     }
-%:ForceCoefficients
-    %(0%)
-    {
-        type                forceCoeffs;
-        libs                ("libforces.so");
-        patches             ( %(reportingFunctions/%(0%)/PatchName%) );
-
-        p                   %(reportingFunctions/%(0%)/Pressure%);
-		U                   %(reportingFunctions/%(0%)/Velocity%);
-%{%(physics/Flow%)
-%:Compressible HighMachCompressible
-        rho                 %(reportingFunctions/%(0%)/Density%);
 %:default
-        rho                 rhoInf;
-%}
-        rhoInf              100000;
-
-		pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
-
-%{%(reportingFunctions/%(0%)/IncludePorosity%)
-%:True
-		porosity            true;
-%:False
-        porosity            false;
-%}
-%{%(reportingFunctions/%(0%)/WriteFields%)
-%:True
-		writeFields         true;
-%:False
-		writeFields         false;
+    // No functions configured
 %}
 
-		CofR                ( %(reportingFunctions/%(0%)/CoR%) );
-        liftDir             ( %(reportingFunctions/%(0%)/Lift%) );
-        dragDir             ( %(reportingFunctions/%(0%)/Drag%) );
-        pitchAxis           ( %(reportingFunctions/%(0%)/Pitch%) );
-
-        magUInf             %(reportingFunctions/%(0%)/MagnitudeUInf%);
-
-        lRef                %(reportingFunctions/%(0%)/LengthRef%);
-        Aref                %(reportingFunctions/%(0%)/AreaRef%);
-
-        binData
-        {
-            nBin          %(reportingFunctions/%(0%)/NBins%);
-            direction     ( %(reportingFunctions/%(0%)/Direction%) );
-%{%(reportingFunctions/%(0%)/Cumulative%)
-%:True
-            cumulative         true;
-%:False
-            cumulative         false;
-%}
-        }
-    }
-%:default
-        // No functions configured
-%}
 %}
 }
+
 // ************************************************************************* //
