@@ -59,6 +59,7 @@ class CfdOFWorkbench(Workbench):
         from CfdZone import _CommandCfdInitialisationZone
         from core.mesh.dynamic.CfdDynamicMeshRefinement import _CommandDynamicMesh
         from core.functionobjects.reporting.CfdReportingFunctions import _CommandCfdReportingFunctions
+        from core.functionobjects.probes.CfdReportingProbes import CommandCfdReportingProbes
 
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
@@ -66,13 +67,14 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
         FreeCADGui.addCommand('Cfd_DynamicMesh', _CommandDynamicMesh())
         FreeCADGui.addCommand('Cfd_ReportingFunctions', _CommandCfdReportingFunctions())
+        FreeCADGui.addCommand('Cfd_ReportingProbes', CommandCfdReportingProbes())
 
         cmdlst = ['Cfd_Analysis',   # Analysis
-                  'Cfd_MeshFromShape', 'Cfd_MeshFromImport', 'Cfd_MeshRegion', 'Cfd_DynamicMesh',   # Meshing
+                  'Cfd_MeshFromShape', 'Cfd_MeshFromImport', 'Cfd_MeshRegion', 'Cfd_DynamicMesh', # Meshing
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',  # Physics and materials
                   'Cfd_InitialiseInternal', # Variables
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',  # Setup
-                  'Cfd_ReportingFunctions', # Reporting and monitoring
+                  'Cfd_ReportingFunctions', 'Cfd_ReportingProbes',  # Reporting and monitoring
                   'Cfd_SolverControl']  # Solver
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)

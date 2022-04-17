@@ -47,7 +47,7 @@ class _CommandCfdInitialiseInternalFlowField:
     """ Field initialisation command """
 
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "initialise.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "initialise.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_InitialiseInternal", "Initialise"),
                 'Accel': "",
@@ -136,7 +136,7 @@ class _ViewProviderCfdInitialseInternalFlowField:
         vobj.Proxy = self
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "initialise.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "initialise.svg")
         return icon_path
 
     def attach(self, vobj):

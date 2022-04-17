@@ -173,9 +173,11 @@ functions
 %}
         }
     }
-%:default
-        // No functions configured
 %}
+%}
+
+%{%(reportingProbes%)
+%[system/_functions_probes%]
 %}
 }
 // ************************************************************************* //
