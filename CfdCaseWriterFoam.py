@@ -94,7 +94,9 @@ class CfdCaseWriterFoam:
             'initialValues': CfdTools.propsToDict(self.initial_conditions),
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
+            'reportingFunctionsEnabled': False,
             'reportingProbes': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_probes),
+            'reportingProbesEnabled': False,
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
@@ -116,8 +118,6 @@ class CfdCaseWriterFoam:
         self.processSolverSettings()
         self.processFluidProperties()
         self.processBoundaryConditions()
-        self.processReportingFunctions()
-        self.processReportingProbes()
         self.processInitialConditions()
         self.clearCase()
 
@@ -126,7 +126,16 @@ class CfdCaseWriterFoam:
             self.processPorousZoneProperties()
         self.processInitialisationZoneProperties()
 
+        if self.reporting_functions:
+            print(f'Reporting functions present')
+            self.processReportingFunctions()
+
+        if self.reporting_probes:
+            print(f'Reporting probes present')
+            self.processReportingProbes()
+
         if self.dynamic_mesh_obj:
+            print(f'Dynamic mesh adapation present')
             self.processDynamicAdaptationMesh()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
@@ -138,10 +147,10 @@ class CfdCaseWriterFoam:
         TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
 
         # Update Allrun permission - will fail silently on Windows
-        fname = os.path.join(self.case_folder, "Allrun")
+        file_name = os.path.join(self.case_folder, "Allrun")
         import stat
-        s = os.stat(fname)
-        os.chmod(fname, s.st_mode | stat.S_IEXEC)
+        s = os.stat(file_name)
+        os.chmod(file_name, s.st_mode | stat.S_IEXEC)
 
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         if self.progressCallback:
@@ -361,6 +370,7 @@ class CfdCaseWriterFoam:
         """ Compute any Function objects required before case build """
         settings = self.settings
         # Copy keys so that we can delete while iterating
+        settings['reportingFunctionsEnabled'] = True
         rf_name = list(settings['reportingFunctions'].keys())
 
         for name in rf_name:
@@ -375,6 +385,7 @@ class CfdCaseWriterFoam:
     def processReportingProbes(self):
         settings = self.settings
         # Copy keys so that we can delete while iterating
+        settings['reportingProbesEnabled'] = True
         rf_name = list(settings['reportingProbes'].keys())
 
         for name in rf_name:
