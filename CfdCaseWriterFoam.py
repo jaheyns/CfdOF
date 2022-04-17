@@ -127,15 +127,15 @@ class CfdCaseWriterFoam:
         self.processInitialisationZoneProperties()
 
         if self.reporting_functions:
-            print(f'Reporting functions present')
+            cfdMessage(f'Reporting functions present')
             self.processReportingFunctions()
 
         if self.reporting_probes:
-            print(f'Reporting probes present')
+            cfdMessage(f'Reporting probes present')
             self.processReportingProbes()
 
         if self.dynamic_mesh_obj:
-            print(f'Dynamic mesh adapation present')
+            cfdMessage(f'Dynamic mesh adapation rule present')
             self.processDynamicAdaptationMesh()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
@@ -155,6 +155,7 @@ class CfdCaseWriterFoam:
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         if self.progressCallback:
             self.progressCallback("Case written successfully")
+            
         return True
 
     def getSolverName(self):
