@@ -1,3 +1,4 @@
+%{%(reportingFunctions%)
 %{%(reportingFunctions/%(0%)/FunctionObjectType%)
 %:Force
     %(0%)

@@ -49,9 +49,9 @@ class CfdCaseWriterFoam:
         self.material_objs = CfdTools.getMaterials(analysis_obj)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
-        self.reporting_functions_objs = CfdTools.getReportingFunctionsGroup(analysis_obj)
-        self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
+        self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
         self.reporting_probes = CfdTools.getReportingProbesGroup(analysis_obj)
+        self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
@@ -94,9 +94,11 @@ class CfdCaseWriterFoam:
             'fluidProperties': [],  # Order is important, so use a list
             'initialValues': CfdTools.propsToDict(self.initial_conditions),
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
-            'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions_objs),
-            'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
+            'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
+            'reportingFunctionsEnabled': False,
             'reportingProbes': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_probes),
+            'reportingProbesEnabled': False,
+            'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
@@ -118,8 +120,6 @@ class CfdCaseWriterFoam:
         self.processSolverSettings()
         self.processFluidProperties()
         self.processBoundaryConditions()
-        self.processReportingFunctions()
-        self.processReportingProbes()
         self.processInitialConditions()
         self.clearCase()
 
@@ -128,7 +128,16 @@ class CfdCaseWriterFoam:
             self.processPorousZoneProperties()
         self.processInitialisationZoneProperties()
 
+        if self.reporting_functions:
+            print(f'Reporting functions present')
+            self.processReportingFunctions()
+
+        if self.reporting_probes:
+            print(f'Reporting probes present')
+            self.processReportingProbes()
+
         if self.dynamic_mesh_obj:
+            print(f'Dynamic mesh adapation present')
             self.processDynamicAdaptationMesh()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
@@ -140,10 +149,10 @@ class CfdCaseWriterFoam:
         TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
 
         # Update Allrun permission - will fail silently on Windows
-        fname = os.path.join(self.case_folder, "Allrun")
+        file_name = os.path.join(self.case_folder, "Allrun")
         import stat
-        s = os.stat(fname)
-        os.chmod(fname, s.st_mode | stat.S_IEXEC)
+        s = os.stat(file_name)
+        os.chmod(file_name, s.st_mode | stat.S_IEXEC)
 
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         if self.progressCallback:
@@ -360,9 +369,9 @@ class CfdCaseWriterFoam:
                 }
 
     def processReportingFunctions(self):
-        """ Compute any Function objects required before case build """
         settings = self.settings
         # Copy keys so that we can delete while iterating
+        settings['reportingFunctionsEnabled'] = True
         rf_name = list(settings['reportingFunctions'].keys())
 
         for name in rf_name:
@@ -377,6 +386,7 @@ class CfdCaseWriterFoam:
     def processReportingProbes(self):
         settings = self.settings
         # Copy keys so that we can delete while iterating
+        settings['reportingProbesEnabled'] = True
         rf_name = list(settings['reportingProbes'].keys())
 
         for name in rf_name:

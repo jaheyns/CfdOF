@@ -73,7 +73,8 @@ libs
 
 functions
 {
-%{%(reportingFunctions%)
+%{%(reportingFunctionsEnabled%)
+%:True
 %[system/_functions_reporting%]
 %}
 
@@ -81,7 +82,8 @@ functions
 %[system/_functions_scalarTransport%]
 %}
 
-%{%(reportingProbes%)
+%{%(reportingProbesEnabled%)
+%:True
 %[system/_functions_probes%]
 %}
 }
