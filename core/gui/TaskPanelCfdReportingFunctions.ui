@@ -72,138 +72,14 @@
             <property name="bottomMargin">
              <number>8</number>
             </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="labelPressure">
-              <property name="text">
-               <string>Pressure field name</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="labelRefPressure">
-              <property name="text">
-               <string>Reference pressure</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="labelVelocity">
-              <property name="text">
-               <string>Velocity field name</string>
-              </property>
-             </widget>
-            </item>
             <item row="2" column="0">
-             <widget class="QLabel" name="labelDensity">
-              <property name="text">
-               <string>Density field name</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QCheckBox" name="inputWriteFields">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="labelWriteFields">
-              <property name="text">
-               <string>Write Fields</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="labelPorosity">
-              <property name="text">
-               <string>Include porosity effects</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QCheckBox" name="inputPorosity">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
-             <widget class="Gui::InputField" name="inputCentreOfRotationx">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.001000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true"/>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
              <widget class="QLabel" name="labelCentreOfRotation">
               <property name="text">
                <string>Centre of rotation (x, y, z)</string>
               </property>
              </widget>
             </item>
-            <item row="6" column="2">
-             <widget class="Gui::InputField" name="inputCentreOfRotationy">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.001000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true"/>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="3">
+            <item row="2" column="3">
              <widget class="Gui::InputField" name="inputCentreOfRotationz">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -231,40 +107,34 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1" colspan="2">
-             <widget class="QLineEdit" name="inputVelocity">
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelRefPressure">
+              <property name="text">
+               <string>Reference pressure</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="labelWriteFields">
+              <property name="text">
+               <string>Write Fields</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="inputWriteFields">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1" colspan="2">
-             <widget class="QLineEdit" name="inputDensity">
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <property name="text">
+               <string/>
               </property>
              </widget>
             </item>
             <item row="0" column="1" colspan="2">
-             <widget class="QLineEdit" name="inputPressure">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1" colspan="2">
              <widget class="Gui::InputField" name="inputReferencePressure">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -280,6 +150,62 @@
               </property>
               <property name="singleStep" stdset="0">
                <double>0.010000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true"/>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="Gui::InputField" name="inputCentreOfRotationx">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.001000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true"/>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2">
+             <widget class="Gui::InputField" name="inputCentreOfRotationy">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.001000000000000</double>
               </property>
               <property name="minimum" stdset="0">
                <double>0.000000000000000</double>

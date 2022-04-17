@@ -1,6 +1,7 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2022 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -88,19 +89,10 @@ class _CfdReportingFunctions:
                           "Name of the patch on which to create the function object")
 
         # Forces
-        # Field names
-        addObjectProperty(obj, 'Pressure', 'p', "App::PropertyString", "Function object",
-                          "Pressure field name")
-        addObjectProperty(obj, 'Velocity', 'U', "App::PropertyString", "Function object",
-                          "Velocity field name")
         addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Function object",
                           "Reference pressure")
-        addObjectProperty(obj, 'Density', 'rho', "App::PropertyString", "Function object",
-                          "Density field name")
         addObjectProperty(obj, 'CoR', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Function object",
                           "Centre of rotation")
-        addObjectProperty(obj, 'IncludePorosity', False, "App::PropertyBool", "Function object",
-                          "Whether to include porosity effects")
         addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Function object",
                           "Whether to write output fields")
 

@@ -82,18 +82,23 @@ functions
         libs                ("libforces.so");
         patches             ( %(reportingFunctions/%(0%)/PatchName%) );
 
-		p                   %(reportingFunctions/%(0%)/Pressure%);
-		U                   %(reportingFunctions/%(0%)/Velocity%);
-%{%(physics/Flow%)
-%:Compressible HighMachCompressible
-        rho                 %(reportingFunctions/%(0%)/Density%);
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
+        p_rgh               p_rgh;
 %:default
+        p                   p;
+%}
+		U                   U;
+%{%(solver/SolverName%)
+%:simpleFoam pimpleFoam
         rho                 rhoInf;
+%:default
+        rho                 rho;
 %}
         rhoInf              100000;
 
 		pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
-%{%(reportingFunctions/%(0%)/IncludePorosity%)
+%{%(porousZonesPresent%)
 %:True
 		porosity            true;
 %:False
@@ -109,13 +114,13 @@ functions
 
         binData
         {
-            nBin          %(reportingFunctions/%(0%)/NBins%);
-            direction     ( %(reportingFunctions/%(0%)/Direction%) );
+            nBin            %(reportingFunctions/%(0%)/NBins%);
+            direction       ( %(reportingFunctions/%(0%)/Direction%) );
 %{%(reportingFunctions/%(0%)/Cumulative%)
 %:True
-            cumulative         true;
+            cumulative      true;
 %:False
-            cumulative         false;
+            cumulative      false;
 %}
         }
     }
