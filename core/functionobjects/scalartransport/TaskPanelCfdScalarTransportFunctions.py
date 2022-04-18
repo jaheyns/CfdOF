@@ -53,6 +53,12 @@ class TaskPanelCfdScalarTransportFunctions:
         setQuantity(self.form.inputDiffusivityFixed, self.obj.DiffusivityFixedValue)
         self.form.inputDiffusivityField.setText(self.obj.DiffusivityFieldName)
 
+        setQuantity(self.form.inputInjectionPointx, "{} m".format(self.obj.InjectionPoint.x))
+        setQuantity(self.form.inputInjectionPointy, "{} m".format(self.obj.InjectionPoint.y))
+        setQuantity(self.form.inputInjectionPointz, "{} m".format(self.obj.InjectionPoint.z))
+
+        setQuantity(self.form.inputInjectionRate, self.obj.InjectionRate)
+
     def updateUI(self):
         pass
 
@@ -80,6 +86,15 @@ class TaskPanelCfdScalarTransportFunctions:
                              "= '{}'".format(self.form.inputDiffusivityField.text()))
         FreeCADGui.doCommand("fo.ResetOnStartup "
                              "= {}".format(self.form.cb_resetonstartup.isChecked()))
+
+        FreeCADGui.doCommand("fo.InjectionPoint.x "
+                             "= '{}'".format(self.form.inputInjectionPointx.property("quantity").Value))
+        FreeCADGui.doCommand("fo.InjectionPoint.y "
+                             "= '{}'".format(self.form.inputInjectionPointy.property("quantity").Value))
+        FreeCADGui.doCommand("fo.InjectionPoint.z "
+                             "= '{}'".format(self.form.inputInjectionPointz.property("quantity").Value))
+        FreeCADGui.doCommand("fo.InjectionRate "
+                             "= '{}'".format(getQuantity(self.form.inputInjectionRate)))
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")

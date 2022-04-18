@@ -20,6 +20,8 @@
 # *                                                                         *
 # ***************************************************************************
 
+import FreeCAD
+import FreeCADGui
 from CfdTools import addObjectProperty
 
 
@@ -55,6 +57,12 @@ class CfdScalarTransportFunction:
 
         addObjectProperty(obj, 'DiffusivityFieldName', "none", "App::PropertyString", "Scalar transport",
                           "Name of the dynamic diffusivity field")
+
+        addObjectProperty(obj, 'InjectionRate', '1 kg/s', "App::PropertyQuantity", "Scalar transport",
+                          "Injection rate")
+
+        addObjectProperty(obj, 'InjectionPoint', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Scalar transport",
+                          "Location of the injection point")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

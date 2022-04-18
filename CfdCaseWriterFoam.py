@@ -99,6 +99,7 @@ class CfdCaseWriterFoam:
             'reportingProbes': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_probes),
             'reportingProbesEnabled': False,
             'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
+            'scalarTransportFunctionsEnabled': False,
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
@@ -135,6 +136,10 @@ class CfdCaseWriterFoam:
         if self.reporting_probes:
             cfdMessage(f'Reporting probes present')
             self.processReportingProbes()
+
+        if self.scalar_transport_objs:
+            cfdMessage(f'Scalar transport functions present')
+            self.processScalarTransportFunctions()
 
         if self.dynamic_mesh_obj:
             cfdMessage(f'Dynamic mesh adapation rule present')
@@ -395,13 +400,21 @@ class CfdCaseWriterFoam:
         rf_name = list(settings['reportingFunctions'].keys())
 
         for name in rf_name:
-            settings['reportingFunctions'][name]['CoR'] = tuple(p for p in settings['reportingFunctions'][name]['CoR'])
-            settings['reportingFunctions'][name]['Direction'] = tuple(p for p in settings['reportingFunctions'][name]['Direction'])
+            settings['reportingFunctions'][name]['CoR'] = \
+                tuple(p for p in settings['reportingFunctions'][name]['CoR'])
+
+            settings['reportingFunctions'][name]['Direction'] = \
+                tuple(p for p in settings['reportingFunctions'][name]['Direction'])
 
             if settings['reportingFunctions'][name]['FunctionObjectType'] == 'ForceCoefficients':
-                settings['reportingFunctions'][name]['Lift'] = tuple(p for p in settings['reportingFunctions'][name]['Lift'])
-                settings['reportingFunctions'][name]['Drag'] = tuple(p for p in settings['reportingFunctions'][name]['Drag'])
-                settings['reportingFunctions'][name]['Pitch'] = tuple(p for p in settings['reportingFunctions'][name]['Pitch'])
+                settings['reportingFunctions'][name]['Lift'] = \
+                    tuple(p for p in settings['reportingFunctions'][name]['Lift'])
+
+                settings['reportingFunctions'][name]['Drag'] = \
+                    tuple(p for p in settings['reportingFunctions'][name]['Drag'])
+
+                settings['reportingFunctions'][name]['Pitch'] = \
+                    tuple(p for p in settings['reportingFunctions'][name]['Pitch'])
 
     def processReportingProbes(self):
         settings = self.settings
@@ -410,7 +423,18 @@ class CfdCaseWriterFoam:
         rf_name = list(settings['reportingProbes'].keys())
 
         for name in rf_name:
-            settings['reportingProbes'][name]['ProbePosition'] = tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
+            settings['reportingProbes'][name]['ProbePosition'] = \
+                tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
+
+    def processScalarTransportFunctions(self):
+        settings = self.settings
+        # Copy keys so that we can delete while iterating
+        settings['scalarTransportFunctionsEnabled'] = True
+        tf_name = list(settings['scalarTransportFunctions'].keys())
+
+        for name in tf_name:
+            settings['scalarTransportFunctions'][name]['InjectionPoint'] = \
+                tuple(p for p in settings['scalarTransportFunctions'][name]['InjectionPoint'])
 
     def parseFaces(self, shape_refs):
         pass
