@@ -380,6 +380,8 @@ class CfdCaseWriterFoam:
         for name in settings['reportingFunctions']:
             rf = settings['reportingFunctions'][name]
 
+            rf['PatchName'] = rf['Patch'].Label
+
             rf['CoR'] = tuple(p for p in rf['CoR'])
             rf['Direction'] = tuple(p for p in rf['Direction'])
 

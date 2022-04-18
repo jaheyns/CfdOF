@@ -174,8 +174,9 @@ class TaskPanelCfdReportingFunctions:
         # Type
         FreeCADGui.doCommand("fo.FunctionObjectType "
                              "= '{}'".format(self.obj.FunctionObjectType))
-        FreeCADGui.doCommand("fo.PatchName "
-                             "= '{}'".format(self.form.cb_patch_list.currentText()))
+        bcs = CfdTools.getCfdBoundaryGroup(self.analysis_obj)
+        FreeCADGui.doCommand("fo.Patch "
+                             "= FreeCAD.ActiveDocument.{}".format(bcs[self.form.cb_patch_list.currentIndex()].Name))
 
         # Force object
         FreeCADGui.doCommand("fo.ReferenceDensity "

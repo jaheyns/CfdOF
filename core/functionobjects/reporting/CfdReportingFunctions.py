@@ -85,8 +85,8 @@ class _CfdReportingFunctions:
         addObjectProperty(obj, 'FunctionObjectType', "functionObjectType", "App::PropertyString", "Function object",
                           "Name of the function object to be created")
 
-        addObjectProperty(obj, 'PatchName', "", "App::PropertyString", "Function object",
-                          "Name of the patch on which to create the function object")
+        addObjectProperty(obj, 'Patch', None, "App::PropertyLink", "Function object",
+                          "Patch on which to create the function object")
 
         # Forces
         addObjectProperty(obj, 'ReferenceDensity', '1 kg/m^3', "App::PropertyQuantity", "Function object",
