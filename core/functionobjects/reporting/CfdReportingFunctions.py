@@ -38,7 +38,7 @@ FUNCTIONS_UI = [[True, False, True],  # Forces
                 [True, True, True, ]]    # Force coefficients
 
 
-def makeCfdReportingFunctions(name="CfdReportingFunctions"):
+def makeCfdReportingFunctions(name="CfdReportingFunction"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdReportingFunctions(obj)
     if FreeCAD.GuiUp:
