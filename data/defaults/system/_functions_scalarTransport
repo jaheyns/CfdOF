@@ -9,7 +9,13 @@
         rho             %(scalarTransportFunctions/%(0%)/DensityFieldName%);
         phase           %(scalarTransportFunctions/%(0%)/PhaseFieldName%);
 
-        resetOnStartUp  %(scalarTransportFunctions/%(0%)/ResetOnStartup%);
+%{%(scalarTransportFunctions/%(0%)/ResetOnStartup%)
+%:True
+        resetOnStartUp  true;
+%:False
+        resetOnStartUp  false;
+%}
+
         schemesField    %(scalarTransportFunctions/%(0%)/SchemeFieldName%);
 
         D               %(scalarTransportFunctions/%(0%)/DiffusivityFixedValue%);

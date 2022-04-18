@@ -266,13 +266,10 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="singleStep" stdset="0">
-          <double>0.001000000000000</double>
-         </property>
-         <property name="minimum" stdset="0">
-          <double>0.000000000000000</double>
+          <double>0.01000000000000</double>
          </property>
          <property name="unit" stdset="0">
-          <string notr="true"/>
+          <string notr="true">mm</string>
          </property>
          <property name="format" stdset="0">
           <number>0</number>
@@ -294,13 +291,10 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="singleStep" stdset="0">
-          <double>0.001000000000000</double>
-         </property>
-         <property name="minimum" stdset="0">
-          <double>0.000000000000000</double>
-         </property>
+          <double>0.01000000000000</double>
+		  </property>
          <property name="unit" stdset="0">
-          <string notr="true"/>
+          <string notr="true">mm</string>
          </property>
          <property name="format" stdset="0">
           <number>0</number>
@@ -335,13 +329,10 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="singleStep" stdset="0">
-          <double>0.001000000000000</double>
-         </property>
-         <property name="minimum" stdset="0">
-          <double>0.000000000000000</double>
+          <double>0.01000000000000</double>
          </property>
          <property name="unit" stdset="0">
-          <string notr="true"/>
+          <string notr="true">mm</string>
          </property>
          <property name="format" stdset="0">
           <number>0</number>
@@ -363,13 +354,10 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="singleStep" stdset="0">
-          <double>0.001000000000000</double>
-         </property>
-         <property name="minimum" stdset="0">
-          <double>0.000000000000000</double>
-         </property>
+          <double>0.1000000000000</double>
+		 </property>
          <property name="unit" stdset="0">
-          <string notr="true"/>
+          <string notr="true">kg/s</string>
          </property>
          <property name="format" stdset="0">
           <number>0</number>

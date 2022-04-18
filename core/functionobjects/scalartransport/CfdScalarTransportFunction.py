@@ -21,7 +21,6 @@
 # ***************************************************************************
 
 import FreeCAD
-import FreeCADGui
 from CfdTools import addObjectProperty
 
 

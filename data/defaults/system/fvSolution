@@ -239,6 +239,26 @@ solvers
     }
 
 %}
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%{%(scalarTransportFunctions%)
+    "(*.)"
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-8;
+        relTol           0.1;
+        nSweeps          1;
+        minIter          1;
+    }
+
+    "(*.)Final"
+    {
+        $*.;
+        relTol          0;
+    }
+%}
+%}
 %{%(solver/SolverName%)
 %:hisa
     yPsi
