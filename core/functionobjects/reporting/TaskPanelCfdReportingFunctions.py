@@ -21,14 +21,14 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
 import os
 import os.path
+import FreeCAD
+if FreeCAD.GuiUp:
+    import FreeCADGui
 import CfdTools
 from CfdTools import getQuantity, setQuantity, indexOrDefault
 from core.functionobjects.reporting import CfdReportingFunctions
-if FreeCAD.GuiUp:
-    import FreeCADGui
 
 
 class TaskPanelCfdReportingFunctions:
@@ -81,6 +81,7 @@ class TaskPanelCfdReportingFunctions:
         self.form.inputDragDirectionx.setToolTip("Drag direction vector")
         self.form.inputPitchAxisx.setToolTip("Pitch axis for moment coefficient")
         self.form.inputMagnitudeUInf.setToolTip("Velocity magnitude reference")
+        self.form.inputReferenceDensity.setToolTip("Density reference")
         self.form.inputLengthRef.setToolTip("Length reference")
         self.form.inputAreaRef.setToolTip("Area reference")
 
@@ -145,16 +146,12 @@ class TaskPanelCfdReportingFunctions:
         coefficient_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][1]
         spatial_bin_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][2]
 
-        self.form.inputReferenceDensity.setVisible(True)
-        self.form.labelRefDensity.setVisible(True)
-        if coefficient_frame_enabled:
-            self.form.inputReferenceDensity.setToolTip("Free-stream density")
-        elif field_name_frame_enabled:
-            if self.physics_obj.Flow == 'Incompressible':
-                self.form.inputReferenceDensity.setToolTip("Incompressible density")
-            else:
-                self.form.inputReferenceDensity.setVisible(False)
-                self.form.labelRefDensity.setVisible(False)
+        if self.physics_obj.Flow == 'Incompressible':
+            self.form.inputReferenceDensity.setVisible(False)
+            self.form.labelRefDensity.setVisible(False)
+        else:
+            self.form.inputReferenceDensity.setVisible(True)
+            self.form.labelRefDensity.setVisible(True)
 
         self.form.fieldNamesFrame.setVisible(field_name_frame_enabled)
         self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
@@ -177,8 +174,9 @@ class TaskPanelCfdReportingFunctions:
         # Type
         FreeCADGui.doCommand("fo.FunctionObjectType "
                              "= '{}'".format(self.obj.FunctionObjectType))
-        FreeCADGui.doCommand("fo.PatchName "
-                             "= '{}'".format(self.form.cb_patch_list.currentText()))
+        bcs = CfdTools.getCfdBoundaryGroup(self.analysis_obj)
+        FreeCADGui.doCommand("fo.Patch "
+                             "= FreeCAD.ActiveDocument.{}".format(bcs[self.form.cb_patch_list.currentIndex()].Name))
 
         # Force object
         FreeCADGui.doCommand("fo.ReferenceDensity "

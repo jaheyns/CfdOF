@@ -108,6 +108,9 @@ class CfdRunnableFoam(CfdRunnable):
 
     def initMonitors(self):
 
+        self.in_forces_output = False
+        self.in_forcecoeffs_output = False
+
         if self.plot_forces:
             self.pressureXResiduals = []
             self.pressureYResiduals = []
@@ -124,12 +127,6 @@ class CfdRunnableFoam(CfdRunnable):
             self.clResiduals = []
 
             self.solver.Proxy.force_coeffs_plotter.reInitialise(self.analysis)
-
-        # if hasattr(self.solver.Proxy, 'forces_plotter') and self.solver.Proxy.forces_plotter is not None:
-        #     self.solver.Proxy.forces_plotter.reInitialise(self.analysis)
-        #
-        # if hasattr(self.solver.Proxy, 'forces_coeffs_plotter') and self.solver.Proxy.force_coeffs_plotter is not None:
-        #     self.solver.Proxy.force_coeffs_plotter.reInitialise(self.analysis)
 
     def get_solver_cmd(self, case_dir):
         self.initResiduals()
@@ -169,11 +166,19 @@ class CfdRunnableFoam(CfdRunnable):
                     # Don't keep spurious time zero
                     self.latest_outer_iter = 0
                     self.niter += 1
+                self.in_forces_output = False
+                self.in_forcecoeffs_output = False
+
             if line.find(u"PIMPLE: iteration ") >= 0 or line.find(u"pseudoTime: iteration ") >= 0:
                 self.latest_outer_iter += 1
                 # Don't increment counter on first outer iter as this was already done with time
                 if self.latest_outer_iter > 1:
                     self.niter += 1
+
+            if line.startswith(u"forces"):
+                self.in_forces_output = True
+            if line.startswith(u"forceCoeffs"):
+                self.in_forcecoeffs_output = True
 
             # Add a point to the time axis for each outer iteration
             if self.niter > len(self.time):
@@ -219,21 +224,23 @@ class CfdRunnableFoam(CfdRunnable):
                 self.ReThetatResiduals.append(float(split[7].split(',')[0]))
 
             # Force monitors
-            if "Pressure" in split and self.niter-1 > len(self.pressureXResiduals):
-                self.pressureXResiduals.append(float(split[2].replace("(", "")))
-                self.pressureYResiduals.append(float(split[3]))
-                self.pressureZResiduals.append(float(split[4].replace(")", "")))
+            if self.in_forces_output:
+                if "Pressure" in split and self.niter-1 > len(self.pressureXResiduals):
+                    self.pressureXResiduals.append(float(split[2].replace("(", "")))
+                    self.pressureYResiduals.append(float(split[3]))
+                    self.pressureZResiduals.append(float(split[4].replace(")", "")))
 
-            if "Viscous" in split and self.niter-1 > len(self.viscousXResiduals):
-                self.viscousXResiduals.append(float(split[2].replace("(", "")))
-                self.viscousYResiduals.append(float(split[3]))
-                self.viscousZResiduals.append(float(split[4].replace(")", "")))
+                if "Viscous" in split and self.niter-1 > len(self.viscousXResiduals):
+                    self.viscousXResiduals.append(float(split[2].replace("(", "")))
+                    self.viscousYResiduals.append(float(split[3]))
+                    self.viscousZResiduals.append(float(split[4].replace(")", "")))
 
-            # Force coefficient monitors
-            if "Cd" in split and self.niter-1 > len(self.cdResiduals):
-                self.cdResiduals.append(float(split[2]))
-            if "Cl" in split and self.niter-1 > len(self.clResiduals):
-                self.clResiduals.append(float(split[2]))
+            if self.in_forcecoeffs_output:
+                # Force coefficient monitors
+                if "Cd" in split and self.niter-1 > len(self.cdResiduals):
+                    self.cdResiduals.append(float(split[2]))
+                if "Cl" in split and self.niter-1 > len(self.clResiduals):
+                    self.clResiduals.append(float(split[2]))
 
         if self.niter > 1 and self.niter > prev_niter:
             self.solver.Proxy.residual_plotter.updateResiduals(self.time, OrderedDict([

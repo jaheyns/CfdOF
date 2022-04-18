@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>CFD boundary condition</string>
+   <string>CFD reporting function</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -206,41 +206,6 @@
               </property>
               <property name="singleStep" stdset="0">
                <double>0.001000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true"/>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="labelRefDensity">
-              <property name="text">
-               <string>Reference density</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1" colspan="2">
-             <widget class="Gui::InputField" name="inputReferenceDensity">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.010000000000000</double>
               </property>
               <property name="minimum" stdset="0">
                <double>0.000000000000000</double>
@@ -503,7 +468,7 @@
             <item row="11" column="0">
              <widget class="QLabel" name="labelMagUInf">
               <property name="text">
-               <string>Free-stream speed</string>
+               <string>Free-stream flow speed</string>
               </property>
              </widget>
             </item>
@@ -672,6 +637,41 @@
              <widget class="QLabel" name="labelPitchAxis">
               <property name="text">
                <string>Pitch Axis (x, y, z)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="0">
+             <widget class="QLabel" name="labelRefDensity">
+              <property name="text">
+               <string>Free-stream density</string>
+              </property>
+             </widget>
+            </item>
+            <item row="12" column="1" colspan="2">
+             <widget class="Gui::InputField" name="inputReferenceDensity">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true"/>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
               </property>
              </widget>
             </item>
@@ -1016,10 +1016,9 @@
  <tabstops>
   <tabstop>comboFunctionObjectType</tabstop>
   <tabstop>cb_patch_list</tabstop>
-  <tabstop>inputReferenceDensity</tabstop>
   <tabstop>inputReferencePressure</tabstop>
-  <tabstop>inputWriteFields</tabstop>
   <tabstop>inputCentreOfRotationx</tabstop>
+  <tabstop>inputWriteFields</tabstop>
   <tabstop>inputCentreOfRotationy</tabstop>
   <tabstop>inputCentreOfRotationz</tabstop>
   <tabstop>inputLiftDirectionx</tabstop>
@@ -1032,6 +1031,7 @@
   <tabstop>inputPitchAxisy</tabstop>
   <tabstop>inputPitchAxisz</tabstop>
   <tabstop>inputMagnitudeUInf</tabstop>
+  <tabstop>inputReferenceDensity</tabstop>
   <tabstop>inputLengthRef</tabstop>
   <tabstop>inputAreaRef</tabstop>
   <tabstop>inputNBins</tabstop>

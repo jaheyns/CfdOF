@@ -25,13 +25,13 @@ This does not mean that advanced features will not be included - however, some t
 These are simply some suggestions which might help you set up a easy-to-use development environment. 
 
 We suggest you use **Qt Designer** and not **Qt Creator** - this is a cut down version of Qt Creator, which is the full Qt IDE intended primarily for C++ development. Qt Designer on the other hand is a lightweight GUI design tool, which will write the required XML only which can then be integrated with the Python PySide (PyQT) library used by FreeCAD
-* Please ensure that your indent spacing for your GUI template (XML) editing software is set to **x4 spaces** and not \tab or other indenting, to be consistent with the indenting used in the Python src files
+* Please ensure that your indent spacing for your GUI template (XML) editing software is set to **x1 spaces** and not \tab or other indenting, to be consistent with the indenting produced by Qt designer.
 * Please note that in some places in the CfdOF GUI, we use a custom input field, GUI::InputField which will need to be included in your set up as a custom widget. 
 * You should be able to get a prebuilt version of [Qt Designer here](https://build-system.fman.io/qt-designer-download) for Mac and Windows otherwise you can also download a copy using PIP (Package name: pyqt5-tools)
 
 Choice of Python IDE's is whatever you feel most comfortable with, although we have found **VS Code** and **PyCharm** quick and easy to set up. 
 * Whatever IDE you use, the most important consideration is to ensure that your Python interpreter includes the FreeCAD **bin** and **lib** paths so that you will have access to the bundled Python libs distributed (and required) by FreeCAD workbenches
-* Please note that at this stage, 3rd party code (ie libraries) which can be used by FreeCAD workbenches, are restricted to those distributed with the main FreeCAD installation itself - we cannot at this stage include additional Python libraries with Workbenches. 
+* Please note that at this stage, 3rd party code (i.e. libraries) which can be used by FreeCAD workbenches, are restricted to those distributed with the main FreeCAD installation itself - we cannot at this stage include additional Python libraries with Workbenches. 
 
 ## Source code contributions
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/alerts/)[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/context:python)
@@ -44,9 +44,9 @@ Our philosophy is 'Do the basics well' and therefore robust operation takes prec
 
 We have found the easist way to develop for CfdOF is to work directly in the FreeCAD module installation directory for CfdOF as the FreeCAD AddOn Manager simply clones the latest commits from the main Workbench repo to this directory. Therefore, you should be able to access Git and switch branches as required directly from this directory. 
 
-* In terms of managing your own repo, for occaisional developers, we suggest cloning the CfdOF repo, and issuing Pull Requests to the main CfdOF repo with your bug fix and / or new feature. 
+* In terms of managing your own repo, for occasional developers, we suggest cloning the CfdOF repo, and issuing Pull Requests to the main CfdOF repo with your bug fix and / or new feature. 
     - When developing, please use the **Gitflow** approach - we welcome _feature/new-feature-branch_ or _bugfix/my-bug-fix_ PR's into **develop** only, as the **master** branch is mirrored and pulled immediately into the FreeCAD Workbench distribution system, so any code added to master will effectively go live as soon as it is committed. 
-    -  Hotfixes to released versions (ie **master**, _hotfix/my-hotfix_) will be accepted but only if determined to be essential by the core developers, otherwise it may be requested that your fix be included in the **develop** trunk and released with the next pull to master. 
+    -  Hotfixes to released versions (i.e. **master**, _hotfix/my-hotfix_) will be accepted but only if determined to be essential by the core developers, otherwise it may be requested that your fix be included in the **develop** trunk and released with the next pull to master. 
 * Regular contributors may be granted _developer_ access to the repo, in which case contributions can be pushed directly to the main CfdOF repository
     - Developer access is still restricted to the _develop_ and your own _feature_ / _bugfix_ branches. 
 
@@ -97,4 +97,4 @@ In order to make sure that tests have been run before you issue your PR's, pleas
 ## Documentation
 At present, there is not much documentation available for CfdOF users. As such, for those contributors who would prefer to help in non-code based ways, we would welcome contributions in terms of video and or written user guides or tutorials. 
 
-_Last updated 07/04/2022_
+_Last updated 18/04/2022_
