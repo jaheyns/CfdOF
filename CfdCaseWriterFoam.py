@@ -395,26 +395,20 @@ class CfdCaseWriterFoam:
 
     def processReportingFunctions(self):
         settings = self.settings
-        # Copy keys so that we can delete while iterating
         settings['reportingFunctionsEnabled'] = True
-        rf_name = list(settings['reportingFunctions'].keys())
 
-        for name in rf_name:
-            settings['reportingFunctions'][name]['CoR'] = \
-                tuple(p for p in settings['reportingFunctions'][name]['CoR'])
+        for name in settings['reportingFunctions']:
+            rf = settings['reportingFunctions'][name]
 
-            settings['reportingFunctions'][name]['Direction'] = \
-                tuple(p for p in settings['reportingFunctions'][name]['Direction'])
+            rf['PatchName'] = rf['Patch'].Label
 
-            if settings['reportingFunctions'][name]['FunctionObjectType'] == 'ForceCoefficients':
-                settings['reportingFunctions'][name]['Lift'] = \
-                    tuple(p for p in settings['reportingFunctions'][name]['Lift'])
+            rf['CoR'] = tuple(p for p in rf['CoR'])
+            rf['Direction'] = tuple(p for p in rf['Direction'])
 
-                settings['reportingFunctions'][name]['Drag'] = \
-                    tuple(p for p in settings['reportingFunctions'][name]['Drag'])
-
-                settings['reportingFunctions'][name]['Pitch'] = \
-                    tuple(p for p in settings['reportingFunctions'][name]['Pitch'])
+            if rf['FunctionObjectType'] == 'ForceCoefficients':
+                rf['Lift'] = tuple(p for p in rf['Lift'])
+                rf['Drag'] = tuple(p for p in rf['Drag'])
+                rf['Pitch'] = tuple(p for p in rf['Pitch'])
 
     def processReportingProbes(self):
         settings = self.settings

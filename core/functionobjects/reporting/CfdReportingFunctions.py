@@ -38,7 +38,7 @@ FUNCTIONS_UI = [[True, False, True],    # Forces
                 [True, True, True, ]]   # Force coefficients
 
 
-def makeCfdReportingFunctions(name="CfdReportingFunctions"):
+def makeCfdReportingFunctions(name="CfdReportingFunction"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdReportingFunctions(obj)
     if FreeCAD.GuiUp:
@@ -78,49 +78,46 @@ class _CfdReportingFunctions:
 
     def initProperties(self, obj):
 
-        addObjectProperty(obj, 'CaseName', "meshCase", "App::PropertyString", "",
-                          "Name of directory in which the mesh is created")
-
         # Setup and utility
-        addObjectProperty(obj, 'FunctionObjectType', "functionObjectType", "App::PropertyString", "Function object",
+        addObjectProperty(obj, 'FunctionObjectType', "functionObjectType", "App::PropertyString", "Forces",
                           "Name of the function object to be created")
 
-        addObjectProperty(obj, 'PatchName', "", "App::PropertyString", "Function object",
-                          "Name of the patch on which to create the function object")
+        addObjectProperty(obj, 'Patch', None, "App::PropertyLink", "Function object",
+                          "Patch on which to create the function object")
 
         # Forces
-        addObjectProperty(obj, 'ReferenceDensity', '1 kg/m^3', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'ReferenceDensity', '1 kg/m^3', "App::PropertyQuantity", "Forces",
                           "Reference density")
-        addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Function object",
+        addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Forces",
                           "Reference pressure")
-        addObjectProperty(obj, 'CoR', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Function object",
+        addObjectProperty(obj, 'CoR', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Forces",
                           "Centre of rotation")
-        addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Function object",
+        addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Forces",
                           "Whether to write output fields")
 
         # Force coefficients
-        addObjectProperty(obj, 'Lift', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Function object",
+        addObjectProperty(obj, 'Lift', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Force coefficients",
                           "Lift direction (x component)")
 
-        addObjectProperty(obj, 'Drag', FreeCAD.Vector(0, 1, 0), "App::PropertyVector", "Function object",
+        addObjectProperty(obj, 'Drag', FreeCAD.Vector(0, 1, 0), "App::PropertyVector", "Force coefficients",
                           "Drag direction")
 
-        addObjectProperty(obj, 'Pitch', FreeCAD.Vector(0, 0, 1), "App::PropertyVector", "Function object",
+        addObjectProperty(obj, 'Pitch', FreeCAD.Vector(0, 0, 1), "App::PropertyVector", "Force coefficients",
                           "Centre of pitch")
 
-        addObjectProperty(obj, 'MagnitudeUInf', '1 m/s', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'MagnitudeUInf', '1 m/s', "App::PropertyQuantity", "Force coefficients",
                           "Freestream velocity magnitude")
-        addObjectProperty(obj, 'LengthRef', '1 m', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'LengthRef', '1 m', "App::PropertyQuantity", "Force coefficients",
                           "Coefficient length reference")
-        addObjectProperty(obj, 'AreaRef', '1 m^2', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'AreaRef', '1 m^2', "App::PropertyQuantity", "Force coefficients",
                           "Coefficient area reference")
 
         # Spatial binning
-        addObjectProperty(obj, 'NBins', '0', "App::PropertyQuantity", "Function object",
+        addObjectProperty(obj, 'NBins', '0', "App::PropertyQuantity", "Forces",
                           "Number of bins")
-        addObjectProperty(obj, 'Direction', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Function object",
+        addObjectProperty(obj, 'Direction', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Forces",
                           "Binning direction")
-        addObjectProperty(obj, 'Cumulative', True, "App::PropertyBool", "Function object",
+        addObjectProperty(obj, 'Cumulative', True, "App::PropertyBool", "Forces",
                           "Cumulative")
 
     def onDocumentRestored(self, obj):
