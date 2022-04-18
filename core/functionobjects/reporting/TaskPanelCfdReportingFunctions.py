@@ -1,6 +1,7 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2022 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -37,6 +38,7 @@ class TaskPanelCfdReportingFunctions:
     def __init__(self, obj):
         self.obj = obj
         self.analysis_obj = CfdTools.getActiveAnalysis()
+        self.physics_obj = CfdTools.getPhysicsModel(self.analysis_obj)
 
         self.FunctionObjectTypeOrig = str(self.obj.FunctionObjectType)
 
@@ -52,20 +54,13 @@ class TaskPanelCfdReportingFunctions:
 
         # Set the inputs for various function objects
         # Force fo
-        self.form.inputPressure.setText(self.obj.Pressure)
-        self.form.inputVelocity.setText(self.obj.Velocity)
-        self.form.inputDensity.setText(self.obj.Density)
+        setQuantity(self.form.inputReferenceDensity, self.obj.ReferenceDensity)
         setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
-        setQuantity(self.form.inputPorosity, self.obj.IncludePorosity)
         setQuantity(self.form.inputWriteFields, self.obj.WriteFields)
         setQuantity(self.form.inputCentreOfRotationx, self.obj.CoR.x)
         setQuantity(self.form.inputCentreOfRotationy, self.obj.CoR.y)
         setQuantity(self.form.inputCentreOfRotationz, self.obj.CoR.z)
-        self.form.inputPressure.setToolTip("Pressure field name")
-        self.form.inputVelocity.setToolTip("Velocity field name")
-        self.form.inputDensity.setToolTip("Density field name")
         self.form.inputReferencePressure.setToolTip("Reference pressure")
-        self.form.inputPorosity.setToolTip("Porosity")
         self.form.inputWriteFields.setToolTip("Write output fields")
         self.form.inputCentreOfRotationx.setToolTip("Centre of rotation vector for moments")
 
@@ -113,11 +108,8 @@ class TaskPanelCfdReportingFunctions:
         except:
             pass
 
-        self.form.inputPressure.setText(self.obj.Pressure)
-        self.form.inputVelocity.setText(self.obj.Velocity)
-        self.form.inputDensity.setText(self.obj.Density)
+        setQuantity(self.form.inputReferenceDensity, self.obj.ReferenceDensity)
         setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
-        self.form.inputPorosity.setChecked(self.obj.IncludePorosity)
         self.form.inputWriteFields.setChecked(self.obj.WriteFields)
 
         setQuantity(self.form.inputCentreOfRotationx, "{} m".format(self.obj.CoR.x))
@@ -153,6 +145,17 @@ class TaskPanelCfdReportingFunctions:
         coefficient_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][1]
         spatial_bin_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][2]
 
+        self.form.inputReferenceDensity.setVisible(True)
+        self.form.labelRefDensity.setVisible(True)
+        if coefficient_frame_enabled:
+            self.form.inputReferenceDensity.setToolTip("Free-stream density")
+        elif field_name_frame_enabled:
+            if self.physics_obj.Flow == 'Incompressible':
+                self.form.inputReferenceDensity.setToolTip("Incompressible density")
+            else:
+                self.form.inputReferenceDensity.setVisible(False)
+                self.form.labelRefDensity.setVisible(False)
+
         self.form.fieldNamesFrame.setVisible(field_name_frame_enabled)
         self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
         self.form.spatialFrame.setVisible(spatial_bin_frame_enabled)
@@ -178,16 +181,10 @@ class TaskPanelCfdReportingFunctions:
                              "= '{}'".format(self.form.cb_patch_list.currentText()))
 
         # Force object
-        FreeCADGui.doCommand("fo.Pressure "
-                             "= '{}'".format(self.form.inputPressure.text()))
-        FreeCADGui.doCommand("fo.Velocity "
-                             "= '{}'".format(self.form.inputVelocity.text()))
-        FreeCADGui.doCommand("fo.Density "
-                             "= '{}'".format(self.form.inputDensity.text()))
+        FreeCADGui.doCommand("fo.ReferenceDensity "
+                             "= '{}'".format(getQuantity(self.form.inputReferenceDensity)))
         FreeCADGui.doCommand("fo.ReferencePressure "
                              "= '{}'".format(getQuantity(self.form.inputReferencePressure)))
-        FreeCADGui.doCommand("fo.IncludePorosity "
-                             "= {}".format(self.form.inputPorosity.isChecked()))
         FreeCADGui.doCommand("fo.WriteFields "
                              "= {}".format(self.form.inputWriteFields.isChecked()))
         FreeCADGui.doCommand("fo.CoR.x "
