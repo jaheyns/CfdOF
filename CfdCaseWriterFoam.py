@@ -376,17 +376,17 @@ class CfdCaseWriterFoam:
     def processReportingFunctions(self):
         """ Compute any Function objects required before case build """
         settings = self.settings
-        # Copy keys so that we can delete while iterating
-        rf_name = list(settings['reportingFunctions'].keys())
 
-        for name in rf_name:
-            settings['reportingFunctions'][name]['CoR'] = tuple(p for p in settings['reportingFunctions'][name]['CoR'])
-            settings['reportingFunctions'][name]['Direction'] = tuple(p for p in settings['reportingFunctions'][name]['Direction'])
+        for name in settings['reportingFunctions']:
+            rf = settings['reportingFunctions'][name]
 
-            if settings['reportingFunctions'][name]['FunctionObjectType'] == 'ForceCoefficients':
-                settings['reportingFunctions'][name]['Lift'] = tuple(p for p in settings['reportingFunctions'][name]['Lift'])
-                settings['reportingFunctions'][name]['Drag'] = tuple(p for p in settings['reportingFunctions'][name]['Drag'])
-                settings['reportingFunctions'][name]['Pitch'] = tuple(p for p in settings['reportingFunctions'][name]['Pitch'])
+            rf['CoR'] = tuple(p for p in rf['CoR'])
+            rf['Direction'] = tuple(p for p in rf['Direction'])
+
+            if rf['FunctionObjectType'] == 'ForceCoefficients':
+                rf['Lift'] = tuple(p for p in rf['Lift'])
+                rf['Drag'] = tuple(p for p in rf['Drag'])
+                rf['Pitch'] = tuple(p for p in rf['Pitch'])
 
     def parseFaces(self, shape_refs):
         pass

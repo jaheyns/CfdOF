@@ -93,29 +93,33 @@ functions
 %:default
         p                   p;
 %}
-		U                   U;
+        U                   U;
 %{%(solver/SolverName%)
-%:simpleFoam pimpleFoam
+%:simpleFoam porousSimpleFoam pimpleFoam
         rho                 rhoInf;
+        rhoInf              %(fluidProperties/%(fluidProperties%)/Density%);
 %:default
         rho                 rho;
-%}
+%{%(reportingFunctions/%(0%)/FunctionObjectType%)
+%:ForceCoefficients
         rhoInf              %(reportingFunctions/%(0%)/ReferenceDensity%);
+%}
+%}
 
-		pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
+        pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
 %{%(porousZonesPresent%)
 %:True
-		porosity            true;
+        porosity            true;
 %:False
         porosity            false;
 %}
 %{%(reportingFunctions/%(0%)/WriteFields%)
 %:True
-		writeFields         true;
+        writeFields         true;
 %:False
-		writeFields         false;
+        writeFields         false;
 %}
-		CofR                ( %(reportingFunctions/%(0%)/CoR%) );
+        CofR                ( %(reportingFunctions/%(0%)/CoR%) );
 %{%(reportingFunctions/%(0%)/FunctionObjectType%)
 %:ForceCoefficients
         liftDir             ( %(reportingFunctions/%(0%)/Lift%) );
