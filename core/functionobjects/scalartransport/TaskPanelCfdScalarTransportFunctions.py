@@ -85,7 +85,6 @@ class TaskPanelCfdScalarTransportFunctions:
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
 
     def reject(self):
-        self.obj.FunctionObjectType = self.FunctionObjectTypeOrig
         FreeCADGui.Selection.removeObserver(self)
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
