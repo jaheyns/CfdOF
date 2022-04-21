@@ -112,13 +112,13 @@ class CfdRunnableFoam(CfdRunnable):
         self.in_forcecoeffs_output = False
 
         if self.plot_forces:
-            self.pressureXResiduals = []
-            self.pressureYResiduals = []
-            self.pressureZResiduals = []
+            self.pressureXForces = []
+            self.pressureYForces = []
+            self.pressureZForces = []
 
-            self.viscousXResiduals = []
-            self.viscousYResiduals = []
-            self.viscousZResiduals = []
+            self.viscousXForces = []
+            self.viscousYForces = []
+            self.viscousZForces = []
 
             self.solver.Proxy.forces_plotter.reInitialise(self.analysis)
 
@@ -225,15 +225,15 @@ class CfdRunnableFoam(CfdRunnable):
 
             # Force monitors
             if self.in_forces_output:
-                if "Pressure" in split and self.niter-1 > len(self.pressureXResiduals):
-                    self.pressureXResiduals.append(float(split[2].replace("(", "")))
-                    self.pressureYResiduals.append(float(split[3]))
-                    self.pressureZResiduals.append(float(split[4].replace(")", "")))
+                if "Pressure" in split and self.niter-1 > len(self.pressureXForces):
+                    self.pressureXForces.append(float(split[2].replace("(", "")))
+                    self.pressureYForces.append(float(split[3]))
+                    self.pressureZForces.append(float(split[4].replace(")", "")))
 
-                if "Viscous" in split and self.niter-1 > len(self.viscousXResiduals):
-                    self.viscousXResiduals.append(float(split[2].replace("(", "")))
-                    self.viscousYResiduals.append(float(split[3]))
-                    self.viscousZResiduals.append(float(split[4].replace(")", "")))
+                if "Viscous" in split and self.niter-1 > len(self.viscousXForces):
+                    self.viscousXForces.append(float(split[2].replace("(", "")))
+                    self.viscousYForces.append(float(split[3]))
+                    self.viscousZForces.append(float(split[4].replace(")", "")))
 
             if self.in_forcecoeffs_output:
                 # Force coefficient monitors
@@ -259,12 +259,12 @@ class CfdRunnableFoam(CfdRunnable):
 
             if self.plot_forces:
                 self.solver.Proxy.forces_plotter.updateResiduals(self.time, OrderedDict([
-                    ('$Pressure_x$', self.pressureXResiduals),
-                    ('$Pressure_y$', self.pressureYResiduals),
-                    ('$Pressure_z$', self.pressureZResiduals),
-                    ('$Viscous_x$', self.viscousXResiduals),
-                    ('$Viscous_y$', self.viscousYResiduals),
-                    ('$Viscous_z$', self.viscousZResiduals)]))
+                    ('$Pressure_x$', self.pressureXForces),
+                    ('$Pressure_y$', self.pressureYForces),
+                    ('$Pressure_z$', self.pressureZForces),
+                    ('$Viscous_x$', self.viscousXForces),
+                    ('$Viscous_y$', self.viscousYForces),
+                    ('$Viscous_z$', self.viscousZForces)]))
 
             if self.plot_force_coefficients:
                 self.solver.Proxy.force_coeffs_plotter.updateResiduals(self.time, OrderedDict([
