@@ -1131,9 +1131,9 @@ def checkCfdDependencies():
             print(plot_msg)
     if not plot_ok:
         try:
-            from freecad.plot import Plot  # Plot workbench
+            from compat import Plot  # Plot workbench
         except ImportError:
-            plot_msg = "Could not load Plot workbench\nPlease install it using Tools | Addon manager"
+            plot_msg = "Could not load legacy Plot module"
             message += plot_msg + '\n'
             print(plot_msg)
 
