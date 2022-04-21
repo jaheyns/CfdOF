@@ -39,7 +39,7 @@ from FreeCAD import Units
 import CfdTools
 
 
-class ResidualPlot:
+class TimePlot:
     def __init__(self, title, is_log=True):
         self.fig = None
         self.title = title

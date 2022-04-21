@@ -33,7 +33,7 @@ import CfdAnalysis
 from PySide.QtCore import QObject, Signal
 from collections import OrderedDict
 
-from CfdResidualPlot import ResidualPlot
+from CfdTimePlot import TimePlot
 
 
 class CfdRunnable(QObject, object):
@@ -146,10 +146,10 @@ class CfdRunnableFoam(CfdRunnable):
             for rf_type in reporting_functions:
                 if rf_type.FunctionObjectType == "Force":
                     self.plot_forces = True
-                    self.solver.Proxy.forces_plotter = ResidualPlot(title="Forces", is_log=False)
+                    self.solver.Proxy.forces_plotter = TimePlot(title="Forces", is_log=False)
                 elif rf_type.FunctionObjectType == "ForceCoefficients":
                     self.plot_force_coefficients = True
-                    self.solver.Proxy.force_coeffs_plotter = ResidualPlot(title="Force Coefficients", is_log=False)
+                    self.solver.Proxy.force_coeffs_plotter = TimePlot(title="Force Coefficients", is_log=False)
 
     def process_output(self, text):
         log_lines = text.split('\n')
