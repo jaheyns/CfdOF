@@ -27,12 +27,12 @@ import FreeCAD
 from PySide import QtCore
 
 if int(FreeCAD.Version()[0]) == 0 and int(FreeCAD.Version()[1].split('.')[0]) < 20:
-    from freecad.plot import Plot  # Plot workbench
+    from compat import Plot  # Plot workbench
 else:
     try:
         from FreeCAD.Plot import Plot  # Inbuilt plot module
     except ImportError:
-        from freecad.plot import Plot  # Fallback to workbench
+        from compat import Plot  # Fallback to compat (should be unnecessary once 0.20 is stable)
 import math
 
 

@@ -27,8 +27,7 @@ This offering is not approved or endorsed by OpenCFD Limited, producer and distr
 * Flow initialisation with a potential solver
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
 * Cut-cell Cartesian meshing with baffles (snappyHexMesh) and implicit / explicit snapping
-* Tetrahedral meshing using Gmsh
-* Conversion to poly dual mesh from existing meshes
+* Tetrahedral meshing using Gmsh, including conversion to polyhedral dual mesh
 * Post meshing check mesh
 * Postprocessing using Paraview
 * Runs on Windows 7-11 and Linux
@@ -63,7 +62,6 @@ which can be automatically installed (see below for instructions).
  or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
 - OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2112](http://openfoam.com/download)  
 - [Paraview](http://www.paraview.org/)  
-- [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
 - [HiSA (High Speed Aerodynamic Solver)](https://hisa.gitlab.io)
 - [Gmsh (version 2.13 or later)](http://gmsh.info/) - optional, for generating tetrahedral meshes
@@ -80,14 +78,12 @@ by respectively running the installer or extracting the .7z archive to a directo
 \<FreeCAD-directory\>. In the latter case, FreeCAD can be run in place
 (\<FreeCAD-directory\>\bin\FreeCAD.exe). 
 
-Before installing CfdOF, the Plot workbench must first be 
-installed into FreeCAD using the Addon manager:
+CfdOF itself is installed into FreeCAD using the Addon manager:
 
 * Run FreeCAD
 * Select Tools | Addon manager ...
-* Select Plot in the list of workbenches, and click "Install/update"
+* Select CfdOF in the list of workbenches, and click "Install/update"
 * Restart FreeCAD
-* Repeat the above for the "CfdOF" workbench
 * For installation of dependencies, see below
 
 Note: The CfdOF workbench can be updated at any time through the Addon manager.
@@ -158,23 +154,22 @@ to be runnable from FreeCAD.
 For the reasons above we recommend the AppImage as the most robust installation
 option on Linux.
 
-Before installing CfdOF, the Plot workbench must first be 
-installed into FreeCAD using the Addon manager:
+CfdOF itself is installed into FreeCAD using the Addon manager:
 
-* Run FreeCAD 
+* Run FreeCAD
 * Select Tools | Addon manager ...
-* Select Plot in the list of workbenches, and click "Install/update"
+* Select CfdOF in the list of workbenches, and click "Install/update"
 * Restart FreeCAD
-* Repeat the above for the "CfdOF" workbench
 * For installation of dependencies, see below
 
+Note: The CfdOF workbench can be updated at any time through the Addon manager.
 
 ##### Dependency installation
 
 Dependencies can be checked and some of them installed
 conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
-choose "CFD".
+choose "CfdOF".
 
 However, in Linux, manual installation is required for 
 OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openfoam.org/download/) versions),
@@ -189,11 +184,11 @@ We therefore recommend installation of the packages supplied through
 the official websites above.
 
 Set the OpenFOAM install directory in the preferences
-panel - examples of typical install locations are /opt/openfoam8 
-or /home/user/OpenFOAM/OpenFOAM-8.x (It will be automatically 
+panel - examples of typical install locations are /usr/lib/openfoam/openfoam2112, 
+/opt/openfoam9 or /home/user/OpenFOAM/OpenFOAM-9.x (It will be automatically 
 detected in common default install
 locations). Note that if you have loaded the desired OpenFOAM 
-environment already, the install directory should be left blank.
+environment already before starting FreeCAD, the install directory should be left blank.
 
 cfMesh and HiSA can be installed using the Preferences panel described above,
 and can be downloaded and built from their source
@@ -311,7 +306,7 @@ We acknowledge significant contributions from
 * Michael Hindley (2016) - Initial concept
 * Klaus Sembritzki (2017) - Multiphase extension
 * Thomas Schrader (2017-) <info@schraderundschrader.de> - Testing and user assistance
-* Jonathan Bergh (2022) - Additional turbulence models
+* Jonathan Bergh (2022) - Additional turbulence models and mesh check
 
 ### Dedication
 
