@@ -146,10 +146,10 @@ class CfdRunnableFoam(CfdRunnable):
             for rf_type in reporting_functions:
                 if rf_type.FunctionObjectType == "Force":
                     self.plot_forces = True
-                    self.solver.Proxy.forces_plotter = TimePlot(title="Forces", is_log=False)
+                    self.solver.Proxy.forces_plotter = TimePlot(title="Forces", y_label="Force [N]", is_log=False)
                 elif rf_type.FunctionObjectType == "ForceCoefficients":
                     self.plot_force_coefficients = True
-                    self.solver.Proxy.force_coeffs_plotter = TimePlot(title="Force Coefficients", is_log=False)
+                    self.solver.Proxy.force_coeffs_plotter = TimePlot(title="Force Coefficients", y_label="Coefficient", is_log=False)
 
     def process_output(self, text):
         log_lines = text.split('\n')
@@ -243,7 +243,7 @@ class CfdRunnableFoam(CfdRunnable):
                     self.clResiduals.append(float(split[2]))
 
         if self.niter > 1 and self.niter > prev_niter:
-            self.solver.Proxy.residual_plotter.updateResiduals(self.time, OrderedDict([
+            self.solver.Proxy.residual_plotter.updateValues(self.time, OrderedDict([
                 ('$\\rho$', self.rhoResiduals),
                 ('$U_x$', self.UxResiduals),
                 ('$U_y$', self.UyResiduals),
@@ -258,7 +258,7 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$Re_{\\theta}$', self.ReThetatResiduals)]))
 
             if self.plot_forces:
-                self.solver.Proxy.forces_plotter.updateResiduals(self.time, OrderedDict([
+                self.solver.Proxy.forces_plotter.updateValues(self.time, OrderedDict([
                     ('$Pressure_x$', self.pressureXForces),
                     ('$Pressure_y$', self.pressureYForces),
                     ('$Pressure_z$', self.pressureZForces),
@@ -267,7 +267,7 @@ class CfdRunnableFoam(CfdRunnable):
                     ('$Viscous_z$', self.viscousZForces)]))
 
             if self.plot_force_coefficients:
-                self.solver.Proxy.force_coeffs_plotter.updateResiduals(self.time, OrderedDict([
+                self.solver.Proxy.force_coeffs_plotter.updateValues(self.time, OrderedDict([
                     ('$C_D$', self.cdResiduals),
                     ('$C_L$', self.clResiduals)
                 ]))
