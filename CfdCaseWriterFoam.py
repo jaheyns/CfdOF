@@ -97,6 +97,8 @@ class CfdCaseWriterFoam:
             'reportingFunctionsEnabled': False,
             'reportingProbes': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_probes),
             'reportingProbesEnabled': False,
+            'dynamicMeshAdaptation': {},
+            'dynamicMeshAdaptationEnabled': False,
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
@@ -109,8 +111,6 @@ class CfdCaseWriterFoam:
             'meshDir': "../" + self.mesh_obj.CaseName,
             'solver': CfdTools.propsToDict(self.solver_obj),
             'system': {},
-            'dynamicMeshAdaptationEnabled': False,
-            'dynamicMeshAdaptation': {},
             'runChangeDictionary': False
             }
 
@@ -135,7 +135,7 @@ class CfdCaseWriterFoam:
             self.processReportingProbes()
 
         if self.dynamic_mesh_obj:
-            cfdMessage(f'Dynamic mesh adapation rule present')
+            cfdMessage(f'Dynamic mesh adaptation rule present')
             self.processDynamicAdaptationMesh()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
@@ -159,8 +159,10 @@ class CfdCaseWriterFoam:
         return True
 
     def getSolverName(self):
-        """ Solver name is selected based on selected physics. This should only be extended as additional physics are
-        included. """
+        """
+        Solver name is selected based on selected physics. This should only be extended as additional physics are
+        included.
+        """
         solver = None
         if self.physics_model.Phase == 'Single':
             if len(self.material_objs) == 1:
@@ -386,33 +388,6 @@ class CfdCaseWriterFoam:
                     'BoundarySubType': 'symmetry'
                 }
 
-    def processReportingFunctions(self):
-        """ Compute any Function objects required before case build """
-        settings = self.settings
-        settings['reportingFunctionsEnabled'] = True
-
-        for name in settings['reportingFunctions']:
-            rf = settings['reportingFunctions'][name]
-
-            rf['PatchName'] = rf['Patch'].Label
-
-            rf['CoR'] = tuple(p for p in rf['CoR'])
-            rf['Direction'] = tuple(p for p in rf['Direction'])
-
-            if rf['FunctionObjectType'] == 'ForceCoefficients':
-                rf['Lift'] = tuple(p for p in rf['Lift'])
-                rf['Drag'] = tuple(p for p in rf['Drag'])
-                rf['Pitch'] = tuple(p for p in rf['Pitch'])
-
-    def processReportingProbes(self):
-        settings = self.settings
-        # Copy keys so that we can delete while iterating
-        settings['reportingProbesEnabled'] = True
-        rf_name = list(settings['reportingProbes'].keys())
-
-        for name in rf_name:
-            settings['reportingProbes'][name]['ProbePosition'] = tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
-
     def parseFaces(self, shape_refs):
         pass
 
@@ -564,8 +539,41 @@ class CfdCaseWriterFoam:
                 else:
                     raise RuntimeError("No boundary selected to copy initial turbulence values from.")
 
-    # Zones
+    # Function objects (reporting functions, probes)
+    def processReportingFunctions(self):
+        """ Compute any Function objects required before case build """
+        settings = self.settings
+        settings['reportingFunctionsEnabled'] = True
 
+        for name in settings['reportingFunctions']:
+            rf = settings['reportingFunctions'][name]
+
+            rf['PatchName'] = rf['Patch'].Label
+
+            rf['CoR'] = tuple(p for p in rf['CoR'])
+            rf['Direction'] = tuple(p for p in rf['Direction'])
+
+            if rf['FunctionObjectType'] == 'ForceCoefficients':
+                rf['Lift'] = tuple(p for p in rf['Lift'])
+                rf['Drag'] = tuple(p for p in rf['Drag'])
+                rf['Pitch'] = tuple(p for p in rf['Pitch'])
+
+    def processReportingProbes(self):
+        settings = self.settings
+        # Copy keys so that we can delete while iterating
+        settings['reportingProbesEnabled'] = True
+        rf_name = list(settings['reportingProbes'].keys())
+
+        for name in rf_name:
+            settings['reportingProbes'][name]['ProbePosition'] = tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
+
+    # Mesh related
+    def processDynamicAdaptationMesh(self):
+        settings = self.settings
+        settings['dynamicMeshAdaptationEnabled'] = True
+        settings['dynamicMeshAdaptation'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
+
+    # Zones
     def exportZoneStlSurfaces(self):
         for zo in self.zone_objs:
             for r in zo.ShapeRefs:
@@ -624,11 +632,6 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("Unrecognised method for porous baffle resistance")
             porousZoneSettings[po['Label']] = pd
-
-    def processDynamicAdaptationMesh(self):
-        settings = self.settings
-        settings['dynamicMeshAdaptationEnabled'] = True
-        settings['dynamicMeshAdaptation'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
 
     def processInitialisationZoneProperties(self):
         settings = self.settings
