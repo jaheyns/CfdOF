@@ -25,21 +25,22 @@
 # *                                                                        *
 # **************************************************************************/
 
+from PySide import QtCore
+
 
 class CfdOFWorkbench(Workbench):
     """ CfdOF workbench object """
     def __init__(self):
         import os
         import CfdTools
+        from PySide import QtCore
+        from CfdPreferencePage import CfdPreferencePage
+
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd.svg")
         self.__class__.Icon = icon_path
         self.__class__.MenuText = "CfdOF"
         self.__class__.ToolTip = "CfdOF workbench"
 
-        from PySide import QtCore
-        from CfdPreferencePage import CfdPreferencePage
-        ICONS_PATH = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons")
-        QtCore.QDir.addSearchPath("icons", ICONS_PATH)
         FreeCADGui.addPreferencePage(CfdPreferencePage, "CfdOF")
 
     def Initialize(self):

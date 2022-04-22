@@ -50,9 +50,9 @@ class ResidualPlot:
         self.residuals = {}
         self.transient = False
 
-        self.Timer = QtCore.QTimer()
-        self.Timer.timeout.connect(self.refresh)
-        self.Timer.start(2000)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.refresh)
+        self.timer.start(2000)
 
     def __del__(self):
         if FreeCAD.GuiUp:

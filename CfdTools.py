@@ -46,12 +46,12 @@ from FreeCAD import Units
 import Part
 import BOPTools
 from BOPTools import SplitFeatures
+import CfdConsoleProcess
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
     from PySide import QtCore
     from PySide.QtGui import QFormLayout, QGridLayout
-import CfdConsoleProcess
 
 
 # Some standard install locations that are searched if an install directory is not specified
@@ -105,7 +105,6 @@ def getOutputPath(analysis):
 
 
 # Get functions
-
 if FreeCAD.GuiUp:
     def getResultObject():
         sel = FreeCADGui.Selection.getSelection()
@@ -286,7 +285,6 @@ def get_module_path():
 
 
 # Set functions
-
 def setCompSolid(vobj):
     """
     To enable correct mesh refinement, boolean fragments are set to compSolid mode

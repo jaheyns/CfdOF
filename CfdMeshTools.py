@@ -166,14 +166,7 @@ class CfdMeshTools:
                 if extrusion_normal.dot(face_normal) < 0:
                     axis_direction = -axis_direction
 
-            #TODO remove
-            print(f'Axis direction: {axis_direction}')
-
             this_extrusion_settings['AxisDirection'] = tuple(d for d in axis_direction)
-
-            #TODO remove
-            print(f'After: {this_extrusion_settings["AxisDirection"]}')
-
             self.extrusion_settings['Extrusions'].append(this_extrusion_settings)
 
     def getClmax(self):

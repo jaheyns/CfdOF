@@ -28,12 +28,12 @@
 import os
 import os.path
 import FreeCAD
-if FreeCAD.GuiUp:
-    import FreeCADGui
-    from PySide import QtCore
 import CfdTools
 from CfdTools import addObjectProperty
 from CfdResidualPlot import ResidualPlot
+if FreeCAD.GuiUp:
+    import FreeCADGui
+    from PySide import QtCore
 
 
 def makeCfdSolverFoam(name="CfdSolver"):
