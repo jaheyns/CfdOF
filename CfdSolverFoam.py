@@ -30,7 +30,7 @@ import os.path
 import FreeCAD
 import CfdTools
 from CfdTools import addObjectProperty
-from CfdResidualPlot import ResidualPlot
+from CfdTimePlot import TimePlot
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -106,7 +106,7 @@ class _CfdSolverFoam(object):
         addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "TimeStepControl",
                           "Output time interval")
 
-        self.residual_plotter = ResidualPlot(title="Simulation residuals")
+        self.residual_plotter = TimePlot(title="Simulation residuals", y_label="Residual", is_log=True)
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
