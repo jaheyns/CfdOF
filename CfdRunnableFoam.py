@@ -144,10 +144,10 @@ class CfdRunnableFoam(CfdRunnable):
         reporting_functions = CfdTools.getReportingFunctionsGroup(CfdTools.getActiveAnalysis())
         if reporting_functions is not None:
             for rf_type in reporting_functions:
-                if rf_type.FunctionObjectType == "Force":
+                if rf_type.ReportingFunctionType == "Force":
                     self.plot_forces = True
                     self.solver.Proxy.forces_plotter = TimePlot(title="Forces", y_label="Force [N]", is_log=False)
-                elif rf_type.FunctionObjectType == "ForceCoefficients":
+                elif rf_type.ReportingFunctionType == "ForceCoefficients":
                     self.plot_force_coefficients = True
                     self.solver.Proxy.force_coeffs_plotter = TimePlot(title="Force Coefficients", y_label="Coefficient", is_log=False)
 

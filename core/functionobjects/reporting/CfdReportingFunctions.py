@@ -32,12 +32,14 @@ from CfdTools import addObjectProperty
 import os
 
 # Constants
-OBJECT_NAMES = ["Force", "ForceCoefficients"]
-OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches"]
+OBJECT_NAMES = ["Force", "ForceCoefficients", "Probes"]
+OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches", 
+    "Sample fields at specified locations"]
 
 # GUI
-FUNCTIONS_UI = [[True, False, True],    # Forces
-                [True, True, True, ]]   # Force coefficients
+FUNCTIONS_UI = [0, 0, 1]
+FORCES_UI = [[True, False, True],    # Forces
+             [True, True, True, ]]   # Force coefficients
 
 
 def makeCfdReportingFunctions(name="ReportingFunction"):
@@ -81,8 +83,8 @@ class _CfdReportingFunctions:
     def initProperties(self, obj):
 
         # Setup and utility
-        addObjectProperty(obj, 'FunctionObjectType', "functionObjectType", "App::PropertyString", "Forces",
-                          "Name of the function object to be created")
+        addObjectProperty(obj, 'ReportingFunctionType', "Forces", "App::PropertyString",
+                          "Type of reporting function")
 
         addObjectProperty(obj, 'Patch', None, "App::PropertyLink", "Function object",
                           "Patch on which to create the function object")
@@ -121,6 +123,14 @@ class _CfdReportingFunctions:
                           "Binning direction")
         addObjectProperty(obj, 'Cumulative', True, "App::PropertyBool", "Forces",
                           "Cumulative")
+
+        # Probes
+        addObjectProperty(obj, 'SampleFieldName', "p", "App::PropertyString", "Probes",
+                          "Name of the field to sample")
+
+        addObjectProperty(obj, 'ProbePosition', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Probes",
+                          "Location of the probe sample location")
+
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
@@ -187,6 +197,8 @@ class _ViewProviderCfdReportingFunctions:
             return False
 
         import core.functionobjects.reporting.TaskPanelCfdReportingFunctions as TaskPanelCfdReportingFunctions
+        import importlib
+        importlib.reload(TaskPanelCfdReportingFunctions)
         taskd = TaskPanelCfdReportingFunctions.TaskPanelCfdReportingFunctions(self.Object)
         self.Object.ViewObject.show()
         taskd.obj = vobj.Object

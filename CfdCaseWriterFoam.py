@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -50,7 +50,6 @@ class CfdCaseWriterFoam:
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
         self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
-        self.reporting_probes = CfdTools.getReportingProbesGroup(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
@@ -95,8 +94,6 @@ class CfdCaseWriterFoam:
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
             'reportingFunctionsEnabled': False,
-            'reportingProbes': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_probes),
-            'reportingProbesEnabled': False,
             'dynamicMeshAdaptation': {},
             'dynamicMeshAdaptationEnabled': False,
             'bafflesPresent': self.bafflesPresent(),
@@ -129,10 +126,6 @@ class CfdCaseWriterFoam:
         if self.reporting_functions:
             cfdMessage(f'Reporting functions present')
             self.processReportingFunctions()
-
-        if self.reporting_probes:
-            cfdMessage(f'Reporting probes present')
-            self.processReportingProbes()
 
         if self.dynamic_mesh_obj:
             cfdMessage(f'Dynamic mesh adaptation rule present')
@@ -553,19 +546,14 @@ class CfdCaseWriterFoam:
             rf['CoR'] = tuple(p for p in rf['CoR'])
             rf['Direction'] = tuple(p for p in rf['Direction'])
 
-            if rf['FunctionObjectType'] == 'ForceCoefficients':
+            if rf['ReportingFunctionType'] == 'ForceCoefficients':
                 rf['Lift'] = tuple(p for p in rf['Lift'])
                 rf['Drag'] = tuple(p for p in rf['Drag'])
                 rf['Pitch'] = tuple(p for p in rf['Pitch'])
 
-    def processReportingProbes(self):
-        settings = self.settings
-        # Copy keys so that we can delete while iterating
-        settings['reportingProbesEnabled'] = True
-        rf_name = list(settings['reportingProbes'].keys())
+            settings['reportingFunctions'][name]['ProbePosition'] = \
+                tuple(p for p in settings['reportingFunctions'][name]['ProbePosition'])
 
-        for name in rf_name:
-            settings['reportingProbes'][name]['ProbePosition'] = tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
 
     # Mesh related
     def processDynamicAdaptationMesh(self):

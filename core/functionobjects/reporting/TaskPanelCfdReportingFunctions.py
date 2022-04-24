@@ -40,14 +40,12 @@ class TaskPanelCfdReportingFunctions:
         self.analysis_obj = CfdTools.getActiveAnalysis()
         self.physics_obj = CfdTools.getPhysicsModel(self.analysis_obj)
 
-        self.FunctionObjectTypeOrig = str(self.obj.FunctionObjectType)
-
         ui_path = os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdReportingFunctions.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         # Function Object types
         self.form.comboFunctionObjectType.addItems(CfdReportingFunctions.OBJECT_NAMES)
-        bi = indexOrDefault(CfdReportingFunctions.OBJECT_NAMES, self.obj.FunctionObjectType, 0)
+        bi = indexOrDefault(CfdReportingFunctions.OBJECT_NAMES, self.obj.ReportingFunctionType, 0)
         self.form.comboFunctionObjectType.currentIndexChanged.connect(self.comboFunctionObjectTypeChanged)
         self.form.comboFunctionObjectType.setCurrentIndex(bi)
         self.comboFunctionObjectTypeChanged()
@@ -139,12 +137,22 @@ class TaskPanelCfdReportingFunctions:
         setQuantity(self.form.inputDirectionz, self.obj.Direction.z)
         self.form.inputCumulative.setChecked(self.obj.Cumulative)
 
+        self.form.inputFieldName.setText(self.obj.SampleFieldName)
+        setQuantity(self.form.inputProbeLocx, self.obj.ProbePosition.x)
+        setQuantity(self.form.inputProbeLocy, self.obj.ProbePosition.y)
+        setQuantity(self.form.inputProbeLocz, self.obj.ProbePosition.z)
+
     def updateUI(self):
         # Function object type
         type_index = self.form.comboFunctionObjectType.currentIndex()
-        field_name_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][0]
-        coefficient_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][1]
-        spatial_bin_frame_enabled = CfdReportingFunctions.FUNCTIONS_UI[type_index][2]
+        self.form.stackedWidget.setCurrentIndex(CfdReportingFunctions.FUNCTIONS_UI[type_index])
+        if type_index < len(CfdReportingFunctions.FORCES_UI):
+            field_name_frame_enabled = CfdReportingFunctions.FORCES_UI[type_index][0]
+            coefficient_frame_enabled = CfdReportingFunctions.FORCES_UI[type_index][1]
+            spatial_bin_frame_enabled = CfdReportingFunctions.FORCES_UI[type_index][2]
+            self.form.fieldNamesFrame.setVisible(field_name_frame_enabled)
+            self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
+            self.form.spatialFrame.setVisible(spatial_bin_frame_enabled)
 
         if self.physics_obj.Flow == 'Incompressible':
             self.form.inputReferenceDensity.setVisible(False)
@@ -153,15 +161,9 @@ class TaskPanelCfdReportingFunctions:
             self.form.inputReferenceDensity.setVisible(True)
             self.form.labelRefDensity.setVisible(True)
 
-        self.form.fieldNamesFrame.setVisible(field_name_frame_enabled)
-        self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
-        self.form.spatialFrame.setVisible(spatial_bin_frame_enabled)
-
     def comboFunctionObjectTypeChanged(self):
         index = self.form.comboFunctionObjectType.currentIndex()
-        self.obj.FunctionObjectType = CfdReportingFunctions.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()]
         self.form.functionObjectDescription.setText(CfdReportingFunctions.OBJECT_DESCRIPTIONS[index])
-
         self.updateUI()
 
     def accept(self):
@@ -172,8 +174,10 @@ class TaskPanelCfdReportingFunctions:
 
         FreeCADGui.doCommand("\nfo = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
         # Type
-        FreeCADGui.doCommand("fo.FunctionObjectType "
-                             "= '{}'".format(self.obj.FunctionObjectType))
+        index = self.form.comboFunctionObjectType.currentIndex()
+        FreeCADGui.doCommand("fo.ReportingFunctionType = '{}'".format(
+                                 CfdReportingFunctions.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()]))
+
         bcs = CfdTools.getCfdBoundaryGroup(self.analysis_obj)
         FreeCADGui.doCommand("fo.Patch "
                              "= FreeCAD.ActiveDocument.{}".format(bcs[self.form.cb_patch_list.currentIndex()].Name))
@@ -230,12 +234,20 @@ class TaskPanelCfdReportingFunctions:
         FreeCADGui.doCommand("fo.Cumulative "
                              "= {}".format(self.form.inputCumulative.isChecked()))
 
+        # Probe info
+        FreeCADGui.doCommand("fo.SampleFieldName "
+                             "= '{}'".format(self.form.inputFieldName.text()))
+        FreeCADGui.doCommand("fo.ProbePosition.x "
+                             "= '{}'".format(self.form.inputProbeLocx.property("quantity").getValueAs("m")))
+        FreeCADGui.doCommand("fo.ProbePosition.y "
+                             "= '{}'".format(self.form.inputProbeLocy.property("quantity").getValueAs("m")))
+        FreeCADGui.doCommand("fo.ProbePosition.z "
+                             "= '{}'".format(self.form.inputProbeLocz.property("quantity").getValueAs("m")))
+
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
 
     def reject(self):
-        self.obj.FunctionObjectType = self.FunctionObjectTypeOrig
-        FreeCADGui.Selection.removeObserver(self)
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
         FreeCAD.getDocument(doc_name).recompute()

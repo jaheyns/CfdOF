@@ -267,15 +267,6 @@ def getReportingFunctionsGroup(analysis_object):
     return group
 
 
-def getReportingProbesGroup(analysis_object):
-    group = []
-    from core.functionobjects.probes.CfdReportingProbes import CfdReportingProbes
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, CfdReportingProbes):
-            group.append(i)
-    return group
-
-
 # Mesh
 def getMeshRefinementObjs(mesh_obj):
     from CfdMeshRefinement import _CfdMeshRefinement

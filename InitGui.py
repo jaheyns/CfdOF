@@ -59,21 +59,19 @@ class CfdOFWorkbench(Workbench):
         from CfdZone import _CommandCfdInitialisationZone
         from core.mesh.dynamic.CfdDynamicMeshRefinement import _CommandDynamicMesh
         from core.functionobjects.reporting.CfdReportingFunctions import _CommandCfdReportingFunctions
-        from core.functionobjects.probes.CfdReportingProbes import CommandCfdReportingProbes
 
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
         FreeCADGui.addCommand('Cfd_DynamicMesh', _CommandDynamicMesh())
         FreeCADGui.addCommand('Cfd_ReportingFunctions', _CommandCfdReportingFunctions())
-        FreeCADGui.addCommand('Cfd_ReportingProbes', CommandCfdReportingProbes())
 
         cmdlst = ['Cfd_Analysis',
                   'Cfd_MeshFromShape', 'Cfd_MeshRegion', 'Cfd_DynamicMesh',
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
-                  'Cfd_ReportingFunctions', 'Cfd_ReportingProbes',
+                  'Cfd_ReportingFunctions',
                   'Cfd_SolverControl']
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)
