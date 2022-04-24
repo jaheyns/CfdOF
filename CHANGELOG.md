@@ -2,6 +2,13 @@
 Brought to you by the developers of the CfdOF FreeCAD OpenFOAM integration workbench.
 
 ## Release notes
+## v1.15.0
+* Added dynamic mesh adaptation functionality
+* Added Reporting functions functionality
+* Added Reporting probes functionality
+* Support for backwards Plot module compatibility
+* Update ResidualPlot to generalised TimePlot
+
 ## v1.14.0
 * Added support for LES models (WALE, Smagorinsky, kEqn-based)
 * Changed turbulence intensity inputs to percentages to make things more user friendly / intuitive
