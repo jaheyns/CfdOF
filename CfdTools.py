@@ -186,24 +186,6 @@ def getInitialConditions(analysis_object):
     return None
 
 
-def getReportingFunctionsGroup(analysis_object):
-    group = []
-    from core.functionobjects.reporting.CfdReportingFunctions import _CfdReportingFunctions
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, _CfdReportingFunctions):
-            group.append(i)
-    return group
-
-
-def getReportingProbesGroup(analysis_object):
-    group = []
-    from core.functionobjects.probes.CfdReportingProbes import CfdReportingProbes
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, CfdReportingProbes):
-            group.append(i)
-    return group
-
-
 def getMaterials(analysis_object):
     return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
 
@@ -258,15 +240,6 @@ def getMesh(analysis_object):
     return None
 
 
-def getMeshRefinementObjs(mesh_obj):
-    from CfdMeshRefinement import _CfdMeshRefinement
-    ref_objs = []
-    for obj in mesh_obj.Group:
-        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMeshRefinement):
-            ref_objs = ref_objs + [obj]
-    return ref_objs
-
-
 def getResult(analysis_object):
     for i in analysis_object.Group:
         if i.isDerivedFrom("Fem::FemResultObject"):
@@ -282,6 +255,35 @@ def get_module_path():
     (The second overrides the first.)
     """
     return os.path.dirname(__file__)
+
+
+# Function objects
+def getReportingFunctionsGroup(analysis_object):
+    group = []
+    from core.functionobjects.reporting.CfdReportingFunctions import _CfdReportingFunctions
+    for i in analysis_object.Group:
+        if isinstance(i.Proxy, _CfdReportingFunctions):
+            group.append(i)
+    return group
+
+
+def getReportingProbesGroup(analysis_object):
+    group = []
+    from core.functionobjects.probes.CfdReportingProbes import CfdReportingProbes
+    for i in analysis_object.Group:
+        if isinstance(i.Proxy, CfdReportingProbes):
+            group.append(i)
+    return group
+
+
+# Mesh
+def getMeshRefinementObjs(mesh_obj):
+    from CfdMeshRefinement import _CfdMeshRefinement
+    ref_objs = []
+    for obj in mesh_obj.Group:
+        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMeshRefinement):
+            ref_objs = ref_objs + [obj]
+    return ref_objs
 
 
 # Set functions

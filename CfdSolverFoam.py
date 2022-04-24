@@ -175,9 +175,9 @@ class _ViewProviderCfdSolverFoam:
     def setEdit(self, vobj, mode):
         if CfdTools.getActiveAnalysis():
             from CfdRunnableFoam import CfdRunnableFoam
-            foamRunnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
+            foam_runnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
             from _TaskPanelCfdSolverControl import _TaskPanelCfdSolverControl
-            self.taskd = _TaskPanelCfdSolverControl(foamRunnable)
+            self.taskd = _TaskPanelCfdSolverControl(foam_runnable)
             self.taskd.obj = vobj.Object
 
             FreeCADGui.Control.showDialog(self.taskd)

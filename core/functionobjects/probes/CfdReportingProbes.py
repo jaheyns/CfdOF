@@ -31,7 +31,7 @@ import os
 import CfdTools
 
 
-def makeCfdReportingProbes(name="CfdReportingProbes"):
+def makeCfdReportingProbes(name="ReportingProbe"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     CfdReportingProbes(obj)
     if FreeCAD.GuiUp:
@@ -45,7 +45,7 @@ class CommandCfdReportingProbes:
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "monitor_probes.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingProbes",
-                                                     "Cfd reporting probes"),
+                                                     "Reporting probe"),
                 'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingProbes",
                                                     "Create a reporting probe for the current case")}
 
@@ -64,17 +64,17 @@ class CommandCfdReportingProbes:
 class CfdReportingProbes:
 
     def __init__(self, obj):
-        self.Type = "CfdReportingFunctions"
+        self.Type = "ReportingProbe"
         self.Object = obj
         obj.Proxy = self
         self.initProperties(obj)
 
     def initProperties(self, obj):
 
-        addObjectProperty(obj, 'FieldName', "p", "App::PropertyString", "Function object",
+        addObjectProperty(obj, 'FieldName', "p", "App::PropertyString", "Probes",
                           "Name of the field to sample")
 
-        addObjectProperty(obj, 'ProbePosition', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Function object",
+        addObjectProperty(obj, 'ProbePosition', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Probes",
                           "Location of the probe sample location")
 
     def onDocumentRestored(self, obj):

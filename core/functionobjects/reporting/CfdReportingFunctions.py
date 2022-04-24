@@ -31,14 +31,16 @@ import CfdTools
 from CfdTools import addObjectProperty
 import os
 
+# Constants
 OBJECT_NAMES = ["Force", "ForceCoefficients"]
 OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches"]
 
+# GUI
 FUNCTIONS_UI = [[True, False, True],    # Forces
                 [True, True, True, ]]   # Force coefficients
 
 
-def makeCfdReportingFunctions(name="CfdReportingFunction"):
+def makeCfdReportingFunctions(name="ReportingFunction"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdReportingFunctions(obj)
     if FreeCAD.GuiUp:
@@ -51,7 +53,7 @@ class _CommandCfdReportingFunctions:
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "monitor.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
-                                                     "Cfd reporting functions"),
+                                                     "Reporting function"),
                 'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
                                                     "Create a reporting function for the current case")}
 
@@ -71,7 +73,7 @@ class _CfdReportingFunctions:
     """ CFD Function objects properties """
 
     def __init__(self, obj):
-        self.Type = "CfdReportingFunctions"
+        self.Type = "ReportingFunction"
         self.Object = obj
         obj.Proxy = self
         self.initProperties(obj)

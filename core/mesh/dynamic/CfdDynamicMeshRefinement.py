@@ -32,8 +32,9 @@ from core.mesh.dynamic import TaskPanelCfdDynamicMeshRefinement
 
 
 def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshModel"):
-    """ makeCfdDynamicMeshRefinement([name]):
-        Creates an object to define dynamic mesh refinement properties and existing mesh if the solver supports it
+    """
+    makeCfdDynamicMeshRefinement([name]):
+    Creates an object to define dynamic mesh refinement properties and existing mesh if the solver supports it
     """
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdDynamicMeshRefinement(obj)
@@ -77,9 +78,6 @@ class _CommandDynamicMesh:
                     FreeCADGui.doCommand("")
                     FreeCADGui.addModule("core.mesh.dynamic.CfdDynamicMeshRefinement as CfdDynamicMeshRefinement")
                     FreeCADGui.addModule("CfdTools")
-                    # FreeCADGui.doCommand(
-                    #     "CfdTools.getActiveAnalysis().addObject(CfdDynamicMeshRefinement" +
-                    #     ".makeCfdDynamicMeshRefinement(App.ActiveDocument.{}))".format(sobj.Name))
                     FreeCADGui.doCommand(
                         "CfdDynamicMeshRefinement.makeCfdDynamicMeshRefinement(App.ActiveDocument.{})".format(sobj.Name))
                     FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
