@@ -103,8 +103,8 @@ class _CfdSolverFoam(object):
                           "Output time interval")
 
         self.residual_plotter = TimePlot(title="Simulation residuals", y_label="Residual", is_log=True)
-        self.forces_plotter = None
-        self.force_coeffs_plotter = None
+        self.forces_plotters = {}
+        self.force_coeffs_plotters = {}
         self.probes_plotters = {}
 
 

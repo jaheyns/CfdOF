@@ -74,8 +74,8 @@ class CfdRunnableFoam(CfdRunnable):
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnableFoam, self).__init__(analysis, solver)
 
-        self.plot_forces = False
-        self.plot_force_coefficients = False
+        self.forces = {}
+        self.force_coeffs = {}
         self.probes = {}
 
         self.constructAncillaryPlotters()
@@ -111,34 +111,37 @@ class CfdRunnableFoam(CfdRunnable):
 
     def initMonitors(self):
 
-        self.in_forces_output = False
-        self.in_forcecoeffs_output = False
+        self.in_forces_section = None
+        self.in_forcecoeffs_section = None
 
-        if self.plot_forces:
-            self.pressureXForces = []
-            self.pressureYForces = []
-            self.pressureZForces = []
+        for fn in self.forces:
+            f = self.forces[fn]
 
-            self.viscousXForces = []
-            self.viscousYForces = []
-            self.viscousZForces = []
+            f['pressureXForces'] = []
+            f['pressureYForces'] = []
+            f['pressureZForces'] = []
 
-            self.solver.Proxy.forces_plotter.reInitialise(self.analysis)
+            f['viscousXForces'] = []
+            f['viscousYForces'] = []
+            f['viscousZForces'] = []
 
-        if self.plot_force_coefficients:
-            self.cdCoeffs = []
-            self.clCoeffs = []
+        for fn in self.solver.Proxy.forces_plotters:
+            self.solver.Proxy.forces_plotters[fn].reInitialise(self.analysis)
 
-            self.solver.Proxy.force_coeffs_plotter.reInitialise(self.analysis)
+        for fcn in self.force_coeffs:
+            fc = self.force_coeffs[fcn]
+            fc['cdCoeffs'] = []
+            fc['clCoeffs'] = []
+        for fcn in self.solver.Proxy.force_coeffs_plotters:
+            self.solver.Proxy.force_coeffs_plotters[fcn].reInitialise(self.analysis)
 
-        if self.plot_probes:
-            for pn in self.probes:
-                p = self.probes[pn]
-                p['file'] = None
-                p['time'] = []
-                p['values'] = [[]]
-            for pn in self.solver.Proxy.probes_plotters:
-                self.solver.Proxy.probes_plotters[pn].reInitialise(self.analysis)
+        for pn in self.probes:
+            p = self.probes[pn]
+            p['file'] = None
+            p['time'] = []
+            p['values'] = [[]]
+        for pn in self.solver.Proxy.probes_plotters:
+            self.solver.Proxy.probes_plotters[pn].reInitialise(self.analysis)
 
 
     def get_solver_cmd(self, case_dir):
@@ -158,20 +161,17 @@ class CfdRunnableFoam(CfdRunnable):
         if reporting_functions is not None:
             for rf in reporting_functions:
                 if rf.ReportingFunctionType == "Force":
-                    self.plot_forces = True
-                    if self.solver.Proxy.forces_plotter is None:
-                        self.solver.Proxy.forces_plotter = TimePlot(title="Forces", y_label="Force [N]", is_log=False)
+                    self.forces[rf.Label] = {}
+                    if rf.Label not in self.solver.Proxy.forces_plotters:
+                        self.solver.Proxy.forces_plotters[rf.Label] = \
+                            TimePlot(title=rf.Label, y_label="Force [N]", is_log=False)
                 elif rf.ReportingFunctionType == "ForceCoefficients":
-                    self.plot_force_coefficients = True
-                    if self.solver.Proxy.force_coeffs_plotter is None:
-                        self.solver.Proxy.force_coeffs_plotter = \
-                            TimePlot(title="Force Coefficients", y_label="Coefficient", is_log=False)
+                    self.force_coeffs[rf.Label] = {}
+                    if rf.Label not in self.solver.Proxy.force_coeffs_plotters:
+                        self.solver.Proxy.force_coeffs_plotters[rf.Label] = \
+                            TimePlot(title=rf.Label, y_label="Coefficient", is_log=False)
                 elif rf.ReportingFunctionType == 'Probes':
-                    self.plot_probes = True
                     self.probes[rf.Label] = {
-                        'file': None, 
-                        'time': [], 
-                        'values': [[]], 
                         'field': rf.SampleFieldName, 
                         'points': [rf.ProbePosition]}
                     if rf.Label not in self.solver.Proxy.probes_plotters:
@@ -193,8 +193,8 @@ class CfdRunnableFoam(CfdRunnable):
                     # Don't keep spurious time zero
                     self.latest_outer_iter = 0
                     self.niter += 1
-                self.in_forces_output = False
-                self.in_forcecoeffs_output = False
+                self.in_forces_section = None
+                self.in_forcecoeffs_section = None
 
             if line.find(u"PIMPLE: iteration ") >= 0 or line.find(u"pseudoTime: iteration ") >= 0:
                 self.latest_outer_iter += 1
@@ -202,10 +202,14 @@ class CfdRunnableFoam(CfdRunnable):
                 if self.latest_outer_iter > 1:
                     self.niter += 1
 
-            if line.startswith(u"forces"):
-                self.in_forces_output = True
-            if line.startswith(u"forceCoeffs"):
-                self.in_forcecoeffs_output = True
+            if line.startswith(u"forces") and line.endswith(u"write:"):
+                self.in_forces_section = line.split()[1]
+            if line.startswith(u"forceCoeffs") and line.endswith(u"execute:"):
+                self.in_forcecoeffs_section = line.split()[1]
+            if not line.strip():  
+                # Blank line
+                self.in_forces_section = None
+                self.in_forcecoeffs_section = None
 
             # Add a point to the time axis for each outer iteration
             if self.niter > len(self.time):
@@ -251,23 +255,24 @@ class CfdRunnableFoam(CfdRunnable):
                 self.ReThetatResiduals.append(float(split[7].split(',')[0]))
 
             # Force monitors
-            if self.in_forces_output:
-                if "Pressure" in split and self.niter-1 > len(self.pressureXForces):
-                    self.pressureXForces.append(float(split[2].replace("(", "")))
-                    self.pressureYForces.append(float(split[3]))
-                    self.pressureZForces.append(float(split[4].replace(")", "")))
+            if self.in_forces_section:
+                f = self.forces[self.in_forces_section]
+                if "Pressure" in split and self.niter-1 > len(f['pressureXForces']):
+                    f['pressureXForces'].append(float(split[2].lstrip("(")))
+                    f['pressureYForces'].append(float(split[3]))
+                    f['pressureZForces'].append(float(split[4].rstrip(")")))
+                if "Viscous" in split and self.niter-1 > len(f['viscousXForces']):
+                    f['viscousXForces'].append(float(split[2].lstrip("(")))
+                    f['viscousYForces'].append(float(split[3]))
+                    f['viscousZForces'].append(float(split[4].rstrip(")")))
 
-                if "Viscous" in split and self.niter-1 > len(self.viscousXForces):
-                    self.viscousXForces.append(float(split[2].replace("(", "")))
-                    self.viscousYForces.append(float(split[3]))
-                    self.viscousZForces.append(float(split[4].replace(")", "")))
-
-            if self.in_forcecoeffs_output:
-                # Force coefficient monitors
-                if "Cd" in split and self.niter-1 > len(self.cdCoeffs):
-                    self.cdCoeffs.append(float(split[2]))
-                if "Cl" in split and self.niter-1 > len(self.clCoeffs):
-                    self.clCoeffs.append(float(split[2]))
+            # Force coefficient monitors
+            if self.in_forcecoeffs_section:
+                fc = self.force_coeffs[self.in_forcecoeffs_section]
+                if "Cd" in split and self.niter-1 > len(fc['cdCoeffs']):
+                    fc['cdCoeffs'].append(float(split[2]))
+                if "Cl" in split and self.niter-1 > len(fc['clCoeffs']):
+                    fc['clCoeffs'].append(float(split[2]))
 
         # Update plots
         if self.niter > 1 and self.niter > prev_niter:
@@ -285,19 +290,21 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$\\gamma$', self.gammaIntResiduals),
                 ('$Re_{\\theta}$', self.ReThetatResiduals)]))
 
-            if self.plot_forces:
-                self.solver.Proxy.forces_plotter.updateValues(self.time, OrderedDict([
-                    ('$Pressure_x$', self.pressureXForces),
-                    ('$Pressure_y$', self.pressureYForces),
-                    ('$Pressure_z$', self.pressureZForces),
-                    ('$Viscous_x$', self.viscousXForces),
-                    ('$Viscous_y$', self.viscousYForces),
-                    ('$Viscous_z$', self.viscousZForces)]))
+            for fn in self.forces:
+                f = self.forces[fn]
+                self.solver.Proxy.forces_plotters[fn].updateValues(self.time, OrderedDict([
+                    ('$Pressure_x$', f['pressureXForces']),
+                    ('$Pressure_y$', f['pressureYForces']),
+                    ('$Pressure_z$', f['pressureZForces']),
+                    ('$Viscous_x$', f['viscousXForces']),
+                    ('$Viscous_y$', f['viscousYForces']),
+                    ('$Viscous_z$', f['viscousZForces'])]))
 
-            if self.plot_force_coefficients:
-                self.solver.Proxy.force_coeffs_plotter.updateValues(self.time, OrderedDict([
-                    ('$C_D$', self.cdCoeffs),
-                    ('$C_L$', self.clCoeffs)
+            for fcn in self.force_coeffs:
+                fc = self.force_coeffs[fcn]
+                self.solver.Proxy.force_coeffs_plotters[fcn].updateValues(self.time, OrderedDict([
+                    ('$C_D$', fc['cdCoeffs']),
+                    ('$C_L$', fc['clCoeffs'])
                 ]))
 
         # Probes
