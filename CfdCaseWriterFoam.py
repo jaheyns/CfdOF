@@ -543,7 +543,8 @@ class CfdCaseWriterFoam:
 
             rf['PatchName'] = rf['Patch'].Label
 
-            rf['CoR'] = tuple(p for p in rf['CoR'])
+            rf['CentreOfRotation'] = \
+                tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in rf['CentreOfRotation'])
             rf['Direction'] = tuple(p for p in rf['Direction'])
 
             if rf['ReportingFunctionType'] == 'ForceCoefficients':
@@ -551,8 +552,9 @@ class CfdCaseWriterFoam:
                 rf['Drag'] = tuple(p for p in rf['Drag'])
                 rf['Pitch'] = tuple(p for p in rf['Pitch'])
 
-            settings['reportingFunctions'][name]['ProbePosition'] = \
-                tuple(p for p in settings['reportingFunctions'][name]['ProbePosition'])
+            settings['reportingFunctions'][name]['ProbePosition'] = tuple(
+                Units.Quantity(p, Units.Length).getValueAs('m') 
+                for p in settings['reportingFunctions'][name]['ProbePosition'])
 
 
     # Mesh related

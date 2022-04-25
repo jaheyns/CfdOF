@@ -24,11 +24,12 @@
 import os
 import os.path
 import FreeCAD
-if FreeCAD.GuiUp:
-    import FreeCADGui
+from FreeCAD import Units
 import CfdTools
 from CfdTools import getQuantity, setQuantity, indexOrDefault
 from core.functionobjects.reporting import CfdReportingFunctions
+if FreeCAD.GuiUp:
+    import FreeCADGui
 
 
 class TaskPanelCfdReportingFunctions:
@@ -45,36 +46,12 @@ class TaskPanelCfdReportingFunctions:
 
         # Function Object types
         self.form.comboFunctionObjectType.addItems(CfdReportingFunctions.OBJECT_NAMES)
-        bi = indexOrDefault(CfdReportingFunctions.OBJECT_NAMES, self.obj.ReportingFunctionType, 0)
         self.form.comboFunctionObjectType.currentIndexChanged.connect(self.comboFunctionObjectTypeChanged)
-        self.form.comboFunctionObjectType.setCurrentIndex(bi)
-        self.comboFunctionObjectTypeChanged()
 
-        # Set the inputs for various function objects
-        # Force fo
-        setQuantity(self.form.inputReferenceDensity, self.obj.ReferenceDensity)
-        setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
-        setQuantity(self.form.inputWriteFields, self.obj.WriteFields)
-        setQuantity(self.form.inputCentreOfRotationx, self.obj.CoR.x)
-        setQuantity(self.form.inputCentreOfRotationy, self.obj.CoR.y)
-        setQuantity(self.form.inputCentreOfRotationz, self.obj.CoR.z)
         self.form.inputReferencePressure.setToolTip("Reference pressure")
         self.form.inputWriteFields.setToolTip("Write output fields")
         self.form.inputCentreOfRotationx.setToolTip("Centre of rotation vector for moments")
 
-        # Force coefficients fo
-        setQuantity(self.form.inputLiftDirectionx, self.obj.Lift.x)
-        setQuantity(self.form.inputLiftDirectiony, self.obj.Lift.y)
-        setQuantity(self.form.inputLiftDirectionz, self.obj.Lift.z)
-        setQuantity(self.form.inputDragDirectionx, self.obj.Drag.x)
-        setQuantity(self.form.inputDragDirectiony, self.obj.Drag.y)
-        setQuantity(self.form.inputDragDirectionz, self.obj.Drag.z)
-        setQuantity(self.form.inputPitchAxisx, self.obj.Pitch.x)
-        setQuantity(self.form.inputPitchAxisy, self.obj.Pitch.y)
-        setQuantity(self.form.inputPitchAxisz, self.obj.Pitch.z)
-        setQuantity(self.form.inputMagnitudeUInf, self.obj.MagnitudeUInf)
-        setQuantity(self.form.inputLengthRef, self.obj.LengthRef)
-        setQuantity(self.form.inputAreaRef, self.obj.AreaRef)
         self.form.inputLiftDirectionx.setToolTip("Lift direction vector")
         self.form.inputDragDirectionx.setToolTip("Drag direction vector")
         self.form.inputPitchAxisx.setToolTip("Pitch axis for moment coefficient")
@@ -83,12 +60,6 @@ class TaskPanelCfdReportingFunctions:
         self.form.inputLengthRef.setToolTip("Length reference")
         self.form.inputAreaRef.setToolTip("Area reference")
 
-        # Spatial binning
-        setQuantity(self.form.inputNBins, self.obj.NBins)
-        setQuantity(self.form.inputDirectionx, self.obj.Direction.x)
-        setQuantity(self.form.inputDirectiony, self.obj.Direction.y)
-        setQuantity(self.form.inputDirectionz, self.obj.Direction.z)
-        setQuantity(self.form.inputCumulative, self.obj.Cumulative)
         self.form.inputNBins.setToolTip("Number of bins")
         self.form.inputDirectionx.setToolTip("Binning direction")
         self.form.inputCumulative.setToolTip("Cumulative")
@@ -101,19 +72,21 @@ class TaskPanelCfdReportingFunctions:
         self.updateUI()
 
     def load(self):
-        try:
-            previous_index = self.list_of_bcs.index(self.obj.PatchName)
-            self.form.cb_patch_list.setCurrentIndex(previous_index)
-        except:
-            pass
+        bi = indexOrDefault(CfdReportingFunctions.OBJECT_NAMES, self.obj.ReportingFunctionType, 0)
+        self.form.comboFunctionObjectType.setCurrentIndex(bi)
+        self.comboFunctionObjectTypeChanged()
+        
+        if self.obj.Patch:
+            index = self.list_of_bcs.index(self.obj.Patch.Label)
+            self.form.cb_patch_list.setCurrentIndex(index)
 
         setQuantity(self.form.inputReferenceDensity, self.obj.ReferenceDensity)
         setQuantity(self.form.inputReferencePressure, self.obj.ReferencePressure)
         self.form.inputWriteFields.setChecked(self.obj.WriteFields)
 
-        setQuantity(self.form.inputCentreOfRotationx, "{} m".format(self.obj.CoR.x))
-        setQuantity(self.form.inputCentreOfRotationy, "{} m".format(self.obj.CoR.y))
-        setQuantity(self.form.inputCentreOfRotationz, "{} m".format(self.obj.CoR.z))
+        setQuantity(self.form.inputCentreOfRotationx, Units.Quantity(self.obj.CentreOfRotation.x, Units.Length))
+        setQuantity(self.form.inputCentreOfRotationy, Units.Quantity(self.obj.CentreOfRotation.y, Units.Length))
+        setQuantity(self.form.inputCentreOfRotationz, Units.Quantity(self.obj.CentreOfRotation.z, Units.Length))
 
         setQuantity(self.form.inputLiftDirectionx, self.obj.Lift.x)
         setQuantity(self.form.inputLiftDirectiony, self.obj.Lift.y)
@@ -131,16 +104,16 @@ class TaskPanelCfdReportingFunctions:
         setQuantity(self.form.inputLengthRef, self.obj.LengthRef)
         setQuantity(self.form.inputAreaRef, self.obj.AreaRef)
 
-        setQuantity(self.form.inputNBins, self.obj.NBins)
+        self.form.inputNBins.setValue(self.obj.NBins)
         setQuantity(self.form.inputDirectionx, self.obj.Direction.x)
         setQuantity(self.form.inputDirectiony, self.obj.Direction.y)
         setQuantity(self.form.inputDirectionz, self.obj.Direction.z)
         self.form.inputCumulative.setChecked(self.obj.Cumulative)
 
         self.form.inputFieldName.setText(self.obj.SampleFieldName)
-        setQuantity(self.form.inputProbeLocx, self.obj.ProbePosition.x)
-        setQuantity(self.form.inputProbeLocy, self.obj.ProbePosition.y)
-        setQuantity(self.form.inputProbeLocz, self.obj.ProbePosition.z)
+        setQuantity(self.form.inputProbeLocx, Units.Quantity(self.obj.ProbePosition.x, Units.Length))
+        setQuantity(self.form.inputProbeLocy, Units.Quantity(self.obj.ProbePosition.y, Units.Length))
+        setQuantity(self.form.inputProbeLocz, Units.Quantity(self.obj.ProbePosition.z, Units.Length))
 
     def updateUI(self):
         # Function object type
@@ -189,32 +162,32 @@ class TaskPanelCfdReportingFunctions:
                              "= '{}'".format(getQuantity(self.form.inputReferencePressure)))
         FreeCADGui.doCommand("fo.WriteFields "
                              "= {}".format(self.form.inputWriteFields.isChecked()))
-        FreeCADGui.doCommand("fo.CoR.x "
-                             "= '{}'".format(self.form.inputCentreOfRotationx.property("quantity").getValueAs("m")))
-        FreeCADGui.doCommand("fo.CoR.y "
-                             "= '{}'".format(self.form.inputCentreOfRotationy.property("quantity").getValueAs("m")))
-        FreeCADGui.doCommand("fo.CoR.z "
-                             "= '{}'".format(self.form.inputCentreOfRotationz.property("quantity").getValueAs("m")))
+        FreeCADGui.doCommand("fo.CentreOfRotation.x "
+                             "= {}".format(self.form.inputCentreOfRotationx.property("quantity").Value))
+        FreeCADGui.doCommand("fo.CentreOfRotation.y "
+                             "= {}".format(self.form.inputCentreOfRotationy.property("quantity").Value))
+        FreeCADGui.doCommand("fo.CentreOfRotation.z "
+                             "= {}".format(self.form.inputCentreOfRotationz.property("quantity").Value))
 
         # # Coefficient object
         FreeCADGui.doCommand("fo.Lift.x "
-                             "= '{}'".format(self.form.inputLiftDirectionx.property("quantity").Value))
+                             "= {}".format(self.form.inputLiftDirectionx.property("quantity").Value))
         FreeCADGui.doCommand("fo.Lift.y "
-                             "= '{}'".format(self.form.inputLiftDirectiony.property("quantity").Value))
+                             "= {}".format(self.form.inputLiftDirectiony.property("quantity").Value))
         FreeCADGui.doCommand("fo.Lift.z "
-                             "= '{}'".format(self.form.inputLiftDirectionz.property("quantity").Value))
+                             "= {}".format(self.form.inputLiftDirectionz.property("quantity").Value))
         FreeCADGui.doCommand("fo.Drag.x "
-                             "= '{}'".format(self.form.inputDragDirectionx.property("quantity").Value))
+                             "= {}".format(self.form.inputDragDirectionx.property("quantity").Value))
         FreeCADGui.doCommand("fo.Drag.y "
-                             "= '{}'".format(self.form.inputDragDirectiony.property("quantity").Value))
+                             "= {}".format(self.form.inputDragDirectiony.property("quantity").Value))
         FreeCADGui.doCommand("fo.Drag.z "
-                             "= '{}'".format(self.form.inputDragDirectionz.property("quantity").Value))
+                             "= {}".format(self.form.inputDragDirectionz.property("quantity").Value))
         FreeCADGui.doCommand("fo.Pitch.x "
-                             "= '{}'".format(self.form.inputPitchAxisx.property("quantity").Value))
+                             "= {}".format(self.form.inputPitchAxisx.property("quantity").Value))
         FreeCADGui.doCommand("fo.Pitch.y "
-                             "= '{}'".format(self.form.inputPitchAxisy.property("quantity").Value))
+                             "= {}".format(self.form.inputPitchAxisy.property("quantity").Value))
         FreeCADGui.doCommand("fo.Pitch.z "
-                             "= '{}'".format(self.form.inputPitchAxisz.property("quantity").Value))
+                             "= {}".format(self.form.inputPitchAxisz.property("quantity").Value))
         FreeCADGui.doCommand("fo.MagnitudeUInf "
                              "= '{}'".format(getQuantity(self.form.inputMagnitudeUInf)))
         FreeCADGui.doCommand("fo.LengthRef "
@@ -224,7 +197,7 @@ class TaskPanelCfdReportingFunctions:
 
         # # Spatial binning
         FreeCADGui.doCommand("fo.NBins "
-                             "= '{}'".format(getQuantity(self.form.inputNBins)))
+                             "= {}".format(self.form.inputNBins.value()))
         FreeCADGui.doCommand("fo.Direction.x "
                              "= '{}'".format(self.form.inputDirectionx.property("quantity").Value))
         FreeCADGui.doCommand("fo.Direction.y "
@@ -238,11 +211,11 @@ class TaskPanelCfdReportingFunctions:
         FreeCADGui.doCommand("fo.SampleFieldName "
                              "= '{}'".format(self.form.inputFieldName.text()))
         FreeCADGui.doCommand("fo.ProbePosition.x "
-                             "= '{}'".format(self.form.inputProbeLocx.property("quantity").getValueAs("m")))
+                             "= {}".format(self.form.inputProbeLocx.property("quantity").Value))
         FreeCADGui.doCommand("fo.ProbePosition.y "
-                             "= '{}'".format(self.form.inputProbeLocy.property("quantity").getValueAs("m")))
+                             "= {}".format(self.form.inputProbeLocy.property("quantity").Value))
         FreeCADGui.doCommand("fo.ProbePosition.z "
-                             "= '{}'".format(self.form.inputProbeLocz.property("quantity").getValueAs("m")))
+                             "= {}".format(self.form.inputProbeLocz.property("quantity").Value))
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")

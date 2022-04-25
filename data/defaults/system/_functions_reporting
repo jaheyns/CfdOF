@@ -43,7 +43,7 @@
 %:False
         writeFields         false;
 %}
-        CofR                ( %(reportingFunctions/%(0%)/CoR%) );
+        CofR                ( %(reportingFunctions/%(0%)/CentreOfRotation%) );
 %{%(reportingFunctions/%(0%)/ReportingFunctionType%)
 %:ForceCoefficients
         liftDir             ( %(reportingFunctions/%(0%)/Lift%) );

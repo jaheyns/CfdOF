@@ -963,32 +963,7 @@
              </widget>
             </item>
             <item row="0" column="1" colspan="2">
-             <widget class="Gui::InputField" name="inputNBins">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.010000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true"/>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
+             <widget class="QSpinBox" name="inputNBins"/>
             </item>
            </layout>
           </item>
@@ -1182,7 +1157,6 @@
   <tabstop>inputReferenceDensity</tabstop>
   <tabstop>inputLengthRef</tabstop>
   <tabstop>inputAreaRef</tabstop>
-  <tabstop>inputNBins</tabstop>
   <tabstop>inputDirectionx</tabstop>
   <tabstop>inputDirectiony</tabstop>
   <tabstop>inputDirectionz</tabstop>

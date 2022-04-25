@@ -94,7 +94,7 @@ class _CfdReportingFunctions:
                           "Reference density")
         addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Forces",
                           "Reference pressure")
-        addObjectProperty(obj, 'CoR', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Forces",
+        addObjectProperty(obj, 'CentreOfRotation', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Forces",
                           "Centre of rotation")
         addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Forces",
                           "Whether to write output fields")
@@ -117,7 +117,7 @@ class _CfdReportingFunctions:
                           "Coefficient area reference")
 
         # Spatial binning
-        addObjectProperty(obj, 'NBins', '0', "App::PropertyQuantity", "Forces",
+        addObjectProperty(obj, 'NBins', 0, "App::PropertyInteger", "Forces",
                           "Number of bins")
         addObjectProperty(obj, 'Direction', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Forces",
                           "Binning direction")
