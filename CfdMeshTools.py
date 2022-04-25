@@ -154,7 +154,8 @@ class CfdMeshTools:
             this_extrusion_settings['Angle'] = extrusion_obj.ExtrusionAngle.getValueAs('deg')
             this_extrusion_settings['NumLayers'] = extrusion_obj.ExtrusionLayers
             this_extrusion_settings['ExpansionRatio'] = extrusion_obj.ExtrusionRatio
-            this_extrusion_settings['AxisPoint'] = tuple(p for p in extrusion_obj.ExtrusionAxisPoint)
+            this_extrusion_settings['AxisPoint'] = \
+                tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in extrusion_obj.ExtrusionAxisPoint)
 
             axis_direction = extrusion_obj.ExtrusionAxisDirection
 
