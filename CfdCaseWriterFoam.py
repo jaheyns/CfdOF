@@ -28,9 +28,7 @@
 import os
 import os.path
 import shutil
-
 from FreeCAD import Units
-
 import CfdTools
 import TemplateBuilder
 from CfdTools import cfdMessage
@@ -393,43 +391,6 @@ class CfdCaseWriterFoam:
                     'BoundarySubType': 'symmetry'
                 }
 
-    def processReportingFunctions(self):
-        settings = self.settings
-        settings['reportingFunctionsEnabled'] = True
-
-        for name in settings['reportingFunctions']:
-            rf = settings['reportingFunctions'][name]
-
-            rf['PatchName'] = rf['Patch'].Label
-
-            rf['CoR'] = tuple(p for p in rf['CoR'])
-            rf['Direction'] = tuple(p for p in rf['Direction'])
-
-            if rf['FunctionObjectType'] == 'ForceCoefficients':
-                rf['Lift'] = tuple(p for p in rf['Lift'])
-                rf['Drag'] = tuple(p for p in rf['Drag'])
-                rf['Pitch'] = tuple(p for p in rf['Pitch'])
-
-    def processReportingProbes(self):
-        settings = self.settings
-        # Copy keys so that we can delete while iterating
-        settings['reportingProbesEnabled'] = True
-        rf_name = list(settings['reportingProbes'].keys())
-
-        for name in rf_name:
-            settings['reportingProbes'][name]['ProbePosition'] = \
-                tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
-
-    def processScalarTransportFunctions(self):
-        settings = self.settings
-        # Copy keys so that we can delete while iterating
-        settings['scalarTransportFunctionsEnabled'] = True
-        tf_name = list(settings['scalarTransportFunctions'].keys())
-
-        for name in tf_name:
-            settings['scalarTransportFunctions'][name]['InjectionPoint'] = \
-                tuple(p for p in settings['scalarTransportFunctions'][name]['InjectionPoint'])
-
     def parseFaces(self, shape_refs):
         pass
 
@@ -581,8 +542,51 @@ class CfdCaseWriterFoam:
                 else:
                     raise RuntimeError("No boundary selected to copy initial turbulence values from.")
 
-    # Zones
+    # Reporting functions
+    def processReportingFunctions(self):
+        settings = self.settings
+        settings['reportingFunctionsEnabled'] = True
 
+        for name in settings['reportingFunctions']:
+            rf = settings['reportingFunctions'][name]
+
+            rf['PatchName'] = rf['Patch'].Label
+
+            rf['CoR'] = tuple(p for p in rf['CoR'])
+            rf['Direction'] = tuple(p for p in rf['Direction'])
+
+            if rf['FunctionObjectType'] == 'ForceCoefficients':
+                rf['Lift'] = tuple(p for p in rf['Lift'])
+                rf['Drag'] = tuple(p for p in rf['Drag'])
+                rf['Pitch'] = tuple(p for p in rf['Pitch'])
+
+    def processReportingProbes(self):
+        settings = self.settings
+        # Copy keys so that we can delete while iterating
+        settings['reportingProbesEnabled'] = True
+        rf_name = list(settings['reportingProbes'].keys())
+
+        for name in rf_name:
+            settings['reportingProbes'][name]['ProbePosition'] = \
+                tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
+
+    def processScalarTransportFunctions(self):
+        settings = self.settings
+        # Copy keys so that we can delete while iterating
+        settings['scalarTransportFunctionsEnabled'] = True
+        tf_name = list(settings['scalarTransportFunctions'].keys())
+
+        for name in tf_name:
+            settings['scalarTransportFunctions'][name]['InjectionPoint'] = \
+                tuple(p for p in settings['scalarTransportFunctions'][name]['InjectionPoint'])
+
+    # Mesh
+    def processDynamicAdaptationMesh(self):
+        settings = self.settings
+        settings['dynamicMeshAdaptationEnabled'] = True
+        settings['dynamicMeshAdaptation'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
+
+    # Zones
     def exportZoneStlSurfaces(self):
         for zo in self.zone_objs:
             for r in zo.ShapeRefs:
@@ -641,11 +645,6 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("Unrecognised method for porous baffle resistance")
             porousZoneSettings[po['Label']] = pd
-
-    def processDynamicAdaptationMesh(self):
-        settings = self.settings
-        settings['dynamicMeshAdaptationEnabled'] = True
-        settings['dynamicMeshAdaptation'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
 
     def processInitialisationZoneProperties(self):
         settings = self.settings

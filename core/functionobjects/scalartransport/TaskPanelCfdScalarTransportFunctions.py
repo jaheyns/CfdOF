@@ -53,9 +53,9 @@ class TaskPanelCfdScalarTransportFunctions:
         setQuantity(self.form.inputDiffusivityFixed, self.obj.DiffusivityFixedValue)
         self.form.inputDiffusivityField.setText(self.obj.DiffusivityFieldName)
 
-        setQuantity(self.form.inputInjectionPointx, "{} m".format(self.obj.InjectionPoint.x))
-        setQuantity(self.form.inputInjectionPointy, "{} m".format(self.obj.InjectionPoint.y))
-        setQuantity(self.form.inputInjectionPointz, "{} m".format(self.obj.InjectionPoint.z))
+        setQuantity(self.form.inputInjectionPointx, self.obj.InjectionPoint.x)
+        setQuantity(self.form.inputInjectionPointy, self.obj.InjectionPoint.y)
+        setQuantity(self.form.inputInjectionPointz, self.obj.InjectionPoint.z)
 
         setQuantity(self.form.inputInjectionRate, self.obj.InjectionRate)
 

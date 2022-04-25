@@ -27,7 +27,7 @@ from CfdTools import addObjectProperty
 class CfdScalarTransportFunction:
 
     def __init__(self, obj):
-        self.Type = "CfdScalarTransportFunction"
+        self.Type = "ScalarTransportFunction"
         self.Object = obj
         obj.Proxy = self
         self.initProperties(obj)

@@ -33,9 +33,6 @@ class ViewProviderCfdScalarTransportFunction:
 
     def __init__(self, vobj):
         vobj.Proxy = self
-        # self.ViewObject = None
-        # self.Object = None
-        # self.standard = None
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "scalartransport.svg")

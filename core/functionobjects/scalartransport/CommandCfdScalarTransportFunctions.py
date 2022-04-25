@@ -32,7 +32,7 @@ from core.functionobjects.scalartransport.ViewProviderCfdScalarTransportFunction
     import ViewProviderCfdScalarTransportFunction
 
 
-def makeCfdScalarTransportFunction(name="CfdScalarTransportFunction"):
+def makeCfdScalarTransportFunction(name="ScalarTransportFunction"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     CfdScalarTransportFunction(obj)
     if FreeCAD.GuiUp:
