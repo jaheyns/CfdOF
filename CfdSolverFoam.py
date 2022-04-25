@@ -79,10 +79,6 @@ class _CfdSolverFoam(object):
         self.Object = obj  # keep a ref to the DocObj for nonGui usage
         obj.Proxy = self  # link between App::DocumentObject to  this object
 
-        self.residual_plotter = None
-        self.forces_plotter = None
-        self.force_coeffs_plotter = None
-
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -107,6 +103,10 @@ class _CfdSolverFoam(object):
                           "Output time interval")
 
         self.residual_plotter = TimePlot(title="Simulation residuals", y_label="Residual", is_log=True)
+        self.forces_plotter = None
+        self.force_coeffs_plotter = None
+        self.probes_plotters = {}
+
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

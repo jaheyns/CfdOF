@@ -27,7 +27,9 @@
 
 from __future__ import print_function
 
+import os
 import FreeCAD
+from FreeCAD import Units
 import CfdTools
 import CfdAnalysis
 from PySide.QtCore import QObject, Signal
@@ -74,6 +76,7 @@ class CfdRunnableFoam(CfdRunnable):
 
         self.plot_forces = False
         self.plot_force_coefficients = False
+        self.probes = {}
 
         self.constructAncillaryPlotters()
 
@@ -123,10 +126,20 @@ class CfdRunnableFoam(CfdRunnable):
             self.solver.Proxy.forces_plotter.reInitialise(self.analysis)
 
         if self.plot_force_coefficients:
-            self.cdResiduals = []
-            self.clResiduals = []
+            self.cdCoeffs = []
+            self.clCoeffs = []
 
             self.solver.Proxy.force_coeffs_plotter.reInitialise(self.analysis)
+
+        if self.plot_probes:
+            for pn in self.probes:
+                p = self.probes[pn]
+                p['file'] = None
+                p['time'] = []
+                p['values'] = [[]]
+            for pn in self.solver.Proxy.probes_plotters:
+                self.solver.Proxy.probes_plotters[pn].reInitialise(self.analysis)
+
 
     def get_solver_cmd(self, case_dir):
         self.initResiduals()
@@ -143,13 +156,27 @@ class CfdRunnableFoam(CfdRunnable):
     def constructAncillaryPlotters(self):
         reporting_functions = CfdTools.getReportingFunctionsGroup(CfdTools.getActiveAnalysis())
         if reporting_functions is not None:
-            for rf_type in reporting_functions:
-                if rf_type.ReportingFunctionType == "Force":
+            for rf in reporting_functions:
+                if rf.ReportingFunctionType == "Force":
                     self.plot_forces = True
-                    self.solver.Proxy.forces_plotter = TimePlot(title="Forces", y_label="Force [N]", is_log=False)
-                elif rf_type.ReportingFunctionType == "ForceCoefficients":
+                    if self.solver.Proxy.forces_plotter is None:
+                        self.solver.Proxy.forces_plotter = TimePlot(title="Forces", y_label="Force [N]", is_log=False)
+                elif rf.ReportingFunctionType == "ForceCoefficients":
                     self.plot_force_coefficients = True
-                    self.solver.Proxy.force_coeffs_plotter = TimePlot(title="Force Coefficients", y_label="Coefficient", is_log=False)
+                    if self.solver.Proxy.force_coeffs_plotter is None:
+                        self.solver.Proxy.force_coeffs_plotter = \
+                            TimePlot(title="Force Coefficients", y_label="Coefficient", is_log=False)
+                elif rf.ReportingFunctionType == 'Probes':
+                    self.plot_probes = True
+                    self.probes[rf.Label] = {
+                        'file': None, 
+                        'time': [], 
+                        'values': [[]], 
+                        'field': rf.SampleFieldName, 
+                        'points': [rf.ProbePosition]}
+                    if rf.Label not in self.solver.Proxy.probes_plotters:
+                        self.solver.Proxy.probes_plotters[rf.Label] = \
+                            TimePlot(title=rf.Label, y_label=rf.SampleFieldName, is_log=False)
 
     def process_output(self, text):
         log_lines = text.split('\n')
@@ -237,11 +264,12 @@ class CfdRunnableFoam(CfdRunnable):
 
             if self.in_forcecoeffs_output:
                 # Force coefficient monitors
-                if "Cd" in split and self.niter-1 > len(self.cdResiduals):
-                    self.cdResiduals.append(float(split[2]))
-                if "Cl" in split and self.niter-1 > len(self.clResiduals):
-                    self.clResiduals.append(float(split[2]))
+                if "Cd" in split and self.niter-1 > len(self.cdCoeffs):
+                    self.cdCoeffs.append(float(split[2]))
+                if "Cl" in split and self.niter-1 > len(self.clCoeffs):
+                    self.clCoeffs.append(float(split[2]))
 
+        # Update plots
         if self.niter > 1 and self.niter > prev_niter:
             self.solver.Proxy.residual_plotter.updateValues(self.time, OrderedDict([
                 ('$\\rho$', self.rhoResiduals),
@@ -268,6 +296,57 @@ class CfdRunnableFoam(CfdRunnable):
 
             if self.plot_force_coefficients:
                 self.solver.Proxy.force_coeffs_plotter.updateValues(self.time, OrderedDict([
-                    ('$C_D$', self.cdResiduals),
-                    ('$C_L$', self.clResiduals)
+                    ('$C_D$', self.cdCoeffs),
+                    ('$C_L$', self.clCoeffs)
                 ]))
+
+        # Probes
+        for pn in self.probes:
+            p = self.probes[pn]
+            if p['file'] is None:
+                working_dir = CfdTools.getOutputPath(self.analysis)
+                case_name = self.solver.InputCaseName
+                solver_dir = os.path.abspath(os.path.join(working_dir, case_name))
+                try:
+                    f = open(os.path.join(solver_dir, 'postProcessing', pn, '0', p['field']))
+                    p['file'] = f
+                except OSError:
+                    pass
+            if p['file']:
+                ntimes = len(p['time'])
+                is_vector = False
+                
+                for l in p['file'].readlines():
+                    l = l.strip()
+                    if len(l) and not l.startswith('#'):
+                        s = l.split()
+                        p['time'].append(float(s[0]))
+                        
+                        if s[1].startswith('('):
+                            is_vector = True
+                        while len(p['values']) < len(s)-1:
+                            p['values'].append([])
+                        for i in range(1, len(s)):
+                            s[i] = s[i].lstrip('(').rstrip(')')
+                            p['values'][i-1].append(float(s[i]))
+
+                if len(p['time']) > ntimes:
+                    legends = []
+                    for pi in p['points']:
+                        points_str = '({}, {}, {}) m'.format(
+                            *(Units.Quantity(pij, Units.Length).getValueAs('m') for pij in (pi.x, pi.y, pi.z)))
+                        if is_vector:
+                            legends.append('{}$_x$ @ '.format(p['field']) + points_str)
+                            legends.append('{}$_y$ @ '.format(p['field']) + points_str)
+                            legends.append('{}$_z$ @ '.format(p['field']) + points_str)
+                        else:
+                            legends.append('${}$ @ '.format(p['field']) + points_str)
+                    self.solver.Proxy.probes_plotters[pn].updateValues(p['time'], OrderedDict(
+                        zip(legends, p['values'])))
+
+    def solverFinished(self):
+        for pn in self.probes:
+            p = self.probes[pn]
+            if p['file']:
+                p['file'].close()
+                p['file'] = None
