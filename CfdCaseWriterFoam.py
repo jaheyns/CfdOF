@@ -129,7 +129,7 @@ class CfdCaseWriterFoam:
 
         if self.dynamic_mesh_obj:
             cfdMessage(f'Dynamic mesh adaptation rule present')
-            self.ProcessDynamicMesh()
+            self.processDynamicMesh()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         cfdMessage("Matching boundary conditions ...\n")
@@ -558,14 +558,26 @@ class CfdCaseWriterFoam:
 
 
     # Mesh related
-    def ProcessDynamicMesh(self):
+    def processDynamicMesh(self):
         settings = self.settings
         settings['dynamicMeshEnabled'] = True
+
+        # Check whether transient
         if not self.physics_model.Time == 'Transient':
             raise RuntimeError("Dynamic mesh is not supported by steady-state solvers")
+        
         if self.dynamic_mesh_obj.DynamicMeshType == 'DynamicRefinement':
+            # Check whether cellLevel supported
             if self.mesh_obj.MeshUtility not in ['cfMesh', 'snappyHexMesh']:
                 raise RuntimeError("Dynamic mesh refinement is only supported by cfMesh and snappyHexMesh")
+        
+            # Check whether 2D extrusion present
+            mesh_refinements = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+            for mr in mesh_refinements:
+                if mr.Extrusion:
+                    if mr.ExtrusionType == '2DPlanar' or mr.ExtrusionType == '2DWedge':
+                        raise RuntimeError("Dynamic mesh refinement will not work with 2D or wedge mesh")
+        
         settings['dynamicMesh'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
 
     # Zones
