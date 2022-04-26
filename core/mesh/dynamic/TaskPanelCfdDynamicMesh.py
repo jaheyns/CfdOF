@@ -35,7 +35,7 @@ class TaskPanelCfdDynamicMesh:
         self.obj = obj
 
         self.form = FreeCADGui.PySideUic.loadUi(
-            os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdDynamicMeshRefinement.ui"))
+            os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdDynamicMesh.ui"))
 
         self.form.cb_dynamic_type.currentIndexChanged.connect(self.updateUI)
         self.form.cb_dynamic_type.addItems(CfdDynamicMesh.DYNAMIC_MESH_NAMES)

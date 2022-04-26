@@ -63,7 +63,18 @@ class _CommandDynamicMesh:
 
     def IsActive(self):
         sel = FreeCADGui.Selection.getSelection()
-        return sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, _CfdMesh)
+        mesh_selected = (sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, _CfdMesh))
+
+        transient = False
+        if mesh_selected:
+            analysis = CfdTools.getParentAnalysisObject(sel[0])
+            physics = None
+            if analysis:
+                physics = CfdTools.getPhysicsModel(analysis)
+                if physics:
+                    transient = (physics.Time == 'Transient')
+        
+        return mesh_selected and transient
 
     def Activated(self):
         is_present = False
@@ -81,7 +92,7 @@ class _CommandDynamicMesh:
                 if len(sel) == 1 and hasattr(sobj, "Proxy") and isinstance(sobj.Proxy, _CfdMesh):
                     FreeCAD.ActiveDocument.openTransaction("Create DynamicMesh")
                     FreeCADGui.doCommand("")
-                    FreeCADGui.addModule("core.mesh.dynamic.CfdDynamicMeshRefinement as CfdDynamicMesh")
+                    FreeCADGui.addModule("core.mesh.dynamic.CfdDynamicMesh as CfdDynamicMesh")
                     FreeCADGui.addModule("CfdTools")
                     FreeCADGui.doCommand(
                         "CfdDynamicMesh.makeCfdDynamicMesh(App.ActiveDocument.{})".format(sobj.Name))

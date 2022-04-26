@@ -94,8 +94,8 @@ class CfdCaseWriterFoam:
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
             'reportingFunctionsEnabled': False,
-            'dynamicMeshAdaptation': {},
-            'dynamicMeshAdaptationEnabled': False,
+            'dynamicMesh': {},
+            'dynamicMeshEnabled': False,
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
@@ -129,7 +129,7 @@ class CfdCaseWriterFoam:
 
         if self.dynamic_mesh_obj:
             cfdMessage(f'Dynamic mesh adaptation rule present')
-            self.processDynamicAdaptationMesh()
+            self.ProcessDynamicMesh()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         cfdMessage("Matching boundary conditions ...\n")
@@ -558,10 +558,15 @@ class CfdCaseWriterFoam:
 
 
     # Mesh related
-    def processDynamicAdaptationMesh(self):
+    def ProcessDynamicMesh(self):
         settings = self.settings
-        settings['dynamicMeshAdaptationEnabled'] = True
-        settings['dynamicMeshAdaptation'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
+        settings['dynamicMeshEnabled'] = True
+        if not self.physics_model.Time == 'Transient':
+            raise RuntimeError("Dynamic mesh is not supported by steady-state solvers")
+        if self.dynamic_mesh_obj.DynamicMeshType == 'DynamicRefinement':
+            if self.mesh_obj.MeshUtility not in ['cfMesh', 'snappyHexMesh']:
+                raise RuntimeError("Dynamic mesh refinement is only supported by cfMesh and snappyHexMesh")
+        settings['dynamicMesh'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
 
     # Zones
     def exportZoneStlSurfaces(self):
