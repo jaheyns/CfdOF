@@ -83,7 +83,7 @@ class _CfdReportingFunctions:
     def initProperties(self, obj):
 
         # Setup and utility
-        addObjectProperty(obj, 'ReportingFunctionType', "Forces", "App::PropertyString",
+        addObjectProperty(obj, 'ReportingFunctionType', OBJECT_NAMES, "App::PropertyEnumeration", "",
                           "Type of reporting function")
 
         addObjectProperty(obj, 'Patch', None, "App::PropertyLink", "Function object",
