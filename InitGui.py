@@ -57,7 +57,7 @@ class CfdOFWorkbench(Workbench):
         from CfdFluidBoundary import _CommandCfdFluidBoundary
         from CfdZone import _CommandCfdPorousZone
         from CfdZone import _CommandCfdInitialisationZone
-        from core.mesh.dynamic.CfdDynamicMeshRefinement import _CommandDynamicMesh
+        from core.mesh.dynamic.CfdDynamicMesh import _CommandDynamicMesh
         from core.functionobjects.reporting.CfdReportingFunctions import _CommandCfdReportingFunctions
 
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())

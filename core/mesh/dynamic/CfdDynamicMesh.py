@@ -29,7 +29,7 @@ import os
 import CfdTools
 from CfdTools import addObjectProperty
 from pivy import coin
-from core.mesh.dynamic import TaskPanelCfdDynamicMeshRefinement
+from core.mesh.dynamic import TaskPanelCfdDynamicMesh
 
 DYNAMIC_MESH_TYPES = ['DynamicRefinement']
 DYNAMIC_MESH_NAMES = ["Dynamic Refinement"]
@@ -164,8 +164,8 @@ class _ViewProviderCfdDynamicMesh:
 
     def setEdit(self, vobj, mode=0):
         import importlib
-        importlib.reload(TaskPanelCfdDynamicMeshRefinement)
-        taskd = TaskPanelCfdDynamicMeshRefinement.TaskPanelCfdDynamicMesh(self.Object)
+        importlib.reload(TaskPanelCfdDynamicMesh)
+        taskd = TaskPanelCfdDynamicMesh.TaskPanelCfdDynamicMesh(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True
