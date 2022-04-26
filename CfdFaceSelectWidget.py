@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -469,7 +469,7 @@ class CfdFaceSelectWidget:
 
     def hideObjects(self):
         for i in FreeCADGui.ActiveDocument.Document.Objects:
-            if "Shape" in i.PropertiesList:
+            if 'Shape' in i.PropertiesList and len(i.Shape.Faces):
                 FreeCADGui.hideObject(i)
         self.view_object.show()
 
