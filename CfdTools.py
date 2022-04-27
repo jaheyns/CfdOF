@@ -46,12 +46,12 @@ from FreeCAD import Units
 import Part
 import BOPTools
 from BOPTools import SplitFeatures
+import CfdConsoleProcess
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
     from PySide import QtCore
     from PySide.QtGui import QFormLayout, QGridLayout
-import CfdConsoleProcess
 
 
 # Some standard install locations that are searched if an install directory is not specified
@@ -105,7 +105,6 @@ def getOutputPath(analysis):
 
 
 # Get functions
-
 if FreeCAD.GuiUp:
     def getResultObject():
         sel = FreeCADGui.Selection.getSelection()
@@ -195,24 +194,6 @@ def getDynamicMeshAdaptation(analysis_object):
     return dynamic_mesh_adaption_model
 
 
-def getReportingFunctionsGroup(analysis_object):
-    group = []
-    from core.functionobjects.reporting.CfdReportingFunctions import _CfdReportingFunctions
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, _CfdReportingFunctions):
-            group.append(i)
-    return group
-
-
-def getReportingProbesGroup(analysis_object):
-    group = []
-    from core.functionobjects.probes.CfdReportingProbes import CfdReportingProbes
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, CfdReportingProbes):
-            group.append(i)
-    return group
-
-
 def getMaterials(analysis_object):
     return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
 
@@ -259,13 +240,12 @@ def isPlanar(shape):
     return True
 
 
-def getMeshRefinementObjs(mesh_obj):
-    from CfdMeshRefinement import _CfdMeshRefinement
-    ref_objs = []
-    for obj in mesh_obj.Group:
-        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMeshRefinement):
-            ref_objs = ref_objs + [obj]
-    return ref_objs
+def getMesh(analysis_object):
+    from CfdMesh import _CfdMesh
+    for i in analysis_object.Group:
+        if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
+            return i
+    return None
 
 
 def getResult(analysis_object):
@@ -285,8 +265,27 @@ def get_module_path():
     return os.path.dirname(__file__)
 
 
-# Set functions
+# Function objects
+def getReportingFunctionsGroup(analysis_object):
+    group = []
+    from core.functionobjects.reporting.CfdReportingFunctions import _CfdReportingFunctions
+    for i in analysis_object.Group:
+        if isinstance(i.Proxy, _CfdReportingFunctions):
+            group.append(i)
+    return group
 
+
+# Mesh
+def getMeshRefinementObjs(mesh_obj):
+    from CfdMeshRefinement import _CfdMeshRefinement
+    ref_objs = []
+    for obj in mesh_obj.Group:
+        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMeshRefinement):
+            ref_objs = ref_objs + [obj]
+    return ref_objs
+
+
+# Set functions
 def setCompSolid(vobj):
     """
     To enable correct mesh refinement, boolean fragments are set to compSolid mode

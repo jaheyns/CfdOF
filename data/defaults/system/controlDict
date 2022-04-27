@@ -77,11 +77,6 @@ functions
 %:True
 %[system/_functions_reporting%]
 %}
-
-%{%(reportingProbesEnabled%)
-%:True
-%[system/_functions_probes%]
-%}
 }
 
 // ************************************************************************* //

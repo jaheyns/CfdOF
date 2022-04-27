@@ -25,21 +25,22 @@
 # *                                                                        *
 # **************************************************************************/
 
+from PySide import QtCore
+
 
 class CfdOFWorkbench(Workbench):
     """ CfdOF workbench object """
     def __init__(self):
         import os
         import CfdTools
+        from PySide import QtCore
+        from CfdPreferencePage import CfdPreferencePage
+
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd.svg")
         self.__class__.Icon = icon_path
         self.__class__.MenuText = "CfdOF"
         self.__class__.ToolTip = "CfdOF workbench"
 
-        from PySide import QtCore
-        from CfdPreferencePage import CfdPreferencePage
-        ICONS_PATH = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons")
-        QtCore.QDir.addSearchPath("icons", ICONS_PATH)
         FreeCADGui.addPreferencePage(CfdPreferencePage, "CfdOF")
 
     def Initialize(self):
@@ -57,9 +58,8 @@ class CfdOFWorkbench(Workbench):
         from CfdFluidBoundary import _CommandCfdFluidBoundary
         from CfdZone import _CommandCfdPorousZone
         from CfdZone import _CommandCfdInitialisationZone
-        from core.mesh.dynamic.CfdDynamicMeshRefinement import _CommandDynamicMesh
+        from core.mesh.dynamic.CfdDynamicMesh import _CommandDynamicMesh
         from core.functionobjects.reporting.CfdReportingFunctions import _CommandCfdReportingFunctions
-        from core.functionobjects.probes.CfdReportingProbes import CommandCfdReportingProbes
 
         FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
@@ -67,15 +67,14 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
         FreeCADGui.addCommand('Cfd_DynamicMesh', _CommandDynamicMesh())
         FreeCADGui.addCommand('Cfd_ReportingFunctions', _CommandCfdReportingFunctions())
-        FreeCADGui.addCommand('Cfd_ReportingProbes', CommandCfdReportingProbes())
 
-        cmdlst = ['Cfd_Analysis',   # Analysis
-                  'Cfd_MeshFromShape', 'Cfd_MeshFromImport', 'Cfd_MeshRegion', 'Cfd_DynamicMesh', # Meshing
-                  'Cfd_PhysicsModel', 'Cfd_FluidMaterial',  # Physics and materials
-                  'Cfd_InitialiseInternal', # Variables
-                  'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',  # Setup
-                  'Cfd_ReportingFunctions', 'Cfd_ReportingProbes',  # Reporting and monitoring
-                  'Cfd_SolverControl']  # Solver
+        cmdlst = ['Cfd_Analysis',
+                  'Cfd_MeshFromShape', 'Cfd_MeshFromImport' 'Cfd_MeshRegion', 'Cfd_DynamicMesh',
+                  'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
+                  'Cfd_InitialiseInternal',
+                  'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
+                  'Cfd_ReportingFunctions',
+                  'Cfd_SolverControl']
 
         self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)
         self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), cmdlst)

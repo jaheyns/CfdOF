@@ -24,6 +24,7 @@
 # ***************************************************************************
 
 from __future__ import print_function
+
 import platform
 import os
 import sys
@@ -34,9 +35,11 @@ import CfdTools
 
 
 class CfdConsoleProcess:
-    """ Class to run a console process asynchronously, printing output and
+    """
+    Class to run a console process asynchronously, printing output and
     errors to the FreeCAD console and allowing clean termination in Linux
-    and Windows """
+    and Windows
+    """
     def __init__(self, finished_hook=None, stdout_hook=None, stderr_hook=None):
         self.process = QProcess()
         self.finishedHook = finished_hook
@@ -90,8 +93,8 @@ class CfdConsoleProcess:
         # Ensure only complete lines are passed on
         text = ""
         while self.process.canReadLine():
-            byteArr = self.process.readLine()
-            text += QTextStream(byteArr).readAll()
+            byte_arr = self.process.readLine()
+            text += QTextStream(byte_arr).readAll()
         if text:
             print(text, end='')  # Avoid displaying on FreeCAD status bar
             if self.stdoutHook:
@@ -101,13 +104,12 @@ class CfdConsoleProcess:
                 FreeCAD.Gui.updateGui()
 
     def readStderr(self):
-        # Ensure only complete lines are passed on
-        # Print any error output to console
+        # Ensure only complete lines are passed on. Print any error output to console
         self.process.setReadChannel(QProcess.StandardError)
         text = ""
         while self.process.canReadLine():
-            byteArr = self.process.readLine()
-            text += QTextStream(byteArr).readAll()
+            byte_arr = self.process.readLine()
+            text += QTextStream(byte_arr).readAll()
         self.process.setReadChannel(QProcess.StandardOutput)
         if text:
             if self.stderrHook:
@@ -146,27 +148,27 @@ class CfdConsoleProcess:
         :return: A message to be printed on console, or None
         """
         ret = ""
-        errlines = err.split('\n')
-        for errline in errlines:
-            if len(errline) > 0:  # Ignore blanks
+        err_lines = err.split('\n')
+        for err_line in err_lines:
+            if len(err_line) > 0:  # Ignore blanks
                 if self.print_next_error_lines > 0:
-                    ret += errline + "\n"
+                    ret += err_line + "\n"
                     self.print_next_error_lines -= 1
-                if self.print_next_error_file and "file:" in errline:
-                    ret += errline + "\n"
+                if self.print_next_error_file and "file:" in err_line:
+                    ret += err_line + "\n"
                     self.print_next_error_file = False
-                words = errline.split(' ', 1)  # Split off first field for parallel
+                words = err_line.split(' ', 1)  # Split off first field for parallel
                 FATAL = "--> FOAM FATAL ERROR"
-                FATALIO = "--> FOAM FATAL IO ERROR"
-                if errline.startswith(FATAL) or (len(words) > 1 and words[1].startswith(FATAL)):
+                FATAL_IO = "--> FOAM FATAL IO ERROR"
+                if err_line.startswith(FATAL) or (len(words) > 1 and words[1].startswith(FATAL)):
                     self.print_next_error_lines = 1
                     ret += "OpenFOAM fatal error:\n"
-                elif errline.startswith(FATALIO) or (len(words) > 1 and words[1].startswith(FATALIO)):
+                elif err_line.startswith(FATAL_IO) or (len(words) > 1 and words[1].startswith(FATAL_IO)):
                     self.print_next_error_lines = 1
                     self.print_next_error_file = True
                     ret += "OpenFOAM IO error:\n"
-                elif errline.startswith("Fatal error:"):
-                    ret += errline
+                elif err_line.startswith("Fatal error:"):
+                    ret += err_line
         if len(ret) > 0:
             return ret
         else:
