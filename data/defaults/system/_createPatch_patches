@@ -1,0 +1,10 @@
+
+    {
+        name %(0%);
+        patchInfo
+        {
+            type %(createPatches/%(0%)/PatchType%);
+        }
+        constructFrom patches;
+        patches ( %(createPatches/%(0%)/PatchNamesList%) );
+    }

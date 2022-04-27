@@ -211,7 +211,7 @@ class TaskPanelCfdFluidBoundary:
                         self.form.checkReverse.setChecked(reverse)
 
         turb_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][3]
-        self.form.turbulenceFrame.setVisible(turb_enabled and self.turbModel is not None)
+        self.form.turbulenceFrame.setVisible(turb_enabled and self.turb_model is not None)
 
         alpha_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][4]
         self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)

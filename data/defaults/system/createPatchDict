@@ -61,6 +61,13 @@ patches
 
 %}
 %}
+
+%{%(createPatchesForPeriodics%)
+%:True
+%{%(createPeriodics%)
+%[system/_createPatch_periodics%]
+%}
+%}
 );
 
 

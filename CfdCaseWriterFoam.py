@@ -132,6 +132,7 @@ class CfdCaseWriterFoam:
             self.processDynamicMesh()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
+        self.settings['createPatchesForPeriodics'] = False
         cfdMessage("Matching boundary conditions ...\n")
         if self.progressCallback:
             self.progressCallback("Matching boundary conditions ...")
@@ -556,7 +557,6 @@ class CfdCaseWriterFoam:
                 Units.Quantity(p, Units.Length).getValueAs('m') 
                 for p in settings['reportingFunctions'][name]['ProbePosition'])
 
-
     # Mesh related
     def processDynamicMesh(self):
         settings = self.settings
@@ -679,6 +679,7 @@ class CfdCaseWriterFoam:
         settings = self.settings
         settings['createPatches'] = {}
         settings['createPatchesSnappyBaffles'] = {}
+        settings['createPeriodics'] = {}
         bc_group = self.bc_group
 
         defaultPatchType = "patch"
@@ -690,6 +691,7 @@ class CfdCaseWriterFoam:
                 'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
                 'PatchType': patchType
             }
+
             if bc_obj.DefaultBoundary:
                 defaultPatchType = patchType
 
@@ -698,6 +700,22 @@ class CfdCaseWriterFoam:
                 settings['createPatchesSnappyBaffles'][bc_obj.Label] = {
                     'PatchNamesList': '"'+bc_obj.Name+'_[^_]*"',
                     'PatchNamesListSlave': '"'+bc_obj.Name+'_.*_slave"'}
+
+            if bcSubType == 'cyclicAMI':
+                settings['createPatchesForPeriodics'] = True
+
+                if bc_obj.RotationalPeriodic:
+                    settings['createPeriodics'][bc_obj.Label] = {
+                        'RotationalPeriodic': bc_obj.RotationalPeriodic,
+                        'PeriodicCentreOfRotation': tuple(p for p in bc_obj.PeriodicCentreOfRotation),
+                        'PeriodicCentreOfRotationAxis': tuple(p for p in bc_obj.PeriodicCentreOfRotationAxis),
+                        'PatchNamesList': '"'+bc_obj.Name+'_[^_]*"',
+                        'PatchNamesListSlave': '"'+bc_obj.Name+'_.*_slave"'}
+                else:
+                    settings['createPeriodics'][bc_obj.Label] = {
+                        'RotationalPeriodic': bc_obj.RotationalPeriodic,
+                        'PatchNamesList': '"' + bc_obj.Name + '_[^_]*"',
+                        'PatchNamesListSlave': '"' + bc_obj.Name + '_.*_slave"'}
 
         # Set up default BC for unassigned faces
         settings['createPatches']['defaultFaces'] = {
