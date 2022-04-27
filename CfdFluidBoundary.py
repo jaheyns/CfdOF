@@ -271,6 +271,14 @@ class _CfdFluidBoundary:
         addObjectProperty(obj, 'HeatTransferCoeff', '0 W/m^2/K', "App::PropertyQuantity", "Thermal",
                           "Wall heat transfer coefficient")
 
+        # Periodic
+        addObjectProperty(obj, 'RotationalPeriodic', True, "App::PropertyBool", "Periodic",
+                          "Whether to use rotational or translational periodics")
+        addObjectProperty(obj, 'PeriodicCentreOfRotation', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
+                          "Periodic", "Location of the probe sample location")
+        addObjectProperty(obj, 'PeriodicCentreOfRotationAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
+                          "periodic", "Location of the probe sample location")
+
         # Turbulence
         all_turb_specs = []
         for k in TURBULENT_INLET_SPEC:
