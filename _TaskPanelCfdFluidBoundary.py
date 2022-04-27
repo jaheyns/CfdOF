@@ -414,17 +414,17 @@ class TaskPanelCfdFluidBoundary:
         FreeCADGui.doCommand("bc.RotationalPeriodic "
                              "= {}".format(self.form.rb_rotational_periodic.isChecked()))
         FreeCADGui.doCommand("bc.PeriodicCentreOfRotation.x "
-                             "= '{}'".format(getQuantity(self.form.input_corx.property("quantity"))))
+                             "= '{}'".format(getQuantity(self.form.input_corx.property("quantity").Value)))
         FreeCADGui.doCommand("bc.PeriodicCentreOfRotation.y "
-                             "= '{}'".format(getQuantity(self.form.input_cory.property("quantity"))))
+                             "= '{}'".format(getQuantity(self.form.input_cory.property("quantity").Value)))
         FreeCADGui.doCommand("bc.PeriodicCentreOfRotation.z "
-                             "= '{}'".format(getQuantity(self.form.input_corz.property("quantity"))))
+                             "= '{}'".format(getQuantity(self.form.input_corz.property("quantity").Value)))
         FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.x "
-                             "= '{}'".format(getQuantity(self.form.input_axisx.property("quantity"))))
+                             "= '{}'".format(getQuantity(self.form.input_axisx.property("quantity").Value)))
         FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.y "
-                             "= '{}'".format(getQuantity(self.form.input_axisy.property("quantity"))))
+                             "= '{}'".format(getQuantity(self.form.input_axisy.property("quantity").Value)))
         FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.z "
-                             "= '{}'".format(getQuantity(self.form.input_axisz.property("quantity"))))
+                             "= '{}'".format(getQuantity(self.form.input_axisz.property("quantity").Value)))
 
         # Turbulence
         if self.turbModel in CfdFluidBoundary.TURBULENT_INLET_SPEC:
