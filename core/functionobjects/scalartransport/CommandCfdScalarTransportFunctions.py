@@ -57,14 +57,27 @@ class CommandCfdScalarTransportFunction:
         return CfdTools.getActiveAnalysis() is not None
 
     def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Create CfdScalarTransportFunctions object")
-        FreeCADGui.doCommand("")
-        FreeCADGui.addModule("core.functionobjects.scalartransport.CommandCfdScalarTransportFunctions " \
-                             + "as CommandCfdScalarTransportFunctions")
-        FreeCADGui.addModule("CfdTools")
-        FreeCADGui.doCommand(
-            "CfdTools.getActiveAnalysis().addObject(CommandCfdScalarTransportFunctions.makeCfdScalarTransportFunction())")
-        FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
+        is_present = False
+        members = CfdTools.getScalarTransportFunctionsGroup(CfdTools.getActiveAnalysis())
+        for i in members:
+            if hasattr(i, 'Proxy') and isinstance(i.Proxy, CfdScalarTransportFunction):
+                FreeCADGui.activeDocument().setEdit(i.Name)
+                is_present = True
+
+        # Allow to re-create if deleted
+        if not is_present:
+            FreeCADGui.Selection.clearSelection()
+
+            FreeCAD.ActiveDocument.openTransaction("Create CfdScalarTransportFunctions object")
+            FreeCADGui.doCommand("")
+            FreeCADGui.addModule("core.functionobjects.scalartransport.CommandCfdScalarTransportFunctions " \
+                                 + "as CommandCfdScalarTransportFunctions")
+            FreeCADGui.addModule("CfdTools")
+            FreeCADGui.doCommand(
+                "CfdTools.getActiveAnalysis().addObject(CommandCfdScalarTransportFunctions.makeCfdScalarTransportFunction())")
+            FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
+
+        FreeCADGui.Selection.clearSelection()
 
 
 if FreeCAD.GuiUp:
