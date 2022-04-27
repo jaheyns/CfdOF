@@ -35,9 +35,9 @@ if sys.version_info >= (3,):  # Python 3
 else:
     import urllib as urlrequest
     import urlparse
+
 import ssl
 import ctypes
-
 import FreeCAD
 import CfdTools
 import tempfile
@@ -50,6 +50,7 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt, QObject, QThread
     from PySide.QtGui import QApplication
 
+# Constants
 OPENFOAM_URL = \
     "https://sourceforge.net/projects/openfoam/files/v2012/OpenCFD-OpenFOAM-v2012-DP-mingw-crosscompiled-WindowsInstaller.exe/download"
 OPENFOAM_FILE_EXT = ".exe"
@@ -68,7 +69,6 @@ HISA_URL_MINGW = \
     "https://sourceforge.net/projects/hisa/files/hisa-master-binaries-{}.zip/download"
 HISA_FILE_BASE = "hisa-master"
 HISA_FILE_EXT = ".zip"
-
 
 # Tasks for the worker thread
 DOWNLOAD_OPENFOAM = 1
@@ -162,8 +162,7 @@ class CfdPreferencePage:
 
     def consoleMessage(self, message="", color="#000000"):
         message = message.replace('\n', '<br>')
-        self.console_message = self.console_message + \
-            '<font color="{0}">{1}</font><br>'.format(color, message)
+        self.console_message = self.console_message + '<font color="{0}">{1}</font><br>'.format(color, message)
         self.form.textEdit_Output.setText(self.console_message)
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 

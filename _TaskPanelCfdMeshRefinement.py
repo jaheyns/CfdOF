@@ -121,11 +121,11 @@ class _TaskPanelCfdMeshRefinement:
             FreeCADGui.doCommand("obj.ExtrusionLayers = {}".format(self.form.numLayersInput.value()))
             FreeCADGui.doCommand("obj.ExtrusionRatio = {}".format(self.form.ratioInput.value()))
             FreeCADGui.doCommand("obj.ExtrusionAxisPoint.x = {}".format(
-                self.form.axisPointXEdit.property("quantity").getValueAs("m")))
+                self.form.axisPointXEdit.property("quantity").Value))
             FreeCADGui.doCommand("obj.ExtrusionAxisPoint.y = {}".format(
-                self.form.axisPointYEdit.property("quantity").getValueAs("m")))
+                self.form.axisPointYEdit.property("quantity").Value))
             FreeCADGui.doCommand("obj.ExtrusionAxisPoint.z = {}".format(
-                self.form.axisPointZEdit.property("quantity").getValueAs("m")))
+                self.form.axisPointZEdit.property("quantity").Value))
             FreeCADGui.doCommand("obj.ExtrusionAxisDirection.x = {}".format(
                 self.form.axisDirectionXEdit.property("quantity").Value))
             FreeCADGui.doCommand("obj.ExtrusionAxisDirection.y = {}".format(
@@ -177,9 +177,9 @@ class _TaskPanelCfdMeshRefinement:
 
         self.form.numLayersInput.setValue(self.obj.ExtrusionLayers)
         self.form.ratioInput.setValue(self.obj.ExtrusionRatio)
-        setQuantity(self.form.axisPointXEdit, "{} m".format(self.obj.ExtrusionAxisPoint.x))
-        setQuantity(self.form.axisPointYEdit, "{} m".format(self.obj.ExtrusionAxisPoint.y))
-        setQuantity(self.form.axisPointZEdit, "{} m".format(self.obj.ExtrusionAxisPoint.z))
+        setQuantity(self.form.axisPointXEdit, Units.Quantity(self.obj.ExtrusionAxisPoint.x, Units.Length))
+        setQuantity(self.form.axisPointYEdit, Units.Quantity(self.obj.ExtrusionAxisPoint.y, Units.Length))
+        setQuantity(self.form.axisPointZEdit, Units.Quantity(self.obj.ExtrusionAxisPoint.z, Units.Length))
         setQuantity(self.form.axisDirectionXEdit, self.obj.ExtrusionAxisDirection.x)
         setQuantity(self.form.axisDirectionYEdit, self.obj.ExtrusionAxisDirection.y)
         setQuantity(self.form.axisDirectionZEdit, self.obj.ExtrusionAxisDirection.z)

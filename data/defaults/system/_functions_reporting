@@ -1,9 +1,9 @@
 %{%(reportingFunctions%)
-%{%(reportingFunctions/%(0%)/FunctionObjectType%)
+%{%(reportingFunctions/%(0%)/ReportingFunctionType%)
 %:Force ForceCoefficients
     %(0%)
     {
-%{%(reportingFunctions/%(0%)/FunctionObjectType%)
+%{%(reportingFunctions/%(0%)/ReportingFunctionType%)
 %:Force
         type                forces;
 %:ForceCoefficients
@@ -25,7 +25,7 @@
         rhoInf              %(fluidProperties/%(fluidProperties%)/Density%);
 %:default
         rho                 rho;
-%{%(reportingFunctions/%(0%)/FunctionObjectType%)
+%{%(reportingFunctions/%(0%)/ReportingFunctionType%)
 %:ForceCoefficients
         rhoInf              %(reportingFunctions/%(0%)/ReferenceDensity%);
 %}
@@ -43,8 +43,8 @@
 %:False
         writeFields         false;
 %}
-        CofR                ( %(reportingFunctions/%(0%)/CoR%) );
-%{%(reportingFunctions/%(0%)/FunctionObjectType%)
+        CofR                ( %(reportingFunctions/%(0%)/CentreOfRotation%) );
+%{%(reportingFunctions/%(0%)/ReportingFunctionType%)
 %:ForceCoefficients
         liftDir             ( %(reportingFunctions/%(0%)/Lift%) );
         dragDir             ( %(reportingFunctions/%(0%)/Drag%) );
@@ -67,6 +67,25 @@
             cumulative      false;
 %}
         }
+    }
+%:Probes
+    %(0%)
+    {
+        type            probes;
+        libs            ("libsampling.so");
+
+        writeControl    timeStep;
+        writeInterval   1;
+
+        fields
+        (
+            %(reportingFunctions/%(0%)/SampleFieldName%)
+        );
+
+        probeLocations
+        (
+            ( %(reportingFunctions/%(0%)/ProbePosition%) )
+        );
     }
 %}
 

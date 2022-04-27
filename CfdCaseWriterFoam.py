@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -48,7 +48,6 @@ class CfdCaseWriterFoam:
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
         self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
-        self.reporting_probes = CfdTools.getReportingProbesGroup(analysis_obj)
         self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
@@ -94,10 +93,10 @@ class CfdCaseWriterFoam:
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
             'reportingFunctionsEnabled': False,
-            'reportingProbes': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_probes),
-            'reportingProbesEnabled': False,
             'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
             'scalarTransportFunctionsEnabled': False,
+            'dynamicMesh': {},
+            'dynamicMeshEnabled': False,
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
@@ -110,8 +109,6 @@ class CfdCaseWriterFoam:
             'meshDir': "../" + self.mesh_obj.CaseName,
             'solver': CfdTools.propsToDict(self.solver_obj),
             'system': {},
-            'dynamicMeshAdaptationEnabled': False,
-            'dynamicMeshAdaptation': {},
             'runChangeDictionary': False
             }
 
@@ -131,17 +128,13 @@ class CfdCaseWriterFoam:
             cfdMessage(f'Reporting functions present')
             self.processReportingFunctions()
 
-        if self.reporting_probes:
-            cfdMessage(f'Reporting probes present')
-            self.processReportingProbes()
-
         if self.scalar_transport_objs:
             cfdMessage(f'Scalar transport functions present')
             self.processScalarTransportFunctions()
 
         if self.dynamic_mesh_obj:
-            cfdMessage(f'Dynamic mesh adapation rule present')
-            self.processDynamicAdaptationMesh()
+            cfdMessage(f'Dynamic mesh adaptation rule present')
+            self.processDynamicMesh()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         cfdMessage("Matching boundary conditions ...\n")
@@ -164,8 +157,10 @@ class CfdCaseWriterFoam:
         return True
 
     def getSolverName(self):
-        """ Solver name is selected based on selected physics. This should only be extended as additional physics are
-        included. """
+        """
+        Solver name is selected based on selected physics. This should only be extended as additional physics are
+        included.
+        """
         solver = None
         if self.physics_model.Phase == 'Single':
             if len(self.material_objs) == 1:
@@ -542,8 +537,9 @@ class CfdCaseWriterFoam:
                 else:
                     raise RuntimeError("No boundary selected to copy initial turbulence values from.")
 
-    # Reporting functions
+    # Function objects (reporting functions, probes)
     def processReportingFunctions(self):
+        """ Compute any Function objects required before case build """
         settings = self.settings
         settings['reportingFunctionsEnabled'] = True
 
@@ -551,24 +547,18 @@ class CfdCaseWriterFoam:
             rf = settings['reportingFunctions'][name]
 
             rf['PatchName'] = rf['Patch'].Label
-
-            rf['CoR'] = tuple(p for p in rf['CoR'])
+            rf['CentreOfRotation'] = \
+                tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in rf['CentreOfRotation'])
             rf['Direction'] = tuple(p for p in rf['Direction'])
 
-            if rf['FunctionObjectType'] == 'ForceCoefficients':
+            if rf['ReportingFunctionType'] == 'ForceCoefficients':
                 rf['Lift'] = tuple(p for p in rf['Lift'])
                 rf['Drag'] = tuple(p for p in rf['Drag'])
                 rf['Pitch'] = tuple(p for p in rf['Pitch'])
 
-    def processReportingProbes(self):
-        settings = self.settings
-        # Copy keys so that we can delete while iterating
-        settings['reportingProbesEnabled'] = True
-        rf_name = list(settings['reportingProbes'].keys())
-
-        for name in rf_name:
-            settings['reportingProbes'][name]['ProbePosition'] = \
-                tuple(p for p in settings['reportingProbes'][name]['ProbePosition'])
+            settings['reportingFunctions'][name]['ProbePosition'] = tuple(
+                Units.Quantity(p, Units.Length).getValueAs('m') 
+                for p in settings['reportingFunctions'][name]['ProbePosition'])
 
     def processScalarTransportFunctions(self):
         settings = self.settings
@@ -580,11 +570,28 @@ class CfdCaseWriterFoam:
             settings['scalarTransportFunctions'][name]['InjectionPoint'] = \
                 tuple(p for p in settings['scalarTransportFunctions'][name]['InjectionPoint'])
 
-    # Mesh
-    def processDynamicAdaptationMesh(self):
+    # Mesh related
+    def processDynamicMesh(self):
         settings = self.settings
-        settings['dynamicMeshAdaptationEnabled'] = True
-        settings['dynamicMeshAdaptation'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
+        settings['dynamicMeshEnabled'] = True
+
+        # Check whether transient
+        if not self.physics_model.Time == 'Transient':
+            raise RuntimeError("Dynamic mesh is not supported by steady-state solvers")
+        
+        if self.dynamic_mesh_obj.DynamicMeshType == 'DynamicRefinement':
+            # Check whether cellLevel supported
+            if self.mesh_obj.MeshUtility not in ['cfMesh', 'snappyHexMesh']:
+                raise RuntimeError("Dynamic mesh refinement is only supported by cfMesh and snappyHexMesh")
+        
+            # Check whether 2D extrusion present
+            mesh_refinements = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+            for mr in mesh_refinements:
+                if mr.Extrusion:
+                    if mr.ExtrusionType == '2DPlanar' or mr.ExtrusionType == '2DWedge':
+                        raise RuntimeError("Dynamic mesh refinement will not work with 2D or wedge mesh")
+        
+        settings['dynamicMesh'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
 
     # Zones
     def exportZoneStlSurfaces(self):

@@ -23,6 +23,7 @@
 # ***************************************************************************
 
 from __future__ import print_function
+
 import re
 import os
 
@@ -32,14 +33,14 @@ class BracketError(ValueError):
 
 
 class TemplateBuilder(object):
-    """ Build a case directory from a template directory by substituting
-     values in a python settings dictionary """
-    def __init__(self,
-                 case_path,
-                 template_path,
-                 settings):
+    """
+    Build a case directory from a template directory by substituting
+    values in a python settings dictionary
+    """
+    def __init__(self, case_path, template_path, settings):
         if case_path[0] == "~":
             case_path = os.path.expanduser(case_path)
+
         self.case_path = os.path.abspath(case_path)
         self.settings = settings
         self.template_path = template_path
@@ -95,6 +96,7 @@ class TemplateBuilder(object):
                 rel_file = rel_file_default
         contents = fid.read()
         fid.close()
+
         try:
             contents = self.process(contents, rel_file, params)
         except BracketError as err:
@@ -159,8 +161,10 @@ class TemplateBuilder(object):
         return contents
 
     def processConditionals(self, contents, curr_file, params):
-        """ Select the relevant conditional block introduced by %:key1 key2 ... by matching the first parameter on 
-        the stack, and process the block with that parameter removed """
+        """
+        Select the relevant conditional block introduced by %:key1 key2 ... by matching the first parameter on
+        the stack, and process the block with that parameter removed
+        """
         # Find first conditional
         start = self.findAtCurrentLevel(contents, "%:", 0)
         if start is None:
@@ -189,7 +193,8 @@ class TemplateBuilder(object):
         %{val1 [val2]\n
         content
         %} [output-file]\n
-        pushes values onto the parameter stack, one by one and repeats content for each """
+        pushes values onto the parameter stack, one by one and repeats content for each
+        """
         while True:
             start = contents.find("%{")
             if start < 0:
@@ -235,7 +240,8 @@ class TemplateBuilder(object):
         in the settings dict, with subdicts separated by slashes, or a numeric value on the
         parameter stack. If 
         key/in/settings/dict specifies a dictionary or a list, its keys/values 
-        are outputted separated by white space """
+        are outputted separated by white space
+        """
         while True:
             start = contents.find("%(")
             if start < 0:

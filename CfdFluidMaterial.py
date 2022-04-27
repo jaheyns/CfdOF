@@ -35,7 +35,6 @@ if FreeCAD.GuiUp:
 
 def makeCfdFluidMaterial(name):
     obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
-
     _CfdMaterial(obj)  # Include default fluid properties
     if FreeCAD.GuiUp:
         _ViewProviderCfdFluidMaterial(obj.ViewObject)
@@ -49,8 +48,7 @@ class _CommandCfdFluidMaterial:
         return {
             'Pixmap': icon_path,
             'MenuText': 'Add fluid properties',
-            'ToolTip': 'Add fluid properties'
-            }
+            'ToolTip': 'Add fluid properties'}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None

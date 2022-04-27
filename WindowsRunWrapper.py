@@ -23,6 +23,7 @@
 # ***************************************************************************
 
 from __future__ import print_function
+
 import sys
 import threading
 import signal
@@ -46,6 +47,7 @@ def processStdout():
         except UnicodeDecodeError:
             # Avoid falling over is some weird character is emitted
             pass
+
 
 def processStderr():
     with process.stderr:

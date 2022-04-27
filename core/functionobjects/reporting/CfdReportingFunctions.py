@@ -31,14 +31,18 @@ import CfdTools
 from CfdTools import addObjectProperty
 import os
 
-OBJECT_NAMES = ["Force", "ForceCoefficients"]
-OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches"]
+# Constants
+OBJECT_NAMES = ["Force", "ForceCoefficients", "Probes"]
+OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches", 
+    "Sample fields at specified locations"]
 
-FUNCTIONS_UI = [[True, False, True],    # Forces
-                [True, True, True, ]]   # Force coefficients
+# GUI
+FUNCTIONS_UI = [0, 0, 1]
+FORCES_UI = [[True, False, True],    # Forces
+             [True, True, True, ]]   # Force coefficients
 
 
-def makeCfdReportingFunctions(name="CfdReportingFunction"):
+def makeCfdReportingFunctions(name="ReportingFunction"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdReportingFunctions(obj)
     if FreeCAD.GuiUp:
@@ -51,7 +55,7 @@ class _CommandCfdReportingFunctions:
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "monitor.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
-                                                     "Cfd reporting functions"),
+                                                     "Reporting function"),
                 'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
                                                     "Create a reporting function for the current case")}
 
@@ -71,7 +75,7 @@ class _CfdReportingFunctions:
     """ CFD Function objects properties """
 
     def __init__(self, obj):
-        self.Type = "CfdReportingFunctions"
+        self.Type = "ReportingFunction"
         self.Object = obj
         obj.Proxy = self
         self.initProperties(obj)
@@ -79,8 +83,8 @@ class _CfdReportingFunctions:
     def initProperties(self, obj):
 
         # Setup and utility
-        addObjectProperty(obj, 'FunctionObjectType', "functionObjectType", "App::PropertyString", "Forces",
-                          "Name of the function object to be created")
+        addObjectProperty(obj, 'ReportingFunctionType', OBJECT_NAMES, "App::PropertyEnumeration", "",
+                          "Type of reporting function")
 
         addObjectProperty(obj, 'Patch', None, "App::PropertyLink", "Function object",
                           "Patch on which to create the function object")
@@ -90,7 +94,7 @@ class _CfdReportingFunctions:
                           "Reference density")
         addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Forces",
                           "Reference pressure")
-        addObjectProperty(obj, 'CoR', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Forces",
+        addObjectProperty(obj, 'CentreOfRotation', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Forces",
                           "Centre of rotation")
         addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Forces",
                           "Whether to write output fields")
@@ -113,12 +117,20 @@ class _CfdReportingFunctions:
                           "Coefficient area reference")
 
         # Spatial binning
-        addObjectProperty(obj, 'NBins', '0', "App::PropertyQuantity", "Forces",
+        addObjectProperty(obj, 'NBins', 0, "App::PropertyInteger", "Forces",
                           "Number of bins")
         addObjectProperty(obj, 'Direction', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Forces",
                           "Binning direction")
         addObjectProperty(obj, 'Cumulative', True, "App::PropertyBool", "Forces",
                           "Cumulative")
+
+        # Probes
+        addObjectProperty(obj, 'SampleFieldName', "p", "App::PropertyString", "Probes",
+                          "Name of the field to sample")
+
+        addObjectProperty(obj, 'ProbePosition', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Probes",
+                          "Location of the probe sample location")
+
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
@@ -185,6 +197,8 @@ class _ViewProviderCfdReportingFunctions:
             return False
 
         import core.functionobjects.reporting.TaskPanelCfdReportingFunctions as TaskPanelCfdReportingFunctions
+        import importlib
+        importlib.reload(TaskPanelCfdReportingFunctions)
         taskd = TaskPanelCfdReportingFunctions.TaskPanelCfdReportingFunctions(self.Object)
         self.Object.ViewObject.show()
         taskd.obj = vobj.Object

@@ -180,15 +180,15 @@ class _CfdZone:
         self.initProperties(obj)
 
     def execute(self, fp):
-        listOfShapes = []
+        list_of_shapes = []
         for r in fp.ShapeRefs:
             object = r[0]
             try:
-                listOfShapes.append(object.Shape)
+                list_of_shapes.append(object.Shape)
             except Part.OCCError:  # In case solid deleted
                 pass
-        if listOfShapes:
-            fp.Shape = Part.makeCompound(listOfShapes)
+        if list_of_shapes:
+            fp.Shape = Part.makeCompound(list_of_shapes)
         else:
             fp.Shape = Part.Shape()
 
@@ -208,7 +208,7 @@ class _ViewProviderCfdZone:
     def attach(self, vobj):
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.ViewObject.ShapeColor = (0.5,0.0,1.0)
+        self.ViewObject.ShapeColor = (0.5, 0.0, 1.0)
         self.ViewObject.Transparency = 70
         # Setup the scene sub-graph of the view provider, this method is mandatory
         return

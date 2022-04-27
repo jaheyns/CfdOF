@@ -89,9 +89,11 @@ class TaskPanelCfdFluidProperties:
         if self.material['Type'] == 'Isothermal':
             self.fields = ['Density', 'DynamicViscosity']
         elif self.material['Type'] == 'Incompressible':
-            self.fields = ['MolarMass', 'DensityPolynomial', 'CpPolynomial', 'DynamicViscosityPolynomial', 'ThermalConductivityPolynomial']
+            self.fields = ['MolarMass', 'DensityPolynomial', 'CpPolynomial', 'DynamicViscosityPolynomial',
+                           'ThermalConductivityPolynomial']
         else:
-            self.fields = ['MolarMass', 'Cp', 'SutherlandTemperature', 'SutherlandRefTemperature', 'SutherlandRefViscosity']
+            self.fields = ['MolarMass', 'Cp', 'SutherlandTemperature', 'SutherlandRefTemperature',
+                           'SutherlandRefViscosity']
 
         self.text_boxes = {}
         for name in self.fields:

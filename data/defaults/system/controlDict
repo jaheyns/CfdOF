@@ -83,10 +83,6 @@ functions
 %[system/_functions_scalarTransport%]
 %}
 
-%{%(reportingProbesEnabled%)
-%:True
-%[system/_functions_probes%]
-%}
 }
 
 // ************************************************************************* //
