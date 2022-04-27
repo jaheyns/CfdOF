@@ -111,10 +111,9 @@ class TaskPanelCfdFluidBoundary:
         # Periodics
         self.form.buttonGroupPeriodic.setId(self.form.rb_rotational_periodic, 0)
         self.form.buttonGroupPeriodic.setId(self.form.rb_translational_periodic, 1)
-        self.form.rb_rotational_periodic.toggled.connect(self.periodicTypeChanged())
-        self.form.rb_translational_periodic.toggled.connect(self.periodicTypeChanged())
 
-        self.form.rb_rotational_periodic.setChecked(self.obj.RotationalPeriodic) # Set only x1, other will follow
+        self.form.rb_rotational_periodic.setChecked(self.obj.RotationalPeriodic)
+        self.form.rb_translational_periodic.setChecked(not self.obj.RotationalPeriodic)
         setQuantity(self.form.input_corx, self.obj.PeriodicCentreOfRotation.x)
         setQuantity(self.form.input_cory, self.obj.PeriodicCentreOfRotation.y)
         setQuantity(self.form.input_corz, self.obj.PeriodicCentreOfRotation.z)
@@ -179,6 +178,8 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.updateUI)
         self.form.checkBoxDefaultBoundary.stateChanged.connect(self.updateUI)
+        self.form.rb_rotational_periodic.toggled.connect(self.periodicTypeChanged)
+        self.form.rb_translational_periodic.toggled.connect(self.periodicTypeChanged)
 
         # Face list selection panel - modifies obj.ShapeRefs passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
@@ -208,13 +209,12 @@ class TaskPanelCfdFluidBoundary:
                     if self.form.lineDirection.text() == "":
                         self.form.checkReverse.setChecked(reverse)
 
-        if self.form.rb_rotational_periodic.isChecked():
-            self.form.rotationalFrame.setVisible(True)
-
         turb_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][3]
         self.form.turbulenceFrame.setVisible(turb_enabled and self.turbModel is not None)
+
         alpha_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][4]
         self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)
+
         if self.physics_model.Thermal != 'None' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
             self.form.thermalFrame.setVisible(True)
             selected_rows = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6]
@@ -265,6 +265,16 @@ class TaskPanelCfdFluidBoundary:
                     if isinstance(item, QtGui.QWidgetItem):
                         item.widget().setVisible(rowi-2 in panel_numbers)
 
+        periodic_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][7]
+        if periodic_enabled:
+            self.form.periodicFrame.setVisible(True)
+            if self.form.rb_rotational_periodic.isChecked():
+                self.form.rotationalFrame.setVisible(True)
+            else:
+                self.form.rotationalFrame.setVisible(False)
+        else:
+            self.form.periodicFrame.setVisible(False)
+
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
         self.form.comboSubtype.clear()
@@ -284,7 +294,7 @@ class TaskPanelCfdFluidBoundary:
         self.updateUI()
 
     def periodicTypeChanged(self):
-        if self.form.rb_rotational_periodic.isChecked:
+        if self.form.rb_rotational_periodic.isChecked():
             self.form.rotationalFrame.setVisible(True)
         else:
             self.form.rotationalFrame.setVisible(False)
