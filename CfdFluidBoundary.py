@@ -275,9 +275,9 @@ class _CfdFluidBoundary:
         addObjectProperty(obj, 'RotationalPeriodic', True, "App::PropertyBool", "Periodic",
                           "Whether to use rotational or translational periodics")
         addObjectProperty(obj, 'PeriodicCentreOfRotation', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
-                          "Periodic", "Location of the probe sample location")
+                          "Periodic", "Centre of rotation for rotational periodics")
         addObjectProperty(obj, 'PeriodicCentreOfRotationAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
-                          "periodic", "Location of the probe sample location")
+                          "Periodic", "Axis of rotational for rotational periodics")
 
         # Turbulence
         all_turb_specs = []

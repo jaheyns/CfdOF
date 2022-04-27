@@ -1579,9 +1579,9 @@
                    <property name="text">
                     <string>Rotational</string>
                    </property>
-				 <attribute name="buttonGroup">
-                  <string notr="true">buttonGroupPeriodic</string>
-                 </attribute>
+                   <attribute name="buttonGroup">
+                    <string notr="true">buttonGroupPeriodic</string>
+                   </attribute>
                   </widget>
                  </item>
                  <item row="0" column="1">
@@ -1589,9 +1589,9 @@
                    <property name="text">
                     <string>Translational</string>
                    </property>
-			     <attribute name="buttonGroup">
-                  <string notr="true">buttonGroupPeriodic</string>
-                 </attribute>
+                   <attribute name="buttonGroup">
+                    <string notr="true">buttonGroupPeriodic</string>
+                   </attribute>
                   </widget>
                  </item>
                 </layout>
@@ -1633,7 +1633,7 @@
                   <double>0.100000000000000</double>
                  </property>
                  <property name="unit" stdset="0">
-                  <string notr="true">m/s</string>
+                  <string notr="true">mm</string>
                  </property>
                  <property name="format" stdset="0">
                   <number>0</number>
@@ -1658,7 +1658,7 @@
                   <double>0.100000000000000</double>
                  </property>
                  <property name="unit" stdset="0">
-                  <string notr="true">m/s</string>
+                  <string notr="true">mm</string>
                  </property>
                  <property name="format" stdset="0">
                   <number>0</number>
@@ -1683,7 +1683,7 @@
                   <double>0.100000000000000</double>
                  </property>
                  <property name="unit" stdset="0">
-                  <string notr="true">m/s</string>
+                  <string notr="true">mm</string>
                  </property>
                  <property name="format" stdset="0">
                   <number>0</number>
@@ -1729,7 +1729,7 @@
                   <double>0.100000000000000</double>
                  </property>
                  <property name="unit" stdset="0">
-                  <string notr="true">m/s</string>
+                  <string notr="true"/>
                  </property>
                  <property name="format" stdset="0">
                   <number>0</number>
@@ -1761,7 +1761,7 @@
                   <double>0.100000000000000</double>
                  </property>
                  <property name="unit" stdset="0">
-                  <string notr="true">m/s</string>
+                  <string notr="true"/>
                  </property>
                  <property name="format" stdset="0">
                   <number>0</number>
@@ -1793,7 +1793,7 @@
                   <double>0.100000000000000</double>
                  </property>
                  <property name="unit" stdset="0">
-                  <string notr="true">m/s</string>
+                  <string notr="true"/>
                  </property>
                  <property name="format" stdset="0">
                   <number>0</number>
