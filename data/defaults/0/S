@@ -1,3 +1,5 @@
+%{%(scalarTransportFunctionsEnabled%)
+%:True
 %[_header%]
 FoamFile
 {
@@ -19,59 +21,32 @@ boundaryField
 %{%(boundaries/%(0%)/BoundaryType%)
 %:empty
 %[0/_boundary_empty%]
+
 %:wall
-%{%(boundaries/%(0%)/BoundarySubType%)
-%:fixedWall translatingWall partialSlipWall roughWall
     %(0%)
     {
-        type        kqRWallFunction;
+        type        fixedValue;
         value       $internalField;
     }
 %:slipWall
 %[0/_boundary_zeroGradient%]
-%}
+
 %:inlet open
-%{%(boundaries/%(0%)/TurbulenceInletSpecification%)
-%:TKEAndSpecDissipationRate
-    %(0%)
-    {
-        type        inletOutlet;
-        inletValue  uniform %(boundaries/%(0%)/TurbulentKineticEnergy%);
-        value       $internalField;
-    }
-%:intensityAndLengthScale
-    %(0%)
-    {
-        type        turbulentIntensityKineticEnergyInlet;
-        intensity   %(boundaries/%(0%)/TurbulenceIntensity%);
-        value       $internalField;
-    }
-%:TurbulentViscosityAndK
     %(0%)
     {
         type        fixedValue;
-        value       uniform %(boundaries/%(0%)/kEqnTurbulentKineticEnergy%);
+        value       $internalField;
     }
-%:default
-    %(0%)
-    {
-        type            fixedValue;
-        value           $internalField;
-    }
-%}
 %:outlet
     %(0%)
     {
-        type        inletOutlet;
-        inletValue  $internalField;
-        value       $internalField;
+        type        zeroGradient;
     }
 %:constraint
 %[0/_boundary_constraint%]
 %:baffle
 %[0/_boundary_cyclic_baffle%]
 %}
-
 %}
-
 }
+%}
