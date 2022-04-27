@@ -25,18 +25,17 @@
 # ***************************************************************************
 
 import os
-import FreeCAD
 from pivy import coin
 import Part
+import CfdTools
+from CfdTools import addObjectProperty
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
     import _TaskPanelCfdFluidBoundary
-import CfdTools
-from CfdTools import addObjectProperty
 
 # Constants
-
 BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Open", "Constraint", "Baffle"]
 
 BOUNDARY_TYPES = ["wall", "inlet", "outlet", "open", "constraint", "baffle"]
@@ -45,14 +44,14 @@ SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translatin
             ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure"],
             ["Static pressure", "Uniform velocity", "Extrapolated"],
             ["Ambient pressure", "Far-field"],
-            ["Symmetry"],
+            ["Symmetry", "Periodic"],
             ["Porous Baffle"]]
 
 SUBTYPES = [["fixedWall", "slipWall", "partialSlipWall", "translatingWall", "roughWall"],
             ["uniformVelocityInlet", "volumetricFlowRateInlet", "massFlowRateInlet", "totalPressureInlet", "staticPressureInlet"],
             ["staticPressureOutlet", "uniformVelocityOutlet", "outFlowOutlet"],
             ["totalPressureOpening", "farField"],
-            ["symmetry"],
+            ["symmetry", "cyclicAMI"],
             ["porousBaffle"]]
 
 SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
@@ -70,14 +69,16 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                       "All fields extrapolated; possibly unstable"],
                      ["Boundary open to surroundings with total pressure specified",
                       "Characteristic-based non-reflecting boundary"],
-                     ["Symmetry of flow quantities about boundary face"],
+                     ["Symmetry of flow quantities about boundary face",
+                      "Rotationally or translationally periodic flows between two boundary faces"],
                      ["Permeable screen"]]
 
 # For each sub-type, whether the basic tab is enabled, the panel numbers to show (ignored if false), whether
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
 # whether volume fraction panel is shown, whether thermal GUI is shown,
 # rows of thermal UI to show (all shown if None)
-
+# Summary:
+# basic | panel numbers | reversal dir | turb panel | vol frac | thermal | thermal UI rows |
 BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                 [False, [], False, False, False, True, None],  # Slip
                 [True, [2], False, False, False, True, None],  # Partial slip
@@ -93,7 +94,8 @@ BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                 [False, [], False, False, False, False, None]],  # Outflow
                [[True, [1], False, True, True, True, [2]],  # Opening
                 [True, [0, 1], False, True, False, True, [2]]],  # Far-field
-               [[False, [], False, False, False, False, None]],  # Symmetry plane
+               [[False, [], False, False, False, False, None],  # Symmetry plane
+                [False, [], False, False, False, False, None]],  # Cyclic AMI
                [[True, [5], False, False, False, False, None]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows
@@ -217,13 +219,15 @@ class _CfdFluidBoundary:
                 obj.removeProperty('LinkedObjects')
 
         addObjectProperty(obj, 'DefaultBoundary', False, "App::PropertyBool", "Boundary faces")
-        addObjectProperty(obj, 'BoundaryType', BOUNDARY_TYPES, "App::PropertyEnumeration", "", "Boundary condition category")
+        addObjectProperty(obj, 'BoundaryType', BOUNDARY_TYPES, "App::PropertyEnumeration", "",
+                          "Boundary condition category")
 
         all_subtypes = []
         for s in SUBTYPES:
             all_subtypes += s
 
-        addObjectProperty(obj, 'BoundarySubType', all_subtypes, "App::PropertyEnumeration", "", "Boundary condition type")
+        addObjectProperty(obj, 'BoundarySubType', all_subtypes, "App::PropertyEnumeration", "",
+                          "Boundary condition type")
         addObjectProperty(obj, 'VelocityIsCartesian', True, "App::PropertyBool", "Flow",
                           "Whether to use components of velocity")
         addObjectProperty(obj, 'Ux', '0 m/s', "App::PropertySpeed", "Flow",
@@ -267,6 +271,7 @@ class _CfdFluidBoundary:
         addObjectProperty(obj, 'HeatTransferCoeff', '0 W/m^2/K', "App::PropertyQuantity", "Thermal",
                           "Wall heat transfer coefficient")
 
+        # Turbulence
         all_turb_specs = []
         for k in TURBULENT_INLET_SPEC:
             all_turb_specs += TURBULENT_INLET_SPEC[k][1]
@@ -306,7 +311,6 @@ class _CfdFluidBoundary:
                           "Turbulent viscosity")
 
         # General
-
         addObjectProperty(obj, 'TurbulenceIntensityPercentage', '1', "App::PropertyQuantity", "Turbulence",
                           "Turbulence intensity (percent)")
         # Backward compat
