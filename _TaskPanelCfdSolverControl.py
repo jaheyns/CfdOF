@@ -205,6 +205,7 @@ class _TaskPanelCfdSolverControl:
             self.consoleMessage("Simulation finished successfully")
         else:
             self.consoleMessage("Simulation exited with error", "#FF0000")
+        self.solver_runner.solverFinished()
         self.form.pb_write_inp.setEnabled(True)
         self.form.pb_run_solver.setEnabled(True)
         self.form.terminateSolver.setEnabled(False)

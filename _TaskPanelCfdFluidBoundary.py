@@ -44,7 +44,7 @@ class TaskPanelCfdFluidBoundary:
         self.obj = obj
 
         self.physics_model = physics_model
-        self.turbModel = (physics_model.TurbulenceModel
+        self.turb_model = (physics_model.TurbulenceModel
                           if physics_model.Turbulence == 'RANS' or physics_model.Turbulence == 'LES' else None)
 
         self.material_objs = material_objs
@@ -122,9 +122,9 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.input_axisz, self.obj.PeriodicCentreOfRotationAxis.z)
 
         # Turbulence
-        if self.turbModel is not None:
-            self.form.comboTurbulenceSpecification.addItems(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][0])
-            ti = indexOrDefault(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][1],
+        if self.turb_model is not None:
+            self.form.comboTurbulenceSpecification.addItems(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][0])
+            ti = indexOrDefault(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][1],
                                 self.obj.TurbulenceInletSpecification, 0)
             self.form.comboTurbulenceSpecification.setCurrentIndex(ti)
 
@@ -163,6 +163,7 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputGammaInt.setToolTip("Turbulence intermittency")
         self.form.inputReThetat.setToolTip("Momentum thickness Reynolds number")
         self.form.inputNuTilda.setToolTip("Modified turbulent viscosity")
+
         # LES models
         self.form.inputTurbulentViscosity.setToolTip("Turbulent viscosity")
 
@@ -195,9 +196,9 @@ class TaskPanelCfdFluidBoundary:
 
         self.form.basicFrame.setVisible(tab_enabled)
 
-        for paneli in range(self.form.layoutBasicValues.count()):
-            if isinstance(self.form.layoutBasicValues.itemAt(paneli), QtGui.QWidgetItem):
-                self.form.layoutBasicValues.itemAt(paneli).widget().setVisible(False)
+        for panel_i in range(self.form.layoutBasicValues.count()):
+            if isinstance(self.form.layoutBasicValues.itemAt(panel_i), QtGui.QWidgetItem):
+                self.form.layoutBasicValues.itemAt(panel_i).widget().setVisible(False)
 
         if tab_enabled:
             panel_numbers = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][1]
@@ -240,11 +241,11 @@ class TaskPanelCfdFluidBoundary:
         self.form.stackedWidgetPorous.setCurrentIndex(method)
 
         # Turbulence model, set visible gui components
-        if self.turbModel:
+        if self.turb_model:
             index = self.form.comboTurbulenceSpecification.currentIndex()
             self.form.labelTurbulenceDescription.setText(
-                CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][2][index])
-            panel_numbers = CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][3][index]
+                CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][2][index])
+            panel_numbers = CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][3][index]
             # Enables specified rows of a QFormLayout
             for rowi in range(self.form.layoutTurbulenceValues.count()):
                 for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
@@ -440,10 +441,10 @@ class TaskPanelCfdFluidBoundary:
                              "= {}".format(self.form.input_axisz.property("quantity").Value))
 
         # Turbulence
-        if self.turbModel in CfdFluidBoundary.TURBULENT_INLET_SPEC:
+        if self.turb_model in CfdFluidBoundary.TURBULENT_INLET_SPEC:
             turb_index = self.form.comboTurbulenceSpecification.currentIndex()
             FreeCADGui.doCommand("bc.TurbulenceInletSpecification "
-                                 "= '{}'".format(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turbModel][1][turb_index]))
+                                 "= '{}'".format(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][1][turb_index]))
         else:
             FreeCADGui.doCommand("bc.TurbulenceInletSpecification "
                                  "= '{}'".format(self.obj.TurbulenceInletSpecification))

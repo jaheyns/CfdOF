@@ -1,4 +1,4 @@
-%{%(dynamicMeshAdaptationEnabled%)
+%{%(dynamicMeshEnabled%)
 %:True
 %[_header%]
 FoamFile
@@ -11,16 +11,16 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 dynamicFvMesh       dynamicRefineFvMesh;
 
-refineInterval  %(dynamicMeshAdaptation/RefinementInterval%);
-field           %(dynamicMeshAdaptation/RefinementField%);
+refineInterval  %(dynamicMesh/RefinementInterval%);
+field           %(dynamicMesh/RefinementField%);
 
-lowerRefineLevel %(dynamicMeshAdaptation/LowerRefinementLevel%);
-upperRefineLevel %(dynamicMeshAdaptation/UpperRefinementLevel%);
+lowerRefineLevel %(dynamicMesh/LowerRefinementLevel%);
+upperRefineLevel %(dynamicMesh/UpperRefinementLevel%);
 
-unrefineLevel   %(dynamicMeshAdaptation/UnRefinementLevel%);
-nBufferLayers   %(dynamicMeshAdaptation/BufferLayers%);
-maxRefinement   %(dynamicMeshAdaptation/MaxRefinementLevel%);
-maxCells        %(dynamicMeshAdaptation/MaxRefinementCells%);
+unrefineLevel   %(dynamicMesh/UnRefinementLevel%);
+nBufferLayers   %(dynamicMesh/BufferLayers%);
+maxRefinement   %(dynamicMesh/MaxRefinementLevel%);
+maxCells        %(dynamicMesh/MaxRefinementCells%);
 
 correctFluxes
 (
@@ -32,7 +32,7 @@ correctFluxes
     (alphaPhiUn none)
 );
 
-%{%(dynamicMeshAdaptation/WriteFields%)
+%{%(dynamicMesh/WriteFields%)
 %:True
 dumpLevel       true;
 %:False

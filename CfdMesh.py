@@ -63,8 +63,8 @@ class _CommandCfdMeshFromShape:
         FreeCAD.ActiveDocument.openTransaction("Create CFD mesh")
         analysis_obj = CfdTools.getActiveAnalysis()
         if analysis_obj:
-            meshObj = CfdTools.getMesh(analysis_obj)
-            if not meshObj:
+            mesh_obj = CfdTools.getMesh(analysis_obj)
+            if not mesh_obj:
                 sel = FreeCADGui.Selection.getSelection()
                 if len(sel) == 1:
                     if sel[0].isDerivedFrom("Part::Feature"):
@@ -86,8 +86,7 @@ class _CommandCfdMeshFromShape:
 class _CfdMesh:
     """ CFD mesh properties """
 
-    # Variables that need to be used outside this class and therefore are included outside of
-    # the constructor
+    # Variables that need to be used outside this class and therefore are included outside of the constructor
     known_element_dimensions = ['2D', '3D']
 
     def __init__(self, obj):

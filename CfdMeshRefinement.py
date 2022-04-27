@@ -36,15 +36,14 @@ import Part
 import _TaskPanelCfdMeshRefinement
 
 # Constants
-
 EXTRUSION_NAMES = ["2D planar mesh", "2D wedge mesh", "Patch-normal", "Rotational"]
 EXTRUSION_TYPES = ["2DPlanar", "2DWedge", "PatchNormal", "Rotational"]
 EXTRUSION_UI = [[2], [6], [1, 2, 4, 5], [1, 3, 4, 5, 6]]
 
 
 def makeCfdMeshRefinement(base_mesh, name="MeshRefinement"):
-    """ makeCfdMeshRefinement([name]):
-        Creates an object to define refinement properties for a surface or region of the mesh
+    """
+    makeCfdMeshRefinement([name]): Creates an object to define refinement properties for a surface or region of the mesh
     """
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     _CfdMeshRefinement(obj)
@@ -91,8 +90,7 @@ class _CfdMeshRefinement:
 
     def initProperties(self, obj):
         # Common to all
-        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList",
-                             "", "List of mesh refinement objects"):
+        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "List of mesh refinement objects"):
             # Backward compat
             if 'References' in obj.PropertiesList:
                 doc = FreeCAD.getDocument(obj.Document.Name)
