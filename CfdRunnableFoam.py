@@ -182,6 +182,7 @@ class CfdRunnableFoam(CfdRunnable):
         log_lines = text.split('\n')
         prev_niter = self.niter
         for line in log_lines:
+            line = line.rstrip()
             split = line.split()
 
             # Only record the first residual per outer iteration
@@ -202,11 +203,11 @@ class CfdRunnableFoam(CfdRunnable):
                 if self.latest_outer_iter > 1:
                     self.niter += 1
 
-            if line.startswith(u"forces") and line.endswith(u"write:"):
-                self.in_forces_section = line.split()[1]
-            if line.startswith(u"forceCoeffs") and line.endswith(u"execute:"):
-                self.in_forcecoeffs_section = line.split()[1]
-            if not line.strip():  
+            if line.startswith(u"forces") and (line.endswith(u"write:") or line.endswith(u"execute:")):
+                self.in_forces_section = split[1]
+            if line.startswith(u"forceCoeffs") and (line.endswith(u"write:") or line.endswith(u"execute:")):
+                self.in_forcecoeffs_section = split[1]
+            if not line.strip():
                 # Blank line
                 self.in_forces_section = None
                 self.in_forcecoeffs_section = None
@@ -257,11 +258,11 @@ class CfdRunnableFoam(CfdRunnable):
             # Force monitors
             if self.in_forces_section:
                 f = self.forces[self.in_forces_section]
-                if "Pressure" in split and self.niter-1 > len(f['pressureXForces']):
+                if (("Pressure" in split) or ("pressure" in split)) and self.niter-1 > len(f['pressureXForces']):
                     f['pressureXForces'].append(float(split[2].lstrip("(")))
                     f['pressureYForces'].append(float(split[3]))
                     f['pressureZForces'].append(float(split[4].rstrip(")")))
-                if "Viscous" in split and self.niter-1 > len(f['viscousXForces']):
+                if (("Viscous" in split) or ("viscous" in split)) and self.niter-1 > len(f['viscousXForces']):
                     f['viscousXForces'].append(float(split[2].lstrip("(")))
                     f['viscousYForces'].append(float(split[3]))
                     f['viscousZForces'].append(float(split[4].rstrip(")")))
