@@ -28,9 +28,7 @@
 import os
 import os.path
 import shutil
-
 from FreeCAD import Units
-
 import CfdTools
 import TemplateBuilder
 from CfdTools import cfdMessage
@@ -50,6 +48,7 @@ class CfdCaseWriterFoam:
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
         self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
+        self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
@@ -94,6 +93,8 @@ class CfdCaseWriterFoam:
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
             'reportingFunctionsEnabled': False,
+            'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
+            'scalarTransportFunctionsEnabled': False,
             'dynamicMesh': {},
             'dynamicMeshEnabled': False,
             'bafflesPresent': self.bafflesPresent(),
@@ -126,6 +127,10 @@ class CfdCaseWriterFoam:
         if self.reporting_functions:
             cfdMessage(f'Reporting functions present')
             self.processReportingFunctions()
+
+        if self.scalar_transport_objs:
+            cfdMessage(f'Scalar transport functions present')
+            self.processScalarTransportFunctions()
 
         if self.dynamic_mesh_obj:
             cfdMessage(f'Dynamic mesh adaptation rule present')
@@ -542,7 +547,6 @@ class CfdCaseWriterFoam:
             rf = settings['reportingFunctions'][name]
 
             rf['PatchName'] = rf['Patch'].Label
-
             rf['CentreOfRotation'] = \
                 tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in rf['CentreOfRotation'])
             rf['Direction'] = tuple(p for p in rf['Direction'])
@@ -556,6 +560,15 @@ class CfdCaseWriterFoam:
                 Units.Quantity(p, Units.Length).getValueAs('m') 
                 for p in settings['reportingFunctions'][name]['ProbePosition'])
 
+    def processScalarTransportFunctions(self):
+        settings = self.settings
+        # Copy keys so that we can delete while iterating
+        settings['scalarTransportFunctionsEnabled'] = True
+        tf_name = list(settings['scalarTransportFunctions'].keys())
+
+        for name in tf_name:
+            settings['scalarTransportFunctions'][name]['InjectionPoint'] = \
+                tuple(p for p in settings['scalarTransportFunctions'][name]['InjectionPoint'])
 
     # Mesh related
     def processDynamicMesh(self):

@@ -1,5 +1,5 @@
 %{%(physics/Turbulence%)
-%:RANS LES
+%:RANS DES LES
 %[_header%]
 FoamFile
 {
@@ -55,7 +55,7 @@ boundaryField
     %(0%)
     {
 %{%(physics/TurbulenceModel%)
-%:SpalartAllmaras Smagorinsky
+%:SpalartAllmaras SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES Smagorinsky
         type        nutUSpaldingWallFunction;
 %:default
         type        nutkWallFunction;
@@ -68,7 +68,7 @@ boundaryField
     %(0%)
     {
 %{%(physics/TurbulenceModel%)
-%:SpalartAllmaras Smagorinsky
+%:SpalartAllmaras SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES Smagorinsky
         type        nutURoughWallFunction;
 %:default
         type        nutkRoughWallFunction;

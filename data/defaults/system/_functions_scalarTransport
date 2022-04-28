@@ -1,0 +1,48 @@
+%{%(scalarTransportFunctions%)
+    %(0%)
+    {
+        type            scalarTransport;
+        libs            ("libsolverFunctionObjects.so");
+
+        field           %(scalarTransportFunctions/%(0%)/FieldName%);
+        phi             %(scalarTransportFunctions/%(0%)/FluxFieldName%);
+        rho             %(scalarTransportFunctions/%(0%)/DensityFieldName%);
+        phase           %(scalarTransportFunctions/%(0%)/PhaseFieldName%);
+
+%{%(scalarTransportFunctions/%(0%)/ResetOnStartup%)
+%:True
+        resetOnStartUp  true;
+%:False
+        resetOnStartUp  false;
+%}
+
+        schemesField    %(scalarTransportFunctions/%(0%)/SchemeFieldName%);
+
+        D               %(scalarTransportFunctions/%(0%)/DiffusivityFixedValue%);
+        nut             %(scalarTransportFunctions/%(0%)/DiffusivityFieldName%);
+
+        // Run-time selectable sources
+        fvOptions
+        {
+            %(0%)
+            {
+                type            scalarSemiImplicitSource;
+                timeStart       0;
+                duration        999;
+                active          true;
+                selectionMode   points;
+                points
+                (
+                    ( %(scalarTransportFunctions/%(0%)/InjectionPoint%) )
+                );
+
+                volumeMode      absolute;
+                injectionRateSuSp
+                {
+                    %(scalarTransportFunctions/%(0%)/FieldName%)     ( %(scalarTransportFunctions/%(0%)/InjectionRate%) 0 ); // kg/s
+                }
+
+            }
+        }
+    }
+%}

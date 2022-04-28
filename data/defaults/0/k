@@ -1,7 +1,7 @@
 %{%(physics/Turbulence%)
-%:RANS LES
+%:RANS DES LES
 %{%(physics/TurbulenceModel%)
-%:kOmegaSST kEpsilon kOmegaSSTLM kEqn
+%:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES kEpsilon kOmegaSSTLM kEqn
 %[_header%]
 FoamFile
 {
