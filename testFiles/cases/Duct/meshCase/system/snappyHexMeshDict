@@ -54,8 +54,8 @@ geometry
 
 castellatedMeshControls
 {
-    maxLocalCells 100000;
-    maxGlobalCells 2000000;
+    maxLocalCells 100000000;
+    maxGlobalCells 2000000000;
     minRefinementCells 0;
     nCellsBetweenLevels 3;
 
@@ -116,17 +116,18 @@ addLayersControls
     layers
     {
     }
-    expansionRatio 1.3;
-    finalLayerThickness 1;
+
+    expansionRatio 1.2;
+    finalLayerThickness 0.3;
     minThickness 0.1;
     nGrow 0;
-    featureAngle 30;
+    featureAngle 120;
     nRelaxIter 3;
     nSmoothSurfaceNormals 1;
     nSmoothNormals 3;
-    nSmoothThickness 2;
+    nSmoothThickness 10;
     maxFaceThicknessRatio 0.5;
-    maxThicknessToMedialRatio 1;
+    maxThicknessToMedialRatio 0.3;
     minMedianAxisAngle 90;
     nBufferCellsNoExtrude 0;
     nLayerIter 50;

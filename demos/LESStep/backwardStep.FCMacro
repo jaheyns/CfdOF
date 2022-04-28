@@ -24,6 +24,7 @@ CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
 
 FreeCAD.ActiveDocument.Pad_Mesh.CharacteristicLengthMax = '0.7 mm'
 FreeCAD.ActiveDocument.Pad_Mesh.MeshUtility = 'gmsh'
+FreeCAD.ActiveDocument.Pad_Mesh.ConvertToDualMesh = True
 
 obj = FreeCAD.ActiveDocument.PhysicsModel
 obj.Time = 'Transient'
