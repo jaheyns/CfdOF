@@ -10,8 +10,9 @@
         type                forceCoeffs;
 %}
         libs                ("libforces.so");
-        patches             ( %(reportingFunctions/%(0%)/PatchName%) );
+        log                 true;
 
+        patches             ( %(reportingFunctions/%(0%)/PatchName%) );
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
         p_rgh               p_rgh;
