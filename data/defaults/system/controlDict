@@ -77,6 +77,16 @@ functions
 %:True
 %[system/_functions_reporting%]
 %}
+
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%[system/_functions_scalarTransport%]
+%}
+
+%{%(physics/TurbulenceModel%)
+%:kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
+%[system/_functions_DESRegions%]
+%}
 }
 
 // ************************************************************************* //

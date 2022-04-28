@@ -135,6 +135,60 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                           "Turbulence intensity and eddy length scale"],
                          [[0, 2, 6, 7],  # k, omega, gamma and reThetat
                           [3, 4]]],  # I, l
+                        'kOmegaSSTDES':
+                        [["Kinetic Energy & Specific Dissipation Rate",
+                          "Intensity & Length Scale"],
+                         ["TKEAndSpecDissipationRate",
+                          "intensityAndLengthScale"],
+                         ["k and omega specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 2],  # k, omega
+                          [3, 4]]],
+                        'kOmegaSSTDDES':
+                        [["Kinetic Energy & Specific Dissipation Rate",
+                          "Intensity & Length Scale"],
+                         ["TKEAndSpecDissipationRate",
+                          "intensityAndLengthScale"],
+                         ["k and omega specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 2],  # k, omega
+                          [3, 4]]],
+                        'kOmegaSSTIDDES':
+                        [["Kinetic Energy & Specific Dissipation Rate",
+                          "Intensity & Length Scale"],
+                         ["TKEAndSpecDissipationRate",
+                          "intensityAndLengthScale"],
+                         ["k and omega specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[0, 2],  # k, omega
+                          [3, 4]]],
+                        'SpalartAllmarasDES':
+                        [["Modified Turbulent Viscosity",
+                          "Intensity & Length Scale"],
+                         ["TransportedNuTilda",
+                          "intensityAndLengthScale"],
+                         ["nu-tilde specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[5],  # nu tilda
+                          [3, 4]]],
+                        'SpalartAllmarasDDES':
+                        [["Modified Turbulent Viscosity",
+                          "Intensity & Length Scale"],
+                         ["TransportedNuTilda",
+                          "intensityAndLengthScale"],
+                         ["nu-tilde specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[5],  # nu tilda
+                          [3, 4]]],
+                        'SpalartAllmarasIDDES':
+                        [["Modified Turbulent Viscosity",
+                          "Intensity & Length Scale"],
+                         ["TransportedNuTilda",
+                          "intensityAndLengthScale"],
+                         ["nu-tilde specified",
+                          "Turbulence intensity and eddy length scale"],
+                         [[5],  # nu tilda
+                          [3, 4]]],
                         "kEqn":
                         [["Kinetic Energy & Turbulent viscosity"],
                          ["TurbulentViscosityAndK"],

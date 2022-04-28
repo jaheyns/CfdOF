@@ -20,7 +20,7 @@ RAS
 
     printCoeffs         on;
 }
-%:LES
+%:DES LES
 simulationType LES;
 
 LES
@@ -32,10 +32,18 @@ LES
     printCoeffs         on;
 
 %{%(physics/TurbulenceModel%)
-%:Smagorinsky kEqn WALE
+%:kOmegaSSTDES kOmegaSSTDDES SpalartAllmarasDES SpalartAllmarasDDES Smagorinsky kEqn WALE
     delta               vanDriest;
 
 %[constant/_turbulenceProperties_LES%]
+%:kOmegaSSTIDDES SpalartAllmarasIDDES
+    delta               IDDESDelta;
+
+    IDDESDelta
+    {
+        cw 0.15;
+        deltaCoeff 1;
+    }
 
 %}
 }
