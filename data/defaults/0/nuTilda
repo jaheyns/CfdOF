@@ -1,7 +1,7 @@
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS DES
 %{%(physics/TurbulenceModel%)
-%:SpalartAllmaras
+%:SpalartAllmaras SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
 %[_header%]
 FoamFile
 {

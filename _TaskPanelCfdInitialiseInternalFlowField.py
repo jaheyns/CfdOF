@@ -157,7 +157,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
             self.form.volumeFractionsFrame.setVisible(False)
 
         # Turbulence
-        if self.physicsModel.Turbulence in ['RANS', 'LES']:
+        if self.physicsModel.Turbulence in ['RANS', 'DES', 'LES']:
             self.form.turbulencePropertiesFrame.setVisible(True)
         else:
             self.form.turbulencePropertiesFrame.setVisible(False)
@@ -185,6 +185,7 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         self.form.lesModelsFrame.setVisible(False)
         self.form.leskEqnFrame.setVisible(False)
 
+        # RANS
         if self.physicsModel.TurbulenceModel == 'kOmegaSST':
             self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
         elif self.physicsModel.TurbulenceModel == 'kEpsilon':
@@ -194,6 +195,20 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         elif self.physicsModel.TurbulenceModel == 'kOmegaSSTLM':
             self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
             self.form.kOmegaSSTLMFrame.setVisible(not use_inlet_turb)
+        #DES
+        elif self.physicsModel.TurbulenceModel == 'kOmegaSSTDES':
+            self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'kOmegaSSTDDES':
+            self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'kOmegaSSTIDDES':
+            self.form.kOmegaSSTFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'SpalartAllmarasDES':
+            self.form.SpalartAllmarasFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'SpalartAllmarasDDES':
+            self.form.SpalartAllmarasFrame.setVisible(not use_inlet_turb)
+        elif self.physicsModel.TurbulenceModel == 'SpalartAllmarasIDDES':
+            self.form.SpalartAllmarasFrame.setVisible(not use_inlet_turb)
+        #LES
         elif self.physicsModel.TurbulenceModel == 'Smagorinsky' or \
             self.physicsModel.TurbulenceModel == 'WALE':
             self.form.lesModelsFrame.setVisible(not use_inlet_turb)
