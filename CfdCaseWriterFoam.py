@@ -52,7 +52,7 @@ class CfdCaseWriterFoam:
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
-        self.dynamic_mesh_obj = CfdTools.getDynamicMeshAdaptation(analysis_obj)
+        self.dynamic_mesh_refinement_obj = CfdTools.getDynamicMeshAdaptation(analysis_obj)
         self.mesh_generated = False
         self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
         self.progressCallback = None
@@ -132,9 +132,9 @@ class CfdCaseWriterFoam:
             cfdMessage(f'Scalar transport functions present')
             self.processScalarTransportFunctions()
 
-        if self.dynamic_mesh_obj:
+        if self.dynamic_mesh_refinement_obj:
             cfdMessage(f'Dynamic mesh adaptation rule present')
-            self.processDynamicMesh()
+            self.processDynamicMeshRefinement()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         cfdMessage("Matching boundary conditions ...\n")
@@ -571,27 +571,26 @@ class CfdCaseWriterFoam:
                 tuple(p for p in settings['scalarTransportFunctions'][name]['InjectionPoint'])
 
     # Mesh related
-    def processDynamicMesh(self):
+    def processRefin(self):
         settings = self.settings
         settings['dynamicMeshEnabled'] = True
 
         # Check whether transient
         if not self.physics_model.Time == 'Transient':
-            raise RuntimeError("Dynamic mesh is not supported by steady-state solvers")
+            raise RuntimeError("Dynamic mesh refinement is not supported by steady-state solvers")
         
-        if self.dynamic_mesh_obj.DynamicMeshType == 'DynamicRefinement':
-            # Check whether cellLevel supported
-            if self.mesh_obj.MeshUtility not in ['cfMesh', 'snappyHexMesh']:
-                raise RuntimeError("Dynamic mesh refinement is only supported by cfMesh and snappyHexMesh")
+        # Check whether cellLevel supported
+        if self.mesh_obj.MeshUtility not in ['cfMesh', 'snappyHexMesh']:
+            raise RuntimeError("Dynamic mesh refinement is only supported by cfMesh and snappyHexMesh")
+    
+        # Check whether 2D extrusion present
+        mesh_refinements = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+        for mr in mesh_refinements:
+            if mr.Extrusion:
+                if mr.ExtrusionType == '2DPlanar' or mr.ExtrusionType == '2DWedge':
+                    raise RuntimeError("Dynamic mesh refinement will not work with 2D or wedge mesh")
         
-            # Check whether 2D extrusion present
-            mesh_refinements = CfdTools.getMeshRefinementObjs(self.mesh_obj)
-            for mr in mesh_refinements:
-                if mr.Extrusion:
-                    if mr.ExtrusionType == '2DPlanar' or mr.ExtrusionType == '2DWedge':
-                        raise RuntimeError("Dynamic mesh refinement will not work with 2D or wedge mesh")
-        
-        settings['dynamicMesh'] = CfdTools.propsToDict(self.dynamic_mesh_obj)
+        settings['dynamicMesh'] = CfdTools.propsToDict(self.dynamic_mesh_refinement_obj)
 
     # Zones
     def exportZoneStlSurfaces(self):

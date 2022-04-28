@@ -29,27 +29,23 @@ import os
 import CfdTools
 from CfdTools import addObjectProperty
 from pivy import coin
-from core.mesh.dynamic import TaskPanelCfdDynamicMesh
-
-DYNAMIC_MESH_TYPES = ['DynamicRefinement']
-DYNAMIC_MESH_NAMES = ["Dynamic Refinement"]
-DYNAMIC_MESH_DESCRIPTIONS = ["Adaptively refines a cartesian mesh according to the value of an indicator field."]
+from core.mesh.dynamic import TaskPanelCfdDynamicMeshRefinement
 
 
-def makeCfdDynamicMesh(base_mesh, name="DynamicMeshModel"):
+def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshRefinement"):
     """
-    makeCfdDynamicMesh([name]):
+    makeCfdDynamicMeshRefinement([name]):
     Creates an object to define dynamic mesh properties if the solver supports it
     """
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdDynamicMesh(obj)
+    _CfdDynamicMeshRefinement(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdDynamicMesh(obj.ViewObject)
+        _ViewProviderCfdDynamicMeshRefinement(obj.ViewObject)
     base_mesh.addObject(obj)
     return obj
 
 
-class _CommandDynamicMesh:
+class _CommandDynamicMeshRefinement:
 
     def __init__(self):
         pass
@@ -57,7 +53,7 @@ class _CommandDynamicMesh:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh_dynamic.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Dynamic mesh"),
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Dynamic mesh refinement"),
                 'Accel': "M, D",
                 'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Defines dynamic mesh behaviour")}
 
@@ -80,7 +76,7 @@ class _CommandDynamicMesh:
         is_present = False
         members = CfdTools.getMesh(CfdTools.getActiveAnalysis()).Group
         for i in members:
-            if hasattr(i, 'Proxy') and isinstance(i.Proxy, _CfdDynamicMesh):
+            if hasattr(i, 'Proxy') and isinstance(i.Proxy, _CfdDynamicMeshRefinement):
                 FreeCADGui.activeDocument().setEdit(i.Name)
                 is_present = True
 
@@ -92,26 +88,23 @@ class _CommandDynamicMesh:
                 if len(sel) == 1 and hasattr(sobj, "Proxy") and isinstance(sobj.Proxy, _CfdMesh):
                     FreeCAD.ActiveDocument.openTransaction("Create DynamicMesh")
                     FreeCADGui.doCommand("")
-                    FreeCADGui.addModule("core.mesh.dynamic.CfdDynamicMesh as CfdDynamicMesh")
+                    FreeCADGui.addModule("core.mesh.dynamic.CfdDynamicMeshRefinement as CfdDynamicMeshRefinement")
                     FreeCADGui.addModule("CfdTools")
                     FreeCADGui.doCommand(
-                        "CfdDynamicMesh.makeCfdDynamicMesh(App.ActiveDocument.{})".format(sobj.Name))
+                        "CfdDynamicMeshRefinement.makeCfdDynamicMeshRefinement(App.ActiveDocument.{})".format(sobj.Name))
                     FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
         FreeCADGui.Selection.clearSelection()
 
 
-class _CfdDynamicMesh:
+class _CfdDynamicMeshRefinement:
 
     def __init__(self, obj):
         obj.Proxy = self
-        self.Type = "DynamicMeshModel"
+        self.Type = "DynamicMeshRefinement"
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, 'DynamicMeshType', DYNAMIC_MESH_TYPES, "App::PropertyEnumeration", "",
-                          "Type of dynamic mesh")
-
         addObjectProperty(obj, "RefinementInterval", 1, "App::PropertyInteger", "DynamicMesh",
                           "Set the interval at which to run the dynamic mesh refinement")
 
@@ -143,7 +136,7 @@ class _CfdDynamicMesh:
         self.initProperties(obj)
 
 
-class _ViewProviderCfdDynamicMesh:
+class _ViewProviderCfdDynamicMeshRefinement:
     def __init__(self, vobj):
         vobj.Proxy = self
 
@@ -175,8 +168,8 @@ class _ViewProviderCfdDynamicMesh:
 
     def setEdit(self, vobj, mode=0):
         import importlib
-        importlib.reload(TaskPanelCfdDynamicMesh)
-        taskd = TaskPanelCfdDynamicMesh.TaskPanelCfdDynamicMesh(self.Object)
+        importlib.reload(TaskPanelCfdDynamicMeshRefinement)
+        taskd = TaskPanelCfdDynamicMeshRefinement.TaskPanelCfdDynamicMeshRefinement(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True
