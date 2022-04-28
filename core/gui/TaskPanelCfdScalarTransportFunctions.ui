@@ -209,6 +209,9 @@
        </item>
        <item row="1" column="1">
         <widget class="QLineEdit" name="inputScalarFieldName">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -266,7 +269,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="singleStep" stdset="0">
-          <double>0.01000000000000</double>
+          <double>0.010000000000000</double>
          </property>
          <property name="unit" stdset="0">
           <string notr="true">mm</string>
@@ -291,8 +294,8 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="singleStep" stdset="0">
-          <double>0.01000000000000</double>
-		  </property>
+          <double>0.010000000000000</double>
+         </property>
          <property name="unit" stdset="0">
           <string notr="true">mm</string>
          </property>
@@ -329,7 +332,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="singleStep" stdset="0">
-          <double>0.01000000000000</double>
+          <double>0.010000000000000</double>
          </property>
          <property name="unit" stdset="0">
           <string notr="true">mm</string>
@@ -354,8 +357,8 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="singleStep" stdset="0">
-          <double>0.1000000000000</double>
-		 </property>
+          <double>0.100000000000000</double>
+         </property>
          <property name="unit" stdset="0">
           <string notr="true">kg/s</string>
          </property>
