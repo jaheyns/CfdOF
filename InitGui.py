@@ -41,6 +41,8 @@ class CfdOFWorkbench(Workbench):
         self.__class__.MenuText = "CfdOF"
         self.__class__.ToolTip = "CfdOF workbench"
 
+        icons_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons")
+        QtCore.QDir.addSearchPath("icons", icons_path)
         FreeCADGui.addPreferencePage(CfdPreferencePage, "CfdOF")
 
     def Initialize(self):
