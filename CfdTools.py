@@ -6,6 +6,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -45,12 +46,12 @@ from FreeCAD import Units
 import Part
 import BOPTools
 from BOPTools import SplitFeatures
+import CfdConsoleProcess
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
     from PySide import QtCore
     from PySide.QtGui import QFormLayout, QGridLayout
-import CfdConsoleProcess
 
 
 # Some standard install locations that are searched if an install directory is not specified
@@ -104,7 +105,6 @@ def getOutputPath(analysis):
 
 
 # Get functions
-
 if FreeCAD.GuiUp:
     def getResultObject():
         sel = FreeCADGui.Selection.getSelection()
@@ -128,23 +128,34 @@ def getParentAnalysisObject(obj):
     elif hasattr(parent, 'Proxy') and isinstance(parent.Proxy, CfdAnalysis._CfdAnalysis):
         return parent
     else:
-        return getParentAnalysisObject(parent)    
+        return getParentAnalysisObject(parent)
 
 
 def getPhysicsModel(analysis_object):
-    isPresent = False
+    is_present = False
     for i in analysis_object.Group:
         if "PhysicsModel" in i.Name:
-            physicsModel = i
-            isPresent = True
-    if not isPresent:
-        physicsModel = None
-    return physicsModel
+            physics_model = i
+            is_present = True
+    if not is_present:
+        physics_model = None
+    return physics_model
+
+
+def getDynamicMeshAdaptation(analysis_object):
+    is_present = False
+    for i in getMesh(analysis_object).Group:
+        if "DynamicMeshRefinement" in i.Name:
+            dynamic_mesh_adaption_model = i
+            is_present = True
+    if not is_present:
+        dynamic_mesh_adaption_model = None
+    return dynamic_mesh_adaption_model
 
 
 def getMeshObject(analysis_object):
-    isPresent = False
-    meshObj = []
+    is_present = False
+    mesh_obj = []
     if analysis_object:
         members = analysis_object.Group
     else:
@@ -152,14 +163,14 @@ def getMeshObject(analysis_object):
     from CfdMesh import _CfdMesh
     for i in members:
         if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
-            if isPresent:
+            if is_present:
                 FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
             else:
-                meshObj.append(i)
-                isPresent = True
-    if not isPresent:
-        meshObj = [None]
-    return meshObj[0]
+                mesh_obj.append(i)
+                is_present = True
+    if not is_present:
+        mesh_obj = [None]
+    return mesh_obj[0]
 
 
 def getPorousZoneObjects(analysis_object):
@@ -183,8 +194,7 @@ def getInitialConditions(analysis_object):
 
 
 def getMaterials(analysis_object):
-    return [i for i in analysis_object.Group
-            if i.isDerivedFrom('App::MaterialObjectPython')]
+    return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
 
 
 def getSolver(analysis_object):
@@ -214,7 +224,7 @@ def getCfdBoundaryGroup(analysis_object):
     return group
 
 
-def is_planar(shape):
+def isPlanar(shape):
     """
     Return whether the shape is a planar face
     """
@@ -237,15 +247,6 @@ def getMesh(analysis_object):
     return None
 
 
-def getMeshRefinementObjs(mesh_obj):
-    from CfdMeshRefinement import _CfdMeshRefinement
-    ref_objs = []
-    for obj in mesh_obj.Group:
-        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMeshRefinement):
-            ref_objs = ref_objs + [obj]
-    return ref_objs
-
-
 def getResult(analysis_object):
     for i in analysis_object.Group:
         if i.isDerivedFrom("Fem::FemResultObject"):
@@ -263,8 +264,27 @@ def get_module_path():
     return os.path.dirname(__file__)
 
 
-# Set functions
+# Function objects
+def getReportingFunctionsGroup(analysis_object):
+    group = []
+    from core.functionobjects.reporting.CfdReportingFunctions import _CfdReportingFunctions
+    for i in analysis_object.Group:
+        if isinstance(i.Proxy, _CfdReportingFunctions):
+            group.append(i)
+    return group
 
+
+# Mesh
+def getMeshRefinementObjs(mesh_obj):
+    from CfdMeshRefinement import _CfdMeshRefinement
+    ref_objs = []
+    for obj in mesh_obj.Group:
+        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMeshRefinement):
+            ref_objs = ref_objs + [obj]
+    return ref_objs
+
+
+# Set functions
 def setCompSolid(vobj):
     """
     To enable correct mesh refinement, boolean fragments are set to compSolid mode
@@ -870,11 +890,11 @@ def checkCfdDependencies():
     FC_COMMIT_REQUIRED = 16146
 
     CF_MAJOR_VER_REQUIRED = 1
-    CF_MINOR_VER_REQUIRED = 12
+    CF_MINOR_VER_REQUIRED = 16
 
     HISA_MAJOR_VER_REQUIRED = 1
     HISA_MINOR_VER_REQUIRED = 6
-    HISA_PATCH_VER_REQUIRED = 3
+    HISA_PATCH_VER_REQUIRED = 4
 
     message = ""
     FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
@@ -1093,9 +1113,9 @@ def checkCfdDependencies():
             print(plot_msg)
     if not plot_ok:
         try:
-            from freecad.plot import Plot  # Plot workbench
+            from compat import Plot  # Plot workbench
         except ImportError:
-            plot_msg = "Could not load Plot workbench\nPlease install it using Tools | Addon manager"
+            plot_msg = "Could not load legacy Plot module"
             message += plot_msg + '\n'
             print(plot_msg)
 

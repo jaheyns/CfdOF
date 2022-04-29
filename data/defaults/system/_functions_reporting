@@ -1,0 +1,93 @@
+%{%(reportingFunctions%)
+%{%(reportingFunctions/%(0%)/ReportingFunctionType%)
+%:Force ForceCoefficients
+    %(0%)
+    {
+%{%(reportingFunctions/%(0%)/ReportingFunctionType%)
+%:Force
+        type                forces;
+%:ForceCoefficients
+        type                forceCoeffs;
+%}
+        libs                ("libforces.so");
+        log                 true;
+
+        patches             ( %(reportingFunctions/%(0%)/PatchName%) );
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
+        p_rgh               p_rgh;
+%:default
+        p                   p;
+%}
+        U                   U;
+%{%(solver/SolverName%)
+%:simpleFoam porousSimpleFoam pimpleFoam
+        rho                 rhoInf;
+        rhoInf              %(fluidProperties/%(fluidProperties%)/Density%);
+%:default
+        rho                 rho;
+%{%(reportingFunctions/%(0%)/ReportingFunctionType%)
+%:ForceCoefficients
+        rhoInf              %(reportingFunctions/%(0%)/ReferenceDensity%);
+%}
+%}
+        pRef                %(reportingFunctions/%(0%)/ReferencePressure%);
+%{%(porousZonesPresent%)
+%:True
+        porosity            true;
+%:False
+        porosity            false;
+%}
+%{%(reportingFunctions/%(0%)/WriteFields%)
+%:True
+        writeFields         true;
+%:False
+        writeFields         false;
+%}
+        CofR                ( %(reportingFunctions/%(0%)/CentreOfRotation%) );
+%{%(reportingFunctions/%(0%)/ReportingFunctionType%)
+%:ForceCoefficients
+        liftDir             ( %(reportingFunctions/%(0%)/Lift%) );
+        dragDir             ( %(reportingFunctions/%(0%)/Drag%) );
+        pitchAxis           ( %(reportingFunctions/%(0%)/Pitch%) );
+
+        magUInf             %(reportingFunctions/%(0%)/MagnitudeUInf%);
+
+        lRef                %(reportingFunctions/%(0%)/LengthRef%);
+        Aref                %(reportingFunctions/%(0%)/AreaRef%);
+%}
+
+        binData
+        {
+            nBin            %(reportingFunctions/%(0%)/NBins%);
+            direction       ( %(reportingFunctions/%(0%)/Direction%) );
+%{%(reportingFunctions/%(0%)/Cumulative%)
+%:True
+            cumulative      true;
+%:False
+            cumulative      false;
+%}
+        }
+    }
+%:Probes
+    %(0%)
+    {
+        type            probes;
+        libs            ("libsampling.so");
+
+        writeControl    timeStep;
+        writeInterval   1;
+
+        fields
+        (
+            %(reportingFunctions/%(0%)/SampleFieldName%)
+        );
+
+        probeLocations
+        (
+            ( %(reportingFunctions/%(0%)/ProbePosition%) )
+        );
+    }
+%}
+
+%}

@@ -28,34 +28,24 @@ boundaryField
 %:fixedWall translatingWall partialSlipWall roughWall
     %(0%)
     {
+%{%(solver/SolverName%)
+%:hisa
+        type        boundaryCorrectedFixedValue;
+%:default
         type        fixedValue;
+%}
         value       uniform 0;
     }
 %:slipWall
 %[0/_boundary_zeroGradient%]
 %}
 %:inlet open
-%{%(boundaries/%(0%)/TurbulenceInletSpecification%)
-%:TransportedNuTilda
     %(0%)
     {
         type        inletOutlet;
         inletValue  uniform %(boundaries/%(0%)/NuTilda%);
         value       $internalField;
     }
-%:intensityAndLengthScale
-    %(0%)
-    {
-        type              fixedValue;
-        value             $internalField;
-    }
-%:default
-    %(0%)
-    {
-        type            fixedValue;
-        value           $internalField;
-    }
-%}
 %:outlet
     %(0%)
     {

@@ -23,32 +23,37 @@
 # *                                                                         *
 # ***************************************************************************
 
-import math
 from PySide import QtCore
+import math
 import FreeCAD
+
 if int(FreeCAD.Version()[0]) == 0 and int(FreeCAD.Version()[1].split('.')[0]) < 20:
-    from freecad.plot import Plot  # Plot workbench
+    from compat import Plot  # Plot workbench
 else:
     try:
         from FreeCAD.Plot import Plot  # Inbuilt plot module
     except ImportError:
-        from freecad.plot import Plot  # Fallback to workbench
+        from compat import Plot  # Fallback to compat (should be unnecessary once 0.20 is stable)
+
 from FreeCAD import Units
 import CfdTools
 
 
-class ResidualPlot:
-    def __init__(self):
+class TimePlot:
+    def __init__(self, title, y_label, is_log):
         self.fig = None
+        self.title = title
+        self.is_logarithmic = is_log
+        self.y_label = y_label
 
         self.updated = False
         self.times = []
-        self.residuals = {}
+        self.values = {}
         self.transient = False
 
-        self.Timer = QtCore.QTimer()
-        self.Timer.timeout.connect(self.refresh)
-        self.Timer.start(2000)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.refresh)
+        self.timer.start(2000)
 
     def __del__(self):
         if FreeCAD.GuiUp:
@@ -57,42 +62,44 @@ class ResidualPlot:
     def figureClosed(self):
         self.fig = None
 
-    def updateResiduals(self, times, residuals):
+    def updateValues(self, times, values):
         self.updated = True
         self.times = times
-        self.residuals = residuals
+        self.values = values
 
     def reInitialise(self, analysis_obj):
         phys_model = CfdTools.getPhysicsModel(analysis_obj)
         solver_obj = CfdTools.getSolver(analysis_obj)
         self.transient = (phys_model.Time == 'Transient')
-        self.residuals = {}
+        self.values = {}
         self.times = [solver_obj.TimeStep.getValueAs(Units.TimeSpan) if self.transient else 1]
 
     def refresh(self):
         if self.updated:
             self.updated = False
             if self.fig is None:
-                self.fig = Plot.figure("Residuals for " + FreeCAD.ActiveDocument.Name)
+                self.fig = Plot.figure(self.title + " for " + FreeCAD.ActiveDocument.Name)
                 self.fig.destroyed.connect(self.figureClosed)
             ax = self.fig.axes
             ax.cla()
-            ax.set_title("Simulation residuals")
+            ax.set_title(self.title)
             time_unit = str(Units.Quantity(1, Units.TimeSpan)).split()[-1]
             ax.set_xlabel("Time [{}]".format(time_unit) if self.transient else "Iteration")
-            ax.set_ylabel("Residual")
+            ax.set_ylabel(self.y_label)
 
-            last_residuals_min = 1e-2
+            last_values_min = 1e-2
             time_max = max(10*self.times[0] if self.transient else 100, self.times[-1])
-            for k in self.residuals:
-                if self.residuals[k]:
-                    ax.plot(self.times[0:len(self.residuals[k])], self.residuals[k], label=k, linewidth=1)
-                    last_residuals_min = min([last_residuals_min]+self.residuals[k][1:-1])
+            for k in self.values:
+                if self.values[k]:
+                    ax.plot(self.times[0:len(self.values[k])], self.values[k], label=k, linewidth=1)
+                    last_values_min = min([last_values_min]+self.values[k][1:-1])
 
             ax.grid()
-            ax.set_yscale('log')
-            # Decrease in increments of 10
-            ax.set_ylim([10**(math.floor(math.log10(last_residuals_min))), 1])
+            if self.is_logarithmic:
+                ax.set_yscale('log')
+                # Decrease in increments of 10
+                ax.set_ylim([10**(math.floor(math.log10(last_values_min))), 1])
+
             # Increase in increments of 100
             time_incr = 10.0*self.times[0] if self.transient else 100
             ax.set_xlim([0, math.ceil(float(time_max)/time_incr)*time_incr])

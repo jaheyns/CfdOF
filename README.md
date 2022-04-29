@@ -1,36 +1,42 @@
 # CfdOF: A Computational fluid dynamics (CFD) workbench for FreeCAD
 
 This workbench aims to help users set up and run CFD analyses within the [FreeCAD](https://freecadweb.org)
-modeller. It guides the user in selecting the relevant physics,
-specifying the material properties, generating a mesh, assigning boundary conditions and choosing the solver settings
-before running the simulation. Best practices are specified to maximise the stability of the solvers.
+modeller, and serves as a front-end (GUI) for the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
+It guides the user in selecting the relevant physics, specifying the material properties, generating a mesh, assigning 
+boundary conditions and choosing the solver settings before running the simulation. Best practices are specified to 
+maximise the stability of the solvers.
 
 ![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
 
-The workbench serves as a front-end (GUI) for the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
-
 Disclaimer:
-This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
+This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via 
+www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 
 ## Features
 
 ### Current:
 
+#### Flow physics
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
-* Extension to RANS turbulent flow (k-omega SST (incl. transition), k-epsilon, and Spalart-Allmaras models supported)
-* Extension to LES turbulent flow (k-Equation, Smagorinsky and WALE (Wall bounded) models)
+* RANS turbulent flow supporting k-omega SST (incl. transition), k-epsilon, and Spalart-Allmaras models
+* LES turbulent flow supporting k-Equation, Smagorinsky and WALE (Wall bounded) models
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
 * Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
 * Porous regions and porous baffles
 * Basic material database
 * Flow initialisation with a potential solver
+#### Meshing
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
 * Cut-cell Cartesian meshing with baffles (snappyHexMesh) and implicit / explicit snapping
-* Tetrahedral meshing using Gmsh
-* Conversion to poly dual mesh from existing meshes
-* Post meshing check mesh
+* Tetrahedral meshing using Gmsh, including conversion to polyhedral dual mesh
+* Post-meshing check mesh
+* Support for dynamic mesh adaptation for supported solvers
+#### Post processing and monitoring
 * Postprocessing using Paraview
+* Basic support for force-based function objects (Forces, Force Coefficients)
+* Basic support for probes
+#### Other features
 * Runs on Windows 7-11 and Linux
 * Unit/regression testing
 * Case builder using an extensible template structure
@@ -60,10 +66,9 @@ The CfdOF workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (at least version 0.18.4 / git commit 16146)](https://www.freecadweb.org/downloads.php)
- or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)
-- OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2112](http://openfoam.com/download)
-- [Paraview](http://www.paraview.org/)
-- [FreeCAD plot workbench](https://github.com/FreeCAD/freecad.plot.git)
+ or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
+- OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2112](http://openfoam.com/download)  
+- [Paraview](http://www.paraview.org/)  
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
 - [HiSA (High Speed Aerodynamic Solver)](https://hisa.gitlab.io)
 - [Gmsh (version 2.13 or later)](http://gmsh.info/) - optional, for generating tetrahedral meshes
@@ -80,28 +85,26 @@ by respectively running the installer or extracting the .7z archive to a directo
 \<FreeCAD-directory\>. In the latter case, FreeCAD can be run in place
 (\<FreeCAD-directory\>\bin\FreeCAD.exe).
 
-Before installing CfdOF, the Plot workbench must first be
-installed into FreeCAD using the Addon manager:
+CfdOF itself is installed into FreeCAD using the Addon manager:
 
 * Run FreeCAD
 * Select Tools | Addon manager ...
-* Select Plot in the list of workbenches, and click "Install/update"
+* Select CfdOF in the list of workbenches, and click "Install/update"
 * Restart FreeCAD
-* Repeat the above for the "CfdOF" workbench
 * For installation of dependencies, see below
 
 Note: The CfdOF workbench can be updated at any time through the Addon manager.
 
 ##### Dependency installation
 
-Dependencies can be checked and installed
-conveniently from the CfdOF Preferences panel in FreeCAD.
-In the FreeCAD window, select Edit | Preferences ... and
-choose "CfdOF".
+Dependencies can be checked and installed conveniently from the CfdOF Preferences panel in FreeCAD.
+In the FreeCAD window, select Edit | Preferences ... and choose "CfdOF".
 
-The OpenFOAM installation is via the [OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php), and
+The OpenFOAM installation is via the 
+[OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php), and
 the [BlueCFD Core](https://bluecfd.github.io/Core/) port of OpenFOAM is also supported.
-The [OpenCFD docker package](https://www.openfoam.com/download/install-binary-windows.php) is also currently supported but has some issues.
+The [OpenCFD docker package](https://www.openfoam.com/download/install-binary-windows.php) is also currently supported 
+but has some issues.
 
 OpenFOAM can be installed manually using the above links, or by clicking the relevant
 button in the Preferences panel described above. If you experience problems running OpenFOAM in CfdOF, please make
@@ -124,8 +127,7 @@ by following the above link or clicking the relevant button in the Preferences p
 Set the ParaView install path in the preferences panel to the 'paraview.exe' file in the 'bin'
 subfolder of the ParaView installation. Common defaults will be detected if it is left blank.
 
-Likewise, cfMesh and HiSA can be installed from the
-Preferences panel. Do not close
+Likewise, cfMesh and HiSA can be installed from the Preferences panel. Do not close
 it until the 'Install completed' message is received.
 Note that the OpenFOAM installation must be in a writable location
 for cfMesh and HiSA to be installed successfully.
@@ -147,8 +149,8 @@ https://github.com/FreeCAD/FreeCAD .
 
 Note:
 * Installations of FreeCAD via Linux package managers (including the PPA daily build above)
-make use of your local python installation. Therefore you might need to install additional
-python packages to get full functionality. The dependency checker (see below) can help to diagnose
+make use of your local Python installation. Therefore you might need to install additional
+Python packages to get full functionality. The dependency checker (see below) can help to diagnose
 this.
 * Note that the 'Snap' container installed through some distributions' package managers
 can be problematic as it does not allow access to system
@@ -158,23 +160,22 @@ to be runnable from FreeCAD.
 For the reasons above we recommend the AppImage as the most robust installation
 option on Linux.
 
-Before installing CfdOF, the Plot workbench must first be
-installed into FreeCAD using the Addon manager:
+CfdOF itself is installed into FreeCAD using the Addon manager:
 
 * Run FreeCAD
 * Select Tools | Addon manager ...
-* Select Plot in the list of workbenches, and click "Install/update"
+* Select CfdOF in the list of workbenches, and click "Install/update"
 * Restart FreeCAD
-* Repeat the above for the "CfdOF" workbench
 * For installation of dependencies, see below
 
+Note: The CfdOF workbench can be updated at any time through the Addon manager.
 
 ##### Dependency installation
 
 Dependencies can be checked and some of them installed
 conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
-choose "CFD".
+choose "CfdOF".
 
 However, in Linux, manual installation is required for
 OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openfoam.org/download/) versions),
@@ -189,11 +190,11 @@ We therefore recommend installation of the packages supplied through
 the official websites above.
 
 Set the OpenFOAM install directory in the preferences
-panel - examples of typical install locations are /opt/openfoam8
-or /home/user/OpenFOAM/OpenFOAM-8.x (It will be automatically
+panel - examples of typical install locations are /usr/lib/openfoam/openfoam2112, 
+/opt/openfoam9 or /home/user/OpenFOAM/OpenFOAM-9.x (it will be automatically 
 detected in common default install
-locations). Note that if you have loaded the desired OpenFOAM
-environment already, the install directory should be left blank.
+locations). Note that if you have loaded the desired OpenFOAM 
+environment already before starting FreeCAD, the install directory should be left blank.
 
 cfMesh and HiSA can be installed using the Preferences panel described above,
 and can be downloaded and built from their source
@@ -234,12 +235,13 @@ Gaps smaller than the mesh spacing are also allowed.
 
 Please discuss issues on the [CfdOF FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37)
 for community assistance.
-Bugs can be reported on the [gitlab project site](https://gitlab.com/opensimproject/cfdof).
+Bugs can be reported on the [Gitlab project site](https://gitlab.com/opensimproject/cfdof).
 
 Please first read the [guidelines for reporting bugs](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359)
 in order to provide sufficient information.
 
 ## Development
+
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/alerts/)[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/context:python)
 
 If you'd like to get involved in the development of CfdOF, please check out our [Contribution guidelines](CONTRIBUTING.md).
@@ -247,27 +249,29 @@ If you'd like to get involved in the development of CfdOF, please check out our 
 ## Acknowledgements
 
 ### Funding
+
 This development was made possible through initial funding from [Eskom Holdings SOC Ltd](http://www.eskom.co.za)
 and the [Council for Scientific and Industrial Research](https://www.csir.co.za) (South Africa).
 
-### Lead developers
-The code is primarily developed by
+### Developers
+
+The code has been primarily developed by
 * Oliver Oxtoby (CSIR, 2016-2018; private 2019-) <oliveroxtoby@gmail.com>
 * Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>
 * Alfred Bogaers (CSIR, 2016-2018) <alfredbogaers@gmail.com>
+* Jonathan Bergh (2022-)
 
 ### Contributors
 
-We acknowledge significant contributions from
+We acknowledge other significant contributions from
 * Qingfeng Xia (2015) - Original framework
 * Michael Hindley (2016) - Initial concept
 * Klaus Sembritzki (2017) - Multiphase extension
 * Thomas Schrader (2017-) <info@schraderundschrader.de> - Testing and user assistance
-* Jonathan Bergh (2022) - Additional turbulence models
 
 ### Dedication
 
 CfdOF is dedicated to the memory of Michael Hindley. It is thanks to his irrepressible enthusiasm for
 FreeCAD and open source software that this workbench exists. Rest in peace.
 
-_Last Updated 07/04/2022_
+_Last Updated 21/04/2022_

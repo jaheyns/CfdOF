@@ -154,7 +154,8 @@ class CfdMeshTools:
             this_extrusion_settings['Angle'] = extrusion_obj.ExtrusionAngle.getValueAs('deg')
             this_extrusion_settings['NumLayers'] = extrusion_obj.ExtrusionLayers
             this_extrusion_settings['ExpansionRatio'] = extrusion_obj.ExtrusionRatio
-            this_extrusion_settings['AxisPoint'] = tuple(p for p in extrusion_obj.ExtrusionAxisPoint)
+            this_extrusion_settings['AxisPoint'] = \
+                tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in extrusion_obj.ExtrusionAxisPoint)
 
             axis_direction = extrusion_obj.ExtrusionAxisDirection
 
@@ -167,7 +168,6 @@ class CfdMeshTools:
                     axis_direction = -axis_direction
 
             this_extrusion_settings['AxisDirection'] = tuple(d for d in axis_direction)
-
             self.extrusion_settings['Extrusions'].append(this_extrusion_settings)
 
     def getClmax(self):
@@ -204,9 +204,6 @@ class CfdMeshTools:
     def processRefinements(self):
         """ Process mesh refinements """
         mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
-
-        # todo remove
-        print(f'*********** Mesh refinement objects {mr_objs}')
 
         cf_settings = self.cf_settings
         cf_settings['MeshRegions'] = {}
@@ -486,25 +483,14 @@ class CfdMeshTools:
 
             # In addition, for cfMesh and SnappyHesMesh, record matched boundary layer patches
 
-            # todo remove
-            print(f'************ Starting BL addition')
-            if self.mesh_obj.MeshUtility == 'cfMesh' or self.mesh_obj.MeshUtility == 'snappyHexMesh' \
+            if (self.mesh_obj.MeshUtility == 'cfMesh' or self.mesh_obj.MeshUtility == 'snappyHexMesh') \
                     and mr_obj.NumberLayers > 1 and not Internal and not mr_obj.Extrusion:
-
-                # todo remove
-                print(f'************ Running boundary layer addition checks')
-                print(f'patch_faces: {self.patch_faces}')
-                print(f'patch_name: {self.patch_names}')
-                print(f'mr_id: {mr_id}')
 
                 for k in range(len(self.patch_faces)):
                     if len(self.patch_faces[k][mr_id + 1]):
                         # Limit expansion ratio to greater than 1.0 and less than 1.2
                         expratio = mr_obj.ExpansionRatio
                         expratio = min(1.2, max(1.0, expratio))
-
-                        # todo remove
-                        print(f'************ Expansion ratio {expratio}')
 
                         if self.mesh_obj.MeshUtility == 'cfMesh':
                             cf_settings['BoundaryLayers'][self.patch_names[k][mr_id + 1]] = \
@@ -514,8 +500,6 @@ class CfdMeshTools:
                                 'FirstLayerHeight': self.scale * Units.Quantity(mr_obj.FirstLayerHeight).Value
                             }
                         elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                            # todo remove
-                            print(f'************ Setting SHM boundary layers')
                             snappy_settings['BoundaryLayers'][self.patch_names[k][mr_id + 1]] = \
                             {
                                 'NumberLayers': mr_obj.NumberLayers,
@@ -645,9 +629,6 @@ class CfdMeshTools:
                 "cellsY": cells_y,
                 "cellsZ": cells_z
             }
-
-            # todo remove
-            print(f"BoundaryLayersPresent: {len(self.snappy_settings['BoundaryLayers']) > 0}")
 
             if len(self.snappy_settings['BoundaryLayers']) > 0:
                 self.snappy_settings['BoundaryLayerPresent'] = True

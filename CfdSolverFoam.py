@@ -28,12 +28,12 @@
 import os
 import os.path
 import FreeCAD
+import CfdTools
+from CfdTools import addObjectProperty
+from CfdTimePlot import TimePlot
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
-import CfdTools
-from CfdTools import addObjectProperty
-from CfdResidualPlot import ResidualPlot
 
 
 def makeCfdSolverFoam(name="CfdSolver"):
@@ -46,7 +46,7 @@ def makeCfdSolverFoam(name="CfdSolver"):
 
 class _CommandCfdSolverFoam:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Solver job control"),
                 'Accel': "S, C",
@@ -77,6 +77,7 @@ class _CfdSolverFoam(object):
         self.Type = "CfdSolverFoam"
         self.Object = obj  # keep a ref to the DocObj for nonGui usage
         obj.Proxy = self  # link between App::DocumentObject to  this object
+
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -100,7 +101,11 @@ class _CfdSolverFoam(object):
         addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "TimeStepControl",
                           "Output time interval")
 
-        self.residual_plot = ResidualPlot()
+        self.residual_plotter = TimePlot(title="Simulation residuals", y_label="Residual", is_log=True)
+        self.forces_plotters = {}
+        self.force_coeffs_plotters = {}
+        self.probes_plotters = {}
+
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
@@ -129,7 +134,7 @@ class _ViewProviderCfdSolverFoam:
 
     def getIcon(self):
         # """after load from FCStd file, self.icon does not exist, return constant path instead"""
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "solver.svg")
         return icon_path
 
     def attach(self, vobj):
@@ -146,11 +151,11 @@ class _ViewProviderCfdSolverFoam:
     def setEdit(self, vobj, mode):
         if CfdTools.getActiveAnalysis():
             from CfdRunnableFoam import CfdRunnableFoam
-            foamRunnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
+            foam_runnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
             import _TaskPanelCfdSolverControl
             import importlib
             importlib.reload(_TaskPanelCfdSolverControl)
-            self.taskd = _TaskPanelCfdSolverControl._TaskPanelCfdSolverControl(foamRunnable)
+            self.taskd = _TaskPanelCfdSolverControl._TaskPanelCfdSolverControl(foam_runnable)
             self.taskd.obj = vobj.Object
             FreeCADGui.Control.showDialog(self.taskd)
         return True

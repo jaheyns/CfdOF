@@ -30,7 +30,7 @@ from CfdTools import addObjectProperty
 import os
 
 
-MESHER_DESCRIPTIONS = ['cfMesh', 'snappyHexMesh', 'gmsh (tetrahedral)', 'gmsh (polyhedral dual mesh)']
+MESHER_DESCRIPTIONS = ['cfMesh', 'snappyHexMesh', 'gmsh (tetrahedral)', 'gmsh (polyhedral)']
 MESHERS = ['cfMesh', 'snappyHexMesh', 'gmsh', 'gmsh']
 DIMENSION = ['3D', '3D', '3D', '3D']
 DUAL_CONVERSION = [False, False, False, True]
@@ -46,7 +46,7 @@ def makeCfdMesh(name="CFDMesh"):
 
 class _CommandCfdMeshFromShape:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
                                                      "CFD mesh"),
@@ -62,8 +62,8 @@ class _CommandCfdMeshFromShape:
         FreeCAD.ActiveDocument.openTransaction("Create CFD mesh")
         analysis_obj = CfdTools.getActiveAnalysis()
         if analysis_obj:
-            meshObj = CfdTools.getMesh(analysis_obj)
-            if not meshObj:
+            mesh_obj = CfdTools.getMesh(analysis_obj)
+            if not mesh_obj:
                 sel = FreeCADGui.Selection.getSelection()
                 if len(sel) == 1:
                     if sel[0].isDerivedFrom("Part::Feature"):
@@ -77,16 +77,15 @@ class _CommandCfdMeshFromShape:
                             FreeCADGui.doCommand(
                                 "CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
                         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
-        else:
-            print("ERROR: You cannot have more than one mesh object")
+            else:
+                print("ERROR: You cannot have more than one mesh object")
         FreeCADGui.Selection.clearSelection()
 
 
 class _CfdMesh:
     """ CFD mesh properties """
 
-    # Variables that need to be used outside this class and therefore are included outside of
-    # the constructor
+    # Variables that need to be used outside this class and therefore are included outside of the constructor
     known_element_dimensions = ['2D', '3D']
 
     def __init__(self, obj):
@@ -130,7 +129,7 @@ class _CfdMesh:
                           "Relative edge (feature) refinement")
 
         # PolyDualMesh
-        addObjectProperty(obj, 'ConvertToDualMesh', True, "App::PropertyBool", "Mesh Parameters",
+        addObjectProperty(obj, 'ConvertToDualMesh', False, "App::PropertyBool", "Mesh Parameters",
                           "Convert to polyhedral dual mesh")
 
         # Edge detection, implicit / explicit (NB Implicit = False implies Explicit = True)
@@ -163,7 +162,7 @@ class _ViewProviderCfdMesh:
         self.taskd = None
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "mesh.svg")
         return icon_path
 
     def attach(self, vobj):

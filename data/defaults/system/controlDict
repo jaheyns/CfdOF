@@ -71,4 +71,12 @@ libs
 %}
 );
 
+functions
+{
+%{%(reportingFunctionsEnabled%)
+%:True
+%[system/_functions_reporting%]
+%}
+}
+
 // ************************************************************************* //

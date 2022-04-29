@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -38,6 +38,10 @@ from CfdTools import cfdMessage
 
 class CfdCaseWriterFoam:
     def __init__(self, analysis_obj):
+        self.case_folder = None
+        self.mesh_file_name = None
+        self.template_path = None
+
         self.analysis_obj = analysis_obj
         self.solver_obj = CfdTools.getSolver(analysis_obj)
         self.physics_model = CfdTools.getPhysicsModel(analysis_obj)
@@ -45,12 +49,16 @@ class CfdCaseWriterFoam:
         self.material_objs = CfdTools.getMaterials(analysis_obj)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
-        self.porousZone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
-        self.initialisationZone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
+        self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
+        self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
+        self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
+        self.dynamic_mesh_refinement_obj = CfdTools.getDynamicMeshAdaptation(analysis_obj)
         self.mesh_generated = False
         self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
         self.progressCallback = None
+
+        self.settings = None
 
     def writeCase(self):
         """ writeCase() will collect case settings, and finally build a runnable case. """
@@ -84,16 +92,20 @@ class CfdCaseWriterFoam:
             'fluidProperties': [],  # Order is important, so use a list
             'initialValues': CfdTools.propsToDict(self.initial_conditions),
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
+            'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
+            'reportingFunctionsEnabled': False,
+            'dynamicMesh': {},
+            'dynamicMeshEnabled': False,
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
-            'initialisationZones': {o.Label: CfdTools.propsToDict(o) for o in self.initialisationZone_objs},
-            'initialisationZonesPresent': len(self.initialisationZone_objs) > 0,
+            'initialisationZones': {o.Label: CfdTools.propsToDict(o) for o in self.initialisation_zone_objs},
+            'initialisationZonesPresent': len(self.initialisation_zone_objs) > 0,
             'zones': {o.Label: {'PartNameList': tuple(r[0].Name for r in o.ShapeRefs)} for o in self.zone_objs},
             'zonesPresent': len(self.zone_objs) > 0,
             'meshType': self.mesh_obj.Proxy.Type,
             'meshDimension': self.mesh_obj.ElementDimension,
-            'meshDir': "../"+self.mesh_obj.CaseName,
+            'meshDir': "../" + self.mesh_obj.CaseName,
             'solver': CfdTools.propsToDict(self.solver_obj),
             'system': {},
             'runChangeDictionary': False
@@ -107,9 +119,17 @@ class CfdCaseWriterFoam:
         self.clearCase()
 
         self.exportZoneStlSurfaces()
-        if self.porousZone_objs:
+        if self.porous_zone_objs:
             self.processPorousZoneProperties()
         self.processInitialisationZoneProperties()
+
+        if self.reporting_functions:
+            cfdMessage(f'Reporting functions present')
+            self.processReportingFunctions()
+
+        if self.dynamic_mesh_refinement_obj:
+            cfdMessage(f'Dynamic mesh adaptation rule present')
+            self.processDynamicMeshRefinement()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         cfdMessage("Matching boundary conditions ...\n")
@@ -120,19 +140,22 @@ class CfdCaseWriterFoam:
         TemplateBuilder.TemplateBuilder(self.case_folder, self.template_path, self.settings)
 
         # Update Allrun permission - will fail silently on Windows
-        fname = os.path.join(self.case_folder, "Allrun")
+        file_name = os.path.join(self.case_folder, "Allrun")
         import stat
-        s = os.stat(fname)
-        os.chmod(fname, s.st_mode | stat.S_IEXEC)
+        s = os.stat(file_name)
+        os.chmod(file_name, s.st_mode | stat.S_IEXEC)
 
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         if self.progressCallback:
             self.progressCallback("Case written successfully")
+            
         return True
 
     def getSolverName(self):
-        """ Solver name is selected based on selected physics. This should only be extended as additional physics are
-        included. """
+        """
+        Solver name is selected based on selected physics. This should only be extended as additional physics are
+        included.
+        """
         solver = None
         if self.physics_model.Phase == 'Single':
             if len(self.material_objs) == 1:
@@ -141,7 +164,7 @@ class CfdCaseWriterFoam:
                         if self.physics_model.Time == 'Transient':
                             solver = 'pimpleFoam'
                         else:
-                            if self.porousZone_objs or self.porousBafflesPresent():
+                            if self.porous_zone_objs or self.porousBafflesPresent():
                                 solver = 'porousSimpleFoam'
                             else:
                                 solver = 'simpleFoam'
@@ -264,7 +287,7 @@ class CfdCaseWriterFoam:
                     selected_object = self.analysis_obj.Document.getObject(face[0])
                     if hasattr(selected_object, "Shape"):
                         elt = selected_object.Shape.getElement(face[1])
-                        if elt.ShapeType == 'Face' and CfdTools.is_planar(elt):
+                        if elt.ShapeType == 'Face' and CfdTools.isPlanar(elt):
                             n = elt.normalAt(0.5, 0.5)
                             if bc['ReverseNormal']:
                                n = [-ni for ni in n]
@@ -304,7 +327,26 @@ class CfdCaseWriterFoam:
                         sum_alpha += alpha
                 bc['VolumeFractions'] = alphas_new
 
+            # Copy turbulence settings
             bc['TurbulenceIntensity'] = bc['TurbulenceIntensityPercentage']/100.0
+            physics = settings['physics']
+            if physics['Turbulence'] == 'RANS' and physics['TurbulenceModel'] == 'SpalartAllmaras':
+                if (bc['BoundaryType'] == 'inlet' or bc['BoundaryType'] == 'open') and \
+                        bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
+                    if bc['BoundarySubType'] == 'uniformVelocityInlet' or bc['BoundarySubType'] == 'farField':
+                        Uin = (bc['Ux']**2 + bc['Uy']**2 + bc['Uz']**2)**0.5
+
+                        # Turb Intensity and length scale
+                        I = bc['TurbulenceIntensity']
+                        l = bc['TurbulenceLengthScale']
+
+                        # Spalart Allmaras
+                        bc['NuTilda'] = (3.0/2.0)**0.5 * Uin * I * l
+
+                    else:
+                        raise RuntimeError(
+                            "Inlet type currently unsupported for calculating turbulence inlet conditions from "
+                            "intensity and length scale.")
 
             if bc['DefaultBoundary']:
                 if settings['boundaries'].get('defaultFaces'):
@@ -338,6 +380,9 @@ class CfdCaseWriterFoam:
                     'BoundaryType': 'constraint',
                     'BoundarySubType': 'symmetry'
                 }
+
+    def parseFaces(self, shape_refs):
+        pass
 
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
@@ -450,7 +495,7 @@ class CfdCaseWriterFoam:
                             epsilon = (k**(3.0/2.0) * Cmu**0.75) / l
 
                             # Spalart Allmaras
-                            nuTilda = (3.0/2.0)**0.5 * Uin * I * l
+                            nuTilda = inlet_bc['NuTilda']
 
                             # k omega (transition)
                             gammaInt = 1
@@ -477,8 +522,54 @@ class CfdCaseWriterFoam:
                     raise RuntimeError("No boundary selected to copy initial turbulence values from.")
             #TODO: Check that the required values have actually been set for each turbulent model
 
-    # Zones
+    # Function objects (reporting functions, probes)
+    def processReportingFunctions(self):
+        """ Compute any Function objects required before case build """
+        settings = self.settings
+        settings['reportingFunctionsEnabled'] = True
 
+        for name in settings['reportingFunctions']:
+            rf = settings['reportingFunctions'][name]
+
+            rf['PatchName'] = rf['Patch'].Label
+
+            rf['CentreOfRotation'] = \
+                tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in rf['CentreOfRotation'])
+            rf['Direction'] = tuple(p for p in rf['Direction'])
+
+            if rf['ReportingFunctionType'] == 'ForceCoefficients':
+                rf['Lift'] = tuple(p for p in rf['Lift'])
+                rf['Drag'] = tuple(p for p in rf['Drag'])
+                rf['Pitch'] = tuple(p for p in rf['Pitch'])
+
+            settings['reportingFunctions'][name]['ProbePosition'] = tuple(
+                Units.Quantity(p, Units.Length).getValueAs('m') 
+                for p in settings['reportingFunctions'][name]['ProbePosition'])
+
+
+    # Mesh related
+    def processRefin(self):
+        settings = self.settings
+        settings['dynamicMeshEnabled'] = True
+
+        # Check whether transient
+        if not self.physics_model.Time == 'Transient':
+            raise RuntimeError("Dynamic mesh refinement is not supported by steady-state solvers")
+        
+        # Check whether cellLevel supported
+        if self.mesh_obj.MeshUtility not in ['cfMesh', 'snappyHexMesh']:
+            raise RuntimeError("Dynamic mesh refinement is only supported by cfMesh and snappyHexMesh")
+    
+        # Check whether 2D extrusion present
+        mesh_refinements = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+        for mr in mesh_refinements:
+            if mr.Extrusion:
+                if mr.ExtrusionType == '2DPlanar' or mr.ExtrusionType == '2DWedge':
+                    raise RuntimeError("Dynamic mesh refinement will not work with 2D or wedge mesh")
+        
+        settings['dynamicMesh'] = CfdTools.propsToDict(self.dynamic_mesh_refinement_obj)
+
+    # Zones
     def exportZoneStlSurfaces(self):
         for zo in self.zone_objs:
             for r in zo.ShapeRefs:
@@ -500,7 +591,7 @@ class CfdCaseWriterFoam:
         settings = self.settings
         settings['porousZonesPresent'] = True
         porousZoneSettings = settings['porousZones']
-        for po in self.porousZone_objs:
+        for po in self.porous_zone_objs:
             pd = {'PartNameList': tuple(r[0].Name for r in po.ShapeRefs)}
             po = CfdTools.propsToDict(po)
             if po['PorousCorrelation'] == 'DarcyForchheimer':

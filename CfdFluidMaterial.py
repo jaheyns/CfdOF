@@ -36,7 +36,6 @@ import _TaskPanelCfdFluidProperties
 
 def makeCfdFluidMaterial(name):
     obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
-
     _CfdMaterial(obj)  # Include default fluid properties
     if FreeCAD.GuiUp:
         _ViewProviderCfdFluidMaterial(obj.ViewObject)
@@ -46,12 +45,11 @@ def makeCfdFluidMaterial(name):
 class _CommandCfdFluidMaterial:
 
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.svg")
         return {
             'Pixmap': icon_path,
             'MenuText': 'Add fluid properties',
-            'ToolTip': 'Add fluid properties'
-            }
+            'ToolTip': 'Add fluid properties'}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None
@@ -119,7 +117,7 @@ class _ViewProviderCfdFluidMaterial:
         self.taskd = None
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.svg")
         return icon_path
 
     def attach(self, vobj):

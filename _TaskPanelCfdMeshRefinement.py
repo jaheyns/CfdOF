@@ -122,9 +122,9 @@ class _TaskPanelCfdMeshRefinement:
 
         self.form.numLayersInput.setValue(self.obj.ExtrusionLayers)
         self.form.ratioInput.setValue(self.obj.ExtrusionRatio)
-        setQuantity(self.form.axisPointXEdit, "{} m".format(self.obj.ExtrusionAxisPoint.x))
-        setQuantity(self.form.axisPointYEdit, "{} m".format(self.obj.ExtrusionAxisPoint.y))
-        setQuantity(self.form.axisPointZEdit, "{} m".format(self.obj.ExtrusionAxisPoint.z))
+        setQuantity(self.form.axisPointXEdit, Units.Quantity(self.obj.ExtrusionAxisPoint.x, Units.Length))
+        setQuantity(self.form.axisPointYEdit, Units.Quantity(self.obj.ExtrusionAxisPoint.y, Units.Length))
+        setQuantity(self.form.axisPointZEdit, Units.Quantity(self.obj.ExtrusionAxisPoint.z, Units.Length))
         setQuantity(self.form.axisDirectionXEdit, self.obj.ExtrusionAxisDirection.x)
         setQuantity(self.form.axisDirectionYEdit, self.obj.ExtrusionAxisDirection.y)
         setQuantity(self.form.axisDirectionZEdit, self.obj.ExtrusionAxisDirection.z)
@@ -237,7 +237,7 @@ class _TaskPanelCfdMeshRefinement:
         storeIfChanged(self.obj, 'RelativeLength', self.form.if_rellen.value())
         if not self.mesh_obj.MeshUtility == 'gmsh':
             storeIfChanged(self.obj, 'RefinementThickness', getQuantity(self.form.if_refinethick))
-            
+
             if self.form.check_boundlayer.isChecked():
                 num_layers = self.form.if_numlayer.value()
             else:
@@ -250,7 +250,7 @@ class _TaskPanelCfdMeshRefinement:
 
         storeIfChanged(self.obj, 'Extrusion', self.form.extrusionToggle.isChecked())
         if self.obj.Extrusion:
-            storeIfChanged(self.obj, 'ExtrusionType', 
+            storeIfChanged(self.obj, 'ExtrusionType',
                 CfdMeshRefinement.EXTRUSION_TYPES[self.form.extrusionTypeCombo.currentIndex()])
             storeIfChanged(self.obj, 'KeepExistingMesh', self.form.keepExistingMeshCheck.isChecked())
             storeIfChanged(self.obj, 'ExtrusionThickness', getQuantity(self.form.thicknessInput))
@@ -258,9 +258,9 @@ class _TaskPanelCfdMeshRefinement:
             storeIfChanged(self.obj, 'ExtrusionLayers', self.form.numLayersInput.value())
             storeIfChanged(self.obj, 'ExtrusionRatio', self.form.ratioInput.value())
             new_point = FreeCAD.Vector(
-                self.form.axisPointXEdit.property("quantity").getValueAs("m"),
-                self.form.axisPointYEdit.property("quantity").getValueAs("m"),
-                self.form.axisPointZEdit.property("quantity").getValueAs("m"))
+                self.form.axisPointXEdit.property("quantity").Value,
+                self.form.axisPointYEdit.property("quantity").Value,
+                self.form.axisPointZEdit.property("quantity").Value)
             if self.obj.ExtrusionAxisPoint != new_point:
                 FreeCADGui.doCommand(
                     "App.ActiveDocument.{}.ExtrusionAxisPoint = App.{}".format(self.obj.Name, new_point))

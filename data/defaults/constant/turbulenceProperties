@@ -33,9 +33,10 @@ LES
 
 %{%(physics/TurbulenceModel%)
 %:Smagorinsky kEqn WALE
-	delta           vanDriest;
+    delta               vanDriest;
 
-    %[constant/_turbulenceProperties_LES%]
+%[constant/_turbulenceProperties_LES%]
+
 %}
 }
 %:default

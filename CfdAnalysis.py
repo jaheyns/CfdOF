@@ -69,7 +69,7 @@ class _CommandCfdAnalysis:
         pass
 
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd_analysis.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd_analysis.svg")
         return {'Pixmap': icon_path,
                 'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_Analysis", "Analysis container"),
                 'Accel': "N, C",
@@ -86,8 +86,7 @@ class _CommandCfdAnalysis:
         FreeCADGui.doCommand("analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')")
         FreeCADGui.doCommand("CfdTools.setActiveAnalysis(analysis)")
 
-        ''' Objects ordered according to expected workflow '''
-
+        # Objects ordered according to expected workflow
         # Add physics object when CfdAnalysis container is created
         FreeCADGui.addModule("CfdPhysicsSelection")
         FreeCADGui.doCommand("analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())")
@@ -111,7 +110,7 @@ class _ViewProviderCfdAnalysis:
         vobj.Proxy = self
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd_analysis.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "cfd_analysis.svg")
         return icon_path
 
     def attach(self, vobj):

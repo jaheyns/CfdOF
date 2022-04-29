@@ -28,14 +28,14 @@ import os
 import FreeCAD
 from pivy import coin
 import Part
+import CfdTools
+from CfdTools import addObjectProperty
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
-import CfdTools
-from CfdTools import addObjectProperty
+    import _TaskPanelCfdFluidBoundary
 
 # Constants
-
 BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Open", "Constraint", "Baffle"]
 
 BOUNDARY_TYPES = ["wall", "inlet", "outlet", "open", "constraint", "baffle"]
@@ -76,7 +76,6 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
 # whether volume fraction panel is shown, whether thermal GUI is shown,
 # rows of thermal UI to show (all shown if None)
-
 BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                 [False, [], False, False, False, True, None],  # Slip
                 [True, [2], False, False, False, True, None],  # Partial slip
@@ -132,17 +131,17 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
                           "Turbulence intensity and eddy length scale"],
                          [[0, 2, 6, 7],  # k, omega, gamma and reThetat
                           [3, 4]]],  # I, l
-                        "kEqn":     # todo fix me
+                        "kEqn":
                         [["Kinetic Energy & Turbulent viscosity"],
                          ["TurbulentViscosityAndK"],
                          ["k and turbulent viscosity specified"],
                          [[0, 8]]],     # nut
-                        "Smagorinsky":  # todo fix me
+                        "Smagorinsky":
                         [["Turbulent viscosity"],
                          ["TurbulentViscosity"],
                          ["turbulent viscosity specified"],
                          [[8]]],  # nut
-                        "WALE":     # todo fix me
+                        "WALE":
                         [["Turbulent viscosity"],
                          ["TurbulentViscosity"],
                          ["turbulent viscosity specified"],
@@ -175,7 +174,7 @@ def makeCfdFluidBoundary(name="CfdFluidBoundary"):
 
 class _CommandCfdFluidBoundary:
     def GetResources(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.svg")
         return {
             'Pixmap': icon_path,
             'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_FluidBoundary", "Fluid boundary"),
@@ -196,12 +195,9 @@ class _CommandCfdFluidBoundary:
 
 class _CfdFluidBoundary:
     def __init__(self, obj):
-
         obj.Proxy = self
         self.Type = "CfdFluidBoundary"
-
         self.old_shape = Part.Shape()
-
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -218,13 +214,15 @@ class _CfdFluidBoundary:
                 obj.removeProperty('LinkedObjects')
 
         addObjectProperty(obj, 'DefaultBoundary', False, "App::PropertyBool", "Boundary faces")
-        addObjectProperty(obj, 'BoundaryType', BOUNDARY_TYPES, "App::PropertyEnumeration", "", "Boundary condition category")
+        addObjectProperty(obj, 'BoundaryType', BOUNDARY_TYPES, "App::PropertyEnumeration", "",
+                          "Boundary condition category")
 
         all_subtypes = []
         for s in SUBTYPES:
             all_subtypes += s
 
-        addObjectProperty(obj, 'BoundarySubType', all_subtypes, "App::PropertyEnumeration", "", "Boundary condition type")
+        addObjectProperty(obj, 'BoundarySubType', all_subtypes, "App::PropertyEnumeration", "",
+                          "Boundary condition type")
         addObjectProperty(obj, 'VelocityIsCartesian', True, "App::PropertyBool", "Flow",
                           "Whether to use components of velocity")
         addObjectProperty(obj, 'Ux', '0 m/s', "App::PropertySpeed", "Flow",
@@ -268,6 +266,7 @@ class _CfdFluidBoundary:
         addObjectProperty(obj, 'HeatTransferCoeff', '0 W/m^2/K', "App::PropertyQuantity", "Thermal",
                           "Wall heat transfer coefficient")
 
+        # Turbulence
         all_turb_specs = []
         for k in TURBULENT_INLET_SPEC:
             all_turb_specs += TURBULENT_INLET_SPEC[k][1]
@@ -307,7 +306,6 @@ class _CfdFluidBoundary:
                           "Turbulent viscosity")
 
         # General
-
         addObjectProperty(obj, 'TurbulenceIntensityPercentage', '1', "App::PropertyQuantity", "Turbulence",
                           "Turbulence intensity (percent)")
         # Backward compat
@@ -364,7 +362,7 @@ class _ViewProviderCfdFluidBoundary:
         self.taskd = None
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.png")
+        icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "boundary.svg")
         return icon_path
 
     def attach(self, vobj):

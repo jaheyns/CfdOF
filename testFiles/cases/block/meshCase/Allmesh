@@ -25,9 +25,6 @@ fi
 
 runCommand gmshToFoam "gmsh/Box_Geometry.msh"
 
-# Convert to polyhedra
-runCommand polyDualMesh 10 -concaveMultiCells -overwrite
-
 if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
 then
     runCommand transformPoints "scale=(0.001 0.001 0.001)"
