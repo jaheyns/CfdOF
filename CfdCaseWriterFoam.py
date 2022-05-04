@@ -571,7 +571,7 @@ class CfdCaseWriterFoam:
                 tuple(p for p in settings['scalarTransportFunctions'][name]['InjectionPoint'])
 
     # Mesh related
-    def processRefin(self):
+    def processDynamicMeshRefinement(self):
         settings = self.settings
         settings['dynamicMeshEnabled'] = True
 
