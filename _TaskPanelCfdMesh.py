@@ -295,6 +295,7 @@ class _TaskPanelCfdMesh:
                     "The case setup for the mesher may need to be re-written based on changes you have made to the "
                     "model.\n\nWrite mesh case first?", defaultButton=QtGui.QMessageBox.Yes
                 ) == QtGui.QMessageBox.Yes:
+                    self.Start = time.time()
                     self.writeMesh()
                 else:
                     self.Start = time.time()
@@ -355,6 +356,7 @@ class _TaskPanelCfdMesh:
     def meshFinished(self, exit_code):
         if exit_code == 0:
             self.consoleMessage('Meshing completed')
+            self.analysis_obj.NeedsMeshRerun = False
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(True)

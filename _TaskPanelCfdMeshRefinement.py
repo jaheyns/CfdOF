@@ -48,6 +48,7 @@ class _TaskPanelCfdMeshRefinement:
             os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdMeshRefinement.ui"))
 
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
+        self.ShapeOrig = self.obj.Shape
         self.NeedsMeshRewriteOrig = self.analysis_obj.NeedsMeshRewrite
 
         # Face list selection panel - modifies obj.References passed to it
@@ -100,7 +101,7 @@ class _TaskPanelCfdMeshRefinement:
         # Boundary layer refinement (SnappyHexMesh and CfMesh only)
         if not self.mesh_obj.MeshUtility == "gmsh":
             setQuantity(self.form.if_refinethick, self.obj.RefinementThickness)
-            self.form.check_boundlayer.setChecked(self.obj.NumberLayers > 1)
+            self.form.check_boundlayer.setChecked(self.obj.NumberLayers > 0)
             self.form.if_numlayer.setValue(self.obj.NumberLayers)
             self.form.if_expratio.setValue(self.obj.ExpansionRatio)
             setQuantity(self.form.if_firstlayerheight, self.obj.FirstLayerHeight)
@@ -229,9 +230,12 @@ class _TaskPanelCfdMeshRefinement:
 
     def accept(self):
         FreeCADGui.Selection.removeObserver(self)
-        FreeCADGui.ActiveDocument.resetEdit()
+        self.obj.Shape = self.ShapeOrig
+        # Make sure shape is re-calculated before leaving edit mode
         FreeCAD.ActiveDocument.recompute()
+        print("Have reset shape, resetting NeedsMeshRewrite")
         self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
+        FreeCADGui.ActiveDocument.resetEdit()
 
         # Macro script
         storeIfChanged(self.obj, 'RelativeLength', self.form.if_rellen.value())
@@ -241,7 +245,7 @@ class _TaskPanelCfdMeshRefinement:
             if self.form.check_boundlayer.isChecked():
                 num_layers = self.form.if_numlayer.value()
             else:
-                num_layers = 1
+                num_layers = 0
             storeIfChanged(self.obj, 'NumberLayers', num_layers)
             storeIfChanged(self.obj, 'ExpansionRatio', self.form.if_expratio.value())
             storeIfChanged(self.obj, 'FirstLayerHeight', getQuantity(self.form.if_firstlayerheight))
@@ -284,9 +288,11 @@ class _TaskPanelCfdMeshRefinement:
 
     def reject(self):
         self.obj.ShapeRefs = self.ShapeRefsOrig
+        self.obj.Shape = self.ShapeOrig
         self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
-        FreeCADGui.ActiveDocument.resetEdit()
+        # Make sure shape is re-calculated before leaving edit mode
         FreeCAD.ActiveDocument.recompute()
+        FreeCADGui.ActiveDocument.resetEdit()
         return True
 
     def closing(self):

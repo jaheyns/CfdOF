@@ -197,7 +197,6 @@ class _CfdFluidBoundary:
     def __init__(self, obj):
         obj.Proxy = self
         self.Type = "CfdFluidBoundary"
-        self.old_shape = Part.Shape()
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -326,8 +325,7 @@ class _CfdFluidBoundary:
         shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
             shape = Part.Shape()
-        if shape != self.old_shape:
-            self.old_shape = obj.Shape
+        if shape != obj.Shape:
             obj.Shape = shape
         self.updateBoundaryColors(obj)
 

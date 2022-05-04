@@ -86,7 +86,6 @@ class _CfdMeshRefinement:
     def __init__(self, obj):
         obj.Proxy = self
         self.Type = "CfdMeshRefinement"
-        self.old_shape = Part.Shape()
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -159,8 +158,7 @@ class _CfdMeshRefinement:
         shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
             shape = Part.Shape()
-        if shape != self.old_shape:
-            self.old_shape = obj.Shape
+        if not CfdTools.isSameGeometry(obj.Shape, shape):
             obj.Shape = shape
         if FreeCAD.GuiUp:
             vobj = obj.ViewObject

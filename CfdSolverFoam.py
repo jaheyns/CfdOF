@@ -142,6 +142,7 @@ class _ViewProviderCfdSolverFoam:
         self.Object = vobj.Object
 
     def updateData(self, obj, prop):
+        print("Solver update data: " + prop + " " + str(getattr(obj, prop)))
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
         analysis_obj.NeedsCaseRewrite = True
 
