@@ -64,8 +64,8 @@ geometry
 
 castellatedMeshControls
 {
-    maxLocalCells 100000;
-    maxGlobalCells 2000000;
+    maxLocalCells 100000000;
+    maxGlobalCells 2000000000;
     minRefinementCells 0;
     nCellsBetweenLevels %(SnappySettings/CellsBetweenLevels%);
 
@@ -156,12 +156,15 @@ addLayersControls
     relativeSizes true;
     layers
     {
+%{%(SnappySettings/BoundaryLayerPresent%)
+%:True
 %{%(SnappySettings/BoundaryLayers%)
         "%(0%)"
         {
             nSurfaceLayers %(SnappySettings/BoundaryLayers/%(0%)/NumberLayers%);
             expansionRatio %(SnappySettings/BoundaryLayers/%(0%)/ExpansionRatio%);
         }
+%}
 %}
     }
 

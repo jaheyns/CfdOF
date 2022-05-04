@@ -483,7 +483,7 @@ class CfdMeshTools:
 
             # In addition, for cfMesh and SnappyHesMesh, record matched boundary layer patches
 
-            if self.mesh_obj.MeshUtility == 'cfMesh' or self.mesh_obj.MeshUtility == 'snappyHexMesh' \
+            if (self.mesh_obj.MeshUtility == 'cfMesh' or self.mesh_obj.MeshUtility == 'snappyHexMesh') \
                     and mr_obj.NumberLayers > 1 and not Internal and not mr_obj.Extrusion:
 
                 for k in range(len(self.patch_faces)):
