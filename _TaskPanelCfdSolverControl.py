@@ -133,6 +133,8 @@ class _TaskPanelCfdSolverControl:
                 self.consoleMessage(type(e).__name__ + ": " + str(e), "#FF0000")
                 self.consoleMessage("Write case setup file failed", "#FF0000")
                 raise
+            else:
+                self.analysis_object.NeedsCaseRewrite = False
             finally:
                 QApplication.restoreOverrideCursor()
             self.updateUI()
@@ -156,33 +158,99 @@ class _TaskPanelCfdSolverControl:
 
     def runSolverProcess(self):
         self.Start = time.time()
+
+        # Check for changes that require remesh
+        if FreeCAD.GuiUp and (
+                self.analysis_object.NeedsMeshRewrite or 
+                self.analysis_object.NeedsCaseRewrite or 
+                self.analysis_object.NeedsMeshRerun):
+            
+            if self.analysis_object.NeedsCaseRewrite:
+                if self.analysis_object.NeedsMeshRewrite or self.analysis_object.NeedsMeshRerun:
+                    text = "The case may need to be re-meshed and the case setup re-written based on changes " + \
+                           "you have made to the model.\n\nRe-mesh and re-write case setup first?"
+                else:
+                    text = "The case setup may need to be re-written based on changes " + \
+                           "you have made to the model.\n\nRe-write case setup first?"
+            else:
+                if self.analysis_object.NeedsMeshRewrite or self.analysis_object.NeedsMeshRerun:
+                    text = "The case may need to be re-meshed based on changes " + \
+                           "you have made to the model.\n\nRe-mesh case first?"
+                
+            if QtGui.QMessageBox.question(
+                    None, "CfdOF Workbench", text, defaultButton=QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes:
+                self.Start = time.time()
+                
+                if self.analysis_object.NeedsMeshRewrite or self.analysis_object.NeedsMeshRerun:
+                    import CfdMeshTools
+                    mesh_obj = CfdTools.getMeshObject(self.analysis_object)
+                    cart_mesh = CfdMeshTools.CfdMeshTools(mesh_obj)
+                    cart_mesh.progressCallback = self.consoleMessage
+                    if self.analysis_object.NeedsMeshRewrite:
+                        #Write mesh
+                        cart_mesh.writeMesh()
+                        self.analysis_object.NeedsMeshRewrite = False
+                        self.analysis_object.NeedsMeshRerun = True
+
+                if self.analysis_object.NeedsCaseRewrite:
+                    self.write_input_file_handler()
+
+                if self.analysis_object.NeedsMeshRerun:
+                    # Run mesher
+                    self.solver_object.Proxy.solver_process = CfdConsoleProcess(
+                        finished_hook=self.mesherFinished,
+                        stdout_hook=self.gotOutputLines,
+                        stderr_hook=self.gotErrorLines)
+
+                    cart_mesh.error = False
+                    cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
+                    FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\\n')
+                    env_vars = CfdTools.getRunEnvironment()
+                    self.solver_object.Proxy.solver_process.start(cmd, env_vars=env_vars)
+                    if self.solver_object.Proxy.solver_process.waitForStarted():
+                        # Setting solve button to inactive to ensure that two instances of the same simulation aren't started
+                        # simultaneously
+                        self.form.pb_write_inp.setEnabled(False)
+                        self.form.pb_run_solver.setEnabled(False)
+                        self.form.terminateSolver.setEnabled(True)
+                        self.consoleMessage("Mesher started ...")
+                        return
+            else:
+                self.Start = time.time()
+
         QApplication.setOverrideCursor(Qt.WaitCursor)
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.addModule("CfdConsoleProcess")
-        FreeCADGui.doCommand("analysis_object = FreeCAD.ActiveDocument." + self.analysis_object.Name)
-        FreeCADGui.doCommand("solver_object = FreeCAD.ActiveDocument." + self.solver_object.Name)
-        FreeCADGui.doCommand("working_dir = CfdTools.getOutputPath(analysis_object)")
-        FreeCADGui.doCommand("case_name = solver_object.InputCaseName")
-        FreeCADGui.doCommand("solver_directory = os.path.abspath(os.path.join(working_dir, case_name))")
         self.solver_object.Proxy.solver_runner = self.solver_runner
         FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.solver_object.Name + ".Proxy")
+        # This is a workaround to emit code into macro without actually running it
         FreeCADGui.doCommand("proxy.running_from_macro = True")
         self.solver_object.Proxy.running_from_macro = False
-        FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
-                             "  import CfdRunnableFoam\n" +
-                             "  solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)\n" +
-                             "else:\n" +
-                             "  solver_runner = proxy.solver_runner")
-        FreeCADGui.doCommand("cmd = solver_runner.get_solver_cmd(solver_directory)")
-        FreeCADGui.doCommand("FreeCAD.Console.PrintMessage(' '.join(cmd) + '\\n')")
-        FreeCADGui.doCommand("env_vars = solver_runner.getRunEnvironment()")
         FreeCADGui.doCommand(
             "if proxy.running_from_macro:\n" +
+            "  analysis_object = FreeCAD.ActiveDocument." + self.analysis_object.Name + "\n" +
+            "  solver_object = FreeCAD.ActiveDocument." + self.solver_object.Name + "\n" +
+            "  working_dir = CfdTools.getOutputPath(analysis_object)\n" +
+            "  case_name = solver_object.InputCaseName\n" +
+            "  solver_directory = os.path.abspath(os.path.join(working_dir, case_name))\n" +
+            "  import CfdRunnableFoam\n" +
+            "  solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)\n" +
+            "  cmd = solver_runner.get_solver_cmd(solver_directory)\n" +
+            "  FreeCAD.Console.PrintMessage(' '.join(cmd) + '\\n')\n" +
+            "  env_vars = solver_runner.getRunEnvironment()\n" +
             "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=solver_runner.process_output)\n" +
             "  solver_process.start(cmd, env_vars=env_vars)\n" +
-            "  solver_process.waitForFinished()\n" +
-            "else:\n" +
-            "  proxy.solver_process.start(cmd, env_vars=env_vars)")
+            "  solver_process.waitForFinished()\n")
+        working_dir = CfdTools.getOutputPath(self.analysis_object)
+        case_name = self.solver_object.InputCaseName
+        solver_directory = os.path.abspath(os.path.join(working_dir, case_name))
+        cmd = self.solver_runner.get_solver_cmd(solver_directory)
+        FreeCAD.Console.PrintMessage(' '.join(cmd) + '\\n')
+        env_vars = self.solver_runner.getRunEnvironment()
+        self.solver_object.Proxy.solver_process = CfdConsoleProcess(finished_hook=self.solverFinished,
+                                                                    stdout_hook=self.gotOutputLines,
+                                                                    stderr_hook=self.gotErrorLines)
+        self.solver_object.Proxy.solver_process.start(cmd, env_vars=env_vars)
         if self.solver_object.Proxy.solver_process.waitForStarted():
             # Setting solve button to inactive to ensure that two instances of the same simulation aren't started
             # simultaneously
@@ -209,6 +277,17 @@ class _TaskPanelCfdSolverControl:
         self.form.pb_write_inp.setEnabled(True)
         self.form.pb_run_solver.setEnabled(True)
         self.form.terminateSolver.setEnabled(False)
+
+    def mesherFinished(self, exit_code):
+        self.form.pb_write_inp.setEnabled(True)
+        self.form.pb_run_solver.setEnabled(True)
+        self.form.terminateSolver.setEnabled(False)
+        if exit_code == 0:
+            self.consoleMessage("Mesher finished successfully")
+            self.analysis_object.NeedsMeshRerun = False
+            self.runSolverProcess()
+        else:
+            self.consoleMessage("Mesher exited with error", "#FF0000")
 
     def gotOutputLines(self, lines):
         self.solver_runner.process_output(lines)
