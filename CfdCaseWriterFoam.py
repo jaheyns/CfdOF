@@ -558,7 +558,7 @@ class CfdCaseWriterFoam:
 
 
     # Mesh related
-    def processRefin(self):
+    def processDynamicMeshRefinement(self):
         settings = self.settings
         settings['dynamicMeshEnabled'] = True
 
