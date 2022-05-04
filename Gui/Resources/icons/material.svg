@@ -2,17 +2,32 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="128"
    height="128"
-   viewBox="0 0 33.866666 33.866668"
+   viewBox="0 0 128 128"
    version="1.1"
    id="svg72"
-   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
-   sodipodi:docname="material.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="material.svg">
+  <metadata
+     id="metadata935">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
   <sodipodi:namedview
      id="namedview74"
      pagecolor="#ffffff"
@@ -21,16 +36,16 @@
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
-     inkscape:document-units="mm"
+     inkscape:document-units="px"
      showgrid="false"
      units="px"
-     inkscape:zoom="1.4396184"
-     inkscape:cx="-44.108911"
-     inkscape:cy="58.001481"
-     inkscape:window-width="1920"
-     inkscape:window-height="1001"
-     inkscape:window-x="-9"
-     inkscape:window-y="-9"
+     inkscape:zoom="6.546875"
+     inkscape:cx="64"
+     inkscape:cy="64"
+     inkscape:window-width="1848"
+     inkscape:window-height="1016"
+     inkscape:window-x="72"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
@@ -40,23 +55,24 @@
      inkscape:groupmode="layer"
      id="layer1">
     <g
-       id="g2610">
+       id="g2610"
+       transform="matrix(4.0405019,0,0,4.0405019,-0.48077114,-6.5279362)">
       <ellipse
-         style="fill:#3a3a3a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264583"
+         style="fill:#3a3a3a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.26458299"
          id="path110"
          cx="21.854137"
          cy="4.53966"
          rx="2.9565244"
          ry="2.9240351" />
       <ellipse
-         style="fill:#3a3a3a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264583"
+         style="fill:#3a3a3a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.26458299"
          id="path110-1"
          cx="19.343596"
          cy="30.370823"
          rx="2.9565244"
          ry="2.9240351" />
       <ellipse
-         style="fill:#3a3a3a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264583"
+         style="fill:#3a3a3a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.26458299"
          id="path110-3"
          cx="4.9622526"
          cy="18.286819"
@@ -70,7 +86,7 @@
          rx="3.6227527"
          ry="3.4064763" />
       <ellipse
-         style="fill:#3a3a3a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264583"
+         style="fill:#3a3a3a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.26458299"
          id="path110-5"
          cx="26.954956"
          cy="20.459408"

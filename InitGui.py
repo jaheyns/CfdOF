@@ -41,6 +41,8 @@ class CfdOFWorkbench(Workbench):
         self.__class__.MenuText = "CfdOF"
         self.__class__.ToolTip = "CfdOF workbench"
 
+        icons_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons")
+        QtCore.QDir.addSearchPath("icons", icons_path)
         FreeCADGui.addPreferencePage(CfdPreferencePage, "CfdOF")
 
     def Initialize(self):
@@ -58,7 +60,7 @@ class CfdOFWorkbench(Workbench):
         from CfdFluidBoundary import _CommandCfdFluidBoundary
         from CfdZone import _CommandCfdPorousZone
         from CfdZone import _CommandCfdInitialisationZone
-        from core.mesh.dynamic.CfdDynamicMesh import _CommandDynamicMesh
+        from core.mesh.dynamic.CfdDynamicMeshRefinement import _CommandDynamicMeshRefinement
         from core.functionobjects.reporting.CfdReportingFunctions import _CommandCfdReportingFunctions
         from core.functionobjects.scalartransport.CommandCfdScalarTransportFunctions \
             import CommandCfdScalarTransportFunction
@@ -67,20 +69,22 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
         FreeCADGui.addCommand('Cfd_MeshFromImport', _CommandCfdMeshFromImport())
         FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
-        FreeCADGui.addCommand('Cfd_DynamicMesh', _CommandDynamicMesh())
+        FreeCADGui.addCommand('Cfd_DynamicMeshRefinement', _CommandDynamicMeshRefinement())
         FreeCADGui.addCommand('Cfd_ReportingFunctions', _CommandCfdReportingFunctions())
         FreeCADGui.addCommand('Cfd_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
 
         cmdlst = ['Cfd_Analysis',
-                  'Cfd_MeshFromShape', 'Cfd_MeshFromImport' 'Cfd_MeshRegion', 'Cfd_DynamicMesh',
+                  'Cfd_MeshFromShape', 'Cfd_MeshFromImport' 'Cfd_MeshRegion', 'Cfd_DynamicMeshRefinement',
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
                   'Cfd_ReportingFunctions', 'Cfd_ScalarTransportFunctions',
                   'Cfd_SolverControl']
 
-        self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)
         self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), cmdlst)
+
+        cmdlst.remove('Cfd_DynamicMeshRefinement')
+        self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)
 
         # TODO enable QtCore translation here
 

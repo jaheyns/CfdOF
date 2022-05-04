@@ -26,19 +26,16 @@ from math import ceil
 import FreeCAD
 import FreeCADGui
 from CfdTools import setQuantity, getQuantity, indexOrDefault
-import core.mesh.dynamic.CfdDynamicMesh as CfdDynamicMesh
+import core.mesh.dynamic.CfdDynamicMeshRefinement as CfdDynamicMeshRefinement
 
 
-class TaskPanelCfdDynamicMesh:
+class TaskPanelCfdDynamicMeshRefinement:
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.obj = obj
 
         self.form = FreeCADGui.PySideUic.loadUi(
-            os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdDynamicMesh.ui"))
-
-        self.form.cb_dynamic_type.currentIndexChanged.connect(self.updateUI)
-        self.form.cb_dynamic_type.addItems(CfdDynamicMesh.DYNAMIC_MESH_NAMES)
+            os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdDynamicMeshRefinement.ui"))
 
         self.load()
 
@@ -48,10 +45,6 @@ class TaskPanelCfdDynamicMesh:
 
     def load(self):
         """ fills the widgets """
-
-        index = indexOrDefault(CfdDynamicMesh.DYNAMIC_MESH_TYPES, self.obj.DynamicMeshType, 0)
-        self.form.cb_dynamic_type.setCurrentIndex(index)
-        self.updateUI()
 
         # Mesh controls
         self.form.sb_refinement_interval.setValue(self.obj.RefinementInterval)
@@ -68,9 +61,7 @@ class TaskPanelCfdDynamicMesh:
         self.form.cb_write_refinement_volscalarfield.setChecked(self.obj.WriteFields)
 
     def updateUI(self):
-        type_index = self.form.cb_dynamic_type.currentIndex()
-        self.form.l_description.setText(CfdDynamicMesh.DYNAMIC_MESH_DESCRIPTIONS[type_index])
-        self.form.stackedWidget.setCurrentIndex(type_index)
+        pass
 
     def accept(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
@@ -78,8 +69,6 @@ class TaskPanelCfdDynamicMesh:
 
         # Macro script
         FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-        FreeCADGui.doCommand("obj.DynamicMeshType = '{}'".format(
-            CfdDynamicMesh.DYNAMIC_MESH_TYPES[self.form.cb_dynamic_type.currentIndex()]))
         FreeCADGui.doCommand("obj.RefinementInterval = {}".format(int(self.form.sb_refinement_interval.value())))
         FreeCADGui.doCommand("obj.MaxRefinementLevel = {}".format(int(self.form.sb_max_refinement_levels.value())))
         FreeCADGui.doCommand("obj.BufferLayers = {}".format(int(self.form.sb_no_buffer_layers.value())))

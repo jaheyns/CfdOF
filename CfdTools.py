@@ -124,6 +124,28 @@ def getParentAnalysisObject(obj):
     return obj.getParentGroup()
 
 
+def getPhysicsModel(analysis_object):
+    is_present = False
+    for i in analysis_object.Group:
+        if "PhysicsModel" in i.Name:
+            physics_model = i
+            is_present = True
+    if not is_present:
+        physics_model = None
+    return physics_model
+
+
+def getDynamicMeshAdaptation(analysis_object):
+    is_present = False
+    for i in getMesh(analysis_object).Group:
+        if "DynamicMeshRefinement" in i.Name:
+            dynamic_mesh_adaption_model = i
+            is_present = True
+    if not is_present:
+        dynamic_mesh_adaption_model = None
+    return dynamic_mesh_adaption_model
+
+
 def getMeshObject(analysis_object):
     is_present = False
     mesh_obj = []
@@ -181,17 +203,6 @@ def getInitialConditions(analysis_object):
         if isinstance(i.Proxy, _CfdInitialVariables):
             return i
     return None
-
-
-def getDynamicMeshAdaptation(analysis_object):
-    is_present = False
-    for i in getMesh(analysis_object).Group:
-        if "DynamicMeshModel" in i.Name:
-            dynamic_mesh_adaption_model = i
-            is_present = True
-    if not is_present:
-        dynamic_mesh_adaption_model = None
-    return dynamic_mesh_adaption_model
 
 
 def getMaterials(analysis_object):
@@ -907,11 +918,11 @@ def checkCfdDependencies():
     FC_COMMIT_REQUIRED = 16146
 
     CF_MAJOR_VER_REQUIRED = 1
-    CF_MINOR_VER_REQUIRED = 12
+    CF_MINOR_VER_REQUIRED = 16
 
     HISA_MAJOR_VER_REQUIRED = 1
     HISA_MINOR_VER_REQUIRED = 6
-    HISA_PATCH_VER_REQUIRED = 3
+    HISA_PATCH_VER_REQUIRED = 4
 
     message = ""
     FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
