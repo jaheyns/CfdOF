@@ -35,6 +35,8 @@ from CfdTools import getQuantity, setQuantity, storeIfChanged
 
 
 RANS_MODELS = ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM']
+DES_MODELS = ['kOmegaSSTDES', 'kOmegaSSTDDES', 'kOmegaSSTIDDES', 'SpalartAllmarasDES', 'SpalartAllmarasDDES',
+              'SpalartAllmarasIDDES']
 LES_MODELS = ['kEqn', 'Smagorinsky', 'WALE']
 
 class _TaskPanelCfdPhysicsSelection:
@@ -53,8 +55,8 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.viscousCheckBox.stateChanged.connect(self.updateUI)
         self.form.radioButtonLaminar.toggled.connect(self.updateUI)
         self.form.radioButtonRANS.toggled.connect(self.updateUI)
+        self.form.radioButtonDES.toggled.connect(self.updateUI)
         self.form.radioButtonLES.toggled.connect(self.updateUI)
-        #self.form.radioButtonLES_DES.toggled.connect(self.updateUI)
 
         self.load()
 
@@ -92,6 +94,9 @@ class _TaskPanelCfdPhysicsSelection:
         elif self.obj.Turbulence == 'RANS':
             self.form.viscousCheckBox.setChecked(True)
             self.form.radioButtonRANS.toggle()
+        elif self.obj.Turbulence == 'DES':
+            self.form.viscousCheckBox.setChecked(True)
+            self.form.radioButtonDES.toggle()
         elif self.obj.Turbulence == 'LES':
             self.form.viscousCheckBox.setChecked(True)
             self.form.radioButtonLES.toggle()
@@ -111,11 +116,15 @@ class _TaskPanelCfdPhysicsSelection:
         # Steady / transient
         if self.form.radioButtonSteady.isChecked():
             self.form.radioButtonFreeSurface.setEnabled(False)
+            if self.form.radioButtonDES.isChecked() or self.form.radioButtonLES.isChecked():
+                self.form.radioButtonRANS.toggle()
+            self.form.radioButtonDES.setEnabled(False)
             self.form.radioButtonLES.setEnabled(False)
             if self.form.radioButtonFreeSurface.isChecked():
                 self.form.radioButtonSinglePhase.toggle()
         else:
             self.form.radioButtonFreeSurface.setEnabled(True)
+            self.form.radioButtonDES.setEnabled(True)
             self.form.radioButtonLES.setEnabled(True)
 
         # Gravity
@@ -142,6 +151,13 @@ class _TaskPanelCfdPhysicsSelection:
                 self.form.turbulenceComboBox.clear()
                 self.form.turbulenceComboBox.addItems(RANS_MODELS)
                 ti = CfdTools.indexOrDefault(RANS_MODELS, self.obj.TurbulenceModel, 0)
+                self.form.turbulenceComboBox.setCurrentIndex(ti)
+                self.form.turbulenceModelFrame.setVisible(True)
+            #DES
+            elif self.form.radioButtonDES.isChecked():
+                self.form.turbulenceComboBox.clear()
+                self.form.turbulenceComboBox.addItems(DES_MODELS)
+                ti = CfdTools.indexOrDefault(DES_MODELS, self.obj.TurbulenceModel, 0)
                 self.form.turbulenceComboBox.setCurrentIndex(ti)
                 self.form.turbulenceModelFrame.setVisible(True)
             # LES
@@ -185,11 +201,13 @@ class _TaskPanelCfdPhysicsSelection:
         if self.form.viscousCheckBox.isChecked():
             if self.form.radioButtonLaminar.isChecked():
                 storeIfChanged(self.obj, 'Turbulence', 'Laminar')
-            elif self.form.radioButtonRANS.isChecked():
-                storeIfChanged(self.obj, 'Turbulence', 'RANS')
-                storeIfChanged(self.obj, 'TurbulenceModel', self.form.turbulenceComboBox.currentText())
-            elif self.form.radioButtonLES.isChecked():
-                storeIfChanged(self.obj, 'Turbulence', 'LES')
+            else:
+                if self.form.radioButtonRANS.isChecked():
+                    storeIfChanged(self.obj, 'Turbulence', 'RANS')
+                elif self.form.radioButtonDES.isChecked():
+                    storeIfChanged(self.obj, 'Turbulence', 'DES')
+                elif self.form.radioButtonLES.isChecked():
+                    storeIfChanged(self.obj, 'Turbulence', 'LES')
                 storeIfChanged(self.obj, 'TurbulenceModel', self.form.turbulenceComboBox.currentText())
         else:
             storeIfChanged(self.obj, 'Turbulence', 'Inviscid')

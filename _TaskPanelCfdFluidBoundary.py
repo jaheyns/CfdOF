@@ -45,7 +45,8 @@ class TaskPanelCfdFluidBoundary:
 
         self.physics_model = physics_model
         self.turb_model = (physics_model.TurbulenceModel
-                          if physics_model.Turbulence == 'RANS' or physics_model.Turbulence == 'LES' else None)
+                          if physics_model.Turbulence == 'RANS' or physics_model.Turbulence == 'DES'
+                             or physics_model.Turbulence == 'LES' else None)
 
         self.material_objs = material_objs
         self.analysis_obj = CfdTools.getParentAnalysisObject(obj)
@@ -113,8 +114,7 @@ class TaskPanelCfdFluidBoundary:
         # Turbulence
         if self.turb_model is not None:
             self.form.comboTurbulenceSpecification.addItems(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][0])
-            ti = indexOrDefault(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][1],
-                                self.obj.TurbulenceInletSpecification, 0)
+            ti = indexOrDefault(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][1], self.obj.TurbulenceInletSpecification, 0)
             self.form.comboTurbulenceSpecification.setCurrentIndex(ti)
 
         # Add volume fraction fields

@@ -80,7 +80,8 @@ class TaskPanelCfdDynamicMeshRefinement:
         FreeCADGui.doCommand("obj.UnRefinementLevel = {}".format(int(float(getQuantity(self.form.if_unrefine_level)))))
         FreeCADGui.doCommand("obj.WriteFields = {}".format(self.form.cb_write_refinement_volscalarfield.isChecked()))
 
-        return True
+        # Finalise
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

@@ -274,6 +274,15 @@ def getReportingFunctionsGroup(analysis_object):
     return group
 
 
+def getScalarTransportFunctionsGroup(analysis_object):
+    group = []
+    from core.functionobjects.scalartransport.CfdScalarTransportFunction import CfdScalarTransportFunction
+    for i in analysis_object.Group:
+        if isinstance(i.Proxy, CfdScalarTransportFunction):
+            group.append(i)
+    return group
+
+
 # Mesh
 def getMeshRefinementObjs(mesh_obj):
     from CfdMeshRefinement import _CfdMeshRefinement

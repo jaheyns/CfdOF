@@ -1,0 +1,52 @@
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      S;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:empty
+%[0/_boundary_empty%]
+
+%:wall
+    %(0%)
+    {
+        type        fixedValue;
+        value       $internalField;
+    }
+%:slipWall
+%[0/_boundary_zeroGradient%]
+
+%:inlet open
+    %(0%)
+    {
+        type        fixedValue;
+        value       $internalField;
+    }
+%:outlet
+    %(0%)
+    {
+        type        zeroGradient;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
+%}
+%}
+}
+%}

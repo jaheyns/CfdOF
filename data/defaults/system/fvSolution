@@ -221,7 +221,7 @@ solvers
 %}
 %}
 %{%(physics/Turbulence%)
-%:RANS LES
+%:RANS DES LES
     "(k|omega|epsilon|nuTilda|gammaInt|ReThetat)"
     {
         solver           smoothSolver;
@@ -238,6 +238,26 @@ solvers
         relTol          0;
     }
 
+%}
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%{%(scalarTransportFunctions%)
+    "(*.)"
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-8;
+        relTol           0.1;
+        nSweeps          1;
+        minIter          1;
+    }
+
+    "(*.)Final"
+    {
+        $*.;
+        relTol          0;
+    }
+%}
 %}
 %{%(solver/SolverName%)
 %:hisa
@@ -293,15 +313,15 @@ relaxationFactors
         h               0.6;
 %}
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS DES
 %{%(physics/TurbulenceModel%)
-%:kOmegaSST
+%:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES
         k               0.5;
         omega           0.5;
 %:kEpsilon
         k               0.5;
         epsilon         0.5;
-%:SpalartAllmaras
+%:SpalartAllmaras SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
         nuTilda         0.5;
 %:kOmegaSSTLM
         k               0.5;
@@ -332,9 +352,9 @@ relaxationFactors
         hFinal          1;
 %}
 %{%(physics/Turbulence%)
-%:RANS LES
+%:RANS DES LES
 %{%(physics/TurbulenceModel%)
-%:kOmegaSST
+%:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES
         k               0.5;
         kFinal          1;
         omega           0.5;
@@ -344,7 +364,7 @@ relaxationFactors
         kFinal          1;
         epsilon         0.5;
         epsilonFinal    1;
-%:SpalartAllmaras
+%:SpalartAllmaras SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
         nuTilda         0.5;
         nuTildaFinal    1;
 %:kOmegaSSTLM
