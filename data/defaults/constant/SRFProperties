@@ -1,5 +1,3 @@
-%{%(physics/SRFModelEnabled%)
-%:True
 %{%(solver/SolverName%)
 %:SRFSimpleFoam
 %[_header%]
@@ -15,13 +13,13 @@ FoamFile
 
 SRFModel        rpm;
 
-origin          %(physics/SRFModelCoR%);
-axis            %(physics/SRFModelAxis%);
+origin          ( %(physics/SRFModelCoR%) );
+axis            ( %(physics/SRFModelAxis%) );
 
 rpmCoeffs
 {
     rpm         %(physics/SRFModelRPM%);
 }
 
-
 // ************************************************************************* //
+%}

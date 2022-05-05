@@ -243,16 +243,16 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string/>
         </property>
         <property name="singleStep" stdset="0">
-         <double>1000.000000000000000</double>
+         <double>1.000000000000000</double>
         </property>
         <property name="unit" stdset="0">
          <string notr="true">rev/s</string>
         </property>
         <property name="format" stdset="0">
-         <number>0</number>
+         <string>g</string>
         </property>
        </widget>
       </item>

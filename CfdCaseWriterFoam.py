@@ -116,6 +116,7 @@ class CfdCaseWriterFoam:
         self.processSolverSettings()
         self.processFluidProperties()
         self.processBoundaryConditions()
+        self.processReferenceFrames()
         self.processInitialConditions()
         self.clearCase()
 
@@ -171,6 +172,8 @@ class CfdCaseWriterFoam:
                         else:
                             if self.porous_zone_objs or self.porousBafflesPresent():
                                 solver = 'porousSimpleFoam'
+                            elif self.physics_model.SRFModelEnabled:
+                                solver = 'SRFSimpleFoam'
                             else:
                                 solver = 'simpleFoam'
                     else:
@@ -388,6 +391,11 @@ class CfdCaseWriterFoam:
 
     def parseFaces(self, shape_refs):
         pass
+
+    def processReferenceFrames(self):
+        if self.settings['solver']['SolverName'] == 'SRFSimpleFoam':
+            self.settings['physics']['SRFModelCoR'] = tuple(p for p in self.settings['physics']['SRFModelCoR'])
+            self.settings['physics']['SRFModelAxis'] = tuple(p for p in self.settings['physics']['SRFModelAxis'])
 
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """

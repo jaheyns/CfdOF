@@ -28,7 +28,7 @@ import FreeCAD
 import os
 import os.path
 import CfdTools
-from CfdTools import setQuantity
+from CfdTools import setQuantity, getQuantity
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore, QtGui
@@ -52,6 +52,7 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.radioButtonIncompressible.toggled.connect(self.updateUI)
         self.form.radioButtonCompressible.toggled.connect(self.updateUI)
         self.form.viscousCheckBox.stateChanged.connect(self.updateUI)
+        self.form.srfCheckBox.stateChanged.connect(self.updateUI)
         self.form.radioButtonLaminar.toggled.connect(self.updateUI)
         self.form.radioButtonRANS.toggled.connect(self.updateUI)
         self.form.radioButtonDES.toggled.connect(self.updateUI)
@@ -105,6 +106,19 @@ class _TaskPanelCfdPhysicsSelection:
         setQuantity(self.form.gy, self.obj.gy)
         setQuantity(self.form.gz, self.obj.gz)
 
+        # SRF model
+        self.form.srfCheckBox.setChecked(self.obj.SRFModelEnabled)
+
+        setQuantity(self.form.inputSRFCoRx, self.obj.SRFModelCoR.x)
+        setQuantity(self.form.inputSRFCoRy, self.obj.SRFModelCoR.y)
+        setQuantity(self.form.inputSRFCoRz, self.obj.SRFModelCoR.z)
+
+        setQuantity(self.form.inputSRFAxisx, self.obj.SRFModelAxis.x)
+        setQuantity(self.form.inputSRFAxisy, self.obj.SRFModelAxis.y)
+        setQuantity(self.form.inputSRFAxisz, self.obj.SRFModelAxis.z)
+
+        setQuantity(self.form.inputSRFRPM, self.obj.SRFModelRPM)
+
         self.updateUI()
 
     def updateUI(self):
@@ -128,6 +142,12 @@ class _TaskPanelCfdPhysicsSelection:
         self.form.gravityFrame.setEnabled(
             self.form.radioButtonFreeSurface.isChecked() or
             (self.form.radioButtonCompressible.isChecked() and not self.form.checkBoxHighMach.isChecked()))
+
+        # SRF model
+        srf_capable = (self.form.srfCheckBox.isChecked() and self.form.radioButtonSteady.isChecked()
+                      and not self.form.radioButtonCompressible.isChecked())
+        self.form.srfFrame.setEnabled(srf_capable)
+        self.form.srfCheckBox.setChecked(srf_capable)
 
         # Free surface
         if self.form.radioButtonFreeSurface.isChecked():
@@ -218,21 +238,20 @@ class _TaskPanelCfdPhysicsSelection:
         FreeCADGui.doCommand("obj.gy = '{}'".format(self.form.gy.text()))
         FreeCADGui.doCommand("obj.gz = '{}'".format(self.form.gz.text()))
 
-        if self.form.srfCheckBox.isChecked():
-            FreeCADGui.doCommand("obj.SRFModelEnabled = {}".format(self.form.srfCheckBox.isChecked()))
-            FreeCADGui.doCommand("obj.SRFModelRPM = '{}'".getQuantity(self.form.inputSRFModelRPM))
-            FreeCADGui.doCommand("obj.SRFModelCoR.x "
-                                 "= '{}'".format(self.form.inputSRFCoRx.property("quantity").Value))
-            FreeCADGui.doCommand("obj.SRFModelCoR.y "
-                                 "= '{}'".format(self.form.inputSRFCoRy.property("quantity").Value))
-            FreeCADGui.doCommand("obj.SRFModelCoR.z "
-                                 "= '{}'".format(self.form.inputSRFCoRz.property("quantity").Value))
-            FreeCADGui.doCommand("obj.SRFModelAxis.x "
-                                 "= '{}'".format(self.form.inputSRFAxisx.property("quantity").Value))
-            FreeCADGui.doCommand("obj.SRFModelAxis.y "
-                                 "= '{}'".format(self.form.inputSRFAxisy.property("quantity").Value))
-            FreeCADGui.doCommand("obj.SRFModelAxis.z "
-                                 "= '{}'".format(self.form.inputSRFAxisz.property("quantity").Value))
+        FreeCADGui.doCommand("obj.SRFModelEnabled = {}".format(self.form.srfCheckBox.isChecked()))
+        FreeCADGui.doCommand("obj.SRFModelRPM = '{}'".format(getQuantity(self.form.inputSRFRPM)))
+        FreeCADGui.doCommand("obj.SRFModelCoR.x "
+                             "= '{}'".format(self.form.inputSRFCoRx.property("quantity").Value))
+        FreeCADGui.doCommand("obj.SRFModelCoR.y "
+                             "= '{}'".format(self.form.inputSRFCoRy.property("quantity").Value))
+        FreeCADGui.doCommand("obj.SRFModelCoR.z "
+                             "= '{}'".format(self.form.inputSRFCoRz.property("quantity").Value))
+        FreeCADGui.doCommand("obj.SRFModelAxis.x "
+                             "= '{}'".format(self.form.inputSRFAxisx.property("quantity").Value))
+        FreeCADGui.doCommand("obj.SRFModelAxis.y "
+                             "= '{}'".format(self.form.inputSRFAxisy.property("quantity").Value))
+        FreeCADGui.doCommand("obj.SRFModelAxis.z "
+                             "= '{}'".format(self.form.inputSRFAxisz.property("quantity").Value))
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
