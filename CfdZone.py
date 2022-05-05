@@ -215,9 +215,9 @@ class _ViewProviderCfdZone:
         return
 
     def updateData(self, obj, prop):
-        print("Zone update data: " + prop + " " + str(getattr(obj, prop)))
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        analysis_obj.NeedsCaseRewrite = True
+        if not analysis_obj.Proxy.loading:
+            analysis_obj.NeedsCaseRewrite = True
 
     def getDisplayModes(self, obj):
         """ Return a list of display modes. """

@@ -170,14 +170,13 @@ class _ViewProviderCfdMesh:
         self.Object = vobj.Object
 
     def updateData(self, obj, prop):
-        print("Mesh update data: " + prop + " " + str(getattr(obj, prop)))
         gui_doc = FreeCADGui.getDocument(obj.Document)
         # Ignore this notification when coming out of edit mode, since already accounted for during editing of
         # properties themselves
         if gui_doc.getInEdit() and prop == "_GroupTouched":
             return
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        if 'NeedsMeshRewrite' in analysis_obj.PropertiesList:
+        if not analysis_obj.Proxy.loading:
             analysis_obj.NeedsMeshRewrite = True
 
     def onChanged(self, vobj, prop):

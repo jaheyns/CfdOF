@@ -146,11 +146,10 @@ class _ViewProviderCfdInitialseInternalFlowField:
         self.Object = vobj.Object
 
     def updateData(self, obj, prop):
-        print("Initialisation update data: " + prop + " " + str(getattr(obj, prop)))
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
         # Ignore Shape updates as these relate to linked patches
         if prop != 'Shape':
-            if 'NeedsCaseRewrite' in analysis_obj.PropertiesList:
+            if not analysis_obj.Proxy.loading:
                 analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):

@@ -192,18 +192,14 @@ class _ViewProviderCfdMeshRefinement:
         return mode
 
     def updateData(self, obj, prop):
-        print("Mesh refinement update data: " + prop + " " + str(getattr(obj, prop)))
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        if 'NeedsMeshRewrite' in analysis_obj.PropertiesList:
+        if not analysis_obj.Proxy.loading:
             analysis_obj.NeedsMeshRewrite = True
 
     def onChanged(self, vobj, prop):
         return
 
     def setEdit(self, vobj, mode=0):
-        #for obj in FreeCAD.ActiveDocument.Objects:
-        #    if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMesh) and (self.Object in obj.Group):
-        #        obj.Part.ViewObject.show()
         import importlib
         importlib.reload(_TaskPanelCfdMeshRefinement)
         self.taskd = _TaskPanelCfdMeshRefinement._TaskPanelCfdMeshRefinement(self.Object)

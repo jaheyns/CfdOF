@@ -382,15 +382,14 @@ class _ViewProviderCfdFluidBoundary:
         return mode
 
     def updateData(self, obj, prop):
-        print("Boundary update data: " + prop + " " + str(getattr(obj, prop)))
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
         if prop == 'ShapeRefs' or prop == 'Shape':
             # Only a change to the shape allocation or geometry affects mesh
-            if 'NeedsMeshRewrite' in analysis_obj.PropertiesList:
+            if not analysis_obj.Proxy.loading:
                 analysis_obj.NeedsMeshRewrite = True
         else:
             # Else mark case itself as needing updating
-            if analysis_obj and 'NeedsCaseRewrite' in analysis_obj.PropertiesList:
+            if not analysis_obj.Proxy.loading:
                 analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):

@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -48,6 +48,7 @@ class _CfdAnalysis:
     def __init__(self, obj):
         obj.Proxy = self
         self.Type = "CfdAnalysis"
+        self.loading = False
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -60,8 +61,13 @@ class _CfdAnalysis:
         addObjectProperty(obj, 'NeedsMeshRerun', True, "App::PropertyBool", "", "Mesher needs to be re-run before running solver")
 
     def onDocumentRestored(self, obj):
+        self.loading = False
         self.initProperties(obj)
 
+    def __setstate__(self, state_dict):
+        self.__dict__ = state_dict
+        # Set while we are loading from file
+        self.loading = True
 
 class _CommandCfdAnalysis:
     """ The Cfd_Analysis command definition """
@@ -116,10 +122,12 @@ class _ViewProviderCfdAnalysis:
     def attach(self, vobj):
         self.ViewObject = vobj
         self.Object = vobj.Object
-        self.bubbles = None
 
     def updateData(self, obj, prop):
-        return
+        if prop == 'OutputPath':
+            if not analysis_obj.Proxy.loading:
+                obj.NeedsMeshRewrite = True
+                obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         self.makePartTransparent(vobj)

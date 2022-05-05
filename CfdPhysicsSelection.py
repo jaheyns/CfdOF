@@ -155,9 +155,9 @@ class _ViewProviderPhysicsSelection:
         self.bubbles = None
 
     def updateData(self, obj, prop):
-        print("Physics update data: " + prop + " " + str(getattr(obj, prop)))
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        analysis_obj.NeedsCaseRewrite = True
+        if not analysis_obj.Proxy.loading:
+            analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         return
