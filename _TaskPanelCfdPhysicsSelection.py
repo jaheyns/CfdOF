@@ -218,6 +218,22 @@ class _TaskPanelCfdPhysicsSelection:
         FreeCADGui.doCommand("obj.gy = '{}'".format(self.form.gy.text()))
         FreeCADGui.doCommand("obj.gz = '{}'".format(self.form.gz.text()))
 
+        if self.form.srfCheckBox.isChecked():
+            FreeCADGui.doCommand("obj.SRFModelEnabled = {}".format(self.form.srfCheckBox.isChecked()))
+            FreeCADGui.doCommand("obj.SRFModelRPM = '{}'".getQuantity(self.form.inputSRFModelRPM))
+            FreeCADGui.doCommand("obj.SRFModelCoR.x "
+                                 "= '{}'".format(self.form.inputSRFCoRx.property("quantity").Value))
+            FreeCADGui.doCommand("obj.SRFModelCoR.y "
+                                 "= '{}'".format(self.form.inputSRFCoRy.property("quantity").Value))
+            FreeCADGui.doCommand("obj.SRFModelCoR.z "
+                                 "= '{}'".format(self.form.inputSRFCoRz.property("quantity").Value))
+            FreeCADGui.doCommand("obj.SRFModelAxis.x "
+                                 "= '{}'".format(self.form.inputSRFAxisx.property("quantity").Value))
+            FreeCADGui.doCommand("obj.SRFModelAxis.y "
+                                 "= '{}'".format(self.form.inputSRFAxisy.property("quantity").Value))
+            FreeCADGui.doCommand("obj.SRFModelAxis.z "
+                                 "= '{}'".format(self.form.inputSRFAxisz.property("quantity").Value))
+
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()

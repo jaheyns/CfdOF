@@ -1,0 +1,27 @@
+%{%(physics/SRFModelEnabled%)
+%:True
+%{%(solver/SolverName%)
+%:SRFSimpleFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      SRFProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+SRFModel        rpm;
+
+origin          %(physics/SRFModelCoR%);
+axis            %(physics/SRFModelAxis%);
+
+rpmCoeffs
+{
+    rpm         %(physics/SRFModelRPM%);
+}
+
+
+// ************************************************************************* //

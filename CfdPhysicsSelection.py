@@ -132,12 +132,22 @@ class _CfdPhysicsModel:
                              "App::PropertyEnumeration", "Physics modelling", "Turbulence model"):
             obj.TurbulenceModel = 'kOmegaSST'
 
+        # Gravity
         addObjectProperty(obj, "gx", '0 m/s^2', "App::PropertyAcceleration", "Physics modelling",
                           "Gravitational acceleration vector (x component)")
         addObjectProperty(obj, "gy", '-9.81 m/s^2', "App::PropertyAcceleration", "Physics modelling",
                           "Gravitational acceleration vector (y component)")
         addObjectProperty(obj, "gz", '0 m/s^2', "App::PropertyAcceleration", "Physics modelling",
                           "Gravitational acceleration vector (z component)")
+
+        # SRF model
+        addObjectProperty(obj, 'SRFModelRPM', "0", "App::PropertyString", "SRF model", "Rotational speed")
+
+        addObjectProperty(obj, 'SRFModelCoR', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "SRF model",
+                          "SRF centre of rotation")
+
+        addObjectProperty(obj, 'SRFModelAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "SRF model",
+                          "SRF rotational axis")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
