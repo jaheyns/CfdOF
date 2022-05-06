@@ -310,7 +310,7 @@ class CfdCaseWriterFoam:
                         raise RuntimeError
                 except (SystemError, RuntimeError):
                     raise RuntimeError(str(bc['DirectionFace']) + " is not a valid, planar face.")
-            if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
+            if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
                 bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
             if bc['PorousBaffleMethod'] == 'porousScreen':
@@ -402,7 +402,7 @@ class CfdCaseWriterFoam:
         """ Do any required computations before case build. Boundary conditions must be processed first. """
         settings = self.settings
         initial_values = settings['initialValues']
-        if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
+        if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
             mat_prop = settings['fluidProperties'][0]
             initial_values['KinematicPressure'] = initial_values['Pressure'] / mat_prop['Density']
         if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
@@ -422,7 +422,8 @@ class CfdCaseWriterFoam:
             initial_values['VolumeFractions'] = alphas_new
 
         if initial_values['PotentialFlowP']:
-            if settings['solver']['SolverName'] not in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'hisa']:
+            if settings['solver']['SolverName'] not in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam',
+                                                        'hisa']:
                 raise RuntimeError("Selected solver does not support potential pressure initialisation.")
 
         physics = settings['physics']

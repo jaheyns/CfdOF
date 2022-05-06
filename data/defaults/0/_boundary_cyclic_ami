@@ -3,4 +3,5 @@
     {
         type        cyclicAMI;
     }
+
 %}

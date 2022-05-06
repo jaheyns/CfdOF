@@ -155,8 +155,6 @@ boundaryField
 %{%(boundaries/%(0%)/BoundarySubType%)
 %:porousBaffle
 %[0/_boundary_cyclic_baffle%]
-%:cyclicAMI
-%[0/_boundary_cyclic_ami%]
 %}
 %}
 

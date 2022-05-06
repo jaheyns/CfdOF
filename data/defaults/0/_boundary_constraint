@@ -11,6 +11,8 @@
         type        cyclic;
         value       $internalField;
     }
+%:cyclicAMI
+%[0/_boundary_cyclic_ami%]
 %:empty
 %[0/_boundary_empty%]
 %:wedge
