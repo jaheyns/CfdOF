@@ -74,7 +74,7 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
 
         cmdlst = ['Cfd_Analysis',
-                  'Cfd_MeshFromShape', 'Cfd_MeshFromImport' 'Cfd_MeshRegion', 'Cfd_DynamicMeshRefinement',
+                  'Cfd_MeshFromShape', 'Cfd_MeshFromImport', 'Cfd_MeshRegion', 'Cfd_DynamicMeshRefinement',
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_InitialiseInternal',
                   'Cfd_FluidBoundary', 'Cfd_InitialisationZone', 'Cfd_PorousZone',
