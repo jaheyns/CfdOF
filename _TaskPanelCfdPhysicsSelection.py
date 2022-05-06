@@ -115,6 +115,8 @@ class _TaskPanelCfdPhysicsSelection:
         # Steady / transient
         if self.form.radioButtonSteady.isChecked():
             self.form.radioButtonFreeSurface.setEnabled(False)
+            if self.form.radioButtonDES.isChecked() or self.form.radioButtonLES.isChecked():
+                self.form.radioButtonRANS.toggle()
             self.form.radioButtonDES.setEnabled(False)
             self.form.radioButtonLES.setEnabled(False)
             if self.form.radioButtonFreeSurface.isChecked():
