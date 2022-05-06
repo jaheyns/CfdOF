@@ -25,48 +25,22 @@ patches
         constructFrom patches;
         patches ( %(createPatches/%(0%)/PatchNamesList%) );
     }
-
 %}
 %}
 
 %{%(createPatchesFromSnappyBaffles%)
 %:True
 %{%(createPatchesSnappyBaffles%)
-    {
-        name %(0%)_master;
-        patchInfo
-        {
-            type cyclic;
-            matchTolerance 1e-04;
-            neighbourPatch %(0%)_slave;
-        }
-
-        constructFrom patches;
-        patches ( %(createPatchesSnappyBaffles/%(0%)/PatchNamesList%) );
-    }
-
-    {
-        name %(0%)_slave;
-        patchInfo
-        {
-            type cyclic;
-            matchTolerance 1e-04;
-            neighbourPatch %(0%)_master;
-        }
-
-        constructFrom patches;
-        patches ( %(createPatchesSnappyBaffles/%(0%)/PatchNamesListSlave%) );
-    }
-
+%[system/_createPatch_snappybaffles%]
 %}
 %}
-
 %{%(createPatchesForPeriodics%)
 %:True
 %{%(createPeriodics%)
 %[system/_createPatch_periodics%]
 %}
 %}
+
 );
 
 
