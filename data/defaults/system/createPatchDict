@@ -15,7 +15,6 @@ patches
 (
 %{%(createPatches%)
 %{%(boundaries/%(0%)/BoundaryType%)
-%:baffle
 %:default
     {
         name %(0%);
