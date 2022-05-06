@@ -23,7 +23,7 @@ objectRefinements
 %{%(CfSettings/InternalRegions%)
     %(0%)
     {
-        cellSize %(CfSettings/InternalRegions/%(0%)/RelativeLength%);
+        additionalRefinementLevels %(CfSettings/InternalRegions/%(0%)/RefinementLevel%);
         type insideSurface;
         closedSurfaceFile "constant/triSurface/%(0%).stl";
     }
@@ -38,7 +38,7 @@ surfaceMeshRefinement
 %{%(CfSettings/MeshRegions%)
     %(0%)
     {
-        cellSize  %(CfSettings/MeshRegions/%(0%)/RelativeLength%);
+        additionalRefinementLevels  %(CfSettings/MeshRegions/%(0%)/RefinementLevel%);
         surfaceFile "constant/triSurface/%(0%).stl";
 %{%(CfSettings/MeshRegions/%(0%)/RefinementThickness%)
 %:0.0
