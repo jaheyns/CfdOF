@@ -125,7 +125,7 @@ class _ViewProviderCfdAnalysis:
 
     def updateData(self, obj, prop):
         if prop == 'OutputPath':
-            if not analysis_obj.Proxy.loading:
+            if not obj.Proxy.loading:
                 obj.NeedsMeshRewrite = True
                 obj.NeedsCaseRewrite = True
 

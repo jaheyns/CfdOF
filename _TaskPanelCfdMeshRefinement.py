@@ -233,7 +233,6 @@ class _TaskPanelCfdMeshRefinement:
         self.obj.Shape = self.ShapeOrig
         # Make sure shape is re-calculated before leaving edit mode
         FreeCAD.ActiveDocument.recompute()
-        print("Have reset shape, resetting NeedsMeshRewrite")
         self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
         FreeCADGui.ActiveDocument.resetEdit()
 
