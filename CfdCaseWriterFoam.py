@@ -138,6 +138,7 @@ class CfdCaseWriterFoam:
             self.processDynamicMeshRefinement()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
+        self.settings['createPatchesForPeriodics'] = False
         cfdMessage("Matching boundary conditions ...\n")
         if self.progressCallback:
             self.progressCallback("Matching boundary conditions ...")
@@ -286,7 +287,7 @@ class CfdCaseWriterFoam:
         for bc_name in bc_names:
             bc = settings['boundaries'][bc_name]
             if not bc['VelocityIsCartesian']:
-                veloMag = bc['VelocityMag']
+                velo_mag = bc['VelocityMag']
                 face = bc['DirectionFace'].split(':')
                 if not face[0]:
                     face = bc['ShapeRefs'][0].Name
@@ -299,7 +300,7 @@ class CfdCaseWriterFoam:
                             n = elt.normalAt(0.5, 0.5)
                             if bc['ReverseNormal']:
                                n = [-ni for ni in n]
-                            velocity = [ni*veloMag for ni in n]
+                            velocity = [ni*velo_mag for ni in n]
                             bc['Ux'] = velocity[0]
                             bc['Uy'] = velocity[1]
                             bc['Uz'] = velocity[2]
@@ -699,6 +700,7 @@ class CfdCaseWriterFoam:
         settings = self.settings
         settings['createPatches'] = {}
         settings['createPatchesSnappyBaffles'] = {}
+        settings['createPeriodics'] = {}
         bc_group = self.bc_group
 
         defaultPatchType = "patch"
@@ -706,10 +708,14 @@ class CfdCaseWriterFoam:
             bcType = bc_obj.BoundaryType
             bcSubType = bc_obj.BoundarySubType
             patchType = CfdTools.getPatchType(bcType, bcSubType)
-            settings['createPatches'][bc_obj.Label] = {
-                'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
-                'PatchType': patchType
-            }
+
+            if not bcType == 'baffle' and not bcSubType == 'cyclicAMI':
+                print(f'creating {bcType} : {bcSubType}')
+                settings['createPatches'][bc_obj.Label] = {
+                    'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
+                    'PatchType': patchType
+                }
+
             if bc_obj.DefaultBoundary:
                 defaultPatchType = patchType
 
@@ -718,6 +724,22 @@ class CfdCaseWriterFoam:
                 settings['createPatchesSnappyBaffles'][bc_obj.Label] = {
                     'PatchNamesList': '"'+bc_obj.Name+'_[^_]*"',
                     'PatchNamesListSlave': '"'+bc_obj.Name+'_.*_slave"'}
+
+            if bcSubType == 'cyclicAMI':
+                settings['createPatchesForPeriodics'] = True
+                if bc_obj.RotationalPeriodic:
+                    print(f'rotational cyclic')
+                    settings['createPeriodics'][bc_obj.Label] = {
+                        'RotationalPeriodic': bc_obj.RotationalPeriodic,
+                        'PeriodicCentreOfRotation': tuple(p for p in bc_obj.PeriodicCentreOfRotation),
+                        'PeriodicCentreOfRotationAxis': tuple(p for p in bc_obj.PeriodicCentreOfRotationAxis),
+                        'PatchNamesList': '"'+bc_obj.Name+'_[^_]*"',
+                        'PatchNamesListSlave': '"'+bc_obj.Name+'_.*_slave"'}
+                else:
+                    settings['createPeriodics'][bc_obj.Label] = {
+                        'RotationalPeriodic': bc_obj.RotationalPeriodic,
+                        'PatchNamesList': '"' + bc_obj.Name + '_[^_]*"',
+                        'PatchNamesListSlave': '"' + bc_obj.Name + '_.*_slave"'}
 
         # Set up default BC for unassigned faces
         settings['createPatches']['defaultFaces'] = {

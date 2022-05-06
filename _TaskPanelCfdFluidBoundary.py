@@ -109,6 +109,19 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputHeatFlux, self.obj.HeatFlux)
         setQuantity(self.form.inputHeatTransferCoeff, self.obj.HeatTransferCoeff)
 
+        # Periodics
+        self.form.buttonGroupPeriodic.setId(self.form.rb_rotational_periodic, 0)
+        self.form.buttonGroupPeriodic.setId(self.form.rb_translational_periodic, 1)
+
+        self.form.rb_rotational_periodic.setChecked(self.obj.RotationalPeriodic)
+        self.form.rb_translational_periodic.setChecked(not self.obj.RotationalPeriodic)
+        setQuantity(self.form.input_corx, self.obj.PeriodicCentreOfRotation.x)
+        setQuantity(self.form.input_cory, self.obj.PeriodicCentreOfRotation.y)
+        setQuantity(self.form.input_corz, self.obj.PeriodicCentreOfRotation.z)
+        setQuantity(self.form.input_axisx, self.obj.PeriodicCentreOfRotationAxis.x)
+        setQuantity(self.form.input_axisy, self.obj.PeriodicCentreOfRotationAxis.y)
+        setQuantity(self.form.input_axisz, self.obj.PeriodicCentreOfRotationAxis.z)
+
         # Turbulence
         if self.turb_model is not None:
             self.form.comboTurbulenceSpecification.addItems(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][0])
@@ -166,6 +179,8 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.updateUI)
         self.form.checkBoxDefaultBoundary.stateChanged.connect(self.updateUI)
+        self.form.rb_rotational_periodic.toggled.connect(self.periodicTypeChanged)
+        self.form.rb_translational_periodic.toggled.connect(self.periodicTypeChanged)
 
         # Face list selection panel - modifies obj.ShapeRefs passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
@@ -197,8 +212,10 @@ class TaskPanelCfdFluidBoundary:
 
         turb_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][3]
         self.form.turbulenceFrame.setVisible(turb_enabled and self.turb_model is not None)
+
         alpha_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][4]
         self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)
+
         if self.physics_model.Thermal != 'None' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
             self.form.thermalFrame.setVisible(True)
             selected_rows = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6]
@@ -249,6 +266,16 @@ class TaskPanelCfdFluidBoundary:
                     if isinstance(item, QtGui.QWidgetItem):
                         item.widget().setVisible(rowi-2 in panel_numbers)
 
+        periodic_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][7]
+        if periodic_enabled:
+            self.form.periodicFrame.setVisible(True)
+            if self.form.rb_rotational_periodic.isChecked():
+                self.form.rotationalFrame.setVisible(True)
+            else:
+                self.form.rotationalFrame.setVisible(False)
+        else:
+            self.form.periodicFrame.setVisible(False)
+
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
         self.form.comboSubtype.clear()
@@ -266,6 +293,12 @@ class TaskPanelCfdFluidBoundary:
         self.form.labelBoundaryDescription.setText(CfdFluidBoundary.SUBTYPES_HELPTEXT[type_index][subtype_index])
         self.obj.BoundarySubType = CfdFluidBoundary.SUBTYPES[type_index][self.form.comboSubtype.currentIndex()]
         self.updateUI()
+
+    def periodicTypeChanged(self):
+        if self.form.rb_rotational_periodic.isChecked():
+            self.form.rotationalFrame.setVisible(True)
+        else:
+            self.form.rotationalFrame.setVisible(False)
 
     def buttonDirectionClicked(self):
         self.selecting_direction = not self.selecting_direction
@@ -390,6 +423,22 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputHeatFlux)))
         FreeCADGui.doCommand("bc.HeatTransferCoeff "
                              "= '{}'".format(getQuantity(self.form.inputHeatTransferCoeff)))
+
+        # Periodic
+        FreeCADGui.doCommand("bc.RotationalPeriodic "
+                             "= {}".format(self.form.rb_rotational_periodic.isChecked()))
+        FreeCADGui.doCommand("bc.PeriodicCentreOfRotation.x "
+                             "= {}".format(self.form.input_corx.property("quantity").Value))
+        FreeCADGui.doCommand("bc.PeriodicCentreOfRotation.y "
+                             "= {}".format(self.form.input_cory.property("quantity").Value))
+        FreeCADGui.doCommand("bc.PeriodicCentreOfRotation.z "
+                             "= {}".format(self.form.input_corz.property("quantity").Value))
+        FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.x "
+                             "= {}".format(self.form.input_axisx.property("quantity").Value))
+        FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.y "
+                             "= {}".format(self.form.input_axisy.property("quantity").Value))
+        FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.z "
+                             "= {}".format(self.form.input_axisz.property("quantity").Value))
 
         # Turbulence
         if self.turb_model in CfdFluidBoundary.TURBULENT_INLET_SPEC:
