@@ -92,6 +92,7 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputSlipRatio, self.obj.SlipRatio)
         setQuantity(self.form.inputVolFlowRate, self.obj.VolFlowRate)
         setQuantity(self.form.inputMassFlowRate, self.obj.MassFlowRate)
+        self.form.cb_relative_srf.setChecked(self.obj.RelativeToFrame)
 
         buttonId = indexOrDefault(CfdFluidBoundary.POROUS_METHODS, self.obj.PorousBaffleMethod, 0)
         selButton = self.form.buttonGroupPorous.button(buttonId)
@@ -410,6 +411,10 @@ class TaskPanelCfdFluidBoundary:
                              "= '{}'".format(getQuantity(self.form.inputMassFlowRate)))
         FreeCADGui.doCommand("bc.VolFlowRate "
                              "= '{}'".format(getQuantity(self.form.inputVolFlowRate)))
+
+        FreeCADGui.doCommand("bc.RelativeToFrame "
+                             "= {}".format(self.form.cb_relative_srf.isChecked()))
+
         # Pressure
         FreeCADGui.doCommand("bc.Pressure "
                              "= '{}'".format(getQuantity(self.form.inputPressure)))

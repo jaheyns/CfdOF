@@ -304,6 +304,9 @@ class _CfdFluidBoundary:
         addObjectProperty(obj, 'MassFlowRate', '0 kg/s', "App::PropertyQuantity", "Flow",
                           "Mass flow rate")
 
+        addObjectProperty(obj, 'RelativeToFrame', False, "App::PropertyBool", "Flow",
+                          "Relative velocity")
+
         if addObjectProperty(obj, 'PorousBaffleMethod', POROUS_METHODS, "App::PropertyEnumeration",
                              "Baffle", "Baffle"):
             obj.PorousBaffleMethod = 'porousCoeff'

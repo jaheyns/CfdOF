@@ -1525,7 +1525,7 @@
                <item>
                 <widget class="QCheckBox" name="cb_relative_srf">
                  <property name="text">
-                  <string>SRF relative velocity</string>
+                  <string>Relative to rotating frame</string>
                  </property>
                 </widget>
                </item>

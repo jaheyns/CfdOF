@@ -64,7 +64,12 @@ boundaryField
 %:SRFSimpleFoam
         type                SRFVelocity;
         inletValue          uniform ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+%{%(boundaries/%(0%)/RelativeToFrame%)
+%:True
         relative            yes;
+%:False
+        relative            no;
+%}
 %}
         value               uniform ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
     }
