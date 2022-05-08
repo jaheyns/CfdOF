@@ -12,6 +12,7 @@
             rotationCentre ( %(createPeriodics/%(0%)/PeriodicCentreOfRotation%) );
             %:False
             transform translational;
+            separationVector ( %(createPeriodics/%(0%)/PeriodicSeparationVector%) );
             %}
         }
 
@@ -33,6 +34,7 @@
             rotationCentre ( %(createPeriodics/%(0%)/PeriodicCentreOfRotation%) );
             %:False
             transform translational;
+            separationVector ( %(createPeriodics/%(0%)/PeriodicSeparationVector%) );
             %}
         }
 

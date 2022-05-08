@@ -122,6 +122,9 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.input_axisx, self.obj.PeriodicCentreOfRotationAxis.x)
         setQuantity(self.form.input_axisy, self.obj.PeriodicCentreOfRotationAxis.y)
         setQuantity(self.form.input_axisz, self.obj.PeriodicCentreOfRotationAxis.z)
+        setQuantity(self.form.input_sepx, self.obj.PeriodicSeparationVector.x)
+        setQuantity(self.form.input_sepy, self.obj.PeriodicSeparationVector.y)
+        setQuantity(self.form.input_sepz, self.obj.PeriodicSeparationVector.z)
 
         # Turbulence
         if self.turb_model is not None:
@@ -217,7 +220,7 @@ class TaskPanelCfdFluidBoundary:
         alpha_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][4]
         self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)
 
-        if self.physics_model.Thermal != 'None' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
+        if not self.physics_model.Thermal == 'None' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
             self.form.thermalFrame.setVisible(True)
             selected_rows = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6]
             for rowi in range(self.form.layoutThermal.count()):
@@ -267,13 +270,15 @@ class TaskPanelCfdFluidBoundary:
                     if isinstance(item, QtGui.QWidgetItem):
                         item.widget().setVisible(rowi-2 in panel_numbers)
 
-        periodic_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6]
+        periodic_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][7]
         if periodic_enabled:
             self.form.periodicFrame.setVisible(True)
             if self.form.rb_rotational_periodic.isChecked():
                 self.form.rotationalFrame.setVisible(True)
+                self.form.translationalFrame.setVisible(False)
             else:
                 self.form.rotationalFrame.setVisible(False)
+                self.form.translationalFrame.setVisible(True)
         else:
             self.form.periodicFrame.setVisible(False)
 
@@ -298,8 +303,10 @@ class TaskPanelCfdFluidBoundary:
     def periodicTypeChanged(self):
         if self.form.rb_rotational_periodic.isChecked():
             self.form.rotationalFrame.setVisible(True)
+            self.form.translationalFrame.setVisible(False)
         else:
             self.form.rotationalFrame.setVisible(False)
+            self.form.translationalFrame.setVisible(True)
 
     def buttonDirectionClicked(self):
         self.selecting_direction = not self.selecting_direction
@@ -444,6 +451,13 @@ class TaskPanelCfdFluidBoundary:
                              "= {}".format(self.form.input_axisy.property("quantity").Value))
         FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.z "
                              "= {}".format(self.form.input_axisz.property("quantity").Value))
+
+        FreeCADGui.doCommand("bc.PeriodicSeparationVector.x "
+                             "= {}".format(self.form.input_sepx.property("quantity").Value))
+        FreeCADGui.doCommand("bc.PeriodicSeparationVector.y "
+                             "= {}".format(self.form.input_sepy.property("quantity").Value))
+        FreeCADGui.doCommand("bc.PeriodicSeparationVector.z "
+                             "= {}".format(self.form.input_sepz.property("quantity").Value))
 
         # Turbulence
         if self.turb_model in CfdFluidBoundary.TURBULENT_INLET_SPEC:

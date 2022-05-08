@@ -739,6 +739,7 @@ class CfdCaseWriterFoam:
                 else:
                     settings['createPeriodics'][bc_obj.Label] = {
                         'RotationalPeriodic': bc_obj.RotationalPeriodic,
+                        'PeriodicSeparationVector': tuple(p for p in bc_obj.PeriodicSeparationVector),
                         'PatchNamesList': '"' + bc_obj.Name + '_[^_]*"',
                         'PatchNamesListSlave': '"' + bc_obj.Name + '_.*_slave"'}
 

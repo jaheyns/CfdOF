@@ -78,26 +78,26 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
 # For each sub-type, whether the basic tab is enabled, the panel numbers to show (ignored if false), whether
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
 # whether volume fraction panel is shown, whether thermal GUI is shown,
-# rows of thermal UI to show (all shown if None)
-BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
-                [False, [], False, False, False, True, None],  # Slip
-                [True, [2], False, False, False, True, None],  # Partial slip
-                [True, [0], False, False, False, True, None],  # Translating wall
-                [True, [0], False, False, False, True, None]],  # Rough
-               [[True, [0, 1], True, True, True, True, [2]],  # Velocity
-                [True, [3], False, True, True, True, [2]],  # Vol flow rate
-                [True, [4], False, True, True, True, [2]],  # Mass Flow rate
-                [True, [1], False, True, True, True, [2]],  # Total pressure
-                [True, [0, 1], False, True, True, True, [2]],    # Static pressure
-                [True, [0, 1, 6], False, True, True, True, [2]]],  # SRF velocity
-               [[True, [0, 1], False, False, True, True, [2]],  # Static pressure
-                [True, [0, 1], False, False, True, True, [2]],  # Uniform velocity
-                [False, [], False, False, False, False, None]],  # Outflow
-               [[True, [1], False, True, True, True, [2]],  # Opening
-                [True, [0, 1], False, True, False, True, [2]]],  # Far-field
-               [[False, [], False, False, False, False, None],  # Symmetry plane
-                [False, [], False, False, False, False, None]],  # Periodic
-               [[True, [5], False, False, False, False, None]]]  # Permeable screen
+# rows of thermal UI to show (all shown if None), whether periodic panel is shown
+BOUNDARY_UI = [[[False, [], False, False, False, True, None, False],  # No slip
+                [False, [], False, False, False, True, None, False],  # Slip
+                [True, [2], False, False, False, True, None, False],  # Partial slip
+                [True, [0], False, False, False, True, None, False],  # Translating wall
+                [True, [0], False, False, False, True, None, False]],  # Rough
+               [[True, [0, 1], True, True, True, True, [2], False],  # Velocity
+                [True, [3], False, True, True, True, [2], False],  # Vol flow rate
+                [True, [4], False, True, True, True, [2], False],  # Mass Flow rate
+                [True, [1], False, True, True, True, [2], False],  # Total pressure
+                [True, [0, 1], False, True, True, True, [2], False],    # Static pressure
+                [True, [0, 1, 6], False, True, True, True, [2], False]],  # SRF velocity
+               [[True, [0, 1], False, False, True, True, [2], False],  # Static pressure
+                [True, [0, 1], False, False, True, True, [2], False],  # Uniform velocity
+                [False, [], False, False, False, False, None], False],  # Outflow
+               [[True, [1], False, True, True, True, [2], False],  # Opening
+                [True, [0, 1], False, True, False, True, [2], False]],  # Far-field
+               [[False, [], False, False, False, False, None, False],  # Symmetry plane
+                [False, [], False, False, False, False, None, True]],  # Periodic
+               [[True, [5], False, False, False, False, None, False]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows
 TURBULENT_INLET_SPEC = {'kOmegaSST':
@@ -334,6 +334,8 @@ class _CfdFluidBoundary:
                           "Periodic", "Centre of rotation for rotational periodics")
         addObjectProperty(obj, 'PeriodicCentreOfRotationAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
                           "Periodic", "Axis of rotational for rotational periodics")
+        addObjectProperty(obj, 'PeriodicSeparationVector', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
+                          "Periodic", "Separation vector for translational periodics")
 
         # Turbulence
         all_turb_specs = []
