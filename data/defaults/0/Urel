@@ -57,6 +57,17 @@ boundaryField
 %}
 %:inlet
 %{%(boundaries/%(0%)/BoundarySubType%)
+%:SRFVelocity
+    %(0%)
+    {
+%{%(solver/SolverName%)
+%:SRFSimpleFoam
+        type                SRFVelocity;
+        inletValue          uniform ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        relative            yes;
+%}
+        value               uniform ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+    }
 %:uniformVelocityInlet
     %(0%)
     {

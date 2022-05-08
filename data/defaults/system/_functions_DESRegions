@@ -6,5 +6,6 @@
         enabled         true;
         writeControl    outputTime;
         log             true;
+        writeToFile     true;
         resultName      DESRegions;
     }

@@ -266,7 +266,7 @@ class TaskPanelCfdFluidBoundary:
                     if isinstance(item, QtGui.QWidgetItem):
                         item.widget().setVisible(rowi-2 in panel_numbers)
 
-        periodic_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][7]
+        periodic_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6]
         if periodic_enabled:
             self.form.periodicFrame.setVisible(True)
             if self.form.rb_rotational_periodic.isChecked():
