@@ -711,7 +711,6 @@ class CfdCaseWriterFoam:
             patchType = CfdTools.getPatchType(bcType, bcSubType)
 
             if not bcType == 'baffle' and not bcSubType == 'cyclicAMI':
-                print(f'creating {bcType} : {bcSubType}')
                 settings['createPatches'][bc_obj.Label] = {
                     'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
                     'PatchType': patchType
