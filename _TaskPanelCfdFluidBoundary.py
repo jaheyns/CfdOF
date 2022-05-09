@@ -199,6 +199,9 @@ class TaskPanelCfdFluidBoundary:
         tab_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][0]
 
         self.form.basicFrame.setVisible(tab_enabled)
+        if tab_enabled:
+            is_srf = CfdTools.propsToDict(CfdTools.getPhysicsModel(CfdTools.getActiveAnalysis()))['SRFModelEnabled']
+            self.form.cb_relative_srf.setVisible(is_srf)
 
         for panel_i in range(self.form.layoutBasicValues.count()):
             if isinstance(self.form.layoutBasicValues.itemAt(panel_i), QtGui.QWidgetItem):

@@ -41,8 +41,7 @@ BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Open", "Constraint", "Baffle"]
 BOUNDARY_TYPES = ["wall", "inlet", "outlet", "open", "constraint", "baffle"]
 
 SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translating", "Rough"],
-            ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure",
-             "SRF velocity"],
+            ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure"],
             ["Static pressure", "Uniform velocity", "Extrapolated"],
             ["Ambient pressure", "Far-field"],
             ["Symmetry", "Periodic"],
@@ -50,7 +49,7 @@ SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translatin
 
 SUBTYPES = [["fixedWall", "slipWall", "partialSlipWall", "translatingWall", "roughWall"],
             ["uniformVelocityInlet", "volumetricFlowRateInlet", "massFlowRateInlet", "totalPressureInlet",
-             "staticPressureInlet", "SRFVelocity"],
+             "staticPressureInlet"],
             ["staticPressureOutlet", "uniformVelocityOutlet", "outFlowOutlet"],
             ["totalPressureOpening", "farField"],
             ["symmetry", "cyclicAMI"],
@@ -65,7 +64,7 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                       "Uniform volume flow rate specified",
                       "Uniform mass flow rate specified",
                       "Total pressure specified; treated as static pressure for reverse flow",
-                      "Static pressure specified", "Single rotating frame of reference velocity"],
+                      "Static pressure specified"],
                      ["Static pressure specified for outflow and total pressure for reverse flow",
                       "Normal component imposed for outflow; velocity fixed for reverse flow",
                       "All fields extrapolated; possibly unstable"],
@@ -84,12 +83,11 @@ BOUNDARY_UI = [[[False, [], False, False, False, True, None, False],  # No slip
                 [True, [2], False, False, False, True, None, False],  # Partial slip
                 [True, [0], False, False, False, True, None, False],  # Translating wall
                 [True, [0], False, False, False, True, None, False]],  # Rough
-               [[True, [0, 1], True, True, True, True, [2], False],  # Velocity
+               [[True, [0, 1, 6], True, True, True, True, [2], False],  # Velocity
                 [True, [3], False, True, True, True, [2], False],  # Vol flow rate
                 [True, [4], False, True, True, True, [2], False],  # Mass Flow rate
                 [True, [1], False, True, True, True, [2], False],  # Total pressure
-                [True, [0, 1], False, True, True, True, [2], False],    # Static pressure
-                [True, [0, 1, 6], False, True, True, True, [2], False]],  # SRF velocity
+                [True, [0, 1], False, True, True, True, [2], False]],    # Static pressure
                [[True, [0, 1], False, False, True, True, [2], False],  # Static pressure
                 [True, [0, 1], False, False, True, True, [2], False],  # Uniform velocity
                 [False, [], False, False, False, False, None], False],  # Outflow
