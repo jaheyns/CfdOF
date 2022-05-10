@@ -263,7 +263,7 @@ class CfdMeshTools:
         mr_face_list = []
         for mr_id, mr_obj in enumerate(mr_objs):
             if mr_obj.Extrusion or (
-                self.mesh_obj.MeshUtility == 'cfMesh' and not mr_obj.Internal and mr_obj.NumberLayers > 1) or (
+                self.mesh_obj.MeshUtility == 'cfMesh' and not mr_obj.Internal and mr_obj.NumberLayers > 0) or (
                 self.mesh_obj.MeshUtility == 'snappyHexMesh' and not mr_obj.Internal
             ):
                 for ri, r in enumerate(mr_obj.ShapeRefs):
@@ -454,10 +454,11 @@ class CfdMeshTools:
                             with open(os.path.join(self.triSurfaceDir, mr_patch_name + '.stl'), 'w') as fid:
                                 CfdTools.writePatchToStl(mr_patch_name, facemesh, fid, self.scale)
 
+                        refinement_level = CfdTools.relLenToRefinementLevel(mr_obj.RelativeLength)
                         if self.mesh_obj.MeshUtility == 'cfMesh':
                             if not Internal:
                                 cf_settings['MeshRegions'][mr_patch_name] = {
-                                    'RelativeLength': mr_rellen * self.clmax * self.scale,
+                                    'RefinementLevel': refinement_level,
                                     'RefinementThickness': self.scale * Units.Quantity(
                                         mr_obj.RefinementThickness).Value,
                                 }
@@ -467,7 +468,6 @@ class CfdMeshTools:
                                 }
 
                         elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                            refinement_level = CfdTools.relLenToRefinementLevel(mr_obj.RelativeLength)
                             if not Internal:
                                 edge_level = CfdTools.relLenToRefinementLevel(mr_obj.RegionEdgeRefinement)
                                 snappy_settings['MeshRegions'][mr_patch_name] = {
@@ -484,7 +484,7 @@ class CfdMeshTools:
             # In addition, for cfMesh and SnappyHesMesh, record matched boundary layer patches
 
             if (self.mesh_obj.MeshUtility == 'cfMesh' or self.mesh_obj.MeshUtility == 'snappyHexMesh') \
-                    and mr_obj.NumberLayers > 1 and not Internal and not mr_obj.Extrusion:
+                    and mr_obj.NumberLayers > 0 and not Internal and not mr_obj.Extrusion:
 
                 for k in range(len(self.patch_faces)):
                     if len(self.patch_faces[k][mr_id + 1]):
@@ -672,8 +672,6 @@ class CfdMeshTools:
             self.gmsh_settings['HasLengthMap'] = False
             if self.ele_length_map:
                 self.gmsh_settings['HasLengthMap'] = True
-                print(self.ele_length_map)
-                print(self.ele_node_map)
                 self.gmsh_settings['LengthMap'] = self.ele_length_map
                 self.gmsh_settings['NodeMap'] = {}
                 for e in self.ele_length_map:
@@ -715,12 +713,11 @@ class CfdMeshTools:
             self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
 
         if self.mesh_obj.NumberOfProcesses <= 1:
-            self.mesh_obj.NumberOfProcesses = 1
             self.settings['ParallelMesh'] = False
+            self.settings['NumberOfProcesses'] = 1
         else:
             self.settings['ParallelMesh'] = True
-
-        self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
+            self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
         self.settings['NumberOfThreads'] = self.mesh_obj.NumberOfThreads
 
         TemplateBuilder.TemplateBuilder(self.meshCaseDir, self.template_path, self.settings)
@@ -731,4 +728,5 @@ class CfdMeshTools:
         s = os.stat(fname)
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
 
+        self.analysis.NeedsMeshRewrite = False
         CfdTools.cfdMessage("Successfully wrote meshCase to folder {}\n".format(self.meshCaseDir))

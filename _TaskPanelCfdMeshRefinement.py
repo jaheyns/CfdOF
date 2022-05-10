@@ -29,7 +29,7 @@ import FreeCADGui
 from PySide import QtGui
 import os
 import CfdTools
-from CfdTools import getQuantity, setQuantity, indexOrDefault
+from CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
 import CfdFaceSelectWidget
 import CfdMeshRefinement
 from FreeCAD import Units
@@ -42,11 +42,14 @@ class _TaskPanelCfdMeshRefinement:
         FreeCADGui.Selection.clearSelection()
         self.obj = obj
         self.mesh_obj = self.getMeshObject()
+        self.analysis_obj = CfdTools.getParentAnalysisObject(obj)
 
         self.form = FreeCADGui.PySideUic.loadUi(
             os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdMeshRefinement.ui"))
 
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
+        self.ShapeOrig = self.obj.Shape
+        self.NeedsMeshRewriteOrig = self.analysis_obj.NeedsMeshRewrite
 
         # Face list selection panel - modifies obj.References passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.referenceSelectWidget,
@@ -91,63 +94,6 @@ class _TaskPanelCfdMeshRefinement:
 
         self.updateUI()
 
-    def accept(self):
-        FreeCADGui.Selection.removeObserver(self)
-        FreeCADGui.ActiveDocument.resetEdit()
-        FreeCAD.ActiveDocument.recompute()
-
-        # Macro script
-        FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-        FreeCADGui.doCommand("obj.RelativeLength = {}".format(self.form.if_rellen.value()))
-        if not self.mesh_obj.MeshUtility == 'gmsh':
-            FreeCADGui.doCommand("obj.RefinementThickness = '{}'".format(getQuantity(self.form.if_refinethick)))
-            if self.form.check_boundlayer.isChecked():
-                num_layers = self.form.if_numlayer.value()
-            else:
-                num_layers = 1
-            FreeCADGui.doCommand("obj.NumberLayers = {}".format(num_layers))
-            FreeCADGui.doCommand("obj.ExpansionRatio = {}".format(self.form.if_expratio.value()))
-            FreeCADGui.doCommand("obj.FirstLayerHeight = '{}'".format(getQuantity(self.form.if_firstlayerheight)))
-            FreeCADGui.doCommand("obj.RegionEdgeRefinement = {}".format(self.form.if_edgerefinement.value()))
-            FreeCADGui.doCommand("obj.Internal = {}".format(self.form.volumeRefinementToggle.isChecked()))
-
-        FreeCADGui.doCommand("obj.Extrusion = {}".format(self.form.extrusionToggle.isChecked()))
-        if self.obj.Extrusion:
-            FreeCADGui.doCommand("obj.ExtrusionType = '{}'".format(CfdMeshRefinement.EXTRUSION_TYPES[
-                self.form.extrusionTypeCombo.currentIndex()]))
-            FreeCADGui.doCommand("obj.KeepExistingMesh = {}".format(self.form.keepExistingMeshCheck.isChecked()))
-            FreeCADGui.doCommand("obj.ExtrusionThickness = '{}'".format(getQuantity(self.form.thicknessInput)))
-            FreeCADGui.doCommand("obj.ExtrusionAngle = '{}'".format(getQuantity(self.form.angleInput)))
-            FreeCADGui.doCommand("obj.ExtrusionLayers = {}".format(self.form.numLayersInput.value()))
-            FreeCADGui.doCommand("obj.ExtrusionRatio = {}".format(self.form.ratioInput.value()))
-            FreeCADGui.doCommand("obj.ExtrusionAxisPoint.x = {}".format(
-                self.form.axisPointXEdit.property("quantity").Value))
-            FreeCADGui.doCommand("obj.ExtrusionAxisPoint.y = {}".format(
-                self.form.axisPointYEdit.property("quantity").Value))
-            FreeCADGui.doCommand("obj.ExtrusionAxisPoint.z = {}".format(
-                self.form.axisPointZEdit.property("quantity").Value))
-            FreeCADGui.doCommand("obj.ExtrusionAxisDirection.x = {}".format(
-                self.form.axisDirectionXEdit.property("quantity").Value))
-            FreeCADGui.doCommand("obj.ExtrusionAxisDirection.y = {}".format(
-                self.form.axisDirectionYEdit.property("quantity").Value))
-            FreeCADGui.doCommand("obj.ExtrusionAxisDirection.z = {}".format(
-                self.form.axisDirectionZEdit.property("quantity").Value))
-
-        refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
-        refstr += ',\n'.join(
-            "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
-        refstr += "]"
-        FreeCADGui.doCommand(refstr)
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
-        return True
-
-    def reject(self):
-        FreeCADGui.Selection.removeObserver(self)
-        self.obj.ShapeRefs = self.ShapeRefsOrig
-        FreeCADGui.ActiveDocument.resetEdit()
-        FreeCAD.ActiveDocument.recompute()
-        return True
-
     def load(self):
         """ fills the widgets """
         self.form.if_rellen.setValue(self.obj.RelativeLength)
@@ -155,7 +101,7 @@ class _TaskPanelCfdMeshRefinement:
         # Boundary layer refinement (SnappyHexMesh and CfMesh only)
         if not self.mesh_obj.MeshUtility == "gmsh":
             setQuantity(self.form.if_refinethick, self.obj.RefinementThickness)
-            self.form.check_boundlayer.setChecked(self.obj.NumberLayers > 1)
+            self.form.check_boundlayer.setChecked(self.obj.NumberLayers > 0)
             self.form.if_numlayer.setValue(self.obj.NumberLayers)
             self.form.if_expratio.setValue(self.obj.ExpansionRatio)
             setQuantity(self.form.if_firstlayerheight, self.obj.FirstLayerHeight)
@@ -281,3 +227,74 @@ class _TaskPanelCfdMeshRefinement:
         setQuantity(self.form.axisDirectionXEdit, ax.x)
         setQuantity(self.form.axisDirectionYEdit, ax.y)
         setQuantity(self.form.axisDirectionZEdit, ax.z)
+
+    def accept(self):
+        FreeCADGui.Selection.removeObserver(self)
+        self.obj.Shape = self.ShapeOrig
+        # Make sure shape is re-calculated before leaving edit mode
+        FreeCAD.ActiveDocument.recompute()
+        self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
+        FreeCADGui.ActiveDocument.resetEdit()
+
+        # Macro script
+        storeIfChanged(self.obj, 'RelativeLength', self.form.if_rellen.value())
+        if not self.mesh_obj.MeshUtility == 'gmsh':
+            storeIfChanged(self.obj, 'RefinementThickness', getQuantity(self.form.if_refinethick))
+
+            if self.form.check_boundlayer.isChecked():
+                num_layers = self.form.if_numlayer.value()
+            else:
+                num_layers = 0
+            storeIfChanged(self.obj, 'NumberLayers', num_layers)
+            storeIfChanged(self.obj, 'ExpansionRatio', self.form.if_expratio.value())
+            storeIfChanged(self.obj, 'FirstLayerHeight', getQuantity(self.form.if_firstlayerheight))
+            storeIfChanged(self.obj, 'RegionEdgeRefinement', self.form.if_edgerefinement.value())
+            storeIfChanged(self.obj, 'Internal', self.form.volumeRefinementToggle.isChecked())
+
+        storeIfChanged(self.obj, 'Extrusion', self.form.extrusionToggle.isChecked())
+        if self.obj.Extrusion:
+            storeIfChanged(self.obj, 'ExtrusionType',
+                CfdMeshRefinement.EXTRUSION_TYPES[self.form.extrusionTypeCombo.currentIndex()])
+            storeIfChanged(self.obj, 'KeepExistingMesh', self.form.keepExistingMeshCheck.isChecked())
+            storeIfChanged(self.obj, 'ExtrusionThickness', getQuantity(self.form.thicknessInput))
+            storeIfChanged(self.obj, 'ExtrusionAngle', getQuantity(self.form.angleInput))
+            storeIfChanged(self.obj, 'ExtrusionLayers', self.form.numLayersInput.value())
+            storeIfChanged(self.obj, 'ExtrusionRatio', self.form.ratioInput.value())
+            new_point = FreeCAD.Vector(
+                self.form.axisPointXEdit.property("quantity").Value,
+                self.form.axisPointYEdit.property("quantity").Value,
+                self.form.axisPointZEdit.property("quantity").Value)
+            if self.obj.ExtrusionAxisPoint != new_point:
+                FreeCADGui.doCommand(
+                    "App.ActiveDocument.{}.ExtrusionAxisPoint = App.{}".format(self.obj.Name, new_point))
+            new_dir = FreeCAD.Vector(
+                self.form.axisDirectionXEdit.property("quantity").Value,
+                self.form.axisDirectionYEdit.property("quantity").Value,
+                self.form.axisDirectionZEdit.property("quantity").Value)
+            if self.obj.ExtrusionAxisDirection != new_dir:
+                FreeCADGui.doCommand(
+                    "App.ActiveDocument.{}.ExtrusionAxisDirection = App.{}".format(self.obj.Name, new_dir))
+
+        if self.obj.ShapeRefs != self.ShapeRefsOrig:
+            refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
+            refstr += ',\n'.join(
+                "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
+            refstr += "]"
+            FreeCADGui.doCommand(refstr)
+
+        FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
+        return True
+
+    def reject(self):
+        self.obj.ShapeRefs = self.ShapeRefsOrig
+        self.obj.Shape = self.ShapeOrig
+        self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
+        # Make sure shape is re-calculated before leaving edit mode
+        FreeCAD.ActiveDocument.recompute()
+        FreeCADGui.ActiveDocument.resetEdit()
+        return True
+
+    def closing(self):
+        # We call this from unsetEdit to ensure cleanup
+        FreeCADGui.Selection.removeObserver(self)
+        self.faceSelector.closing()

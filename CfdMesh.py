@@ -1,7 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2016 - Bernd Hahnebach <bernd@bimstatik.org>            *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -171,17 +170,25 @@ class _ViewProviderCfdMesh:
         self.Object = vobj.Object
 
     def updateData(self, obj, prop):
-        return
+        gui_doc = FreeCADGui.getDocument(obj.Document)
+        # Ignore this notification when coming out of edit mode, since already accounted for during editing of
+        # properties themselves
+        if gui_doc.getInEdit() and prop == "_GroupTouched":
+            return
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        if not analysis_obj.Proxy.loading:
+            analysis_obj.NeedsMeshRewrite = True
 
     def onChanged(self, vobj, prop):
         CfdTools.setCompSolid(vobj)
-        return
 
     def setEdit(self, vobj, mode):
         for obj in FreeCAD.ActiveDocument.Objects:
             if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdMesh):
                 obj.ViewObject.show()
         import _TaskPanelCfdMesh
+        import importlib
+        importlib.reload(_TaskPanelCfdMesh)
         self.taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.Object)
         self.taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(self.taskd)
@@ -201,6 +208,7 @@ class _ViewProviderCfdMesh:
             gui_doc.setEdit(vobj.Object.Name)
         else:
             FreeCAD.Console.PrintError('Task dialog already open\n')
+            FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def onDelete(self, feature, subelements):

@@ -121,7 +121,14 @@ def getParentAnalysisObject(obj):
     """
     Return CfdAnalysis object to which this obj belongs in the tree
     """
-    return obj.getParentGroup()
+    import CfdAnalysis
+    parent = obj.getParentGroup()
+    if parent is None:
+        return None
+    elif hasattr(parent, 'Proxy') and isinstance(parent.Proxy, CfdAnalysis._CfdAnalysis):
+        return parent
+    else:
+        return getParentAnalysisObject(parent)
 
 
 def getPhysicsModel(analysis_object):
@@ -393,24 +400,17 @@ def indexOrDefault(list, findItem, defaultIndex):
 def storeIfChanged(obj, prop, val):
     cur_val = getattr(obj, prop)
     if isinstance(cur_val, Units.Quantity):
-        if str(cur_val) != str(val):
+        if Units.Quantity(cur_val).Value != Units.Quantity(val).Value:
+            print(str(cur_val))
+            print(str(val))
+            print(Units.Quantity(cur_val).Value)
+            print(Units.Quantity(val).Value)
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
     elif cur_val != val:
         if isinstance(cur_val, str):
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
         else:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
-
-
-def hidePartsShowMeshes():
-    if FreeCAD.GuiUp:
-        for acnstrmesh in getActiveAnalysis().Group:
-            if "Mesh" in acnstrmesh.TypeId:
-                aparttoshow = acnstrmesh.Name.replace("_Mesh", "")
-                for apart in FreeCAD.activeDocument().Objects:
-                    if aparttoshow == apart.Name:
-                        apart.ViewObject.Visibility = False
-                acnstrmesh.ViewObject.Visibility = True
 
 
 def copyFilesRec(src, dst, symlinks=False, ignore=None):

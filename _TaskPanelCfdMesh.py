@@ -49,6 +49,7 @@ class _TaskPanelCfdMesh:
     """ The TaskPanel for editing References property of CfdMesh objects and creation of new CFD mesh """
     def __init__(self, obj):
         self.mesh_obj = obj
+        self.analysis_obj = CfdTools.getParentAnalysisObject(self.mesh_obj)
         self.form = FreeCADGui.PySideUic.loadUi(os.path.join(os.path.dirname(__file__), "core/gui/TaskPanelCfdMesh.ui"))
 
         self.console_message_cart = ''
@@ -226,6 +227,8 @@ class _TaskPanelCfdMesh:
         except Exception as ex:
             self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
             raise
+        else:
+            self.analysis_obj.NeedsMeshRerun = True
         finally:
             QApplication.restoreOverrideCursor()
 
@@ -283,6 +286,22 @@ class _TaskPanelCfdMesh:
 
     def runMesh(self):
         self.Start = time.time()
+
+        # Check for changes that require mesh re-write
+        self.store()
+        if self.analysis_obj.NeedsMeshRewrite:
+            if FreeCAD.GuiUp:
+                if QtGui.QMessageBox.question(
+                    None,
+                    "CfdOF Workbench",
+                    "The case setup for the mesher may need to be re-written based on changes you have made to the "
+                    "model.\n\nWrite mesh case first?", defaultButton=QtGui.QMessageBox.Yes
+                ) == QtGui.QMessageBox.Yes:
+                    self.Start = time.time()
+                    self.writeMesh()
+                else:
+                    self.Start = time.time()
+
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             self.consoleMessage("Initializing {} ...".format(self.mesh_obj.MeshUtility))
@@ -339,6 +358,7 @@ class _TaskPanelCfdMesh:
     def meshFinished(self, exit_code):
         if exit_code == 0:
             self.consoleMessage('Meshing completed')
+            self.analysis_obj.NeedsMeshRerun = False
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_paraview.setEnabled(True)
@@ -369,14 +389,18 @@ class _TaskPanelCfdMesh:
 
     def pbLoadMeshClicked(self):
         self.consoleMessage("Reading mesh ...", timed=False)
+        prev_write_mesh = self.analysis_obj.NeedsMeshRewrite
         self.mesh_obj.Proxy.cart_mesh.loadSurfMesh()
+        self.analysis_obj.NeedsMeshRewrite = prev_write_mesh
         self.consoleMessage('Triangulated representation of the surface mesh is shown - ', timed=False)
         self.consoleMessage("Please view in Paraview for accurate display.\n", timed=False)
 
     def pbClearMeshClicked(self):
+        prev_write_mesh = self.analysis_obj.NeedsMeshRewrite
         for m in self.mesh_obj.Group:
             if m.isDerivedFrom("Fem::FemMeshObject"):
                 FreeCAD.ActiveDocument.removeObject(m.Name)
+        self.analysis_obj.NeedsMeshRewrite = prev_write_mesh
         FreeCAD.ActiveDocument.recompute()
 
     def searchPointInMesh(self):
