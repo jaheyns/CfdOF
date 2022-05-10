@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Scalar transport functions</string>
+   <string>Scalar transport function</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -31,6 +31,15 @@
      <property name="leftMargin">
       <number>8</number>
      </property>
+     <property name="topMargin">
+      <number>8</number>
+     </property>
+     <property name="rightMargin">
+      <number>8</number>
+     </property>
+     <property name="bottomMargin">
+      <number>8</number>
+     </property>
      <item>
       <widget class="QLabel" name="label">
        <property name="font">
@@ -40,7 +49,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Scalar Function</string>
+        <string>Scalar Transport</string>
        </property>
       </widget>
      </item>
@@ -55,40 +64,6 @@
        <property name="bottomMargin">
         <number>8</number>
        </property>
-       <item row="3" column="0">
-        <widget class="QLabel" name="labelDensity">
-         <property name="text">
-          <string>Density field name</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QCheckBox" name="cb_resetonstartup">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="labelFlux">
-         <property name="text">
-          <string>Flux field name</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="labelPhase">
-         <property name="text">
-          <string>Phase field name</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
         <widget class="QLabel" name="labelPressure">
          <property name="text">
@@ -96,22 +71,27 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="labelReset">
-         <property name="text">
-          <string>Reset on startup</string>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="inputScalarFieldName">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
-        <widget class="QLabel" name="labelScheme">
-         <property name="text">
-          <string>Scheme field name (fvSchemes) </string>
+       <item row="3" column="1">
+        <widget class="Gui::InputField" name="inputDiffusivity">
+         <property name="enabled">
+          <bool>true</bool>
          </property>
-        </widget>
-       </item>
-       <item row="7" column="1">
-        <widget class="Gui::InputField" name="inputDiffusivityFixed">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -125,108 +105,27 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
          <property name="singleStep" stdset="0">
-          <double>0.001000000000000</double>
-         </property>
-         <property name="minimum" stdset="0">
-          <double>0.000000000000000</double>
+          <double>0.100000000000000</double>
          </property>
          <property name="unit" stdset="0">
-          <string notr="true"/>
+          <string notr="true">kg/m/s</string>
          </property>
          <property name="format" stdset="0">
           <number>0</number>
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
-        <widget class="QLabel" name="labelDiffusivity">
+       <item row="2" column="0" colspan="2">
+        <widget class="QRadioButton" name="radioViscousDiffusivity">
          <property name="text">
-          <string>Diffusivity (fixed value)</string>
+          <string>Viscous/turbulent diffusivity</string>
          </property>
         </widget>
        </item>
-       <item row="8" column="0">
-        <widget class="QLabel" name="labelDiffusivityField">
+       <item row="3" column="0">
+        <widget class="QRadioButton" name="radioUniformDiffusivity">
          <property name="text">
-          <string>Diffusivity (field based)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="8" column="1">
-        <widget class="QLineEdit" name="inputDiffusivityField">
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="inputPhaseFieldName">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-         <property name="singleStep" stdset="0">
-          <double>0.010000000000000</double>
-         </property>
-         <property name="minimum" stdset="0">
-          <double>0.000000000000000</double>
-         </property>
-         <property name="unit" stdset="0">
-          <string notr="true"/>
-         </property>
-         <property name="format" stdset="0">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="inputDensityFieldName">
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="inputFluxFieldName">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="inputScalarFieldName">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="1">
-        <widget class="QLineEdit" name="inputSchemeFieldName">
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <string>Specified coefficient</string>
          </property>
         </widget>
        </item>
@@ -247,10 +146,28 @@
      </item>
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_3">
+       <item row="1" column="2" colspan="2">
+        <widget class="Gui::InputField" name="inputInjectionRate">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
-          <string>Injection point (x, y, z)</string>
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true">kg/s</string>
+         </property>
+         <property name="format" stdset="0">
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -304,19 +221,6 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Injection rate</string>
-         </property>
-        </widget>
-       </item>
        <item row="3" column="2">
         <widget class="Gui::InputField" name="inputInjectionPointy">
          <property name="sizePolicy">
@@ -342,8 +246,15 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="2" colspan="2">
-        <widget class="Gui::InputField" name="inputInjectionRate">
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Injection point (x, y, z)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -351,19 +262,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>0</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-         <property name="singleStep" stdset="0">
-          <double>0.100000000000000</double>
-         </property>
-         <property name="unit" stdset="0">
-          <string notr="true">kg/s</string>
-         </property>
-         <property name="format" stdset="0">
-          <number>0</number>
+          <string>Injection rate</string>
          </property>
         </widget>
        </item>
@@ -393,6 +292,16 @@
    <header>Gui/InputField.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>inputScalarFieldName</tabstop>
+  <tabstop>radioViscousDiffusivity</tabstop>
+  <tabstop>radioUniformDiffusivity</tabstop>
+  <tabstop>inputDiffusivity</tabstop>
+  <tabstop>inputInjectionRate</tabstop>
+  <tabstop>inputInjectionPointx</tabstop>
+  <tabstop>inputInjectionPointy</tabstop>
+  <tabstop>inputInjectionPointz</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

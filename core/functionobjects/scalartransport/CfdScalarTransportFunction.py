@@ -1,6 +1,7 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2022 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -36,26 +37,12 @@ class CfdScalarTransportFunction:
         addObjectProperty(obj, 'FieldName', "S", "App::PropertyString", "Scalar transport",
                           "Name of the scalar transport field")
 
-        addObjectProperty(obj, 'FluxFieldName', "phi", "App::PropertyString", "Scalar transport",
-                          "Name of the scalar transport flux field")
+        addObjectProperty(obj, 'DiffusivityFixed', False, "App::PropertyBool", "Scalar transport",
+                          "Use fixed value for diffusivity rather than viscosity")
 
-        addObjectProperty(obj, 'DensityFieldName', "rho", "App::PropertyString", "Scalar transport",
-                          "Name of the density field")
-
-        addObjectProperty(obj, 'PhaseFieldName', "none", "App::PropertyString", "Scalar transport",
-                          "Name of the scalar transport phase field")
-
-        addObjectProperty(obj, 'ResetOnStartup', False, "App::PropertyBool", "Scalar transport",
-                          "Reset the scalar field on startup")
-
-        addObjectProperty(obj, 'SchemeFieldName', "U", "App::PropertyString", "Scalar transport",
-                          "Name of the scheme field name from fvScheme")
-
-        addObjectProperty(obj, 'DiffusivityFixedValue', "0.001", "App::PropertyQuantity", "Scalar transport",
-                          "Diffusion coefficient for fixed value diffusivity")
-
-        addObjectProperty(obj, 'DiffusivityFieldName', "none", "App::PropertyString", "Scalar transport",
-                          "Name of the dynamic diffusivity field")
+        # This is actually rho*diffusivity, but this is what OpenFOAM uses
+        addObjectProperty(obj, 'DiffusivityFixedValue', "0.001 kg/m/s", "App::PropertyQuantity", "Scalar transport",
+                          "Diffusion coefficient for fixed diffusivity")
 
         addObjectProperty(obj, 'InjectionRate', '1 kg/s', "App::PropertyQuantity", "Scalar transport",
                           "Injection rate")

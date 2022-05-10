@@ -1,6 +1,7 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2022 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -45,13 +46,11 @@ class TaskPanelCfdScalarTransportFunctions:
 
     def load(self):
         self.form.inputScalarFieldName.setText(self.obj.FieldName)
-        self.form.inputFluxFieldName.setText(self.obj.FluxFieldName)
-        self.form.inputDensityFieldName.setText(self.obj.DensityFieldName)
-        self.form.inputPhaseFieldName.setText(self.obj.PhaseFieldName)
-        self.form.cb_resetonstartup.setChecked(self.obj.ResetOnStartup)
-        self.form.inputSchemeFieldName.setText(self.obj.SchemeFieldName)
-        setQuantity(self.form.inputDiffusivityFixed, self.obj.DiffusivityFixedValue)
-        self.form.inputDiffusivityField.setText(self.obj.DiffusivityFieldName)
+        if self.obj.DiffusivityFixed:
+            self.form.radioUniformDiffusivity.toggle()
+        else:
+            self.form.radioViscousDiffusivity.toggle()
+        setQuantity(self.form.inputDiffusivity, self.obj.DiffusivityFixedValue)
 
         setQuantity(self.form.inputInjectionPointx, self.obj.InjectionPoint.x)
         setQuantity(self.form.inputInjectionPointy, self.obj.InjectionPoint.y)
@@ -70,20 +69,10 @@ class TaskPanelCfdScalarTransportFunctions:
         # Type
         FreeCADGui.doCommand("fo.FieldName "
                              "= '{}'".format(self.form.inputScalarFieldName.text()))
-        FreeCADGui.doCommand("fo.FluxFieldName "
-                             "= '{}'".format(self.form.inputFluxFieldName.text()))
-        FreeCADGui.doCommand("fo.DensityFieldName "
-                             "= '{}'".format(self.form.inputDensityFieldName.text()))
-        FreeCADGui.doCommand("fo.PhaseFieldName "
-                             "= '{}'".format(self.form.inputPhaseFieldName.text()))
-        FreeCADGui.doCommand("fo.SchemeFieldName "
-                             "= '{}'".format(self.form.inputSchemeFieldName.text()))
+        FreeCADGui.doCommand("fo.DiffusivityFixed "
+                             "= {}".format(self.form.radioUniformDiffusivity.isChecked()))
         FreeCADGui.doCommand("fo.DiffusivityFixedValue "
-                             "= '{}'".format(getQuantity(self.form.inputDiffusivityFixed)))
-        FreeCADGui.doCommand("fo.DiffusivityFieldName "
-                             "= '{}'".format(self.form.inputDiffusivityField.text()))
-        FreeCADGui.doCommand("fo.ResetOnStartup "
-                             "= {}".format(self.form.cb_resetonstartup.isChecked()))
+                             "= '{}'".format(getQuantity(self.form.inputDiffusivity)))
 
         FreeCADGui.doCommand("fo.InjectionPoint.x "
                              "= '{}'".format(self.form.inputInjectionPointx.property("quantity").Value))
