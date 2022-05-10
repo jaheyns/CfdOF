@@ -242,7 +242,7 @@ solvers
 %{%(scalarTransportFunctionsEnabled%)
 %:True
 %{%(scalarTransportFunctions%)
-    "(*.)"
+    %(scalarTransportFunctions/%(0%)/FieldName%)
     {
         solver           smoothSolver;
         smoother         GaussSeidel;
@@ -252,9 +252,9 @@ solvers
         minIter          1;
     }
 
-    "(*.)Final"
+    %(scalarTransportFunctions/%(0%)/FieldName%)Final
     {
-        $*.;
+        $%(scalarTransportFunctions/%(0%)/FieldName%);
         relTol          0;
     }
 %}
@@ -330,6 +330,12 @@ relaxationFactors
         ReThetat        0.5;
 %}
 %}
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%{%(scalarTransportFunctions%)
+        %(scalarTransportFunctions/%(0%)/FieldName%) 0.5;
+%}
+%}
     }
 
     fields
@@ -384,6 +390,13 @@ relaxationFactors
 %{%(solver/SolverName%)
 %:hisa
     yWall               0.7;
+%}
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%{%(scalarTransportFunctions%)
+        %(scalarTransportFunctions/%(0%)/FieldName%) 0.5;
+        %(scalarTransportFunctions/%(0%)/FieldName%)Final 1;
+%}
 %}
     }
 %{%(solver/SolverName%)
