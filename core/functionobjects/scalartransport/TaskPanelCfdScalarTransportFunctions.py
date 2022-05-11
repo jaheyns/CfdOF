@@ -1,6 +1,7 @@
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2022 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -24,7 +25,7 @@ import FreeCAD
 import os
 import os.path
 import CfdTools
-from CfdTools import getQuantity, setQuantity
+from CfdTools import getQuantity, setQuantity, storeIfChanged, indexOrDefault
 if FreeCAD.GuiUp:
     import FreeCADGui
 
@@ -35,23 +36,35 @@ class TaskPanelCfdScalarTransportFunctions:
     """
     def __init__(self, obj):
         self.obj = obj
-        self.analysis_obj = CfdTools.getActiveAnalysis()
+        self.analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        self.physics_model = CfdTools.getPhysicsModel(self.analysis_obj)
+        self.material_objs = CfdTools.getMaterials(self.analysis_obj)
 
         ui_path = os.path.join(os.path.dirname(__file__), "../../gui/TaskPanelCfdScalarTransportFunctions.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
-
+        
         self.load()
         self.updateUI()
 
     def load(self):
         self.form.inputScalarFieldName.setText(self.obj.FieldName)
-        self.form.inputFluxFieldName.setText(self.obj.FluxFieldName)
-        self.form.inputDensityFieldName.setText(self.obj.DensityFieldName)
-        self.form.inputPhaseFieldName.setText(self.obj.PhaseFieldName)
-        self.form.cb_resetonstartup.setChecked(self.obj.ResetOnStartup)
-        self.form.inputSchemeFieldName.setText(self.obj.SchemeFieldName)
-        setQuantity(self.form.inputDiffusivityFixed, self.obj.DiffusivityFixedValue)
-        self.form.inputDiffusivityField.setText(self.obj.DiffusivityFieldName)
+        if self.obj.DiffusivityFixed:
+            self.form.radioUniformDiffusivity.toggle()
+        else:
+            self.form.radioViscousDiffusivity.toggle()
+        setQuantity(self.form.inputDiffusivity, self.obj.DiffusivityFixedValue)
+
+        self.form.checkRestrictToPhase.setChecked(self.obj.RestrictToPhase)
+
+        # Add phases
+        mat_names = []
+        for m in self.material_objs:
+            mat_names.append(m.Label)
+        self.form.comboPhase.clear()
+        # Seems to be a restriction of the FO - can't use last (passive) phase
+        self.form.comboPhase.addItems(mat_names[:-1])
+
+        self.form.comboPhase.setCurrentIndex(indexOrDefault(mat_names, self.obj.PhaseName, 0))
 
         setQuantity(self.form.inputInjectionPointx, self.obj.InjectionPoint.x)
         setQuantity(self.form.inputInjectionPointy, self.obj.InjectionPoint.y)
@@ -60,39 +73,28 @@ class TaskPanelCfdScalarTransportFunctions:
         setQuantity(self.form.inputInjectionRate, self.obj.InjectionRate)
 
     def updateUI(self):
-        pass
+        # Multiphase
+        mp = (self.physics_model and self.physics_model.Phase != 'Single')
+        self.form.checkRestrictToPhase.setVisible(mp)
+        self.form.comboPhase.setVisible(mp)
 
     def accept(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-        FreeCADGui.doCommand("\nfo = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
         # Type
-        FreeCADGui.doCommand("fo.FieldName "
-                             "= '{}'".format(self.form.inputScalarFieldName.text()))
-        FreeCADGui.doCommand("fo.FluxFieldName "
-                             "= '{}'".format(self.form.inputFluxFieldName.text()))
-        FreeCADGui.doCommand("fo.DensityFieldName "
-                             "= '{}'".format(self.form.inputDensityFieldName.text()))
-        FreeCADGui.doCommand("fo.PhaseFieldName "
-                             "= '{}'".format(self.form.inputPhaseFieldName.text()))
-        FreeCADGui.doCommand("fo.SchemeFieldName "
-                             "= '{}'".format(self.form.inputSchemeFieldName.text()))
-        FreeCADGui.doCommand("fo.DiffusivityFixedValue "
-                             "= '{}'".format(getQuantity(self.form.inputDiffusivityFixed)))
-        FreeCADGui.doCommand("fo.DiffusivityFieldName "
-                             "= '{}'".format(self.form.inputDiffusivityField.text()))
-        FreeCADGui.doCommand("fo.ResetOnStartup "
-                             "= {}".format(self.form.cb_resetonstartup.isChecked()))
+        storeIfChanged(self.obj, 'FieldName', self.form.inputScalarFieldName.text())
+        storeIfChanged(self.obj, 'DiffusivityFixed', self.form.radioUniformDiffusivity.isChecked())
+        storeIfChanged(self.obj, 'DiffusivityFixedValue', getQuantity(self.form.inputDiffusivity))
+        storeIfChanged(self.obj, 'RestrictToPhase', self.form.checkRestrictToPhase.isChecked())
+        storeIfChanged(self.obj, 'PhaseName', self.form.comboPhase.currentText())
 
-        FreeCADGui.doCommand("fo.InjectionPoint.x "
-                             "= '{}'".format(self.form.inputInjectionPointx.property("quantity").Value))
-        FreeCADGui.doCommand("fo.InjectionPoint.y "
-                             "= '{}'".format(self.form.inputInjectionPointy.property("quantity").Value))
-        FreeCADGui.doCommand("fo.InjectionPoint.z "
-                             "= '{}'".format(self.form.inputInjectionPointz.property("quantity").Value))
-        FreeCADGui.doCommand("fo.InjectionRate "
-                             "= '{}'".format(getQuantity(self.form.inputInjectionRate)))
+        injection_point = FreeCAD.Vector(
+            self.form.inputInjectionPointx.property("quantity").Value,
+            self.form.inputInjectionPointy.property("quantity").Value,
+            self.form.inputInjectionPointz.property("quantity").Value)
+        storeIfChanged(self.obj, 'InjectionPoint', injection_point)
+        storeIfChanged(self.obj, 'InjectionRate', getQuantity(self.form.inputInjectionRate))
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")

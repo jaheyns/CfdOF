@@ -400,17 +400,15 @@ def indexOrDefault(list, findItem, defaultIndex):
 def storeIfChanged(obj, prop, val):
     cur_val = getattr(obj, prop)
     if isinstance(cur_val, Units.Quantity):
-        if Units.Quantity(cur_val).Value != Units.Quantity(val).Value:
-            print(str(cur_val))
-            print(str(val))
-            print(Units.Quantity(cur_val).Value)
-            print(Units.Quantity(val).Value)
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
+        if str(cur_val) != str(val):
+            FreeCADGui.doCommand("App.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
     elif cur_val != val:
         if isinstance(cur_val, str):
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
+            FreeCADGui.doCommand("App.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
+        elif isinstance(cur_val, FreeCAD.Vector):
+            FreeCADGui.doCommand("App.ActiveDocument.{}.{} = App.{}".format(obj.Name, prop, val))
         else:
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
+            FreeCADGui.doCommand("App.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
 
 
 def copyFilesRec(src, dst, symlinks=False, ignore=None):

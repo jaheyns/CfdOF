@@ -64,6 +64,8 @@ class ViewProviderCfdScalarTransportFunction:
 
         import core.functionobjects.scalartransport.TaskPanelCfdScalarTransportFunctions \
             as TaskPanelCfdScalarTransportFunctions
+        import importlib
+        importlib.reload(TaskPanelCfdScalarTransportFunctions)
         taskd = TaskPanelCfdScalarTransportFunctions.TaskPanelCfdScalarTransportFunctions(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)

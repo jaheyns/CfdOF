@@ -552,13 +552,14 @@ class CfdCaseWriterFoam:
 
     def processScalarTransportFunctions(self):
         settings = self.settings
-        # Copy keys so that we can delete while iterating
         settings['scalarTransportFunctionsEnabled'] = True
-        tf_name = list(settings['scalarTransportFunctions'].keys())
-
-        for name in tf_name:
-            settings['scalarTransportFunctions'][name]['InjectionPoint'] = \
-                tuple(p for p in settings['scalarTransportFunctions'][name]['InjectionPoint'])
+        for name in settings['scalarTransportFunctions']:
+            stf = settings['scalarTransportFunctions'][name]
+            if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
+                stf['InjectionRate'] = stf['InjectionRate']/settings['fluidProperties'][0]['Density']
+                stf['DiffusivityFixedValue'] = stf['DiffusivityFixedValue']/settings['fluidProperties'][0]['Density']
+            stf['InjectionPoint'] = tuple(
+                Units.Quantity(p, Units.Length).getValueAs('m') for p in stf['InjectionPoint'])
 
     # Mesh related
     def processDynamicMeshRefinement(self):
