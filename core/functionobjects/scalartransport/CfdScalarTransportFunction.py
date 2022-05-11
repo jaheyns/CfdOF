@@ -44,6 +44,12 @@ class CfdScalarTransportFunction:
         addObjectProperty(obj, 'DiffusivityFixedValue', "0.001 kg/m/s", "App::PropertyQuantity", "Scalar transport",
                           "Diffusion coefficient for fixed diffusivity")
 
+        addObjectProperty(obj, 'RestrictToPhase', False, "App::PropertyBool", "Scalar transport",
+                          "Restrict transport within phase")
+        
+        addObjectProperty(obj, 'PhaseName', "water", "App::PropertyString", "Scalar transport",
+                          "Transport within phase")
+
         addObjectProperty(obj, 'InjectionRate', '1 kg/s', "App::PropertyQuantity", "Scalar transport",
                           "Injection rate")
 

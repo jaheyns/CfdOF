@@ -394,12 +394,14 @@ def storeIfChanged(obj, prop, val):
     cur_val = getattr(obj, prop)
     if isinstance(cur_val, Units.Quantity):
         if str(cur_val) != str(val):
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
+            FreeCADGui.doCommand("App.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
     elif cur_val != val:
         if isinstance(cur_val, str):
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
+            FreeCADGui.doCommand("App.ActiveDocument.{}.{} = '{}'".format(obj.Name, prop, val))
+        elif isinstance(cur_val, FreeCAD.Vector):
+            FreeCADGui.doCommand("App.ActiveDocument.{}.{} = App.{}".format(obj.Name, prop, val))
         else:
-            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
+            FreeCADGui.doCommand("App.ActiveDocument.{}.{} = {}".format(obj.Name, prop, val))
 
 
 def hidePartsShowMeshes():
