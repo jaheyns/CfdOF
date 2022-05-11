@@ -45,6 +45,11 @@ class ViewProviderCfdScalarTransportFunction:
         vobj.addDisplayMode(self.standard, "Standard")
         return
 
+    def updateData(self, obj, prop):
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        if analysis_obj and not analysis_obj.Proxy.loading:
+            analysis_obj.NeedsCaseRewrite = True
+
     def onChanged(self, vobj, prop):
         return
 
