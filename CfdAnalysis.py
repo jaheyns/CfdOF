@@ -124,9 +124,12 @@ class _ViewProviderCfdAnalysis:
         self.Object = vobj.Object
 
     def updateData(self, obj, prop):
-        if prop == 'OutputPath':
-            if not obj.Proxy.loading:
+        if not obj.Proxy.loading:
+            if prop == 'OutputPath':
                 obj.NeedsMeshRewrite = True
+                obj.NeedsCaseRewrite = True
+            elif prop == 'Group':
+                # Something was added or deleted
                 obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
