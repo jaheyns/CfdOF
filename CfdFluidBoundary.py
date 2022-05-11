@@ -443,7 +443,7 @@ class _ViewProviderCfdFluidBoundary:
                 analysis_obj.NeedsMeshRewrite = True
         else:
             # Else mark case itself as needing updating
-            if not analysis_obj.Proxy.loading:
+            if analysis_obj and not analysis_obj.Proxy.loading:
                 analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):

@@ -176,7 +176,9 @@ class _ViewProviderCfdReportingFunctions:
         return mode
 
     def updateData(self, obj, prop):
-        return
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        if analysis_obj and not analysis_obj.Proxy.loading:
+            analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         CfdTools.setCompSolid(vobj)

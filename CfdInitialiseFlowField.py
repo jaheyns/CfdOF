@@ -149,7 +149,7 @@ class _ViewProviderCfdInitialseInternalFlowField:
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
         # Ignore Shape updates as these relate to linked patches
         if prop != 'Shape':
-            if not analysis_obj.Proxy.loading:
+            if analysis_obj and not analysis_obj.Proxy.loading:
                 analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):

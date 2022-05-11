@@ -176,7 +176,7 @@ class _ViewProviderCfdMesh:
         if gui_doc.getInEdit() and prop == "_GroupTouched":
             return
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        if not analysis_obj.Proxy.loading:
+        if analysis_obj and not analysis_obj.Proxy.loading:
             analysis_obj.NeedsMeshRewrite = True
 
     def onChanged(self, vobj, prop):

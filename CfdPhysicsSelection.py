@@ -159,7 +159,7 @@ class _ViewProviderPhysicsSelection:
 
     def updateData(self, obj, prop):
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        if not analysis_obj.Proxy.loading:
+        if analysis_obj and not analysis_obj.Proxy.loading:
             analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
