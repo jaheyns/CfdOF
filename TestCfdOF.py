@@ -201,7 +201,7 @@ class BlockTest(unittest.TestCase):
         taskd = _TaskPanelCfdSolverControl._TaskPanelCfdSolverControl(solver_runner)
         taskd.obj = self.solver_object.ViewObject
         taskd.write_input_file_handler()
-        taskd.closed()
+        taskd.closing()
 
     def test_new_analysis(self):
         fccPrint('--------------- Start of CFD tests ---------------')

@@ -65,6 +65,7 @@ divSchemes
     div(yPhi,yWall) Gauss linearUpwind grad(yWall);
 %}
 %{%(scalarTransportFunctionsEnabled%)
+%:True
 %{%(scalarTransportFunctions%)
     div(phi,%(scalarTransportFunctions/%(0%)/FieldName%)) bounded Gauss linearUpwind grad(%(scalarTransportFunctions/%(0%)/FieldName%));
 %}
@@ -150,6 +151,7 @@ divSchemes
     div(yPhi,yWall) Gauss linearUpwind grad(yWall);
 %}
 %{%(scalarTransportFunctionsEnabled%)
+%:True
 %{%(scalarTransportFunctions%)
     div(phi,%(scalarTransportFunctions/%(0%)/FieldName%)) Gauss linearUpwind grad(%(scalarTransportFunctions/%(0%)/FieldName%));
 %}

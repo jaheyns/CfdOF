@@ -439,7 +439,7 @@ class _ViewProviderCfdFluidBoundary:
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
         if prop == 'ShapeRefs' or prop == 'Shape':
             # Only a change to the shape allocation or geometry affects mesh
-            if not analysis_obj.Proxy.loading:
+            if analysis_obj and not analysis_obj.Proxy.loading:
                 analysis_obj.NeedsMeshRewrite = True
         else:
             # Else mark case itself as needing updating

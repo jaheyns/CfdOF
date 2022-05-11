@@ -464,6 +464,7 @@ class CfdMeshTools:
                                 }
                             else:
                                 cf_settings['InternalRegions'][mr_obj.Name] = {
+                                    'RefinementLevel': refinement_level,
                                     'RelativeLength': mr_rellen * self.clmax * self.scale
                                 }
 
