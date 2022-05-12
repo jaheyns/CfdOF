@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -24,17 +24,17 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
 import os
 import os.path
-import CfdTools
-from CfdTools import getQuantity, setQuantity, indexOrDefault
-import CfdFaceSelectWidget
-import CfdFluidBoundary
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
     from PySide.QtGui import QFormLayout
+import CfdTools
+from CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
+import CfdFaceSelectWidget
+import CfdFluidBoundary
 
 
 class TaskPanelCfdFluidBoundary:
@@ -49,11 +49,13 @@ class TaskPanelCfdFluidBoundary:
                              or physics_model.Turbulence == 'LES' else None)
 
         self.material_objs = material_objs
+        self.analysis_obj = CfdTools.getParentAnalysisObject(obj)
 
         # Store values which are changed on the fly for visual update
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
         self.BoundaryTypeOrig = str(self.obj.BoundaryType)
         self.BoundarySubTypeOrig = str(self.obj.BoundarySubType)
+        self.NeedsMeshRewriteOrig = self.analysis_obj.NeedsMeshRewrite
 
         self.alphas = {}
 
@@ -211,7 +213,7 @@ class TaskPanelCfdFluidBoundary:
             panel_numbers = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][1]
             for panel_number in panel_numbers:
                 self.form.layoutBasicValues.itemAt(panel_number).widget().setVisible(True)
-                if panel_number == 0:
+                if panel_number == 0 and self.form.radioButtonMagNormal.isChecked():
                     reverse = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][2]
                     # If user hasn't set a patch yet, initialise 'reverse' to default
                     if self.form.lineDirection.text() == "":
@@ -386,58 +388,45 @@ class TaskPanelCfdFluidBoundary:
         self.alphas[self.form.comboFluid.currentText()] = getQuantity(self.form.inputVolumeFraction)
 
     def accept(self):
+        self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
+
         if self.obj.Label.startswith("CfdFluidBoundary"):
-            self.obj.Label = self.obj.BoundaryType
-        FreeCADGui.Selection.removeObserver(self)
+            storeIfChanged(self.obj, 'Label', self.obj.BoundaryType)
 
-        doc = FreeCADGui.getDocument(self.obj.Document)
-        doc.resetEdit()
-
-        FreeCADGui.doCommand("\nbc = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
         # Type
-        FreeCADGui.doCommand("bc.BoundaryType "
-                             "= '{}'".format(self.obj.BoundaryType))
-        FreeCADGui.doCommand("bc.BoundarySubType "
-                             "= '{}'".format(self.obj.BoundarySubType))
-        FreeCADGui.doCommand("bc.ThermalBoundaryType "
-                             "= '{}'".format(CfdFluidBoundary.THERMAL_BOUNDARY_TYPES[
-                                self.form.comboThermalBoundaryType.currentIndex()]))
+        if self.obj.BoundaryType != self.BoundaryTypeOrig:
+            FreeCADGui.doCommand(
+                "FreeCAD.ActiveDocument.{}.BoundaryType = '{}'".format(self.obj.Name, self.obj.BoundaryType))
+        if self.obj.BoundarySubType != self.BoundarySubTypeOrig:
+            FreeCADGui.doCommand(
+                "FreeCAD.ActiveDocument.{}.BoundarySubType = '{}'".format(self.obj.Name, self.obj.BoundarySubType))
+        storeIfChanged(self.obj, 'ThermalBoundaryType',
+                       CfdFluidBoundary.THERMAL_BOUNDARY_TYPES[self.form.comboThermalBoundaryType.currentIndex()])
+
         # Velocity
-        FreeCADGui.doCommand("bc.VelocityIsCartesian "
-                             "= {}".format(self.form.radioButtonCart.isChecked()))
-        FreeCADGui.doCommand("bc.Ux "
-                             "= '{}'".format(getQuantity(self.form.inputCartX)))
-        FreeCADGui.doCommand("bc.Uy "
-                             "= '{}'".format(getQuantity(self.form.inputCartY)))
-        FreeCADGui.doCommand("bc.Uz "
-                             "= '{}'".format(getQuantity(self.form.inputCartZ)))
-        FreeCADGui.doCommand("bc.VelocityMag "
-                             "= '{}'".format(getQuantity(self.form.inputVelocityMag)))
-        FreeCADGui.doCommand("bc.DirectionFace "
-                             "= '{}'".format(self.form.lineDirection.text()))
-        FreeCADGui.doCommand("bc.ReverseNormal "
-                             "= {}".format(self.form.checkReverse.isChecked()))
-        FreeCADGui.doCommand("bc.MassFlowRate "
-                             "= '{}'".format(getQuantity(self.form.inputMassFlowRate)))
-        FreeCADGui.doCommand("bc.VolFlowRate "
-                             "= '{}'".format(getQuantity(self.form.inputVolFlowRate)))
+        storeIfChanged(self.obj, 'VelocityIsCartesian', self.form.radioButtonCart.isChecked())
+        storeIfChanged(self.obj, 'Ux', getQuantity(self.form.inputCartX))
+        storeIfChanged(self.obj, 'Uy', getQuantity(self.form.inputCartY))
+        storeIfChanged(self.obj, 'Uz', getQuantity(self.form.inputCartZ))
+        storeIfChanged(self.obj, 'VelocityMag', getQuantity(self.form.inputVelocityMag))
+        storeIfChanged(self.obj, 'DirectionFace', self.form.lineDirection.text())
+        storeIfChanged(self.obj, 'ReverseNormal', self.form.checkReverse.isChecked())
+        storeIfChanged(self.obj, 'MassFlowRate', getQuantity(self.form.inputMassFlowRate))
+        storeIfChanged(self.obj, 'VolFlowRate', getQuantity(self.form.inputVolFlowRate))
 
         FreeCADGui.doCommand("bc.RelativeToFrame "
                              "= {}".format(self.form.cb_relative_srf.isChecked()))
 
         # Pressure
-        FreeCADGui.doCommand("bc.Pressure "
-                             "= '{}'".format(getQuantity(self.form.inputPressure)))
+        storeIfChanged(self.obj, 'Pressure', getQuantity(self.form.inputPressure))
+
         # Wall
-        FreeCADGui.doCommand("bc.SlipRatio "
-                             "= '{}'".format(getQuantity(self.form.inputSlipRatio)))
+        storeIfChanged(self.obj, 'SlipRatio', getQuantity(self.form.inputSlipRatio))
+
         # Thermal
-        FreeCADGui.doCommand("bc.Temperature "
-                             "= '{}'".format(getQuantity(self.form.inputTemperature)))
-        FreeCADGui.doCommand("bc.HeatFlux "
-                             "= '{}'".format(getQuantity(self.form.inputHeatFlux)))
-        FreeCADGui.doCommand("bc.HeatTransferCoeff "
-                             "= '{}'".format(getQuantity(self.form.inputHeatTransferCoeff)))
+        storeIfChanged(self.obj, 'Temperature', getQuantity(self.form.inputTemperature))
+        storeIfChanged(self.obj, 'HeatFlux', getQuantity(self.form.inputHeatFlux))
+        storeIfChanged(self.obj, 'HeatTransferCoeff', getQuantity(self.form.inputHeatTransferCoeff))
 
         # Periodic
         FreeCADGui.doCommand("bc.RotationalPeriodic "
@@ -465,57 +454,43 @@ class TaskPanelCfdFluidBoundary:
         # Turbulence
         if self.turb_model in CfdFluidBoundary.TURBULENT_INLET_SPEC:
             turb_index = self.form.comboTurbulenceSpecification.currentIndex()
-            FreeCADGui.doCommand("bc.TurbulenceInletSpecification "
-                                 "= '{}'".format(CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][1][turb_index]))
+            storeIfChanged(self.obj, 'TurbulenceInletSpecification',
+                           CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][1][turb_index])
         else:
-            FreeCADGui.doCommand("bc.TurbulenceInletSpecification "
-                                 "= '{}'".format(self.obj.TurbulenceInletSpecification))
-        FreeCADGui.doCommand("bc.TurbulentKineticEnergy "
-                             "= '{}'".format(getQuantity(self.form.inputKineticEnergy)))
-        FreeCADGui.doCommand("bc.SpecificDissipationRate "
-                             "= '{}'".format(getQuantity(self.form.inputSpecificDissipationRate)))
-        FreeCADGui.doCommand("bc.DissipationRate "
-                             "= '{}'".format(getQuantity(self.form.inputDissipationRate)))
-        FreeCADGui.doCommand("bc.NuTilda "
-                             "= '{}'".format(getQuantity(self.form.inputNuTilda)))
-        FreeCADGui.doCommand("bc.Intermittency "
-                             "= '{}'".format(getQuantity(self.form.inputGammaInt)))
-        FreeCADGui.doCommand("bc.ReThetat "
-                             "= '{}'".format(getQuantity(self.form.inputReThetat)))
-        FreeCADGui.doCommand("bc.TurbulentViscosity "
-                             "= '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
-        FreeCADGui.doCommand("bc.kEqnTurbulentKineticEnergy "
-                             "= '{}'".format(getQuantity(self.form.inputKineticEnergy)))
-        FreeCADGui.doCommand("bc.kEqnTurbulentViscosity "
-                             "= '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
-        FreeCADGui.doCommand("bc.TurbulenceIntensityPercentage "
-                             "= '{}'".format(getQuantity(self.form.inputIntensity)))
-        FreeCADGui.doCommand("bc.TurbulenceLengthScale "
-                             "= '{}'".format(getQuantity(self.form.inputLengthScale)))
+            storeIfChanged(self.obj, 'TurbulenceInletSpecification', self.obj.TurbulenceInletSpecification)
+        storeIfChanged(self.obj, 'TurbulentKineticEnergy', getQuantity(self.form.inputKineticEnergy))
+        storeIfChanged(self.obj, 'SpecificDissipationRate', getQuantity(self.form.inputSpecificDissipationRate))
+        storeIfChanged(self.obj, 'DissipationRate', getQuantity(self.form.inputDissipationRate))
+        storeIfChanged(self.obj, 'NuTilda', getQuantity(self.form.inputNuTilda))
+        storeIfChanged(self.obj, 'Intermittency', getQuantity(self.form.inputGammaInt))
+        storeIfChanged(self.obj, 'ReThetat', getQuantity(self.form.inputReThetat))
+        storeIfChanged(self.obj, 'TurbulentViscosity', getQuantity(self.form.inputTurbulentViscosity))
+        storeIfChanged(self.obj, 'kEqnTurbulentKineticEnergy', getQuantity(self.form.inputKineticEnergy))
+        storeIfChanged(self.obj, 'kEqnTurbulentViscosity', getQuantity(self.form.inputTurbulentViscosity))
+        storeIfChanged(self.obj, 'TurbulenceIntensityPercentage', getQuantity(self.form.inputIntensity))
+        storeIfChanged(self.obj, 'TurbulenceLengthScale', getQuantity(self.form.inputLengthScale))
 
         # Multiphase
-        FreeCADGui.doCommand("bc.VolumeFractions = {}".format(self.alphas))
+        storeIfChanged(self.obj, 'VolumeFractions', self.alphas)
 
         # Porous
-        FreeCADGui.doCommand("bc.PorousBaffleMethod "
-                             "= '{}'".format(CfdFluidBoundary.POROUS_METHODS[self.form.buttonGroupPorous.checkedId()]))
-        FreeCADGui.doCommand("bc.PressureDropCoeff "
-                             "= '{}'".format(getQuantity(self.form.inputPressureDropCoeff)))
-        FreeCADGui.doCommand("bc.ScreenWireDiameter "
-                             "= '{}'".format(getQuantity(self.form.inputWireDiameter)))
-        FreeCADGui.doCommand("bc.ScreenSpacing "
-                             "= '{}'".format(getQuantity(self.form.inputSpacing)))
-        FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Label = '{}'".format(self.obj.Name, self.obj.Label))
+        storeIfChanged(self.obj, 'PorousBaffleMethod',
+                       CfdFluidBoundary.POROUS_METHODS[self.form.buttonGroupPorous.checkedId()])
+        storeIfChanged(self.obj, 'PressureDropCoeff', getQuantity(self.form.inputPressureDropCoeff))
+        storeIfChanged(self.obj, 'ScreenWireDiameter', getQuantity(self.form.inputWireDiameter))
+        storeIfChanged(self.obj, 'ScreenSpacing', getQuantity(self.form.inputSpacing))
 
-        refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
-        refstr += ',\n'.join(
-            "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
-        refstr += "]"
-        FreeCADGui.doCommand(refstr)
+        # Only update references if changed
+        if self.obj.ShapeRefs != self.ShapeRefsOrig:
+            refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
+            refstr += ',\n'.join(
+                "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
+            refstr += "]"
+            FreeCADGui.doCommand(refstr)
 
         # Default boundary
         defaultBoundary = self.form.checkBoxDefaultBoundary.isChecked()
-        FreeCADGui.doCommand("bc.DefaultBoundary = {}".format(defaultBoundary))
+        storeIfChanged(self.obj, 'DefaultBoundary', defaultBoundary)
         boundaries = CfdTools.getCfdBoundaryGroup(CfdTools.getParentAnalysisObject(self.obj))
         # Deactivate previous default boundary, if any
         for b in boundaries:
@@ -523,16 +498,22 @@ class TaskPanelCfdFluidBoundary:
                 FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.DefaultBoundary = False".format(b.Name))
 
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
-        self.faceSelector.closing()
+
+        doc = FreeCADGui.getDocument(self.obj.Document)
+        doc.resetEdit()
 
     def reject(self):
         self.obj.ShapeRefs = self.ShapeRefsOrig
         self.obj.BoundaryType = self.BoundaryTypeOrig
         self.obj.BoundarySubType = self.BoundarySubTypeOrig
-        FreeCADGui.Selection.removeObserver(self)
+        self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
         FreeCAD.getDocument(doc_name).recompute()
         doc.resetEdit()
-        self.faceSelector.closing()
         return True
+
+    def closing(self):
+        # We call this from unsetEdit to ensure cleanup
+        FreeCADGui.Selection.removeObserver(self)
+        self.faceSelector.closing()

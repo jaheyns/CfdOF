@@ -64,6 +64,12 @@ divSchemes
     div(tauMC)      Gauss linear;
     div(yPhi,yWall) Gauss linearUpwind grad(yWall);
 %}
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%{%(scalarTransportFunctions%)
+    div(phi,%(scalarTransportFunctions/%(0%)/FieldName%)) bounded Gauss linearUpwind grad(%(scalarTransportFunctions/%(0%)/FieldName%));
+%}
+%}
 }
 
 %:Transient
@@ -143,6 +149,12 @@ divSchemes
 %:hisa
     div(tauMC)      Gauss linear;
     div(yPhi,yWall) Gauss linearUpwind grad(yWall);
+%}
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%{%(scalarTransportFunctions%)
+    div(phi,%(scalarTransportFunctions/%(0%)/FieldName%)) Gauss linearUpwind grad(%(scalarTransportFunctions/%(0%)/FieldName%));
+%}
 %}
 }
 

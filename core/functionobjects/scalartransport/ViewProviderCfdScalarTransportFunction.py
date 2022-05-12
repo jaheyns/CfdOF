@@ -45,6 +45,11 @@ class ViewProviderCfdScalarTransportFunction:
         vobj.addDisplayMode(self.standard, "Standard")
         return
 
+    def updateData(self, obj, prop):
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        if analysis_obj and not analysis_obj.Proxy.loading:
+            analysis_obj.NeedsCaseRewrite = True
+
     def onChanged(self, vobj, prop):
         return
 
@@ -64,6 +69,8 @@ class ViewProviderCfdScalarTransportFunction:
 
         import core.functionobjects.scalartransport.TaskPanelCfdScalarTransportFunctions \
             as TaskPanelCfdScalarTransportFunctions
+        import importlib
+        importlib.reload(TaskPanelCfdScalarTransportFunctions)
         taskd = TaskPanelCfdScalarTransportFunctions.TaskPanelCfdScalarTransportFunctions(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)

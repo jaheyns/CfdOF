@@ -26,7 +26,7 @@ import os.path
 import FreeCAD
 from FreeCAD import Units
 import CfdTools
-from CfdTools import getQuantity, setQuantity, indexOrDefault
+from CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
 from core.functionobjects.reporting import CfdReportingFunctions
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -145,77 +145,63 @@ class TaskPanelCfdReportingFunctions:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-        FreeCADGui.doCommand("\nfo = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
         # Type
         index = self.form.comboFunctionObjectType.currentIndex()
-        FreeCADGui.doCommand("fo.ReportingFunctionType = '{}'".format(
-                                 CfdReportingFunctions.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()]))
+        storeIfChanged(self.obj, 'ReportingFunctionType', 
+            CfdReportingFunctions.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()])
 
         bcs = CfdTools.getCfdBoundaryGroup(self.analysis_obj)
-        FreeCADGui.doCommand("fo.Patch "
-                             "= FreeCAD.ActiveDocument.{}".format(bcs[self.form.cb_patch_list.currentIndex()].Name))
+        bc = bcs[self.form.cb_patch_list.currentIndex()]
+        if (not self.obj.Patch and bc) or (bc and bc.Name != self.obj.Patch.Name):
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.Patch "
+                                 "= FreeCAD.ActiveDocument.{}".format(self.obj.Name, bc.Name))
 
         # Force object
-        FreeCADGui.doCommand("fo.ReferenceDensity "
-                             "= '{}'".format(getQuantity(self.form.inputReferenceDensity)))
-        FreeCADGui.doCommand("fo.ReferencePressure "
-                             "= '{}'".format(getQuantity(self.form.inputReferencePressure)))
-        FreeCADGui.doCommand("fo.WriteFields "
-                             "= {}".format(self.form.inputWriteFields.isChecked()))
-        FreeCADGui.doCommand("fo.CentreOfRotation.x "
-                             "= {}".format(self.form.inputCentreOfRotationx.property("quantity").Value))
-        FreeCADGui.doCommand("fo.CentreOfRotation.y "
-                             "= {}".format(self.form.inputCentreOfRotationy.property("quantity").Value))
-        FreeCADGui.doCommand("fo.CentreOfRotation.z "
-                             "= {}".format(self.form.inputCentreOfRotationz.property("quantity").Value))
+        storeIfChanged(self.obj, 'ReferenceDensity', getQuantity(self.form.inputReferenceDensity))
+        storeIfChanged(self.obj, 'ReferencePressure', getQuantity(self.form.inputReferencePressure))
+        storeIfChanged(self.obj, 'WriteFields', self.form.inputWriteFields.isChecked())
+        centre_of_rotation = FreeCAD.Vector(
+            self.form.inputCentreOfRotationx.property("quantity").Value,
+            self.form.inputCentreOfRotationy.property("quantity").Value,
+            self.form.inputCentreOfRotationz.property("quantity").Value)
+        storeIfChanged(self.obj, 'CentreOfRotation', centre_of_rotation)
 
         # # Coefficient object
-        FreeCADGui.doCommand("fo.Lift.x "
-                             "= {}".format(self.form.inputLiftDirectionx.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Lift.y "
-                             "= {}".format(self.form.inputLiftDirectiony.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Lift.z "
-                             "= {}".format(self.form.inputLiftDirectionz.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Drag.x "
-                             "= {}".format(self.form.inputDragDirectionx.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Drag.y "
-                             "= {}".format(self.form.inputDragDirectiony.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Drag.z "
-                             "= {}".format(self.form.inputDragDirectionz.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Pitch.x "
-                             "= {}".format(self.form.inputPitchAxisx.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Pitch.y "
-                             "= {}".format(self.form.inputPitchAxisy.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Pitch.z "
-                             "= {}".format(self.form.inputPitchAxisz.property("quantity").Value))
-        FreeCADGui.doCommand("fo.MagnitudeUInf "
-                             "= '{}'".format(getQuantity(self.form.inputMagnitudeUInf)))
-        FreeCADGui.doCommand("fo.LengthRef "
-                             "= '{}'".format(getQuantity(self.form.inputLengthRef)))
-        FreeCADGui.doCommand("fo.AreaRef "
-                             "= '{}'".format(getQuantity(self.form.inputAreaRef)))
+        lift_dir = FreeCAD.Vector(
+            self.form.inputLiftDirectionx.property("quantity").Value,
+            self.form.inputLiftDirectiony.property("quantity").Value,
+            self.form.inputLiftDirectionz.property("quantity").Value)
+        storeIfChanged(self.obj, 'Lift', lift_dir)
+        drag_dir = FreeCAD.Vector(
+            self.form.inputDragDirectionx.property("quantity").Value,
+            self.form.inputDragDirectiony.property("quantity").Value,
+            self.form.inputDragDirectionz.property("quantity").Value)
+        storeIfChanged(self.obj, 'Drag', drag_dir)
+        pitch_axis = FreeCAD.Vector(
+            self.form.inputPitchAxisx.property("quantity").Value,
+            self.form.inputPitchAxisy.property("quantity").Value,
+            self.form.inputPitchAxisz.property("quantity").Value)
+        storeIfChanged(self.obj, 'Pitch', pitch_axis)
+        storeIfChanged(self.obj, 'MagnitudeUInf', getQuantity(self.form.inputMagnitudeUInf))
+        storeIfChanged(self.obj, 'LengthRef', getQuantity(self.form.inputLengthRef))
+        storeIfChanged(self.obj, 'AreaRef', getQuantity(self.form.inputAreaRef))
 
         # # Spatial binning
-        FreeCADGui.doCommand("fo.NBins "
-                             "= {}".format(self.form.inputNBins.value()))
-        FreeCADGui.doCommand("fo.Direction.x "
-                             "= '{}'".format(self.form.inputDirectionx.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Direction.y "
-                             "= '{}'".format(self.form.inputDirectiony.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Direction.z "
-                             "= '{}'".format(self.form.inputDirectionz.property("quantity").Value))
-        FreeCADGui.doCommand("fo.Cumulative "
-                             "= {}".format(self.form.inputCumulative.isChecked()))
+        storeIfChanged(self.obj, 'NBins', self.form.inputNBins.value())
+        bins_direction = FreeCAD.Vector(
+            self.form.inputDirectionx.property("quantity").Value,
+            self.form.inputDirectiony.property("quantity").Value,
+            self.form.inputDirectionz.property("quantity").Value)
+        storeIfChanged(self.obj, 'Direction', bins_direction)
+        storeIfChanged(self.obj, 'Cumulative', self.form.inputCumulative.isChecked())
 
         # Probe info
-        FreeCADGui.doCommand("fo.SampleFieldName "
-                             "= '{}'".format(self.form.inputFieldName.text()))
-        FreeCADGui.doCommand("fo.ProbePosition.x "
-                             "= {}".format(self.form.inputProbeLocx.property("quantity").Value))
-        FreeCADGui.doCommand("fo.ProbePosition.y "
-                             "= {}".format(self.form.inputProbeLocy.property("quantity").Value))
-        FreeCADGui.doCommand("fo.ProbePosition.z "
-                             "= {}".format(self.form.inputProbeLocz.property("quantity").Value))
+        storeIfChanged(self.obj, 'SampleFieldName', self.form.inputFieldName.text())
+        probe_position = FreeCAD.Vector(
+            self.form.inputProbeLocx.property("quantity").Value,
+            self.form.inputProbeLocy.property("quantity").Value,
+            self.form.inputProbeLocz.property("quantity").Value)
+        storeIfChanged(self.obj, 'ProbePosition', probe_position)
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")

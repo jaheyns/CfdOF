@@ -5,7 +5,7 @@
 # *   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>        *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>   *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -25,14 +25,14 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
 import os
 import os.path
-import CfdTools
-from CfdTools import setQuantity, getQuantity
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
+import CfdTools
+from CfdTools import setQuantity, getQuantity, storeIfChanged
 
 
 class TaskPanelCfdFluidProperties:
@@ -120,6 +120,15 @@ class TaskPanelCfdFluidProperties:
                 setQuantity(widget, val)
                 widget.valueChanged.connect(self.manualEdit)
 
+    def populateMaterialsList(self):
+        self.form.PredefinedMaterialLibraryComboBox.clear()
+        self.materials, material_name_path_list = CfdTools.importMaterials()
+        for mat in material_name_path_list:
+            if self.material['Type'] == self.materials[mat[1]]['Type']:
+                mat_name = self.materials[mat[1]]['Name']
+                self.form.PredefinedMaterialLibraryComboBox.addItem(QtGui.QIcon(":/icons/freecad.svg"), mat_name, mat[1])
+        self.form.PredefinedMaterialLibraryComboBox.addItem("Custom")
+
     def selectPredefined(self):
         index = self.form.PredefinedMaterialLibraryComboBox.currentIndex()
 
@@ -155,19 +164,12 @@ class TaskPanelCfdFluidProperties:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
         doc.Document.recompute()
-
-        FreeCADGui.doCommand("\nFreeCAD.ActiveDocument." + self.obj.Name + ".Material"
-                             " = {}".format(self.material))
+        storeIfChanged(self.obj, 'Material', self.material)
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-    def populateMaterialsList(self):
-        self.form.PredefinedMaterialLibraryComboBox.clear()
-        self.materials, material_name_path_list = CfdTools.importMaterials()
-        for mat in material_name_path_list:
-            if self.material['Type'] == self.materials[mat[1]]['Type']:
-                mat_name = self.materials[mat[1]]['Name']
-                self.form.PredefinedMaterialLibraryComboBox.addItem(QtGui.QIcon(":/icons/freecad.svg"), mat_name, mat[1])
-        self.form.PredefinedMaterialLibraryComboBox.addItem("Custom")
+    def closing(self):
+        # We call this from unsetEdit to allow cleanup
+        return

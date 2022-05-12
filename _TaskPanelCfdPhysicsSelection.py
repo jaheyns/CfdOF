@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>        *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>   *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -24,14 +24,17 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
 import os
 import os.path
 import CfdTools
 from CfdTools import setQuantity, getQuantity
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore, QtGui
+import CfdTools
+from CfdTools import getQuantity, setQuantity, storeIfChanged
+
 
 RANS_MODELS = ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM']
 DES_MODELS = ['kOmegaSSTDES', 'kOmegaSSTDDES', 'kOmegaSSTIDDES', 'SpalartAllmarasDES', 'SpalartAllmarasDDES',
@@ -197,48 +200,43 @@ class _TaskPanelCfdPhysicsSelection:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-        FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
         if self.form.radioButtonSteady.isChecked():
-            FreeCADGui.doCommand("obj.Time = 'Steady'")
+            storeIfChanged(self.obj, 'Time', 'Steady')
         elif self.form.radioButtonTransient.isChecked():
-            FreeCADGui.doCommand("obj.Time = 'Transient'")
+            storeIfChanged(self.obj, 'Time', 'Transient')
 
         if self.form.radioButtonSinglePhase.isChecked():
-            FreeCADGui.doCommand("obj.Phase = 'Single'")
+            storeIfChanged(self.obj, 'Phase', 'Single')
         elif self.form.radioButtonFreeSurface.isChecked():
-            FreeCADGui.doCommand("obj.Phase = 'FreeSurface'")
+            storeIfChanged(self.obj, 'Phase', 'FreeSurface')
 
         if self.form.radioButtonIncompressible.isChecked():
-            FreeCADGui.doCommand("obj.Flow = 'Incompressible'")
-            FreeCADGui.doCommand("obj.Thermal = 'None'")
+            storeIfChanged(self.obj, 'Flow', 'Incompressible')
+            storeIfChanged(self.obj, 'Thermal', 'None')
         elif self.form.radioButtonCompressible.isChecked():
             if self.form.checkBoxHighMach.isChecked():
-                FreeCADGui.doCommand("obj.Flow = 'HighMachCompressible'")
+                storeIfChanged(self.obj, 'Flow', 'HighMachCompressible')
             else:
-                FreeCADGui.doCommand("obj.Flow = 'Compressible'")
-            FreeCADGui.doCommand("obj.Thermal = 'Energy'")
+                storeIfChanged(self.obj, 'Flow', 'Compressible')
+            storeIfChanged(self.obj, 'Thermal', 'Energy')
 
         if self.form.viscousCheckBox.isChecked():
             if self.form.radioButtonLaminar.isChecked():
-                FreeCADGui.doCommand("obj.Turbulence = 'Laminar'")
-            elif self.form.radioButtonRANS.isChecked():
-                FreeCADGui.doCommand("obj.Turbulence = 'RANS'")
-                FreeCADGui.doCommand("obj.TurbulenceModel = '{}'".format(
-                    self.form.turbulenceComboBox.currentText()))
-            elif self.form.radioButtonDES.isChecked():
-                FreeCADGui.doCommand("obj.Turbulence = 'DES'")
-                FreeCADGui.doCommand("obj.TurbulenceModel = '{}'".format(
-                    self.form.turbulenceComboBox.currentText()))
-            elif self.form.radioButtonLES.isChecked():
-                FreeCADGui.doCommand("obj.Turbulence = 'LES'")
-                FreeCADGui.doCommand("obj.TurbulenceModel = '{}'".format(
-                    self.form.turbulenceComboBox.currentText()))
+                storeIfChanged(self.obj, 'Turbulence', 'Laminar')
+            else:
+                if self.form.radioButtonRANS.isChecked():
+                    storeIfChanged(self.obj, 'Turbulence', 'RANS')
+                elif self.form.radioButtonDES.isChecked():
+                    storeIfChanged(self.obj, 'Turbulence', 'DES')
+                elif self.form.radioButtonLES.isChecked():
+                    storeIfChanged(self.obj, 'Turbulence', 'LES')
+                storeIfChanged(self.obj, 'TurbulenceModel', self.form.turbulenceComboBox.currentText())
         else:
-            FreeCADGui.doCommand("obj.Turbulence = 'Inviscid'")
+            storeIfChanged(self.obj, 'Turbulence', 'Inviscid')
 
-        FreeCADGui.doCommand("obj.gx = '{}'".format(self.form.gx.text()))
-        FreeCADGui.doCommand("obj.gy = '{}'".format(self.form.gy.text()))
-        FreeCADGui.doCommand("obj.gz = '{}'".format(self.form.gz.text()))
+        storeIfChanged(self.obj, 'gx', getQuantity(self.form.gx))
+        storeIfChanged(self.obj, 'gy', getQuantity(self.form.gy))
+        storeIfChanged(self.obj, 'gz', getQuantity(self.form.gz))
 
         FreeCADGui.doCommand("obj.SRFModelEnabled = {}".format(self.form.srfCheckBox.isChecked()))
         FreeCADGui.doCommand("obj.SRFModelRPM = '{}'".format(getQuantity(self.form.inputSRFRPM)))
@@ -258,3 +256,7 @@ class _TaskPanelCfdPhysicsSelection:
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
+
+    def closing(self):
+        # We call this from unsetEdit to allow cleanup
+        return

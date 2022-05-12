@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2020 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -25,12 +25,12 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
 import os
 import os.path
-from CfdTools import getQuantity, setQuantity
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
+from CfdTools import getQuantity, setQuantity, storeIfChanged
 
 
 class _TaskPanelCfdInitialiseInternalFlowField:
@@ -231,44 +231,37 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-        FreeCADGui.doCommand("\ninit = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-
-        # Potential flow
-        FreeCADGui.doCommand("init.PotentialFlow = {}".format(self.form.radioButtonPotentialFlowU.isChecked()))
-
         # Velocity
-        FreeCADGui.doCommand("init.UseInletUValues = {}".format(self.form.radioButtonUseInletValuesU.isChecked()))
-        FreeCADGui.doCommand("init.Ux = '{}'".format(getQuantity(self.form.Ux)))
-        FreeCADGui.doCommand("init.Uy = '{}'".format(getQuantity(self.form.Uy)))
-        FreeCADGui.doCommand("init.Uz = '{}'".format(getQuantity(self.form.Uz)))
+        storeIfChanged(self.obj, 'PotentialFlow', self.form.radioButtonPotentialFlowU.isChecked())
+        storeIfChanged(self.obj, 'UseInletUValues', self.form.radioButtonUseInletValuesU.isChecked())
+        storeIfChanged(self.obj, 'Ux', getQuantity(self.form.Ux))
+        storeIfChanged(self.obj, 'Uy', getQuantity(self.form.Uy))
+        storeIfChanged(self.obj, 'Uz', getQuantity(self.form.Uz))
 
         # Pressure
-        FreeCADGui.doCommand("init.UseOutletPValue = {}".format(self.form.radioButtonUseInletValuesP.isChecked()))
-        FreeCADGui.doCommand("init.PotentialFlowP = {}".format(self.form.radioButtonPotentialFlowP.isChecked()))
-        FreeCADGui.doCommand("init.Pressure = '{}'".format(getQuantity(self.form.pressure)))
+        storeIfChanged(self.obj, 'UseOutletPValue', self.form.radioButtonUseInletValuesP.isChecked())
+        storeIfChanged(self.obj, 'PotentialFlowP', self.form.radioButtonPotentialFlowP.isChecked())
+        storeIfChanged(self.obj, 'Pressure', getQuantity(self.form.pressure))
 
         # Multiphase
-        FreeCADGui.doCommand("init.VolumeFractions = {}".format(self.alphas))
+        storeIfChanged(self.obj, 'VolumeFractions', self.alphas)
 
         # Thermal
-        FreeCADGui.doCommand("init.UseInletTemperatureValue "
-                             "= {}".format(self.form.checkUseInletValuesThermal.isChecked()))
-        FreeCADGui.doCommand("init.Temperature "
-                             "= '{}'".format(getQuantity(self.form.inputTemperature)))
+        storeIfChanged(self.obj, 'UseInletTemperatureValue', self.form.checkUseInletValuesThermal.isChecked())
+        storeIfChanged(self.obj, 'Temperature', getQuantity(self.form.inputTemperature))
 
         # Turbulence
-        FreeCADGui.doCommand("init.UseInletTurbulenceValues "
-                             "= {}".format(self.form.checkUseInletValuesTurb.isChecked()))
-        FreeCADGui.doCommand("init.k = '{}'".format(getQuantity(self.form.inputk)))
-        FreeCADGui.doCommand("init.epsilon = '{}'".format(getQuantity(self.form.inputEpsilon)))
-        FreeCADGui.doCommand("init.omega = '{}'".format(getQuantity(self.form.inputOmega)))
-        FreeCADGui.doCommand("init.nuTilda = '{}'".format(getQuantity(self.form.inputnuTilda)))
-        FreeCADGui.doCommand("init.gammaInt = '{}'".format(getQuantity(self.form.inputGammaInt)))
-        FreeCADGui.doCommand("init.ReThetat = '{}'".format(getQuantity(self.form.inputReThetat)))
+        storeIfChanged(self.obj, 'UseInletTurbulenceValues', self.form.checkUseInletValuesTurb.isChecked())
+        storeIfChanged(self.obj, 'nuTilda', getQuantity(self.form.inputnuTilda))
+        storeIfChanged(self.obj, 'epsilon', getQuantity(self.form.inputEpsilon))
+        storeIfChanged(self.obj, 'omega', getQuantity(self.form.inputOmega))
+        storeIfChanged(self.obj, 'k', getQuantity(self.form.inputk))
+        storeIfChanged(self.obj, 'gammaInt', getQuantity(self.form.inputGammaInt))
+        storeIfChanged(self.obj, 'ReThetat', getQuantity(self.form.inputReThetat))
         # LES
-        FreeCADGui.doCommand("init.nut = '{}'".format(getQuantity(self.form.inputTurbulentViscosity)))
-        FreeCADGui.doCommand("init.kEqnk = '{}'".format(getQuantity(self.form.inputkEqnKineticEnergy)))
-        FreeCADGui.doCommand("init.kEqnNut = '{}'".format(getQuantity(self.form.inputkEqnTurbulentViscosity)))
+        storeIfChanged(self.obj, 'nut', getQuantity(self.form.inputTurbulentViscosity))
+        storeIfChanged(self.obj, 'kEqnk', getQuantity(self.form.inputkEqnKineticEnergy))
+        storeIfChanged(self.obj, 'kEqnNut', getQuantity(self.form.inputkEqnTurbulentViscosity))
 
         boundaryU = self.form.comboBoundaryU.currentData()
         boundaryP = self.form.comboBoundaryP.currentData()
@@ -276,22 +269,34 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         boundaryTurb = self.form.comboBoundaryTurb.currentData()
 
         if boundaryU:
-            FreeCADGui.doCommand("init.BoundaryU = FreeCAD.ActiveDocument.{}".format(boundaryU))
+            if self.obj.BoundaryU and boundaryU != self.obj.BoundaryU.Name:
+                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryU = FreeCAD.ActiveDocument.{}".format(
+                    self.obj.Name, boundaryU))
         else:
-            FreeCADGui.doCommand("init.BoundaryU = None")
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryU = None".format(self.obj.Name))
         if boundaryP:
-            FreeCADGui.doCommand("init.BoundaryP = FreeCAD.ActiveDocument.{}".format(boundaryP))
+            if self.obj.BoundaryP and boundaryP != self.obj.BoundaryP.Name:
+                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryP = FreeCAD.ActiveDocument.{}".format(
+                    self.obj.Name, boundaryP))
         else:
-            FreeCADGui.doCommand("init.BoundaryP = None")
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryP = None".format(self.obj.Name))
         if boundaryT:
-            FreeCADGui.doCommand("init.BoundaryT = FreeCAD.ActiveDocument.{}".format(boundaryT))
+            if self.obj.BoundaryT and boundaryT != self.obj.BoundaryT.Name:
+                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryT = FreeCAD.ActiveDocument.{}".format(
+                    self.obj.Name, boundaryT))
         else:
-            FreeCADGui.doCommand("init.BoundaryT = None")
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryT = None".format(self.obj.Name))
         if boundaryTurb:
-            FreeCADGui.doCommand("init.BoundaryTurb = FreeCAD.ActiveDocument.{}".format(boundaryTurb))
+            if self.obj.BoundaryTurb and boundaryTurb != self.obj.BoundaryTurb.Name:
+                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryTurb = FreeCAD.ActiveDocument.{}".format(
+                    self.obj.Name, boundaryTurb))
         else:
-            FreeCADGui.doCommand("init.BoundaryTurb = None")
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryTurb = None".format(self.obj.Name))
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
+
+    def closing(self):
+        # We call this from unsetEdit to allow cleanup
+        return
