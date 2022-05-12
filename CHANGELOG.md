@@ -2,6 +2,9 @@
 Brought to you by the developers of the CfdOF FreeCAD OpenFOAM integration workbench.
 
 ## Release notes
+## v1.16.0
+* Support added for passive scalar transport solution
+
 ## v1.15.0
 * Added dynamic mesh adaptation functionality
 * Added Reporting functions functionality
