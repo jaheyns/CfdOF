@@ -4,7 +4,7 @@ Brought to you by the developers of the CfdOF FreeCAD OpenFOAM integration workb
 ## Release notes
 ## v1.16.0
 * Support added for passive scalar transport solution
-
+* Added support for Detached Eddy Simulation (DES, DDES and IDDES)
 ## v1.15.0
 * Added dynamic mesh adaptation functionality
 * Added Reporting functions functionality
