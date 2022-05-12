@@ -11,7 +11,7 @@ import CfdMeshRefinement
 CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Fusion_Mesh)
 FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.5
 FreeCAD.ActiveDocument.MeshRefinement.RefinementThickness = '0 mm'
-FreeCAD.ActiveDocument.MeshRefinement.NumberLayers = 1
+FreeCAD.ActiveDocument.MeshRefinement.NumberLayers = 0
 FreeCAD.ActiveDocument.MeshRefinement.ExpansionRatio = 1.2
 FreeCAD.ActiveDocument.MeshRefinement.FirstLayerHeight = '0 mm'
 FreeCAD.ActiveDocument.MeshRefinement.RegionEdgeRefinement = 1.0

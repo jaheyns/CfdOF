@@ -23,7 +23,7 @@ objectRefinements
 {
     MeshRefinement001
     {
-        cellSize 0.025;
+        additionalRefinementLevels 2;
         type insideSurface;
         closedSurfaceFile "constant/triSurface/MeshRefinement001.stl";
     }
@@ -33,13 +33,13 @@ surfaceMeshRefinement
 {
     MeshRefinement
     {
-        cellSize  0.002;
+        additionalRefinementLevels  6;
         surfaceFile "constant/triSurface/MeshRefinement.stl";
         refinementThickness 0.001;
     }
     MeshRefinement002
     {
-        cellSize  0.002;
+        additionalRefinementLevels  6;
         surfaceFile "constant/triSurface/MeshRefinement002.stl";
         refinementThickness 0.001;
     }

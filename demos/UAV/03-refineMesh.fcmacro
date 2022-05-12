@@ -14,7 +14,7 @@ FreeCAD.ActiveDocument.MeshRefinement001.ShapeRefs = [
 
 FreeCAD.ActiveDocument.MeshRefinement001.RelativeLength = 0.25
 FreeCAD.ActiveDocument.MeshRefinement001.RefinementThickness = '0 mm'
-FreeCAD.ActiveDocument.MeshRefinement001.NumberLayers = 1
+FreeCAD.ActiveDocument.MeshRefinement001.NumberLayers = 0
 FreeCAD.ActiveDocument.MeshRefinement001.ExpansionRatio = 1.2
 FreeCAD.ActiveDocument.MeshRefinement001.FirstLayerHeight = '0 mm'
 FreeCAD.ActiveDocument.MeshRefinement001.RegionEdgeRefinement = 1.0
@@ -36,7 +36,7 @@ FreeCAD.ActiveDocument.MeshRefinement002.ShapeRefs = [
 'Face31', 'Face32', 'Face45', 'Face46', 'Face47', 'Face48', 'Face49', 'Face50', 'Face51', 'Face52', 'Face53', 'Face75'))]
 FreeCAD.ActiveDocument.MeshRefinement002.RelativeLength = 0.02
 FreeCAD.ActiveDocument.MeshRefinement002.RefinementThickness = '1 mm'
-FreeCAD.ActiveDocument.MeshRefinement002.NumberLayers = 1
+FreeCAD.ActiveDocument.MeshRefinement002.NumberLayers = 0
 FreeCAD.ActiveDocument.MeshRefinement002.ExpansionRatio = 1.2
 FreeCAD.ActiveDocument.MeshRefinement002.FirstLayerHeight = '0 mm'
 FreeCAD.ActiveDocument.MeshRefinement002.RegionEdgeRefinement = 1.0
