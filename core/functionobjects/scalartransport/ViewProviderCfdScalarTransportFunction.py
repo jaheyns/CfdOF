@@ -67,7 +67,7 @@ class ViewProviderCfdScalarTransportFunction:
             CfdTools.cfdErrorBox("Scalar transport object must have a parent analysis object")
             return False
 
-        import core.functionobjects.scalartransport.TaskPanelCfdScalarTransportFunctions \
+        from core.functionobjects.scalartransport import TaskPanelCfdScalarTransportFunctions \
             as TaskPanelCfdScalarTransportFunctions
         import importlib
         importlib.reload(TaskPanelCfdScalarTransportFunctions)

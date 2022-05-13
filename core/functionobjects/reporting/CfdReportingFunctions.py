@@ -33,7 +33,7 @@ import os
 
 # Constants
 OBJECT_NAMES = ["Force", "ForceCoefficients", "Probes"]
-OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches", 
+OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches",
     "Sample fields at specified locations"]
 
 # GUI
@@ -198,7 +198,7 @@ class _ViewProviderCfdReportingFunctions:
             CfdTools.cfdErrorBox("Reporting function must have a parent analysis object")
             return False
 
-        import core.functionobjects.reporting.TaskPanelCfdReportingFunctions as TaskPanelCfdReportingFunctions
+        from core.functionobjects.reporting import TaskPanelCfdReportingFunctions as TaskPanelCfdReportingFunctions
         import importlib
         importlib.reload(TaskPanelCfdReportingFunctions)
         taskd = TaskPanelCfdReportingFunctions.TaskPanelCfdReportingFunctions(self.Object)
