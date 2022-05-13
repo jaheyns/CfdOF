@@ -24,7 +24,7 @@ surfaceMeshRefinement
 {
     MeshRefinement
     {
-        cellSize  0.005;
+        additionalRefinementLevels  1;
         surfaceFile "constant/triSurface/MeshRefinement.stl";
         refinementThickness 0.005;
     }
