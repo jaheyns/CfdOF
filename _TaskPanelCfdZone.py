@@ -41,6 +41,7 @@ class _TaskPanelCfdZone:
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
         self.obj = obj
+        self.analysis_obj = CfdTools.getParentAnalysisObject(obj)
 
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
         self.NeedsCaseRewriteOrig = self.analysis_obj.NeedsCaseRewrite
@@ -297,7 +298,7 @@ class _TaskPanelCfdZone:
             storeIfChanged(self.obj, 'PressureSpecified', self.form.checkPressure.isChecked())
             storeIfChanged(self.obj, 'Pressure', getQuantity(self.form.inputPressure))
             storeIfChanged(self.obj, 'VolumeFractionSpecified', self.form.checkAlpha.isChecked())
-            storeIfChanged(self.obj, 'VolumeFractionSpecified', self.alphas)
+            storeIfChanged(self.obj, 'VolumeFractions', self.alphas)
 
         if self.obj.ShapeRefs != self.ShapeRefsOrig:
             refstr = "FreeCAD.ActiveDocument.{}.ShapeRefs = [\n".format(self.obj.Name)
