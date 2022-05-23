@@ -26,7 +26,7 @@ from math import ceil
 import FreeCAD
 import FreeCADGui
 from CfdTools import setQuantity, getQuantity, indexOrDefault
-from core.mesh.dynamic import CfdDynamicMeshRefinement as CfdDynamicMeshRefinement
+from core.mesh.dynamic import CfdDynamicMeshRefinement
 
 
 class TaskPanelCfdDynamicMeshRefinement:

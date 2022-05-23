@@ -65,7 +65,7 @@ class _CommandCfdReportingFunctions:
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CfdReportingFunctions object")
         FreeCADGui.doCommand("")
-        FreeCADGui.addModule("core.functionobjects.reporting.CfdReportingFunctions as CfdReportingFunctions")
+        FreeCADGui.doCommand("from core.functionobjects.reporting import CfdReportingFunctions")
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdReportingFunctions.makeCfdReportingFunctions())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
@@ -198,7 +198,7 @@ class _ViewProviderCfdReportingFunctions:
             CfdTools.cfdErrorBox("Reporting function must have a parent analysis object")
             return False
 
-        from core.functionobjects.reporting import TaskPanelCfdReportingFunctions as TaskPanelCfdReportingFunctions
+        from core.functionobjects.reporting import TaskPanelCfdReportingFunctions
         import importlib
         importlib.reload(TaskPanelCfdReportingFunctions)
         taskd = TaskPanelCfdReportingFunctions.TaskPanelCfdReportingFunctions(self.Object)
