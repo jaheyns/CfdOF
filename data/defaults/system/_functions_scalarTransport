@@ -5,31 +5,24 @@
         libs            ("libsolverFunctionObjects.so");
 
         field           %(scalarTransportFunctions/%(0%)/FieldName%);
-        phi             %(scalarTransportFunctions/%(0%)/FluxFieldName%);
-        rho             %(scalarTransportFunctions/%(0%)/DensityFieldName%);
-        phase           %(scalarTransportFunctions/%(0%)/PhaseFieldName%);
 
-%{%(scalarTransportFunctions/%(0%)/ResetOnStartup%)
+%{%(scalarTransportFunctions/%(0%)/DiffusivityFixed%)
 %:True
-        resetOnStartUp  true;
-%:False
-        resetOnStartUp  false;
-%}
-
-        schemesField    %(scalarTransportFunctions/%(0%)/SchemeFieldName%);
-
         D               %(scalarTransportFunctions/%(0%)/DiffusivityFixedValue%);
-        nut             %(scalarTransportFunctions/%(0%)/DiffusivityFieldName%);
 
+%}
+%{%(scalarTransportFunctions/%(0%)/RestrictToPhase%)
+%:True
+        phase           alpha.%(scalarTransportFunctions/%(0%)/PhaseName%);
+        bounded01       false;
+
+%}
         // Run-time selectable sources
         fvOptions
         {
             %(0%)
             {
                 type            scalarSemiImplicitSource;
-                timeStart       0;
-                duration        999;
-                active          true;
                 selectionMode   points;
                 points
                 (
@@ -39,10 +32,11 @@
                 volumeMode      absolute;
                 injectionRateSuSp
                 {
-                    %(scalarTransportFunctions/%(0%)/FieldName%)     ( %(scalarTransportFunctions/%(0%)/InjectionRate%) 0 ); // kg/s
+                    %(scalarTransportFunctions/%(0%)/FieldName%)     ( %(scalarTransportFunctions/%(0%)/InjectionRate%) 0 );
                 }
 
             }
         }
     }
+
 %}

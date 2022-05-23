@@ -25,7 +25,7 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>200</height>
+       <height>400</height>
       </size>
      </property>
      <layout class="QGridLayout" name="gridLayout_4"/>

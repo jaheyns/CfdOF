@@ -20,19 +20,21 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
 * RANS turbulent flow supporting k-omega SST (incl. transition), k-epsilon, and Spalart-Allmaras models
 * LES turbulent flow supporting k-Equation, Smagorinsky and WALE (Wall bounded) models
+* DES turbulent flow supporting k-omega SST and Spalart-Allmaras DES, DDES and IDDES variants
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
 * Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
 * Porous regions and porous baffles
 * Basic material database
 * Flow initialisation with a potential solver
+* Solution of arbitrary passive scalar transport functions
 #### Meshing
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
 * Cut-cell Cartesian meshing with baffles (snappyHexMesh) and implicit / explicit snapping
 * Tetrahedral meshing using Gmsh, including conversion to polyhedral dual mesh
 * Post-meshing check mesh
 * Support for dynamic mesh adaptation for supported solvers
-#### Post processing and monitoring
+#### Post-processing and monitoring
 * Postprocessing using Paraview
 * Basic support for force-based function objects (Forces, Force Coefficients)
 * Basic support for probes

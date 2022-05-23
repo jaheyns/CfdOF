@@ -1,7 +1,7 @@
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam buoyantPimpleFoam hisa
 %{%(physics/Turbulence%)
-%:RANS
+%:RANS DES LES
 %[_header%]
 FoamFile
 {

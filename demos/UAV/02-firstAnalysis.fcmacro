@@ -39,7 +39,7 @@ referenceList = FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
 'Face74', 'Face75', 'Face76'))]
 FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.25
 FreeCAD.ActiveDocument.MeshRefinement.RefinementThickness = '100 mm'
-FreeCAD.ActiveDocument.MeshRefinement.NumberLayers = 1
+FreeCAD.ActiveDocument.MeshRefinement.NumberLayers = 0
 FreeCAD.ActiveDocument.MeshRefinement.ExpansionRatio = 1.2
 FreeCAD.ActiveDocument.MeshRefinement.FirstLayerHeight = '0 mm'
 FreeCAD.ActiveDocument.MeshRefinement.RegionEdgeRefinement = 1.0

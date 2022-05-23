@@ -33,7 +33,7 @@ import os
 
 # Constants
 OBJECT_NAMES = ["Force", "ForceCoefficients", "Probes"]
-OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches", 
+OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches",
     "Sample fields at specified locations"]
 
 # GUI
@@ -65,7 +65,7 @@ class _CommandCfdReportingFunctions:
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CfdReportingFunctions object")
         FreeCADGui.doCommand("")
-        FreeCADGui.addModule("core.functionobjects.reporting.CfdReportingFunctions as CfdReportingFunctions")
+        FreeCADGui.doCommand("from core.functionobjects.reporting import CfdReportingFunctions")
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdReportingFunctions.makeCfdReportingFunctions())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
@@ -176,7 +176,9 @@ class _ViewProviderCfdReportingFunctions:
         return mode
 
     def updateData(self, obj, prop):
-        return
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        if analysis_obj and not analysis_obj.Proxy.loading:
+            analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         CfdTools.setCompSolid(vobj)
@@ -196,7 +198,7 @@ class _ViewProviderCfdReportingFunctions:
             CfdTools.cfdErrorBox("Reporting function must have a parent analysis object")
             return False
 
-        import core.functionobjects.reporting.TaskPanelCfdReportingFunctions as TaskPanelCfdReportingFunctions
+        from core.functionobjects.reporting import TaskPanelCfdReportingFunctions
         import importlib
         importlib.reload(TaskPanelCfdReportingFunctions)
         taskd = TaskPanelCfdReportingFunctions.TaskPanelCfdReportingFunctions(self.Object)

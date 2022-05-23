@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>   *
 # *   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>        *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License (LGPL)    *
@@ -25,12 +25,13 @@
 # ***************************************************************************
 
 
-import FreeCAD
-import CfdTools
 import os
-from CfdTools import addObjectProperty
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
+import CfdTools
+from CfdTools import addObjectProperty
+import _TaskPanelCfdFluidProperties
 
 
 def makeCfdFluidMaterial(name):
@@ -85,7 +86,7 @@ class _CfdMaterial:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        # Not currently used
+        # Not currently used, but required for parent class
         addObjectProperty(obj, "References", [], "App::PropertyLinkSubList", "Material", "List of material shapes")
 
         # Compatibility with FEM material object
@@ -113,6 +114,7 @@ class _CfdMaterial:
 class _ViewProviderCfdFluidMaterial:
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.taskd = None
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "material.svg")
@@ -123,18 +125,12 @@ class _ViewProviderCfdFluidMaterial:
         self.Object = vobj.Object
 
     def updateData(self, obj, prop):
-        return
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        if analysis_obj and not analysis_obj.Proxy.loading:
+            analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         return
-
-    def doubleClicked(self, vobj):
-        doc = FreeCADGui.getDocument(vobj.Object.Document)
-        if not doc.getInEdit():
-            doc.setEdit(vobj.Object.Name)
-        else:
-            FreeCAD.Console.PrintError('Existing task dialog already open\n')
-        return True
 
     def setEdit(self, vobj, mode):
         analysis_object = CfdTools.getParentAnalysisObject(self.Object)
@@ -145,15 +141,27 @@ class _ViewProviderCfdFluidMaterial:
         if not physics_model:
             CfdTools.cfdErrorBox("Analysis object must have a physics object")
             return False
-        import _TaskPanelCfdFluidProperties
-        taskd = _TaskPanelCfdFluidProperties.TaskPanelCfdFluidProperties(self.Object, physics_model)
-        taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(taskd)
+        import importlib
+        importlib.reload(_TaskPanelCfdFluidProperties)
+        self.taskd = _TaskPanelCfdFluidProperties.TaskPanelCfdFluidProperties(self.Object, physics_model)
+        self.taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(self.taskd)
+        return True
+
+    def doubleClicked(self, vobj):
+        doc = FreeCADGui.getDocument(vobj.Object.Document)
+        if not doc.getInEdit():
+            doc.setEdit(vobj.Object.Name)
+        else:
+            FreeCAD.Console.PrintError('Task dialog already open\n')
+            FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def unsetEdit(self, vobj, mode):
+        if self.taskd:
+            self.taskd.closing()
+            self.taskd = None
         FreeCADGui.Control.closeDialog()
-        return
 
     def __getstate__(self):
         return None

@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -25,14 +25,15 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
-import CfdTools
-from CfdTools import addObjectProperty
 import os
 import os.path
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
+import CfdTools
+from CfdTools import addObjectProperty
+import _TaskPanelCfdInitialiseInternalFlowField
 
 
 def makeCfdInitialFlowField(name="InitialiseFields"):
@@ -121,10 +122,10 @@ class _CfdInitialVariables:
                           "Turbulent viscosity")
 
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
-        addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary name")
-        addObjectProperty(obj, 'BoundaryP', None, "App::PropertyLink", "", "P boundary name")
-        addObjectProperty(obj, 'BoundaryT', None, "App::PropertyLink", "", "T boundary name")
-        addObjectProperty(obj, 'BoundaryTurb', None, "App::PropertyLink", "", "Turbulence boundary name")
+        addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary")
+        addObjectProperty(obj, 'BoundaryP', None, "App::PropertyLink", "", "P boundary")
+        addObjectProperty(obj, 'BoundaryT', None, "App::PropertyLink", "", "T boundary")
+        addObjectProperty(obj, 'BoundaryTurb', None, "App::PropertyLink", "", "Turbulence boundary")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
@@ -134,6 +135,7 @@ class _ViewProviderCfdInitialseInternalFlowField:
 
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.taskd = None
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "initialise.svg")
@@ -144,7 +146,11 @@ class _ViewProviderCfdInitialseInternalFlowField:
         self.Object = vobj.Object
 
     def updateData(self, obj, prop):
-        return
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        # Ignore Shape updates as these relate to linked patches
+        if prop != 'Shape':
+            if analysis_obj and not analysis_obj.Proxy.loading:
+                analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         return
@@ -161,31 +167,28 @@ class _ViewProviderCfdInitialseInternalFlowField:
         boundaries = CfdTools.getCfdBoundaryGroup(analysis_object)
         material_objs = CfdTools.getMaterials(analysis_object)
 
-        import _TaskPanelCfdInitialiseInternalFlowField
-        taskd = _TaskPanelCfdInitialiseInternalFlowField._TaskPanelCfdInitialiseInternalFlowField(
+        import importlib
+        importlib.reload(_TaskPanelCfdInitialiseInternalFlowField)
+        self.taskd = _TaskPanelCfdInitialiseInternalFlowField._TaskPanelCfdInitialiseInternalFlowField(
             self.Object, physics_model, boundaries, material_objs)
-        taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(taskd)
+        self.taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(self.taskd)
         return True
 
-    def unsetEdit(self, vobj, mode):
-        FreeCADGui.Control.closeDialog()
-        return
-
-    # Override doubleClicked to make sure no other Material taskd (and thus no selection observer) is still active
     def doubleClicked(self, vobj):
         doc = FreeCADGui.getDocument(vobj.Object.Document)
-        if not CfdTools.getActiveAnalysis():
-            analysis_obj = CfdTools.getParentAnalysisObject(self.Object)
-            if analysis_obj:
-                CfdTools.setActiveAnalysis(analysis_obj)
-            else:
-                CfdTools.cfdErrorBox('No parent analysis object detected')
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:
-            FreeCAD.Console.PrintError('Active Task Dialog found! Please close this one first!\n')
+            FreeCAD.Console.PrintError('Task dialog already active\n')
+            FreeCADGui.Control.showDialog(self.taskd)
         return True
+
+    def unsetEdit(self, vobj, mode):
+        if self.taskd:
+            self.taskd.closing()
+            self.taskd = None
+        FreeCADGui.Control.closeDialog()
 
     def __getstate__(self):
         return None

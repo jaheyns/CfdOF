@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>   *
 # *   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>        *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
-# *   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software; you can redistribute it and/or modify  *
@@ -25,14 +25,14 @@
 # ***************************************************************************
 
 
-import FreeCAD
-import CfdTools
-from CfdTools import addObjectProperty
 import os
 import os.path
+import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
+import CfdTools
+from CfdTools import addObjectProperty, storeIfChanged
 
 
 def makeCfdPhysicsSelection(name="PhysicsModel"):
@@ -146,6 +146,7 @@ class _CfdPhysicsModel:
 class _ViewProviderPhysicsSelection:
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.taskd = None
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.get_module_path(), "Gui", "Resources", "icons", "physics.svg")
@@ -157,21 +158,21 @@ class _ViewProviderPhysicsSelection:
         self.bubbles = None
 
     def updateData(self, obj, prop):
-        return
+        analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        if analysis_obj and not analysis_obj.Proxy.loading:
+            analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         return
 
     def setEdit(self, vobj, mode):
         import _TaskPanelCfdPhysicsSelection
-        taskd = _TaskPanelCfdPhysicsSelection._TaskPanelCfdPhysicsSelection(self.Object)
-        taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(taskd)
+        import importlib
+        importlib.reload(_TaskPanelCfdPhysicsSelection)
+        self.taskd = _TaskPanelCfdPhysicsSelection._TaskPanelCfdPhysicsSelection(self.Object)
+        self.taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(self.taskd)
         return True
-
-    def unsetEdit(self, vobj, mode):
-        FreeCADGui.Control.closeDialog()
-        return
 
     def doubleClicked(self, vobj):
         # Make sure no other task dialog still active
@@ -179,8 +180,15 @@ class _ViewProviderPhysicsSelection:
         if not doc.getInEdit():
             doc.setEdit(vobj.Object.Name)
         else:
-            FreeCAD.Console.PrintError('Existing task dialog already open\n')
+            FreeCAD.Console.PrintError('Task dialog already active\n')
+            FreeCADGui.Control.showDialog(self.taskd)
         return True
+
+    def unsetEdit(self, vobj, mode):
+        if self.taskd:
+            self.taskd.closing()
+            self.taskd = None
+        FreeCADGui.Control.closeDialog()
 
     def __getstate__(self):
         return None

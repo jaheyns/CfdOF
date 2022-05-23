@@ -1,12 +1,13 @@
 %{%(scalarTransportFunctionsEnabled%)
 %:True
+%{%(scalarTransportFunctions%)
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    object      S;
+    class       volScalarField;
+    object      %(scalarTransportFunctions/%(0%)/FieldName%);
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -21,26 +22,16 @@ boundaryField
 %{%(boundaries/%(0%)/BoundaryType%)
 %:empty
 %[0/_boundary_empty%]
-
 %:wall
-    %(0%)
-    {
-        type        fixedValue;
-        value       $internalField;
-    }
+%[0/_boundary_zeroGradient%]
 %:slipWall
 %[0/_boundary_zeroGradient%]
-
-%:inlet open
+%:inlet open outlet
     %(0%)
     {
-        type        fixedValue;
+        type        inletOutlet;
+        inletValue  $internalField;
         value       $internalField;
-    }
-%:outlet
-    %(0%)
-    {
-        type        zeroGradient;
     }
 %:constraint
 %[0/_boundary_constraint%]
@@ -49,4 +40,5 @@ boundaryField
 %}
 %}
 }
+%} 0/%(scalarTransportFunctions/%(0%)/FieldName%)
 %}
