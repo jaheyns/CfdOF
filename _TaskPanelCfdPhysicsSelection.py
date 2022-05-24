@@ -238,20 +238,19 @@ class _TaskPanelCfdPhysicsSelection:
         storeIfChanged(self.obj, 'gy', getQuantity(self.form.gy))
         storeIfChanged(self.obj, 'gz', getQuantity(self.form.gz))
 
-        FreeCADGui.doCommand("obj.SRFModelEnabled = {}".format(self.form.srfCheckBox.isChecked()))
-        FreeCADGui.doCommand("obj.SRFModelRPM = '{}'".format(getQuantity(self.form.inputSRFRPM)))
-        FreeCADGui.doCommand("obj.SRFModelCoR.x "
-                             "= '{}'".format(self.form.inputSRFCoRx.property("quantity").Value))
-        FreeCADGui.doCommand("obj.SRFModelCoR.y "
-                             "= '{}'".format(self.form.inputSRFCoRy.property("quantity").Value))
-        FreeCADGui.doCommand("obj.SRFModelCoR.z "
-                             "= '{}'".format(self.form.inputSRFCoRz.property("quantity").Value))
-        FreeCADGui.doCommand("obj.SRFModelAxis.x "
-                             "= '{}'".format(self.form.inputSRFAxisx.property("quantity").Value))
-        FreeCADGui.doCommand("obj.SRFModelAxis.y "
-                             "= '{}'".format(self.form.inputSRFAxisy.property("quantity").Value))
-        FreeCADGui.doCommand("obj.SRFModelAxis.z "
-                             "= '{}'".format(self.form.inputSRFAxisz.property("quantity").Value))
+        if self.form.srfCheckBox.isChecked():
+            storeIfChanged(self.obj, 'SRFModelEnabled', self.form.srfCheckBox.isChecked())
+            storeIfChanged(self.obj, 'SRFModelRPM', self.form.inputSRFRPM.text())
+            centre_of_rotation = FreeCAD.Vector(
+                self.form.inputSRFCoRx.property("quantity").Value,
+                self.form.inputSRFCoRy.property("quantity").Value,
+                self.form.inputSRFCoRz.property("quantity").Value)
+            storeIfChanged(self.obj, 'SRFModelCoR', centre_of_rotation)
+            model_axis = FreeCAD.Vector(
+                self.form.inputSRFAxisx.property("quantity").Value,
+                self.form.inputSRFAxisy.property("quantity").Value,
+                self.form.inputSRFAxisz.property("quantity").Value)
+            storeIfChanged(self.obj, 'SRFModelAxis', model_axis)
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
