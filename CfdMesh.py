@@ -186,6 +186,11 @@ class _ViewProviderCfdMesh:
         for obj in FreeCAD.ActiveDocument.Objects:
             if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdMesh):
                 obj.ViewObject.show()
+
+        if self.Object.Part is None:
+            FreeCAD.Console.PrintError("Meshed part no longer exists")
+            return False
+
         import _TaskPanelCfdMesh
         import importlib
         importlib.reload(_TaskPanelCfdMesh)
@@ -208,7 +213,7 @@ class _ViewProviderCfdMesh:
             gui_doc.setEdit(vobj.Object.Name)
         else:
             FreeCAD.Console.PrintError('Task dialog already open\n')
-            FreeCADGui.Control.showDialog(self.taskd)
+            FreeCADGui.Control.showTaskView()
         return True
 
     def onDelete(self, feature, subelements):

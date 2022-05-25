@@ -59,6 +59,7 @@ class ViewProviderCfdScalarTransportFunction:
             doc.setEdit(vobj.Object.Name)
         else:
             FreeCAD.Console.PrintError('Task dialog already active\n')
+            FreeCADGui.Control.showTaskView()
         return True
 
     def setEdit(self, vobj, mode):

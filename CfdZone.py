@@ -261,7 +261,7 @@ class _ViewProviderCfdZone:
             doc.setEdit(vobj.Object.Name)
         else:
             FreeCAD.Console.PrintError('Task dialog already active\n')
-            FreeCADGui.Control.showDialog(self.taskd)
+            FreeCADGui.Control.showTaskView()
         return True
 
     def unsetEdit(self, vobj, mode):

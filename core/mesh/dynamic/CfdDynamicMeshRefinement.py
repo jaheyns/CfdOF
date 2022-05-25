@@ -184,6 +184,7 @@ class _ViewProviderCfdDynamicMeshRefinement:
             doc.setEdit(vobj.Object.Name)
         else:
             FreeCAD.Console.PrintError('Task dialog already open\n')
+            FreeCADGui.Control.showTaskView()
         return True
 
     def __getstate__(self):
