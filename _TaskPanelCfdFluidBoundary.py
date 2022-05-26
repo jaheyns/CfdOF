@@ -56,6 +56,7 @@ class TaskPanelCfdFluidBoundary:
         self.BoundaryTypeOrig = str(self.obj.BoundaryType)
         self.BoundarySubTypeOrig = str(self.obj.BoundarySubType)
         self.NeedsMeshRewriteOrig = self.analysis_obj.NeedsMeshRewrite
+        self.NeedsCaseRewriteOrig = self.analysis_obj.NeedsCaseRewrite
 
         self.alphas = {}
 
@@ -345,6 +346,7 @@ class TaskPanelCfdFluidBoundary:
 
     def accept(self):
         self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
+        self.analysis_obj.NeedsCaseRewrite = self.NeedsCaseRewriteOrig
 
         if self.obj.Label.startswith("CfdFluidBoundary"):
             storeIfChanged(self.obj, 'Label', self.obj.BoundaryType)
@@ -437,6 +439,7 @@ class TaskPanelCfdFluidBoundary:
         self.obj.BoundaryType = self.BoundaryTypeOrig
         self.obj.BoundarySubType = self.BoundarySubTypeOrig
         self.analysis_obj.NeedsMeshRewrite = self.NeedsMeshRewriteOrig
+        self.analysis_obj.NeedsCaseRewrite = self.NeedsCaseRewriteOrig
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc_name = str(self.obj.Document.Name)
         FreeCAD.getDocument(doc_name).recompute()

@@ -379,7 +379,7 @@ class _CfdFluidBoundary:
         shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
             shape = Part.Shape()
-        if shape != obj.Shape:
+        if not CfdTools.isSameGeometry(shape, obj.Shape):
             obj.Shape = shape
         self.updateBoundaryColors(obj)
 
