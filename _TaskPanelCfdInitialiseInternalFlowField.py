@@ -268,29 +268,29 @@ class _TaskPanelCfdInitialiseInternalFlowField:
         boundaryT = self.form.comboBoundaryT.currentData()
         boundaryTurb = self.form.comboBoundaryTurb.currentData()
 
-        if boundaryU:
-            if self.obj.BoundaryU and boundaryU != self.obj.BoundaryU.Name:
+        if boundaryU and self.obj.UseInletUValues:
+            if not self.obj.BoundaryU or boundaryU != self.obj.BoundaryU.Name:
                 FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryU = FreeCAD.ActiveDocument.{}".format(
                     self.obj.Name, boundaryU))
-        else:
+        elif self.obj.BoundaryU:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryU = None".format(self.obj.Name))
-        if boundaryP:
-            if self.obj.BoundaryP and boundaryP != self.obj.BoundaryP.Name:
+        if boundaryP and self.obj.UseOutletPValue:
+            if not self.obj.BoundaryP or boundaryP != self.obj.BoundaryP.Name:
                 FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryP = FreeCAD.ActiveDocument.{}".format(
                     self.obj.Name, boundaryP))
-        else:
+        elif self.obj.BoundaryP:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryP = None".format(self.obj.Name))
-        if boundaryT:
-            if self.obj.BoundaryT and boundaryT != self.obj.BoundaryT.Name:
+        if boundaryT and self.obj.UseInletTemperatureValue:
+            if not self.obj.BoundaryT or boundaryT != self.obj.BoundaryT.Name:
                 FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryT = FreeCAD.ActiveDocument.{}".format(
                     self.obj.Name, boundaryT))
-        else:
+        elif self.obj.BoundaryT:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryT = None".format(self.obj.Name))
-        if boundaryTurb:
-            if self.obj.BoundaryTurb and boundaryTurb != self.obj.BoundaryTurb.Name:
+        if boundaryTurb and self.obj.UseInletTurbulenceValues:
+            if not self.obj.BoundaryTurb or boundaryTurb != self.obj.BoundaryTurb.Name:
                 FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryTurb = FreeCAD.ActiveDocument.{}".format(
                     self.obj.Name, boundaryTurb))
-        else:
+        elif self.obj.BoundaryTurb:
             FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.BoundaryTurb = None".format(self.obj.Name))
 
     def reject(self):
