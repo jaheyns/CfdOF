@@ -414,8 +414,7 @@ class TaskPanelCfdFluidBoundary:
         storeIfChanged(self.obj, 'MassFlowRate', getQuantity(self.form.inputMassFlowRate))
         storeIfChanged(self.obj, 'VolFlowRate', getQuantity(self.form.inputVolFlowRate))
 
-        FreeCADGui.doCommand("bc.RelativeToFrame "
-                             "= {}".format(self.form.cb_relative_srf.isChecked()))
+        storeIfChanged(self.obj, 'RelativeToFrame', self.form.cb_relative_srf.isChecked())
 
         # Pressure
         storeIfChanged(self.obj, 'Pressure', getQuantity(self.form.inputPressure))
@@ -429,27 +428,24 @@ class TaskPanelCfdFluidBoundary:
         storeIfChanged(self.obj, 'HeatTransferCoeff', getQuantity(self.form.inputHeatTransferCoeff))
 
         # Periodic
-        FreeCADGui.doCommand("bc.RotationalPeriodic "
-                             "= {}".format(self.form.rb_rotational_periodic.isChecked()))
-        FreeCADGui.doCommand("bc.PeriodicCentreOfRotation.x "
-                             "= {}".format(self.form.input_corx.property("quantity").Value))
-        FreeCADGui.doCommand("bc.PeriodicCentreOfRotation.y "
-                             "= {}".format(self.form.input_cory.property("quantity").Value))
-        FreeCADGui.doCommand("bc.PeriodicCentreOfRotation.z "
-                             "= {}".format(self.form.input_corz.property("quantity").Value))
-        FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.x "
-                             "= {}".format(self.form.input_axisx.property("quantity").Value))
-        FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.y "
-                             "= {}".format(self.form.input_axisy.property("quantity").Value))
-        FreeCADGui.doCommand("bc.PeriodicCentreOfRotationAxis.z "
-                             "= {}".format(self.form.input_axisz.property("quantity").Value))
+        storeIfChanged(self.obj, 'RotationalPeriodic', self.form.rb_rotational_periodic.isChecked())
+        centre_of_rotation = FreeCAD.Vector(
+            self.form.input_corx.property("quantity").Value,
+            self.form.input_cory.property("quantity").Value,
+            self.form.input_corz.property("quantity").Value)
+        storeIfChanged(self.obj, 'PeriodicCentreOfRotation', centre_of_rotation)
 
-        FreeCADGui.doCommand("bc.PeriodicSeparationVector.x "
-                             "= {}".format(self.form.input_sepx.property("quantity").Value))
-        FreeCADGui.doCommand("bc.PeriodicSeparationVector.y "
-                             "= {}".format(self.form.input_sepy.property("quantity").Value))
-        FreeCADGui.doCommand("bc.PeriodicSeparationVector.z "
-                             "= {}".format(self.form.input_sepz.property("quantity").Value))
+        rotation_axis = FreeCAD.Vector(
+            self.form.input_axisx.propertx("quantity").Value,
+            self.form.input_axisx.property("quantity").Value,
+            self.form.input_axisx.propertz("quantity").Value)
+        storeIfChanged(self.obj, 'PeriodicCentreOfRotationAxis', rotation_axis)
+
+        separation_vector = FreeCAD.Vector(
+            self.form.input_sepx.property("quantity").Value,
+            self.form.input_sepy.property("quantity").Value,
+            self.form.input_sepz.property("quantity").Value)
+        storeIfChanged(self.obj, 'PeriodicSeparationVector', separation_vector)
 
         # Turbulence
         if self.turb_model in CfdFluidBoundary.TURBULENT_INLET_SPEC:
