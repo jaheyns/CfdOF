@@ -27,6 +27,20 @@ for the user. Generally improve the logging and messages that are printed there.
 e.g. (there are many more!):
     * Switching a case to/from incompressible and compressible and trying to write it without
     re-setting the material properties to a valid type
+* Test and fix running under WSL on Windows
+  
+### Testing
+
+* More 'demo' cases are needed, which are specified as macros and run during the testing runs
+  * Multiphase case(s)
+  * Cases with postprocessing
+  * Buoyant case(s)
+* Additional unit tests which also test the functionality of the task panels, are needed. Currently testing is only
+  done based on macros. Somehow, interaction with the GUI itself needs to be simulated.
+
+### Documentation
+
+* Formal documentation should be added to FreeCAD Wiki.
 
 ### Future scheduled cleanup
 * On release of FreeCAD v0.21, stop supporting FreeCAD <= 0.19
