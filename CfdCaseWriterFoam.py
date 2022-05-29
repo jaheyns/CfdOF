@@ -32,6 +32,7 @@ from FreeCAD import Units
 import CfdTools
 import TemplateBuilder
 from CfdTools import cfdMessage
+import CfdMeshTools
 
 
 class CfdCaseWriterFoam:
@@ -593,12 +594,9 @@ class CfdCaseWriterFoam:
                                     "triSurface")
                 if not os.path.exists(path):
                     os.makedirs(path)
-                fname = os.path.join(path, r[0].Name+u".stl")
-                import MeshPart
                 sel_obj = r[0]
                 shape = sel_obj.Shape
-                meshStl = MeshPart.meshFromShape(shape, LinearDeflection=self.mesh_obj.STLLinearDeflection)
-                meshStl.write(fname)
+                CfdMeshTools.writeSurfaceMeshFromShape(shape, path, r[0].Name, self.mesh_obj)
                 print("Successfully wrote stl surface\n")
 
     def processPorousZoneProperties(self):
