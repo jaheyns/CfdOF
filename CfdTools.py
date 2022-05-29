@@ -47,10 +47,10 @@ import Part
 import BOPTools
 from BOPTools import SplitFeatures
 import CfdConsoleProcess
+from PySide import QtCore
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
-    from PySide import QtCore
     from PySide.QtGui import QFormLayout, QGridLayout
 
 
@@ -1218,6 +1218,23 @@ def startParaview(case_path, script_name, console_message_fn):
             console_message_fn("Paraview started")
         else:
             console_message_fn("Error starting paraview")
+    return proc
+
+
+def startGmsh(working_dir, args, console_message_fn, stdout_fn=None, stderr_fn=None):
+    proc = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=stdout_fn, stderr_hook=stderr_fn)
+    gmsh_cmd = getGmshExecutable()
+
+    if not gmsh_cmd:
+        console_message_fn("GMSH not found")
+    else:
+        console_message_fn("Running " + gmsh_cmd + " " + ' '.join(args))
+
+        proc.start([gmsh_cmd] + args, working_dir=working_dir)
+        if proc.waitForStarted():
+            console_message_fn("GMSH started")
+        else:
+            console_message_fn("Error starting GMSH")
     return proc
 
 

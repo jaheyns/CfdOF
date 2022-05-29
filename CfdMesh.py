@@ -99,7 +99,10 @@ class _CfdMesh:
                           "Name of directory in which the mesh is created")
 
         # Setup and utility
-        addObjectProperty(obj, 'STLLinearDeflection', 0.05, "App::PropertyFloat", "", "STL linear deflection")
+        addObjectProperty(obj, 'STLRelativeLinearDeflection', 1, "App::PropertyFloat", "Surface triangulation", 
+                          "Maximum relative linear deflection for built-in surface triangulation")
+        addObjectProperty(obj, 'STLAngularMeshDensity', 100, "App::PropertyFloat", "Surface triangulation", 
+                          "Mesh elements per 360 degrees for surface triangulation with GMSH")
 
         addObjectProperty(obj, 'NumberOfProcesses', 1, "App::PropertyInteger", "",
                           "Number of parallel processes (only applicable to cfMesh and snappyHexMesh)")

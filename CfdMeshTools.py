@@ -27,6 +27,7 @@ import FreeCAD
 from FreeCAD import Units
 import os
 import shutil
+import tempfile
 import CfdTools
 import math
 import MeshPart
@@ -368,9 +369,8 @@ class CfdMeshTools:
                             bc_obj.Label, str(re)))
                     solid_name = bc_obj.Name + "_" + str(ri)
                     if shape:
-                        CfdTools.cfdMessage("Triangulating baffle {}, section {} ...".format(bc_obj.Label, ri))
-                        facemesh = MeshPart.meshFromShape(
-                            shape, LinearDeflection=self.mesh_obj.STLLinearDeflection)
+                        CfdTools.cfdMessage("Triangulating baffle {}, section {}\n".format(bc_obj.Label, ri))
+                        facemesh = writeSurfaceMeshFromShape(shape, self.triSurfaceDir, solid_name, self.mesh_obj)
 
                         CfdTools.cfdMessage(" writing to file\n")
                         with open(os.path.join(self.triSurfaceDir, solid_name + '.stl'), 'w') as fid:
@@ -439,7 +439,7 @@ class CfdMeshTools:
                         else:
                             mr_patch_name = self.patch_names[bi][mr_id+1]
 
-                        CfdTools.cfdMessage("Triangulating mesh refinement region {}, section {} ...".format(
+                        CfdTools.cfdMessage("Triangulating mesh refinement region {}, section {}\n".format(
                             mr_obj.Label, bi))
 
                         try:
@@ -448,11 +448,7 @@ class CfdMeshTools:
                             raise RuntimeError("Error processing mesh refinement region {}: {}".format(
                                 mr_obj.Label, str(re)))
                         if shape:
-                            facemesh = MeshPart.meshFromShape(shape, LinearDeflection=self.mesh_obj.STLLinearDeflection)
-
-                            CfdTools.cfdMessage(" writing to file\n")
-                            with open(os.path.join(self.triSurfaceDir, mr_patch_name + '.stl'), 'w') as fid:
-                                CfdTools.writePatchToStl(mr_patch_name, facemesh, fid, self.scale)
+                            writeSurfaceMeshFromShape(shape, self.triSurfaceDir, mr_patch_name, self.mesh_obj)
 
                         refinement_level = CfdTools.relLenToRefinementLevel(mr_obj.RelativeLength)
                         if self.mesh_obj.MeshUtility == 'cfMesh':
@@ -561,11 +557,13 @@ class CfdMeshTools:
                             # Put together the faces making up this patch; mesh them and output to file
                             patch_shape = Part.makeCompound([self.mesh_obj.Part.Shape.Faces[f] for f in patch_faces])
                             CfdTools.cfdMessage(
-                                "Triangulating part {}, patch {} ...".format(self.part_obj.Label, patch_name))
-                            mesh_stl = MeshPart.meshFromShape(
-                                patch_shape, LinearDeflection=self.mesh_obj.STLLinearDeflection)
-                            CfdTools.cfdMessage(" writing to file\n")
-                            CfdTools.writePatchToStl(patch_name, mesh_stl, fid, self.scale)
+                                "Triangulating part {}, patch {}\n".format(self.part_obj.Label, patch_name))
+                            mesh_stl = writeSurfaceMeshFromShape(
+                                patch_shape, self.triSurfaceDir, patch_name, self.mesh_obj)
+                            # Append to the main file
+                            with open(os.path.join(self.triSurfaceDir, patch_name + '.stl'), 'r') as fid2:
+                                for l in fid2:
+                                    fid.write(l)
 
     def loadSurfMesh(self):
         if not self.error:
@@ -731,3 +729,33 @@ class CfdMeshTools:
 
         self.analysis.NeedsMeshRewrite = False
         CfdTools.cfdMessage("Successfully wrote meshCase to folder {}\n".format(self.meshCaseDir))
+
+def writeSurfaceMeshFromShape(shape, path, name, mesh_obj):
+    prefs = CfdTools.getPreferencesLocation()
+    use_gmsh = FreeCAD.ParamGet(prefs).GetBool("SurfaceTriangulationUsingGMSH", False)
+    max_num_threads = FreeCAD.ParamGet(prefs).GetUnsigned("SurfaceTriangulationMaxThreads", 0)
+    output_file_name = os.path.join(path, name + '.stl')
+    scaling_factor = 1./FreeCAD.Units.Quantity(1, FreeCAD.Units.Length).getValueAs("m")
+    if use_gmsh:
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            settings = {
+                'Name': name, 
+                'OutputFileName': output_file_name, 
+                'AngularMeshDensity': mesh_obj.STLAngularMeshDensity, 
+                'ScalingFactor': scaling_factor}
+            TemplateBuilder.TemplateBuilder(
+                tmpdirname, os.path.join(CfdTools.get_module_path(), "data", "defaultsSurfaceMesh"), settings)
+            shape.exportBrep(os.path.join(tmpdirname, name+'.brep'))
+            # Run gmsh...
+            if max_num_threads < 1:
+                import multiprocessing
+                max_num_threads = multiprocessing.cpu_count()  # This is the virtual CPU count, i.e. max num threads
+            proc = CfdTools.startGmsh(
+                tmpdirname, ['-nt', str(max_num_threads), '-', name+'.geo'], (lambda msg: CfdTools.cfdMessage(msg+'\n')))
+            if not proc.waitForFinished():
+                raise RuntimeError("GMSH command failed")
+    else:
+        facemesh = MeshPart.meshFromShape(
+            shape, LinearDeflection=mesh_obj.STLRelativeLinearDeflection, Relative=True)
+        with open(output_file_name, 'w') as fid:
+            CfdTools.writePatchToStl(name, facemesh, fid, scaling_factor)
