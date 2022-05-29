@@ -370,11 +370,7 @@ class CfdMeshTools:
                     solid_name = bc_obj.Name + "_" + str(ri)
                     if shape:
                         CfdTools.cfdMessage("Triangulating baffle {}, section {}\n".format(bc_obj.Label, ri))
-                        facemesh = writeSurfaceMeshFromShape(shape, self.triSurfaceDir, solid_name, self.mesh_obj)
-
-                        CfdTools.cfdMessage(" writing to file\n")
-                        with open(os.path.join(self.triSurfaceDir, solid_name + '.stl'), 'w') as fid:
-                            CfdTools.writePatchToStl(solid_name, facemesh, fid, self.scale)
+                        writeSurfaceMeshFromShape(shape, self.triSurfaceDir, solid_name, self.mesh_obj)
 
                         if ri > 0:  # The parts of the baffle corresponding to a surface mesh region obj
                             mr_obj = mr_objs[ri-1]
