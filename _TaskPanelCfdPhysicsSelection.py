@@ -41,6 +41,7 @@ DES_MODELS = ['kOmegaSSTDES', 'kOmegaSSTDDES', 'kOmegaSSTIDDES', 'SpalartAllmara
               'SpalartAllmarasIDDES']
 LES_MODELS = ['kEqn', 'Smagorinsky', 'WALE']
 
+
 class _TaskPanelCfdPhysicsSelection:
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
@@ -64,6 +65,15 @@ class _TaskPanelCfdPhysicsSelection:
         self.load()
 
     def load(self):
+
+        self.form.radioButtonSteady.toggled.connect(self.updateUI)
+        self.form.radioButtonTransient.toggled.connect(self.updateUI)
+        self.form.radioButtonSinglePhase.toggled.connect(self.updateUI)
+        self.form.radioButtonFreeSurface.toggled.connect(self.updateUI)
+        self.form.radioButtonIncompressible.toggled.connect(self.updateUI)
+        self.form.radioButtonCompressible.toggled.connect(self.updateUI)
+        self.form.checkBoxHighMach.toggled.connect(self.updateUI)
+        self.form.srfCheckBox.toggled.connect(self.updateUI)
 
         # Time
         if self.obj.Time == 'Steady':
@@ -149,10 +159,13 @@ class _TaskPanelCfdPhysicsSelection:
             (self.form.radioButtonCompressible.isChecked() and not self.form.checkBoxHighMach.isChecked()))
 
         # SRF model
-        srf_capable = (self.form.srfCheckBox.isChecked() and self.form.radioButtonSteady.isChecked()
-                      and not self.form.radioButtonCompressible.isChecked())
-        self.form.srfFrame.setEnabled(srf_capable)
-        self.form.srfCheckBox.setChecked(srf_capable)
+        srf_capable = (self.form.radioButtonSteady.isChecked() and not self.form.radioButtonCompressible.isChecked())
+        srf_should_be_unchecked = (self.form.radioButtonCompressible.isChecked() or self.form.radioButtonTransient.isChecked()
+                               or self.form.radioButtonFreeSurface.isChecked())
+        self.form.srfCheckBox.setEnabled(srf_capable)
+        if srf_should_be_unchecked:
+            self.form.srfCheckBox.setChecked(False)
+        self.form.srfFrame.setEnabled(self.form.srfCheckBox.isChecked())
 
         # Free surface
         if self.form.radioButtonFreeSurface.isChecked():
