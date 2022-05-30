@@ -551,7 +551,8 @@ class CfdMeshTools:
                         patch_name = self.patch_names[k][l]
                         if len(patch_faces):
                             # Put together the faces making up this patch; mesh them and output to file
-                            patch_shape = Part.makeCompound([self.mesh_obj.Part.Shape.Faces[f] for f in patch_faces])
+                            faces = self.mesh_obj.Part.Shape.Faces
+                            patch_shape = Part.makeCompound([faces[f] for f in patch_faces])
                             CfdTools.cfdMessage(
                                 "Triangulating part {}, patch {}\n".format(self.part_obj.Label, patch_name))
                             mesh_stl = writeSurfaceMeshFromShape(
