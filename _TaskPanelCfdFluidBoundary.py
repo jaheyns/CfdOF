@@ -436,9 +436,9 @@ class TaskPanelCfdFluidBoundary:
         storeIfChanged(self.obj, 'PeriodicCentreOfRotation', centre_of_rotation)
 
         rotation_axis = FreeCAD.Vector(
-            self.form.input_axisx.propertx("quantity").Value,
             self.form.input_axisx.property("quantity").Value,
-            self.form.input_axisx.propertz("quantity").Value)
+            self.form.input_axisy.property("quantity").Value,
+            self.form.input_axisz.property("quantity").Value)
         storeIfChanged(self.obj, 'PeriodicCentreOfRotationAxis', rotation_axis)
 
         separation_vector = FreeCAD.Vector(

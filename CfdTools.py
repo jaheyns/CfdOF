@@ -144,13 +144,18 @@ def getPhysicsModel(analysis_object):
 
 def getDynamicMeshAdaptation(analysis_object):
     is_present = False
-    for i in getMesh(analysis_object).Group:
-        if "DynamicMeshRefinement" in i.Name:
-            dynamic_mesh_adaption_model = i
-            is_present = True
-    if not is_present:
-        dynamic_mesh_adaption_model = None
-    return dynamic_mesh_adaption_model
+    mesh_obj = getMesh(analysis_object)
+
+    if mesh_obj is None:
+        return is_present
+    else:
+        for i in mesh_obj.Group:
+            if "DynamicMeshRefinement" in i.Name:
+                dynamic_mesh_adaption_model = i
+                is_present = True
+        if not is_present:
+            dynamic_mesh_adaption_model = None
+        return dynamic_mesh_adaption_model
 
 
 def getMeshObject(analysis_object):
@@ -441,6 +446,8 @@ def getPatchType(bcType, bcSubType):
             return 'wedge'
         elif bcSubType == 'empty':
             return 'empty'
+        elif bcSubType == 'cyclicAMI':
+            return 'cyclicAMI'
         else:
             return 'patch'
     else:
