@@ -732,7 +732,7 @@ def writeSurfaceMeshFromShape(shape, path, name, mesh_obj):
     use_gmsh = FreeCAD.ParamGet(prefs).GetBool("SurfaceTriangulationUsingGMSH", False)
     max_num_threads = FreeCAD.ParamGet(prefs).GetUnsigned("SurfaceTriangulationMaxThreads", 0)
     output_file_name = os.path.join(path, name + '.stl')
-    scaling_factor = 1./FreeCAD.Units.Quantity(1, FreeCAD.Units.Length).getValueAs("m")
+    scaling_factor = FreeCAD.Units.Quantity(1, FreeCAD.Units.Length).getValueAs("m")
     if use_gmsh:
         with tempfile.TemporaryDirectory() as tmpdirname:
             settings = {
