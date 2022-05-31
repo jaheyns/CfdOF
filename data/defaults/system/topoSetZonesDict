@@ -22,7 +22,7 @@ actions
         source  surfaceToCell;
         sourceInfo
         {
-            file            "constant/triSurface/%(0%)Scaled.stl";
+            file            "constant/triSurface/%(0%).stl";
             useSurfaceOrientation true;
             outsidePoints   ();    //Ignored if useSurfaceOrientation true
             includeCut      false; //Ignored if useSurfaceOrientation true
