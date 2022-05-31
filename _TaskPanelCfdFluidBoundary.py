@@ -29,7 +29,7 @@ import os.path
 import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtGui
+    from PySide import QtGui, QtCore
     from PySide.QtGui import QFormLayout
 import CfdTools
 from CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
@@ -115,6 +115,16 @@ class TaskPanelCfdFluidBoundary:
         # Periodics
         self.form.buttonGroupPeriodic.setId(self.form.rb_rotational_periodic, 0)
         self.form.buttonGroupPeriodic.setId(self.form.rb_translational_periodic, 1)
+
+        boundary_patches = CfdTools.getCfdBoundaryGroup(self.analysis_obj)
+        periodic_patches = []
+        for patch in boundary_patches:
+            if patch.BoundarySubType == 'cyclicAMI' and patch.Label != self.obj.Label:
+                periodic_patches.append(patch.Label)
+
+        self.form.comboBoxPeriodicPartner.addItems(periodic_patches)
+        pi = self.form.comboBoxPeriodicPartner.findText(self.obj.PeriodicPartner, QtCore.Qt.MatchFixedString)
+        self.form.comboBoxPeriodicPartner.setCurrentIndex(pi)
 
         self.form.rb_rotational_periodic.setChecked(self.obj.RotationalPeriodic)
         self.form.rb_translational_periodic.setChecked(not self.obj.RotationalPeriodic)
@@ -446,6 +456,8 @@ class TaskPanelCfdFluidBoundary:
             self.form.input_sepy.property("quantity").Value,
             self.form.input_sepz.property("quantity").Value)
         storeIfChanged(self.obj, 'PeriodicSeparationVector', separation_vector)
+
+        storeIfChanged(self.obj, 'PeriodicPartner', self.form.comboBoxPeriodicPartner.currentText())
 
         # Turbulence
         if self.turb_model in CfdFluidBoundary.TURBULENT_INLET_SPEC:

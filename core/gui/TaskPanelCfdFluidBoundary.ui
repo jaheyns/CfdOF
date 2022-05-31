@@ -1615,6 +1615,16 @@
                  </item>
                 </layout>
                </item>
+               <item>
+                <widget class="QLabel" name="label_13">
+                 <property name="text">
+                  <string>Partner patch</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="comboBoxPeriodicPartner"/>
+               </item>
               </layout>
              </widget>
             </item>
@@ -2109,7 +2119,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupPorous"/>
   <buttongroup name="buttonGroupPeriodic"/>
+  <buttongroup name="buttonGroupPorous"/>
  </buttongroups>
 </ui>

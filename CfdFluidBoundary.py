@@ -334,6 +334,8 @@ class _CfdFluidBoundary:
                           "Periodic", "Axis of rotational for rotational periodics")
         addObjectProperty(obj, 'PeriodicSeparationVector', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
                           "Periodic", "Separation vector for translational periodics")
+        addObjectProperty(obj, 'PeriodicPartner', '', "App::PropertyString", "Periodic",
+                          "Partner patch for the current periodic")
 
         # Turbulence
         all_turb_specs = []

@@ -22,6 +22,16 @@
     {
         type        cyclic;
     }
+%:cyclicAMI
+    %(0%)_master
+    {
+        type        patch;
+    }
+
+    %(0%)_slave
+    {
+        type        patch;
+    }
 %:empty
     %(0%)
     {

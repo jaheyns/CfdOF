@@ -281,8 +281,8 @@ class CfdCaseWriterFoam:
 
     def processBoundaryConditions(self):
         """ Compute any quantities required before case build """
-        settings = self.settings
         # Copy keys so that we can delete while iterating
+        settings = self.settings
         bc_names = list(settings['boundaries'].keys())
         for bc_name in bc_names:
             bc = settings['boundaries'][bc_name]
@@ -310,6 +310,7 @@ class CfdCaseWriterFoam:
                         raise RuntimeError
                 except (SystemError, RuntimeError):
                     raise RuntimeError(str(bc['DirectionFace']) + " is not a valid, planar face.")
+
             if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
                 bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
@@ -361,6 +362,7 @@ class CfdCaseWriterFoam:
                 if settings['boundaries'].get('defaultFaces'):
                     raise ValueError("More than one default boundary defined")
                 settings['boundaries']['defaultFaces'] = bc
+
         if not settings['boundaries'].get('defaultFaces'):
             settings['boundaries']['defaultFaces'] = {
                 'BoundaryType': 'wall',
