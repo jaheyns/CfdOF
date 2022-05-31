@@ -23,7 +23,7 @@ actions
         source  surfaceToCell;
         sourceInfo
         {
-            file            "constant/triSurface/CylinderScaled.stl";
+            file            "constant/triSurface/Cylinder.stl";
             useSurfaceOrientation true;
             outsidePoints   ();    //Ignored if useSurfaceOrientation true
             includeCut      false; //Ignored if useSurfaceOrientation true
