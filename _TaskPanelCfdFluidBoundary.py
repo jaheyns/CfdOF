@@ -126,6 +126,7 @@ class TaskPanelCfdFluidBoundary:
         pi = self.form.comboBoxPeriodicPartner.findText(self.obj.PeriodicPartner, QtCore.Qt.MatchFixedString)
         self.form.comboBoxPeriodicPartner.setCurrentIndex(pi)
 
+        self.form.checkBoxMasterPeriodic.setChecked(self.obj.PeriodicMaster)
         self.form.rb_rotational_periodic.setChecked(self.obj.RotationalPeriodic)
         self.form.rb_translational_periodic.setChecked(not self.obj.RotationalPeriodic)
         setQuantity(self.form.input_corx, self.obj.PeriodicCentreOfRotation.x)
@@ -197,6 +198,7 @@ class TaskPanelCfdFluidBoundary:
         self.form.checkBoxDefaultBoundary.stateChanged.connect(self.updateUI)
         self.form.rb_rotational_periodic.toggled.connect(self.periodicTypeChanged)
         self.form.rb_translational_periodic.toggled.connect(self.periodicTypeChanged)
+        self.form.checkBoxMasterPeriodic.stateChanged.connect(self.enablePeriodicTypes)
 
         # Face list selection panel - modifies obj.ShapeRefs passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
@@ -297,6 +299,8 @@ class TaskPanelCfdFluidBoundary:
         else:
             self.form.periodicFrame.setVisible(False)
 
+        self.enablePeriodicTypes()
+
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
         self.form.comboSubtype.clear()
@@ -322,6 +326,14 @@ class TaskPanelCfdFluidBoundary:
         else:
             self.form.rotationalFrame.setVisible(False)
             self.form.translationalFrame.setVisible(True)
+
+    def enablePeriodicTypes(self):
+        if self.form.checkBoxMasterPeriodic.isChecked():
+            self.form.rotationalFrame.setEnabled(True)
+            self.form.translationalFrame.setEnabled(True)
+        else:
+            self.form.rotationalFrame.setEnabled(False)
+            self.form.translationalFrame.setEnabled(False)
 
     def buttonDirectionClicked(self):
         self.selecting_direction = not self.selecting_direction
@@ -458,6 +470,7 @@ class TaskPanelCfdFluidBoundary:
         storeIfChanged(self.obj, 'PeriodicSeparationVector', separation_vector)
 
         storeIfChanged(self.obj, 'PeriodicPartner', self.form.comboBoxPeriodicPartner.currentText())
+        storeIfChanged(self.obj, 'PeriodicMaster', self.form.checkBoxMasterPeriodic.isChecked())
 
         # Turbulence
         if self.turb_model in CfdFluidBoundary.TURBULENT_INLET_SPEC:

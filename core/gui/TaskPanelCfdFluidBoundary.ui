@@ -1625,6 +1625,13 @@
                <item>
                 <widget class="QComboBox" name="comboBoxPeriodicPartner"/>
                </item>
+               <item>
+                <widget class="QCheckBox" name="checkBoxMasterPeriodic">
+                 <property name="text">
+                  <string>Master patch?</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
             </item>
@@ -2119,7 +2126,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupPeriodic"/>
   <buttongroup name="buttonGroupPorous"/>
+  <buttongroup name="buttonGroupPeriodic"/>
  </buttongroups>
 </ui>

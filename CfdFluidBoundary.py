@@ -336,6 +336,8 @@ class _CfdFluidBoundary:
                           "Periodic", "Separation vector for translational periodics")
         addObjectProperty(obj, 'PeriodicPartner', '', "App::PropertyString", "Periodic",
                           "Partner patch for the current periodic")
+        addObjectProperty(obj, 'PeriodicMaster', True, "App::PropertyBool", "Periodic",
+                          "Whether the current patch is the master or slave patch")
 
         # Turbulence
         all_turb_specs = []

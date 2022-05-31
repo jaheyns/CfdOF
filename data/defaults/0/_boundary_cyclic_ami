@@ -1,5 +1,11 @@
-%{%(0%)_master %(0%)_slave
-    %(0%)
+%{%(boundaries/%(0%)/PeriodicMaster%)
+%:True
+    %(0%)_master
+    {
+        type        cyclicAMI;
+    }
+%:False
+    %(0%)_slave
     {
         type        cyclicAMI;
     }
