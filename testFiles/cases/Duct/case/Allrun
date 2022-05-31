@@ -42,14 +42,6 @@ fi
 # Update patch name and type
 runCommand createPatch -overwrite
 
-# Scaling .stl files exported from FreeCAD from mm to m
-if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
-then
-    runCommand surfaceTransformPoints "scale=(0.001 0.001 0.001)" "constant/triSurface/Cylinder.stl" "constant/triSurface/CylinderScaled.stl"
-else
-    runCommand surfaceTransformPoints -scale "(0.001 0.001 0.001)" "constant/triSurface/Cylinder.stl" "constant/triSurface/CylinderScaled.stl"
-fi
-
 # Set cell zones contained inside the .stl surfaces
 runCommand topoSet -dict system/topoSetZonesDict
 

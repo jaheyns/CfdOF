@@ -45,6 +45,8 @@ fi
 # Update patch name and type
 runCommand createPatch -overwrite
 
+%{%(zonesPresent%)
+%:True
 # Set cell zones contained inside the .stl surfaces
 runCommand topoSet -dict system/topoSetZonesDict
 
