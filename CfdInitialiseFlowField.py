@@ -70,7 +70,6 @@ class _CommandCfdInitialiseInternalFlowField:
 
         # Allow to re-create if deleted
         if not isPresent:
-            FreeCADGui.doCommand("")
             FreeCADGui.addModule("CfdTools")
             FreeCADGui.addModule("CfdInitialiseFlowField")
             FreeCADGui.doCommand(

@@ -240,7 +240,6 @@ class _CommandCfdFluidBoundary:
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CfdFluidBoundary")
-        FreeCADGui.doCommand("")
         FreeCADGui.addModule("CfdFluidBoundary")
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())")

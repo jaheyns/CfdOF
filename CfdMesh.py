@@ -68,7 +68,6 @@ class _CommandCfdMeshFromShape:
                 if len(sel) == 1:
                     if sel[0].isDerivedFrom("Part::Feature"):
                         mesh_obj_name = sel[0].Name + "_Mesh"
-                        FreeCADGui.doCommand("")
                         FreeCADGui.addModule("CfdMesh")
                         FreeCADGui.doCommand("CfdMesh.makeCfdMesh('" + mesh_obj_name + "')")
                         FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)

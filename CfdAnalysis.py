@@ -86,7 +86,6 @@ class _CommandCfdAnalysis:
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CFD Analysis")
-        FreeCADGui.doCommand("")
         FreeCADGui.addModule("CfdAnalysis")
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.doCommand("analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')")

@@ -57,7 +57,6 @@ class _CommandCfdFluidMaterial:
     def Activated(self):
         FreeCAD.Console.PrintMessage("Set fluid properties \n")
         FreeCAD.ActiveDocument.openTransaction("Set CfdFluidMaterialProperty")
-        FreeCADGui.doCommand("")
         FreeCADGui.addModule("CfdTools")
         FreeCADGui.addModule("CfdFluidMaterial")
         editing_existing = False

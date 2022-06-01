@@ -109,6 +109,7 @@ class _TaskPanelCfdSolverControl:
 
     def write_input_file_handler(self):
         self.Start = time.time()
+        FreeCADGui.addModule("CfdCaseWriterFoam")
         import CfdCaseWriterFoam
         import importlib
         importlib.reload(CfdCaseWriterFoam)
@@ -119,7 +120,6 @@ class _TaskPanelCfdSolverControl:
             self.form.pb_run_solver.setEnabled(False)
             QApplication.setOverrideCursor(Qt.WaitCursor)
             try:
-                FreeCADGui.addModule("CfdCaseWriterFoam")
                 FreeCADGui.doCommand("FreeCAD.ActiveDocument." + self.solver_object.Name + ".Proxy.case_writer = "
                                      "CfdCaseWriterFoam.CfdCaseWriterFoam(FreeCAD.ActiveDocument." +
                                      self.solver_runner.analysis.Name + ")")
