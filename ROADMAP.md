@@ -1,16 +1,9 @@
-# CfdOF: A Computational fluid dynamics (CFD) workbench for FreeCAD
+# CfdOF Development Roadmap
 
-The workbench serves as a front-end (GUI) for the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
+This is a (non-exhaustive) list of tasks which are planned or needed. If you would like to make a contribution,
+please consider tackling one of these items.
 
-Disclaimer:
-This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via 
-www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trademarks.
-
-## Roadmap
-
-The following are items for discussion or items for which existing merges / PR's have been done.
-
-### General
+## General
 
 * Add translations
     * See the guide here: https://wiki.freecadweb.org/Translating_an_external_workbench
@@ -29,8 +22,23 @@ e.g. (there are many more!):
     re-setting the material properties to a valid type
 * Test and fix running under WSL on Windows
   
-### Testing
+## Meshing
+* Add ability to import meshes from other formats? (CGNS, .msh (fluent), others?)
+* Expose parallel option in GUI
 
+## Solver
+* Add cyclic boundary conditions
+* Add ability to import / export existing OF cases / results
+* Update src to use Python module hierarchy instead of flat package
+* Improve edge detection for meshing?
+* Expose parallel run option in GUI
+* Add a mechanism to specify surface tension coefficients between each pair of fluids
+  (with future extensibility to other pairwise interfacial properties).
+
+## Documentation
+* Formal documentation should be added to FreeCAD Wiki.
+
+## Testing
 * More 'demo' cases are needed, which are specified as macros and run during the testing runs
   * Multiphase case(s)
   * Cases with postprocessing
@@ -38,36 +46,10 @@ e.g. (there are many more!):
 * Additional unit tests which also test the functionality of the task panels, are needed. Currently testing is only
   done based on macros. Somehow, interaction with the GUI itself needs to be simulated.
 
-### Documentation
-
-* Formal documentation should be added to FreeCAD Wiki.
-
-### Future scheduled cleanup
+## Future scheduled tasks
 * On release of FreeCAD v0.21, stop supporting FreeCAD <= 0.19
     * Remove metadata.txt
     * Remove legacy python 2 code and python2/3 switches
     * Switch repository in Addon manager to gitlab
     * Remove backward-compatible plot code in compat/
     * Update version requirement in package.xml and dependency checker
-    
-
-### Turbulence models / boundary conditions / physics (solvers)
-* k-epsilon - DONE
-* Spalart Allmaras - DONE
-* Langtry's transition models for k-omega - DONE
-* cyclic boundary conditions
-
-### Mesh
-* checkMesh capabilities - DONE
-* Convert tetra mesh to polyhedra mesh using polyDualMesh - DONE
-* ability to import meshes from other formats? (CGNS, .msh (fluent), others?) [TODO]
-* adaptive mesh refinement [DONE]
-
-### Cases
-* ability to import / export existing OF cases / results [TODO]
-
-### Internal
-* Update src to use Python module hierarchy instead of flat package, will make reading / maintaining the code much easier [IN PROGRESS]
-* Improve edge detection for meshing?
-* Move parallel run option to GUI for ease of use [DISCUSS]
-* Implement -parallel meshing for snappyHexMesh (and others if supported) [DONE]
