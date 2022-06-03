@@ -194,13 +194,8 @@ class CfdMeshTools:
 
     def setupMeshCaseDir(self):
         """ Create temporary mesh case directory """
-        if os.path.isdir(self.meshCaseDir):
-            shutil.rmtree(self.meshCaseDir)
-        os.makedirs(self.meshCaseDir)
-        os.makedirs(self.constantDir)
+        CfdTools.clearCase(self.meshCaseDir)
         os.makedirs(self.triSurfaceDir)
-        os.makedirs(self.gmshDir)
-        os.makedirs(self.systemDir)
 
     def processRefinements(self):
         """ Process mesh refinements """

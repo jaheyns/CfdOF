@@ -118,7 +118,7 @@ class CfdCaseWriterFoam:
         self.processFluidProperties()
         self.processBoundaryConditions()
         self.processInitialConditions()
-        self.clearCase()
+        CfdTools.clearCase(self.case_folder)
 
         self.exportZoneStlSurfaces()
         if self.porous_zone_objs:
@@ -223,15 +223,6 @@ class CfdCaseWriterFoam:
         system_settings['FoamPath'] = CfdTools.getFoamDir()
         if CfdTools.getFoamRuntime() != 'WindowsDocker':
             system_settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
-
-    def clearCase(self, backup_path=None):
-        """ Remove and recreate case directory, optionally backing up """
-        output_path = self.case_folder
-        if backup_path and os.path.isdir(output_path):
-            shutil.move(output_path, backup_path)
-        if os.path.isdir(output_path):
-            shutil.rmtree(output_path)
-        os.makedirs(output_path)  # mkdir -p
 
     def setupMesh(self, updated_mesh_path, scale):
         if os.path.exists(updated_mesh_path):

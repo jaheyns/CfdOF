@@ -1629,6 +1629,24 @@ def enableLayoutRows(layout, selected_rows):
                 if isinstance(item, QtGui.QWidgetItem):
                     item.widget().setVisible(selected_rows is None or rowi in selected_rows)
 
+def clearCase(case_path, backup_path=None):
+    """ 
+    Remove and recreate contents of the case directory, optionally backing up 
+    Does not remove the directory entry itself as this requires paraview to be reloaded
+    """
+    if backup_path:
+        os.makedirs(backup_path)  #mkdir -p
+    if os.path.isdir(case_path):
+        for entry in os.scandir(case_path):
+            if backup_path:
+                dest = os.path.join(backup_path, entry.name)
+                shutil.move(entry.path, dest)
+            else:
+                if entry.is_dir():
+                    shutil.rmtree(entry.path)
+    else:
+        os.makedirs(case_path)  # mkdir -p
+
 
 class CfdSynchronousFoamProcess:
     def __init__(self):
