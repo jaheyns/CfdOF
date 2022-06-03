@@ -1,28 +1,24 @@
-# **************************************************************************
-# *  (c) bernd hahnebach (bernd@bimstatik.org) 2014                        *
-# *  (c) qingfeng xia @ iesensor.com 2016                                  *
-# *  Copyright (c) 2017 Andrew Gill (CSIR) <agill@csir.co.za>              *
-# *  Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
-# *  Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
-# *                                                                        *
-# *  this file is part of the freecad cax development system.              *
-# *                                                                        *
-# *  this program is free software; you can redistribute it and/or modify  *
-# *  it under the terms of the gnu lesser general public license (lgpl)    *
-# *  as published by the free software foundation; either version 2 of     *
-# *  the license, or (at your option) any later version.                   *
-# *  for detail see the licence text file.                                 *
-# *                                                                        *
-# *  freecad is distributed in the hope that it will be useful,            *
-# *  but without any warranty; without even the implied warranty of        *
-# *  merchantability or fitness for a particular purpose.  see the         *
-# *  gnu lesser general public license for more details.                   *
-# *                                                                        *
-# *  you should have received a copy of the gnu library general public     *
-# *  license along with freecad; if not, write to the free software        *
-# *  foundation, inc., 59 temple place, suite 330, boston, ma  02111-1307  *
-# *  usa                                                                   *
-# *                                                                        *
+# ***************************************************************************
+# *   (c) bernd hahnebach (bernd@bimstatik.org) 2014                        *
+# *   (c) qingfeng xia @ iesensor.com 2016                                  *
+# *   Copyright (c) 2017 Andrew Gill (CSIR) <agill@csir.co.za>              *
+# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *                                                                         *
+# *   This program is free software: you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License as        *
+# *   published by the Free Software Foundation, either version 3 of the    *
+# *   License, or (at your option) any later version.                       *
+# *                                                                         *
+# *   This program is distributed in the hope that it will be useful,       *
+# *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+# *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+# *   GNU Lesser General Public License for more details.                   *
+# *                                                                         *
+# *   You should have received a copy of the GNU Lesser General Public      *
+# *   License along with this program.  If not,                             *
+# *   see <https://www.gnu.org/licenses/>.                                  *
+# *                                                                         *
 # **************************************************************************/
 
 from PySide import QtCore
