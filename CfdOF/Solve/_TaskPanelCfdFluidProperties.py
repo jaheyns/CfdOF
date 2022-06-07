@@ -72,6 +72,7 @@ class TaskPanelCfdFluidProperties:
             self.selectPredefined()
         finally:
             self.selecting_predefined = False
+        self.form.material_name.setText(self.obj.Label)
 
     def compressibleCheckBoxChanged(self):
         self.material['Type'] = 'Compressible' if self.form.compressibleCheckBox.isChecked() else 'Incompressible'
@@ -140,6 +141,7 @@ class TaskPanelCfdFluidProperties:
                         setQuantity(self.text_boxes[m], self.material.get(m, '0'))
             finally:
                 self.selecting_predefined = False
+            self.form.material_name.setText(self.material['Name'])
         self.form.fluidDescriptor.setText(self.material["Description"])
 
     def manualEdit(self):
@@ -161,6 +163,7 @@ class TaskPanelCfdFluidProperties:
         doc.resetEdit()
         doc.Document.recompute()
         storeIfChanged(self.obj, 'Material', self.material)
+        storeIfChanged(self.obj, 'Label', self.form.material_name.text())
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
