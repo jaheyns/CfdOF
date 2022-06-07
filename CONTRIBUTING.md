@@ -58,7 +58,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 1. Use 4 spaces per indentation level (spaces are preferred over tabs).
    - An exception is the .ui files describing the GUI templates. For convenience these are indented with 1 space in order to follow
 the behaviour of the QtDesigner software (see below).
-   - OpenFOAM template files in the 'defaults' and 'defaultsMesh' directories should be indented with 4 spaces, and not tabs. 
+   - OpenFOAM template files in the 'Templates' directories should be indented with 4 spaces, and not tabs. 
 2. Limit all lines to a maximum of 120 characters.
 3. Break lines before binary operators.
 4. Blank lines 

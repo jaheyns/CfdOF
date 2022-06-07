@@ -208,11 +208,11 @@ prerequisites have been successfully installed.
 
 At present there is no formal documentation for CfdOF apart from this README.
 However, demonstration cases
-are provided inside the 'demos' folder of the
+are provided inside the 'Demos' folder of the
 [CfdOF workbench directory](https://gitlab.com/opensimproject/cfdof). These aim
 to provide a basic overview of features and best practices. The examples are run
 by loading and executing the macro files ending in '.FCMacro' in the various sub-directories
-in the 'demos' directory. Where there are several numbered files, these should be run in order
+in the 'Demos' directory. Where there are several numbered files, these should be run in order
 and aim to demonstrate step-by-step how the case is set up.
 
 Community assistance may be sought at the
@@ -275,4 +275,4 @@ We acknowledge other significant contributions from
 CfdOF is dedicated to the memory of Michael Hindley. It is thanks to his irrepressible enthusiasm for
 FreeCAD and open source software that this workbench exists. Rest in peace.
 
-![screenshot](website/resources/drone.png)
+![screenshot](Doc/Resources/drone.png)

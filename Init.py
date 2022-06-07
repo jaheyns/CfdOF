@@ -20,4 +20,4 @@
 
 
 # Import/export types
-FreeCAD.addImportType("Multi-part ASCII STL Mesh (*.stl *.ast)", "CfdImportSTL")
+FreeCAD.addImportType("Multi-part ASCII STL Mesh (*.stl *.ast)", "CfdOF.CfdImportSTL")

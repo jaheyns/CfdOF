@@ -26,17 +26,17 @@
 import FreeCAD
 import FreeCADGui
 
-import CfdAnalysis
-import CfdSolverFoam
-import CfdPhysicsSelection
-import CfdInitialiseFlowField
-import CfdFluidMaterial
-import CfdMesh
-import CfdFluidBoundary
-import CfdTools
-import CfdCaseWriterFoam
-import CfdMeshTools
-import CfdRunnableFoam
+from CfdOF import CfdAnalysis as CfdAnalysis
+from CfdOF.Solve import CfdSolverFoam
+from CfdOF.Solve import CfdPhysicsSelection
+from CfdOF.Solve import CfdInitialiseFlowField
+from CfdOF.Solve import CfdFluidMaterial
+from CfdOF.Mesh import CfdMesh
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdCaseWriterFoam
+from CfdOF.Mesh import CfdMeshTools
+from CfdOF.Solve import CfdRunnableFoam
 
 import tempfile
 import unittest
@@ -54,9 +54,9 @@ import shutil
 # ***************************************************************************
 
 
-home_path = CfdTools.get_module_path()
+home_path = CfdTools.getModulePath()
 temp_dir = tempfile.gettempdir()
-test_file_dir = os.path.join(home_path, 'testFiles')
+test_file_dir = os.path.join(home_path, 'TestFiles')
 
 
 def fccPrint(message):
@@ -141,7 +141,7 @@ class BlockTest(unittest.TestCase):
         doc = FreeCAD.getDocument(self.__class__.__doc_name)
         obj = doc.getObject('inlet')
         vobj = obj.ViewObject
-        import _TaskPanelCfdFluidBoundary
+        from CfdOF.Solve import _TaskPanelCfdFluidBoundary
         physics_model = CfdTools.getPhysicsModel(self.analysis)
         material_objs = CfdTools.getMaterials(self.analysis)
         taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model, material_objs)
@@ -187,14 +187,14 @@ class BlockTest(unittest.TestCase):
 
     def writeCaseFiles(self):
         print ('Write mesh files ...')
-        import _TaskPanelCfdMesh
+        from CfdOF.Mesh import _TaskPanelCfdMesh
         taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.mesh_object)
         taskd.obj = self.mesh_object.ViewObject
         taskd.writeMesh()
         taskd.closed()
 
         print ('Write case files ...')
-        import _TaskPanelCfdSolverControl
+        from CfdOF.Solve import _TaskPanelCfdSolverControl
         solver_runner = CfdRunnableFoam.CfdRunnableFoam(self.analysis, self.solver_object)
         taskd = _TaskPanelCfdSolverControl._TaskPanelCfdSolverControl(solver_runner)
         taskd.obj = self.solver_object.ViewObject
@@ -296,12 +296,9 @@ class MacroTest:
     def runTest(self, dir_name, macro_names):
         fccPrint('--------------- Start of CFD tests ---------------')
         for m in macro_names:
-            macro_name = os.path.join(home_path, "demos", dir_name, m)
+            macro_name = os.path.join(home_path, "Demos", dir_name, m)
             fccPrint('Running {} macro {} ...'.format(dir_name, macro_name))
-
-            macro_contents = "import FreeCAD\nimport FreeCADGui\nimport FreeCAD as App\nimport FreeCADGui as Gui\n"
-            macro_contents += open(macro_name).read()
-            exec(compile(macro_contents, macro_name, 'exec'), {'__file__': macro_name})
+            CfdTools.executeMacro(macro_name)
 
         fccPrint('Writing {} case files ...'.format(dir_name))
         analysis = CfdTools.getActiveAnalysis()

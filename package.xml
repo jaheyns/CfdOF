@@ -12,7 +12,7 @@
         <workbench>
             <classname>CfdOFWorkbench</classname>
             <subdirectory>./</subdirectory>
-            <icon>Gui/Resources/icons/cfd.svg</icon>
+            <icon>Gui/Icons/cfd.svg</icon>
         </workbench>
     </content>
 </package>
