@@ -421,11 +421,12 @@ class TaskPanelCfdFluidBoundary:
         # Default boundary
         defaultBoundary = self.form.checkBoxDefaultBoundary.isChecked()
         storeIfChanged(self.obj, 'DefaultBoundary', defaultBoundary)
-        boundaries = CfdTools.getCfdBoundaryGroup(CfdTools.getParentAnalysisObject(self.obj))
-        # Deactivate previous default boundary, if any
-        for b in boundaries:
-            if b.Name != self.obj.Name and b.DefaultBoundary:
-                FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.DefaultBoundary = False".format(b.Name))
+        if defaultBoundary:
+            # Deactivate previous default boundary, if any
+            boundaries = CfdTools.getCfdBoundaryGroup(CfdTools.getParentAnalysisObject(self.obj))
+            for b in boundaries:
+                if b.Name != self.obj.Name and b.DefaultBoundary:
+                    FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.DefaultBoundary = False".format(b.Name))
 
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
 
