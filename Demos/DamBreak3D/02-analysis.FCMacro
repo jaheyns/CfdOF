@@ -1,0 +1,120 @@
+# -*- coding: utf-8 -*-
+
+# Macro Begin: /home/oliver/.local/share/FreeCAD/Macro/analysis.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
+import FreeCAD
+import CfdPhysicsSelection
+import CfdFluidMaterial
+import CfdInitialiseFlowField
+import CfdFluidBoundary
+import CfdZone
+
+# Gui.runCommand('Std_DlgMacroRecord',0)
+### Begin command Std_Workbench
+# Gui.activateWorkbench("CfdOFWorkbench")
+### End command Std_Workbench
+### Begin command Cfd_Analysis
+from CfdOF import CfdAnalysis
+from CfdOF import CfdTools
+analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+CfdTools.setActiveAnalysis(analysis)
+from CfdOF.Solve import CfdPhysicsSelection
+analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+from CfdOF.Solve import CfdFluidMaterial
+analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+from CfdOF.Solve import CfdInitialiseFlowField
+analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+from CfdOF.Solve import CfdSolverFoam
+analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+### End command Cfd_Analysis
+# Gui.Selection.addSelection('Unnamed','Box')
+### Begin command Cfd_MeshFromShape
+from CfdOF.Mesh import CfdMesh
+CfdMesh.makeCfdMesh('Box_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Compound
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+### End command Cfd_MeshFromShape
+# Gui.Selection.clearSelection()
+App.ActiveDocument.Box_Mesh.CharacteristicLengthMax = '30.0 mm'
+App.ActiveDocument.Box_Mesh.MeshUtility = 'snappyHexMesh'
+App.ActiveDocument.Box_Mesh.PointInMesh = {'x': '500.0 mm', 'y': '500.0 mm', 'z': '500.0 mm'}
+# Gui.Selection.addSelection('Unnamed','Box_Mesh')
+FreeCAD.getDocument('Unnamed').getObject('Box_Mesh').NumberOfProcesses = 4
+
+### Begin command Cfd_MeshRegion
+
+from CfdOF.Mesh import CfdMeshRefinement
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Box_Mesh)
+### End command Cfd_MeshRegion
+# Gui.Selection.clearSelection()
+App.ActiveDocument.MeshRefinement.RelativeLength = 0.5
+App.ActiveDocument.MeshRefinement.RefinementThickness = '20.0 mm'
+FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Box001'), ('',))]
+FreeCAD.ActiveDocument.recompute()
+# Gui.runCommand('Cfd_PhysicsModel',0)
+App.ActiveDocument.PhysicsModel.Time = 'Transient'
+App.ActiveDocument.PhysicsModel.Phase = 'FreeSurface'
+App.ActiveDocument.PhysicsModel.Turbulence = 'RANS'
+App.ActiveDocument.PhysicsModel.gy = '0.0 mm/s^2'
+App.ActiveDocument.PhysicsModel.gz = '-9810.0 mm/s^2'
+# Gui.Selection.addSelection('Unnamed','FluidProperties')
+# App.getDocument('Unnamed').getObject('FluidProperties').ViewObject.doubleClicked()
+App.ActiveDocument.FluidProperties.Material = {'CardName': 'WaterIsothermal', 'AuthorAndLicense': '', 'Name': 'Water', 'Type': 'Isothermal', 'Description': 'Standard distilled water properties at 20 Degrees Celsius and 1 atm', 'Density': '998 kg/m^3', 'DynamicViscosity': '1.003e-3 kg/m/s'}
+App.ActiveDocument.FluidProperties.Label = 'water'
+# Gui.Selection.clearSelection()
+# Gui.Selection.addSelection('Unnamed','Box002')
+# Gui.Selection.clearSelection()
+# Gui.Selection.addSelection('Unnamed','FluidProperties')
+### Begin command Cfd_FluidMaterial
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdFluidMaterial
+CfdTools.getActiveAnalysis().addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+App.ActiveDocument.FluidProperties001.Label = 'air'
+### End command Cfd_FluidMaterial
+# Gui.Selection.clearSelection()
+# Gui.Selection.addSelection('Unnamed','FluidProperties001')
+# Gui.Selection.addSelection('Unnamed','Box','Face6',1586.26,644.823,1000)
+### Begin command Cfd_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command Cfd_FluidBoundary
+# Gui.Selection.clearSelection()
+App.ActiveDocument.CfdFluidBoundary.Label = 'open'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'open'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'totalPressureOpening'
+App.ActiveDocument.CfdFluidBoundary.SpecificDissipationRate = '57.3 deg/s'
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Box'), ('Face6',))]
+FreeCAD.ActiveDocument.recompute()
+### Begin command Cfd_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command Cfd_FluidBoundary
+App.ActiveDocument.CfdFluidBoundary001.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary001.SpecificDissipationRate = '57.3 deg/s'
+App.ActiveDocument.CfdFluidBoundary001.DefaultBoundary = True
+FreeCAD.ActiveDocument.recompute()
+# Gui.runCommand('Cfd_InitialiseInternal',0)
+# Gui.Selection.clearSelection()
+App.ActiveDocument.InitialiseFields.PotentialFlow = False
+App.ActiveDocument.InitialiseFields.VolumeFractions = {'water': '0.0'}
+App.ActiveDocument.InitialiseFields.omega = '57.3 deg/s'
+# Gui.Selection.addSelection('Unnamed','InitialiseFields')
+# App.getDocument('Unnamed').getObject('InitialiseFields').ViewObject.doubleClicked()
+FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary
+### Begin command Cfd_InitialisationZone
+
+from CfdOF.Solve import CfdZone
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdZone.makeCfdInitialisationZone())
+### End command Cfd_InitialisationZone
+App.ActiveDocument.InitialisationZone.VolumeFractions = {'water': '1.0'}
+FreeCAD.ActiveDocument.InitialisationZone.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Box002'), ('Solid1',))]
+
+FreeCAD.getDocument('Unnamed').getObject('CfdSolver').EndTime = '10.000 s'
+
+# Macro End: /home/oliver/.local/share/FreeCAD/Macro/analysis.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++

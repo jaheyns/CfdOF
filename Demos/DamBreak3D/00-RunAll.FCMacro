@@ -1,0 +1,7 @@
+from os import path
+from CfdOF.CfdTools import executeMacro
+dir = path.dirname(__file__)
+executeMacro(path.join(dir, '01-geom.FCMacro'))
+executeMacro(path.join(dir, '02-analysis.FCMacro'))
+executeMacro(path.join(dir, '03-probes.FCMacro'))
+executeMacro(path.join(dir, '04-adaptiveMesh.FCMacro'))
