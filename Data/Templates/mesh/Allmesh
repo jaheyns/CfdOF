@@ -48,6 +48,7 @@ export OMP_NUM_THREADS=1
 export OMP_NUM_THREADS=%(NumberOfThreads%)
 %}
 runCommand preparePar
+export MPI_BUFFER_SIZE=200000000
 runCommand mpiexec -np %(NumberOfProcesses%) cartesianMesh -parallel
 runCommand reconstructParMesh -constant -fullMatch
 %:False
