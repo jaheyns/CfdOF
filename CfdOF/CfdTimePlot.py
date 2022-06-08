@@ -76,7 +76,7 @@ class TimePlot:
         if self.updated:
             self.updated = False
             if self.fig is None:
-                self.fig = Plot.figure(self.title + " for " + FreeCAD.ActiveDocument.Name)
+                self.fig = Plot.figure(FreeCAD.ActiveDocument.Name + ' : ' + self.title)
                 self.fig.destroyed.connect(self.figureClosed)
             ax = self.fig.axes
             ax.cla()
