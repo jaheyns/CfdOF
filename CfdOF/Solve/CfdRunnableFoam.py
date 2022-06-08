@@ -185,15 +185,20 @@ class CfdRunnableFoam(CfdRunnable):
 
             # Only record the first residual per outer iteration
             if line.startswith(u"Time = "):
-                self.prev_time = self.latest_time
-                self.latest_time = float(line.lstrip(u"Time = "))
-                self.prev_num_outer_iters = self.latest_outer_iter
-                if self.latest_time > 0:
-                    # Don't keep spurious time zero
-                    self.latest_outer_iter = 0
-                    self.niter += 1
-                self.in_forces_section = None
-                self.in_forcecoeffs_section = None
+                try:
+                    time_val = float(line.lstrip(u"Time = "))
+                except ValueError:
+                    pass
+                else:
+                    self.prev_time = self.latest_time
+                    self.latest_time = time_val
+                    self.prev_num_outer_iters = self.latest_outer_iter
+                    if self.latest_time > 0:
+                        # Don't keep spurious time zero
+                        self.latest_outer_iter = 0
+                        self.niter += 1
+                    self.in_forces_section = None
+                    self.in_forcecoeffs_section = None
 
             if line.find(u"PIMPLE: iteration ") >= 0 or line.find(u"pseudoTime: iteration ") >= 0:
                 self.latest_outer_iter += 1
