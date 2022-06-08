@@ -43,7 +43,7 @@ from FreeCAD import Units
 import Part
 import BOPTools
 from BOPTools import SplitFeatures
-from CfdOF import CfdConsoleProcess
+from CfdOF.CfdConsoleProcess import CfdConsoleProcess
 from PySide import QtCore
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -841,9 +841,9 @@ def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook
         cmdline += " 1> >(tee -a " + logFile + ") 2> >(tee -a " + logFile + " >&2)"
         # Tee appends to the log file, so we must remove first. Can't do directly since
         # paths may be specified using variables only available in foam runtime environment.
-        cmdline = "{{ rm {}; {}; }}".format(logFile, cmdline)
+        cmdline = "{{ rm -f {}; {}; }}".format(logFile, cmdline)
 
-    proc = CfdConsoleProcess.CfdConsoleProcess(finished_hook=finished_hook, stdout_hook=stdout_hook, stderr_hook=stderr_hook)
+    proc = CfdConsoleProcess(finished_hook=finished_hook, stdout_hook=stdout_hook, stderr_hook=stderr_hook)
     if logFile:
         print("Running ", ' '.join(cmds), " -> ", logFile)
     else:
@@ -1219,7 +1219,7 @@ def startParaview(case_path, script_name, console_message_fn):
 
 
 def startGmsh(working_dir, args, console_message_fn, stdout_fn=None, stderr_fn=None):
-    proc = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=stdout_fn, stderr_hook=stderr_fn)
+    proc = CfdConsoleProcess(stdout_hook=stdout_fn, stderr_hook=stderr_fn)
     gmsh_cmd = getGmshExecutable()
 
     if not gmsh_cmd:
@@ -1652,7 +1652,7 @@ def executeMacro(macro_name):
 
 class CfdSynchronousFoamProcess:
     def __init__(self):
-        self.process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=self.readOutput, stderr_hook=self.readError)
+        self.process = CfdConsoleProcess(stdout_hook=self.readOutput, stderr_hook=self.readError)
         self.output = ""
         self.outputErr = ""
         self.outputAll = ""

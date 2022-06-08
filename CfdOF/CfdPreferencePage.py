@@ -370,11 +370,12 @@ class CfdPreferencePage:
                         self.install_process = CfdTools.startFoamApplication(
                             "export WM_NCOMPPROCS=1; ./Allwmake",
                             "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
-                            'log.Allwmake', self.installFinished)
+                            'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                     else:
                         self.install_process = CfdTools.startFoamApplication(
-                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
-                            'log.Allwmake', self.installFinished)
+                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake", 
+                            "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                            'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                 else:
                     self.consoleMessage("Install completed")
             # Reset foam dir for now in case the user presses 'Cancel'
@@ -391,11 +392,12 @@ class CfdPreferencePage:
                         self.install_process = CfdTools.startFoamApplication(
                             "export WM_NCOMPPROCS=1; ./Allwmake",
                             "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
-                            'log.Allwmake', self.installFinished)
+                            'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                     else:
                         self.install_process = CfdTools.startFoamApplication(
-                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake", "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
-                            'log.Allwmake', self.installFinished)
+                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake", 
+                            "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                            'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                 else:
                     self.consoleMessage("Install completed")
             # Reset foam dir for now in case the user presses 'Cancel'
@@ -415,6 +417,11 @@ class CfdPreferencePage:
             msg += " of {:.2f} MB".format(float(bytes_total)/(1024*1024))
         self.form.labelDownloadProgress.setText(msg)
 
+    def stderrFilter(self, text):
+        # Print to stdout rather than stderr so as not to alarm the user
+        # with the spurious wmkdep errors on stderr
+        print(text, end='')
+        return ''
 
 class CfdPreferencePageSignals(QObject):
     error = QtCore.Signal(str)  # Signal in PySide, pyqtSignal in PyQt

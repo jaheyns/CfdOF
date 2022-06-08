@@ -94,12 +94,15 @@ class CfdConsoleProcess:
             byte_arr = self.process.readLine()
             text += QTextStream(byte_arr).readAll()
         if text:
-            print(text, end='')  # Avoid displaying on FreeCAD status bar
             if self.stdoutHook:
-                self.stdoutHook(text)
-            # Must be at the end as it can cause re-entrance
-            if FreeCAD.GuiUp:
-                FreeCAD.Gui.updateGui()
+                new_text = self.stdoutHook(text)
+                if new_text:
+                    text = new_text
+            if text:
+                print(text, end='')  # Avoid displaying on FreeCAD status bar
+                # Must be at the end as it can cause re-entrance
+                if FreeCAD.GuiUp:
+                    FreeCAD.Gui.updateGui()
 
     def readStderr(self):
         # Ensure only complete lines are passed on. Print any error output to console
@@ -111,11 +114,14 @@ class CfdConsoleProcess:
         self.process.setReadChannel(QProcess.StandardOutput)
         if text:
             if self.stderrHook:
-                self.stderrHook(text)
-            print(text, end='', file=sys.stderr)  # Avoid displaying on FreeCAD status bar
-            # Must be at the end as it can cause re-entrance
-            if FreeCAD.GuiUp:
-                FreeCAD.Gui.updateGui()
+                new_text = self.stderrHook(text)
+                if new_text is not None:
+                    text = new_text
+            if text:
+                print(text, end='', file=sys.stderr)  # Avoid displaying on FreeCAD status bar
+                # Must be at the end as it can cause re-entrance
+                if FreeCAD.GuiUp:
+                    FreeCAD.Gui.updateGui()
 
     def state(self):
         return self.process.state()
