@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -73,6 +73,17 @@ DOWNLOAD_CFMESH = 3
 DOWNLOAD_HISA = 4
 
 
+class CloseDetector(QObject):
+    def __init__(self, obj, callback):
+        super().__init__(obj)
+        self.callback = callback
+
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.ChildRemoved:
+            self.callback()
+        return False
+
+
 class CfdPreferencePage:
     def __init__(self):
         ui_path = os.path.join(CfdTools.getModulePath(), 'Gui', "CfdPreferencePage.ui")
@@ -100,6 +111,9 @@ class CfdPreferencePage:
         self.form.tb_choose_output_dir.clicked.connect(self.chooseOutputDir)
         self.form.le_output_dir.textChanged.connect(self.outputDirChanged)
 
+        self.ev_filter = CloseDetector(self.form, self.cleanUp)
+        self.form.installEventFilter(self.ev_filter)
+
         self.thread = None
         self.install_process = None
 
@@ -120,11 +134,14 @@ class CfdPreferencePage:
         self.form.gb_paraview.setVisible(platform.system() == 'Windows')
 
     def __del__(self):
+        self.cleanUp()
+
+    def cleanUp(self):
         if self.thread and self.thread.isRunning():
-            FreeCAD.Console.PrintMessage("Terminating a pending install task")
-            self.thread.terminate()
+            FreeCAD.Console.PrintError("Terminating a pending install task\n")
+            self.thread.quit = True
         if self.install_process and self.install_process.state() == QtCore.QProcess.Running:
-            FreeCAD.Console.PrintMessage("Terminating a pending install task")
+            FreeCAD.Console.PrintError("Terminating a pending install task\n")
             self.install_process.terminate()
         QApplication.restoreOverrideCursor()
 
@@ -338,6 +355,7 @@ class CfdPreferencePage:
 
     def threadError(self, msg):
         self.consoleMessage(msg, '#FF0000')
+        self.consoleMessage("Download unsuccessful")
 
     def threadFinished(self, status):
         if self.thread.task == DOWNLOAD_CFMESH:
@@ -359,10 +377,8 @@ class CfdPreferencePage:
                             'log.Allwmake', self.installFinished)
                 else:
                     self.consoleMessage("Install completed")
-                # Reset foam dir for now in case the user presses 'Cancel'
-                CfdTools.setFoamDir(self.initial_foam_dir)
-            else:
-                self.consoleMessage("Download unsuccessful")
+            # Reset foam dir for now in case the user presses 'Cancel'
+            CfdTools.setFoamDir(self.initial_foam_dir)
         elif self.thread.task == DOWNLOAD_HISA:
             if status:
                 if CfdTools.getFoamRuntime() != "MinGW":
@@ -382,10 +398,8 @@ class CfdPreferencePage:
                             'log.Allwmake', self.installFinished)
                 else:
                     self.consoleMessage("Install completed")
-                # Reset foam dir for now in case the user presses 'Cancel'
-                CfdTools.setFoamDir(self.initial_foam_dir)
-            else:
-                self.consoleMessage("Download unsuccessful")
+            # Reset foam dir for now in case the user presses 'Cancel'
+            CfdTools.setFoamDir(self.initial_foam_dir)
         self.thread = None
 
     def installFinished(self, exit_code):
@@ -414,6 +428,7 @@ class CfdPreferencePageThread(QThread):
     def __init__(self):
         super(CfdPreferencePageThread, self).__init__()
         self.signals = CfdPreferencePageSignals()
+        self.quit = False
         self.user_dir = None
         self.task = None
         self.openfoam_url = None
@@ -422,6 +437,7 @@ class CfdPreferencePageThread(QThread):
         self.hisa_url = None
 
     def run(self):
+        self.quit = False
         try:
             if self.task == DOWNLOAD_OPENFOAM:
                 self.downloadOpenFoam()
@@ -432,9 +448,13 @@ class CfdPreferencePageThread(QThread):
             elif self.task == DOWNLOAD_HISA:
                 self.downloadHisa()
         except Exception as e:
-            self.signals.error.emit(str(e))
-            self.signals.finished.emit(False)
-            raise
+            if self.quit:
+                self.signals.finished.emit(False)  # Exit quietly since UI already destroyed
+                return
+            else:
+                self.signals.error.emit(str(e))
+                self.signals.finished.emit(False)
+                raise
         self.signals.finished.emit(True)
 
     def downloadFile(self, url, **kwargs):
@@ -450,6 +470,8 @@ class CfdPreferencePageThread(QThread):
                     data = response.read(block_size)
                     if not data:
                         break
+                    if self.quit:
+                        raise RuntimeError("Premature termination received")
                     tmp_file.write(data)
                     i += 1
                     if reporthook:

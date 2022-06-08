@@ -23,6 +23,7 @@ import os
 from math import ceil
 import FreeCAD
 import FreeCADGui
+from CfdOF import CfdTools
 from CfdOF.CfdTools import setQuantity, getQuantity, indexOrDefault
 from CfdOF.Mesh import CfdDynamicMeshRefinement
 
