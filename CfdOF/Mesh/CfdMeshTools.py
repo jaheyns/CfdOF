@@ -194,6 +194,7 @@ class CfdMeshTools:
         """ Create temporary mesh case directory """
         CfdTools.clearCase(self.meshCaseDir)
         os.makedirs(self.triSurfaceDir)
+        os.makedirs(self.gmshDir)
 
     def processRefinements(self):
         """ Process mesh refinements """
@@ -535,6 +536,7 @@ class CfdMeshTools:
     def writePartFile(self):
         """ Construct multi-element STL based on mesh part faces. """
         if self.mesh_obj.MeshUtility == "gmsh":
+            print(self.temp_file_shape)
             self.part_obj.Shape.exportBrep(self.temp_file_shape)
         else:
             with open(self.temp_file_geo, 'w') as fid:

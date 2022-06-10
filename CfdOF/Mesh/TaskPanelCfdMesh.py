@@ -27,7 +27,6 @@ import FreeCAD
 import os
 import os.path
 from CfdOF.Mesh import CfdMesh
-from CfdOF.Mesh.CfdMesh import _CfdMesh
 import time
 from datetime import timedelta
 from CfdOF import CfdTools
@@ -43,7 +42,7 @@ if FreeCAD.GuiUp:
     from PySide.QtGui import QApplication
 
 
-class _TaskPanelCfdMesh:
+class TaskPanelCfdMesh:
     """ The TaskPanel for editing References property of CfdMesh objects and creation of new CFD mesh """
     def __init__(self, obj):
         self.mesh_obj = obj

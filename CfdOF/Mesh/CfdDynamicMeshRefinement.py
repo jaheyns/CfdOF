@@ -21,7 +21,7 @@
 
 import FreeCAD
 import FreeCADGui
-from CfdOF.Mesh.CfdMesh import _CfdMesh
+from CfdOF.Mesh.CfdMesh import CfdMesh
 from PySide import QtCore
 import os
 from CfdOF import CfdTools
@@ -36,14 +36,14 @@ def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshRefinement"):
     Creates an object to define dynamic mesh properties if the solver supports it
     """
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdDynamicMeshRefinement(obj)
+    CfdDynamicMeshRefinement(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdDynamicMeshRefinement(obj.ViewObject)
+        ViewProviderCfdDynamicMeshRefinement(obj.ViewObject)
     base_mesh.addObject(obj)
     return obj
 
 
-class _CommandDynamicMeshRefinement:
+class CommandDynamicMeshRefinement:
 
     def __init__(self):
         pass
@@ -57,7 +57,7 @@ class _CommandDynamicMeshRefinement:
 
     def IsActive(self):
         sel = FreeCADGui.Selection.getSelection()
-        mesh_selected = (sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, _CfdMesh))
+        mesh_selected = (sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, CfdMesh))
 
         transient = False
         if mesh_selected:
@@ -74,7 +74,7 @@ class _CommandDynamicMeshRefinement:
         is_present = False
         members = CfdTools.getMesh(CfdTools.getActiveAnalysis()).Group
         for i in members:
-            if hasattr(i, 'Proxy') and isinstance(i.Proxy, _CfdDynamicMeshRefinement):
+            if hasattr(i, 'Proxy') and isinstance(i.Proxy, CfdDynamicMeshRefinement):
                 FreeCADGui.activeDocument().setEdit(i.Name)
                 is_present = True
 
@@ -83,7 +83,7 @@ class _CommandDynamicMeshRefinement:
             sel = FreeCADGui.Selection.getSelection()
             if len(sel) == 1:
                 sobj = sel[0]
-                if len(sel) == 1 and hasattr(sobj, "Proxy") and isinstance(sobj.Proxy, _CfdMesh):
+                if len(sel) == 1 and hasattr(sobj, "Proxy") and isinstance(sobj.Proxy, CfdMesh):
                     FreeCAD.ActiveDocument.openTransaction("Create DynamicMesh")
                     FreeCADGui.doCommand("")
                     FreeCADGui.doCommand("from CfdOF.Mesh import CfdDynamicMeshRefinement")
@@ -95,7 +95,7 @@ class _CommandDynamicMeshRefinement:
         FreeCADGui.Selection.clearSelection()
 
 
-class _CfdDynamicMeshRefinement:
+class CfdDynamicMeshRefinement:
 
     def __init__(self, obj):
         obj.Proxy = self
@@ -134,7 +134,13 @@ class _CfdDynamicMeshRefinement:
         self.initProperties(obj)
 
 
-class _ViewProviderCfdDynamicMeshRefinement:
+class _CfdDynamicMeshRefinement:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdDynamicMeshRefinement(obj)
+
+
+class ViewProviderCfdDynamicMeshRefinement:
     def __init__(self, vobj):
         vobj.Proxy = self
 
@@ -184,6 +190,19 @@ class _ViewProviderCfdDynamicMeshRefinement:
             FreeCAD.Console.PrintError('Task dialog already open\n')
             FreeCADGui.Control.showTaskView()
         return True
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class _ViewProviderCfdDynamicMeshRefinement:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdDynamicMeshRefinement(vobj)
+        new_proxy.attach(vobj)
 
     def __getstate__(self):
         return None

@@ -36,13 +36,13 @@ DUAL_CONVERSION = [False, False, False, True]
 
 def makeCfdMesh(name="CFDMesh"):
     obj = FreeCAD.ActiveDocument.addObject("App::DocumentObjectGroupPython", name)
-    _CfdMesh(obj)
+    CfdMesh(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdMesh(obj.ViewObject)
+        ViewProviderCfdMesh(obj.ViewObject)
     return obj
 
 
-class _CommandCfdMeshFromShape:
+class CommandCfdMeshFromShape:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh.svg")
         return {'Pixmap': icon_path,
@@ -79,7 +79,7 @@ class _CommandCfdMeshFromShape:
         FreeCADGui.Selection.clearSelection()
 
 
-class _CfdMesh:
+class CfdMesh:
     """ CFD mesh properties """
 
     # Variables that need to be used outside this class and therefore are included outside of the constructor
@@ -137,7 +137,7 @@ class _CfdMesh:
                           "Use implicit edge detection")
 
         # Mesh dimension
-        if addObjectProperty(obj, 'ElementDimension', _CfdMesh.known_element_dimensions, "App::PropertyEnumeration",
+        if addObjectProperty(obj, 'ElementDimension', CfdMesh.known_element_dimensions, "App::PropertyEnumeration",
                              "Mesh Parameters", "Dimension of mesh elements (Default 3D)"):
             obj.ElementDimension = '3D'
 
@@ -155,7 +155,19 @@ class _CfdMesh:
             self.Type = state
 
 
-class _ViewProviderCfdMesh:
+class _CfdMesh:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdMesh(obj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class ViewProviderCfdMesh:
     """ A View Provider for the CfdMesh object """
     def __init__(self, vobj):
         vobj.Proxy = self
@@ -184,17 +196,17 @@ class _ViewProviderCfdMesh:
 
     def setEdit(self, vobj, mode):
         for obj in FreeCAD.ActiveDocument.Objects:
-            if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdMesh):
+            if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, CfdMesh):
                 obj.ViewObject.show()
 
         if self.Object.Part is None:
             FreeCAD.Console.PrintError("Meshed part no longer exists")
             return False
 
-        from CfdOF.Mesh import _TaskPanelCfdMesh
+        from CfdOF.Mesh import TaskPanelCfdMesh
         import importlib
-        importlib.reload(_TaskPanelCfdMesh)
-        self.taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.Object)
+        importlib.reload(TaskPanelCfdMesh)
+        self.taskd = TaskPanelCfdMesh.TaskPanelCfdMesh(self.Object)
         self.taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(self.taskd)
         return True
@@ -223,6 +235,19 @@ class _ViewProviderCfdMesh:
         except Exception as err:
             FreeCAD.Console.PrintError("Error in onDelete: " + str(err))
         return True
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class _ViewProviderCfdMesh:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdMesh(vobj)
+        new_proxy.attach(vobj)
 
     def __getstate__(self):
         return None

@@ -31,7 +31,7 @@ from CfdOF.CfdTools import addObjectProperty
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
-    from CfdOF.Solve import _TaskPanelCfdFluidBoundary
+    from CfdOF.Solve import TaskPanelCfdFluidBoundary
 
 # Constants
 BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Open", "Constraint", "Baffle"]
@@ -218,13 +218,13 @@ POROUS_METHODS = ['porousCoeff', 'porousScreen']
 
 def makeCfdFluidBoundary(name="CfdFluidBoundary"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdFluidBoundary(obj)
+    CfdFluidBoundary(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdFluidBoundary(obj.ViewObject)
+        ViewProviderCfdFluidBoundary(obj.ViewObject)
     return obj
 
 
-class _CommandCfdFluidBoundary:
+class CommandCfdFluidBoundary:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "boundary.svg")
         return {
@@ -244,7 +244,7 @@ class _CommandCfdFluidBoundary:
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-class _CfdFluidBoundary:
+class CfdFluidBoundary:
     def __init__(self, obj):
         obj.Proxy = self
         self.Type = "CfdFluidBoundary"
@@ -405,7 +405,19 @@ class _CfdFluidBoundary:
         return None
 
 
-class _ViewProviderCfdFluidBoundary:
+class _CfdFluidBoundary:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdFluidBoundary(obj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class ViewProviderCfdFluidBoundary:
     def __init__(self, vobj):
         vobj.Proxy = self
         self.taskd = None
@@ -457,10 +469,10 @@ class _ViewProviderCfdFluidBoundary:
             return False
         material_objs = CfdTools.getMaterials(analysis_object)
 
-        from CfdOF.Solve import _TaskPanelCfdFluidBoundary
+        from CfdOF.Solve import TaskPanelCfdFluidBoundary
         import importlib
-        importlib.reload(_TaskPanelCfdFluidBoundary)
-        self.taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
+        importlib.reload(TaskPanelCfdFluidBoundary)
+        self.taskd = TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
         self.Object.ViewObject.show()
         self.taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(self.taskd)
@@ -488,5 +500,14 @@ class _ViewProviderCfdFluidBoundary:
         return None
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_FluidBoundary', _CommandCfdFluidBoundary())
+class _ViewProviderCfdFluidBoundary:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdFluidBoundary(vobj)
+        new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

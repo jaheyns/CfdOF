@@ -41,7 +41,7 @@ class CfdRunnable(QObject, object):
     def __init__(self, analysis=None, solver=None):
         super(CfdRunnable, self).__init__()
 
-        if analysis and isinstance(analysis.Proxy, CfdAnalysis._CfdAnalysis):
+        if analysis and isinstance(analysis.Proxy, CfdAnalysis.CfdAnalysis):
             self.analysis = analysis
         else:
             if FreeCAD.GuiUp:

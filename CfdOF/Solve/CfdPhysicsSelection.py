@@ -36,13 +36,13 @@ from CfdOF.CfdTools import addObjectProperty, storeIfChanged
 def makeCfdPhysicsSelection(name="PhysicsModel"):
     # DocumentObjectGroupPython, FeaturePython, GeometryPython
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdPhysicsModel(obj)
+    CfdPhysicsModel(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderPhysicsSelection(obj.ViewObject)
+        ViewProviderCfdPhysicsSelection(obj.ViewObject)
     return obj
 
 
-class _CommandCfdPhysicsSelection:
+class CommandCfdPhysicsSelection:
     """ CFD physics selection command definition """
 
     def GetResources(self):
@@ -60,7 +60,7 @@ class _CommandCfdPhysicsSelection:
         is_present = False
         members = CfdTools.getActiveAnalysis().Group
         for i in members:
-            if isinstance(i.Proxy, _CfdPhysicsModel):
+            if isinstance(i.Proxy, CfdPhysicsModel):
                 FreeCADGui.activeDocument().setEdit(i.Name)
                 is_present = True
 
@@ -74,7 +74,7 @@ class _CommandCfdPhysicsSelection:
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-class _CfdPhysicsModel:
+class CfdPhysicsModel:
     """ The CFD Physics Model """
     def __init__(self, obj):
         obj.Proxy = self
@@ -141,7 +141,19 @@ class _CfdPhysicsModel:
         self.initProperties(obj)
 
 
-class _ViewProviderPhysicsSelection:
+class _CfdPhysicsModel:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdPhysicsModel(obj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class ViewProviderCfdPhysicsSelection:
     def __init__(self, vobj):
         vobj.Proxy = self
         self.taskd = None
@@ -164,10 +176,10 @@ class _ViewProviderPhysicsSelection:
         return
 
     def setEdit(self, vobj, mode):
-        from CfdOF.Solve import _TaskPanelCfdPhysicsSelection
+        from CfdOF.Solve import TaskPanelCfdPhysicsSelection
         import importlib
-        importlib.reload(_TaskPanelCfdPhysicsSelection)
-        self.taskd = _TaskPanelCfdPhysicsSelection._TaskPanelCfdPhysicsSelection(self.Object)
+        importlib.reload(TaskPanelCfdPhysicsSelection)
+        self.taskd = TaskPanelCfdPhysicsSelection.TaskPanelCfdPhysicsSelection(self.Object)
         self.taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(self.taskd)
         return True
@@ -195,5 +207,14 @@ class _ViewProviderPhysicsSelection:
         return None
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_PhysicsModel', _CommandCfdPhysicsSelection())
+class _ViewProviderPhysicsSelection:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdPhysicsSelection(vobj)
+        new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

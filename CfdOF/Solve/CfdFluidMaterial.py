@@ -29,18 +29,18 @@ if FreeCAD.GuiUp:
     import FreeCADGui
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
-from CfdOF.Solve import _TaskPanelCfdFluidProperties
+from CfdOF.Solve import TaskPanelCfdFluidProperties
 
 
 def makeCfdFluidMaterial(name):
     obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
-    _CfdMaterial(obj)  # Include default fluid properties
+    CfdMaterial(obj)  # Include default fluid properties
     if FreeCAD.GuiUp:
-        _ViewProviderCfdFluidMaterial(obj.ViewObject)
+        ViewProviderCfdFluidMaterial(obj.ViewObject)
     return obj
 
 
-class _CommandCfdFluidMaterial:
+class CommandCfdFluidMaterial:
 
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "material.svg")
@@ -66,7 +66,7 @@ class _CommandCfdFluidMaterial:
         if not physics_model or physics_model.Phase == 'Single':
             members = analysis_object.Group
             for i in members:
-                if isinstance(i.Proxy, _CfdMaterial):
+                if isinstance(i.Proxy, CfdMaterial):
                     FreeCADGui.activeDocument().setEdit(i.Name)
                     editing_existing = True
         if not editing_existing:
@@ -75,7 +75,7 @@ class _CommandCfdFluidMaterial:
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-class _CfdMaterial:
+class CfdMaterial:
     """ CFD material properties object. Compatible with FreeCAD material object. """
     def __init__(self, obj):
         obj.Proxy = self
@@ -108,7 +108,13 @@ class _CfdMaterial:
         return
 
 
-class _ViewProviderCfdFluidMaterial:
+class _CfdMaterial:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdMaterial(obj)
+
+
+class ViewProviderCfdFluidMaterial:
     def __init__(self, vobj):
         vobj.Proxy = self
         self.taskd = None
@@ -139,8 +145,8 @@ class _ViewProviderCfdFluidMaterial:
             CfdTools.cfdErrorBox("Analysis object must have a physics object")
             return False
         import importlib
-        importlib.reload(_TaskPanelCfdFluidProperties)
-        self.taskd = _TaskPanelCfdFluidProperties.TaskPanelCfdFluidProperties(self.Object, physics_model)
+        importlib.reload(TaskPanelCfdFluidProperties)
+        self.taskd = TaskPanelCfdFluidProperties.TaskPanelCfdFluidProperties(self.Object, physics_model)
         self.taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(self.taskd)
         return True
@@ -167,5 +173,14 @@ class _ViewProviderCfdFluidMaterial:
         return None
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_FluidMaterial', _CommandCfdFluidMaterial())
+class _ViewProviderCfdFluidMaterial:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdFluidMaterial(vobj)
+        new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

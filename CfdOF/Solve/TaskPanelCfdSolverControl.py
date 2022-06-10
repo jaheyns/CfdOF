@@ -36,7 +36,7 @@ if FreeCAD.GuiUp:
     from PySide.QtGui import QApplication
 
 
-class _TaskPanelCfdSolverControl:
+class TaskPanelCfdSolverControl:
     def __init__(self, solver_runner_obj):
         ui_path = os.path.join(CfdTools.getModulePath(), 'Gui', "TaskPanelCfdSolverControl.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)

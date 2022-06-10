@@ -25,12 +25,12 @@ import FreeCAD
 from FreeCAD import Units
 from CfdOF import CfdTools
 from CfdOF.CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
-from CfdOF.PostProcess import CfdReportingFunctions
+from CfdOF.PostProcess import CfdReportingFunction
 if FreeCAD.GuiUp:
     import FreeCADGui
 
 
-class TaskPanelCfdReportingFunctions:
+class TaskPanelCfdReportingFunction:
     """
     Task panel for adding solver function objects
     """
@@ -43,7 +43,7 @@ class TaskPanelCfdReportingFunctions:
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         # Function Object types
-        self.form.comboFunctionObjectType.addItems(CfdReportingFunctions.OBJECT_NAMES)
+        self.form.comboFunctionObjectType.addItems(CfdReportingFunction.OBJECT_NAMES)
         self.form.comboFunctionObjectType.currentIndexChanged.connect(self.comboFunctionObjectTypeChanged)
 
         self.form.inputReferencePressure.setToolTip("Reference pressure")
@@ -70,7 +70,7 @@ class TaskPanelCfdReportingFunctions:
         self.updateUI()
 
     def load(self):
-        bi = indexOrDefault(CfdReportingFunctions.OBJECT_NAMES, self.obj.ReportingFunctionType, 0)
+        bi = indexOrDefault(CfdReportingFunction.OBJECT_NAMES, self.obj.ReportingFunctionType, 0)
         self.form.comboFunctionObjectType.setCurrentIndex(bi)
         self.comboFunctionObjectTypeChanged()
         
@@ -116,11 +116,11 @@ class TaskPanelCfdReportingFunctions:
     def updateUI(self):
         # Function object type
         type_index = self.form.comboFunctionObjectType.currentIndex()
-        self.form.stackedWidget.setCurrentIndex(CfdReportingFunctions.FUNCTIONS_UI[type_index])
-        if type_index < len(CfdReportingFunctions.FORCES_UI):
-            field_name_frame_enabled = CfdReportingFunctions.FORCES_UI[type_index][0]
-            coefficient_frame_enabled = CfdReportingFunctions.FORCES_UI[type_index][1]
-            spatial_bin_frame_enabled = CfdReportingFunctions.FORCES_UI[type_index][2]
+        self.form.stackedWidget.setCurrentIndex(CfdReportingFunction.FUNCTIONS_UI[type_index])
+        if type_index < len(CfdReportingFunction.FORCES_UI):
+            field_name_frame_enabled = CfdReportingFunction.FORCES_UI[type_index][0]
+            coefficient_frame_enabled = CfdReportingFunction.FORCES_UI[type_index][1]
+            spatial_bin_frame_enabled = CfdReportingFunction.FORCES_UI[type_index][2]
             self.form.fieldNamesFrame.setVisible(field_name_frame_enabled)
             self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
             self.form.spatialFrame.setVisible(spatial_bin_frame_enabled)
@@ -134,7 +134,7 @@ class TaskPanelCfdReportingFunctions:
 
     def comboFunctionObjectTypeChanged(self):
         index = self.form.comboFunctionObjectType.currentIndex()
-        self.form.functionObjectDescription.setText(CfdReportingFunctions.OBJECT_DESCRIPTIONS[index])
+        self.form.functionObjectDescription.setText(CfdReportingFunction.OBJECT_DESCRIPTIONS[index])
         self.updateUI()
 
     def accept(self):
@@ -146,7 +146,7 @@ class TaskPanelCfdReportingFunctions:
         # Type
         index = self.form.comboFunctionObjectType.currentIndex()
         storeIfChanged(self.obj, 'ReportingFunctionType', 
-            CfdReportingFunctions.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()])
+            CfdReportingFunction.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()])
 
         bcs = CfdTools.getCfdBoundaryGroup(self.analysis_obj)
         bc = bcs[self.form.cb_patch_list.currentIndex()]

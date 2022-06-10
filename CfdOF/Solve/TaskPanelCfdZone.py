@@ -33,7 +33,7 @@ from CfdOF.Solve import CfdZone
 from CfdOF import CfdFaceSelectWidget
 
 
-class _TaskPanelCfdZone:
+class TaskPanelCfdZone:
     """ Task panel for zone objects """
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()

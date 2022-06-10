@@ -37,7 +37,7 @@ DES_MODELS = ['kOmegaSSTDES', 'kOmegaSSTDDES', 'kOmegaSSTIDDES', 'SpalartAllmara
               'SpalartAllmarasIDDES']
 LES_MODELS = ['kEqn', 'Smagorinsky', 'WALE']
 
-class _TaskPanelCfdPhysicsSelection:
+class TaskPanelCfdPhysicsSelection:
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None

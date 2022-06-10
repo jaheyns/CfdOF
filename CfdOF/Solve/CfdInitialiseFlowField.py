@@ -31,18 +31,18 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
-from CfdOF.Solve import _TaskPanelCfdInitialiseInternalFlowField
+from CfdOF.Solve import TaskPanelCfdInitialiseInternalFlowField
 
 
 def makeCfdInitialFlowField(name="InitialiseFields"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdInitialVariables(obj)
+    CfdInitialVariables(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdInitialseInternalFlowField(obj.ViewObject)
+        ViewProviderCfdInitialiseInternalFlowField(obj.ViewObject)
     return obj
 
 
-class _CommandCfdInitialiseInternalFlowField:
+class CommandCfdInitialiseInternalFlowField:
     """ Field initialisation command """
 
     def GetResources(self):
@@ -75,7 +75,7 @@ class _CommandCfdInitialiseInternalFlowField:
             FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-class _CfdInitialVariables:
+class CfdInitialVariables:
     """ The field initialisation object """
     def __init__(self, obj):
         obj.Proxy = self
@@ -128,7 +128,13 @@ class _CfdInitialVariables:
         self.initProperties(obj)
 
 
-class _ViewProviderCfdInitialseInternalFlowField:
+class _CfdInitialVariables:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdInitialVariables(obj)
+
+
+class ViewProviderCfdInitialiseInternalFlowField:
 
     def __init__(self, vobj):
         vobj.Proxy = self
@@ -165,8 +171,8 @@ class _ViewProviderCfdInitialseInternalFlowField:
         material_objs = CfdTools.getMaterials(analysis_object)
 
         import importlib
-        importlib.reload(_TaskPanelCfdInitialiseInternalFlowField)
-        self.taskd = _TaskPanelCfdInitialiseInternalFlowField._TaskPanelCfdInitialiseInternalFlowField(
+        importlib.reload(TaskPanelCfdInitialiseInternalFlowField)
+        self.taskd = TaskPanelCfdInitialiseInternalFlowField.TaskPanelCfdInitialiseInternalFlowField(
             self.Object, physics_model, boundaries, material_objs)
         self.taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(self.taskd)
@@ -194,5 +200,14 @@ class _ViewProviderCfdInitialseInternalFlowField:
         return None
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_InitialiseInternal', _CommandCfdInitialiseInternalFlowField())
+class _ViewProviderCfdInitialseInternalFlowField:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdInitialiseInternalFlowField(vobj)
+        new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

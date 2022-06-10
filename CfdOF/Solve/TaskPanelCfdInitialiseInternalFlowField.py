@@ -31,7 +31,7 @@ from CfdOF import CfdTools
 from CfdOF.CfdTools import getQuantity, setQuantity, storeIfChanged
 
 
-class _TaskPanelCfdInitialiseInternalFlowField:
+class TaskPanelCfdInitialiseInternalFlowField:
     def __init__(self, obj, physics_model, boundaries, material_objs):
         FreeCADGui.Selection.clearSelection()
         self.obj = obj

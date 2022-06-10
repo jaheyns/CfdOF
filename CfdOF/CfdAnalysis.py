@@ -33,19 +33,19 @@ if FreeCAD.GuiUp:
 def makeCfdAnalysis(name):
     """ Create a Cfd Analysis group object """
     obj = FreeCAD.ActiveDocument.addObject("App::DocumentObjectGroupPython", name)
-    _CfdAnalysis(obj)
+    CfdAnalysis(obj)
 
     if FreeCAD.GuiUp:
-        _ViewProviderCfdAnalysis(obj.ViewObject)
+        ViewProviderCfdAnalysis(obj.ViewObject)
     return obj
 
 
-class _CfdAnalysis:
+class CfdAnalysis:
     """ The CFD analysis group """
     def __init__(self, obj):
+        self.loading = False
         obj.Proxy = self
         self.Type = "CfdAnalysis"
-        self.loading = False
         self.initProperties(obj)
 
     def initProperties(self, obj):
@@ -66,7 +66,19 @@ class _CfdAnalysis:
         # Set while we are loading from file
         self.loading = True
 
-class _CommandCfdAnalysis:
+
+class _CfdAnalysis:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdAnalysis(obj)
+
+    def __setstate__(self, state_dict):
+        self.__dict__ = state_dict
+        # Set while we are loading from file
+        self.loading = True
+
+
+class CommandCfdAnalysis:
     """ The Cfd_Analysis command definition """
     def __init__(self):
         pass
@@ -106,7 +118,7 @@ class _CommandCfdAnalysis:
         FreeCADGui.doCommand("analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())")
 
 
-class _ViewProviderCfdAnalysis:
+class ViewProviderCfdAnalysis:
     """ A View Provider for the CfdAnalysis container object. """
     def __init__(self, vobj):
         vobj.Proxy = self
@@ -160,3 +172,17 @@ class _ViewProviderCfdAnalysis:
 
     def __setstate__(self, state):
         return None
+
+
+class _ViewProviderCfdAnalysis:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdAnalysis(vobj)
+        new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+

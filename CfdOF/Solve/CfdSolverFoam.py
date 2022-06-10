@@ -35,13 +35,13 @@ if FreeCAD.GuiUp:
 
 def makeCfdSolverFoam(name="CfdSolver"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdSolverFoam(obj)
+    CfdSolverFoam(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdSolverFoam(obj.ViewObject)
+        ViewProviderCfdSolverFoam(obj.ViewObject)
     return obj
 
 
-class _CommandCfdSolverFoam:
+class CommandCfdSolverFoam:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "solver.svg")
         return {'Pixmap': icon_path,
@@ -56,7 +56,7 @@ class _CommandCfdSolverFoam:
         is_present = False
         members = CfdTools.getActiveAnalysis().Group
         for i in members:
-            if isinstance(i.Proxy, _CfdSolverFoam):
+            if isinstance(i.Proxy, CfdSolverFoam):
                 FreeCADGui.activeDocument().setEdit(i.Name)
                 is_present = True
 
@@ -68,7 +68,7 @@ class _CommandCfdSolverFoam:
             FreeCADGui.doCommand("Gui.activeDocument().setEdit(App.ActiveDocument.ActiveObject.Name)")
 
 
-class _CfdSolverFoam(object):
+class CfdSolverFoam(object):
     """ Solver-specific properties """
     def __init__(self, obj):
         self.Type = "CfdSolverFoam"
@@ -121,7 +121,19 @@ class _CfdSolverFoam(object):
             self.Type = state
 
 
-class _ViewProviderCfdSolverFoam:
+class _CfdSolverFoam:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdSolverFoam(obj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class ViewProviderCfdSolverFoam:
     """A View Provider for the Solver object, base class for all derived solver
     derived solver should implement  a specific TaskPanel and set up solver and override setEdit()"""
 
@@ -150,10 +162,10 @@ class _ViewProviderCfdSolverFoam:
         if CfdTools.getActiveAnalysis():
             from CfdOF.Solve.CfdRunnableFoam import CfdRunnableFoam
             foam_runnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
-            from CfdOF.Solve import _TaskPanelCfdSolverControl
+            from CfdOF.Solve import TaskPanelCfdSolverControl
             import importlib
-            importlib.reload(_TaskPanelCfdSolverControl)
-            self.taskd = _TaskPanelCfdSolverControl._TaskPanelCfdSolverControl(foam_runnable)
+            importlib.reload(TaskPanelCfdSolverControl)
+            self.taskd = TaskPanelCfdSolverControl.TaskPanelCfdSolverControl(foam_runnable)
             self.taskd.obj = vobj.Object
             FreeCADGui.Control.showDialog(self.taskd)
         return True
@@ -195,5 +207,14 @@ class _ViewProviderCfdSolverFoam:
         return None
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_SolverControl', _CommandCfdSolverFoam())
+class _ViewProviderCfdSolverFoam:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdSolverFoam(vobj)
+        new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

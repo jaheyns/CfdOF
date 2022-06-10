@@ -40,15 +40,15 @@ FORCES_UI = [[True, False, True],    # Forces
              [True, True, True, ]]   # Force coefficients
 
 
-def makeCfdReportingFunctions(name="ReportingFunction"):
+def makeCfdReportingFunction(name="ReportingFunction"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdReportingFunctions(obj)
+    CfdReportingFunction(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdReportingFunctions(obj.ViewObject)
+        ViewProviderCfdReportingFunction(obj.ViewObject)
     return obj
 
 
-class _CommandCfdReportingFunctions:
+class CommandCfdReportingFunction:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "monitor.svg")
         return {'Pixmap': icon_path,
@@ -61,14 +61,14 @@ class _CommandCfdReportingFunctions:
         return CfdTools.getActiveAnalysis() is not None     # Same as for boundary condition commands
 
     def Activated(self):
-        FreeCAD.ActiveDocument.openTransaction("Create CfdReportingFunctions object")
-        FreeCADGui.doCommand("from CfdOF.PostProcess import CfdReportingFunctions")
+        FreeCAD.ActiveDocument.openTransaction("Create CfdReportingFunction object")
+        FreeCADGui.doCommand("from CfdOF.PostProcess import CfdReportingFunction")
         FreeCADGui.doCommand("from CfdOF import CfdTools")
-        FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdReportingFunctions.makeCfdReportingFunctions())")
+        FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-class _CfdReportingFunctions:
+class CfdReportingFunction:
     """ CFD Function objects properties """
 
     def __init__(self, obj):
@@ -142,9 +142,21 @@ class _CfdReportingFunctions:
         return None
 
 
-class _ViewProviderCfdReportingFunctions:
+class _CfdReportingFunctions:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdReportingFunction(obj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class ViewProviderCfdReportingFunction:
     """
-    A View Provider for the CfdReportingFunctions object
+    A View Provider for the CfdReportingFunction object
     """
     def __init__(self, vobj):
         vobj.Proxy = self
@@ -196,10 +208,10 @@ class _ViewProviderCfdReportingFunctions:
             CfdTools.cfdErrorBox("Reporting function must have a parent analysis object")
             return False
 
-        from CfdOF.PostProcess import TaskPanelCfdReportingFunctions
+        from CfdOF.PostProcess import TaskPanelCfdReportingFunction
         import importlib
-        importlib.reload(TaskPanelCfdReportingFunctions)
-        taskd = TaskPanelCfdReportingFunctions.TaskPanelCfdReportingFunctions(self.Object)
+        importlib.reload(TaskPanelCfdReportingFunction)
+        taskd = TaskPanelCfdReportingFunction.TaskPanelCfdReportingFunction(self.Object)
         self.Object.ViewObject.show()
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
@@ -208,6 +220,19 @@ class _ViewProviderCfdReportingFunctions:
     def unsetEdit(self, vobj, mode):
         FreeCADGui.Control.closeDialog()
         return
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class _ViewProviderCfdReportingFunctions:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdReportingFunction(vobj)
+        new_proxy.attach(vobj)
 
     def __getstate__(self):
         return None

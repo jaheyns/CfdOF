@@ -141,10 +141,10 @@ class BlockTest(unittest.TestCase):
         doc = FreeCAD.getDocument(self.__class__.__doc_name)
         obj = doc.getObject('inlet')
         vobj = obj.ViewObject
-        from CfdOF.Solve import _TaskPanelCfdFluidBoundary
+        from CfdOF.Solve import TaskPanelCfdFluidBoundary
         physics_model = CfdTools.getPhysicsModel(self.analysis)
         material_objs = CfdTools.getMaterials(self.analysis)
-        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model, material_objs)
+        taskd = TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model, material_objs)
         taskd.selecting_references = True
         taskd.faceSelector.addSelection(doc.Name, self.__class__.__part_name, 'Face1')
         # Give scheduled recompute a chance to happen
@@ -187,16 +187,16 @@ class BlockTest(unittest.TestCase):
 
     def writeCaseFiles(self):
         print ('Write mesh files ...')
-        from CfdOF.Mesh import _TaskPanelCfdMesh
-        taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.mesh_object)
+        from CfdOF.Mesh import TaskPanelCfdMesh
+        taskd = TaskPanelCfdMesh.TaskPanelCfdMesh(self.mesh_object)
         taskd.obj = self.mesh_object.ViewObject
         taskd.writeMesh()
         taskd.closed()
 
         print ('Write case files ...')
-        from CfdOF.Solve import _TaskPanelCfdSolverControl
+        from CfdOF.Solve import TaskPanelCfdSolverControl
         solver_runner = CfdRunnableFoam.CfdRunnableFoam(self.analysis, self.solver_object)
-        taskd = _TaskPanelCfdSolverControl._TaskPanelCfdSolverControl(solver_runner)
+        taskd = TaskPanelCfdSolverControl.TaskPanelCfdSolverControl(solver_runner)
         taskd.obj = self.solver_object.ViewObject
         taskd.write_input_file_handler()
         taskd.closing()

@@ -29,7 +29,7 @@ e.g. (there are many more!):
 ## Solver
 * Add cyclic boundary conditions
 * Add ability to import / export existing OF cases / results
-* Update src to use Python module hierarchy instead of flat package
+* Improve organisation of source code
 * Improve edge detection for meshing?
 * Expose parallel run option in GUI
 * Add a mechanism to specify surface tension coefficients between each pair of fluids

@@ -24,14 +24,14 @@
 
 import FreeCAD
 import FreeCADGui
-from CfdOF.Mesh.CfdMesh import _CfdMesh
+from CfdOF.Mesh.CfdMesh import CfdMesh
 from PySide import QtCore
 import os
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 from pivy import coin
 import Part
-from CfdOF.Mesh import _TaskPanelCfdMeshRefinement
+from CfdOF.Mesh import TaskPanelCfdMeshRefinement
 
 # Constants
 EXTRUSION_NAMES = ["2D planar mesh", "2D wedge mesh", "Patch-normal", "Rotational"]
@@ -44,14 +44,14 @@ def makeCfdMeshRefinement(base_mesh, name="MeshRefinement"):
     makeCfdMeshRefinement([name]): Creates an object to define refinement properties for a surface or region of the mesh
     """
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdMeshRefinement(obj)
+    CfdMeshRefinement(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdMeshRefinement(obj.ViewObject)
+        ViewProviderCfdMeshRefinement(obj.ViewObject)
     base_mesh.addObject(obj)
     return obj
 
 
-class _CommandMeshRegion:
+class CommandMeshRegion:
 
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh_region.svg")
@@ -62,13 +62,13 @@ class _CommandMeshRegion:
 
     def IsActive(self):
         sel = FreeCADGui.Selection.getSelection()
-        return sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, _CfdMesh)
+        return sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, CfdMesh)
 
     def Activated(self):
         sel = FreeCADGui.Selection.getSelection()
         if len(sel) == 1:
             sobj = sel[0]
-            if len(sel) == 1 and hasattr(sobj, "Proxy") and isinstance(sobj.Proxy, _CfdMesh):
+            if len(sel) == 1 and hasattr(sobj, "Proxy") and isinstance(sobj.Proxy, CfdMesh):
                 FreeCAD.ActiveDocument.openTransaction("Create MeshRegion")
                 FreeCADGui.doCommand("")
                 FreeCADGui.doCommand("from CfdOF.Mesh import CfdMeshRefinement")
@@ -79,7 +79,7 @@ class _CommandMeshRegion:
         FreeCADGui.Selection.clearSelection()
 
 
-class _CfdMeshRefinement:
+class CfdMeshRefinement:
 
     def __init__(self, obj):
         obj.Proxy = self
@@ -164,7 +164,13 @@ class _CfdMeshRefinement:
             vobj.ShapeColor = (1.0, 0.4, 0.0)  # Orange
 
 
-class _ViewProviderCfdMeshRefinement:
+class _CfdMeshRefinement:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdMeshRefinement(obj)
+
+
+class ViewProviderCfdMeshRefinement:
     def __init__(self, vobj):
         vobj.Proxy = self
         self.taskd = None
@@ -199,8 +205,8 @@ class _ViewProviderCfdMeshRefinement:
 
     def setEdit(self, vobj, mode=0):
         import importlib
-        importlib.reload(_TaskPanelCfdMeshRefinement)
-        self.taskd = _TaskPanelCfdMeshRefinement._TaskPanelCfdMeshRefinement(self.Object)
+        importlib.reload(TaskPanelCfdMeshRefinement)
+        self.taskd = TaskPanelCfdMeshRefinement.TaskPanelCfdMeshRefinement(self.Object)
         self.taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(self.taskd)
         return True
@@ -219,6 +225,19 @@ class _ViewProviderCfdMeshRefinement:
             self.taskd.closing()
             self.taskd = None
         FreeCADGui.Control.closeDialog()
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class _ViewProviderCfdMeshRefinement:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdMeshRefinement(vobj)
+        new_proxy.attach(vobj)
 
     def __getstate__(self):
         return None

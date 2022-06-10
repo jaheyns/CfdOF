@@ -168,3 +168,16 @@ class ViewProviderCfdScalarTransportFunction:
 
     def __setstate__(self, state):
         return None
+
+
+class _ViewProviderCfdScalarTransportFunction:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdScalarTransportFunction(vobj)
+        new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

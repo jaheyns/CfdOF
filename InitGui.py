@@ -46,25 +46,32 @@ class CfdOFWorkbench(Workbench):
         # Must import QtCore in this function, not at the beginning of this file for translation support
         from PySide import QtCore
 
-        from CfdOF.CfdAnalysis import _CommandCfdAnalysis
-        from CfdOF.Mesh.CfdMesh import _CommandCfdMeshFromShape
-        from CfdOF.Mesh.CfdMeshRefinement import _CommandMeshRegion
-        from CfdOF.Solve.CfdPhysicsSelection import _CommandCfdPhysicsSelection
-        from CfdOF.Solve.CfdFluidMaterial import _CommandCfdFluidMaterial
-        from CfdOF.Solve.CfdSolverFoam import _CommandCfdSolverFoam
-        from CfdOF.Solve.CfdInitialiseFlowField import _CommandCfdInitialiseInternalFlowField
-        from CfdOF.Solve.CfdFluidBoundary import _CommandCfdFluidBoundary
-        from CfdOF.Solve.CfdZone import _CommandCfdPorousZone
-        from CfdOF.Solve.CfdZone import _CommandCfdInitialisationZone
-        from CfdOF.Mesh.CfdDynamicMeshRefinement import _CommandDynamicMeshRefinement
-        from CfdOF.PostProcess.CfdReportingFunctions import _CommandCfdReportingFunctions
+        from CfdOF.CfdAnalysis import CommandCfdAnalysis
+        from CfdOF.Mesh.CfdMesh import CommandCfdMeshFromShape
+        from CfdOF.Mesh.CfdMeshRefinement import CommandMeshRegion
+        from CfdOF.Solve.CfdPhysicsSelection import CommandCfdPhysicsSelection
+        from CfdOF.Solve.CfdFluidMaterial import CommandCfdFluidMaterial
+        from CfdOF.Solve.CfdSolverFoam import CommandCfdSolverFoam
+        from CfdOF.Solve.CfdInitialiseFlowField import CommandCfdInitialiseInternalFlowField
+        from CfdOF.Solve.CfdFluidBoundary import CommandCfdFluidBoundary
+        from CfdOF.Solve.CfdZone import CommandCfdPorousZone
+        from CfdOF.Solve.CfdZone import CommandCfdInitialisationZone
+        from CfdOF.Mesh.CfdDynamicMeshRefinement import CommandDynamicMeshRefinement
+        from CfdOF.PostProcess.CfdReportingFunction import CommandCfdReportingFunction
         from CfdOF.Solve.CfdScalarTransportFunction import CommandCfdScalarTransportFunction
 
-        FreeCADGui.addCommand('Cfd_Analysis', _CommandCfdAnalysis())
-        FreeCADGui.addCommand('Cfd_MeshFromShape', _CommandCfdMeshFromShape())
-        FreeCADGui.addCommand('Cfd_MeshRegion', _CommandMeshRegion())
-        FreeCADGui.addCommand('Cfd_DynamicMeshRefinement', _CommandDynamicMeshRefinement())
-        FreeCADGui.addCommand('Cfd_ReportingFunctions', _CommandCfdReportingFunctions())
+        FreeCADGui.addCommand('Cfd_Analysis', CommandCfdAnalysis())
+        FreeCADGui.addCommand('Cfd_MeshFromShape', CommandCfdMeshFromShape())
+        FreeCADGui.addCommand('Cfd_MeshRegion', CommandMeshRegion())
+        FreeCADGui.addCommand('Cfd_DynamicMeshRefinement', CommandDynamicMeshRefinement())
+        FreeCADGui.addCommand('Cfd_PhysicsModel', CommandCfdPhysicsSelection())
+        FreeCADGui.addCommand('Cfd_FluidMaterial', CommandCfdFluidMaterial())
+        FreeCADGui.addCommand('Cfd_FluidBoundary', CommandCfdFluidBoundary())
+        FreeCADGui.addCommand('Cfd_InitialiseInternal', CommandCfdInitialiseInternalFlowField())
+        FreeCADGui.addCommand('Cfd_PorousZone', CommandCfdPorousZone())
+        FreeCADGui.addCommand('Cfd_InitialisationZone', CommandCfdInitialisationZone())
+        FreeCADGui.addCommand('Cfd_SolverControl', CommandCfdSolverFoam())
+        FreeCADGui.addCommand('Cfd_ReportingFunctions', CommandCfdReportingFunction())
         FreeCADGui.addCommand('Cfd_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
 
         cmdlst = ['Cfd_Analysis',
@@ -91,7 +98,7 @@ FreeCAD.__unit_test__ += ["TestCfdOF"]
 
 # Create backward compatible aliases for loading from file when modules have moved
 from CfdOF import CfdAnalysis
-sys.modules['CfdAnalysis'] = CfdOF.CfdAnalysis
+sys.modules['CfdAnalysis'] = CfdAnalysis
 from CfdOF.Solve import CfdPhysicsSelection
 sys.modules['CfdPhysicsSelection'] = CfdPhysicsSelection
 from CfdOF.Solve import CfdFluidMaterial
@@ -108,8 +115,9 @@ from CfdOF.Solve import CfdZone
 sys.modules['CfdZone'] = CfdZone
 from CfdOF.Solve import CfdSolverFoam
 sys.modules['CfdSolverFoam'] = CfdSolverFoam
-from CfdOF.PostProcess import CfdReportingFunctions
-sys.modules['core.functionobjects.reporting.CfdReportingFunctions'] = CfdReportingFunctions
+from CfdOF.PostProcess import CfdReportingFunction
+sys.modules['core.functionobjects.reporting.CfdReportingFunctions'] = CfdReportingFunction
+sys.modules['CfdOF.PostProcess.CfdReportingFunctions'] = CfdReportingFunction
 from CfdOF.Solve import CfdScalarTransportFunction
 sys.modules['core.functionobjects.scalartransport.CfdScalarTransportFunction'] = CfdScalarTransportFunction
 from CfdOF.Mesh import CfdDynamicMeshRefinement

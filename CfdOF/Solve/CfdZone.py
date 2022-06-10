@@ -47,21 +47,21 @@ ASPECT_RATIO_TIPS = ["", "Equilateral triangles pointing perpendicular to spacin
 
 def makeCfdPorousZone(name='PorousZone'):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdZone(obj)
+    CfdZone(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdZone(obj.ViewObject)
+        ViewProviderCfdZone(obj.ViewObject)
     return obj
 
 
 def makeCfdInitialisationZone(name='InitialisationZone'):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    _CfdZone(obj)
+    CfdZone(obj)
     if FreeCAD.GuiUp:
-        _ViewProviderCfdZone(obj.ViewObject)
+        ViewProviderCfdZone(obj.ViewObject)
     return obj
 
 
-class _CommandCfdPorousZone:
+class CommandCfdPorousZone:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "porous.svg")
         return {'Pixmap': icon_path,
@@ -81,7 +81,7 @@ class _CommandCfdPorousZone:
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-class _CommandCfdInitialisationZone:
+class CommandCfdInitialisationZone:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "alpha.svg")
         return {'Pixmap': icon_path,
@@ -103,7 +103,7 @@ class _CommandCfdInitialisationZone:
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-class _CfdZone:
+class CfdZone:
     def __init__(self, obj):
         obj.Proxy = self
         self.Type = 'Zone'
@@ -197,7 +197,19 @@ class _CfdZone:
         return None
 
 
-class _ViewProviderCfdZone:
+class _CfdZone:
+    """ Backward compatibility for old class name when loading from file """
+    def onDocumentRestored(self, obj):
+        CfdZone(obj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
+
+class ViewProviderCfdZone:
     """ A View Provider for Zone objects. """
     def __init__(self, vobj):
         """ Set this object to the proxy object of the actual view provider """
@@ -243,10 +255,10 @@ class _ViewProviderCfdZone:
         return icon_path
 
     def setEdit(self, vobj, mode):
-        from CfdOF.Solve import _TaskPanelCfdZone
+        from CfdOF.Solve import TaskPanelCfdZone
         import importlib
-        importlib.reload(_TaskPanelCfdZone)
-        taskd = _TaskPanelCfdZone._TaskPanelCfdZone(self.Object)
+        importlib.reload(TaskPanelCfdZone)
+        taskd = TaskPanelCfdZone.TaskPanelCfdZone(self.Object)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True
@@ -276,6 +288,14 @@ class _ViewProviderCfdZone:
         return None
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_PorousZone', _CommandCfdPorousZone())
-    FreeCADGui.addCommand('Cfd_InitialisationZone', _CommandCfdInitialisationZone())
+class _ViewProviderCfdZone:
+    """ Backward compatibility for old class name when loading from file """
+    def attach(self, vobj):
+        new_proxy = ViewProviderCfdZone(vobj)
+        new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

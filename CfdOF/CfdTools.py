@@ -122,7 +122,7 @@ def getParentAnalysisObject(obj):
     parent = obj.getParentGroup()
     if parent is None:
         return None
-    elif hasattr(parent, 'Proxy') and isinstance(parent.Proxy, CfdAnalysis._CfdAnalysis):
+    elif hasattr(parent, 'Proxy') and isinstance(parent.Proxy, CfdAnalysis.CfdAnalysis):
         return parent
     else:
         return getParentAnalysisObject(parent)
@@ -157,9 +157,9 @@ def getMeshObject(analysis_object):
         members = analysis_object.Group
     else:
         members = FreeCAD.activeDocument().Objects
-    from CfdOF.Mesh.CfdMesh import _CfdMesh
+    from CfdOF.Mesh.CfdMesh import CfdMesh
     for i in members:
-        if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
+        if hasattr(i, "Proxy") and isinstance(i.Proxy, CfdMesh):
             if is_present:
                 FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
             else:
@@ -183,9 +183,9 @@ def getZoneObjects(analysis_object):
 
 
 def getInitialConditions(analysis_object):
-    from CfdOF.Solve.CfdInitialiseFlowField import _CfdInitialVariables
+    from CfdOF.Solve.CfdInitialiseFlowField import CfdInitialVariables
     for i in analysis_object.Group:
-        if isinstance(i.Proxy, _CfdInitialVariables):
+        if isinstance(i.Proxy, CfdInitialVariables):
             return i
     return None
 
@@ -195,9 +195,9 @@ def getMaterials(analysis_object):
 
 
 def getSolver(analysis_object):
-    from CfdOF.Solve.CfdSolverFoam import _CfdSolverFoam
+    from CfdOF.Solve.CfdSolverFoam import CfdSolverFoam
     for i in analysis_object.Group:
-        if isinstance(i.Proxy, _CfdSolverFoam):
+        if isinstance(i.Proxy, CfdSolverFoam):
             return i
 
 
@@ -214,9 +214,9 @@ def getSolverSettings(solver):
 
 def getCfdBoundaryGroup(analysis_object):
     group = []
-    from CfdOF.Solve.CfdFluidBoundary import _CfdFluidBoundary
+    from CfdOF.Solve.CfdFluidBoundary import CfdFluidBoundary
     for i in analysis_object.Group:
-        if isinstance(i.Proxy, _CfdFluidBoundary):
+        if isinstance(i.Proxy, CfdFluidBoundary):
             group.append(i)
     return group
 
@@ -237,9 +237,9 @@ def isPlanar(shape):
 
 
 def getMesh(analysis_object):
-    from CfdOF.Mesh.CfdMesh import _CfdMesh
+    from CfdOF.Mesh.CfdMesh import CfdMesh
     for i in analysis_object.Group:
-        if hasattr(i, "Proxy") and isinstance(i.Proxy, _CfdMesh):
+        if hasattr(i, "Proxy") and isinstance(i.Proxy, CfdMesh):
             return i
     return None
 
@@ -264,9 +264,9 @@ def getModulePath():
 # Function objects
 def getReportingFunctionsGroup(analysis_object):
     group = []
-    from CfdOF.PostProcess.CfdReportingFunctions import _CfdReportingFunctions
+    from CfdOF.PostProcess.CfdReportingFunction import CfdReportingFunction
     for i in analysis_object.Group:
-        if isinstance(i.Proxy, _CfdReportingFunctions):
+        if isinstance(i.Proxy, CfdReportingFunction):
             group.append(i)
     return group
 
@@ -282,10 +282,10 @@ def getScalarTransportFunctionsGroup(analysis_object):
 
 # Mesh
 def getMeshRefinementObjs(mesh_obj):
-    from CfdOF.Mesh.CfdMeshRefinement import _CfdMeshRefinement
+    from CfdOF.Mesh.CfdMeshRefinement import CfdMeshRefinement
     ref_objs = []
     for obj in mesh_obj.Group:
-        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, _CfdMeshRefinement):
+        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, CfdMeshRefinement):
             ref_objs = ref_objs + [obj]
     return ref_objs
 
@@ -1494,18 +1494,18 @@ def resolveReference(r, raise_error=True):
 
 
 def setActiveAnalysis(analysis):
-    from CfdOF.CfdAnalysis import _CfdAnalysis
+    from CfdOF.CfdAnalysis import CfdAnalysis
     for obj in FreeCAD.ActiveDocument.Objects:
-        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdAnalysis):
+        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, CfdAnalysis):
             obj.IsActiveAnalysis = False
 
     analysis.IsActiveAnalysis = True
 
 
 def getActiveAnalysis():
-    from CfdOF.CfdAnalysis import _CfdAnalysis
+    from CfdOF.CfdAnalysis import CfdAnalysis
     for obj in FreeCAD.ActiveDocument.Objects:
-        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, _CfdAnalysis):
+        if hasattr(obj, 'Proxy') and isinstance(obj.Proxy, CfdAnalysis):
             if obj.IsActiveAnalysis:
                 return obj
     return None

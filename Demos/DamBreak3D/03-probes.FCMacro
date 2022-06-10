@@ -8,9 +8,9 @@ import FreeCAD
 # Gui.activateWorkbench("CfdOFWorkbench")
 ### End command Std_Workbench
 ### Begin command Cfd_ReportingFunctions
-from CfdOF.PostProcess import CfdReportingFunctions
+from CfdOF.PostProcess import CfdReportingFunction
 from CfdOF import CfdTools
-CfdTools.getActiveAnalysis().addObject(CfdReportingFunctions.makeCfdReportingFunctions())
+CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())
 ### End command Cfd_ReportingFunctions
 App.ActiveDocument.ReportingFunction.ReportingFunctionType = 'Probes'
 FreeCAD.ActiveDocument.ReportingFunction.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary
@@ -19,9 +19,9 @@ App.ActiveDocument.ReportingFunction.Label = 'P3'
 FreeCAD.ActiveDocument.recompute()
 # Gui.Selection.addSelection('Unnamed','ReportingFunction')
 ### Begin command Cfd_ReportingFunctions
-from CfdOF.PostProcess import CfdReportingFunctions
+from CfdOF.PostProcess import CfdReportingFunction
 from CfdOF import CfdTools
-CfdTools.getActiveAnalysis().addObject(CfdReportingFunctions.makeCfdReportingFunctions())
+CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())
 ### End command Cfd_ReportingFunctions
 App.ActiveDocument.ReportingFunction001.ReportingFunctionType = 'Probes'
 FreeCAD.ActiveDocument.ReportingFunction001.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary

@@ -33,7 +33,7 @@ from CfdOF.Mesh import CfdMeshRefinement
 from FreeCAD import Units
 
 
-class _TaskPanelCfdMeshRefinement:
+class TaskPanelCfdMeshRefinement:
     """ The TaskPanel for editing References property of MeshRefinement objects """
 
     def __init__(self, obj):
