@@ -531,9 +531,10 @@ class CfdCaseWriterFoam:
             rf['Direction'] = tuple(p for p in rf['Direction'])
 
             if rf['ReportingFunctionType'] == 'ForceCoefficients':
+                pitch_axis = rf['Lift'].cross(rf['Drag'])
                 rf['Lift'] = tuple(p for p in rf['Lift'])
                 rf['Drag'] = tuple(p for p in rf['Drag'])
-                rf['Pitch'] = tuple(p for p in rf['Pitch'])
+                rf['Pitch'] = tuple(p for p in pitch_axis)
 
             settings['reportingFunctions'][name]['ProbePosition'] = tuple(
                 Units.Quantity(p, Units.Length).getValueAs('m') 

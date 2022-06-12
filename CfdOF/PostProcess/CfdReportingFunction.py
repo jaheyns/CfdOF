@@ -103,9 +103,6 @@ class CfdReportingFunction:
         addObjectProperty(obj, 'Drag', FreeCAD.Vector(0, 1, 0), "App::PropertyVector", "Force coefficients",
                           "Drag direction")
 
-        addObjectProperty(obj, 'Pitch', FreeCAD.Vector(0, 0, 1), "App::PropertyVector", "Force coefficients",
-                          "Centre of pitch")
-
         addObjectProperty(obj, 'MagnitudeUInf', '1 m/s', "App::PropertyQuantity", "Force coefficients",
                           "Freestream velocity magnitude")
         addObjectProperty(obj, 'LengthRef', '1 m', "App::PropertyQuantity", "Force coefficients",

@@ -52,7 +52,6 @@ class TaskPanelCfdReportingFunction:
 
         self.form.inputLiftDirectionx.setToolTip("Lift direction vector")
         self.form.inputDragDirectionx.setToolTip("Drag direction vector")
-        self.form.inputPitchAxisx.setToolTip("Pitch axis for moment coefficient")
         self.form.inputMagnitudeUInf.setToolTip("Velocity magnitude reference")
         self.form.inputReferenceDensity.setToolTip("Density reference")
         self.form.inputLengthRef.setToolTip("Length reference")
@@ -93,10 +92,6 @@ class TaskPanelCfdReportingFunction:
         setQuantity(self.form.inputDragDirectionx, self.obj.Drag.x)
         setQuantity(self.form.inputDragDirectiony, self.obj.Drag.y)
         setQuantity(self.form.inputDragDirectionz, self.obj.Drag.z)
-
-        setQuantity(self.form.inputPitchAxisx, self.obj.Pitch.x)
-        setQuantity(self.form.inputPitchAxisy, self.obj.Pitch.y)
-        setQuantity(self.form.inputPitchAxisz, self.obj.Pitch.z)
 
         setQuantity(self.form.inputMagnitudeUInf, self.obj.MagnitudeUInf)
         setQuantity(self.form.inputLengthRef, self.obj.LengthRef)
@@ -175,11 +170,6 @@ class TaskPanelCfdReportingFunction:
             self.form.inputDragDirectiony.property("quantity").Value,
             self.form.inputDragDirectionz.property("quantity").Value)
         storeIfChanged(self.obj, 'Drag', drag_dir)
-        pitch_axis = FreeCAD.Vector(
-            self.form.inputPitchAxisx.property("quantity").Value,
-            self.form.inputPitchAxisy.property("quantity").Value,
-            self.form.inputPitchAxisz.property("quantity").Value)
-        storeIfChanged(self.obj, 'Pitch', pitch_axis)
         storeIfChanged(self.obj, 'MagnitudeUInf', getQuantity(self.form.inputMagnitudeUInf))
         storeIfChanged(self.obj, 'LengthRef', getQuantity(self.form.inputLengthRef))
         storeIfChanged(self.obj, 'AreaRef', getQuantity(self.form.inputAreaRef))
