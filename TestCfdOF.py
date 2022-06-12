@@ -56,7 +56,7 @@ import shutil
 
 home_path = CfdTools.getModulePath()
 temp_dir = tempfile.gettempdir()
-test_file_dir = os.path.join(home_path, 'TestFiles')
+test_file_dir = os.path.join(home_path, 'Data', 'TestFiles')
 
 
 def fccPrint(message):
@@ -342,7 +342,7 @@ class ElbowTest(unittest.TestCase, MacroTest):
 
 class DuctTest(unittest.TestCase, MacroTest):
     __dir_name = 'Duct'
-    __macros = ['01-geom.fcmacro', '02-mesh.fcmacro', '03-porous.fcmacro', '04-screen.fcmacro']
+    __macros = ['01-geom.FCMacro', '02-mesh.FCMacro', '03-porous.FCMacro', '04-screen.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
@@ -372,7 +372,7 @@ class ViscousTubeBundleTest(unittest.TestCase, MacroTest):
 
 class UAVTest(unittest.TestCase, MacroTest):
     __dir_name = 'UAV'
-    __macros = ['01-partDesign.fcmacro', '02-firstAnalysis.fcmacro', '03-refineMesh.fcmacro']
+    __macros = ['01-partDesign.FCMacro', '02-firstAnalysis.FCMacro', '03-refineMesh.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
@@ -403,6 +403,21 @@ class ProjectileTest(unittest.TestCase, MacroTest):
 class LESStepTest(unittest.TestCase, MacroTest):
     __dir_name = 'LESStep'
     __macros = ['backwardStep.FCMacro']
+
+    def __init__(self, var):
+        super().__init__(var)
+        MacroTest.child_instance = self
+
+    def test_run(self):
+        self.runTest(self.__class__.__dir_name, self.__class__.__macros)
+
+    def tearDown(self):
+        self.closeDoc()
+
+
+class DamBreak3DTest(unittest.TestCase, MacroTest):
+    __dir_name = 'DamBreak3D'
+    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-probes.FCMacro','04-adaptiveMesh.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)

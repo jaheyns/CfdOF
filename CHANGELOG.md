@@ -2,6 +2,8 @@
 
 ## v1.17.0
 * Significant performance improvement when writing triangulated surfaces
+* Internal directory structure reorganisation
+* Added regression tests covering multiphase, dynamic mesh, and force reporting functions
 
 ## v1.16.0
 * Support added for passive scalar transport solution
