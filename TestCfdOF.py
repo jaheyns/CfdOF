@@ -387,7 +387,7 @@ class UAVTest(unittest.TestCase, MacroTest):
 
 class ProjectileTest(unittest.TestCase, MacroTest):
     __dir_name = 'Projectile'
-    __macros = ['01-geometry.FCMacro', '02-mesh.FCMacro', '03-boundaries.FCMacro']
+    __macros = ['01-geometry.FCMacro', '02-mesh.FCMacro', '03-boundaries.FCMacro', '04-forceCoeffs.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)

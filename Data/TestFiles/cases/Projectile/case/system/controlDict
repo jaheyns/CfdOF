@@ -47,6 +47,38 @@ libs
 
 functions
 {
+    ForceCoeffs
+    {
+        type                forceCoeffs;
+        libs                ("libforces.so");
+        log                 true;
+
+        patches             ( wall );
+        p                   p;
+        U                   U;
+        rho                 rho;
+        rhoInf              1.2;
+        pRef                0.0;
+        porosity            false;
+        writeFields         false;
+        CofR                ( 0.144 0.0 0.0 );
+        liftDir             ( 0.0 0.0 1.0 );
+        dragDir             ( -1.0 0.0 0.0 );
+        pitchAxis           ( 0.0 -1.0 0.0 );
+
+        magUInf             514.0;
+
+        lRef                0.03;
+        Aref                0.000707;
+
+        binData
+        {
+            nBin            0;
+            direction       ( 1.0 0.0 0.0 );
+            cumulative      true;
+        }
+    }
+
 }
 
 // ************************************************************************* //
