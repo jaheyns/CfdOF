@@ -48,6 +48,7 @@ class TimePlot:
         self.times = []
         self.values = {}
         self.transient = False
+        self.ax_lim = 0
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.refresh)
@@ -70,7 +71,7 @@ class TimePlot:
         solver_obj = CfdTools.getSolver(analysis_obj)
         self.transient = (phys_model.Time == 'Transient')
         self.values = {}
-        self.times = [solver_obj.TimeStep.getValueAs(Units.TimeSpan) if self.transient else 1]
+        self.ax_lim = 100*solver_obj.TimeStep.getValueAs(Units.TimeSpan).Value if self.transient else 100
 
     def refresh(self):
         if self.updated:
@@ -86,7 +87,6 @@ class TimePlot:
             ax.set_ylabel(self.y_label)
 
             last_values_min = 1e-2
-            time_max = max(10*self.times[0] if self.transient else 100, self.times[-1])
             for k in self.values:
                 if self.values[k]:
                     ax.plot(self.times[0:len(self.values[k])], self.values[k], label=k, linewidth=1)
@@ -98,11 +98,11 @@ class TimePlot:
                 # Decrease in increments of 10
                 ax.set_ylim([10**(math.floor(math.log10(last_values_min))), 1])
 
-            # Increase in increments of 100
-            time_incr = 10.0*self.times[0] if self.transient else 100
-            ax.set_xlim([0, math.ceil(float(time_max)/time_incr)*time_incr])
+            while float(self.times[-1]) > self.ax_lim:
+                # Increase scale by 10%
+                self.ax_lim *= 1.1
+            ax.set_xlim([0, self.ax_lim])
 
             if len(self.times):
                 ax.legend(loc='lower left')
-
-            self.fig.canvas.draw()
+                self.fig.canvas.draw()
