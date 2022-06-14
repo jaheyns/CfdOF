@@ -1,4 +1,6 @@
-    {
+%{%(createPeriodics/%(0%)/PeriodicMaster%)
+%:True
+        {
         name %(0%)_master;
         patchInfo
         {
@@ -41,3 +43,4 @@
         constructFrom patches;
         patches ( %(createPeriodics/%(0%)/PatchNamesListSlave%) );
     }
+%}

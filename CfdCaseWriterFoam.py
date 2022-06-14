@@ -721,19 +721,28 @@ class CfdCaseWriterFoam:
             if bcSubType == 'cyclicAMI':
                 settings['createPatchesForPeriodics'] = True
                 if bc_obj.RotationalPeriodic:
-                    print(f'rotational cyclic')
+                    print(f'IS MASTER: {bc_obj.PeriodicMaster}')
+                    print(f'PARTNER: {bc_obj.PeriodicPartner}')
                     settings['createPeriodics'][bc_obj.Label] = {
+                        'PeriodicMaster': bc_obj.PeriodicMaster,
+                        'PeriodicPartner': bc_obj.PeriodicPartner,
                         'RotationalPeriodic': bc_obj.RotationalPeriodic,
                         'PeriodicCentreOfRotation': tuple(p for p in bc_obj.PeriodicCentreOfRotation),
                         'PeriodicCentreOfRotationAxis': tuple(p for p in bc_obj.PeriodicCentreOfRotationAxis),
-                        'PatchNamesList': '"'+bc_obj.Name+'_[^_]*"',
-                        'PatchNamesListSlave': '"'+bc_obj.Name+'_.*_slave"'}
+                        'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
+                        'PatchNamesListSlave': '"patch_'+str(bc_id+1)+'_.*"'}
+                    print(f'{settings["createPeriodics"]}')
                 else:
+                    print(f'IS MASTER: {bc_obj.PeriodicMaster}')
+                    print(f'PARTNER: {bc_obj.PeriodicPartner}')
                     settings['createPeriodics'][bc_obj.Label] = {
+                        'PeriodicMaster': bc_obj.PeriodicMaster,
+                        'PeriodicPartner': bc_obj.PeriodicPartner,
                         'RotationalPeriodic': bc_obj.RotationalPeriodic,
                         'PeriodicSeparationVector': tuple(p for p in bc_obj.PeriodicSeparationVector),
-                        'PatchNamesList': '"' + bc_obj.Name + '_[^_]*"',
-                        'PatchNamesListSlave': '"' + bc_obj.Name + '_.*_slave"'}
+                        'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
+                        'PatchNamesListSlave': '"patch_'+str(bc_id+1)+'_.*"'}
+                    print(f'{settings["createPeriodics"]}')
 
         # Set up default BC for unassigned faces
         settings['createPatches']['defaultFaces'] = {
