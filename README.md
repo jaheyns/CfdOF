@@ -18,9 +18,7 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 
 #### Flow physics
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
-* RANS turbulent flow supporting k-omega SST (incl. transition), k-epsilon, and Spalart-Allmaras models
-* LES turbulent flow supporting k-Equation, Smagorinsky and WALE (Wall bounded) models
-* DES turbulent flow supporting k-omega SST and Spalart-Allmaras DES, DDES and IDDES variants
+* Support for various RANS, LES and DES turbulent flow models
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
 * Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
@@ -30,7 +28,7 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 * Solution of arbitrary passive scalar transport functions
 #### Meshing
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
-* Cut-cell Cartesian meshing with baffles (snappyHexMesh) and implicit / explicit snapping
+* Cut-cell Cartesian meshing with baffles (snappyHexMesh)
 * Tetrahedral meshing using Gmsh, including conversion to polyhedral dual mesh
 * Post-meshing check mesh
 * Support for dynamic mesh adaptation for supported solvers
@@ -210,11 +208,11 @@ prerequisites have been successfully installed.
 
 At present there is no formal documentation for CfdOF apart from this README.
 However, demonstration cases
-are provided inside the 'demos' folder of the
+are provided inside the 'Demos' folder of the
 [CfdOF workbench directory](https://gitlab.com/opensimproject/cfdof). These aim
 to provide a basic overview of features and best practices. The examples are run
 by loading and executing the macro files ending in '.FCMacro' in the various sub-directories
-in the 'demos' directory. Where there are several numbered files, these should be run in order
+in the 'Demos' directory. Where there are several numbered files, these should be run in order
 and aim to demonstrate step-by-step how the case is set up.
 
 Community assistance may be sought at the
@@ -246,7 +244,8 @@ in order to provide sufficient information.
 
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/alerts/)[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/context:python)
 
-If you'd like to get involved in the development of CfdOF, please check out our [Contribution guidelines](CONTRIBUTING.md).
+If you would like to get involved in the development of CfdOF, please refer to the [Contribution guidelines](CONTRIBUTING.md)
+and [Roadmap](ROADMAP.md).
 
 ## Acknowledgements
 
@@ -276,4 +275,4 @@ We acknowledge other significant contributions from
 CfdOF is dedicated to the memory of Michael Hindley. It is thanks to his irrepressible enthusiasm for
 FreeCAD and open source software that this workbench exists. Rest in peace.
 
-_Last Updated 21/04/2022_
+![screenshot](Doc/Resources/drone.png)

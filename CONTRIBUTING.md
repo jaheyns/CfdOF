@@ -1,21 +1,13 @@
-# CfdOF: A Computational fluid dynamics (CFD) workbench for FreeCAD
-
-The workbench serves as a front-end (GUI) for the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
-
-Disclaimer:
-This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
-
-## Contributing
-![screenshot](website/resources/drone.png)
+# CfdOF Contribution Guidelines
 
 We welcome contributions to CfdOF from all sources: users (bug reports and feature suggestions / improvements) and developers (bug fixes, merge requests). 
 
-In order to make contributions cohesive with the existing code, as well as admin of the project manageable, when contributing please follow the following contribution guidelines. We have also included some suggestions to make contributing easier if you are considering contributing code, such as dev environment setup etc. 
+In order to make contributions cohesive with the existing code, as well as administration of the project manageable, when contributing please follow the following contribution guidelines. We have also included some suggestions to make contributing easier if you are considering contributing code, such as development environment setup etc. 
 
 ## Ethos
 As indicated, the core developers welcome contributions to CfdOF and we want to build a great tool. However, please note the overarching ethos of CfdOF is to build simplified access to the OpenFOAM® CFD library. 
 
-Therefore, our aim is to include as many useful features as possible, without introducing too many fiddle-factors or tweak parameters to the GUI. In short, CfdOF should make OpenFOAM®  accessible to entry level users, while advanced users can still access the core OpenFOAM configuration files via the "Edit" functionality included wherever needed. 
+Therefore, our aim is to include as many useful features as possible, without introducing too many fiddle-factors or tweak parameters to the GUI. In short, CfdOF should make OpenFOAM accessible to entry level users, while advanced users can still access the core OpenFOAM configuration files via the "Edit" functionality included wherever needed. 
 
 This does not mean that advanced features will not be included - however, some thought and potentially discussion should be applied to your contributions to ensure we continue to build an easy to use tool. 
 
@@ -32,12 +24,9 @@ The easist way to develop for CfdOF is to work directly in the FreeCAD module in
 ($HOME/.FreeCAD/Mod/CfdOF or $HOME/.local/share/FreeCAD/Mod/CfdOF on Linux and %APPDATA%\FreeCAD\Mod\CfdOF on Windows)
 as the workbench will be loaded from this location. Therefore, after installing the workbench via the Addon Manager, you should be able to access Git and switch branches as required directly from this directory. A symlink can be used in Linux if you wish to work in a more convenient location.
 
-For occasional developers, we suggest cloning the CfdOF repo, and issuing Pull Requests to the main CfdOF repo with your bug fix and/or new feature. 
-Regular contributors may be granted _developer_ access to the repo, in which case contributions can be pushed directly to the main CfdOF repository.
-Developer access is still restricted to your own _feature_ / _bugfix_ branches. 
-
+To contribute code, we suggest cloning the CfdOF repository, and issuing a Merge Request with your bug fix and/or new feature. 
 The repository workflow we use is based on the [Github-flow](http://scottchacon.com/2011/08/31/github-flow.html) philosophy.
-Essentially, we ask all developers to submit pull requests for self-contained, tested and working features. 
+Essentially, we ask all developers to submit merge requests for self-contained, tested and working features. 
 Although the process can be frustrating, the long-term health of the project depends on being strict on the quality and completeness 
 of code coming in, as well as harmonising it with the existing design philosophy. Please remember that all developers
 are volunteers with their own interests, and allowing code that is not entirely fit for purpose would place an unfair obligation on others to bring it up to scratch.
@@ -46,10 +35,10 @@ That said, there is generally no objection to submission of an _incomplete_ feat
 as long as it is functional, tested and of good quality as it stands, even if its capabilities are limited.
 
 If you wish to get a first impression or some guidance on a feature you are developing, please feel free to submit a
-'Draft' pull request which can be updated later. Alternatively, open an issue for a proposed change to initiate a discussion.
+'Draft' merge request which can be updated later. Alternatively, open an issue for a proposed change to initiate a discussion.
 
 The branch structure is as follows:
-    - **develop** - Please submit pull requests here. Submitted code should be of sufficient quality that develop remains
+    - **develop** - Please submit merge requests here. Submitted code should be of sufficient quality that develop remains
   'release ready', and pull requests will be evaluated as such.
     - **master** - This is served live to the FreeCAD Addon Manager, so this code is in production. Merging from develop
 is done as frequently as possible and the release will be tagged with a version number.
@@ -69,7 +58,7 @@ For consistency please follow [PEP8](https://www.python.org/dev/peps/pep-0008/)
 1. Use 4 spaces per indentation level (spaces are preferred over tabs).
    - An exception is the .ui files describing the GUI templates. For convenience these are indented with 1 space in order to follow
 the behaviour of the QtDesigner software (see below).
-   - OpenFOAM template files in the 'defaults' and 'defaultsMesh' directories should be indented with 4 spaces, and not tabs. 
+   - OpenFOAM template files in the 'Templates' directories should be indented with 4 spaces, and not tabs. 
 2. Limit all lines to a maximum of 120 characters.
 3. Break lines before binary operators.
 4. Blank lines 
@@ -88,9 +77,10 @@ the behaviour of the QtDesigner software (see below).
     - CONSTANTS_USE_CAPITALS (Uppercase)
     - functionsWithCapitals (Although not following PEP8, Camel-case instead of underscore is preferred as it is widely used within FreeCAD)
     - __class_attribute (Double leading underscore)
-9. Python allows both single quotes ('...') and double quotes ("...") for strings. As a convention, please use single quotes for internal string constants and double quotes for 
-   user-facing communication. The rule of thumb is that if it should be translated, use double quotes.
-   This is not a hard-and-fast rule and can be broken for convenience e.g. when quotes are contained in a string.
+9. Python allows both single quotes ('...') and double quotes ("...") for strings. As a convention, please use single 
+   quotes for internal string   constants and double quotes for user-facing communication. The rule of thumb is that 
+   if a string should be translated, use double quotes. However, this is not a hard-and-fast rule and can be broken 
+   for convenience e.g. when quotes are contained in a string.
    
 ### Testing
 
@@ -104,7 +94,7 @@ FreeCAD -t TestCfdOF
 Alternatively, from FreeCAD, select the 'Testing framework' workbench, choose the 'Self-test' button,
 select the 'TestCfdOF' test name and click 'Start'. Remember to switch to your development / feature branch before testing.
 
-In order to make sure that tests have been run before you issue your PR's, please include in your PR description a comment to show you have run the FreeCAD CfdOF unit tests above and that they have passed. 
+In order to make sure that tests have been run before you issue a merge request, please include a comment to show you have run the FreeCAD CfdOF unit tests above and that they have passed. 
 
 ## Recommended Tools
 ### IDE's and GUI editors
@@ -117,11 +107,9 @@ We suggest you use **Qt Designer** and not **Qt Creator** - this is a cut down v
 * You should be able to get a prebuilt version of [Qt Designer here](https://build-system.fman.io/qt-designer-download) for Mac and Windows otherwise you can also download a copy using PIP (Package name: pyqt5-tools)
 
 Choice of Python IDE's is whatever you feel most comfortable with, although we have found **VS Code** and **PyCharm** quick and easy to set up. 
-* Whatever IDE you use, the most important consideration is to ensure that your Python interpreter includes the FreeCAD **bin** and **lib** paths so that you will have access to the bundled Python libs distributed (and required) by FreeCAD workbenches
+* Whatever IDE you use, the most important consideration is to ensure that your Python interpreter includes the FreeCAD **bin** and **lib** paths so that you will have access to the bundled Python libraries distributed (and required) by FreeCAD workbenches
 * Please note that at this stage, 3rd party code (i.e. libraries) which can be used by FreeCAD workbenches, are restricted to those distributed with the main FreeCAD installation itself - we cannot at this stage include additional Python libraries with Workbenches. 
 
 
 ## Documentation
-At present, there is not much documentation available for CfdOF users. As such, for those contributors who would prefer to help in non-code based ways, we would welcome contributions in terms of video and or written user guides or tutorials. 
-
-_Last updated 22/04/2022_
+At present, there is not much documentation available for CfdOF users. As such, for those contributors who would prefer to help in non-code based ways, we would welcome contributions in terms of video and/or written user guides or tutorials. 

@@ -1,0 +1,48 @@
+import FreeCAD
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+
+bc = FreeCAD.ActiveDocument.CfdFluidBoundary
+bc.BoundaryType = 'wall'
+bc.BoundarySubType = 'fixedWall'
+bc.ThermalBoundaryType = 'zeroGradient'
+bc.VelocityIsCartesian = True
+bc.Ux = '0.0 mm/s'
+bc.Uy = '0.0 mm/s'
+bc.Uz = '0.0 mm/s'
+FreeCAD.ActiveDocument.CfdFluidBoundary.Label = 'wall'
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Compound'), ('',))]
+FreeCAD.ActiveDocument.recompute()
+
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+bc = FreeCAD.ActiveDocument.CfdFluidBoundary001
+bc.BoundaryType = 'open'
+bc.BoundarySubType = 'farField'
+bc.VelocityIsCartesian = True
+bc.Ux = '-514000.0 mm/s'
+bc.Uy = '0.0 mm/s'
+bc.Uz = '-9000.0 mm/s'
+bc.Pressure = '101.3 kg/(mm*s^2)'
+bc.Temperature = '293.1 K'
+bc.TurbulenceInletSpecification = 'intensityAndLengthScale'
+bc.TurbulenceIntensityPercentage = '2 '
+bc.TurbulenceLengthScale = '0.1 mm'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.Label = 'open'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Box'), ('',))]
+FreeCAD.ActiveDocument.recompute()
+
+init = FreeCAD.ActiveDocument.InitialiseFields
+init.PotentialFlow = False
+init.UseInletUValues = True
+init.UseOutletPValue = True
+init.PotentialFlowP = False
+init.UseInletTemperatureValue = True
+init.UseInletTurbulenceValues = True
+init.BoundaryU = FreeCAD.ActiveDocument.CfdFluidBoundary001
+init.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary001
+init.BoundaryT = FreeCAD.ActiveDocument.CfdFluidBoundary001
+init.BoundaryTurb = FreeCAD.ActiveDocument.CfdFluidBoundary001

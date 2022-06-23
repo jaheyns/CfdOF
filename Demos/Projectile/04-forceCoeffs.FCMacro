@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+
+# Macro Begin: /home/oliver/.local/share/FreeCAD/Macro/forces.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
+import FreeCAD
+from CfdOF.PostProcess import CfdReportingFunction
+from CfdOF import CfdTools
+
+CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())
+App.ActiveDocument.ReportingFunction.Label = 'ForceCoeffs'
+App.ActiveDocument.ReportingFunction.ReportingFunctionType = 'ForceCoefficients'
+FreeCAD.ActiveDocument.ReportingFunction.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary
+App.ActiveDocument.ReportingFunction.CentreOfRotation = App.Vector (144.0, 0.0, 0.0)
+App.ActiveDocument.ReportingFunction.Lift = App.Vector (0.0, 0.0, 1.0)
+App.ActiveDocument.ReportingFunction.Drag = App.Vector (-1.0, 0.0, 0.0)
+App.ActiveDocument.ReportingFunction.LengthRef = '30.0 mm'
+App.ActiveDocument.ReportingFunction.AreaRef = '707.0 mm^2'
+FreeCAD.ActiveDocument.recompute()
+App.ActiveDocument.ReportingFunction.ReferenceDensity = '1.2e-09 kg/mm^3'
+App.ActiveDocument.ReportingFunction.MagnitudeUInf = '514000.0 mm/s'
+FreeCAD.ActiveDocument.recompute()
+# Macro End: /home/oliver/.local/share/FreeCAD/Macro/forces.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++

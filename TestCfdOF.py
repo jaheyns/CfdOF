@@ -7,38 +7,36 @@
 # *   Copyright (c) 2021-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
-# *   This program is free software; you can redistribute it and/or modify  *
-# *   it under the terms of the GNU Lesser General Public License (LGPL)    *
-# *   as published by the Free Software Foundation; either version 2 of     *
-# *   the License, or (at your option) any later version.                   *
-# *   for detail see the LICENCE text file.                                 *
+# *   This program is free software: you can redistribute it and/or modify  *
+# *   it under the terms of the GNU Lesser General Public License as        *
+# *   published by the Free Software Foundation, either version 3 of the    *
+# *   License, or (at your option) any later version.                       *
 # *                                                                         *
 # *   This program is distributed in the hope that it will be useful,       *
 # *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
 # *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
-# *   GNU Library General Public License for more details.                  *
+# *   GNU Lesser General Public License for more details.                   *
 # *                                                                         *
-# *   You should have received a copy of the GNU Library General Public     *
-# *   License along with this program; if not, write to the Free Software   *
-# *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  *
-# *   USA                                                                   *
+# *   You should have received a copy of the GNU Lesser General Public      *
+# *   License along with this program.  If not,                             *
+# *   see <https://www.gnu.org/licenses/>.                                  *
 # *                                                                         *
 # ***************************************************************************
 
 import FreeCAD
 import FreeCADGui
 
-import CfdAnalysis
-import CfdSolverFoam
-import CfdPhysicsSelection
-import CfdInitialiseFlowField
-import CfdFluidMaterial
-import CfdMesh
-import CfdFluidBoundary
-import CfdTools
-import CfdCaseWriterFoam
-import CfdMeshTools
-import CfdRunnableFoam
+from CfdOF import CfdAnalysis as CfdAnalysis
+from CfdOF.Solve import CfdSolverFoam
+from CfdOF.Solve import CfdPhysicsSelection
+from CfdOF.Solve import CfdInitialiseFlowField
+from CfdOF.Solve import CfdFluidMaterial
+from CfdOF.Mesh import CfdMesh
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdCaseWriterFoam
+from CfdOF.Mesh import CfdMeshTools
+from CfdOF.Solve import CfdRunnableFoam
 
 import tempfile
 import unittest
@@ -56,9 +54,9 @@ import shutil
 # ***************************************************************************
 
 
-home_path = CfdTools.get_module_path()
+home_path = CfdTools.getModulePath()
 temp_dir = tempfile.gettempdir()
-test_file_dir = os.path.join(home_path, 'testFiles')
+test_file_dir = os.path.join(home_path, 'Data', 'TestFiles')
 
 
 def fccPrint(message):
@@ -143,10 +141,10 @@ class BlockTest(unittest.TestCase):
         doc = FreeCAD.getDocument(self.__class__.__doc_name)
         obj = doc.getObject('inlet')
         vobj = obj.ViewObject
-        import _TaskPanelCfdFluidBoundary
+        from CfdOF.Solve import TaskPanelCfdFluidBoundary
         physics_model = CfdTools.getPhysicsModel(self.analysis)
         material_objs = CfdTools.getMaterials(self.analysis)
-        taskd = _TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model, material_objs)
+        taskd = TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(obj, physics_model, material_objs)
         taskd.selecting_references = True
         taskd.faceSelector.addSelection(doc.Name, self.__class__.__part_name, 'Face1')
         # Give scheduled recompute a chance to happen
@@ -189,16 +187,16 @@ class BlockTest(unittest.TestCase):
 
     def writeCaseFiles(self):
         print ('Write mesh files ...')
-        import _TaskPanelCfdMesh
-        taskd = _TaskPanelCfdMesh._TaskPanelCfdMesh(self.mesh_object)
+        from CfdOF.Mesh import TaskPanelCfdMesh
+        taskd = TaskPanelCfdMesh.TaskPanelCfdMesh(self.mesh_object)
         taskd.obj = self.mesh_object.ViewObject
         taskd.writeMesh()
         taskd.closed()
 
         print ('Write case files ...')
-        import _TaskPanelCfdSolverControl
+        from CfdOF.Solve import TaskPanelCfdSolverControl
         solver_runner = CfdRunnableFoam.CfdRunnableFoam(self.analysis, self.solver_object)
-        taskd = _TaskPanelCfdSolverControl._TaskPanelCfdSolverControl(solver_runner)
+        taskd = TaskPanelCfdSolverControl.TaskPanelCfdSolverControl(solver_runner)
         taskd.obj = self.solver_object.ViewObject
         taskd.write_input_file_handler()
         taskd.closing()
@@ -298,12 +296,9 @@ class MacroTest:
     def runTest(self, dir_name, macro_names):
         fccPrint('--------------- Start of CFD tests ---------------')
         for m in macro_names:
-            macro_name = os.path.join(home_path, "demos", dir_name, m)
+            macro_name = os.path.join(home_path, "Demos", dir_name, m)
             fccPrint('Running {} macro {} ...'.format(dir_name, macro_name))
-
-            macro_contents = "import FreeCAD\nimport FreeCADGui\nimport FreeCAD as App\nimport FreeCADGui as Gui\n"
-            macro_contents += open(macro_name).read()
-            exec(compile(macro_contents, macro_name, 'exec'), {'__file__': macro_name})
+            CfdTools.executeMacro(macro_name)
 
         fccPrint('Writing {} case files ...'.format(dir_name))
         analysis = CfdTools.getActiveAnalysis()
@@ -347,7 +342,7 @@ class ElbowTest(unittest.TestCase, MacroTest):
 
 class DuctTest(unittest.TestCase, MacroTest):
     __dir_name = 'Duct'
-    __macros = ['01-geom.fcmacro', '02-mesh.fcmacro', '03-porous.fcmacro', '04-screen.fcmacro']
+    __macros = ['01-geom.FCMacro', '02-mesh.FCMacro', '03-porous.FCMacro', '04-screen.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
@@ -377,7 +372,7 @@ class ViscousTubeBundleTest(unittest.TestCase, MacroTest):
 
 class UAVTest(unittest.TestCase, MacroTest):
     __dir_name = 'UAV'
-    __macros = ['01-partDesign.fcmacro', '02-firstAnalysis.fcmacro', '03-refineMesh.fcmacro']
+    __macros = ['01-partDesign.FCMacro', '02-firstAnalysis.FCMacro', '03-refineMesh.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
@@ -392,7 +387,7 @@ class UAVTest(unittest.TestCase, MacroTest):
 
 class ProjectileTest(unittest.TestCase, MacroTest):
     __dir_name = 'Projectile'
-    __macros = ['01-geometry.FCMacro', '02-mesh.FCMacro', '03-boundaries.FCMacro']
+    __macros = ['01-geometry.FCMacro', '02-mesh.FCMacro', '03-boundaries.FCMacro', '04-forceCoeffs.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
@@ -408,6 +403,21 @@ class ProjectileTest(unittest.TestCase, MacroTest):
 class LESStepTest(unittest.TestCase, MacroTest):
     __dir_name = 'LESStep'
     __macros = ['backwardStep.FCMacro']
+
+    def __init__(self, var):
+        super().__init__(var)
+        MacroTest.child_instance = self
+
+    def test_run(self):
+        self.runTest(self.__class__.__dir_name, self.__class__.__macros)
+
+    def tearDown(self):
+        self.closeDoc()
+
+
+class DamBreak3DTest(unittest.TestCase, MacroTest):
+    __dir_name = 'DamBreak3D'
+    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-probes.FCMacro','04-adaptiveMesh.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
