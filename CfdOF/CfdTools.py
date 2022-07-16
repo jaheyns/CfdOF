@@ -1643,6 +1643,8 @@ def clearCase(case_path, backup_path=None):
             else:
                 if entry.is_dir():
                     shutil.rmtree(entry.path)
+                else:
+                    os.remove(entry.path)
     else:
         os.makedirs(case_path)  # mkdir -p
 
