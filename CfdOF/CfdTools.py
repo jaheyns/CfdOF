@@ -717,6 +717,8 @@ def makeRunCommand(cmd, dir, source_env=True):
     if installation_path is None:
         raise IOError("OpenFOAM installation directory not found")
 
+    FreeCAD.Console.PrintMessage('Executing: {} in {}\n'.format(cmd, dir))
+
     source = ""
     if source_env and len(installation_path):
         env_setup_script = "{}/etc/bashrc".format(installation_path)
@@ -974,9 +976,9 @@ def checkCfdDependencies():
                         foam_ver = foam_ver.lstrip('v')
                         foam_ver = int(foam_ver.split('.')[0])
                         if getFoamRuntime() == "MinGW":
-                            if foam_ver != 2012:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + " is not supported:\n" + \
-                                         "Only version 2012 supported for MinGW installation"
+                            if foam_ver < 2012 or foam_ver > 2206:
+                                vermsg = "OpenFOAM version " + str(foam_ver) + \
+                                         " is not currently supported with MinGW installation"
                                 message += vermsg + "\n"
                                 print(vermsg)
                         if foam_ver >= 1000:  # Plus version
@@ -985,9 +987,9 @@ def checkCfdDependencies():
                                          "Minimum version 1706 or 5 required"
                                 message += vermsg + "\n"
                                 print(vermsg)
-                            if foam_ver > 2112:
+                            if foam_ver > 2206:
                                 vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                         "Last tested version is 2112"
+                                         "Last tested version is 2206"
                                 message += vermsg + "\n"
                                 print(vermsg)
                         else:  # Foundation version

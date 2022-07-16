@@ -53,3 +53,7 @@ cleantoGrid1Display.RescaleTransferFunctionToDataRange(False, True)
 
 # update the view to ensure updated data information
 renderView1.Update()
+
+# reset view to fit data
+renderView1.ResetCamera(False)
+

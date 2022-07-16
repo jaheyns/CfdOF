@@ -201,7 +201,6 @@ class TaskPanelCfdSolverControl:
 
                     cart_mesh.error = False
                     cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
-                    FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\\n')
                     env_vars = CfdTools.getRunEnvironment()
                     self.solver_object.Proxy.solver_process.start(cmd, env_vars=env_vars)
                     if self.solver_object.Proxy.solver_process.waitForStarted():
@@ -233,7 +232,6 @@ class TaskPanelCfdSolverControl:
             "  import CfdRunnableFoam\n" +
             "  solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)\n" +
             "  cmd = solver_runner.get_solver_cmd(solver_directory)\n" +
-            "  FreeCAD.Console.PrintMessage(' '.join(cmd) + '\\n')\n" +
             "  env_vars = solver_runner.getRunEnvironment()\n" +
             "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=solver_runner.process_output)\n" +
             "  solver_process.start(cmd, env_vars=env_vars)\n" +
@@ -242,7 +240,6 @@ class TaskPanelCfdSolverControl:
         case_name = self.solver_object.InputCaseName
         solver_directory = os.path.abspath(os.path.join(working_dir, case_name))
         cmd = self.solver_runner.get_solver_cmd(solver_directory)
-        FreeCAD.Console.PrintMessage(' '.join(cmd) + '\\n')
         env_vars = self.solver_runner.getRunEnvironment()
         self.solver_object.Proxy.solver_process = CfdConsoleProcess(finished_hook=self.solverFinished,
                                                                     stdout_hook=self.gotOutputLines,
