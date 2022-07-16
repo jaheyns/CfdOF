@@ -96,7 +96,7 @@ class CfdMesh:
                           "Name of directory in which the mesh is created")
 
         # Setup and utility
-        addObjectProperty(obj, 'STLRelativeLinearDeflection', 1, "App::PropertyFloat", "Surface triangulation", 
+        addObjectProperty(obj, 'STLRelativeLinearDeflection', 0.001, "App::PropertyFloat", "Surface triangulation",
                           "Maximum relative linear deflection for built-in surface triangulation")
         addObjectProperty(obj, 'STLAngularMeshDensity', 100, "App::PropertyFloat", "Surface triangulation", 
                           "Mesh elements per 360 degrees for surface triangulation with GMSH")
