@@ -119,6 +119,11 @@ fi
 %:True
 %{%(ExtrusionSettings/Extrusions%)
 cp system/extrudeMeshDict.%(0%) system/extrudeMeshDict
+%{%(ExtrusionSettings/Extrusions/%(0%)/KeepExistingMesh%)
+%:False
+# Refinement history is not processed by extrudeMesh
+rm -f constant/polyMesh/{cellLevel,pointLevel,level0Edge,refinementHistory}
+%}
 runCommand extrudeMesh
 mv log.extrudeMesh log.extrudeMesh.%(0%)
 rm system/extrudeMeshDict

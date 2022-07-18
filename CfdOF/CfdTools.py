@@ -1628,6 +1628,7 @@ def enableLayoutRows(layout, selected_rows):
                 if isinstance(item, QtGui.QWidgetItem):
                     item.widget().setVisible(selected_rows is None or rowi in selected_rows)
 
+
 def clearCase(case_path, backup_path=None):
     """ 
     Remove and recreate contents of the case directory, optionally backing up 
@@ -1647,6 +1648,7 @@ def clearCase(case_path, backup_path=None):
                     os.remove(entry.path)
     else:
         os.makedirs(case_path)  # mkdir -p
+
 
 def executeMacro(macro_name):
     macro_contents = "import FreeCAD\nimport FreeCADGui\nimport FreeCAD as App\nimport FreeCADGui as Gui\n"
