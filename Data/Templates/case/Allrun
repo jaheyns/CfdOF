@@ -39,7 +39,7 @@ fi
 MESHDIR="%(meshDir%)"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
-    rm -r constant/polyMesh 2> /dev/null
+    rm -rf constant/polyMesh
     cp -r "$MESHDIR"/constant/polyMesh constant/polyMesh
 elif [ ! -f constant/polyMesh/faces ]
 then
@@ -127,7 +127,7 @@ runParallel $NPROC potentialFoam -initialiseUBCs -pName $PNAME
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
 # Remove phi with wrong units
-rm processor*/0/phi
+rm -f processor*/0/phi
 %}
 
 %}
@@ -155,7 +155,7 @@ runCommand potentialFoam -initialiseUBCs -pName $PNAME
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
 # Remove phi with wrong units
-rm 0/phi
+rm -f 0/phi
 %}
 
 %}
