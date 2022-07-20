@@ -235,11 +235,13 @@ class CfdMeshTools:
 
         # Check for and filter duplicates
         bc_match_per_shape_face = [-1] * len(mesh_face_list)
+        bc_matched = [False] * len(bc_group)
         for k in range(len(bc_matched_faces)):
             match = bc_matched_faces[k][1]
             prev_k = bc_match_per_shape_face[match]
+            nb, ri, si = bc_matched_faces[k][0]
+            bc_matched[nb] = True
             if prev_k >= 0:
-                nb, ri, si = bc_matched_faces[k][0]
                 nb2, ri2, si2 = bc_matched_faces[prev_k][0]
                 bc = bc_group[nb]
                 bc2 = bc_group[nb2]
@@ -250,6 +252,12 @@ class CfdMeshTools:
                         bc2.Label, bc.ShapeRefs[ri][0].Name, bc.ShapeRefs[ri][1][si]))
             else:
                 bc_match_per_shape_face[match] = k
+        for bc_id, matched in enumerate(bc_matched):
+            if not matched:
+                CfdTools.cfdWarning(
+                    "No part of the boundary '{}' matched any part of the geometry '{}' being meshed\n".format(
+                        bc_group[bc_id].Label, self.mesh_obj.Part.Label))
+
 
         # Match relevant mesh regions to the shape being meshed: boundary layer mesh regions for cfMesh,
         # all surface mesh refinements for snappyHexMesh, and extrusion patches for all meshers.
