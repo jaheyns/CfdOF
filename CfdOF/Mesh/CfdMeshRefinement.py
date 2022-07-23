@@ -88,7 +88,7 @@ class CfdMeshRefinement:
 
     def initProperties(self, obj):
         # Common to all
-        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "List of mesh refinement objects"):
+        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubListGlobal", "", "List of mesh refinement objects"):
             # Backward compat
             if 'References' in obj.PropertiesList:
                 doc = FreeCAD.getDocument(obj.Document.Name)

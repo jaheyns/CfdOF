@@ -83,7 +83,7 @@ class CfdReportingFunction:
         addObjectProperty(obj, 'ReportingFunctionType', OBJECT_NAMES, "App::PropertyEnumeration", "",
                           "Type of reporting function")
 
-        addObjectProperty(obj, 'Patch', None, "App::PropertyLink", "Function object",
+        addObjectProperty(obj, 'Patch', None, "App::PropertyLinkGlobal", "Function object",
                           "Patch on which to create the function object")
 
         # Forces

@@ -108,7 +108,7 @@ class CfdMesh:
                           "Number of parallel threads per process (only applicable to cfMesh and gmsh). "
                           "0 means use all available (if NumberOfProcesses = 1) or use 1 (if NumberOfProcesses > 1)")
 
-        addObjectProperty(obj, "Part", None, "App::PropertyLink", "Mesh Parameters", "Part object to mesh")
+        addObjectProperty(obj, "Part", None, "App::PropertyLinkGlobal", "Mesh Parameters", "Part object to mesh")
 
         if addObjectProperty(obj, "MeshUtility", MESHERS, "App::PropertyEnumeration",
                              "Mesh Parameters", "Meshing utilities"):
