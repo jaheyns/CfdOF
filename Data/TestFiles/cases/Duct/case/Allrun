@@ -36,7 +36,7 @@ fi
 MESHDIR="../meshCaseDuct"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
-    rm -r constant/polyMesh 2> /dev/null
+    rm -rf constant/polyMesh
     cp -r "$MESHDIR"/constant/polyMesh constant/polyMesh
 elif [ ! -f constant/polyMesh/faces ]
 then

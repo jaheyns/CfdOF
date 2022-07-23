@@ -38,6 +38,8 @@ runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/Pad_Geometry.stl" 
 runCommand cartesianMesh
 
 cp system/extrudeMeshDict.0 system/extrudeMeshDict
+# Refinement history is not processed by extrudeMesh
+rm -f constant/polyMesh/{cellLevel,pointLevel,level0Edge,refinementHistory}
 runCommand extrudeMesh
 mv log.extrudeMesh log.extrudeMesh.0
 rm system/extrudeMeshDict
