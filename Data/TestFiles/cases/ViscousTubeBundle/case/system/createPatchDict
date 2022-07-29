@@ -68,16 +68,6 @@ patches
         patches ( "patch_.*_2" );
     }
 
-    {
-        name MeshRefinement001BackFace;
-        patchInfo
-        {
-            type empty;
-        }
-        constructFrom patches;
-        patches ( "patch_.*_2_back" );
-    }
-
 
 );
 

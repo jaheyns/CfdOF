@@ -115,7 +115,7 @@ divSchemes
 %{%(physics/Turbulence%)
 %:DES LES
     div(phi,U)      Gauss LUST grad(U);
-    div(phi,h)      Gauss LUST grad(U);
+    div(phi,h)      Gauss LUST grad(h);
     div(phi,K)      Gauss LUST grad(K);
 %:default
     div(phi,U)      Gauss linearUpwindV grad(U);

@@ -124,15 +124,15 @@ class CfdCaseWriterFoam:
         self.processInitialisationZoneProperties()
 
         if self.reporting_functions:
-            cfdMessage(f'Reporting functions present')
+            cfdMessage('Reporting functions present')
             self.processReportingFunctions()
 
         if self.scalar_transport_objs:
-            cfdMessage(f'Scalar transport functions present')
+            cfdMessage('Scalar transport functions present')
             self.processScalarTransportFunctions()
 
         if self.dynamic_mesh_refinement_obj:
-            cfdMessage(f'Dynamic mesh adaptation rule present')
+            cfdMessage('Dynamic mesh adaptation rule present')
             self.processDynamicMeshRefinement()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
@@ -745,17 +745,9 @@ class CfdCaseWriterFoam:
                     'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'"',
                     'PatchType': "empty"
                 }
-                settings['createPatches'][mr_obj.Label+'BackFace'] = {
-                    'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'_back"',
-                    'PatchType': "empty"
-                }
             elif mr_obj.Extrusion and mr_obj.ExtrusionType == "2DWedge":
                 settings['createPatches'][mr_obj.Label] = {
                     'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'"',
-                    'PatchType': "symmetry"
-                }
-                settings['createPatches'][mr_obj.Label+'BackFace'] = {
-                    'PatchNamesList': '"patch_.*_'+str(mr_id+1)+'_back"',
                     'PatchType': "symmetry"
                 }
             else:

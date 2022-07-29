@@ -17,7 +17,7 @@ FoamFile
 sourceCase          "./";
 sourcePatches       (patch_0_2);
 constructFrom       patch;
-exposedPatchName    patch_0_2_back;
+exposedPatchName    patch_0_2;
 
 flipNormals         false;
 

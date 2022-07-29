@@ -11,19 +11,26 @@ pfoam.Decomposepolyhedra = 0
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
 
-# get color transfer function/color map for 'p'
-ULUT = GetColorTransferFunction('U')
-
-# show data in view
-pfoamDisplay = Show(pfoam, renderView1)
-# trace defaults for the display properties.
-pfoamDisplay.ColorArrayName = ['POINTS', 'U']
-pfoamDisplay.LookupTable = ULUT
-pfoamDisplay.EdgeColor = [0.0, 0.0, 0.5]
-pfoamDisplay.ScalarOpacityUnitDistance = 0.05
-
 # reset view to fit data
 renderView1.ResetCamera()
+
+# create a new 'Clean to Grid'
+cleantoGrid1 = CleantoGrid(Input=pfoam)
+
+# show data in view
+cleantoGrid1Display = Show(cleantoGrid1, renderView1)
+
+# hide data in view
+Hide(pfoam, renderView1)
+
+# get color transfer function/color map for 'U'
+ULUT = GetColorTransferFunction('U')
+
+# trace defaults for the display properties.
+cleantoGrid1Display.ColorArrayName = ['POINTS', 'U']
+cleantoGrid1Display.LookupTable = ULUT
+cleantoGrid1Display.EdgeColor = [0.0, 0.0, 0.5]
+cleantoGrid1Display.ScalarOpacityUnitDistance = 0.05
 
 # get animation scene
 animationScene1 = GetAnimationScene()
@@ -37,7 +44,11 @@ finalTime =  timesteps[-1]
 animationScene1.AnimationTime = finalTime
 
 # rescale color and/or opacity maps used to exactly fit the current data range
-pfoamDisplay.RescaleTransferFunctionToDataRange(False, True)
+cleantoGrid1Display.RescaleTransferFunctionToDataRange(False, True)
 
 # update the view to ensure updated data information
 renderView1.Update()
+
+# reset view to fit data
+renderView1.ResetCamera(False)
+

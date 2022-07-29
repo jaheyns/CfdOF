@@ -148,7 +148,6 @@ class CfdRunnableFoam(CfdRunnable):
 
         # Environment is sourced in run script, so no need to include in run command
         cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
-        FreeCAD.Console.PrintMessage("Solver run command: " + ' '.join(cmd) + "\n")
         return cmd
 
     def getRunEnvironment(self):
@@ -273,9 +272,9 @@ class CfdRunnableFoam(CfdRunnable):
             # Force coefficient monitors
             if self.in_forcecoeffs_section:
                 fc = self.force_coeffs[self.in_forcecoeffs_section]
-                if "Cd" in split and self.niter-1 > len(fc['cdCoeffs']):
+                if (("Cd" in split) or ("Cd:" in split)) and self.niter-1 > len(fc['cdCoeffs']):
                     fc['cdCoeffs'].append(float(split[2]))
-                if "Cl" in split and self.niter-1 > len(fc['clCoeffs']):
+                if (("Cl" in split) or ("Cl:" in split)) and self.niter-1 > len(fc['clCoeffs']):
                     fc['clCoeffs'].append(float(split[2]))
 
         # Update plots

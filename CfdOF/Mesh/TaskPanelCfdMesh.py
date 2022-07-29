@@ -251,7 +251,6 @@ class TaskPanelCfdMesh:
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
             FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh', cart_mesh.meshCaseDir)")
-            FreeCADGui.doCommand("FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\\n')")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             FreeCADGui.doCommand("proxy.running_from_macro = True")
             self.mesh_obj.Proxy.running_from_macro = False
@@ -313,7 +312,6 @@ class TaskPanelCfdMesh:
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
             FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)")
-            FreeCADGui.doCommand("FreeCAD.Console.PrintMessage('Executing: ' + ' '.join(cmd) + '\\n')")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             FreeCADGui.doCommand("proxy.running_from_macro = True")
             self.mesh_obj.Proxy.running_from_macro = False
