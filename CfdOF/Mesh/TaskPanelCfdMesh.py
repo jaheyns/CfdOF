@@ -167,15 +167,19 @@ class TaskPanelCfdMesh:
 
         self.mesh_obj.Proxy.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
 
-    def consoleMessage(self, message="", color="#000000", timed=True):
+    def consoleMessage(self, message="", colour_type=None, timed=True):
         if timed:
-            self.console_message_cart = self.console_message_cart \
-                                        + '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
-                                        format(time.time() - self.Start, color, message)
+            self.console_message_cart += \
+                '<font color="{}">{:4.1f}:</font> '.format(CfdTools.getColour('Logging'), time.time() - self.Start)
+            if colour_type:
+                self.console_message_cart += \
+                    '<font color="{}">{}</font><br>'.format(CfdTools.getColour(colour_type), message)
+            else:
+                self.console_message_cart += message + '<br>'
         else:
             self.console_message_cart = self.console_message_cart \
-                                        + '<font color="{0}">{1}</font><br>'.\
-                                        format(color, message)
+                                        + '<font color="{}">{}</font><br>'.\
+                                        format(colour_type, message)
         self.form.te_output.setText(self.console_message_cart)
         self.form.te_output.moveCursor(QtGui.QTextCursor.End)
         if FreeCAD.GuiUp:
@@ -224,7 +228,7 @@ class TaskPanelCfdMesh:
             print('  CharacteristicLengthMax: ' + str(cart_mesh.clmax))
             FreeCADGui.doCommand("cart_mesh.writeMesh()")
         except Exception as ex:
-            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
+            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), 'Error')
             raise
         else:
             self.analysis_obj.NeedsMeshRerun = True
@@ -241,7 +245,6 @@ class TaskPanelCfdMesh:
         self.Start = time.time()
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
-            self.consoleMessage('Initializing mesh check ...')
             FreeCADGui.doCommand("from CfdOF import CfdTools")
             FreeCADGui.doCommand("from CfdOF.Mesh import CfdMeshTools")
             FreeCADGui.doCommand("from CfdOF import CfdConsoleProcess")
@@ -250,7 +253,7 @@ class TaskPanelCfdMesh:
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
-            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh', cart_mesh.meshCaseDir)")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh -meshQuality', cart_mesh.meshCaseDir)")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             FreeCADGui.doCommand("proxy.running_from_macro = True")
             self.mesh_obj.Proxy.running_from_macro = False
@@ -269,11 +272,11 @@ class TaskPanelCfdMesh:
                 self.form.pb_load_mesh.setEnabled(False)
                 self.consoleMessage("Mesh check started ...")
             else:
-                self.consoleMessage("Error starting mesh checke process", "#FF0000")
+                self.consoleMessage("Error starting mesh check process", 'Error')
                 self.mesh_obj.Proxy.cart_mesh.error = True
 
         except Exception as ex:
-            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
+            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), 'Error')
         finally:
             QApplication.restoreOverrideCursor()
 
@@ -330,10 +333,10 @@ class TaskPanelCfdMesh:
                 self.form.pb_load_mesh.setEnabled(False)
                 self.consoleMessage("Mesher started ...")
             else:
-                self.consoleMessage("Error starting meshing process", "#FF0000")
+                self.consoleMessage("Error starting meshing process", 'Error')
                 self.mesh_obj.Proxy.cart_mesh.error = True
         except Exception as ex:
-            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), '#FF0000')
+            self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), 'Error')
             raise
         finally:
             QApplication.restoreOverrideCursor()
@@ -350,7 +353,7 @@ class TaskPanelCfdMesh:
     def gotErrorLines(self, lines):
         print_err = self.mesh_obj.Proxy.mesh_process.processErrorOutput(lines)
         if print_err is not None:
-            self.consoleMessage(print_err, "#FF0000")
+            self.consoleMessage(print_err, 'Error')
 
     def meshFinished(self, exit_code):
         if exit_code == 0:
@@ -363,7 +366,7 @@ class TaskPanelCfdMesh:
             self.form.pb_check_mesh.setEnabled(True)
             self.form.pb_load_mesh.setEnabled(True)
         else:
-            self.consoleMessage("Meshing exited with error", "#FF0000")
+            self.consoleMessage("Meshing exited with error", 'Error')
             self.form.pb_run_mesh.setEnabled(True)
             self.form.pb_stop_mesh.setEnabled(False)
             self.form.pb_write_mesh.setEnabled(True)

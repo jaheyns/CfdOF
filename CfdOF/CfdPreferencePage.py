@@ -173,9 +173,12 @@ class CfdPreferencePage:
 
         self.setDownloadURLs()
 
-    def consoleMessage(self, message="", color="#000000"):
+    def consoleMessage(self, message="", colour_type=None):
         message = message.replace('\n', '<br>')
-        self.console_message = self.console_message + '<font color="{0}">{1}</font><br>'.format(color, message)
+        if colour_type:
+            self.console_message += '<font color="{0}">{1}</font><br>'.format(CfdTools.getColour(colour_type, message))
+        else:
+            self.console_message += message
         self.form.textEdit_Output.setText(self.console_message)
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
@@ -249,7 +252,7 @@ class CfdPreferencePage:
         CfdTools.setParaviewPath(self.paraview_path)
         CfdTools.setGmshPath(self.gmsh_path)
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.consoleMessage("Checking dependencies...")
+        self.consoleMessage("Checking dependencies...\n")
         msg = CfdTools.checkCfdDependencies()
         self.consoleMessage(msg)
         CfdTools.setFoamDir(self.initial_foam_dir)
@@ -340,7 +343,7 @@ class CfdPreferencePage:
 
     def createThread(self):
         if self.thread and self.thread.isRunning():
-            self.consoleMessage("Busy - please wait...", '#FF0000')
+            self.consoleMessage("Busy - please wait...", 'Error')
             return False
         else:
             self.thread = CfdPreferencePageThread()
@@ -354,7 +357,7 @@ class CfdPreferencePage:
         self.consoleMessage(msg)
 
     def threadError(self, msg):
-        self.consoleMessage(msg, '#FF0000')
+        self.consoleMessage(msg, 'Error')
         self.consoleMessage("Download unsuccessful")
 
     def threadFinished(self, status):

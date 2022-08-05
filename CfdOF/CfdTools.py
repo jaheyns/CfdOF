@@ -359,6 +359,20 @@ def formatTimer(seconds):
     return str(timedelta(seconds=seconds)).split('.', 2)[0].lstrip('0').lstrip(':')
 
 
+def getColour(type):
+    """ 
+    type: 'Error', 'Warning', 'Logging', 'Text' 
+    """
+    col_int = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/OutputWindow").GetUnsigned('color'+type)
+    return '#{:08X}'.format(col_int)[:-2]
+
+
+def setFoamDir(installation_path):
+    prefs = getPreferencesLocation()
+    # Set OpenFOAM install path in parameters
+    FreeCAD.ParamGet(prefs).SetString("InstallationPath", installation_path)
+
+
 def setQuantity(inputField, quantity):
     """
     Set the quantity (quantity object or unlocalised string) into the inputField correctly

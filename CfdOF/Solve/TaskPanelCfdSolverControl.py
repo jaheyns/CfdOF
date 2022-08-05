@@ -80,10 +80,13 @@ class TaskPanelCfdSolverControl:
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(solverDirectory, "pv.foam")))
         self.form.pb_run_solver.setEnabled(os.path.exists(os.path.join(solverDirectory, "Allrun")))
 
-    def consoleMessage(self, message="", color="#000000"):
-        self.console_message = self.console_message + \
-                               '<font color="#0000FF">{0:4.1f}:</font> <font color="{1}">{2}</font><br>'.\
-                               format(time.time() - self.Start, color, message)
+    def consoleMessage(self, message="", colour_type=None):
+        self.console_message += \
+            '<font color="{}">{:4.1f}:</font> '.format(CfdTools.getColour('Logging'), time.time() - self.Start)
+        if colour_type:
+            self.console_message += '<font color="{}">{}</font><br>'.format(CfdTools.getColour(colour_type), message)
+        else:
+            self.console_message += message + '<br>'
         self.form.textEdit_Output.setText(self.console_message)
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
@@ -126,9 +129,9 @@ class TaskPanelCfdSolverControl:
                 writer.progressCallback = self.consoleMessage
                 FreeCADGui.doCommand("writer.writeCase()")
             except Exception as e:
-                self.consoleMessage("Error writing case:", "#FF0000")
-                self.consoleMessage(type(e).__name__ + ": " + str(e), "#FF0000")
-                self.consoleMessage("Write case setup file failed", "#FF0000")
+                self.consoleMessage("Error writing case:", 'Error')
+                self.consoleMessage(type(e).__name__ + ": " + str(e), 'Error')
+                self.consoleMessage("Write case setup file failed", 'Error')
                 raise
             else:
                 self.analysis_object.NeedsCaseRewrite = False
@@ -137,14 +140,14 @@ class TaskPanelCfdSolverControl:
             self.updateUI()
             self.form.pb_run_solver.setEnabled(True)
         else:
-            self.consoleMessage("Case check failed", "#FF0000")
+            self.consoleMessage("Case check failed", 'Error')
 
     def check_prerequisites_helper(self):
         self.consoleMessage("Checking dependencies...")
 
         message = self.solver_runner.check_prerequisites()
         if message != "":
-            self.consoleMessage(message, "#FF0000")
+            self.consoleMessage(message, 'Error')
             return False
         return True
 
@@ -254,7 +257,7 @@ class TaskPanelCfdSolverControl:
             self.form.pb_paraview.setEnabled(True)
             self.consoleMessage("Solver started")
         else:
-            self.consoleMessage("Error starting solver")
+            self.consoleMessage("Error starting solver", 'Error')
         QApplication.restoreOverrideCursor()
 
     def killSolverProcess(self):
@@ -266,7 +269,7 @@ class TaskPanelCfdSolverControl:
         if exit_code == 0:
             self.consoleMessage("Simulation finished successfully")
         else:
-            self.consoleMessage("Simulation exited with error", "#FF0000")
+            self.consoleMessage("Simulation exited with error", 'Error')
         self.solver_runner.solverFinished()
         self.form.pb_write_inp.setEnabled(True)
         self.form.pb_run_solver.setEnabled(True)
@@ -281,7 +284,7 @@ class TaskPanelCfdSolverControl:
             self.analysis_object.NeedsMeshRerun = False
             self.runSolverProcess()
         else:
-            self.consoleMessage("Mesher exited with error", "#FF0000")
+            self.consoleMessage("Mesher exited with error", 'Error')
 
     def gotOutputLines(self, lines):
         self.solver_runner.process_output(lines)
@@ -289,7 +292,7 @@ class TaskPanelCfdSolverControl:
     def gotErrorLines(self, lines):
         print_err = self.solver_object.Proxy.solver_process.processErrorOutput(lines)
         if print_err is not None:
-            self.consoleMessage(print_err, "#FF0000")
+            self.consoleMessage(print_err, 'Error')
 
     def openParaview(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
