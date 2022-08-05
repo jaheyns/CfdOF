@@ -38,7 +38,7 @@ class TaskPanelCfdScalarTransportFunctions:
         self.physics_model = CfdTools.getPhysicsModel(self.analysis_obj)
         self.material_objs = CfdTools.getMaterials(self.analysis_obj)
 
-        us_path = os.path.join(CfdTools.getModulePath(), 'Gui', "TaskPanelCfdScalarTransportFunctions.ui")
+        ui_path = os.path.join(CfdTools.getModulePath(), 'Gui', "TaskPanelCfdScalarTransportFunctions.ui")
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
         
         self.load()
