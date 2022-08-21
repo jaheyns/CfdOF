@@ -20,8 +20,8 @@ Our philosophy is 'Do the basics well' and therefore robust operation takes prec
 
 ### Source code management
 
-The easist way to develop for CfdOF is to work directly in the FreeCAD module installation directory for CfdOF 
-($HOME/.FreeCAD/Mod/CfdOF or $HOME/.local/share/FreeCAD/Mod/CfdOF on Linux and %APPDATA%\FreeCAD\Mod\CfdOF on Windows)
+The easiest way to develop for CfdOF is to work directly in the FreeCAD module installation directory for CfdOF 
+(`$HOME/.FreeCAD/Mod/CfdOF` or $`HOME/.local/share/FreeCAD/Mod/CfdOF` on Linux and `%APPDATA%\FreeCAD\Mod\CfdOF` on Windows)
 as the workbench will be loaded from this location. Therefore, after installing the workbench via the Addon Manager, you should be able to access Git and switch branches as required directly from this directory. A symlink can be used in Linux if you wish to work in a more convenient location.
 
 To contribute code, we suggest cloning the CfdOF repository, and issuing a Merge Request with your bug fix and/or new feature. 
@@ -88,7 +88,7 @@ Unit and regression testing is supported. Where possible, it is asked that new f
 in the unit test framework.
 
 In order to run the tests, the following command can be used from the terminal:
-```
+```bash
 FreeCAD -t TestCfdOF
 ```
 Alternatively, from FreeCAD, select the 'Testing framework' workbench, choose the 'Self-test' button,

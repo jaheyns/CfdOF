@@ -1125,7 +1125,7 @@ def checkCfdDependencies():
     plot_ok = False
     if major_ver > 0 or minor_ver >= 20:
         try:
-            from FreeCAD.Plot import Plot  # Build-in plot module
+            from FreeCAD.Plot import Plot  # Built-in plot module
             plot_ok = True
         except ImportError:
             plot_msg = "Could not load Plot module\nAttempting to use Plot workbench instead"
