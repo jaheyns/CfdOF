@@ -469,7 +469,6 @@ class ViewProviderCfdFluidBoundary:
             return False
         material_objs = CfdTools.getMaterials(analysis_object)
 
-        from CfdOF.Solve import TaskPanelCfdFluidBoundary
         import importlib
         importlib.reload(TaskPanelCfdFluidBoundary)
         self.taskd = TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)

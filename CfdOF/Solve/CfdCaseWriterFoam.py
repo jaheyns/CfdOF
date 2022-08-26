@@ -24,7 +24,6 @@
 
 import os
 import os.path
-import shutil
 from FreeCAD import Units
 from CfdOF import CfdTools
 from CfdOF.TemplateBuilder import TemplateBuilder

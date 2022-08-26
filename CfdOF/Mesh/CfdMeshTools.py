@@ -24,7 +24,6 @@
 import FreeCAD
 from FreeCAD import Units
 import os
-import shutil
 import tempfile
 from CfdOF import CfdTools
 import math
@@ -558,12 +557,11 @@ class CfdMeshTools:
                             patch_shape = Part.makeCompound([faces[f] for f in patch_faces])
                             CfdTools.cfdMessage(
                                 "Triangulating part {}, patch {}\n".format(self.part_obj.Label, patch_name))
-                            mesh_stl = writeSurfaceMeshFromShape(
-                                patch_shape, self.triSurfaceDir, patch_name, self.mesh_obj)
+                            writeSurfaceMeshFromShape(patch_shape, self.triSurfaceDir, patch_name, self.mesh_obj)
                             # Append to the main file
                             with open(os.path.join(self.triSurfaceDir, patch_name + '.stl'), 'r') as fid2:
-                                for l in fid2:
-                                    fid.write(l)
+                                for ln in fid2:
+                                    fid.write(ln)
 
     def loadSurfMesh(self):
         if not self.error:

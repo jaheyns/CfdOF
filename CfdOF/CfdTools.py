@@ -1565,7 +1565,6 @@ def importMaterials():
 
 
 def addMatDir(mat_dir, materials):
-    import glob
     import importFCMat
     mat_file_extension = ".FCMat"
     ext_len = len(mat_file_extension)

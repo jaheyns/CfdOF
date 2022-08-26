@@ -140,8 +140,7 @@ class TaskPanelCfdReportingFunction:
 
         # Type
         index = self.form.comboFunctionObjectType.currentIndex()
-        storeIfChanged(self.obj, 'ReportingFunctionType', 
-            CfdReportingFunction.OBJECT_NAMES[self.form.comboFunctionObjectType.currentIndex()])
+        storeIfChanged(self.obj, 'ReportingFunctionType', CfdReportingFunction.OBJECT_NAMES[index])
 
         bcs = CfdTools.getCfdBoundaryGroup(self.analysis_obj)
         bc = bcs[self.form.cb_patch_list.currentIndex()]

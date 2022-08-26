@@ -176,7 +176,7 @@ class CfdPreferencePage:
     def consoleMessage(self, message="", colour_type=None):
         message = message.replace('\n', '<br>')
         if colour_type:
-            self.console_message += '<font color="{0}">{1}</font><br>'.format(CfdTools.getColour(colour_type, message))
+            self.console_message += '<font color="{0}">{1}</font><br>'.format(CfdTools.getColour(colour_type), message)
         else:
             self.console_message += message
         self.form.textEdit_Output.setText(self.console_message)

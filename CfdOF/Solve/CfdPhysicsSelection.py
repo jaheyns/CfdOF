@@ -30,7 +30,7 @@ if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
 from CfdOF import CfdTools
-from CfdOF.CfdTools import addObjectProperty, storeIfChanged
+from CfdOF.CfdTools import addObjectProperty
 
 
 def makeCfdPhysicsSelection(name="PhysicsModel"):

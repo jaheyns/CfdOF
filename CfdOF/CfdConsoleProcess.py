@@ -29,7 +29,6 @@ import sys
 from PySide import QtCore
 from PySide.QtCore import QProcess, QTextStream
 import FreeCAD
-from CfdOF import CfdTools
 
 
 class CfdConsoleProcess:

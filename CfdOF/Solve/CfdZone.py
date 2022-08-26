@@ -36,8 +36,8 @@ from CfdOF.CfdTools import addObjectProperty
 POROUS_CORRELATIONS = ['DarcyForchheimer', 'Jakob']
 POROUS_CORRELATION_NAMES = ["Darcy-Forchheimer coefficients", "Staggered tube bundle (Jakob)"]
 POROUS_CORRELATION_TIPS = ["Specify viscous and inertial drag tensors by giving their principal components and "
-                           "directions (these will be made orthogonal)", "Specify geometry of parallel tube bundle "
-                                                                         "with staggered layers."]
+                           "directions (these will be made orthogonal)", 
+                           "Specify geometry of parallel tube bundle with staggered layers."]
 
 ASPECT_RATIOS = ["1.0", "1.73", "1.0"]
 ASPECT_RATIO_NAMES = ["User defined", "Equilateral", "Rotated square"]
