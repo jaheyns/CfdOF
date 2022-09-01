@@ -171,15 +171,11 @@ class TaskPanelCfdMesh:
         if timed:
             self.console_message_cart += \
                 '<font color="{}">{:4.1f}:</font> '.format(CfdTools.getColour('Logging'), time.time() - self.Start)
-            if colour_type:
-                self.console_message_cart += \
-                    '<font color="{}">{}</font><br>'.format(CfdTools.getColour(colour_type), message)
-            else:
-                self.console_message_cart += message + '<br>'
+        if colour_type:
+            self.console_message_cart += \
+                '<font color="{}">{}</font><br>'.format(CfdTools.getColour(colour_type), message)
         else:
-            self.console_message_cart = self.console_message_cart \
-                                        + '<font color="{}">{}</font><br>'.\
-                                        format(colour_type, message)
+            self.console_message_cart += message + '<br>'
         self.form.te_output.setText(self.console_message_cart)
         self.form.te_output.moveCursor(QtGui.QTextCursor.End)
         if FreeCAD.GuiUp:
