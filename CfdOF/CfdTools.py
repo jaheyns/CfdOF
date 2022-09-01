@@ -43,6 +43,7 @@ from FreeCAD import Units
 import Part
 import BOPTools
 from BOPTools import SplitFeatures
+import CfdOF.CfdConsoleProcess
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
 from PySide import QtCore
 if FreeCAD.GuiUp:
@@ -1223,7 +1224,7 @@ def startParaview(case_path, script_name, console_message_fn):
         proc.setWorkingDirectory(case_path)
 
         env = QtCore.QProcessEnvironment.systemEnvironment()
-        removeAppimageEnvironment(env)
+        CfdConsoleProcess.removeAppimageEnvironment(env)
         proc.setProcessEnvironment(env)
 
         proc.start(paraview_cmd, [arg])
@@ -1249,28 +1250,6 @@ def startGmsh(working_dir, args, console_message_fn, stdout_fn=None, stderr_fn=N
         else:
             console_message_fn("Error starting GMSH")
     return proc
-
-
-def removeAppimageEnvironment(env):
-    """
-    When running from an AppImage, the changes to the system environment can interfere with the running of
-    external commands. This tries to remove them.
-    """
-    if env.contains("APPIMAGE"):
-        # Strip any value starting with the appimage directory, to attempt to revert to the system environment
-        appdir = env.value("APPDIR")
-        keys = env.keys()
-        for k in keys:
-            vals = env.value(k).split(':')
-            newvals = ''
-            for val in vals:
-                if not val.startswith(appdir):
-                    newvals += val + ':'
-            newvals = newvals.rstrip(':')
-            if newvals:
-                env.insert(k, newvals)
-            else:
-                env.remove(k)
 
 
 def floatEqual(a, b):

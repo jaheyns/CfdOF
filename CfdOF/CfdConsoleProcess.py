@@ -59,7 +59,7 @@ class CfdConsoleProcess:
         if env_vars:
             for key in env_vars:
                 env.insert(key, env_vars[key])
-        CfdTools.removeAppimageEnvironment(env)
+        removeAppimageEnvironment(env)
         self.process.setProcessEnvironment(env)
         if working_dir:
             self.process.setWorkingDirectory(working_dir)
@@ -176,3 +176,25 @@ class CfdConsoleProcess:
             return ret
         else:
             return None
+
+
+def removeAppimageEnvironment(env):
+    """
+    When running from an AppImage, the changes to the system environment can interfere with the running of
+    external commands. This tries to remove them.
+    """
+    if env.contains("APPIMAGE"):
+        # Strip any value starting with the appimage directory, to attempt to revert to the system environment
+        appdir = env.value("APPDIR")
+        keys = env.keys()
+        for k in keys:
+            vals = env.value(k).split(':')
+            newvals = ''
+            for val in vals:
+                if not val.startswith(appdir):
+                    newvals += val + ':'
+            newvals = newvals.rstrip(':')
+            if newvals:
+                env.insert(k, newvals)
+            else:
+                env.remove(k)
