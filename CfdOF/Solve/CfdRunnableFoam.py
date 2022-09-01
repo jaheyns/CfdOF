@@ -273,9 +273,9 @@ class CfdRunnableFoam(CfdRunnable):
             if self.in_forcecoeffs_section:
                 fc = self.force_coeffs[self.in_forcecoeffs_section]
                 if (("Cd" in split) or ("Cd:" in split)) and self.niter-1 > len(fc['cdCoeffs']):
-                    fc['cdCoeffs'].append(float(split[2]))
+                    fc['cdCoeffs'].append(float(split[2] if split[1] == '=' else split[1]))
                 if (("Cl" in split) or ("Cl:" in split)) and self.niter-1 > len(fc['clCoeffs']):
-                    fc['clCoeffs'].append(float(split[2]))
+                    fc['clCoeffs'].append(float(split[2] if split[1] == '=' else split[1]))
 
         # Update plots
         if self.niter > 1 and self.niter > prev_niter:
