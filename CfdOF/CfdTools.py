@@ -43,8 +43,8 @@ from FreeCAD import Units
 import Part
 import BOPTools
 from BOPTools import SplitFeatures
-import CfdOF.CfdConsoleProcess
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
+from CfdOF.CfdConsoleProcess import removeAppimageEnvironment
 from PySide import QtCore
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -1224,7 +1224,7 @@ def startParaview(case_path, script_name, console_message_fn):
         proc.setWorkingDirectory(case_path)
 
         env = QtCore.QProcessEnvironment.systemEnvironment()
-        CfdConsoleProcess.removeAppimageEnvironment(env)
+        removeAppimageEnvironment(env)
         proc.setProcessEnvironment(env)
 
         proc.start(paraview_cmd, [arg])
