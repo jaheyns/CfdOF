@@ -6,7 +6,7 @@ It guides the user in selecting the relevant physics, specifying the material pr
 boundary conditions and choosing the solver settings before running the simulation. Best practices are specified to 
 maximise the stability of the solvers.
 
-![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
+![screenshot](Doc/Resources/boiler.png)
 
 Disclaimer:
 This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via 
@@ -254,21 +254,16 @@ and [Roadmap](ROADMAP.md).
 This development was made possible through initial funding from [Eskom Holdings SOC Ltd](http://www.eskom.co.za)
 and the [Council for Scientific and Industrial Research](https://www.csir.co.za) (South Africa).
 
-### Developers
+### Contributors
 
-The code has been primarily developed by
 * Oliver Oxtoby (CSIR, 2016-2018; private 2019-) <oliveroxtoby@gmail.com>
 * Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>
 * Alfred Bogaers (CSIR, 2016-2018) <alfredbogaers@gmail.com>
-* Jonathan Bergh (2022-)
-
-### Contributors
-
-We acknowledge other significant contributions from
-* Qingfeng Xia (2015) - Original framework
-* Michael Hindley (2016) - Initial concept
-* Klaus Sembritzki (2017) - Multiphase extension
-* Thomas Schrader (2017-) <info@schraderundschrader.de> - Testing and user assistance
+* Jonathan Bergh (2022)
+* Qingfeng Xia (2015)
+* Thomas Schrader (2017-) <info@schraderundschrader.de>
+* Michael Hindley (2016)
+* Klaus Sembritzki (2017)
 
 ### Dedication
 
