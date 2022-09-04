@@ -53,7 +53,8 @@ The major version number is incremented when there is a change which breaks back
 (FCStd files). This is avoided wherever possible, and phased conversion periods where an old format is accepted and the 
 new format written out, are preferred. The minor version number is incremented when there is a new feature in a release,
 or a significant enhancement to existing functionality. The patch version is updated when a release contains only
-a minor bug fix or fixes.
+a minor bug fix or fixes. Please increment the version number in ```package.xml``` and ```metadata.txt``` when 
+submitting a merge request.
 
 ### Style guide
 
