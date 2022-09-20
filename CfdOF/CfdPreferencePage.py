@@ -38,6 +38,7 @@ import FreeCAD
 from CfdOF import CfdTools
 import tempfile
 from contextlib import closing
+from xml.sax.saxutils import escape
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -45,6 +46,7 @@ if FreeCAD.GuiUp:
     from PySide import QtGui
     from PySide.QtCore import Qt, QObject, QThread
     from PySide.QtGui import QApplication
+
 
 # Constants
 OPENFOAM_URL = \
@@ -174,11 +176,12 @@ class CfdPreferencePage:
         self.setDownloadURLs()
 
     def consoleMessage(self, message="", colour_type=None):
+        message = escape(message)
         message = message.replace('\n', '<br>')
         if colour_type:
             self.console_message += '<font color="{0}">{1}</font><br>'.format(CfdTools.getColour(colour_type), message)
         else:
-            self.console_message += message
+            self.console_message += message+'<br>'
         self.form.textEdit_Output.setText(self.console_message)
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
@@ -252,7 +255,7 @@ class CfdPreferencePage:
         CfdTools.setParaviewPath(self.paraview_path)
         CfdTools.setGmshPath(self.gmsh_path)
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.consoleMessage("Checking dependencies...\n")
+        self.consoleMessage("Checking dependencies...")
         msg = CfdTools.checkCfdDependencies()
         self.consoleMessage(msg)
         CfdTools.setFoamDir(self.initial_foam_dir)
@@ -464,7 +467,7 @@ class CfdPreferencePageThread(QThread):
             else:
                 self.signals.error.emit(str(e))
                 self.signals.finished.emit(False)
-                raise
+                return
         self.signals.finished.emit(True)
 
     def downloadFile(self, url, **kwargs):
@@ -493,7 +496,7 @@ class CfdPreferencePageThread(QThread):
         self.signals.status.emit("Downloading {}, please wait...".format(name))
         try:
             if hasattr(ssl, 'create_default_context'):
-                context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+                context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
             else:
                 context = None
             # Download
