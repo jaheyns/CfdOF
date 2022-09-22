@@ -30,7 +30,34 @@ from pivy import coin
 from CfdOF.Mesh import TaskPanelCfdDynamicMeshRefinement
 
 
-def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshRefinement"):
+class CommandGroupDynamicMeshRefinement:
+    def GetCommands(self):
+        return ('Cfd_DynamicMeshRefinement',)
+
+    def GetResources(self):
+        icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh_dynamic.svg")
+        return {'Pixmap': icon_path,
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Dynamic mesh refinement"),
+                'Accel': "M, D",
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Allows adaptive refinement of the mesh")}
+
+    def IsActive(self):
+        sel = FreeCADGui.Selection.getSelection()
+        mesh_selected = (sel and len(sel) == 1 and hasattr(sel[0], "Proxy") and isinstance(sel[0].Proxy, CfdMesh))
+
+        transient = False
+        if mesh_selected:
+            analysis = CfdTools.getParentAnalysisObject(sel[0])
+            physics = None
+            if analysis:
+                physics = CfdTools.getPhysicsModel(analysis)
+                if physics:
+                    transient = (physics.Time == 'Transient')
+        
+        return mesh_selected and transient
+
+
+def makeCfdDynamicMeshRefinement(base_mesh, name="DynamicMeshInterfaceRefinement"):
     """
     makeCfdDynamicMeshRefinement([name]):
     Creates an object to define dynamic mesh properties if the solver supports it
@@ -51,9 +78,10 @@ class CommandDynamicMeshRefinement:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh_dynamic.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Dynamic mesh refinement"),
+                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Interface dynamic refinement"),
                 'Accel': "M, D",
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Defines dynamic mesh behaviour")}
+                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", 
+                "Activates adaptive mesh refinement at free-surface interfaces")}
 
     def IsActive(self):
         sel = FreeCADGui.Selection.getSelection()
@@ -99,10 +127,13 @@ class CfdDynamicMeshRefinement:
 
     def __init__(self, obj):
         obj.Proxy = self
-        self.Type = "DynamicMeshRefinement"
+        self.Type = "DynamicMeshInterfaceRefinement"
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        addObjectProperty(obj, "Phase", "", "App::PropertyString", "DynamicMesh",
+                          "Set the target refinement interface phase")
+
         addObjectProperty(obj, "RefinementInterval", 1, "App::PropertyInteger", "DynamicMesh",
                           "Set the interval at which to run the dynamic mesh refinement")
 
@@ -111,21 +142,6 @@ class CfdDynamicMeshRefinement:
 
         addObjectProperty(obj, "BufferLayers", 1, "App::PropertyInteger", "DynamicMesh",
                           "Set the number of buffer layers between refined and existing cells")
-
-        addObjectProperty(obj, "MaxRefinementCells", 20000000, "App::PropertyInteger", "DynamicMesh",
-                          "Set the maximum number of cells allowed during dynamic mesh refinement")
-
-        addObjectProperty(obj, "RefinementField", "alpha.water", "App::PropertyString", "DynamicMesh",
-                          "Set the target refinement field")
-
-        addObjectProperty(obj, "LowerRefinementLevel", 0.001, "App::PropertyFloat", "DynamicMesh",
-                          "Set the lower mesh refinement")
-
-        addObjectProperty(obj, "UpperRefinementLevel", 0.999, "App::PropertyFloat", "DynamicMesh",
-                          "Set the upper mesh refinement")
-
-        addObjectProperty(obj, "UnRefinementLevel", 10, "App::PropertyInteger", "DynamicMesh",
-                          "Set the unrefinement level below which the mesh will be unrefined")
 
         addObjectProperty(obj, "WriteFields", False, "App::PropertyBool", "DynamicMesh",
                           "Whether to write the dynamic mesh refinement fields after refinement")
@@ -171,9 +187,20 @@ class ViewProviderCfdDynamicMeshRefinement:
         return
 
     def setEdit(self, vobj, mode=0):
+        analysis_object = CfdTools.getParentAnalysisObject(self.Object)
+        if analysis_object is None:
+            CfdTools.cfdErrorBox("No parent analysis object found")
+            return False
+        physics_model = CfdTools.getPhysicsModel(analysis_object)
+        if not physics_model:
+            CfdTools.cfdErrorBox("Analysis object must have a physics object")
+            return False
+        material_models = CfdTools.getMaterials(analysis_object)
+
         import importlib
         importlib.reload(TaskPanelCfdDynamicMeshRefinement)
-        taskd = TaskPanelCfdDynamicMeshRefinement.TaskPanelCfdDynamicMeshRefinement(self.Object)
+        taskd = TaskPanelCfdDynamicMeshRefinement.TaskPanelCfdDynamicMeshRefinement(
+            self.Object, physics_model, material_models)
         taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(taskd)
         return True

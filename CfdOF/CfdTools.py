@@ -143,7 +143,7 @@ def getPhysicsModel(analysis_object):
 def getDynamicMeshAdaptation(analysis_object):
     is_present = False
     for i in getMesh(analysis_object).Group:
-        if "DynamicMeshRefinement" in i.Name:
+        if "DynamicMeshInterfaceRefinement" in i.Name:
             dynamic_mesh_adaption_model = i
             is_present = True
     if not is_present:

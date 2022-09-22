@@ -9,18 +9,18 @@ FoamFile
     object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-dynamicFvMesh       dynamicRefineFvMesh;
+dynamicFvMesh   dynamicRefineFvMesh;
 
 refineInterval  %(dynamicMesh/RefinementInterval%);
-field           %(dynamicMesh/RefinementField%);
+field           alpha.%(dynamicMesh/Phase%);
 
-lowerRefineLevel %(dynamicMesh/LowerRefinementLevel%);
-upperRefineLevel %(dynamicMesh/UpperRefinementLevel%);
+lowerRefineLevel 0.001;
+upperRefineLevel 0.999;
 
-unrefineLevel   %(dynamicMesh/UnRefinementLevel%);
+unrefineLevel   10;
 nBufferLayers   %(dynamicMesh/BufferLayers%);
 maxRefinement   %(dynamicMesh/MaxRefinementLevel%);
-maxCells        %(dynamicMesh/MaxRefinementCells%);
+maxCells        20000000;
 
 correctFluxes
 (
