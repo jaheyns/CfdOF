@@ -74,6 +74,10 @@ class TaskPanelCfdFluidProperties:
             self.selecting_predefined = False
         self.form.material_name.setText(self.obj.Label)
 
+        self.form.saveButton.clicked.connect(self.saveCustomMaterial)
+        self.form.saveButton.setVisible(False)
+        #Hide unless material edited
+
     def compressibleCheckBoxChanged(self):
         self.material['Type'] = 'Compressible' if self.form.compressibleCheckBox.isChecked() else 'Incompressible'
         self.createUIBasedOnPhysics()
@@ -157,6 +161,25 @@ class TaskPanelCfdFluidProperties:
                 else:
                     self.material[f] = getQuantity(self.text_boxes[f])
             self.selectPredefined()
+            self.form.saveButton.setVisible(True)
+
+    def saveCustomMaterial(self):
+        system_mat_dir = os.path.join(CfdTools.getModulePath(), "Data", "CfdFluidMaterialProperties")
+        custom_mat = CfdTools.getMaterials(CfdTools.getActiveAnalysis())
+        d = QtGui.QFileDialog()
+        file_name = d.getSaveFileName(None,"Save Custom Material",system_mat_dir,"FCMat (*.FCMat)")
+        storeIfChanged(self.obj, 'Label', self.form.material_name.text())
+        #makes sure saved name matches what was entered in that task panel session
+        f = open(file_name[0], 'w')
+        f.write('; ' + FreeCAD.ActiveDocument.FluidProperties.Label + '\n')
+        f.write('; \n; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material \n')
+        f.write('\n[FCMat]\n')
+        f.write('Name = ' + FreeCAD.ActiveDocument.FluidProperties.Label + '\n')
+        #self.material['Name'] will always be 'Custom', which makes name unidentifiable in dropdown
+        for key in self.material:
+            if key != 'Name':
+                f.write(key + ' = ' + self.material[key] + '\n')
+        FreeCAD.Console.PrintMessage("Custom material saved\n")
 
     def accept(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
