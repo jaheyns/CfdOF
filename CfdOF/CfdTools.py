@@ -368,12 +368,6 @@ def getColour(type):
     return '#{:08X}'.format(col_int)[:-2]
 
 
-def setFoamDir(installation_path):
-    prefs = getPreferencesLocation()
-    # Set OpenFOAM install path in parameters
-    FreeCAD.ParamGet(prefs).SetString("InstallationPath", installation_path)
-
-
 def setQuantity(inputField, quantity):
     """
     Set the quantity (quantity object or unlocalised string) into the inputField correctly
@@ -489,6 +483,10 @@ def getFoamDir():
     # Ensure parameters exist for future editing
     setFoamDir(installation_path)
 
+    if DockerContainer.usedocker:
+        installation_path = "/home/openfoam"
+        return installation_path
+
     # If not specified, try to detect from shell environment settings and defaults
     if not installation_path:
         installation_path = detectFoamDir()
@@ -522,6 +520,9 @@ def getFoamRuntime():
         if os.path.exists(os.path.join(getFoamDir(), "etc", "bashrc")):
             runtime = 'Posix'
 
+    if DockerContainer.usedocker:
+        runtime = 'Posix'
+    
     if not runtime:
         raise IOError("The directory {} is not a recognised OpenFOAM installation".format(installation_path))
 
@@ -723,11 +724,17 @@ def getRunEnvironment():
         return {}
 
 
-def makeRunCommand(cmd, dir, source_env=True):
+def makeRunCommand(cmd, dir, source_env=True, usedocker=False):
     """
     Generate native command to run the specified Linux command in the relevant environment,
     including changing to the specified working directory if applicable
     """
+    # Start container for case CfdConsole Process called directly (eg Allmesh)
+    if usedocker:
+        if DockerContainer.container_id == None:
+            docker_container = DockerContainer()
+            docker_container.start_container()
+
     installation_path = getFoamDir()
     if installation_path is None:
         raise IOError("OpenFOAM installation directory not found")
@@ -736,8 +743,11 @@ def makeRunCommand(cmd, dir, source_env=True):
 
     source = ""
     if source_env and len(installation_path):
-        env_setup_script = "{}/etc/bashrc".format(installation_path)
-        source = 'source "{}" && '.format(env_setup_script)
+        if usedocker:
+            source = 'source ~/etc/bashrc && '
+        else:
+            env_setup_script = "{}/etc/bashrc".format(installation_path)
+            source = 'source "{}" && '.format(env_setup_script)
     cd = ""
     if dir:
         cd = 'cd "{}" && '.format(translatePath(dir))
@@ -751,6 +761,11 @@ def makeRunCommand(cmd, dir, source_env=True):
                     'export PATH=$FOAM_LIBBIN/msmpi:$FOAM_LIBBIN:$WM_THIRD_PARTY_DIR/platforms/linux64MingwDPInt32/lib:$PATH; '
                      + cd + cmd]
         return cmdline
+
+    if usedocker:
+        cmdline = ['docker', 'exec', DockerContainer.container_id, 'bash', '-c', source + cd + cmd]
+        return cmdline
+
     if getFoamRuntime() == "WindowsDocker":
         foamVersion = os.path.split(installation_path)[-1].lstrip('v')
         cmdline = ['powershell.exe',
@@ -813,7 +828,7 @@ def makeRunCommand(cmd, dir, source_env=True):
         return cmdline
 
 
-def runFoamCommand(cmdline, case=None):
+def runFoamCommand(cmdline, case=None, usedocker=False):
     """
     Run a command in the OpenFOAM environment and wait until finished. Return output as (stdout, stderr, combined)
         Also print output as we go.
@@ -821,8 +836,13 @@ def runFoamCommand(cmdline, case=None):
               e.g. transformPoints -scale "(0.001 0.001 0.001)"
         case - Case directory or path
     """
+    print("runFoamCommand cmdline={}, case={}, usedocker={}".format(cmdline,case,usedocker))
+    if usedocker:
+        if DockerContainer.container_id == None:
+            docker_container = DockerContainer()
+            docker_container.start_container()
     proc = CfdSynchronousFoamProcess()
-    exit_code = proc.run(cmdline, case)
+    exit_code = proc.run(cmdline, case, usedocker=usedocker)
     # Reproduce behaviour of failed subprocess run
     if exit_code:
         raise subprocess.CalledProcessError(exit_code, cmdline)
@@ -860,12 +880,17 @@ def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook
         # paths may be specified using variables only available in foam runtime environment.
         cmdline = "{{ rm -f {}; {}; }}".format(logFile, cmdline)
 
+    if DockerContainer.usedocker:
+        if DockerContainer.container_id == None:
+            docker_container = DockerContainer()
+            docker_container.start_container()
+            
     proc = CfdConsoleProcess(finished_hook=finished_hook, stdout_hook=stdout_hook, stderr_hook=stderr_hook)
     if logFile:
         print("Running ", ' '.join(cmds), " -> ", logFile)
     else:
         print("Running ", ' '.join(cmds))
-    proc.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
+    proc.start(makeRunCommand(cmdline, case, usedocker=DockerContainer.usedocker), env_vars=getRunEnvironment())
     if not proc.waitForStarted():
         raise Exception("Unable to start command " + ' '.join(cmds))
     return proc
@@ -954,6 +979,10 @@ def checkCfdDependencies():
 
     # check openfoam
     print("Checking for OpenFOAM:")
+    if DockerContainer.usedocker:
+        if DockerContainer.container_id == None:
+            docker_container = DockerContainer()
+            docker_container.start_container()
     try:
         foam_dir = getFoamDir()
         sys_msg = "System: {}\nRuntime: {}\nOpenFOAM directory: {}".format(
@@ -975,7 +1004,7 @@ def checkCfdDependencies():
                 if getFoamRuntime() == "MinGW":
                     foam_ver = runFoamCommand("echo $FOAM_API")[0]
                 else:
-                    foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")[0]
+                    foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION",usedocker=DockerContainer.usedocker)[0]
             except Exception as e:
                 runmsg = "OpenFOAM installation found, but unable to run command: " + str(e)
                 message += runmsg + '\n'
@@ -1025,7 +1054,7 @@ def checkCfdDependencies():
                 # Check for wmake
                 if getFoamRuntime() != "MinGW":
                     try:
-                        runFoamCommand("wmake -help")
+                        runFoamCommand("wmake -help", usedocker=DockerContainer.usedocker)
                     except subprocess.CalledProcessError:
                         wmakemsg = "OpenFOAM installation does not include 'wmake'. " + \
                                    "Installation of cfMesh and HiSA will not be possible."
@@ -1034,7 +1063,7 @@ def checkCfdDependencies():
 
                 # Check for cfMesh
                 try:
-                    cfmesh_ver = runFoamCommand("cartesianMesh -version")[0]
+                    cfmesh_ver = runFoamCommand("cartesianMesh -version", usedocker=DockerContainer.usedocker)[0]
                     cfmesh_ver = cfmesh_ver.rstrip().split()[-1]
                     cfmesh_ver = cfmesh_ver.split('.')
                     if (not cfmesh_ver or len(cfmesh_ver) != 2 or
@@ -1052,7 +1081,7 @@ def checkCfdDependencies():
 
                 # Check for HiSA
                 try:
-                    hisa_ver = runFoamCommand("hisa -version")[0]
+                    hisa_ver = runFoamCommand("hisa -version", usedocker=DockerContainer.usedocker)[0]
                     hisa_ver = hisa_ver.rstrip().split()[-1]
                     hisa_ver = hisa_ver.split('.')
                     if (not hisa_ver or len(hisa_ver) != 3 or
@@ -1080,7 +1109,7 @@ def checkCfdDependencies():
             # If not found, try to run from the OpenFOAM environment, in case a bundled version is
             # available from there
             try:
-                runFoamCommand('which paraview')
+                runFoamCommand('which paraview', usedocker=DockerContainer.usedocker)
             except subprocess.CalledProcessError:
                 failed = True
         if failed or not os.path.exists(paraview_cmd):
@@ -1101,7 +1130,7 @@ def checkCfdDependencies():
                 # If not found, try to run from the OpenFOAM environment, in case a bundled version is
                 # available from there
                 try:
-                    runFoamCommand('which pvpython')
+                    runFoamCommand('which pvpython', usedocker=DockerContainer.usedocker)
                 except subprocess.CalledProcessError:
                     failed = True
             else:
@@ -1154,7 +1183,7 @@ def checkCfdDependencies():
         print(gmsh_msg)
         try:
             # Needs to be runnable from OpenFOAM environment
-            gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")[2]
+            gmshversion = runFoamCommand(("'" + gmsh_exe + "'" + " -version"),usedocker=DockerContainer.usedocker)[2]
         except (OSError, subprocess.CalledProcessError):
             gmsh_msg = "gmsh could not be run from OpenFOAM environment"
             message += gmsh_msg + '\n'
@@ -1202,6 +1231,8 @@ def getGmshExecutable():
     if not gmsh_cmd:
         # Otherwise, see if the command 'gmsh' is in the path.
         gmsh_cmd = shutil.which("gmsh")
+    if DockerContainer.usedocker:
+        gmsh_cmd='gmsh'
     return gmsh_cmd
 
 
@@ -1655,9 +1686,10 @@ class CfdSynchronousFoamProcess:
         self.outputErr = ""
         self.outputAll = ""
 
-    def run(self, cmdline, case=None):
+    def run(self, cmdline, case=None, usedocker=False):
         print("Running ", cmdline)
-        self.process.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
+        # Note - don't set source_env if we are using docker but are building hisa or cfmesh 
+        self.process.start(makeRunCommand(cmdline, case, usedocker=usedocker, source_env=not DockerContainer.usedocker or usedocker), env_vars=getRunEnvironment())
         if not self.process.waitForFinished():
             raise Exception("Unable to run command " + cmdline)
         return self.process.exitCode()
@@ -1669,3 +1701,104 @@ class CfdSynchronousFoamProcess:
     def readError(self, output):
         self.outputErr += output
         self.outputAll += output
+
+# Only one container is needed. Start one for the CfdOF workbench as required
+class DockerContainer:
+    container_id = None
+    usedocker = False
+    foam_dir = None
+    
+    def __init__(self):
+        self.image_name = None
+
+    """ Start docker container return values:
+            1 - CfdOF container already running
+            2 - CfdOF container running but not started by CfdOF - may not be configured correctly
+            3 - Config issue
+    """
+    def start_container(self):
+        proc = QtCore.QProcess()
+        prefs = getPreferencesLocation()
+        self.image_name = FreeCAD.ParamGet(prefs).GetString("DockerImageName","")
+        self.foam_dir = FreeCAD.ParamGet(prefs).GetString("InstallationPath","")
+        ds_fname = FreeCAD.ParamGet(prefs).GetString("DockerURL", "").split('/')[-1]
+
+        if DockerContainer.container_id != None:
+            return 1
+        container_ls = self.query_docker_container_ls() 
+        if container_ls != None:
+            print("Docker container {} running but not started by CfdOF - it may not be configured correctly".format(container_ls))
+            button = QtGui.QMessageBox.question(None,
+                            "Stop Running Docker Container?",
+                            "Docker container running but not started by CfdOF - it may not be configured correctly.  Press 'Yes' to stop container")
+            if button == QtGui.QMessageBox.StandardButton.Yes:
+                self.stop_container(alien = True)
+                print("Docker container stopped.  Please try last operation again.")
+            return 2
+        if self.image_name == "" or ds_fname == "":
+            return 3
+
+        cmd = "/bin/sh {0}/bin/{1} -d {0}".format(self.foam_dir, ds_fname)
+        proc.setStandardInputFile(os.devnull)
+        proc.start(cmd)
+        self.getContainerID()
+        return 0
+
+    """ Stop docker container """
+    def stop_container(self, alien = False):
+        if DockerContainer.container_id == None and alien:
+            DockerContainer.container_id = self.query_docker_container_ls()
+        if DockerContainer.container_id != None:
+            print("Stopping docker container {}".format(DockerContainer.container_id))
+            cmd = "docker container stop -t 0 {}".format(DockerContainer.container_id)
+            proc = QtCore.QProcess()
+            proc.start(cmd)
+            if not proc.waitForFinished():
+                print("Stop docker container {} failed".format(DockerContainer.container_id))
+            else:
+                while proc.canReadLine():
+                    line = proc.readLine()
+            DockerContainer.container_id = None
+        else:
+            print("No docker container to stop")
+                    
+    def getContainerID(self):
+        import time
+        timer_counts = 0
+        while timer_counts < 15 and DockerContainer.container_id == None:
+            time.sleep(1)
+            DockerContainer.container_id = self.query_docker_container_ls()
+            timer_counts = timer_counts + 1
+        
+    def query_docker_container_ls(self):
+        cmd = "docker container ls"
+        proc = QtCore.QProcess()
+        proc.start(cmd)
+        proc.waitForFinished()
+        while proc.canReadLine():
+            line = proc.readLine()
+            cnt_lst = str(line.data(), encoding="utf-8").split()
+            if  len(cnt_lst)>0 and cnt_lst[1] == self.image_name:
+                return(cnt_lst[0])
+        return(None)
+
+    def getContainerSource(self):
+        import time
+        timer_counts = 0
+        cmdline = "for d in /opt/*openfoam*; do [[ $d != *para* ]] && [[ -e $d/etc/bashrc ]] && echo if [[ -e $d/etc/bashrc ]]';' then source $d/etc/bashrc';' fi > $HOME/etc/bashrc; done; \
+            source ~/etc/bashrc; echo export PATH=$HOME/platforms/$WM_OPTIONS/bin:'$'PATH >> $HOME/etc/bashrc; \
+            echo export LD_LIBRARY_PATH=$HOME/platforms/$WM_OPTIONS/lib:'$'LD_LIBRARY_PATH >> $HOME/etc/bashrc"
+        cmd = 'docker exec {} bash -c "{}"'.format(DockerContainer.container_id,cmdline)
+        proc = QtCore.QProcess()
+        proc.start(cmd)
+        proc.waitForFinished()
+        while timer_counts < 15 and not os.path.exists(self.foam_dir+'/etc/bashrc'):
+            time.sleep(1)
+            timer_counts = timer_counts + 1
+
+        if timer_counts < 15:
+            with open(self.foam_dir+'/etc/bashrc','r') as f:
+                line = f.readline().rstrip()
+                if line[-15:-4] == "/etc/bashrc":
+                    return(0)
+        return(1)
