@@ -249,7 +249,7 @@ class TaskPanelCfdMesh:
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
-            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh -meshQuality', cart_mesh.meshCaseDir)")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh -meshQuality', cart_mesh.meshCaseDir, usedocker=CfdTools.DockerContainer.usedocker)")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             FreeCADGui.doCommand("proxy.running_from_macro = True")
             self.mesh_obj.Proxy.running_from_macro = False
@@ -310,7 +310,7 @@ class TaskPanelCfdMesh:
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
-            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, usedocker=CfdTools.DockerContainer.usedocker, source_env=False)")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             FreeCADGui.doCommand("proxy.running_from_macro = True")
             self.mesh_obj.Proxy.running_from_macro = False
