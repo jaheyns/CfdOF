@@ -68,7 +68,7 @@ HISA_URL_MINGW = \
 HISA_FILE_BASE = "hisa-master"
 HISA_FILE_EXT = ".zip"
 DOCKER_URL = \
-    "http://dl.openfoam.org/docker/openfoam9-"
+    "docker.io/mmcker/cfdof-openfoam"
 
 # Tasks for the worker thread
 DOWNLOAD_OPENFOAM = 1
@@ -119,9 +119,6 @@ class CfdPreferencePage:
         self.form.pb_download_install_docker.clicked.connect(self.downloadInstallDocker)
 
         self.docker_container = CfdTools.DockerContainer()
-
-        if platform.system() == "Windows":
-            self.form.gb_docker.setVisible(0)        
 
         self.ev_filter = CloseDetector(self.form, self.cleanUp)
         self.form.installEventFilter(self.ev_filter)
@@ -185,16 +182,12 @@ class CfdPreferencePage:
         self.output_dir = CfdTools.getDefaultOutputPath()
         self.form.le_output_dir.setText(self.output_dir)
 
-        CfdTools.DockerContainer.usedocker = FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0)
-        if CfdTools.DockerContainer.usedocker:
+        if FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0):
             self.form.cb_docker_sel.setCheckState(Qt.Checked)
-        else:
-            self.form.pb_download_install_docker.setEnabled(0)
+        # Set usedocker and enable/disable download buttons 
+        self.dockerCheckboxClicked()
 
-        if platform.system() == "Linux":
-            self.form.le_docker_url.setText(DOCKER_URL+"linux")
-        elif platform.system() == "Darwin":
-            self.form.le_docker_url.setText(DOCKER_URL+"macos")
+        self.form.le_docker_url.setText(DOCKER_URL)
 
         self.setDownloadURLs()
 
@@ -435,17 +428,13 @@ class CfdPreferencePage:
             if status:
                 self.consoleMessage("Download completed")
                 user_dir = self.thread.user_dir
-                self.consoleMessage("Downloading/starting docker image.")
+                self.consoleMessage("Starting docker image.")
                 
                 if CfdTools.DockerContainer.container_id != None:
                     self.docker_container.stop_container()
                 exit_code = self.docker_container.start_container()
                 if CfdTools.DockerContainer.container_id != None:
-                    s_exit_code = self.docker_container.getContainerSource()
-                    if s_exit_code == 0:
-                        self.consoleMessage("Success! Docker image {} started. ID = {}".format(self.docker_container.image_name, CfdTools.DockerContainer.container_id))
-                    else:
-                        self.consoleMessage("Problem getting docker container source script")
+                   self.consoleMessage("Success! Docker image {} started. ID = {}".format(self.docker_container.image_name, CfdTools.DockerContainer.container_id))
                 else:
                     self.consoleMessage("Docker start appears to have failed")
                     if exit_code == 1:
@@ -480,6 +469,9 @@ class CfdPreferencePage:
     def dockerCheckboxClicked(self):
         CfdTools.DockerContainer.usedocker = self.form.cb_docker_sel.isChecked()
         self.form.pb_download_install_docker.setEnabled(CfdTools.DockerContainer.usedocker)
+        self.form.pb_download_install_openfoam.setEnabled(not CfdTools.DockerContainer.usedocker)
+        self.form.pb_download_install_hisa.setEnabled(not CfdTools.DockerContainer.usedocker)
+        self.form.pb_download_install_cfMesh.setEnabled(not CfdTools.DockerContainer.usedocker)
 
     def downloadInstallDocker(self):
         # Set foam dir and output dir in preparation for using docker
@@ -513,23 +505,6 @@ class CfdPreferencePageThread(QThread):
 
     def run(self):
         self.quit = False
-        
-        # If using docker, need to make and set the foam, bin & etc directories if they don't already exist
-        if CfdTools.DockerContainer.usedocker:
-            prefs = CfdTools.getPreferencesLocation()
-            foam_dir =  FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
-            if len(foam_dir)==0:
-                self.signals.status.emit("Please enter writable OpenFOAM install directory such as {}/OpenFOAM".format(os.path.expanduser("~")))
-                self.signals.finished.emit(False)
-                return
-            else:
-                cmd = 'mkdir -p {0}/bin ; mkdir -p {0}/etc'.format(foam_dir)
-                proc = QtCore.QProcess()
-                proc.start(cmd)
-                if not proc.waitForFinished():
-                    self.signals.status.emit("Could not create OpenFOAM install sub-directories")
-                    self.signals.finished.emit(False)
-                    return
 
         try:
             if self.task == DOWNLOAD_OPENFOAM:
@@ -613,11 +588,6 @@ class CfdPreferencePageThread(QThread):
             CfdTools.runFoamCommand(
                 '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
                     format(CfdTools.translatePath(filename)))
-        elif CfdTools.DockerContainer.usedocker:
-            prefs = CfdTools.getPreferencesLocation()
-            self.user_dir =  FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
-            cmd = 'cd {} && rm -r {}; unzip -o {}'.format(self.user_dir, CFMESH_FILE_BASE, CfdTools.translatePath(filename))
-            CfdTools.runFoamCommand(cmd)
         else:
             self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR")[0].rstrip().split('\n')[-1]
             # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
@@ -647,11 +617,6 @@ class CfdPreferencePageThread(QThread):
             CfdTools.runFoamCommand(
                 '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
                     format(CfdTools.translatePath(filename)))
-        elif CfdTools.DockerContainer.usedocker:
-            prefs = CfdTools.getPreferencesLocation()
-            self.user_dir =  FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
-            cmd = 'cd {} && rm -r {}; unzip -o {}'.format(self.user_dir, HISA_FILE_BASE, CfdTools.translatePath(filename))
-            CfdTools.runFoamCommand(cmd)
         else:
             self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR")[0].rstrip().split('\n')[-1]
             # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
@@ -673,55 +638,12 @@ class CfdPreferencePageThread(QThread):
                     format(HISA_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadDocker(self):
-        self.signals.status.emit("Downloading Docker run script, please wait...")
-        prefs = CfdTools.getPreferencesLocation()
-        self.user_dir =  FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
-        try:
-            # Download
-            (filename, header) = self.downloadFile(self.docker_url, reporthook=self.downloadStatus)
-        except Exception as ex:
-            raise Exception("Error downloading Docker run script: {}".format(str(ex)))
-
-        cmd = 'cd {} && mkdir -p docker_build'.format(self.user_dir)
-        CfdTools.runFoamCommand(cmd)
-        
-        self.signals.status.emit("Saving Docker run script...")
-        
-        # Add output directory volume to docker script
-        ds_modified_fname = "{}/bin/{}".format(self.user_dir,self.docker_url.split('/')[-1])
-        ds_modified = open(ds_modified_fname,'w')
-        ds_original = open(filename,'r')
-        if not ds_modified or not ds_original:
-            self.signals.status.emit("Could not read and modify docker script")
-            return
-
-        for line in ds_original:
-            if "DOCKER_IMAGE=" in line:
-                base_img_name = line[14:-2]
-                line = line[:-2]+'-gmsh'+line[-2:]
-                gmsh_img_name = line[14:-2]
-                FreeCAD.ParamGet(prefs).SetString("DockerImageName",gmsh_img_name)
-            # Change -it to -t -d so dthe docker continaer will continue to run as a detached background process
-            line = line.replace('-it ','-t -d ')
-            ds_modified.write(line)
-            if "docker run" in line:
-                # Add the output directory
-                ds_modified.write("    -v {}:/tmp \\\n".format(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath","")))
-        ds_modified.close()
-        ds_original.close()
-        dockerfile = open("{}/docker_build/Dockerfile".format(self.user_dir),"w")
-        dockerfile.write("FROM {}\n".format(base_img_name))
-        dockerfile.write(
-"""USER root
-RUN apt-get update && apt-get -y install gmsh
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-USER openfoam
-"""
-        )
-        dockerfile.close()
-        self.signals.status.emit("Adding gmsh to OpenFOAM Image.  If OpenFOAM Image not already downloaded, this could take a while.")
-        cmd = 'cd {}/docker_build;docker build -t {} .'.format(self.user_dir, gmsh_img_name)
-        CfdTools.runFoamCommand(cmd)
+        self.signals.status.emit("Downloading Docker image, please wait...")
+        proc = QtCore.QProcess()
+        cmd = 'docker pull {}'.format(self.docker_url)
+        if platform.system() == 'Windows':
+            cmd = cmd.replace('docker ','podman.exe ')
+        CfdTools.runFoamCommand(cmd,usedocker=True)
     
     def downloadStatus(self, blocks, block_size, total_size):
         self.signals.downloadProgress.emit(blocks*block_size, total_size)
