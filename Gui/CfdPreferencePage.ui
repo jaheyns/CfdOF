@@ -414,7 +414,7 @@
      <item row="3" column="0">
       <widget class="QGroupBox" name="gb_docker">
        <property name="title">
-        <string>Docker</string>
+        <string>Docker Container - includes gmsh, cfMesh and HISA</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
