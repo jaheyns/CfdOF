@@ -118,7 +118,8 @@ class CfdPreferencePage:
         self.form.cb_docker_sel.clicked.connect(self.dockerCheckboxClicked)
         self.form.pb_download_install_docker.clicked.connect(self.downloadInstallDocker)
 
-        self.docker_container = CfdTools.DockerContainer()
+        if CfdTools.docker_container==None:
+            CfdTools.docker_container = CfdTools.DockerContainer()
 
         self.ev_filter = CloseDetector(self.form, self.cleanUp)
         self.form.installEventFilter(self.ev_filter)
@@ -431,10 +432,10 @@ class CfdPreferencePage:
                 self.consoleMessage("Starting docker image.")
                 
                 if CfdTools.DockerContainer.container_id != None:
-                    self.docker_container.stop_container()
-                exit_code = self.docker_container.start_container()
+                    CfdTools.docker_container.stop_container()
+                exit_code = CfdTools.docker_container.start_container()
                 if CfdTools.DockerContainer.container_id != None:
-                   self.consoleMessage("Success! Docker image {} started. ID = {}".format(self.docker_container.image_name, CfdTools.DockerContainer.container_id))
+                   self.consoleMessage("Success! Docker image {} started. ID = {}".format(CfdTools.docker_container.image_name, CfdTools.DockerContainer.container_id))
                 else:
                     self.consoleMessage("Docker start appears to have failed")
                     if exit_code == 1:
@@ -639,10 +640,10 @@ class CfdPreferencePageThread(QThread):
 
     def downloadDocker(self):
         self.signals.status.emit("Downloading Docker image, please wait...")
-        proc = QtCore.QProcess()
-        cmd = 'docker pull {}'.format(self.docker_url)
-        if platform.system() == 'Windows':
-            cmd = cmd.replace('docker ','podman.exe ')
+        cmd = '{} pull {}'.format(CfdTools.docker_container.docker_cmd, self.docker_url)
+        if 'docker'in CfdTools.docker_container.docker_cmd:
+            cmd = cmd.replace('docker.io/','')
+
         CfdTools.runFoamCommand(cmd,usedocker=True)
     
     def downloadStatus(self, blocks, block_size, total_size):

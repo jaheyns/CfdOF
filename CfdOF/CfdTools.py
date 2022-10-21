@@ -81,6 +81,7 @@ QUANTITY_PROPERTIES = ['App::PropertyQuantity',
                        'App::PropertyForce',
                        'App::PropertyPressure']
 
+docker_container = None
 
 def getDefaultOutputPath():
     prefs = getPreferencesLocation()
@@ -729,7 +730,8 @@ def makeRunCommand(cmd, dir, source_env=True, usedocker=False):
     Generate native command to run the specified Linux command in the relevant environment,
     including changing to the specified working directory if applicable
     """
-    
+
+    global docker_container
     # Case where running from Install Docker thread
     if usedocker and ' pull ' in cmd:
             return cmd.split()
@@ -737,7 +739,8 @@ def makeRunCommand(cmd, dir, source_env=True, usedocker=False):
     # Start container for case CfdConsole Process called directly (eg Allmesh)
     if usedocker:
         if DockerContainer.container_id == None:
-            docker_container = DockerContainer()
+            if docker_container == None:
+                docker_container = DockerContainer()
             docker_container.start_container()
 
     installation_path = getFoamDir()
@@ -771,10 +774,7 @@ def makeRunCommand(cmd, dir, source_env=True, usedocker=False):
         return cmdline
 
     if usedocker:
-        if platform.system()=='Windows':
-            cmdline = ['podman.exe', 'exec', DockerContainer.container_id, 'bash', '-c', source + cd + cmd]
-        else:
-            cmdline = ['docker', 'exec', DockerContainer.container_id, 'bash', '-c', source + cd + cmd]
+        cmdline = [docker_container.docker_cmd, 'exec', DockerContainer.container_id, 'bash', '-c', source + cd + cmd]
         return cmdline
 
 
@@ -849,9 +849,11 @@ def runFoamCommand(cmdline, case=None, usedocker=False):
         case - Case directory or path
     """
 
+    global docker_container
     if usedocker:
         if DockerContainer.container_id == None:
-            docker_container = DockerContainer()
+            if docker_container == None:
+                docker_container = DockerContainer()
             docker_container.start_container()
     proc = CfdSynchronousFoamProcess()
     exit_code = proc.run(cmdline, case, usedocker=usedocker)
@@ -892,9 +894,11 @@ def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook
         # paths may be specified using variables only available in foam runtime environment.
         cmdline = "{{ rm -f {}; {}; }}".format(logFile, cmdline)
 
+    global docker_container
     if DockerContainer.usedocker:
         if DockerContainer.container_id == None:
-            docker_container = DockerContainer()
+            if docker_container == None:
+                docker_container = DockerContainer()
             docker_container.start_container()
             
     proc = CfdConsoleProcess(finished_hook=finished_hook, stdout_hook=stdout_hook, stderr_hook=stderr_hook)
@@ -902,6 +906,7 @@ def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook
         print("Running ", ' '.join(cmds), " -> ", logFile)
     else:
         print("Running ", ' '.join(cmds))
+
     proc.start(makeRunCommand(cmdline, case, usedocker=DockerContainer.usedocker), env_vars=getRunEnvironment())
     if not proc.waitForStarted():
         raise Exception("Unable to start command " + ' '.join(cmds))
@@ -991,9 +996,11 @@ def checkCfdDependencies():
 
     # check openfoam
     print("Checking for OpenFOAM:")
+    global docker_container
     if DockerContainer.usedocker:
         if DockerContainer.container_id == None:
-            docker_container = DockerContainer()
+            if docker_container == None:
+                docker_container = DockerContainer()
             docker_container.start_container()
     try:
         foam_dir = getFoamDir()
@@ -1064,7 +1071,7 @@ def checkCfdDependencies():
                         message += vermsg + "\n"
                         print(vermsg)
                 # Check for wmake
-                if getFoamRuntime() != "MinGW":
+                if getFoamRuntime() != "MinGW" and not DockerContainer.usedocker:
                     try:
                         runFoamCommand("wmake -help", usedocker=DockerContainer.usedocker)
                     except subprocess.CalledProcessError:
@@ -1718,9 +1725,23 @@ class DockerContainer:
     container_id = None
     usedocker = False
     foam_dir = None
+    docker_cmd = None
     
     def __init__(self):
         self.image_name = None
+        import shutil
+        
+        if shutil.which('podman') is not None:
+            self.docker_cmd = shutil.which('podman')
+        elif shutil.which('docker') is not None:
+            self.docker_cmd = shutil.which('docker')
+        else:
+            print('Installation of podman or docker required')
+        
+        self.docker_cmd = self.docker_cmd.split(os.path.sep)[-1]
+        
+        if self.docker_cmd is not None:
+            print('Using {}'.format(self.docker_cmd))
 
     """ Start docker container return values:
             1 - CfdOF container already running
@@ -1730,11 +1751,9 @@ class DockerContainer:
     def start_container(self):
         prefs = getPreferencesLocation()
         self.foam_dir = FreeCAD.ParamGet(prefs).GetString("InstallationPath","")
-        if platform.system() == 'Windows':
-            self.image_name = FreeCAD.ParamGet(prefs).GetString("DockerURL", "")
-        else:
-            self.image_name = '/'.join(FreeCAD.ParamGet(prefs).GetString("DockerURL", "").split('/')[1:])
+        self.image_name = FreeCAD.ParamGet(prefs).GetString("DockerURL", "")
         output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+        
         if not output_path:
             output_path = tempfile.gettempdir()
         output_path = os.path.normpath(output_path)
@@ -1755,26 +1774,25 @@ class DockerContainer:
             return 3
 
         if platform.system() == 'Windows':
-            cmd = "docker run -t -d -v {0}:/tmp {1}".format(output_path, self.image_name)
+            cmd = "{0} run -t -d -v {1}:/tmp {2}".format(self.docker_cmd, output_path, self.image_name)
         else:
-            cmd = "docker run -t -d -v {0}:/tmp -u {2}:{3} {1}".format(output_path, self.image_name, os.getuid(), os.getgid())
-        if platform.system() == 'Windows':
-            cmd = cmd.replace('docker ','podman.exe ')
+            cmd = "{0} run -t -d -v {1}:/tmp -u {3}:{4} {2}".format(self.docker_cmd, output_path, self.image_name, os.getuid(), os.getgid())
+
+        if 'docker' in self.docker_cmd:
+            cmd = cmd.replace('docker.io/','')
 
         proc = QtCore.QProcess()
         proc.start(cmd)
         self.getContainerID()
         return 0
 
-    """ Stop docker container """
+    """ Stop docker container and remove """
     def stop_container(self, alien = False):
         if DockerContainer.container_id == None and alien:
             DockerContainer.container_id = self.query_docker_container_ls()
         if DockerContainer.container_id != None:
             print("Stopping docker container {}".format(DockerContainer.container_id))
-            cmd = "docker container stop -t 0 {}".format(DockerContainer.container_id)
-            if platform.system() == 'Windows':
-                cmd = cmd.replace('docker ','podman.exe ')
+            cmd = "{} container rm -f {}".format(self.docker_cmd, DockerContainer.container_id)
             proc = QtCore.QProcess()
             proc.start(cmd)
             if not proc.waitForFinished():
@@ -1789,22 +1807,20 @@ class DockerContainer:
     def getContainerID(self):
         import time
         timer_counts = 0
-        while timer_counts < 15 and DockerContainer.container_id == None:
+        while timer_counts < 10 and DockerContainer.container_id == None:
             time.sleep(1)
             DockerContainer.container_id = self.query_docker_container_ls()
             timer_counts = timer_counts + 1
         
     def query_docker_container_ls(self):
-        cmd = "docker container ls"
-        if platform.system() == 'Windows':
-            cmd = cmd.replace('docker ','podman.exe ')
+        cmd = "{} container ls".format(self.docker_cmd)
         proc = QtCore.QProcess()
         proc.start(cmd)
         proc.waitForFinished()
         while proc.canReadLine():
             line = proc.readLine()
             cnt_lst = str(line.data(), encoding="utf-8").split()
-            if  len(cnt_lst)>0 and cnt_lst[1].replace(':latest','') == self.image_name:
+            if  len(cnt_lst)>0 and cnt_lst[1].replace(':latest','').replace('docker.io/','') == self.image_name.replace(':latest','').replace('docker.io/',''):
                 return(cnt_lst[0])
         return(None)
 
