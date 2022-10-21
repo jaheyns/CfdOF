@@ -1741,11 +1741,12 @@ class DockerContainer:
         if self.docker_cmd is not None:
             print('Using {}'.format(self.docker_cmd))
         else:
-            self.docker_cmd = 'Not Installed'
+            self.docker_cmd = "echo 'need to install podman or docker'"
+            self.form.gb_docker.setVisible(0)
 
     """ Start docker container return values:
             1 - CfdOF container already running
-            2 - CfdOF container running but not started by CfdOF - may not be configured correctly
+            2 - Removed 
             3 - Config issue
     """
     def start_container(self):
@@ -1762,14 +1763,8 @@ class DockerContainer:
             return 1
         container_ls = self.query_docker_container_ls() 
         if container_ls != None:
-            print("Docker container {} running but not started by CfdOF - it may not be configured correctly".format(container_ls))
-            button = QtGui.QMessageBox.question(None,
-                            "Stop Running Docker Container?",
-                            "Docker container running but not started by CfdOF - it may not be configured correctly.  Press 'Yes' to stop container")
-            if button == QtGui.QMessageBox.StandardButton.Yes:
-                self.stop_container(alien = True)
-                print("Docker container stopped.  Please try last operation again.")
-            return 2
+            print("Docker container {} running but not started by CfdOF - it may not be configured correctly - stopping container.".format(container_ls))
+            self.stop_container(alien = True)
         if self.image_name == "":
             return 3
 

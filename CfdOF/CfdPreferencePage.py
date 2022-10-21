@@ -440,8 +440,6 @@ class CfdPreferencePage:
                     self.consoleMessage("Docker start appears to have failed")
                     if exit_code == 1:
                         self.consoleMessage("Docker container already running")
-                    elif exit_code == 2:
-                        self.consoleMessage("Docker container running but not started by CfdOF - it may not be configured correctly.")
                     elif exit_code == 3:
                         self.consoleMessage("CfdOF Config issue")                    
             else:
