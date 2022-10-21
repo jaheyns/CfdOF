@@ -1769,9 +1769,9 @@ class DockerContainer:
             return 3
 
         if platform.system() == 'Windows':
-            cmd = "{0} run -t -d -v {1}:/tmp {2}".format(self.docker_cmd, output_path, self.image_name)
+            cmd = "{0} run -t -d -v {1}:/tmp -v {2}:/home/openfoam {3}".format(self.docker_cmd, output_path,self.foam_dir, self.image_name)
         else:
-            cmd = "{0} run -t -d -v {1}:/tmp -u {3}:{4} {2}".format(self.docker_cmd, output_path, self.image_name, os.getuid(), os.getgid())
+            cmd = "{0} run -t -d -v {1}:/tmp -v {2}:/home/openfoam -u {4}:{5} {3}".format(self.docker_cmd, output_path,self.foam_dir, self.image_name, os.getuid(), os.getgid())
 
         if 'docker' in self.docker_cmd:
             cmd = cmd.replace('docker.io/','')
