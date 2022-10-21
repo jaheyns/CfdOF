@@ -1735,13 +1735,13 @@ class DockerContainer:
             self.docker_cmd = shutil.which('podman')
         elif shutil.which('docker') is not None:
             self.docker_cmd = shutil.which('docker')
-        else:
-            print('Installation of podman or docker required')
         
         self.docker_cmd = self.docker_cmd.split(os.path.sep)[-1]
         
         if self.docker_cmd is not None:
             print('Using {}'.format(self.docker_cmd))
+        else:
+            self.docker_cmd = 'Not Installed'
 
     """ Start docker container return values:
             1 - CfdOF container already running
