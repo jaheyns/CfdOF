@@ -106,8 +106,7 @@ class CfdOFWorkbench(Workbench):
     def __del__(sef):
         from CfdOF import CfdTools
         if CfdTools.DockerContainer.container_id != None:
-            docker_container = CfdTools.DockerContainer()
-            docker_container.stop_container()
+            CfdTools.docker_container.stop_container()
 
 import CfdOF
 FreeCADGui.addWorkbench(CfdOFWorkbench())
