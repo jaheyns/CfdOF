@@ -758,7 +758,7 @@ def makeRunCommand(cmd, dir, source_env=True, usedocker=False):
         source = 'source /etc/bashrc &&'
     cd = ""
     if dir:
-        cd = 'cd "{}" && '.format(translatePath(dir))
+        cd = ' cd "{}" && '.format(translatePath(dir))
     if usedocker:
         prefs = getPreferencesLocation()
         cd = cd.replace(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""),'/tmp').replace('\\','/')
@@ -774,6 +774,8 @@ def makeRunCommand(cmd, dir, source_env=True, usedocker=False):
         return cmdline
 
     if usedocker:
+        if platform.system() == 'Windows' and 'wsl$' in FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "") and cmd[:5] == './All':
+            cmd = 'chmod 744 {0} && {0}'.format(cmd)  # If using windows wsl$ output directory, need to make the command executable
         cmdline = [docker_container.docker_cmd, 'exec', DockerContainer.container_id, 'bash', '-c', source + cd + cmd]
         return cmdline
 
@@ -1769,9 +1771,11 @@ class DockerContainer:
             return 3
 
         if platform.system() == 'Windows':
-            cmd = "{0} run -t -d -v {1}:/tmp -v {2}:/home/openfoam {3}".format(self.docker_cmd, output_path,self.foam_dir, self.image_name)
-        else:
-            cmd = "{0} run -t -d -v {1}:/tmp -v {2}:/home/openfoam -u {4}:{5} {3}".format(self.docker_cmd, output_path,self.foam_dir, self.image_name, os.getuid(), os.getgid())
+            out_d = output_path.split(os.sep)
+            if out_d[2] == 'wsl$':
+                output_path = '/' + '/'.join(out_d[4:])
+
+        cmd = "{0} run -t -d -u 1000:1000 -v {1}:/tmp {2}".format(self.docker_cmd, output_path, self.image_name)
 
         if 'docker' in self.docker_cmd:
             cmd = cmd.replace('docker.io/','')
