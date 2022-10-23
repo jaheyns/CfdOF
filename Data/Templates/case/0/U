@@ -181,10 +181,7 @@ boundaryField
 %:constraint
 %[0/_boundary_constraint%]
 %:baffle
-%{%(boundaries/%(0%)/BoundarySubType%)
-%:porousBaffle
 %[0/_boundary_cyclic_baffle%]
-%}
 %}
 
 %}
