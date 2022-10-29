@@ -94,10 +94,19 @@ class CfdOFWorkbench(Workbench):
                 self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), [cmd])
                 self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), [cmd])
 
+        from CfdOF import CfdTools
+        prefs = CfdTools.getPreferencesLocation()
+        CfdTools.DockerContainer.usedocker = FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0)    
+
         # TODO enable QtCore translation here
 
     def GetClassName(self):
         return "Gui::PythonWorkbench"
+
+    def __del__(sef):
+        from CfdOF import CfdTools
+        if CfdTools.DockerContainer.container_id != None:
+            CfdTools.docker_container.stop_container()
 
 import CfdOF
 FreeCADGui.addWorkbench(CfdOFWorkbench())

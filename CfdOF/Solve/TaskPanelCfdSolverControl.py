@@ -203,7 +203,7 @@ class TaskPanelCfdSolverControl:
                         stderr_hook=self.gotErrorLines)
 
                     cart_mesh.error = False
-                    cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
+                    cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, usedocker=CfdTools.DockerContainer.usedocker, source_env=False)
                     env_vars = CfdTools.getRunEnvironment()
                     self.solver_object.Proxy.solver_process.start(cmd, env_vars=env_vars)
                     if self.solver_object.Proxy.solver_process.waitForStarted():

@@ -147,7 +147,7 @@ class CfdRunnableFoam(CfdRunnable):
         self.initMonitors()
 
         # Environment is sourced in run script, so no need to include in run command
-        cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
+        cmd = CfdTools.makeRunCommand('./Allrun', case_dir, usedocker=CfdTools.DockerContainer.usedocker, source_env=False)
         return cmd
 
     def getRunEnvironment(self):
