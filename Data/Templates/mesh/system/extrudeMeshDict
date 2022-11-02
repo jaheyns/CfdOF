@@ -1,0 +1,66 @@
+%{%(ExtrusionSettings/ExtrusionsPresent%)
+%:True
+%{%(ExtrusionSettings/Extrusions%)
+%[_header%]
+FoamFile
+{
+    version     4.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      extrudeMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+sourceCase          "./";
+sourcePatches       (%(ExtrusionSettings/Extrusions/%(0%)/FrontFaceList%));
+%{%(ExtrusionSettings/Extrusions/%(0%)/KeepExistingMesh%)
+%:True
+constructFrom       mesh;
+%:False
+constructFrom       patch;
+exposedPatchName    %(ExtrusionSettings/Extrusions/%(0%)/BackFace%);
+%}
+
+flipNormals         false;
+
+%{%(ExtrusionSettings/Extrusions/%(0%)/ExtrusionType%)
+%:2DPlanar
+extrudeModel        plane;
+thickness           %(ExtrusionSettings/Extrusions/%(0%)/Distance%);
+%:2DWedge
+extrudeModel        sector;
+nLayers             1;
+sectorCoeffs
+{
+    point           ( %(ExtrusionSettings/Extrusions/%(0%)/AxisPoint%) );
+    axisPt          ( %(ExtrusionSettings/Extrusions/%(0%)/AxisPoint%) );
+    axis            ( %(ExtrusionSettings/Extrusions/%(0%)/AxisDirection%) );
+    angle           %(ExtrusionSettings/Extrusions/%(0%)/Angle%);
+}
+%:PatchNormal
+extrudeModel        linearNormal;
+nLayers             %(ExtrusionSettings/Extrusions/%(0%)/NumLayers%);
+expansionRatio      %(ExtrusionSettings/Extrusions/%(0%)/ExpansionRatio%);
+linearNormalCoeffs
+{
+    thickness       %(ExtrusionSettings/Extrusions/%(0%)/Distance%);
+}
+%:Rotational
+extrudeModel        sector;
+nLayers             %(ExtrusionSettings/Extrusions/%(0%)/NumLayers%);
+sectorCoeffs
+{
+    point           ( %(ExtrusionSettings/Extrusions/%(0%)/AxisPoint%) );
+    axisPt          ( %(ExtrusionSettings/Extrusions/%(0%)/AxisPoint%) );
+    axis            ( %(ExtrusionSettings/Extrusions/%(0%)/AxisDirection%) );
+    angle           %(ExtrusionSettings/Extrusions/%(0%)/Angle%);
+}
+%}
+
+mergeTol            1e-6;
+mergeFaces          false;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+%} system/extrudeMeshDict.%(0%)
+%}

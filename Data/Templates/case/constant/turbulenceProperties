@@ -1,0 +1,52 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(physics/Turbulence%)
+%:RANS
+simulationType RAS;
+
+RAS
+{
+    RASModel            %(physics/TurbulenceModel%);
+
+    turbulence          on;
+
+    printCoeffs         on;
+}
+%:DES LES
+simulationType LES;
+
+LES
+{
+    LESModel            %(physics/TurbulenceModel%);
+
+    turbulence          on;
+
+    printCoeffs         on;
+
+%{%(physics/TurbulenceModel%)
+%:kOmegaSSTDES kOmegaSSTDDES SpalartAllmarasDES SpalartAllmarasDDES Smagorinsky kEqn WALE
+    delta               vanDriest;
+
+%[constant/_turbulenceProperties_LES%]
+%:kOmegaSSTIDDES SpalartAllmarasIDDES
+    delta               IDDESDelta;
+
+    IDDESDelta
+    {
+        cw 0.15;
+        deltaCoeff 1;
+    }
+
+%}
+}
+%:default
+simulationType laminar;
+%}

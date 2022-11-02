@@ -1,0 +1,15 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       polyBoundaryMesh;
+    object      boundary;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+(
+%[constant/polyMesh/_boundaryPatches%]
+)
+
+// ************************************************************************* //

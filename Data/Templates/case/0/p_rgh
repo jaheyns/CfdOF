@@ -1,0 +1,89 @@
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      p_rgh;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform %(initialValues/Pressure%);
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%[0/_boundary_fixedFluxPressure%]
+%:inlet
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:totalPressureInlet
+    %(0%)
+    {
+        type        totalPressure;
+        p0          uniform %(boundaries/%(0%)/Pressure%);
+        value       $internalField;
+    }
+%:staticPressureInlet
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/Pressure%);
+    }
+%:default
+%[0/_boundary_fixedFluxPressure%]
+%}
+%:outlet
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:staticPressureOutlet
+    %(0%)
+    {
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam
+        type        fixedValue;
+%:default
+        type        totalPressure;
+        p0          uniform %(boundaries/%(0%)/Pressure%);
+%}
+        value       $internalField;
+    }
+%:default
+%[0/_boundary_fixedFluxPressure%]
+%}
+%:open
+    %(0%)
+    {
+        type        totalPressure;
+        p0          uniform %(boundaries/%(0%)/Pressure%);
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:porousBaffle
+%{%(0%)_master %(0%)_slave
+    %(0%)
+    {
+        type        porousBafflePressure;
+        patchType   cyclic;
+        length      1.0;
+        I           %(boundaries/%(1%)/PressureDropCoeff%);
+        D           0;
+        value       $internalField;
+    }
+%}
+%}
+%}
+
+%}
+}
+
+// ************************************************************************* //
+%}

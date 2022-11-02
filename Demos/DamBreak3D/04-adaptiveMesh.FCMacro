@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+
+# Macro Begin: /home/oliver/.local/share/FreeCAD/Macro/04-adaptiveMesh.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
+import FreeCAD
+
+# Gui.runCommand('Std_DlgMacroRecord',0)
+### Begin command Cfd_DynamicMeshRefinement
+
+from CfdOF.Mesh import CfdDynamicMeshRefinement
+from CfdOF import CfdTools
+CfdDynamicMeshRefinement.makeCfdDynamicMeshRefinement(App.ActiveDocument.Box_Mesh)
+### End command Cfd_DynamicMeshRefinement
+
+obj = FreeCAD.ActiveDocument.DynamicMeshInterfaceRefinement
+obj.RefinementInterval = 5
+obj.MaxRefinementLevel = 1
+obj.BufferLayers = 3
+obj.Phase = 'water'
+obj.WriteFields = False
+FreeCAD.ActiveDocument.recompute()
+# Macro End: /home/oliver/.local/share/FreeCAD/Macro/04-adaptiveMesh.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++

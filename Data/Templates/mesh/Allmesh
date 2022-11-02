@@ -1,0 +1,149 @@
+#!/bin/bash
+
+runParallel()
+{
+    nproc="$1"
+    shift
+    exe="$(which $1)"
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    shift
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+runCommand()
+{
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+%{%(MeshUtility%)
+%:gmsh
+GMSH_EXE='%(GmshSettings/Executable%)'
+%{%(NumberOfThreads%)
+%:0
+export NTHREADS=$(nproc)
+%:default
+export NTHREADS=%(NumberOfThreads%)
+%}
+runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/%(Name%)_Geometry.geo"
+
+%}
+# Unset and source bashrc
+%{%(FoamRuntime%)
+%:Posix
+FOAMDIR="%(TranslatedFoamPath%)"
+%}
+if [ ! -z "$FOAMDIR" ]
+then
+    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+    source "$FOAMDIR/etc/bashrc"
+fi
+
+%{%(ParallelMesh%)
+%:True
+# Pick up number of parallel processes
+NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
+
+%}
+%{%(MeshUtility%)
+%:cfMesh
+# Extract feature edges
+runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/%(Name%)_Geometry.stl" "%(Name%)_Geometry.fms"
+
+%{%(ParallelMesh%)
+%:True
+%{%(NumberOfThreads%)
+%:0
+export OMP_NUM_THREADS=1
+%:default
+export OMP_NUM_THREADS=%(NumberOfThreads%)
+%}
+runCommand preparePar
+export MPI_BUFFER_SIZE=200000000
+runParallel $NPROC cartesianMesh
+runCommand reconstructParMesh -constant -fullMatch
+%:False
+%{%(NumberOfThreads%)
+%:0
+%:default
+export OMP_NUM_THREADS=%(NumberOfThreads%)
+%}
+runCommand cartesianMesh
+%}
+%:snappyHexMesh
+runCommand blockMesh
+
+# Extract feature edges
+which surfaceFeatures > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    runCommand surfaceFeatures
+else
+    runCommand surfaceFeatureExtract
+fi
+
+%{%(ParallelMesh%)
+%:True
+runCommand decomposePar
+runParallel $NPROC snappyHexMesh -overwrite
+runCommand reconstructParMesh -constant
+%:False
+runCommand snappyHexMesh -overwrite
+%}
+%:gmsh
+runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
+
+%{%(ConvertToDualMesh%)
+%:True
+# Convert to polyhedra
+runCommand polyDualMesh 10 -concaveMultiCells -overwrite
+
+%}
+if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
+then
+    runCommand transformPoints "scale=(0.001 0.001 0.001)"
+else
+    runCommand transformPoints -scale "(0.001 0.001 0.001)"
+fi
+%}
+
+%{%(ExtrusionSettings/ExtrusionsPresent%)
+%:True
+%{%(ExtrusionSettings/Extrusions%)
+cp system/extrudeMeshDict.%(0%) system/extrudeMeshDict
+%{%(ExtrusionSettings/Extrusions/%(0%)/KeepExistingMesh%)
+%:False
+# Refinement history is not processed by extrudeMesh
+rm -f constant/polyMesh/{cellLevel,pointLevel,level0Edge,refinementHistory}
+%}
+runCommand extrudeMesh
+mv log.extrudeMesh log.extrudeMesh.%(0%)
+rm system/extrudeMeshDict
+%}
+%{%(ExtrusionSettings/Extrude2DPlanar%)
+%:True
+runCommand flattenMesh
+%}
+
+%}
+# Extract surface mesh and convert to mm for visualisation in FreeCAD
+if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ] || [ $WM_PROJECT_VERSION == "v1906" ]
+then
+    runCommand surfaceMeshExtract mesh_outside.stl
+else
+    runCommand surfaceMeshTriangulate mesh_outside.stl
+fi
+if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
+then
+    runCommand surfaceTransformPoints "scale=(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
+else
+    runCommand surfaceTransformPoints -scale "(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
+fi

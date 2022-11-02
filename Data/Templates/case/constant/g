@@ -1,0 +1,17 @@
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       uniformDimensionedVectorField;
+    object      g;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -2 0 0 0 0];
+value           (%(physics/gx%) %(physics/gy%) %(physics/gz%));
+
+// ************************************************************************* //
+%}

@@ -1,0 +1,41 @@
+%{%(MeshUtility%)
+%:snappyHexMesh
+%[_header%]
+FoamFile
+{
+    version     4.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      surfaceFeatureExtractDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%(Name%)_Geometry.stl
+{
+    extractionMethod    extractFromSurface;
+    extractFromSurfaceCoeffs
+    {
+        includedAngle   150;
+    }
+    writeObj            yes;
+}
+
+%{%(MeshRegionPresent%)
+%:True
+%{%(SnappySettings/MeshRegions%)
+%(0%).stl
+{
+    extractionMethod    extractFromSurface;
+    extractFromSurfaceCoeffs
+    {
+        includedAngle   150;
+    }
+    writeObj            yes;
+}
+
+%}
+%}
+
+// ************************************************************************* //
+%}

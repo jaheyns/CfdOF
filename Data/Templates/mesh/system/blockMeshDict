@@ -1,0 +1,50 @@
+%{%(MeshUtility%)
+%:snappyHexMesh
+%[_header%]
+FoamFile
+{
+    version     4.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+xMin    %(SnappySettings/BlockMesh/xMin%);
+xMax    %(SnappySettings/BlockMesh/xMax%);
+yMin    %(SnappySettings/BlockMesh/yMin%);
+yMax    %(SnappySettings/BlockMesh/yMax%);
+zMin    %(SnappySettings/BlockMesh/zMin%);
+zMax    %(SnappySettings/BlockMesh/zMax%);
+cellsX  %(SnappySettings/BlockMesh/cellsX%);
+cellsY  %(SnappySettings/BlockMesh/cellsY%);
+cellsZ  %(SnappySettings/BlockMesh/cellsZ%);
+
+vertices
+(
+    ( $xMin  $yMin  $zMin)
+    ( $xMax  $yMin  $zMin)
+    ( $xMax  $yMax  $zMin)
+    ( $xMin  $yMax  $zMin)
+    ( $xMin  $yMin  $zMax)
+    ( $xMax  $yMin  $zMax)
+    ( $xMax  $yMax  $zMax)
+    ( $xMin  $yMax  $zMax)
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7) ($cellsX $cellsY $cellsZ) simpleGrading (1 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+);
+
+// ************************************************************************* //
+%}

@@ -1,0 +1,68 @@
+import Part
+import os
+Part.open(os.path.join(os.path.dirname(__file__), "UAV.IGS"))
+Gui.SendMsgToActiveView("ViewFit")
+Gui.activateWorkbench("DraftWorkbench")
+import Draft
+Draft.downgrade(App.ActiveDocument.UAV,delete=True)
+FreeCAD.ActiveDocument.recompute()
+App.ActiveDocument.removeObject("Face001")
+App.ActiveDocument.removeObject("Face006")
+App.ActiveDocument.removeObject("Face005")
+App.ActiveDocument.removeObject("Face003")
+App.ActiveDocument.removeObject("Face004")
+App.ActiveDocument.removeObject("Face")
+App.ActiveDocument.removeObject("Face019")
+App.ActiveDocument.removeObject("Face022")
+App.ActiveDocument.removeObject("Face017")
+App.ActiveDocument.removeObject("Face021")
+App.ActiveDocument.removeObject("Face020")
+App.ActiveDocument.removeObject("Face016")
+App.ActiveDocument.removeObject("Face014")
+App.ActiveDocument.removeObject("Face011")
+App.ActiveDocument.removeObject("Face012")
+App.ActiveDocument.removeObject("Face008")
+App.ActiveDocument.removeObject("Face009")
+App.ActiveDocument.removeObject("Face013")
+App.ActiveDocument.removeObject("Face018")
+App.ActiveDocument.removeObject("Face023")
+App.ActiveDocument.removeObject("Face002")
+App.ActiveDocument.removeObject("Face007")
+App.ActiveDocument.removeObject("Face010")
+App.ActiveDocument.removeObject("Face015")
+App.ActiveDocument.recompute()
+
+Draft.upgrade(App.ActiveDocument.RootObjects,delete=True)
+FreeCAD.ActiveDocument.recompute()
+
+Gui.activateWorkbench("PartWorkbench")
+App.ActiveDocument.addObject("Part::Box","Box")
+App.ActiveDocument.ActiveObject.Label = "Cube"
+App.ActiveDocument.recompute()
+Gui.SendMsgToActiveView("ViewFit")
+App.ActiveDocument.getObject("Box").Length = '2500 mm'
+App.ActiveDocument.getObject("Box").Width = '4000 mm'
+App.ActiveDocument.getObject("Box").Height = '6000 mm'
+App.ActiveDocument.getObject("Box").Placement = App.Placement(App.Vector(-2500,-2000,-3500),App.Rotation(App.Vector(0,0,1),0))
+
+App.ActiveDocument.addObject("Part::Cut","Cut")
+App.ActiveDocument.Cut.Base = App.activeDocument().Compound
+App.ActiveDocument.Cut.Tool = App.activeDocument().Box
+Gui.ActiveDocument.Compound.Visibility=False
+Gui.ActiveDocument.Box.Visibility=False
+
+App.ActiveDocument.addObject("Part::Box","Box001")
+App.ActiveDocument.ActiveObject.Label = "Cube001"
+App.ActiveDocument.getObject("Box001").Length = '2500 mm'
+App.ActiveDocument.getObject("Box001").Width = '4000 mm'
+App.ActiveDocument.getObject("Box001").Height = '6000 mm'
+App.ActiveDocument.getObject("Box001").Placement = App.Placement(App.Vector(0,-2000,-3500),App.Rotation(App.Vector(0,0,1),0))
+App.ActiveDocument.recompute()
+Gui.SendMsgToActiveView("ViewFit")
+
+App.activeDocument().addObject("Part::Compound","Compound001")
+App.activeDocument().Compound001.Links = [App.activeDocument().Box001,App.activeDocument().Cut]
+App.ActiveDocument.recompute()
+Gui.SendMsgToActiveView("ViewFit")
+
+Gui.ActiveDocument.getObject('Compound').Transparency = 50

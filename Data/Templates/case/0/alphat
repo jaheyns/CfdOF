@@ -1,0 +1,54 @@
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam hisa
+%{%(physics/Turbulence%)
+%:RANS DES LES
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      alphat;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 -1 -1 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall translatingWall partialSlipWall
+    %(0%)
+    {
+        type        compressible::alphatWallFunction;
+        value       uniform 0;
+    }
+%:slipWall
+%[0/_boundary_zeroGradient%]
+%:roughWall
+    %(0%)
+    {
+        type        compressible::alphatWallFunction;
+        value       uniform 0;
+    }
+%}
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
+%:default
+%[0/_boundary_calculated%]
+%}
+
+%}
+}
+
+// ************************************************************************* //
+%}
+%}

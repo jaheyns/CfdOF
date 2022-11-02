@@ -1,0 +1,13 @@
+; Air
+;
+; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material
+
+[FCMat]
+Name = Air
+Type = Compressible
+Description = Compressible air properties
+MolarMass = 0.0289643897748887 kg/mol
+Cp = 1004.703 J/kg/K
+SutherlandTemperature = 110.4 K
+SutherlandRefViscosity = 1.716e-5 kg/m/s
+SutherlandRefTemperature = 273.15 K

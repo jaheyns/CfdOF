@@ -1,0 +1,89 @@
+%{%(physics/Turbulence%)
+%:RANS DES LES
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES kEpsilon kOmegaSSTLM kEqn
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      k;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 2 -2 0 0 0 0];
+
+%{%(physics/TurbulenceModel%)
+%:kEqn
+internalField   uniform %(initialValues/kEqnk%);
+%:default
+internalField   uniform %(initialValues/k%);
+%}
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:empty
+%[0/_boundary_empty%]
+%:wall
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall translatingWall partialSlipWall roughWall
+    %(0%)
+    {
+        type        kqRWallFunction;
+        value       $internalField;
+    }
+%:slipWall
+%[0/_boundary_zeroGradient%]
+%}
+%:inlet open
+%{%(boundaries/%(0%)/TurbulenceInletSpecification%)
+%:TKEAndSpecDissipationRate
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/TurbulentKineticEnergy%);
+        value       $internalField;
+    }
+%:intensityAndLengthScale
+    %(0%)
+    {
+        type        turbulentIntensityKineticEnergyInlet;
+        intensity   %(boundaries/%(0%)/TurbulenceIntensity%);
+        value       $internalField;
+    }
+%:TurbulentViscosityAndK
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/kEqnTurbulentKineticEnergy%);
+    }
+%:default
+    %(0%)
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+%}
+%:outlet
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  $internalField;
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
+%}
+
+%}
+}
+
+// ************************************************************************* //
+%}
+%}

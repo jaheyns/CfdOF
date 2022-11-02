@@ -1,0 +1,214 @@
+%{%(MeshUtility%)
+%:snappyHexMesh
+%[_header%]
+FoamFile
+{
+    version     4.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      snappyHexMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+castellatedMesh true;
+snap            true;
+%{%(SnappySettings/BoundaryLayerPresent%)
+%:True
+addLayers       true;
+%:False
+addLayers       false;
+%}
+
+geometry
+{
+    "%(Name%)_Geometry.stl"
+    {
+        type triSurfaceMesh;
+        name %(Name%)_Geometry;
+        regions
+        {
+%{%(SnappySettings/ShapePatchNames%)
+            %(0%)
+            {
+                name %(0%);
+            }
+
+%}
+        }
+    }
+
+%{%(MeshRegionPresent%)
+%:True
+%{%(SnappySettings/MeshRegions%)
+    "%(0%).stl"
+    {
+        type triSurfaceMesh;
+        name %(0%);
+    }
+
+%}
+%}
+%{%(SnappySettings/InternalRefinementRegionsPresent%)
+%:True
+%{%(SnappySettings/InternalRegions%)
+    "%(0%).stl"
+    {
+        type triSurfaceMesh;
+        name %(0%);
+    }
+
+%}
+%}
+};
+
+castellatedMeshControls
+{
+    maxLocalCells 100000000;
+    maxGlobalCells 2000000000;
+    minRefinementCells 0;
+    nCellsBetweenLevels %(SnappySettings/CellsBetweenLevels%);
+
+    features
+    (
+        {
+            file "%(Name%)_Geometry.eMesh";
+            level %(SnappySettings/EdgeRefinementLevel%);
+        }
+%{%(MeshRegionPresent%)
+%:True
+%{%(SnappySettings/MeshRegions%)
+        {
+            file "%(0%).eMesh";
+            level %(SnappySettings/MeshRegions/%(0%)/EdgeRefinementLevel%);
+        }
+
+%}
+%}
+    );
+
+    refinementSurfaces
+    {
+        %(Name%)_Geometry
+        {
+            level (0 0);
+        }
+
+%{%(MeshRegionPresent%)
+%:True
+%{%(SnappySettings/MeshRegions%)
+        %(0%)
+        {
+            level (%(SnappySettings/MeshRegions/%(0%)/RefinementLevel%) %(SnappySettings/MeshRegions/%(0%)/MaxRefinementLevel%));
+%{%(SnappySettings/MeshRegions/%(0%)/Baffle%)
+%:True
+            faceType baffle;
+%}
+            faceZone %(0%);
+        }
+
+%}
+%}
+    }
+
+    resolveFeatureAngle 30;
+
+    refinementRegions
+    {
+%{%(SnappySettings/InternalRefinementRegionsPresent%)
+%:True
+%{%(SnappySettings/InternalRegions%)
+        %(0%)
+        {
+            mode inside;
+            levels ((1 %(SnappySettings/InternalRegions/%(0%)/RefinementLevel%)));
+        }
+
+%}
+%}
+    }
+
+    locationInMesh (%(SnappySettings/PointInMesh/x%) %(SnappySettings/PointInMesh/y%) %(SnappySettings/PointInMesh/z%));
+    allowFreeStandingZoneFaces true;
+}
+
+snapControls
+{
+    nSmoothPatch 3;
+    tolerance 1.0;
+    nSolveIter 100;
+    nRelaxIter 5;
+    nFeatureSnapIter 10;
+
+%{%(SnappySettings/ImplicitEdgeDetection%)
+%:True
+    implicitFeatureSnap true;
+    explicitFeatureSnap false;
+
+%:False
+    implicitFeatureSnap false;
+    explicitFeatureSnap true;
+%}
+}
+
+addLayersControls
+{
+    relativeSizes true;
+    layers
+    {
+%{%(SnappySettings/BoundaryLayerPresent%)
+%:True
+%{%(SnappySettings/BoundaryLayers%)
+        "%(0%)"
+        {
+            nSurfaceLayers %(SnappySettings/BoundaryLayers/%(0%)/NumberLayers%);
+            expansionRatio %(SnappySettings/BoundaryLayers/%(0%)/ExpansionRatio%);
+        }
+%}
+%}
+    }
+
+    expansionRatio 1.2;
+    finalLayerThickness 0.3;
+    minThickness 0.1;
+    nGrow 0;
+    featureAngle 120;
+    nRelaxIter 3;
+    nSmoothSurfaceNormals 1;
+    nSmoothNormals 3;
+    nSmoothThickness 10;
+    maxFaceThicknessRatio 0.5;
+    maxThicknessToMedialRatio 0.3;
+    minMedianAxisAngle 90;
+    nBufferCellsNoExtrude 0;
+    nLayerIter 50;
+}
+
+meshQualityControls
+{
+    maxNonOrtho 65;
+
+    maxBoundarySkewness 20;
+    maxInternalSkewness 4;
+
+    maxConcave 80;
+    minVol 1e-13;
+    minTetQuality -1;
+    minArea -1;
+    minTwist 0.01;
+    minDeterminant 0.001;
+    minFaceWeight 0.05;
+    minVolRatio 0.01;
+    minTriangleTwist -1;
+    nSmoothScale 4;
+    errorReduction 0.75;
+    relaxed
+    {
+        maxNonOrtho 75;
+    }
+}
+
+mergeTolerance 1e-6;
+
+// ************************************************************************* //
+%}

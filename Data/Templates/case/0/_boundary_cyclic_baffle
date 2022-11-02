@@ -1,0 +1,6 @@
+%{%(0%)_master %(0%)_slave
+    %(0%)
+    {
+        type        cyclic;
+    }
+%}

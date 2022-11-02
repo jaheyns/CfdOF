@@ -1,0 +1,18 @@
+%{%(ParallelMesh%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      decomposeParDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+numberOfSubdomains  %(NumberOfProcesses%);
+
+method              scotch;
+
+// ************************************************************************* //
+%}

@@ -1,0 +1,10 @@
+; Water
+;
+; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material
+
+[FCdMat]
+Name = Water
+Type = Isothermal
+Description = Standard distilled water properties at 20 Degrees Celsius and 1 atm
+Density = 998 kg/m^3
+DynamicViscosity = 1.003e-3 kg/m/s 

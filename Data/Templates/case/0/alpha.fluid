@@ -1,0 +1,43 @@
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+%{%(initialValues/VolumeFractions%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      alpha.%(0%);
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform %(initialValues/VolumeFractions/%(0%)%);
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%[0/_boundary_zeroGradient%]
+%:inlet outlet open
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/VolumeFractions/%(1%)%);
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
+%}
+
+%}
+}
+
+// ************************************************************************* //
+%} 0/alpha.%(0%)
+%}

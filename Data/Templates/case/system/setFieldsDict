@@ -1,0 +1,87 @@
+%{%(initialisationZonesPresent%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defaultFieldValues
+(
+);
+
+regions
+(
+
+%{%(initialisationZones%)
+%{%(zones/%(0%)/PartNameList%)
+    cellToCell
+    {
+        set "%(0%)";
+        fieldValues
+        (
+%{%(initialisationZones/%(1%)%)
+%{%(0%)
+%:Ux
+            volVectorFieldValue U ( %(initialisationZones/%(2%)/Ux%) %(initialisationZones/%(2%)/Uy%) %(initialisationZones/%(2%)/Uz%) )
+%:Uy
+%:Uz
+%:Pressure
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+            volScalarFieldValue p_rgh %(initialisationZones/%(2%)/Pressure%)
+%:simpleFoam porousSimpleFoam pimpleFoam
+            volScalarFieldValue p %(initialisationZones/%(2%)/KinematicPressure%)
+%:default
+            volScalarFieldValue p %(initialisationZones/%(2%)/Pressure%)
+%}
+%:VolumeFractions
+%{%(initialisationZones/%(2%)/VolumeFractions%)
+            volScalarFieldValue alpha.%(0%) %(initialisationZones/%(3%)/VolumeFractions/%(0%)%)
+%}
+%}
+%}
+        );
+    }
+
+    cellToFace
+    {
+        set "%(0%)";
+        option all;
+        fieldValues
+        (
+%{%(initialisationZones/%(1%)%)
+%{%(0%)
+%:Ux
+            volVectorFieldValue U ( %(initialisationZones/%(2%)/Ux%) %(initialisationZones/%(2%)/Uy%) %(initialisationZones/%(2%)/Uz%) )
+%:Uy
+%:Uz
+%:Pressure
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+            volScalarFieldValue p_rgh %(initialisationZones/%(2%)/Pressure%)
+%:simpleFoam porousSimpleFoam pimpleFoam
+            volScalarFieldValue p %(initialisationZones/%(2%)/KinematicPressure%)
+%:default
+            volScalarFieldValue p %(initialisationZones/%(2%)/Pressure%)
+%}
+%:VolumeFractions
+%{%(initialisationZones/%(2%)/VolumeFractions%)
+            volScalarFieldValue alpha.%(0%) %(initialisationZones/%(3%)/VolumeFractions/%(0%)%)
+%}
+%}
+%}
+        );
+    }
+%}
+%}
+);
+
+// ************************************************************************* //
+
+%}

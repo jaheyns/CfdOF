@@ -1,0 +1,44 @@
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%{%(scalarTransportFunctions%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      %(scalarTransportFunctions/%(0%)/FieldName%);
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0;
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:empty
+%[0/_boundary_empty%]
+%:wall
+%[0/_boundary_zeroGradient%]
+%:slipWall
+%[0/_boundary_zeroGradient%]
+%:inlet open outlet
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  $internalField;
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
+%}
+%}
+}
+%} 0/%(scalarTransportFunctions/%(0%)/FieldName%)
+%}

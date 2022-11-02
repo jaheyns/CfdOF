@@ -1,0 +1,65 @@
+#!/bin/bash
+
+runParallel()
+{
+    nproc="$1"
+    shift
+    exe="$(which $1)"
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    shift
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+runCommand()
+{
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+# Unset and source bashrc
+FOAMDIR="/usr/lib/openfoam/openfoam2206"
+if [ ! -z "$FOAMDIR" ]
+then
+    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+    source "$FOAMDIR/etc/bashrc"
+fi
+
+# Pick up number of parallel processes
+NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
+
+runCommand blockMesh
+
+# Extract feature edges
+which surfaceFeatures > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    runCommand surfaceFeatures
+else
+    runCommand surfaceFeatureExtract
+fi
+
+runCommand decomposePar
+runParallel $NPROC snappyHexMesh -overwrite
+runCommand reconstructParMesh -constant
+
+# Extract surface mesh and convert to mm for visualisation in FreeCAD
+if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ] || [ $WM_PROJECT_VERSION == "v1906" ]
+then
+    runCommand surfaceMeshExtract mesh_outside.stl
+else
+    runCommand surfaceMeshTriangulate mesh_outside.stl
+fi
+if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
+then
+    runCommand surfaceTransformPoints "scale=(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
+else
+    runCommand surfaceTransformPoints -scale "(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
+fi

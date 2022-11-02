@@ -1,0 +1,61 @@
+%{%(solver/SolverName%)
+%:simpleFoam porousSimpleFoam pimpleFoam interFoam multiphaseInterFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      transportProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(solver/SolverName%)
+%:simpleFoam porousSimpleFoam pimpleFoam
+transportModel  Newtonian;
+
+nu              [0 2 -1 0 0 0 0] %(fluidProperties/0/KinematicViscosity%);
+%:interFoam
+phases
+(
+%{%(fluidProperties%)
+%(fluidProperties/%(0%)/Name%)
+%}
+);
+
+%{%(fluidProperties%)
+%(fluidProperties/%(0%)/Name%)
+{
+    transportModel  Newtonian;
+    nu              [0 2 -1 0 0 0 0] %(fluidProperties/%(0%)/KinematicViscosity%);
+    rho             [1 -3 0 0 0 0 0] %(fluidProperties/%(0%)/Density%);
+}
+
+%}
+sigma           [1 0 -2 0 0 0 0] 0.0;
+%:multiphaseInterFoam
+phases
+(
+%{%(fluidProperties%)
+     %(fluidProperties/%(0%)/Name%)
+     {
+         transportModel Newtonian;
+         nu [0 2 -1 0 0 0 0] %(fluidProperties/%(0%)/KinematicViscosity%);
+         rho [1 -3 0 0 0 0 0] %(fluidProperties/%(0%)/Density%);
+     }
+
+%}
+);
+
+sigmas
+(
+%{%(fluidProperties%)
+%{%(fluidProperties%)
+    (%(fluidProperties/%(0%)/Name%) %(fluidProperties/%(1%)/Name%)) 0.0
+%}
+%}
+);
+%}
+
+// ************************************************************************* //
+%}

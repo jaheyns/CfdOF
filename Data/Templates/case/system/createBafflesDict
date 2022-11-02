@@ -1,0 +1,43 @@
+%{%(bafflesPresent%)
+%:True
+%{%(createPatchesFromSnappyBaffles%)
+%:False
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      createBafflesDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+internalFacesOnly true;
+
+noFields true;
+
+baffles
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:baffle
+    %(0%)
+    {
+        type        faceZone;
+        zoneName    %(0%);
+
+        patchPairs
+        {
+            type    cyclic;
+        }
+    }
+
+%}
+%}
+}
+
+
+// ************************************************************************* //
+%}
+%}

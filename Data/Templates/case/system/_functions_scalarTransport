@@ -1,0 +1,42 @@
+%{%(scalarTransportFunctions%)
+    %(0%)
+    {
+        type            scalarTransport;
+        libs            ("libsolverFunctionObjects.so");
+
+        field           %(scalarTransportFunctions/%(0%)/FieldName%);
+
+%{%(scalarTransportFunctions/%(0%)/DiffusivityFixed%)
+%:True
+        D               %(scalarTransportFunctions/%(0%)/DiffusivityFixedValue%);
+
+%}
+%{%(scalarTransportFunctions/%(0%)/RestrictToPhase%)
+%:True
+        phase           alpha.%(scalarTransportFunctions/%(0%)/PhaseName%);
+        bounded01       false;
+
+%}
+        // Run-time selectable sources
+        fvOptions
+        {
+            %(0%)
+            {
+                type            scalarSemiImplicitSource;
+                selectionMode   points;
+                points
+                (
+                    ( %(scalarTransportFunctions/%(0%)/InjectionPoint%) )
+                );
+
+                volumeMode      absolute;
+                injectionRateSuSp
+                {
+                    %(scalarTransportFunctions/%(0%)/FieldName%)     ( %(scalarTransportFunctions/%(0%)/InjectionRate%) 0 );
+                }
+
+            }
+        }
+    }
+
+%}

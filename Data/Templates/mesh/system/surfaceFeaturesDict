@@ -1,0 +1,44 @@
+%{%(MeshUtility%)
+%:snappyHexMesh
+%[_header%]
+FoamFile
+{
+    version     4.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      surfaceFeatureExtractDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+surfaces
+(
+    "%(Name%)_Geometry.stl"
+%{%(MeshRegionPresent%)
+%:True
+%{%(SnappySettings/MeshRegions%)
+    "%(0%).stl"
+%}
+%}
+);
+
+includedAngle       150;
+geometricTestOnly   no;
+
+subsetFeatures
+{
+    nonManifoldEdges    yes;
+    openEdges           yes;
+}
+
+trimFeatures
+{
+    minElem         0;
+    minLen          0.0;
+}
+
+writeObj            yes;
+verboseObj          no;
+
+// ************************************************************************* //
+%}

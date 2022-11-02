@@ -1,0 +1,78 @@
+%{%(physics/Turbulence%)
+%:RANS DES
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES kOmegaSSTLM
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      omega;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 -1 0 0 0 0];
+
+internalField   uniform %(initialValues/omega%);
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:empty
+%[0/_boundary_empty%]
+%:wall
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall translatingWall partialSlipWall roughWall
+    %(0%)
+    {
+        type        omegaWallFunction;
+        value       $internalField;
+    }
+%:slipWall
+%[0/_boundary_zeroGradient%]
+%}
+%:inlet open
+%{%(boundaries/%(0%)/TurbulenceInletSpecification%)
+%:TKEAndSpecDissipationRate
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/SpecificDissipationRate%);
+        value       $internalField;
+    }
+%:intensityAndLengthScale
+    %(0%)
+    {
+        type            turbulentMixingLengthFrequencyInlet;
+        mixingLength    %(boundaries/%(0%)/TurbulenceLengthScale%);
+        value           $internalField;
+    }
+%:default
+    %(0%)
+    {
+        type            fixedValue;
+        value           $internalField;
+    }
+%}
+%:outlet
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  $internalField;
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
+%}
+
+%}
+}
+
+// ************************************************************************* //
+%}
+%}

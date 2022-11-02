@@ -1,0 +1,262 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(solver/SolverName%)
+%:hisa
+fluxScheme          AUSMPlusUp;
+%}
+
+%{%(physics/Time%)
+%:Steady
+
+ddtSchemes
+{
+%{%(solver/SolverName%)
+%:hisa
+    default         bounded dualTime rPseudoDeltaT steadyState;
+%:default
+    default         steadyState;
+%}
+}
+
+divSchemes
+{
+    default         none;
+    // Use second-order accurate convection
+    // Bounded schemes for steady-state solution
+    div(phi,U)      bounded Gauss linearUpwindV grad(U);
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam
+    div(phi,K)      bounded Gauss upwind;
+    div(phi,h)      bounded Gauss upwind;
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+%:default
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+%}
+    div(div(phi,U)) Gauss linear;
+%{%(physics/Turbulence%)
+%:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST
+    div(phi,k)      bounded Gauss upwind;
+    div(phi,omega)  bounded Gauss upwind;
+%:kEpsilon
+    div(phi,k)      bounded Gauss upwind;
+    div(phi,epsilon)  bounded Gauss upwind;
+%:SpalartAllmaras
+    div(phi,nuTilda) bounded Gauss upwind;
+%:kOmegaSSTLM
+    div(phi,k)      bounded Gauss upwind;
+    div(phi,omega)  bounded Gauss upwind;
+    div(phi,gammaInt)   bounded Gauss upwind;
+    div(phi,ReThetat)   bounded Gauss upwind;
+%}
+%}
+%{%(solver/SolverName%)
+%:hisa
+    div(tauMC)      Gauss linear;
+    div(yPhi,yWall) Gauss linearUpwind grad(yWall);
+%}
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%{%(scalarTransportFunctions%)
+    div(phi,%(scalarTransportFunctions/%(0%)/FieldName%)) bounded Gauss linearUpwind grad(%(scalarTransportFunctions/%(0%)/FieldName%));
+%}
+%}
+}
+
+%:Transient
+ddtSchemes
+{
+%{%(physics/Turbulence%)
+%:DES LES
+%{%(solver/SolverName%)
+%:hisa
+    default         dualTime rPseudoDeltaT backward;
+%:default
+    default         backward;
+%}
+%:default
+%{%(solver/SolverName%)
+%:hisa
+    default         dualTime rPseudoDeltaT Euler;
+%:default
+    default         Euler;
+%}
+%}
+}
+
+divSchemes
+{
+    // Use second-order accurate convection
+%{%(solver/SolverName%)
+%:pimpleFoam
+%{%(physics/Turbulence%)
+%:DES LES
+    div(phi,U)      Gauss LUST grad(U);
+%:default
+    div(phi,U)      Gauss linearUpwindV grad(U);
+%}
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+    div(div(phi,U)) Gauss linear;
+%:interFoam multiphaseInterFoam
+    div(rhoPhi,U)   Gauss linearUpwind grad(U);
+    div(phi,alpha)  Gauss vanLeer;
+    div(phirb,alpha) Gauss linear;
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+%:buoyantPimpleFoam
+%{%(physics/Turbulence%)
+%:DES LES
+    div(phi,U)      Gauss LUST grad(U);
+    div(phi,h)      Gauss LUST grad(h);
+    div(phi,K)      Gauss LUST grad(K);
+%:default
+    div(phi,U)      Gauss linearUpwindV grad(U);
+    div(phi,h)      Gauss upwind;
+    div(phi,K)      Gauss upwind;
+%}
+    div(phi,Ekp)     Gauss linear;
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+%}
+%{%(physics/Turbulence%)
+%:RANS DES LES
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+%:kEpsilon
+    div(phi,k)      Gauss upwind;
+    div(phi,epsilon)  Gauss upwind;
+%:SpalartAllmaras SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
+    div(phi,nuTilda)  Gauss upwind;
+%:kOmegaSSTLM
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+    div(phi,gammaInt)   bounded Gauss upwind;
+    div(phi,ReThetat)   bounded Gauss upwind;
+%:kEqn
+    div(phi,k)     Gauss limitedLinear 1;
+%}
+%}
+%{%(solver/SolverName%)
+%:hisa
+    div(tauMC)      Gauss linear;
+    div(yPhi,yWall) Gauss linearUpwind grad(yWall);
+%}
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%{%(scalarTransportFunctions%)
+    div(phi,%(scalarTransportFunctions/%(0%)/FieldName%)) Gauss linearUpwind grad(%(scalarTransportFunctions/%(0%)/FieldName%));
+%}
+%}
+}
+
+%}
+gradSchemes
+{
+    // Limit gradient to improve stability when bad cells encountered
+    // (0 = no limiting; 1 = do not exceed surrounding cells)
+%{%(solver/SolverName%)
+%:hisa
+    default         cellLimited faceLeastSquares linear 0.6;
+    gradTvd         cellLimited faceLeastSquares linear 0.6;
+%:default
+    default         cellLimited Gauss linear 0.95;
+    grad(p)         Gauss linear;
+    grad(p_rgh)     Gauss linear;
+%}
+%{%(physics/Turbulence%)
+%:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST
+    grad(k)         cellLimited Gauss linear 0.9;
+    grad(omega)     cellLimited Gauss linear 0.9;
+%:kEpsilon
+    grad(k)         cellLimited Gauss linear 0.9;
+    grad(epsilon)     cellLimited Gauss linear 0.9;
+%:SpalartAllmaras
+    grad(nuTilda)   cellLimited Gauss linear 0.9;
+%:kOmegaSSTLM
+    grad(k)         cellLimited Gauss linear 0.9;
+    grad(omega)     cellLimited Gauss linear 0.9;
+    grad(gammaInt)   cellLimited Gauss linear 0.9;
+    grad(ReThetat)   cellLimited Gauss linear 0.9;
+%}
+%}
+}
+
+laplacianSchemes
+{
+    // Limited explicit correction to the surface normal gradient,
+    // for stability in highly non-orthogonal cells.
+    // (0 = uncorrected, fully implicit; 1 = full correction)
+%{%(solver/SolverName%)
+%:hisa
+    default                     Gauss linear corrected;
+    laplacian(muEff,U)          Gauss linear compact;
+    laplacian(alphaEff,e)       Gauss linear compact;
+    laplacian(yPsi)             Gauss linear corrected;
+%:default
+    default                     Gauss linear limited 0.3;
+%{%(physics/Turbulence%)
+%:RANS
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST
+    laplacian(DkEff,k)          Gauss linear uncorrected;
+    laplacian(DomegaEff,omega)  Gauss linear uncorrected;
+%:kEpsilon
+    laplacian(DkEff,k)          Gauss linear uncorrected;
+    laplacian(DepsilonEff,epsilon)  Gauss linear uncorrected;
+%:SpalartAllmaras
+    laplacian(DnuTildaEff,nuTilda)  Gauss linear uncorrected;
+%}
+%}
+%}
+}
+
+interpolationSchemes
+{
+    default         linear;
+%{%(solver/SolverName%)
+%:hisa
+    reconstruct(rho) wVanLeer gradTvd;
+    reconstruct(U)   wVanLeer gradTvd;
+    reconstruct(T)   wVanLeer gradTvd;
+%}
+}
+
+snGradSchemes
+{
+    // Limited explicit correction to the surface normal gradient,
+    // for stability in highly non-orthogonal cells.
+    // (0 = uncorrected, fully implicit; 1 = full correction)
+%{%(solver/SolverName%)
+%:default
+    default         limited 0.3;
+%:hisa
+    default         corrected;
+%}
+}
+
+wallDist
+{
+%{%(solver/SolverName%)
+%:hisa
+    method    Poisson;
+    epsilon   0.1;     // Smaller = more accurate but less stable
+    tolerance 1e-5;
+    maxIter   10;
+%:default
+    method meshWave;
+%}
+}
+
+
+// ************************************************************************* //

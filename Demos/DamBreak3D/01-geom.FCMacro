@@ -1,0 +1,83 @@
+# -*- coding: utf-8 -*-
+
+# Macro Begin: /home/oliver/.local/share/FreeCAD/Macro/damBreak3D.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
+import FreeCAD
+import Part
+import Part,PartGui
+
+App.newDocument("Unnamed")
+
+# Gui.runCommand('Std_DlgMacroRecord',0)
+### Begin command Std_Workbench
+# Gui.activateWorkbench("PartWorkbench")
+### End command Std_Workbench
+### Begin command Part_Box
+App.ActiveDocument.addObject("Part::Box","Box")
+App.ActiveDocument.ActiveObject.Label = "Cube"
+# Object created at document root.
+App.ActiveDocument.recompute()
+# Gui.SendMsgToActiveView("ViewFit")
+### End command Part_Box
+# Gui.Selection.addSelection('Unnamed','Box')
+# Gui.ActiveDocument.setEdit(App.getDocument('Unnamed').getObject('Box'), 0)
+from FreeCAD import Base
+App.getDocument("Unnamed").Box.Length=3.22e+03
+App.getDocument("Unnamed").Box.Width=1e+03
+App.getDocument("Unnamed").Box.Height=1e+03
+App.getDocument("Unnamed").Box.Placement=App.Placement(App.Vector(0.000,0.000,0.000),App.Rotation(App.Vector(0.000,0.000,1.000),0.000))
+App.ActiveDocument.Box.Label = 'tank'
+
+# Gui.getDocument('Unnamed').resetEdit()
+### Begin command Std_ViewDimetric
+Gui.activeDocument().activeView().viewDimetric()
+### End command Std_ViewDimetric
+### Begin command Std_ViewFitAll
+Gui.SendMsgToActiveView("ViewFit")
+### End command Std_ViewFitAll
+### Begin command Part_Box
+App.ActiveDocument.addObject("Part::Box","Box")
+App.ActiveDocument.ActiveObject.Label = "Cube"
+# Object created at document root.
+App.ActiveDocument.recompute()
+# Gui.SendMsgToActiveView("ViewFit")
+### End command Part_Box
+# Gui.Selection.clearSelection()
+# Gui.Selection.addSelection('Unnamed','Box001')
+# Gui.ActiveDocument.setEdit(App.getDocument('Unnamed').getObject('Box001'), 0)
+from FreeCAD import Base
+App.getDocument("Unnamed").Box001.Length=160
+App.getDocument("Unnamed").Box001.Width=400
+App.getDocument("Unnamed").Box001.Height=160
+App.getDocument("Unnamed").Box001.Placement=App.Placement(App.Vector(670.000,300.000,0.000),App.Rotation(App.Vector(0.000,0.000,1.000),0.000))
+App.ActiveDocument.Box001.Label = 'obstacle'
+
+### Begin command Part_CompCompoundTools
+App.activeDocument().addObject("Part::Compound","Compound")
+App.activeDocument().Compound.Links = [App.activeDocument().Box,App.activeDocument().Box001,]
+App.ActiveDocument.recompute()
+### End command Part_CompCompoundTools
+
+# Gui.getDocument('Unnamed').resetEdit()
+# Gui.Selection.clearSelection()
+# Gui.Selection.addSelection('Unnamed','Box')
+# Gui.runCommand('Std_ToggleVisibility',0)
+# Gui.runCommand('Std_ToggleVisibility',0)
+### Begin command Part_Box
+App.ActiveDocument.addObject("Part::Box","Box")
+App.ActiveDocument.ActiveObject.Label = "Cube"
+# Object created at document root.
+App.ActiveDocument.recompute()
+# Gui.SendMsgToActiveView("ViewFit")
+### End command Part_Box
+# Gui.Selection.clearSelection()
+# Gui.Selection.addSelection('Unnamed','Box002')
+# Gui.ActiveDocument.setEdit(App.getDocument('Unnamed').getObject('Box002'), 0)
+from FreeCAD import Base
+App.getDocument("Unnamed").Box002.Length=1.22e+03
+App.getDocument("Unnamed").Box002.Width=1e+03
+App.getDocument("Unnamed").Box002.Height=550
+App.getDocument("Unnamed").Box002.Placement=App.Placement(App.Vector(2000.000,0.000,0.000),App.Rotation(App.Vector(0.000,0.000,1.000),0.000))
+App.ActiveDocument.Box002.Label = 'initWater'
+
+# Gui.getDocument('Unnamed').resetEdit()
+# Macro End: /home/oliver/.local/share/FreeCAD/Macro/damBreak3D.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++

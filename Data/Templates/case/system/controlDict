@@ -1,0 +1,90 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     %(solver/SolverName%);
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+%{%(physics/Time%)
+%:Steady
+deltaT          1;
+
+endTime         %(solver/MaxIterations%);
+
+writeControl    timeStep;
+
+writeInterval   %(solver/SteadyWriteInterval%);
+
+purgeWrite      0;
+
+%:Transient
+deltaT          %(solver/TimeStep%);
+
+endTime         %(solver/EndTime%);
+
+writeControl    adjustableRunTime;
+
+writeInterval   %(solver/TransientWriteInterval%);
+
+purgeWrite      0;
+
+%{%(solver/SolverName%)
+%:hisa
+adjustTimeStep  no;
+%:default
+adjustTimeStep  yes;
+%}
+
+maxCo           5;
+
+%}
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+maxAlphaCo      5;
+
+%}
+writeFormat     ascii;
+
+writePrecision  8;
+
+runTimeModifiable true;
+
+libs
+(
+    // Needed for availability of porous baffle boundary in potentialFoam
+    #include "turbulenceLib"
+%{%(solver/SolverName%)
+%:hisa
+    // Needed for availability of boundary conditions in potentialFoam
+    "libhisaFiniteVolume.so"
+%}
+);
+
+functions
+{
+%{%(reportingFunctionsEnabled%)
+%:True
+%[system/_functions_reporting%]
+%}
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%[system/_functions_scalarTransport%]
+%}
+%{%(physics/TurbulenceModel%)
+%:kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
+%[system/_functions_DESRegions%]
+%}
+}
+
+// ************************************************************************* //

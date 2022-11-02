@@ -1,0 +1,26 @@
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      decomposeParDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+numberOfSubdomains  %(solver/ParallelCores%);
+
+method              scotch;
+
+%{%(bafflesPresent%)
+%:True
+constraints
+{
+    preserveBaffles
+    {
+        type preserveBaffles;
+    }
+}
+%}
+
+// ************************************************************************* //

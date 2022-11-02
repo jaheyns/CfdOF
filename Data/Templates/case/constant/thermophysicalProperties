@@ -1,0 +1,92 @@
+%{%(solver/SolverName%)
+%:buoyantSimpleFoam buoyantPimpleFoam hisa
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+thermoType
+{
+%{%(solver/SolverName%)
+%:hisa
+    type            hePsiThermo;
+%:default
+    type            heRhoThermo;
+%}
+    mixture         pureMixture;
+    specie          specie;
+%{%(fluidProperties/0/Type%)
+%:Incompressible
+    equationOfState icoPolynomial;
+    thermo          hPolynomial;
+    transport       polynomial;
+%:default
+    equationOfState perfectGas;
+    thermo          hConst;
+%{%(physics/Turbulence%)
+%:Inviscid
+    transport       const;
+%:default
+    transport       sutherland;
+%}
+%}
+%{%(solver/SolverName%)
+%:hisa
+    energy          sensibleInternalEnergy;
+%:default
+    energy          sensibleEnthalpy;
+%}
+}
+
+
+mixture
+{
+   specie
+   {
+       nMoles          1;
+       molWeight       %(fluidProperties/0/MolarMass%);
+   }
+%{%(fluidProperties/0/Type%)
+%:Incompressible
+   equationOfState
+   {
+       rhoCoeffs<8>     (%(fluidProperties/0/DensityPolynomial%));
+   }
+   thermodynamics
+   {
+       CpCoeffs<8>     (%(fluidProperties/0/CpPolynomial%));
+       Hf              0;
+       Sf              0;
+   }
+   transport
+   {
+       muCoeffs<8>     (%(fluidProperties/0/DynamicViscosityPolynomial%));
+       kappaCoeffs<8>  (%(fluidProperties/0/ThermalConductivityPolynomial%));
+   }
+%:default
+   thermodynamics
+   {
+       Cp              %(fluidProperties/0/Cp%);
+       Hf              0;
+   }
+   transport
+   {
+%{%(physics/Turbulence%)
+%:Inviscid
+       mu              0;
+       Pr              1;
+%:default
+       As              %(fluidProperties/0/SutherlandConstant%);
+       Ts              %(fluidProperties/0/SutherlandTemperature%);
+%}
+   }
+%}
+}
+
+// ************************************************************************* //
+%}

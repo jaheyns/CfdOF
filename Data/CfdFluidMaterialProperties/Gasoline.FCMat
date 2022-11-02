@@ -1,0 +1,10 @@
+; Gasoline
+;
+; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material
+
+[FCMat]
+Name = Gasoline
+Type = Isothermal
+Description = Gasoline at 20 Degrees Celsius and 1 atm
+Density = 680 kg/m^3
+DynamicViscosity = 2.92e-4 kg/m/s 

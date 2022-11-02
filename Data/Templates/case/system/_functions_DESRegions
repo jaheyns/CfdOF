@@ -1,0 +1,10 @@
+    DESModelRegions1
+    {
+        type            DESModelRegions;
+        libs            ("libfieldFunctionObjects.so");
+        enabled         true;
+        writeControl    outputTime;
+        log             true;
+        writeToFile     true;
+        resultName      DESRegions;
+    }
