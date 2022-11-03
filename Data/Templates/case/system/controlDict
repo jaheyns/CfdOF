@@ -37,7 +37,7 @@ writeControl    adjustableRunTime;
 
 writeInterval   %(solver/TransientWriteInterval%);
 
-purgeWrite      5;
+purgeWrite      %(solver/PurgeWrite%);
 
 %{%(solver/SolverName%)
 %:hisa
