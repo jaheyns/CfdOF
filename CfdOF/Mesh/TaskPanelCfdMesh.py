@@ -238,6 +238,8 @@ class TaskPanelCfdMesh:
         self.consoleMessage(message)
 
     def checkMeshClicked(self):
+        if CfdTools.getFoamRuntime() == "PosixDocker":
+            CfdTools.startDocker()
         self.Start = time.time()
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -282,6 +284,9 @@ class TaskPanelCfdMesh:
         CfdTools.openFileManager(case_path)
 
     def runMesh(self):
+        if CfdTools.getFoamRuntime() == "PosixDocker":
+            CfdTools.startDocker()
+
         self.Start = time.time()
 
         # Check for changes that require mesh re-write
