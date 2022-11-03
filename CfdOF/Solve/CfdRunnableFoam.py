@@ -146,6 +146,9 @@ class CfdRunnableFoam(CfdRunnable):
         self.initResiduals()
         self.initMonitors()
 
+        if CfdTools.getFoamRuntime() == "PosixDocker":
+            CfdTools.startDocker()
+
         # Environment is sourced in run script, so no need to include in run command
         cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
         return cmd

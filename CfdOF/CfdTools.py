@@ -81,6 +81,7 @@ QUANTITY_PROPERTIES = ['App::PropertyQuantity',
                        'App::PropertyForce',
                        'App::PropertyPressure']
 
+docker_container = None
 
 def getDefaultOutputPath():
     prefs = getPreferencesLocation()
@@ -368,12 +369,6 @@ def getColour(type):
     return '#{:08X}'.format(col_int)[:-2]
 
 
-def setFoamDir(installation_path):
-    prefs = getPreferencesLocation()
-    # Set OpenFOAM install path in parameters
-    FreeCAD.ParamGet(prefs).SetString("InstallationPath", installation_path)
-
-
 def setQuantity(inputField, quantity):
     """
     Set the quantity (quantity object or unlocalised string) into the inputField correctly
@@ -481,8 +476,79 @@ def setFoamDir(installation_path):
     # Set OpenFOAM install path in parameters
     FreeCAD.ParamGet(prefs).SetString("InstallationPath", installation_path)
 
+def startDocker():
+    global docker_container
+    if docker_container==None:
+        docker_container = DockerContainer()
+    if docker_container.container_id==None:
+        if "podman" in docker_container.docker_cmd:
+            # Start podman machine if not already started
+            exit_code = checkPodmanMachineRunning()
+            if exit_code==2:
+                startPodmanMachine()
+                if checkPodmanMachineRunning():
+                    print("Aborting docker container initialization")
+                    return 1
+            elif exit_code==1:
+                print("Aborting docker container initialization")
+                return 1
+        docker_container.start_container()
+        if docker_container.container_id != None:
+            print("Docker image {} started. ID = {}".format(docker_container.image_name, docker_container.container_id))
+            return 0
+        else:
+            print("Docker start appears to have failed")
+            return 1
+
+def checkPodmanMachineRunning():
+    print("Checking podman machine running")
+    cmd = "podman machine list"
+    proc = QtCore.QProcess()
+    proc.start(cmd)
+    proc.waitForFinished()
+    line = ""
+    while proc.canReadLine():
+        line = str(proc.readLine().data(), encoding="utf-8")
+        if len(line)>0:
+            print(line)
+    if "Currently running" in line:
+        print("Podman machine running")
+        return 0
+    elif line[-9:]=="DISK SIZE":
+        print("Podman machine not initialized - please refer to readme")
+        return 1
+    else:
+        print("Podman machine not running")
+        return 2
+
+def startPodmanMachine():
+    print("Attempting podman machine start")
+    cmd = "podman machine start"
+    proc = QtCore.QProcess()
+    proc.start(cmd)
+    proc.waitForFinished()
+    line = ""
+    while proc.canReadLine():
+        line = str(proc.readLine().data(), encoding="utf-8")
+        if len(line)>0:
+            print(line)
+    cmd = "podman machine set --rootful"
+    proc = QtCore.QProcess()
+    proc.start(cmd)
+    proc.waitForFinished()
+    line = ""
+    while proc.canReadLine():
+        line = str(proc.readLine().data(), encoding="utf-8")
+        if len(line)>0:
+            print(line)
 
 def getFoamDir():
+    global docker_container
+    if docker_container==None:
+        docker_container = DockerContainer()
+    if docker_container.usedocker:
+        return ""
+        
     prefs = getPreferencesLocation()
     # Get OpenFOAM install path from parameters
     installation_path = FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
@@ -500,6 +566,12 @@ def getFoamDir():
 
 
 def getFoamRuntime():
+    global docker_container
+    if docker_container==None:
+        docker_container = DockerContainer()
+    if docker_container.usedocker:
+        return 'PosixDocker'
+
     installation_path = getFoamDir()
     if installation_path is None:
         raise IOError("OpenFOAM installation path not set and not detected")
@@ -728,6 +800,11 @@ def makeRunCommand(cmd, dir, source_env=True):
     Generate native command to run the specified Linux command in the relevant environment,
     including changing to the specified working directory if applicable
     """
+
+    if getFoamRuntime() == "PosixDocker" and ' pull ' in cmd:
+        # Case where running from Install Docker thread
+        return cmd.split()
+
     installation_path = getFoamDir()
     if installation_path is None:
         raise IOError("OpenFOAM installation directory not found")
@@ -738,9 +815,18 @@ def makeRunCommand(cmd, dir, source_env=True):
     if source_env and len(installation_path):
         env_setup_script = "{}/etc/bashrc".format(installation_path)
         source = 'source "{}" && '.format(env_setup_script)
+
+    if getFoamRuntime() == "PosixDocker":
+        # Set source for docker container
+        source = 'source /etc/bashrc && '
+        
     cd = ""
     if dir:
         cd = 'cd "{}" && '.format(translatePath(dir))
+    
+    if getFoamRuntime() == "PosixDocker":
+        prefs = getPreferencesLocation()
+        cd = cd.replace(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""),'/tmp').replace('\\','/')
 
     if getFoamRuntime() == "MinGW":
         # .bashrc will exit unless shell is interactive, so we have to manually load the foam bashrc
@@ -751,6 +837,16 @@ def makeRunCommand(cmd, dir, source_env=True):
                     'export PATH=$FOAM_LIBBIN/msmpi:$FOAM_LIBBIN:$WM_THIRD_PARTY_DIR/platforms/linux64MingwDPInt32/lib:$PATH; '
                      + cd + cmd]
         return cmdline
+
+    if getFoamRuntime() == "PosixDocker":
+        global docker_container
+        if docker_container==None:
+            docker_container = DockerContainer()
+        if platform.system() == 'Windows' and 'wsl$' in FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "") and cmd[:5] == './All':
+            cmd = 'chmod 744 {0} && {0}'.format(cmd)  # If using windows wsl$ output directory, need to make the command executable
+        cmdline = [docker_container.docker_cmd, 'exec', docker_container.container_id, 'bash', '-c', source + cd + cmd]
+        return cmdline
+
     if getFoamRuntime() == "WindowsDocker":
         foamVersion = os.path.split(installation_path)[-1].lstrip('v')
         cmdline = ['powershell.exe',
@@ -865,6 +961,7 @@ def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook
         print("Running ", ' '.join(cmds), " -> ", logFile)
     else:
         print("Running ", ' '.join(cmds))
+
     proc.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
     if not proc.waitForStarted():
         raise Exception("Unable to start command " + ' '.join(cmds))
@@ -971,6 +1068,8 @@ def checkCfdDependencies():
             print(ofmsg)
             message += ofmsg + '\n'
         else:
+            if getFoamRuntime() == "PosixDocker":
+                startDocker()
             try:
                 if getFoamRuntime() == "MinGW":
                     foam_ver = runFoamCommand("echo $FOAM_API")[0]
@@ -1023,7 +1122,7 @@ def checkCfdDependencies():
                         message += vermsg + "\n"
                         print(vermsg)
                 # Check for wmake
-                if getFoamRuntime() != "MinGW":
+                if getFoamRuntime() != "MinGW" and getFoamRuntime() != "PosixDocker":
                     try:
                         runFoamCommand("wmake -help")
                     except subprocess.CalledProcessError:
@@ -1154,7 +1253,7 @@ def checkCfdDependencies():
         print(gmsh_msg)
         try:
             # Needs to be runnable from OpenFOAM environment
-            gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")[2]
+            gmshversion = runFoamCommand(("'" + gmsh_exe + "'" + " -version"))[2]
         except (OSError, subprocess.CalledProcessError):
             gmsh_msg = "gmsh could not be run from OpenFOAM environment"
             message += gmsh_msg + '\n'
@@ -1202,6 +1301,8 @@ def getGmshExecutable():
     if not gmsh_cmd:
         # Otherwise, see if the command 'gmsh' is in the path.
         gmsh_cmd = shutil.which("gmsh")
+    if getFoamRuntime() == "PosixDocker":
+        gmsh_cmd='gmsh'
     return gmsh_cmd
 
 
@@ -1656,6 +1757,9 @@ class CfdSynchronousFoamProcess:
         self.outputAll = ""
 
     def run(self, cmdline, case=None):
+        if getFoamRuntime() == "PosixDocker" and ' pull ' not in cmdline:
+            if startDocker():
+                return 1
         print("Running ", cmdline)
         self.process.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
         if not self.process.waitForFinished():
@@ -1669,3 +1773,107 @@ class CfdSynchronousFoamProcess:
     def readError(self, output):
         self.outputErr += output
         self.outputAll += output
+
+# Only one container is needed. Start one for the CfdOF workbench as required
+class DockerContainer:
+    container_id = None
+    usedocker = False
+    foam_dir = None
+    docker_cmd = None
+    
+    def __init__(self):
+        self.image_name = None
+        import shutil
+        
+        if shutil.which('podman') is not None:
+            self.docker_cmd = shutil.which('podman')
+        elif shutil.which('docker') is not None:
+            self.docker_cmd = shutil.which('docker')
+        else:
+            self.docker_cmd = None
+
+        if self.docker_cmd is not None:
+            self.docker_cmd = self.docker_cmd.split(os.path.sep)[-1]
+
+    def start_container(self):
+        prefs = getPreferencesLocation()
+        self.foam_dir = FreeCAD.ParamGet(prefs).GetString("InstallationPath","")
+        self.image_name = FreeCAD.ParamGet(prefs).GetString("DockerURL", "")
+        output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+        
+        if not output_path:
+            output_path = tempfile.gettempdir()
+        output_path = os.path.normpath(output_path)
+        
+        if not os.path.isdir(output_path):
+            print("Default output directory not found")
+            return 1
+        
+        if DockerContainer.container_id != None:
+            print("Attempting to start container but id already set")
+
+        container_ls = self.query_docker_container_ls() 
+        if container_ls != None:
+            print("Docker container {} running but not started by CfdOF - it may not be configured correctly - stopping container.".format(container_ls))
+            self.stop_container(alien = True)
+
+        if self.image_name == "":
+            print("Docker image name not set")
+            return 1
+
+        if self.docker_cmd == None:
+            print("Need to install either podman or docker")
+            return 1
+
+        if platform.system() == 'Windows':
+            out_d = output_path.split(os.sep)
+            if len(out_d)>2 and out_d[2] == 'wsl$':
+                output_path = '/' + '/'.join(out_d[4:])
+
+        cmd = "{0} run -t -d -u 1000:1000 -v {1}:/tmp {2}".format(self.docker_cmd, output_path, self.image_name)
+
+        if 'docker' in self.docker_cmd:
+            cmd = cmd.replace('docker.io/','')
+        proc = QtCore.QProcess()
+        proc.start(cmd)
+        self.getContainerID()
+        return 0
+
+    """ Stop docker container and remove """
+    def stop_container(self, alien = False):
+        if DockerContainer.container_id == None and alien:
+            DockerContainer.container_id = self.query_docker_container_ls()
+        if DockerContainer.container_id != None:
+            print("Stopping docker container {}".format(DockerContainer.container_id))
+            cmd = "{} container rm -f {}".format(self.docker_cmd, DockerContainer.container_id)
+            proc = QtCore.QProcess()
+            proc.start(cmd)
+            if not proc.waitForFinished():
+                print("Stop docker container {} failed".format(DockerContainer.container_id))
+            else:
+                while proc.canReadLine():
+                    line = proc.readLine()
+            DockerContainer.container_id = None
+        else:
+            print("No docker container to stop")
+                    
+    def getContainerID(self):
+        import time
+        timer_counts = 0
+        while timer_counts < 10 and DockerContainer.container_id == None:
+            time.sleep(1)
+            DockerContainer.container_id = self.query_docker_container_ls()
+            timer_counts = timer_counts + 1
+        
+    def query_docker_container_ls(self):
+        cmd = "{} container ls".format(self.docker_cmd)
+        proc = QtCore.QProcess()
+        proc.start(cmd)
+        proc.waitForFinished()
+        while proc.canReadLine():
+            line = proc.readLine()
+            cnt_lst = str(line.data(), encoding="utf-8").split()
+            if  len(cnt_lst)>0 and cnt_lst[1].replace(':latest','').replace('docker.io/','') == self.image_name.replace(':latest','').replace('docker.io/',''):
+                return(cnt_lst[0])
+        return(None)
+

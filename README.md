@@ -98,13 +98,12 @@ Note: The CfdOF workbench can be updated at any time through the Addon manager.
 ##### Dependency installation
 
 Dependencies can be checked and installed conveniently from the CfdOF Preferences panel in FreeCAD.
-In the FreeCAD window, select Edit | Preferences ... and choose "CfdOF".
+In the FreeCAD window, select Edit | Preferences ... and choose "CfdOF".  The dependencies can be installed as 
+indvidual components or as part of a docker container (refer to the **Docker container install** section below). 
 
 The OpenFOAM installation is via the 
 [OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php), and
 the [BlueCFD Core](https://bluecfd.github.io/Core/) port of OpenFOAM is also supported.
-The [OpenCFD docker package](https://www.openfoam.com/download/install-binary-windows.php) is also currently supported 
-but has some issues.
 
 OpenFOAM can be installed manually using the above links, or by clicking the relevant
 button in the Preferences panel described above. If you experience problems running OpenFOAM in CfdOF, please make
@@ -177,11 +176,9 @@ conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CfdOF".
 
-However, in Linux, manual installation is required for
-OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openfoam.org/download/) versions),
-[Paraview](http://www.paraview.org/) and
-[Gmsh](http://gmsh.info/) (optional). They should be
-installed using the links above or your distribution's package
+The dependencies can be installed manually, or as part of a docker container (refer to Docker container install below). Manual 
+installation may be undertaken for OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openfoam.org/download/) 
+versions), [Paraview](http://www.paraview.org/) and [Gmsh](http://gmsh.info/) (optional) by using the links above or your distribution's package
 manager. Note, however, that the OpenFOAM packages bundled in
 some Linux distributions may be out of date or incomplete; for example,
 the standard Debian and Ubuntu packages do not include the build command 'wmake'
@@ -203,6 +200,39 @@ not already done so yourself. Note that this is a lengthy process.
 
 Choosing the "Check dependencies" option will verify that all
 prerequisites have been successfully installed.
+
+#### Docker container install
+
+Docker containers offer a convenient way of providing pre-compiled program packages for both windows and linux. macOS can also be supported but
+assistance will be required to setup a container.  Please leave a message on the [forum](https://forum.freecadweb.org/viewforum.php?f=37).
+
+##### Docker on Windows
+
+The prefered docker run-time for Windows is via [podman](https://podman.io/) as currently this provides fast filesystem integration.
+[Docker Desktop](https://www.docker.com/products/docker-desktop/) may also be used.
+
+1. Install [podman](https://github.com/containers/podman/releases/download/v4.2.1/podman-v4.2.1.msi) (or [docker desktop](https://www.docker.com/products/docker-desktop/)).
+2. If using podman, open a cmd window and issue the following commands: 
+   * `podman machine init`
+   * `podman machine start`
+   * `podman machine set --rootful`      
+3. Edit &rarr; Preferences &rarr; CfdOF: Press the _Install Paraview_ button.
+4. Edit &rarr; Preferences &rarr; CfdOF: Select _Use docker_.
+5. Press the _Install Docker Container_ button. There is no need to install gmsh, cfmesh and HISA as they are included in the docker image.
+6. If using podman, fast WSL file system integration can be enabled:
+   * Create a new subdirectory (for example `cfdof`) in the following firectory created by podman: 
+   `\\wsl$\podman-machine-default\home\user`
+   * In the cfdof preference page, set the default output directory as above:  
+   `\\wsl$\podman-machine-default\home\user\cfdof`
+7. Press the _Run dependancy checker_ button.
+
+##### Docker on Linux
+1. Install docker using these [instructions](https://www.linuxtechi.com/install-docker-engine-on-debian/) (or similar).
+2. Install paraview as per the package installation instructions for your distribution  
+   (for example `sudo apt-get install paraview` on debian).
+3. Edit &rarr; Preferences &rarr; CfdOF: Select _Use docker_.
+4. Press the _Install Docker Container_ button. There is no need to install gmsh, cfmesh and HISA as they are included in the docker image.
+5. Press the _Run dependancy checker_ button.
 
 ## Documentation
 

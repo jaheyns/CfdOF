@@ -109,6 +109,10 @@ class CfdCaseWriterFoam:
             'runChangeDictionary': False
             }
 
+        if CfdTools.DockerContainer.usedocker:
+            mesh_d = self.settings['meshDir'].split(os.sep)
+            self.settings['meshDir'] = '/tmp/{}'.format(mesh_d[-1])
+
         self.processSystemSettings()
         self.processSolverSettings()
         self.processFluidProperties()
