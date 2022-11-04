@@ -162,10 +162,11 @@ class ViewProviderCfdSolverFoam:
 
     def setEdit(self, vobj, mode):
         if CfdTools.getActiveAnalysis():
-            from CfdOF.Solve.CfdRunnableFoam import CfdRunnableFoam
-            foam_runnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
-            from CfdOF.Solve import TaskPanelCfdSolverControl
+            from CfdOF.Solve import CfdRunnableFoam
             import importlib
+            importlib.reload(CfdRunnableFoam)
+            foam_runnable = CfdRunnableFoam.CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
+            from CfdOF.Solve import TaskPanelCfdSolverControl
             importlib.reload(TaskPanelCfdSolverControl)
             self.taskd = TaskPanelCfdSolverControl.TaskPanelCfdSolverControl(foam_runnable)
             self.taskd.obj = vobj.Object

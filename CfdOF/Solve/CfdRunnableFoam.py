@@ -176,7 +176,7 @@ class CfdRunnableFoam(CfdRunnable):
                             TimePlot(title=rf.Label, y_label=rf.SampleFieldName, is_log=False)
 
     def process_output(self, text):
-        log_lines = text.split('\n')
+        log_lines = text.split('\n')[:-1]
         prev_niter = self.niter
         for line in log_lines:
             line = line.rstrip()
