@@ -59,8 +59,6 @@ class TaskPanelCfdSolverControl:
         self.form.terminateSolver.clicked.connect(self.killSolverProcess)
         self.form.terminateSolver.setEnabled(False)
 
-        self.open_paraview = QtCore.QProcess()
-
         self.working_dir = CfdTools.getOutputPath(self.analysis_object)
 
         self.updateUI()
@@ -104,7 +102,6 @@ class TaskPanelCfdSolverControl:
         # We call this from unsetEdit to ensure cleanup
         self.solver_object.Proxy.solver_process.terminate()
         self.solver_object.Proxy.solver_process.waitForFinished()
-        self.open_paraview.terminate()
         self.Timer.stop()
 
     def write_input_file_handler(self):
@@ -299,6 +296,6 @@ class TaskPanelCfdSolverControl:
         case_path = os.path.abspath(os.path.join(self.working_dir, self.solver_object.InputCaseName))
         script_name = "pvScript.py"
         try:
-            self.open_paraview = CfdTools.startParaview(case_path, script_name, self.consoleMessage)
+            CfdTools.startParaview(case_path, script_name, self.consoleMessage)
         finally:
             QApplication.restoreOverrideCursor()

@@ -62,8 +62,6 @@ class TaskPanelCfdMesh:
         self.Timer.setInterval(1000)
         self.Timer.timeout.connect(self.update_timer_text)
 
-        self.open_paraview = QtCore.QProcess()
-
         self.form.cb_utility.activated.connect(self.choose_utility)
         self.form.pb_write_mesh.clicked.connect(self.writeMesh)
         self.form.pb_edit_mesh.clicked.connect(self.editMesh)
@@ -112,7 +110,6 @@ class TaskPanelCfdMesh:
         self.store()
         self.mesh_obj.Proxy.mesh_process.terminate()
         self.mesh_obj.Proxy.mesh_process.waitForFinished()
-        self.open_paraview.terminate()
         self.Timer.stop()
         FreeCAD.ActiveDocument.recompute()
 
@@ -384,7 +381,7 @@ class TaskPanelCfdMesh:
         case_path = os.path.abspath(self.mesh_obj.Proxy.cart_mesh.meshCaseDir)
         script_name = "pvScriptMesh.py"
         try:
-            self.open_paraview = CfdTools.startParaview(case_path, script_name, self.consoleMessage)
+            CfdTools.startParaview(case_path, script_name, self.consoleMessage)
         finally:
             QApplication.restoreOverrideCursor()
 

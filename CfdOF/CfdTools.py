@@ -1315,25 +1315,35 @@ def startParaview(case_path, script_name, console_message_fn):
         # If not found, try to run from the OpenFOAM environment, in case a bundled version is available from there
         paraview_cmd = "$(which paraview)"  # 'which' required due to mingw weirdness(?) on Windows
         try:
-            console_message_fn("Running " + paraview_cmd + " " + arg)
-            proc = startFoamApplication([paraview_cmd, arg], case_path, log_name=None)
+            cmds = [paraview_cmd, arg]
+            cmd = ' '.join(cmds)
+            console_message_fn("Running " + cmd)
+            args = makeRunCommand(cmd, case_path)
+            paraview_cmd = args[0]
+            args = args[1:] if len(args) > 1 else []
+            proc.setProgram(paraview_cmd)
+            proc.setArguments([arg])
+            proc.setProcessEnvironment(getRunEnvironment())
+            success = proc.startDetached()
+            if not success:
+                raise Exception("Unable to start command " + cmd)
             console_message_fn("Paraview started")
         except QtCore.QProcess.ProcessError:
             console_message_fn("Error starting paraview")
     else:
         console_message_fn("Running " + paraview_cmd + " " + arg)
+        proc.setProgram(paraview_cmd)
+        proc.setArguments([arg])
         proc.setWorkingDirectory(case_path)
-
         env = QtCore.QProcessEnvironment.systemEnvironment()
         removeAppimageEnvironment(env)
         proc.setProcessEnvironment(env)
-
-        proc.start(paraview_cmd, [arg])
-        if proc.waitForStarted():
+        success = proc.startDetached()
+        if success:
             console_message_fn("Paraview started")
         else:
             console_message_fn("Error starting paraview")
-    return proc
+    return success
 
 
 def startGmsh(working_dir, args, console_message_fn, stdout_fn=None, stderr_fn=None):
