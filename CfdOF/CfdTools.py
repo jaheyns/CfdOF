@@ -826,7 +826,8 @@ def makeRunCommand(cmd, dir, source_env=True):
     
     if getFoamRuntime() == "PosixDocker":
         prefs = getPreferencesLocation()
-        cd = cd.replace(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""),'/tmp').replace('\\','/')
+        if dir:
+            cd = cd.replace(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""),'/tmp').replace('\\','/')
 
     if getFoamRuntime() == "MinGW":
         # .bashrc will exit unless shell is interactive, so we have to manually load the foam bashrc
@@ -840,9 +841,11 @@ def makeRunCommand(cmd, dir, source_env=True):
 
     if getFoamRuntime() == "PosixDocker":
         global docker_container
-        if docker_container==None:
-            docker_container = DockerContainer()
-        if platform.system() == 'Windows' and 'wsl$' in FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "") and cmd[:5] == './All':
+        if docker_container.output_path_used!=FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""):
+            print("Output path changed - restarting container")
+            docker_container.stop_container()
+            docker_container.start_container()
+        if platform.system() == 'Windows' and FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")[:5]=='\\\\wsl' and cmd[:5] == './All':
             cmd = 'chmod 744 {0} && {0}'.format(cmd)  # If using windows wsl$ output directory, need to make the command executable
         cmdline = [docker_container.docker_cmd, 'exec', docker_container.container_id, 'bash', '-c', source + cd + cmd]
         return cmdline
@@ -1253,7 +1256,7 @@ def checkCfdDependencies():
         print(gmsh_msg)
         try:
             # Needs to be runnable from OpenFOAM environment
-            gmshversion = runFoamCommand(("'" + gmsh_exe + "'" + " -version"))[2]
+            gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")[2]
         except (OSError, subprocess.CalledProcessError):
             gmsh_msg = "gmsh could not be run from OpenFOAM environment"
             message += gmsh_msg + '\n'
@@ -1788,7 +1791,7 @@ class CfdSynchronousFoamProcess:
 class DockerContainer:
     container_id = None
     usedocker = False
-    foam_dir = None
+    output_path_used = None
     docker_cmd = None
     
     def __init__(self):
@@ -1807,7 +1810,6 @@ class DockerContainer:
 
     def start_container(self):
         prefs = getPreferencesLocation()
-        self.foam_dir = FreeCAD.ParamGet(prefs).GetString("InstallationPath","")
         self.image_name = FreeCAD.ParamGet(prefs).GetString("DockerURL", "")
         output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
         
@@ -1837,7 +1839,7 @@ class DockerContainer:
 
         if platform.system() == 'Windows':
             out_d = output_path.split(os.sep)
-            if len(out_d)>2 and out_d[2] == 'wsl$':
+            if len(out_d)>2 and out_d[2][:3] == 'wsl':
                 output_path = '/' + '/'.join(out_d[4:])
 
         cmd = "{0} run -t -d -u 1000:1000 -v {1}:/tmp {2}".format(self.docker_cmd, output_path, self.image_name)
@@ -1847,7 +1849,11 @@ class DockerContainer:
         proc = QtCore.QProcess()
         proc.start(cmd)
         self.getContainerID()
-        return 0
+        if self.container_id != None:
+            self.output_path_used = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+            return 0
+        else:
+            return 1
 
     """ Stop docker container and remove """
     def stop_container(self, alien = False):
@@ -1864,6 +1870,7 @@ class DockerContainer:
                 while proc.canReadLine():
                     line = proc.readLine()
             DockerContainer.container_id = None
+            DockerContainer.output_path_used = None
         else:
             print("No docker container to stop")
                     

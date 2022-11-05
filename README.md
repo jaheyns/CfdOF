@@ -220,7 +220,7 @@ The prefered docker run-time for Windows is via [podman](https://podman.io/) as 
 4. Edit &rarr; Preferences &rarr; CfdOF: Select _Use docker_.
 5. Press the _Install Docker Container_ button. There is no need to install gmsh, cfmesh and HISA as they are included in the docker image.
 6. If using podman, fast WSL file system integration can be enabled:
-   * Create a new subdirectory (for example `cfdof`) in the following firectory created by podman: 
+   * Create a new subdirectory (for example `cfdof`) in the following firectory created by podman:  
    `\\wsl$\podman-machine-default\home\user`
    * In the cfdof preference page, set the default output directory as above:  
    `\\wsl$\podman-machine-default\home\user\cfdof`

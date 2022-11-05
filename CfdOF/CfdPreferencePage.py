@@ -259,10 +259,6 @@ class CfdPreferencePage:
 
     def outputDirChanged(self, text):
         self.output_dir = text
-        # Need to restart docker container if running
-        if CfdTools.docker_container is not None and CfdTools.docker_container.container_id!=None:
-            CfdTools.docker_container.stop_container()
-        CfdTools.docker_container = None
 
     def chooseOutputDir(self):
         d = QtGui.QFileDialog().getExistingDirectory(None, 'Choose output directory', self.output_dir)
