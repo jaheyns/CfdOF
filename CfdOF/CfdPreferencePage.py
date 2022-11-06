@@ -188,7 +188,7 @@ class CfdPreferencePage:
         # Set usedocker and enable/disable download buttons 
         self.dockerCheckboxClicked()
 
-        self.form.le_docker_url.setText(DOCKER_URL)
+        self.form.le_docker_url.setText(FreeCAD.ParamGet(prefs).GetString("DockerURL", DOCKER_URL))
 
         self.setDownloadURLs()
 
