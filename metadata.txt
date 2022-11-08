@@ -8,7 +8,7 @@ description=Computational Fluid Dynamics (CFD) analysis based on OpenFOAM
 about=Simple workflow to get started with CFD analysis.
       Supports incompressible laminar and turbulent flow, basic multiphase flow,
       and cut-cell cartesian meshing
-version=1.20.1
+version=1.20.2
 tracker=https://forum.freecadweb.org/viewforum.php?f=37&sid=3d90858d2ff441bd10475a693b55643a
 repository=https://gitlab.com/opensimproject/cfdof
 license=LGPL
