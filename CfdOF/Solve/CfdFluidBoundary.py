@@ -78,7 +78,7 @@ BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
                 [False, [], False, False, False, True, None],  # Slip
                 [True, [2], False, False, False, True, None],  # Partial slip
                 [True, [0], False, False, False, True, None],  # Translating wall
-                [True, [0], False, False, False, True, None]],  # Rough
+                [True, [0, 6], False, False, False, True, None]],  # Rough
                [[True, [0, 1], True, True, True, True, [2]],  # Velocity
                 [True, [3], False, True, True, True, [2]],  # Vol flow rate
                 [True, [4], False, True, True, True, [2]],  # Mass Flow rate
@@ -306,6 +306,11 @@ class CfdFluidBoundary:
                           "Porous screen mesh diameter")
         addObjectProperty(obj, 'ScreenSpacing', '2 mm', "App::PropertyLength", "Baffle",
                           "Porous screen mesh spacing")
+
+        addObjectProperty(obj, 'RoughnessHeight', '0 mm', "App::PropertyQuantity", "Turbulence",
+                          "Sand-grain roughness")
+        addObjectProperty(obj, 'RoughnessConstant', '0.5', "App::PropertyQuantity", "Turbulence",
+                          "Coefficient of roughness [0.5-1]")
 
         addObjectProperty(obj, 'ThermalBoundaryType', THERMAL_BOUNDARY_TYPES, "App::PropertyEnumeration", "Thermal",
                           "Type of thermal boundary")
