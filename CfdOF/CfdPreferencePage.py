@@ -304,7 +304,7 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickOpenFoamFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose OpenFOAM install file', filter="*.exe")
+        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose OpenFOAM install file', filter="*.exe")
         if f and os.access(f, os.R_OK):
             self.form.le_openfoam_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
@@ -315,7 +315,7 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickParaviewFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose ParaView install file', filter="*.exe")
+        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose ParaView install file', filter="*.exe")
         if f and os.access(f, os.R_OK):
             self.form.le_paraview_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
@@ -336,7 +336,7 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickCfMeshFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose cfMesh archive', filter="*.zip")
+        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose cfMesh archive', filter="*.zip")
         if f and os.access(f, os.R_OK):
             self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
@@ -357,7 +357,7 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickHisaFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose HiSA archive', filter="*.zip")
+        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose HiSA archive', filter="*.zip")
         if f and os.access(f, os.R_OK):
             self.form.le_hisa_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
