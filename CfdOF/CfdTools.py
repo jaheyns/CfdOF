@@ -668,7 +668,7 @@ def translatePath(p):
     Transform path to the perspective of the Linux subsystem in which OpenFOAM is run (e.g. mingw)
     """
     if platform.system() == 'Windows':
-        return fromWindowsPath(p)
+        return fromWindowsPath(os.path.abspath(p))
     else:
         return p
 
