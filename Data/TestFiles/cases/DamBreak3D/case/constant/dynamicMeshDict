@@ -12,7 +12,7 @@ FoamFile
     object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-dynamicFvMesh       dynamicRefineFvMesh;
+dynamicFvMesh   dynamicRefineFvMesh;
 
 refineInterval  5;
 field           alpha.water;
