@@ -293,8 +293,8 @@ and the [Council for Scientific and Industrial Research](https://www.csir.co.za)
 * Qingfeng Xia (2015)
 * Thomas Schrader (2017-) <info@schraderundschrader.de>
 * Michael Hindley (2016)
-* Forum user @mmcker (2022)
-* Forum user @KAKM (2022)
+* Mark Mackenzie (CNF, 2022)
+* Katy Akmal (2022) [Forum: @KAKM]
 * Adrian Insaurralde (2022)
 * Klaus Sembritzki (2017)
 

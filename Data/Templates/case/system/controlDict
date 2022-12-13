@@ -85,6 +85,11 @@ functions
 %:kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
 %[system/_functions_DESRegions%]
 %}
+%{%(solver/SolverName%)
+%:hisa
+#includeFunc MachNo
+
+%}
 }
 
 // ************************************************************************* //

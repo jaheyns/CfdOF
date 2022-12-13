@@ -100,7 +100,19 @@ boundaryField
         value           $internalField;
     }
 %:totalPressureInlet
+%{%(solver/SolverName%)
+%:hisa
+    %(0%)
+    {
+        type                characteristicPressureInletOutletVelocity;
+        U                   (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
+        p                   %(boundaries/%(0%)/Pressure%);
+        T                   %(boundaries/%(0%)/T%);
+        value               $internalField;
+    }
+%:default
 %[0/_U_boundary_pressureInletOutletVelocity%]
+%}
 %:staticPressureInlet
 %{%(solver/SolverName%)
 %:hisa
@@ -176,7 +188,19 @@ boundaryField
         value       $internalField;
     }
 %:default
+%{%(solver/SolverName%)
+%:hisa
+    %(0%)
+    {
+        type        characteristicPressureInletOutletVelocity;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       $internalField;
+    }
+%:default
 %[0/_U_boundary_pressureInletOutletVelocity%]
+%}
 %}
 %:constraint
 %[0/_boundary_constraint%]
