@@ -12,7 +12,8 @@ FoamFile
 %:snappyHexMesh
 
 // Include defaults parameters from master dictionary
-#includeEtc "caseDicts/meshQualityDict"
+#includeIfPresent "$FOAM_ETC/caseDicts/meshQualityDict"
+#includeIfPresent "$FOAM_ETC/caseDicts/mesh/generation/meshQualityDict"
 
 // ************************************************************************* //
 %:default
