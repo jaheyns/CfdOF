@@ -1,6 +1,5 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *   Copyright (c) 2022 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -21,12 +20,13 @@
 
 import os
 from math import ceil
+import FreeCAD
 import FreeCADGui
 from CfdOF import CfdTools
-from CfdOF.CfdTools import indexOrDefault, setQuantity, getQuantity
+from CfdOF.CfdTools import setQuantity, getQuantity, storeIfChanged
 
 
-class TaskPanelCfdDynamicMeshRefinement:
+class TaskPanelCfdDynamicMeshShockRefinement:
     def __init__(self, obj, physics_model, material_objs):
         FreeCADGui.Selection.clearSelection()
         self.obj = obj
@@ -35,7 +35,7 @@ class TaskPanelCfdDynamicMeshRefinement:
         self.material_objs = material_objs
 
         self.form = FreeCADGui.PySideUic.loadUi(
-                    os.path.join(CfdTools.getModulePath(), 'Gui', "TaskPanelCfdDynamicMeshInterfaceRefinement.ui"))
+                    os.path.join(CfdTools.getModulePath(), 'Gui', "TaskPanelCfdDynamicMeshShockRefinement.ui"))
 
         self.load()
 
@@ -46,22 +46,13 @@ class TaskPanelCfdDynamicMeshRefinement:
     def load(self):
         """ fills the widgets """
 
-        # Add volume fraction fields
-        if self.physics_model.Phase != 'Single':
-            mat_names = []
-            for m in self.material_objs:
-                mat_names.append(m.Label)
-            self.form.cb_fluid.clear()
-            items = mat_names[:-1]
-            self.form.cb_fluid.addItems(items)
-            idx = indexOrDefault(items, self.obj.Phase, 0)
-            self.form.cb_fluid.setCurrentIndex(idx)
-        else:
-            self.form.cb_fluid.clear()
-        self.form.sb_refinement_interval.setValue(self.obj.RefinementInterval)
-        self.form.sb_max_refinement_levels.setValue(self.obj.MaxRefinementLevel)
-        self.form.sb_no_buffer_layers.setValue(self.obj.BufferLayers)
-        self.form.cb_write_refinement_volscalarfield.setChecked(self.obj.WriteFields)
+        setQuantity(self.form.inputReferenceVelocityX, self.obj.ReferenceVelocityDirection.x)
+        setQuantity(self.form.inputReferenceVelocityY, self.obj.ReferenceVelocityDirection.y)
+        setQuantity(self.form.inputReferenceVelocityZ, self.obj.ReferenceVelocityDirection.z)
+        self.form.sbRelativeElementSize.setValue(self.obj.RelativeElementSize)
+        self.form.sbRefinementInterval.setValue(getattr(self.obj, 'RefinementInterval'+self.physics_model.Time))
+        self.form.sbNumBufferLayers.setValue(self.obj.BufferLayers)
+        self.form.cbWriteRefinementField.setChecked(self.obj.WriteFields)
 
     def updateUI(self):
         pass
@@ -70,13 +61,15 @@ class TaskPanelCfdDynamicMeshRefinement:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-        # Macro script
-        FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-        FreeCADGui.doCommand("obj.Phase = '{}'".format(self.form.cb_fluid.currentText()))
-        FreeCADGui.doCommand("obj.RefinementInterval = {}".format(int(self.form.sb_refinement_interval.value())))
-        FreeCADGui.doCommand("obj.MaxRefinementLevel = {}".format(int(self.form.sb_max_refinement_levels.value())))
-        FreeCADGui.doCommand("obj.BufferLayers = {}".format(int(self.form.sb_no_buffer_layers.value())))
-        FreeCADGui.doCommand("obj.WriteFields = {}".format(self.form.cb_write_refinement_volscalarfield.isChecked()))
+        ref_dir = FreeCAD.Vector(
+            self.form.inputReferenceVelocityX.property("quantity").Value,
+            self.form.inputReferenceVelocityY.property("quantity").Value,
+            self.form.inputReferenceVelocityZ.property("quantity").Value)
+        storeIfChanged(self.obj, 'ReferenceVelocityDirection', ref_dir)
+        storeIfChanged(self.obj, 'RelativeElementSize', float(self.form.sbRelativeElementSize.value()))
+        storeIfChanged(self.obj, 'RefinementInterval'+self.physics_model.Time, int(self.form.sbRefinementInterval.value()))
+        storeIfChanged(self.obj, 'BufferLayers', int(self.form.sbNumBufferLayers.value()))
+        storeIfChanged(self.obj, 'WriteFields', self.form.cbWriteRefinementField.isChecked())
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")

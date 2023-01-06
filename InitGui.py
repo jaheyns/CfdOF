@@ -55,14 +55,16 @@ class CfdOFWorkbench(Workbench):
         from CfdOF.Solve.CfdFluidBoundary import CommandCfdFluidBoundary
         from CfdOF.Solve.CfdZone import CommandCfdPorousZone
         from CfdOF.Solve.CfdZone import CommandCfdInitialisationZone
-        from CfdOF.Mesh.CfdDynamicMeshRefinement import CommandGroupDynamicMeshRefinement, CommandDynamicMeshRefinement
+        from CfdOF.Mesh.CfdDynamicMeshRefinement import CommandGroupDynamicMeshRefinement, \
+            CommandDynamicMeshInterfaceRefinement, CommandDynamicMeshShockRefinement
         from CfdOF.PostProcess.CfdReportingFunction import CommandCfdReportingFunction
         from CfdOF.Solve.CfdScalarTransportFunction import CommandCfdScalarTransportFunction
 
         FreeCADGui.addCommand('Cfd_Analysis', CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', CommandCfdMeshFromShape())
         FreeCADGui.addCommand('Cfd_MeshRegion', CommandMeshRegion())
-        FreeCADGui.addCommand('Cfd_DynamicMeshRefinement', CommandDynamicMeshRefinement())
+        FreeCADGui.addCommand('Cfd_DynamicMeshInterfaceRefinement', CommandDynamicMeshInterfaceRefinement())
+        FreeCADGui.addCommand('Cfd_DynamicMeshShockRefinement', CommandDynamicMeshShockRefinement())
         FreeCADGui.addCommand('Cfd_GroupDynamicMeshRefinement', CommandGroupDynamicMeshRefinement())
         FreeCADGui.addCommand('Cfd_PhysicsModel', CommandCfdPhysicsSelection())
         FreeCADGui.addCommand('Cfd_FluidMaterial', CommandCfdFluidMaterial())
@@ -76,7 +78,7 @@ class CfdOFWorkbench(Workbench):
 
         cmdlst = ['Cfd_Analysis',
                   'Cfd_MeshFromShape', 'Cfd_MeshRegion', 
-                  ("Dynamic mesh refinement", ['Cfd_DynamicMeshRefinement']),
+                  ("Dynamic mesh refinement", ['Cfd_DynamicMeshInterfaceRefinement','Cfd_DynamicMeshShockRefinement',]),
                   ('Cfd_GroupDynamicMeshRefinement',),
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_FluidBoundary', 'Cfd_InitialiseInternal',

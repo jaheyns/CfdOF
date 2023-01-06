@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Macro Begin: /home/oliver/.local/share/FreeCAD/Macro/damBreak3D.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
 import FreeCAD
 import Part
 import Part,PartGui
@@ -80,4 +79,3 @@ App.getDocument("Unnamed").Box002.Placement=App.Placement(App.Vector(2000.000,0.
 App.ActiveDocument.Box002.Label = 'initWater'
 
 # Gui.getDocument('Unnamed').resetEdit()
-# Macro End: /home/oliver/.local/share/FreeCAD/Macro/damBreak3D.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++

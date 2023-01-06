@@ -33,7 +33,7 @@ CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Cut_Mesh)
 FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
 (FreeCAD.ActiveDocument.getObject('Cut'), ('Face7', 'Face9', 'Face11', 'Face13', 'Face15', 'Face6', 'Face25', 'Face23', 'Face21', 'Face19'))]
 
-FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.5
+FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.6
 FreeCAD.ActiveDocument.MeshRefinement.RefinementThickness = '5 mm'
 FreeCAD.ActiveDocument.MeshRefinement.NumberLayers = 16
 FreeCAD.ActiveDocument.MeshRefinement.ExpansionRatio = 1.2

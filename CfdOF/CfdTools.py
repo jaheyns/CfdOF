@@ -141,14 +141,11 @@ def getPhysicsModel(analysis_object):
     return physics_model
 
 
-def getDynamicMeshAdaptation(analysis_object):
-    is_present = False
-    for i in getMesh(analysis_object).Group:
-        if "DynamicMeshInterfaceRefinement" in i.Name:
+def getDynamicMeshAdaptation(mesh_object):
+    dynamic_mesh_adaption_model = None
+    for i in mesh_object.Group:
+        if i.Name.startswith("DynamicMeshInterfaceRefinement") or i.Name.startswith("DynamicMeshShockRefinement"):
             dynamic_mesh_adaption_model = i
-            is_present = True
-    if not is_present:
-        dynamic_mesh_adaption_model = None
     return dynamic_mesh_adaption_model
 
 
@@ -1011,7 +1008,7 @@ def checkCfdDependencies():
     FC_COMMIT_REQUIRED = 16146
 
     CF_MAJOR_VER_REQUIRED = 1
-    CF_MINOR_VER_REQUIRED = 16
+    CF_MINOR_VER_REQUIRED = 20
 
     HISA_MAJOR_VER_REQUIRED = 1
     HISA_MINOR_VER_REQUIRED = 6
