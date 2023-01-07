@@ -99,6 +99,11 @@ def getOutputPath(analysis):
         output_path = ""
     if not output_path:
         output_path = getDefaultOutputPath()
+    if not os.path.isabs(output_path):
+        if not FreeCAD.ActiveDocument.FileName:
+            raise RuntimeError("The output directory is specified as a path relative to the current file's location; " 
+                "however, it needs to be saved in order to determine this.")
+        output_path = os.path.join(os.path.dirname(FreeCAD.ActiveDocument.FileName), output_path)
     output_path = os.path.normpath(output_path)
     return output_path
 
