@@ -50,7 +50,8 @@ class CfdAnalysis:
 
     def initProperties(self, obj):
         addObjectProperty(obj, "OutputPath", "", "App::PropertyPath", "",
-                          "Path to which cases are written (blank to use system default)")
+                          "Path to which cases are written (blank to use system default; relative path is relative "
+                          "to location of current file)")
         addObjectProperty(obj, "IsActiveAnalysis", False, "App::PropertyBool", "", "Active analysis object in document")
         obj.setEditorMode("IsActiveAnalysis", 1)  # Make read-only (2 = hidden)
         addObjectProperty(obj, 'NeedsMeshRewrite', True, "App::PropertyBool", "", "Mesh setup needs to be re-written")
