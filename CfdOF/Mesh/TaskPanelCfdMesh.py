@@ -242,33 +242,36 @@ class TaskPanelCfdMesh:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             FreeCADGui.doCommand("from CfdOF import CfdTools")
             FreeCADGui.doCommand("from CfdOF.Mesh import CfdMeshTools")
-            FreeCADGui.doCommand("from CfdOF import CfdConsoleProcess")
+            FreeCADGui.doCommand("from CfdOF.CfdConsoleProcess import CfdConsoleProcess")
             FreeCADGui.doCommand("cart_mesh = "
-                                 "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
+                                 "    CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
             FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh -meshQuality', cart_mesh.meshCaseDir)")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
+            self.check_mesh_error = False
             FreeCADGui.doCommand("proxy.running_from_macro = True")
             self.mesh_obj.Proxy.running_from_macro = False
+            self.mesh_obj.Proxy.check_mesh_process = CfdConsoleProcess(
+                stdout_hook=self.gotOutputLines, stderr_hook=self.gotErrorLines)
             FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
-                                 "  mesh_process = CfdConsoleProcess.CfdConsoleProcess()\n" +
-                                 "  mesh_process.start(cmd, env_vars=env_vars)\n" +
-                                 "  mesh_process.waitForFinished()\n" +
+                                 "  proxy.check_mesh_process = CfdConsoleProcess()\n" +
+                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars)\n" +
+                                 "  proxy.check_mesh_process.waitForFinished()\n" +
                                  "else:\n" +
-                                 "  proxy.mesh_process.start(cmd, env_vars=env_vars)")
-            if self.mesh_obj.Proxy.mesh_process.waitForStarted():
-                self.form.pb_check_mesh.setEnabled(False)   # Prevent user running a second instance
-                self.form.pb_run_mesh.setEnabled(False)
-                self.form.pb_write_mesh.setEnabled(False)
-                self.form.pb_stop_mesh.setEnabled(False)
-                self.form.pb_paraview.setEnabled(False)
-                self.form.pb_load_mesh.setEnabled(False)
+                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars)")
+            if self.mesh_obj.Proxy.check_mesh_process.waitForStarted():
                 self.consoleMessage("Mesh check started ...")
             else:
                 self.consoleMessage("Error starting mesh check process", 'Error')
-                self.mesh_obj.Proxy.cart_mesh.error = True
+            if self.mesh_obj.Proxy.check_mesh_process.waitForFinished():
+                if self.check_mesh_error:
+                    self.consoleMessage("Detected error(s) in mesh", 'Error')
+                else:
+                    self.consoleMessage("Mesh check OK")
+            else:
+                self.consoleMessage("Mesh check process failed")
 
         except Exception as ex:
             self.consoleMessage("Error " + type(ex).__name__ + ": " + str(ex), 'Error')
@@ -308,7 +311,7 @@ class TaskPanelCfdMesh:
             FreeCADGui.doCommand("from CfdOF import CfdTools")
             FreeCADGui.doCommand("from CfdOF import CfdConsoleProcess")
             FreeCADGui.doCommand("cart_mesh = "
-                                 "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
+                                 "    CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
@@ -346,7 +349,9 @@ class TaskPanelCfdMesh:
         # Note: meshFinished will still be called
 
     def gotOutputLines(self, lines):
-        pass
+        for l in lines.split('\n'):
+            if l.endswith("faces in error to set meshQualityFaces"):
+                self.check_mesh_error = True
 
     def gotErrorLines(self, lines):
         print_err = self.mesh_obj.Proxy.mesh_process.processErrorOutput(lines)
