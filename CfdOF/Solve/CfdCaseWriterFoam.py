@@ -103,7 +103,7 @@ class CfdCaseWriterFoam:
             'zonesPresent': len(self.zone_objs) > 0,
             'meshType': self.mesh_obj.Proxy.Type,
             'meshDimension': self.mesh_obj.ElementDimension,
-            'meshDir': os.path.join(self.working_dir, self.mesh_obj.CaseName),
+            'meshDir': os.path.relpath(os.path.join(self.working_dir, self.mesh_obj.CaseName), self.case_folder),
             'solver': CfdTools.propsToDict(self.solver_obj),
             'system': {},
             'runChangeDictionary': False
