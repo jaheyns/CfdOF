@@ -743,7 +743,7 @@ def writeSurfaceMeshFromShape(shape, path, name, mesh_obj):
                 'OutputFileName': output_file_name, 
                 'AngularMeshDensity': mesh_obj.STLAngularMeshDensity, 
                 'ScalingFactor': scaling_factor}
-            TemplateBuilder.TemplateBuilder(
+            TemplateBuilder(
                 tmpdirname, os.path.join(CfdTools.getModulePath(), "Data", "Templates", "surfaceMesh"), settings)
             shape.exportBrep(os.path.join(tmpdirname, name+'.brep'))
             # Run gmsh...
