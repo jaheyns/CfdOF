@@ -277,8 +277,11 @@ class CfdCaseWriterFoam:
             if not bc['VelocityIsCartesian']:
                 veloMag = bc['VelocityMag']
                 face = bc['DirectionFace'].split(':')
+                print(bc['ShapeRefs'])
+                if not face[0] and len(bc['ShapeRefs']):
+                    face = bc['ShapeRefs'][0][0].Name
                 if not face[0]:
-                    face = bc['ShapeRefs'][0].Name
+                    raise RuntimeError(str("No face specified for velocity direction in boundary '" + bc_name + "'"))
                 # See if entered face actually exists and is planar
                 try:
                     selected_object = self.analysis_obj.Document.getObject(face[0])
@@ -297,7 +300,10 @@ class CfdCaseWriterFoam:
                     else:
                         raise RuntimeError
                 except (SystemError, RuntimeError):
-                    raise RuntimeError(str(bc['DirectionFace']) + " is not a valid, planar face.")
+                    if bc['DirectionFace']:
+                        raise RuntimeError(str(bc['DirectionFace']) + ", specified for velocity direction in boundary '" + bc_name + "', is not a valid, planar face.")
+                    else:
+                        raise RuntimeError(str("No face specified for velocity direction in boundary '" + bc_name + "'"))
             if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
                 bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
