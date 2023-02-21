@@ -344,7 +344,7 @@ class CfdMeshTools:
                 bc_matched[nb] = True
 
         for bc_id, matched in enumerate(bc_matched):
-            if not matched:
+            if not matched and not bc_group[bc_id].DefaultBoundary:
                 CfdTools.cfdWarning(
                     "No part of the boundary '{}' matched any part of the geometry '{}' being meshed\n".format(
                         bc_group[bc_id].Label, self.mesh_obj.Part.Label))
