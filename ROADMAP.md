@@ -49,6 +49,5 @@ e.g. (there are many more!):
 * On release of FreeCAD v0.21, stop supporting FreeCAD <= 0.19
     * Remove metadata.txt
     * Remove legacy python 2 code and python2/3 switches
-    * Switch repository in Addon manager to gitlab
     * Remove backward-compatible plot code in compat/
     * Update version requirement in package.xml and dependency checker
