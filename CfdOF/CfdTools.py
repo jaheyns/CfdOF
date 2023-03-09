@@ -1112,6 +1112,13 @@ def checkCfdDependencies(msgFn):
                         msgFn("OpenFOAM installation does not include 'wmake'. " + \
                               "Installation of cfMesh and HiSA will not be possible.")
 
+                # Check for mpiexec
+                try:
+                    runFoamCommand("mpiexec --help")
+                except subprocess.CalledProcessError:
+                    msgFn("MPI is not installed. " + \
+                            "Parallel execution will not be possible.")
+
                 # Check for cfMesh
                 try:
                     cfmesh_ver = runFoamCommand("cartesianMesh -version")[0]
