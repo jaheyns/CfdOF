@@ -356,21 +356,19 @@
      <property name="verticalSpacing">
       <number>6</number>
      </property>
-     <item row="8" column="0">
-      <widget class="QLabel" name="label_outputdir">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
+     <item row="7" column="1">
+      <widget class="QToolButton" name="tb_choose_remote_gmsh_path">
        <property name="text">
-        <string>Remote output path</string>
+        <string>...</string>
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
-      <widget class="QLineEdit" name="le_gmsh_path"/>
+     <item row="10" column="0">
+      <widget class="QCheckBox" name="cb_add_filename_to_output">
+       <property name="text">
+        <string>Add filename to output path ?</string>
+       </property>
+      </widget>
      </item>
      <item row="9" column="0">
       <widget class="QLineEdit" name="le_output_path">
@@ -379,52 +377,6 @@
        </property>
        <property name="toolTip">
         <string>The directory to which case folders are written. Used unless overridden on a per-analysis basis.</string>
-       </property>
-       <property name="readOnly">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_7">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Remote OpenFOAM executable directory</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QToolButton" name="tb_choose_remote_gmsh_path">
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLineEdit" name="le_foam_dir">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="toolTip">
-        <string>The OpenFOAM install folder (e.g. 'OpenFOAM-xxx'). Leave blank to use $WM_PROJECT_DIR environment setting or search standard locations.</string>
-       </property>
-       <property name="readOnly">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QLineEdit" name="le_paraview_path">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="toolTip">
-        <string>The full path of the ParaView executable. Leave blank to use search path.</string>
        </property>
        <property name="readOnly">
         <bool>false</bool>
@@ -441,26 +393,6 @@
        </property>
        <property name="text">
         <string>Remote gmsh executable path</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QToolButton" name="tb_choose_remote_foam_dir">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QToolButton" name="tb_choose_paraview_path">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>...</string>
        </property>
       </widget>
      </item>
@@ -487,10 +419,92 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="0">
-      <widget class="QCheckBox" name="cb_add_filename_to_output">
+     <item row="5" column="0">
+      <widget class="QLineEdit" name="le_paraview_path">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>The full path of the ParaView executable. Leave blank to use search path.</string>
+       </property>
+       <property name="readOnly">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QCheckBox" name="cb_copy_back">
        <property name="text">
-        <string>Add filename to output path ?</string>
+        <string>Copy mesh and solver results back to workstation ?</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QToolButton" name="tb_choose_paraview_path">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLineEdit" name="le_foam_dir">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>The OpenFOAM install folder (e.g. 'OpenFOAM-xxx'). Leave blank to use $WM_PROJECT_DIR environment setting or search standard locations.</string>
+       </property>
+       <property name="readOnly">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QToolButton" name="tb_choose_remote_foam_dir">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLineEdit" name="le_gmsh_path"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Remote OpenFOAM executable directory</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="label_outputdir">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Remote output path</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QCheckBox" name="cb_delete_remote_results">
+       <property name="text">
+        <string>Delete mesh and server results on remote host ?</string>
        </property>
       </widget>
      </item>

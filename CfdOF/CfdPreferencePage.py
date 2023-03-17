@@ -193,10 +193,12 @@ class CfdPreferencePage:
 
         self.setDownloadURLs()
 
-        if FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0):
-            self.form.cb_add_filename_to_output.setChecked(True)
-        else:
-            self.form.cb_add_filename_to_output.setChecked(False)
+        # disable add_filename_to_output for now.
+        self.form.cb_add_filename_to_output.setEnabled(False)
+        #if FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0):
+        #    self.form.cb_add_filename_to_output.setChecked(True)
+        #else:
+        #    self.form.cb_add_filename_to_output.setChecked(False)
 
     def consoleMessage(self, message="", colour_type=None):
         message = escape(message)

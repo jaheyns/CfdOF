@@ -739,13 +739,19 @@ class CfdMeshTools:
         #if this is a remote mesh, copy the mesh case folder from the local mesh case dir
         # to the remote host's directory
         if host_profile != "local":
+            #this code is also used in reverse in TaskPanelCfdMesh.py for copyback after the meshing is done
+            # TODO: make it a function ?
             profile_prefs = CfdTools.getPreferencesLocation() +"/Hosts/" + host_profile
             remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
             remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
             remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
 
             # rsync the meshCase directory to the remote host's output directory
-            # Typical useage: rsync -r --delete /tmp/meshCase me@david:/tmp
+            # Typical useage: rsync -r --remove-source-files --delete /tmp/meshCase me@david:/tmp
+            # --remove-source-files removes the files that get transfered
+            # --delete removes files from the destination that didn't get transfered
+            # not using --remove-source-files because the workstation uses it to determine what actions are
+            # appropriate to do on the remote host, ie has a meshCase been written.
             try:
                 CfdTools.runFoamCommand("rsync -r --delete " + self.meshCaseDir + " " + remote_user + "@" + remote_hostname + \
                                     ":" + remote_output_path)

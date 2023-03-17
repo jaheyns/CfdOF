@@ -213,6 +213,10 @@ class CfdRemotePreferencePage:
         #connect the add filename to output control
         self.form.cb_add_filename_to_output.clicked.connect(self.addFilenameToOutputChanged)
 
+        self.form.cb_copy_back.clicked.connect(self.copyBackChanged)
+        self.form.cb_delete_remote_results.clicked.connect(self.deleteRemoteResultsChanged)
+
+
 
         # connect handlers for various control events
         # note: some of these aren't actually used.  Code left in tact anyway
@@ -274,6 +278,8 @@ class CfdRemotePreferencePage:
         self.output_path = ""
         self.gmsh_path = ""
         self.add_filename_to_output = False
+        self.delete_remote_results = False
+        self.copy_back = False
 
         # TODO:fix these references
         # if they are still used. Most are not.
@@ -320,15 +326,20 @@ class CfdRemotePreferencePage:
         self.form.pb_download_install_cfMesh.setEnabled(value)
         self.form.le_cfmesh_url.setEnabled(value)
 
+        self.form.cb_copy_back.setEnabled(value)
+        self.form.cb_delete_remote_results.setEnabled(value)
 
         # Controls below here are not yet operational regardless of if remote processing
         # is enabled or not.  So they are disabled.  Change this as new functionality
         # is added to the page
         value = False
 
+        # not implmented yet
+        self.form.cb_add_filename_to_output.setEnabled(value)
+
         self.form.pb_about_remote_processing.setEnabled(value)
 
-        #disable the foam path chooser
+        # disable the foam path chooser
         self.form.tb_choose_remote_foam_dir.setEnabled(value)
         self.form.tb_choose_remote_foam_dir.setVisible(value)
 
@@ -410,6 +421,8 @@ class CfdRemotePreferencePage:
             self.foam_dir = ""
             self.output_path = ""
             self.add_filename_to_output = False
+            self.copy_back = False
+            self.delete_remote_results = False
 
         else:
             hostPrefs = self.host_prefs_location
@@ -422,8 +435,11 @@ class CfdRemotePreferencePage:
             self.foam_dir = FreeCAD.ParamGet(hostPrefs).GetString("FoamDir", "")
             self.output_path = FreeCAD.ParamGet(hostPrefs).GetString("OutputPath","")
             self.add_filename_to_output = FreeCAD.ParamGet(hostPrefs).GetBool("AddFilenameToOutput")
+            self.copy_back = FreeCAD.ParamGet(hostPrefs).GetBool("CopyBack")
+            self.delete_remote_results = FreeCAD.ParamGet(hostPrefs).GetBool("DeleteRemoteResults")
 
-        #now set the control values
+
+        #now set the UI controls
         self.form.le_hostname.setText(self.hostname)
         self.form.le_username.setText(self.username)
         self.form.le_mesh_processes.setText(str(self.mesh_processes))
@@ -433,6 +449,8 @@ class CfdRemotePreferencePage:
         self.form.le_foam_dir.setText(self.foam_dir)
         self.form.le_output_path.setText(self.output_path)
         self.form.cb_add_filename_to_output.setChecked(self.add_filename_to_output)
+        self.form.cb_copy_back.setChecked(self.copy_back)
+        self.form.cb_delete_remote_results.setChecked(self.delete_remote_results)
 
 
     # create a new profile and add it to the cb_profile control
@@ -469,6 +487,8 @@ class CfdRemotePreferencePage:
             FreeCAD.ParamGet(hostPrefs).SetString("FoamDir", OPENFOAM_DIR)
             FreeCAD.ParamGet(hostPrefs).SetString("OutputPath","/tmp")
             FreeCAD.ParamGet(hostPrefs).SetBool("AddFilenameToOutput", False)
+            FreeCAD.ParamGet(hostPrefs).SetBool("CopyBack", False)
+            FreeCAD.ParamGet(hostPrefs).SetBool("DeleteRemoteResults", False)
 
             # now load the controls and local vars from the profile parameters
             self.loadProfile(profile_name)
@@ -513,6 +533,7 @@ class CfdRemotePreferencePage:
 
 
     # save the current profile by writing its the parameters
+    # not currently used.
     def saveProfile(self):
         print("saveProfile has fired")
         if self.profile_name != "":
@@ -526,6 +547,8 @@ class CfdRemotePreferencePage:
             FreeCAD.ParamGet(hostPrefs).SetString("FoamDir", self.foam_dir)
             FreeCAD.ParamGet(hostPrefs).SetString("OutputPath",self.output_path)
             FreeCAD.ParamGet(hostPrefs).SetBool("AddFilenameToOutput", self.add_filename_to_output)
+            FreeCAD.ParamGet(hostPrefs).SetBool("DeleteRemoteResults", self.delete_remote_results)
+            FreeCAD.ParamGet(hostPrefs).SetBool("CopyBack", self.copy_back)
             self.profileChanged = False
 
     def meshThreadsChanged(self):
@@ -634,6 +657,20 @@ class CfdRemotePreferencePage:
             return
         self.add_filename_to_output = self.form.cb_add_filename_to_output.isChecked()
         FreeCAD.ParamGet(self.host_prefs_location).SetBool("AddFilenameToOutput", self.add_filename_to_output)
+        self.profile_changed = True
+
+    def copyBackChanged(self):
+        if self.profile_name == "":
+            return
+        self.copy_back = self.form.cb_copy_back.isChecked()
+        FreeCAD.ParamGet(self.host_prefs_location).SetBool("CopyBack", self.copy_back)
+        self.profile_changed = True
+
+    def deleteRemoteResultsChanged(self):
+        if self.profile_name == "":
+            return
+        self.delete_remote_results = self.form.cb_delete_remote_results.isChecked()
+        FreeCAD.ParamGet(self.host_prefs_location).SetBool("DeleteRemoteResults", self.delete_remote_results)
         self.profile_changed = True
 
     #TODO: Move this to CfdTools

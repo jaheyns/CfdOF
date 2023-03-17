@@ -24,26 +24,32 @@
 #
 # LinuxGuy123@gmail.com's notes:
 #
-#
 # TODOs, in addition to TODOs in the code itself
 #
 # - This code uses (dangerous) global vars to access things like profile_name, hostname, output dir, etc.
 # The profile_name, hostname, output dir should be attached to the mesh object and used from it.
 #
 #- Add use filename extension to the output path.  For both local and remote processing.
-# The value is already saved in prefs.  You can get it with FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0)
+# The value is already saved in prefs for both local and hosts
+# You can get it with FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0)
 # Should be appended to the mesh object   ?
 #
-# - right now there is no way to edit the case on a remote host.  This could be enabled by
-# copying back the case to the local machine, allowing the user to edit the files in a temp dir
-# and then copying them back to the remote host
+#- the ParaView button gets enabled as soon as the mesh case is written before the results are
+# available.   This should be fixed.  See updateUI.
 #
-#- copy the mesh back from the host to the local computer for Paraview, Load surface mesh and Check Mesh.
+#- the Clear Surface mesh button is enabled even when the surface isn't loaded.  This should be fixed in
+# updateUI.
 #
-#- enable check mesh for remote hosts
-#- enable ParaView for remote hosts
-#- enable Load Surface mesh for remote hosts
-#- enable Clear Surface mesh for remote hosts
+#- the UI doesn't know where a meshCase is available to run.  You can write a mesh case to the local, then
+# change to a host and Run Mesh will be available to use. But there is no meshCase on that host yet.  Ideally
+# the mesh object would retain the host that the mesh case is on so that it could properly enable various actions.  Luckily
+# run mesh fails gracefully if no mesh case is found.
+#
+#- delete_remote_results removes the meshCase after a successful solve.  Thus you have to rewrite the mesh case and rerun it on the
+# server after every successful solve, if delete_remote_results is selected.
+#
+#- edit mesh should copy the edited mesh to the server after the edit is done. Right now it doesn't.
+#
 
 from __future__ import print_function
 import FreeCAD
@@ -58,7 +64,6 @@ from CfdOF.Mesh import CfdMeshTools
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
     from PySide import QtCore
     from PySide import QtGui
     from PySide.QtCore import Qt
@@ -101,6 +106,8 @@ class TaskPanelCfdMesh:
         self.output_path = ""
         self.gmsh_path = ""
         self.add_filename_to_output = False
+        self.copy_back = False
+        self.delete_remote_results = False
 
         #add a local host to cb_profile
         self.form.cb_profile.addItem("local")
@@ -193,19 +200,18 @@ class TaskPanelCfdMesh:
               self.form.pb_check_mesh.setEnabled(True)
               self.form.pb_load_mesh.setEnabled(True)
               self.form.pb_clear_mesh.setEnabled(True)
-              # the local code doesn't use these vars, so don't set them
-              # dangerous.
-              """
+
+              # the local code doesn't use these vars, setting them to be safe
               self.username = ""
               self.mesh_processes = 0
               self.mesh_threads = 0
               self.foam_processes = 0
               self.foam_threads = 0
-              self.foam_dir = FreeCAD.ParamGet(hostPrefs).GetString("FoamDir", "")
-              self.output_path = FreeCAD.ParamGet(hostPrefs).GetString("OutputPath","")
+              #self.foam_dir = FreeCAD.ParamGet(Prefs).GetString("FoamDir", "")
+              #self.output_path = FreeCAD.ParamGet(Prefs).GetString("OutputPath","")
               self.output_path = ""
               self.add_filename_to_output = False
-              """
+
          else:
               # set the vars to the remote host parameters
               # most of these aren't used, at least not in this page
@@ -219,6 +225,8 @@ class TaskPanelCfdMesh:
               self.foam_dir = FreeCAD.ParamGet(hostPrefs).GetString("FoamDir", "")
               self.output_path = FreeCAD.ParamGet(hostPrefs).GetString("OutputPath","")
               self.add_filename_to_output = FreeCAD.ParamGet(hostPrefs).GetBool("AddFilenameToOutput")
+              self.copy_back = FreeCAD.ParamGet(hostPrefs).GetBool("CopyBack")
+              self.delete_remote_results = FreeCAD.ParamGet(hostPrefs).GetBool("DeleteRemoteResults")
 
               #now set the control values
               self.mesh_obj.NumberOfProcesses = self.mesh_processes
@@ -254,13 +262,11 @@ class TaskPanelCfdMesh:
         print ("New profile is ", self.profile_name)
         self.loadProfile(self.profile_name)
 
-        # TODO enable and disable the appropriate controls here
-        # Remote hosts can't edit the case nor Paraview, check mesh, etc.
-        # Nor load surface mesh nor clear surface mesh.
-        #updateUI
+        # enable and disable the appropriate controls
+        self.updateUI
 
     # test routine to run a mesh without a proxy
-    # The real routine is runMesh way below
+    # The real routine is runMesh down below
     def runRemoteMesh(self):
         # run remote meshing directly, without a proxy
         #profile_prefs = CfdTools.getPreferencesLocation() + '/Hosts/' + self.profile_name
@@ -335,15 +341,22 @@ class TaskPanelCfdMesh:
             self.form.snappySpecificProperties.setVisible(False)
 
         # enable the appropriate controls
+        # this is always an appropriate action
         self.form.pb_write_mesh.setEnabled(True)
-        if self.profile_name == 'local':
+
+        #enable these if the mesh result is available locally
+        if self.profile_name == 'local' or self.copy_back :
             self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
             self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
+            # TODO This enables as soon as the mesh case is written.  It shouldn't.
             self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(case_path, "pv.foam")))
             self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
             self.form.pb_check_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
+            # TODO Should check that the mesh is loaded before enabling this. Not working right the way it is
+            self.form.pb_clear_mesh.setEnabled(True)
 
-        # remote host is being used
+        # remote host is being used without copy_back
+        # no local results to work on so disable these controls
         else:
             # remote hosts don't support these functions yet
             self.form.pb_run_mesh.setEnabled(True)
@@ -483,14 +496,13 @@ class TaskPanelCfdMesh:
                                  "  proxy.check_mesh_process.start(cmd, env_vars=env_vars)\n" +
                                  "  proxy.check_mesh_process.waitForFinished()\n" +
                                  "else:\n" +
-                                 "  proxy.mesh_process.start(cmd, env_vars=env_vars)"+
+                                 #"  proxy.mesh_process.start(cmd, env_vars=env_vars)"+
                                  "  proxy.check_mesh_process.start(cmd, env_vars=env_vars)")
 
             if self.mesh_obj.Proxy.mesh_process.waitForStarted():
                 self.form.pb_check_mesh.setEnabled(False)   # Prevent user running a second instance
                 self.form.pb_run_mesh.setEnabled(False)
                 self.form.pb_write_mesh.setEnabled(False)
-                #self.form.pb_write_remote_mesh.setEnabled(False)
                 self.form.pb_stop_mesh.setEnabled(False)
                 self.form.pb_paraview.setEnabled(False)
                 self.form.pb_load_mesh.setEnabled(False)
@@ -520,7 +532,6 @@ class TaskPanelCfdMesh:
         CfdTools.openFileManager(case_path)
 
     def runMesh(self):
-        # TODO: this only works for local processing.  Not remote processing.
         if CfdTools.getFoamRuntime() == "PosixDocker":
             CfdTools.startDocker()
 
@@ -668,6 +679,59 @@ class TaskPanelCfdMesh:
         if exit_code == 0:
             self.consoleMessage('Meshing completed')
             self.analysis_obj.NeedsMeshRerun = False
+
+            #check if there is work to do on the remote host
+            if self.profile_name != 'local':
+                # copy the meshcase back to the workstation?
+                # this code is also used in reverse in CfdMeshTools.py for copying the mesh case to the server
+                if self.copy_back:
+                    local_prefs = CfdTools.getPreferencesLocation()
+                    profile_prefs = local_prefs +"/Hosts/" + self.profile_name
+
+                    remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
+                    remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
+                    remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+                    local_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+
+                    #case_path = os.path.abspath(self.mesh_obj.Proxy.cart_mesh.meshCaseDir)
+                    # If this ^ is used as the destination dir, it will put the remote meshCase dir in the
+                    # local meshCase directory, which is wrong (/tmp/CfdOF/meshCase/meshCase, for example
+
+                    # if we are deleting the mesh case on the server
+                    # don't delete the mesh case.  In most cases we need it for the solver to run later
+                    # it will be deleted after the solve if we elect to remove results
+
+                    """
+                    if self.delete_remote_results:
+                        deleteStr = "--remove-source-files "
+                    else:
+                        deleteStr = ""
+                    """
+                    deleteStr = ""
+
+                    # rsync the meshCase result on the server to the workstation's output directory
+                    # Typical useage: rsync -r  --delete --remove-source-files me@david/tmp/meshCase /tmp
+                    # --remove-source-files removes the files that get transfered
+                    # --delete removes files from the destination that didn't get transfered
+
+                    try:
+                        CfdTools.runFoamCommand("rsync -r --delete " + deleteStr +  remote_user + "@" + remote_hostname + ":" + remote_output_path + "/meshCase " +  \
+                                    local_output_path)
+                    except Exception as e:
+                        CfdTools.cfdMessage("Could not copy mesh case back to local computer: " + str(e))
+                        if self.progressCallback:
+                            self.progressCallback("Could not copy mesh case back to local computer: " + str(e))
+                    else:
+                        CfdTools.cfdMessage("Successfully copied mesh case to " + local_output_path + "\n" )
+                        if self.progressCallback:
+                            self.progressCallback("Successfully copied mesh case to folder " + local_output_path  + "\n")
+                if self.progressCallback:
+                        self.progressCallback("Mesh case copy back process is complete.")
+
+                # delete the result on the server ?
+                if self.delete_remote_results:
+                    pass
+
         else:
             self.consoleMessage("Meshing exited with error", 'Error')
 
