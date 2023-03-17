@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Macro Begin: /home/oliver/.local/share/FreeCAD/Macro/postProc.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
 import FreeCAD
 
 # Gui.runCommand('Std_DlgMacroRecord',0)
@@ -30,4 +29,3 @@ App.ActiveDocument.ReportingFunction001.Label = 'P7'
 FreeCAD.ActiveDocument.recompute()
 # Gui.Selection.clearSelection()
 # Gui.Selection.addSelection('Unnamed','ReportingFunction001')
-# Macro End: /home/oliver/.local/share/FreeCAD/Macro/postProc.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++

@@ -12,29 +12,32 @@ FoamFile
     object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 dynamicFvMesh   dynamicRefineFvMesh;
 
-refineInterval  5;
-field           alpha.water;
+dynamicRefineFvMeshCoeffs
+{
+    refineInterval  5;
+    field           alpha.water;
 
-lowerRefineLevel 0.001;
-upperRefineLevel 0.999;
+    lowerRefineLevel 0.001;
+    upperRefineLevel 0.999;
 
-unrefineLevel   10;
-nBufferLayers   3;
-maxRefinement   1;
-maxCells        20000000;
+    unrefineLevel   10;
+    nBufferLayers   3;
+    maxRefinement   1;
+    maxCells        20000000;
 
-correctFluxes
-(
-    (phi none)
-    (nHatf none)
-    (rhoPhi none)
-    (alphaPhi0.water none)
-    (ghf none)
-    (alphaPhiUn none)
-);
+    correctFluxes
+    (
+        (phi none)
+        (nHatf none)
+        (rhoPhi none)
+        (ghf none)
+        (alphaPhiUn none)
+    );
 
-dumpLevel       false;
+    dumpLevel       false;
+}
 
 //************************************************************************ //

@@ -184,6 +184,8 @@ class ViewProviderCfdMesh:
     def __init__(self, vobj):
         vobj.Proxy = self
         self.taskd = None
+        self.num_refinement_objs = 0
+        self.num_dyn_refinement_objs = 0
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh.svg")
@@ -195,13 +197,25 @@ class ViewProviderCfdMesh:
 
     def updateData(self, obj, prop):
         gui_doc = FreeCADGui.getDocument(obj.Document)
-        # Ignore this notification when coming out of edit mode, since already accounted for during editing of
-        # properties themselves
-        if gui_doc.getInEdit() and prop == "_GroupTouched":
-            return
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        if analysis_obj and not analysis_obj.Proxy.loading:
-            analysis_obj.NeedsMeshRewrite = True
+        num_refinement_objs = CfdTools.getMeshRefinementObjs(obj)
+        num_dyn_refinement_objs = (0 if CfdTools.getDynamicMeshAdaptation(obj) is None else 1)
+        # Ignore this notification since already accounted for during editing of
+        # properties themselves
+        if prop == "_GroupTouched":
+            return
+        elif prop == "Group":
+            if analysis_obj and not analysis_obj.Proxy.loading:
+                if num_refinement_objs != self.num_refinement_objs:
+                    analysis_obj.NeedsMeshRewrite = True
+            if analysis_obj and not analysis_obj.Proxy.loading:
+                if num_dyn_refinement_objs != self.num_dyn_refinement_objs:
+                    analysis_obj.NeedsCaseRewrite = True
+            self.num_refinement_objs = num_refinement_objs
+            self.num_dyn_refinement_objs = num_dyn_refinement_objs
+        else:
+            if analysis_obj and not analysis_obj.Proxy.loading:
+                analysis_obj.NeedsMeshRewrite = True
 
     def onChanged(self, vobj, prop):
         CfdTools.setCompSolid(vobj)

@@ -239,7 +239,7 @@ The prefered docker run-time for Windows is via [podman](https://podman.io/) as 
 At present there is no formal documentation for CfdOF apart from this README.
 However, demonstration cases
 are provided inside the 'Demos' folder of the
-[CfdOF workbench directory](https://gitlab.com/opensimproject/cfdof). These aim
+[CfdOF workbench directory](https://github.com/jaheyns/cfdof). These aim
 to provide a basic overview of features and best practices. The examples are run
 by loading and executing the macro files ending in '.FCMacro' in the various sub-directories
 in the 'Demos' directory. Where there are several numbered files, these should be run in order
@@ -265,7 +265,7 @@ Gaps smaller than the mesh spacing are also allowed.
 
 Please discuss issues on the [CfdOF FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37)
 for community assistance.
-Bugs can be reported on the [Gitlab project site](https://gitlab.com/opensimproject/cfdof).
+Bugs can be reported on the [Github project site](https://github.com/jaheyns/cfdof).
 
 Please first read the [guidelines for reporting bugs](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359)
 in order to provide sufficient information.

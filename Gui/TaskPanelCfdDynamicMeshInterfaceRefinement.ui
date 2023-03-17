@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TaskPanelCfdDynamicMeshRefinement</class>
- <widget class="QWidget" name="TaskPanelCfdDynamicMeshRefinement">
+ <class>TaskPanelCfdDynamicMeshInterfaceRefinement</class>
+ <widget class="QWidget" name="TaskPanelCfdDynamicMeshInterfaceRefinement">
   <property name="geometry">
    <rect>
     <x>0</x>

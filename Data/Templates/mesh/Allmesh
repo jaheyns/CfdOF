@@ -70,7 +70,12 @@ export OMP_NUM_THREADS=%(NumberOfThreads%)
 runCommand preparePar
 export MPI_BUFFER_SIZE=200000000
 runParallel $NPROC cartesianMesh
-runCommand reconstructParMesh -constant -fullMatch
+if [ -z $FOAM_API ]
+then
+    runCommand reconstructParMesh -constant
+else
+    runCommand reconstructParMesh -constant -fullMatch
+fi
 %:False
 %{%(NumberOfThreads%)
 %:0

@@ -249,12 +249,6 @@ class CfdMeshTools:
                         bc2.Label, bc.ShapeRefs[ri][0].Name, bc.ShapeRefs[ri][1][si]))
             else:
                 bc_match_per_shape_face[match] = k
-        for bc_id, matched in enumerate(bc_matched):
-            if not matched:
-                CfdTools.cfdWarning(
-                    "No part of the boundary '{}' matched any part of the geometry '{}' being meshed\n".format(
-                        bc_group[bc_id].Label, self.mesh_obj.Part.Label))
-
 
         # Match relevant mesh regions to the shape being meshed: boundary layer mesh regions for cfMesh,
         # all surface mesh refinements for snappyHexMesh, and extrusion patches for all meshers.
@@ -343,7 +337,15 @@ class CfdMeshTools:
         bc_mr_matched_faces = []
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
             bc_mr_matched_faces = CfdTools.matchFaces(boundary_face_list, mr_face_list)
+            for k in range(len(bc_mr_matched_faces)):
+                nb, ri, si = bc_mr_matched_faces[k][0]
+                bc_matched[nb] = True
 
+        for bc_id, matched in enumerate(bc_matched):
+            if not matched and not bc_group[bc_id].DefaultBoundary:
+                CfdTools.cfdWarning(
+                    "No part of the boundary '{}' matched any part of the geometry '{}' being meshed\n".format(
+                        bc_group[bc_id].Label, self.mesh_obj.Part.Label))
         # Handle baffles
         for bc_id, bc_obj in enumerate(bc_group):
             if bc_obj.BoundaryType == 'baffle':
@@ -772,7 +774,7 @@ def writeSurfaceMeshFromShape(shape, path, name, mesh_obj):
                 'OutputFileName': output_file_name, 
                 'AngularMeshDensity': mesh_obj.STLAngularMeshDensity, 
                 'ScalingFactor': scaling_factor}
-            TemplateBuilder.TemplateBuilder(
+            TemplateBuilder(
                 tmpdirname, os.path.join(CfdTools.getModulePath(), "Data", "Templates", "surfaceMesh"), settings)
             shape.exportBrep(os.path.join(tmpdirname, name+'.brep'))
             # Run gmsh...

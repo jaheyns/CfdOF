@@ -30,7 +30,7 @@ from CfdOF import CfdTools
 from CfdOF.TemplateBuilder import TemplateBuilder
 from CfdOF.CfdTools import cfdMessage
 from CfdOF.Mesh import CfdMeshTools
-
+from CfdOF.Mesh import CfdDynamicMeshRefinement
 
 class CfdCaseWriterFoam:
     def __init__(self, analysis_obj):
@@ -50,7 +50,7 @@ class CfdCaseWriterFoam:
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
-        self.dynamic_mesh_refinement_obj = CfdTools.getDynamicMeshAdaptation(analysis_obj)
+        self.dynamic_mesh_refinement_obj = CfdTools.getDynamicMeshAdaptation(self.mesh_obj)
         self.mesh_generated = False
         self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
         self.progressCallback = None
@@ -104,7 +104,7 @@ class CfdCaseWriterFoam:
             'zonesPresent': len(self.zone_objs) > 0,
             'meshType': self.mesh_obj.Proxy.Type,
             'meshDimension': self.mesh_obj.ElementDimension,
-            'meshDir': os.path.join(self.working_dir, self.mesh_obj.CaseName),
+            'meshDir': os.path.relpath(os.path.join(self.working_dir, self.mesh_obj.CaseName), self.case_folder),
             'solver': CfdTools.propsToDict(self.solver_obj),
             'system': {},
             'runChangeDictionary': False
@@ -307,8 +307,11 @@ class CfdCaseWriterFoam:
             if not bc['VelocityIsCartesian']:
                 veloMag = bc['VelocityMag']
                 face = bc['DirectionFace'].split(':')
+                print(bc['ShapeRefs'])
+                if not face[0] and len(bc['ShapeRefs']):
+                    face = bc['ShapeRefs'][0][0].Name
                 if not face[0]:
-                    face = bc['ShapeRefs'][0].Name
+                    raise RuntimeError(str("No face specified for velocity direction in boundary '" + bc_name + "'"))
                 # See if entered face actually exists and is planar
                 try:
                     selected_object = self.analysis_obj.Document.getObject(face[0])
@@ -327,7 +330,10 @@ class CfdCaseWriterFoam:
                     else:
                         raise RuntimeError
                 except (SystemError, RuntimeError):
-                    raise RuntimeError(str(bc['DirectionFace']) + " is not a valid, planar face.")
+                    if bc['DirectionFace']:
+                        raise RuntimeError(str(bc['DirectionFace']) + ", specified for velocity direction in boundary '" + bc_name + "', is not a valid, planar face.")
+                    else:
+                        raise RuntimeError(str("No face specified for velocity direction in boundary '" + bc_name + "'"))
             if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
                 bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
@@ -589,10 +595,6 @@ class CfdCaseWriterFoam:
         settings = self.settings
         settings['dynamicMeshEnabled'] = True
 
-        # Check whether transient
-        if not self.physics_model.Time == 'Transient':
-            raise RuntimeError("Dynamic mesh refinement is not supported by steady-state solvers")
-        
         # Check whether cellLevel supported
         if self.mesh_obj.MeshUtility not in ['cfMesh', 'snappyHexMesh']:
             raise RuntimeError("Dynamic mesh refinement is only supported by cfMesh and snappyHexMesh")
@@ -605,6 +607,14 @@ class CfdCaseWriterFoam:
                     raise RuntimeError("Dynamic mesh refinement will not work with 2D or wedge mesh")
         
         settings['dynamicMesh'] = CfdTools.propsToDict(self.dynamic_mesh_refinement_obj)
+        if isinstance(self.dynamic_mesh_refinement_obj.Proxy, CfdDynamicMeshRefinement.CfdDynamicMeshShockRefinement):
+            settings['dynamicMesh']['Type'] = 'shock'
+            settings['dynamicMesh']['RefinementLevel'] = CfdTools.relLenToRefinementLevel(
+                self.dynamic_mesh_refinement_obj.RelativeElementSize)
+            rvd = settings['dynamicMesh']['ReferenceVelocityDirection']
+            settings['dynamicMesh']['ReferenceVelocityDirection'] = tuple((rvd.x, rvd.y, rvd.z))
+        else:
+            settings['dynamicMesh']['Type'] = 'interface'
 
     # Zones
     def exportZoneStlSurfaces(self):

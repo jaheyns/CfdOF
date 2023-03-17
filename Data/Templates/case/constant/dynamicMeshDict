@@ -9,35 +9,54 @@ FoamFile
     object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 dynamicFvMesh   dynamicRefineFvMesh;
 
-refineInterval  %(dynamicMesh/RefinementInterval%);
-field           alpha.%(dynamicMesh/Phase%);
+dynamicRefineFvMeshCoeffs
+{
+%{%(dynamicMesh/Type%)
+%:interface
+    refineInterval  %(dynamicMesh/RefinementInterval%);
+    field           alpha.%(dynamicMesh/Phase%);
 
-lowerRefineLevel 0.001;
-upperRefineLevel 0.999;
+    lowerRefineLevel 0.001;
+    upperRefineLevel 0.999;
 
-unrefineLevel   10;
-nBufferLayers   %(dynamicMesh/BufferLayers%);
-maxRefinement   %(dynamicMesh/MaxRefinementLevel%);
-maxCells        20000000;
+    unrefineLevel   10;
+    nBufferLayers   %(dynamicMesh/BufferLayers%);
+    maxRefinement   %(dynamicMesh/MaxRefinementLevel%);
+    maxCells        20000000;
 
-correctFluxes
-(
-    (phi none)
-    (nHatf none)
-    (rhoPhi none)
-    (alphaPhi0.water none)
-    (ghf none)
-    (alphaPhiUn none)
-);
+    correctFluxes
+    (
+        (phi none)
+        (nHatf none)
+        (rhoPhi none)
+        (ghf none)
+        (alphaPhiUn none)
+    );
+%:shock
+    refineInterval  %(dynamicMesh/RefinementInterval%(physics/Time%)%);
+    field           refinementControl;
+    lowerRefineLevel 0.5;
+    upperRefineLevel 1.5;
+    unrefineLevel   -0.5;
+    nBufferLayers   %(dynamicMesh/BufferLayers%);
+    maxRefinement   20;
+    maxCells        2000000000;
+    correctFluxes
+    (
+        (phi none)
+    );
+%}
 
 %{%(dynamicMesh/WriteFields%)
 %:True
-dumpLevel       true;
+    dumpLevel       true;
 %:False
-dumpLevel       false;
+    dumpLevel       false;
 %}
+}
 
 //************************************************************************ //
 %}

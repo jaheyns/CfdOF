@@ -118,6 +118,11 @@ def getOutputPath(analysis):
         output_path = ""
     if not output_path:
         output_path = getDefaultOutputPath()
+    if not os.path.isabs(output_path):
+        if not FreeCAD.ActiveDocument.FileName:
+            raise RuntimeError("The output directory is specified as a path relative to the current file's location; " 
+                "however, it needs to be saved in order to determine this.")
+        output_path = os.path.join(os.path.dirname(FreeCAD.ActiveDocument.FileName), output_path)
     output_path = os.path.normpath(output_path)
     return output_path
 
@@ -173,14 +178,11 @@ def getPhysicsModel(analysis_object):
     return physics_model
 
 
-def getDynamicMeshAdaptation(analysis_object):
-    is_present = False
-    for i in getMesh(analysis_object).Group:
-        if "DynamicMeshInterfaceRefinement" in i.Name:
+def getDynamicMeshAdaptation(mesh_object):
+    dynamic_mesh_adaption_model = None
+    for i in mesh_object.Group:
+        if i.Name.startswith("DynamicMeshInterfaceRefinement") or i.Name.startswith("DynamicMeshShockRefinement"):
             dynamic_mesh_adaption_model = i
-            is_present = True
-    if not is_present:
-        dynamic_mesh_adaption_model = None
     return dynamic_mesh_adaption_model
 
 
@@ -1071,14 +1073,14 @@ def convertMesh(case, mesh_file, scale):
         print("Error: mesh scaling ratio is must be a float or integer\n")
 
 
-def checkCfdDependencies():
+def checkCfdDependencies(msgFn):
     FC_MAJOR_VER_REQUIRED = 0
     FC_MINOR_VER_REQUIRED = 18
     FC_PATCH_VER_REQUIRED = 4
     FC_COMMIT_REQUIRED = 16146
 
     CF_MAJOR_VER_REQUIRED = 1
-    CF_MINOR_VER_REQUIRED = 16
+    CF_MINOR_VER_REQUIRED = 20
 
     HISA_MAJOR_VER_REQUIRED = 1
     HISA_MINOR_VER_REQUIRED = 6
@@ -1113,30 +1115,22 @@ def checkCfdDependencies():
            (patch_ver < FC_PATCH_VER_REQUIRED or
             (patch_ver == FC_PATCH_VER_REQUIRED and
              gitver < FC_COMMIT_REQUIRED)))))):
-        fc_msg = "FreeCAD version ({}.{}.{}) ({}) must be at least {}.{}.{} ({})".format(
+        msgFn("FreeCAD version (currently {}.{}.{} ({})) must be at least {}.{}.{} ({})".format(
             int(ver[0]), minor_ver, patch_ver, gitver,
-            FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED)
-        print(fc_msg)
-        message += fc_msg + '\n'
+            FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED))
 
     # check openfoam
     print("Checking for OpenFOAM:")
     try:
         foam_dir = getFoamDir()
-        sys_msg = "System: {}\nRuntime: {}\nOpenFOAM directory: {}".format(
-            platform.system(), getFoamRuntime(), foam_dir if len(foam_dir) else "(system installation)")
-        print(sys_msg)
-        message += sys_msg + '\n'
+        msgFn("System: {}\nRuntime: {}\nOpenFOAM directory: {}".format(
+            platform.system(), getFoamRuntime(), foam_dir if len(foam_dir) else "(system installation)"))
     except IOError as e:
-        ofmsg = "Could not find OpenFOAM installation: " + str(e)
-        print(ofmsg)
-        message += ofmsg + '\n'
+        msgFn("Could not find OpenFOAM installation: " + str(e))
     else:
         if foam_dir is None:
-            ofmsg = "OpenFOAM installation path not set and OpenFOAM environment neither pre-loaded before " + \
-                    "running FreeCAD nor detected in standard locations"
-            print(ofmsg)
-            message += ofmsg + '\n'
+            msgFn("OpenFOAM installation path not set and OpenFOAM environment neither pre-loaded before " + \
+                  "running FreeCAD nor detected in standard locations")
         else:
             if getFoamRuntime() == "PosixDocker":
                 startDocker()
@@ -1146,9 +1140,7 @@ def checkCfdDependencies():
                 else:
                     foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")[0]
             except Exception as e:
-                runmsg = "OpenFOAM installation found, but unable to run command: " + str(e)
-                message += runmsg + '\n'
-                print(runmsg)
+                msgFn("OpenFOAM installation found, but unable to run command: " + str(e))
                 raise
             else:
                 foam_ver = foam_ver.rstrip()
@@ -1161,45 +1153,38 @@ def checkCfdDependencies():
                         foam_ver = int(foam_ver.split('.')[0])
                         if getFoamRuntime() == "MinGW":
                             if foam_ver < 2012 or foam_ver > 2206:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + \
-                                         " is not currently supported with MinGW installation"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + \
+                                      " is not currently supported with MinGW installation")
                         if foam_ver >= 1000:  # Plus version
                             if foam_ver < 1706:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                         "Minimum version 1706 or 5 required"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
+                                      "Minimum version 1706 or 5 required")
                             if foam_ver > 2206:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                         "Last tested version is 2206"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
+                                      "Last tested version is 2206")
                         else:  # Foundation version
                             if foam_ver < 5:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                         "Minimum version 5 or 1706 required"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
+                                      "Minimum version 5 or 1706 required")
                             if foam_ver > 9:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                         "Last tested version is 9"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
+                                      "Last tested version is 9")
                     except ValueError:
-                        vermsg = "Error parsing OpenFOAM version string " + foam_ver
-                        message += vermsg + "\n"
-                        print(vermsg)
+                        msgFn("Error parsing OpenFOAM version string " + foam_ver)
                 # Check for wmake
                 if getFoamRuntime() != "MinGW" and getFoamRuntime() != "PosixDocker":
                     try:
                         runFoamCommand("wmake -help")
                     except subprocess.CalledProcessError:
-                        wmakemsg = "OpenFOAM installation does not include 'wmake'. " + \
-                                   "Installation of cfMesh and HiSA will not be possible."
-                        message += wmakemsg + "\n"
-                        print(wmakemsg)
+                        msgFn("OpenFOAM installation does not include 'wmake'. " + \
+                              "Installation of cfMesh and HiSA will not be possible.")
+
+                # Check for mpiexec
+                try:
+                    runFoamCommand("mpiexec --help")
+                except subprocess.CalledProcessError:
+                    msgFn("MPI is not installed. " + \
+                            "Parallel execution will not be possible.")
 
                 # Check for cfMesh
                 try:
@@ -1210,14 +1195,10 @@ def checkCfdDependencies():
                         int(cfmesh_ver[0]) < CF_MAJOR_VER_REQUIRED or
                         (int(cfmesh_ver[0]) == CF_MAJOR_VER_REQUIRED and
                          int(cfmesh_ver[1]) < CF_MINOR_VER_REQUIRED)):
-                        vermsg = "cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
-                                                                              CF_MINOR_VER_REQUIRED)
-                        message += vermsg + "\n"
-                        print(vermsg)
+                        msgFn("cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
+                                                                           CF_MINOR_VER_REQUIRED))
                 except subprocess.CalledProcessError:
-                    cfmesh_msg = "cfMesh (CfdOF version) not found"
-                    message += cfmesh_msg + '\n'
-                    print(cfmesh_msg)
+                    msgFn("cfMesh (CfdOF version) not found")
 
                 # Check for HiSA
                 try:
@@ -1230,15 +1211,11 @@ def checkCfdDependencies():
                          (int(hisa_ver[1]) < HISA_MINOR_VER_REQUIRED or
                           (int(hisa_ver[1]) == HISA_MINOR_VER_REQUIRED and
                            int(hisa_ver[2]) < HISA_PATCH_VER_REQUIRED)))):
-                        vermsg = "HiSA version {}.{}.{} required".format(HISA_MAJOR_VER_REQUIRED,
-                                                                         HISA_MINOR_VER_REQUIRED,
-                                                                         HISA_PATCH_VER_REQUIRED)
-                        message += vermsg + "\n"
-                        print(vermsg)
+                        msgFn("HiSA version {}.{}.{} required".format(HISA_MAJOR_VER_REQUIRED,
+                                                                      HISA_MINOR_VER_REQUIRED,
+                                                                      HISA_PATCH_VER_REQUIRED))
                 except subprocess.CalledProcessError:
-                    hisa_msg = "HiSA not found"
-                    message += hisa_msg + '\n'
-                    print(hisa_msg)
+                    msgFn("HiSA not found")
 
         # Check for paraview
         print("Checking for paraview:")
@@ -1253,13 +1230,9 @@ def checkCfdDependencies():
             except subprocess.CalledProcessError:
                 failed = True
         if failed or not os.path.exists(paraview_cmd):
-            pv_msg = "Paraview executable '" + paraview_cmd + "' not found."
-            message += pv_msg + '\n'
-            print(pv_msg)
+            msgFn("Paraview executable '" + paraview_cmd + "' not found.")
         else:
-            pv_msg = "Paraview executable: {}".format(paraview_cmd)
-            message += pv_msg + '\n'
-            print(pv_msg)
+            msgFn("Paraview executable: {}".format(paraview_cmd))
 
         # Check for paraview python support
         if not failed:
@@ -1279,18 +1252,14 @@ def checkCfdDependencies():
                 else:
                     pvpython_cmd = paraview_cmd.rstrip('paraview')+'pvpython'
             if failed or not os.path.exists(pvpython_cmd):
-                pv_msg = "Python support in paraview not found. Please install paraview python packages."
-                message += pv_msg + '\n'
-                print(pv_msg)
+                msgFn("Python support in paraview not found. Please install paraview python packages.")
 
     print("Checking Plot module:")
 
     try:
         import matplotlib
     except ImportError:
-        matplot_msg = "Could not load matplotlib package (required by Plot module)"
-        message += matplot_msg + '\n'
-        print(matplot_msg)
+        msgFn("Could not load matplotlib package (required by Plot module)")
 
     plot_ok = False
     if major_ver > 0 or minor_ver >= 20:
@@ -1298,48 +1267,35 @@ def checkCfdDependencies():
             from FreeCAD.Plot import Plot  # Built-in plot module
             plot_ok = True
         except ImportError:
-            plot_msg = "Could not load Plot module\nAttempting to use Plot workbench instead"
-            message += plot_msg + "\n"
-            print(plot_msg)
+            msgFn("Could not load Plot module\nAttempting to use Plot workbench instead")
     if not plot_ok:
         try:
             from CfdOF.compat import Plot  # Plot workbench
         except ImportError:
-            plot_msg = "Could not load legacy Plot module"
-            message += plot_msg + '\n'
-            print(plot_msg)
+            msgFn("Could not load legacy Plot module")
 
     print("Checking for gmsh:")
     # check that gmsh version 2.13 or greater is installed
     gmshversion = ""
     gmsh_exe = getGmshExecutable()
     if gmsh_exe is None:
-        gmsh_msg = "gmsh not found (optional)"
-        message += gmsh_msg + '\n'
-        print(gmsh_msg)
+        msgFn("gmsh not found (optional)")
     else:
-        gmsh_msg = "gmsh executable: " + gmsh_exe
-        message += gmsh_msg + '\n'
-        print(gmsh_msg)
+        msgFn("gmsh executable: " + gmsh_exe)
         try:
             # Needs to be runnable from OpenFOAM environment
             gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")[2]
         except (OSError, subprocess.CalledProcessError):
-            gmsh_msg = "gmsh could not be run from OpenFOAM environment"
-            message += gmsh_msg + '\n'
-            print(gmsh_msg)
+            msgFn("gmsh could not be run from OpenFOAM environment")
         if len(gmshversion) > 1:
             # Only the last line contains gmsh version number
             gmshversion = gmshversion.rstrip().split()
             gmshversion = gmshversion[-1]
             versionlist = gmshversion.split(".")
             if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
-                gmsh_ver_msg = "gmsh version is older than minimum required (2.13)"
-                message += gmsh_ver_msg + '\n'
-                print(gmsh_ver_msg)
+                msgFn("gmsh version is older than minimum required (2.13)")
 
-    print("Completed CFD dependency check")
-    return message
+    msgFn("Completed CFD dependency check")
 
 #******************************************************************************
 # Done: TODO: right now this routine returns the error code of the outermost process, ie the one called with cmd parameter.

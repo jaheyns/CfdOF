@@ -12,22 +12,23 @@ FoamFile
 %:snappyHexMesh
 
 // Include defaults parameters from master dictionary
-#includeEtc "caseDicts/meshQualityDict"
+#includeIfPresent "$FOAM_ETC/caseDicts/meshQualityDict"
+#includeIfPresent "$FOAM_ETC/caseDicts/mesh/generation/meshQualityDict"
 
 // ************************************************************************* //
 %:default
 
 //- Maximum non-orthogonality allowed. Set to 180 to disable.
-maxNonOrtho 70;
+maxNonOrtho 90;
 
 //- Max skewness allowed. Set to <0 to disable.
-maxBoundarySkewness 20;
-maxInternalSkewness 4;
+maxBoundarySkewness 100;
+maxInternalSkewness 50;
 
 //- Max concaveness allowed. Is angle (in degrees) below which concavity
 //  is allowed. 0 is straight face, <0 would be convex face.
 //  Set to 180 to disable.
-maxConcave 80;
+maxConcave 90;
 
 //- Minimum pyramid volume. Is absolute volume of cell pyramid.
 //  Set to a sensible fraction of the smallest cell volume expected.
@@ -61,10 +62,10 @@ minDeterminant 0;
 
 //- Relative position of face in relation to cell centres (0.5 for orthogonal
 //  mesh) (0 -> 0.5)
-minFaceWeight 0.001;
+minFaceWeight 0.0001;
 
 //- Volume ratio of neighbouring cells (0 -> 1)
-minVolRatio 0.001;
+minVolRatio 0.0001;
 
 //- Per triangle normal compared to that of preceding triangle. Must be >0
 //  for Fluent compatibility

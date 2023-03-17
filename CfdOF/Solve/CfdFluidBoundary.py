@@ -381,8 +381,7 @@ class CfdFluidBoundary:
         shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
             shape = Part.Shape()
-        if not CfdTools.isSameGeometry(shape, obj.Shape):
-            obj.Shape = shape
+        obj.Shape = shape
         self.updateBoundaryColors(obj)
 
     def updateBoundaryColors(self, obj):
@@ -451,13 +450,16 @@ class ViewProviderCfdFluidBoundary:
 
     def updateData(self, obj, prop):
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        if prop == 'ShapeRefs' or prop == 'Shape':
-            # Only a change to the shape allocation or geometry affects mesh
-            if analysis_obj and not analysis_obj.Proxy.loading:
+        if analysis_obj and not analysis_obj.Proxy.loading:
+            if prop == 'Shape':
+                # Updates to the shape should be taken care of via links in 
+                # ShapeRefs
+                pass
+            elif prop == 'ShapeRefs':
+                # Only a change to the shape allocation or geometry affects mesh
                 analysis_obj.NeedsMeshRewrite = True
-        else:
-            # Else mark case itself as needing updating
-            if analysis_obj and not analysis_obj.Proxy.loading:
+            else:
+                # Else mark case itself as needing updating
                 analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
