@@ -24,7 +24,8 @@
 
 import os
 import os.path
-from FreeCAD import Units
+#import FreeCAD
+from FreeCAD import Units, ParamGet
 from CfdOF import CfdTools
 from CfdOF.TemplateBuilder import TemplateBuilder
 from CfdOF.CfdTools import cfdMessage
@@ -56,7 +57,7 @@ class CfdCaseWriterFoam:
 
         self.settings = None
 
-    def writeCase(self):
+    def writeCase(self, profile_name):
         """ writeCase() will collect case settings, and finally build a runnable case. """
         cfdMessage("Writing case to folder {}\n".format(self.working_dir))
         if not os.path.exists(self.working_dir):
@@ -153,8 +154,37 @@ class CfdCaseWriterFoam:
 
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         if self.progressCallback:
-            self.progressCallback("Case written successfully")
-            
+            self.progressCallback("Case written locally successfully")
+
+        # if using a remote host, copy the case folder from the local case dir
+        # to the remote host's directory
+        if profile_name != "local":
+            profile_prefs = CfdTools.getPreferencesLocation() +"/Hosts/" + profile_name
+            remote_user = ParamGet(profile_prefs).GetString("Username", "")
+            remote_hostname = ParamGet(profile_prefs).GetString("Hostname", "")
+            remote_output_path = ParamGet(profile_prefs).GetString("OutputPath","")
+
+            #print("remote_user:" + remote_user)
+            #print("remote_hostname:" + remote_hostname)
+            #print("remote_output_path:" + remote_output_path)
+            #print("self.case_folder:" + self.case_folder)
+            #print("self.working_dir:" + self.working_dir)
+
+            # rsync the meshCase directory to the remote host's output directory
+            # Typical useage: rsync -r --delete /tmp/ me@david:/tmp
+            try:
+                CfdTools.runFoamCommand("rsync -r --delete " + self.case_folder + " " + remote_user + "@" + remote_hostname + \
+                                        ":" + remote_output_path)
+            except Exception as e:
+                CfdTools.cfdMessage("Could not copy case to remote host: " + str(e))
+                if self.progressCallback:
+                    self.progressCallback("Could not copy case to remote host: " + str(e))
+                    return False
+            else:
+                CfdTools.cfdMessage("Successfully copied local case to folder " + remote_output_path + " on remote host " + remote_hostname + "\n" )
+                if self.progressCallback:
+                    self.progressCallback("Successfully copied local case to folder " + remote_output_path + " on remote host " + remote_hostname + "\n")
+
         return True
 
     def getSolverName(self):

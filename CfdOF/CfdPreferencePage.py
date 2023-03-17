@@ -114,6 +114,7 @@ class CfdPreferencePage:
 
         self.form.tb_choose_output_dir.clicked.connect(self.chooseOutputDir)
         self.form.le_output_dir.textChanged.connect(self.outputDirChanged)
+        self.form.cb_add_filename_to_output.clicked.connect(self.addFilenameChanged)
 
         self.form.cb_docker_sel.clicked.connect(self.dockerCheckboxClicked)
         self.form.pb_download_install_docker.clicked.connect(self.downloadInstallDocker)
@@ -192,6 +193,11 @@ class CfdPreferencePage:
 
         self.setDownloadURLs()
 
+        if FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0):
+            self.form.cb_add_filename_to_output.setChecked(True)
+        else:
+            self.form.cb_add_filename_to_output.setChecked(False)
+
     def consoleMessage(self, message="", colour_type=None):
         message = escape(message)
         message = message.replace('\n', '<br>')
@@ -201,6 +207,10 @@ class CfdPreferencePage:
             self.console_message += message+'<br>'
         self.form.textEdit_Output.setText(self.console_message)
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
+
+    def addFilenameChanged(self):
+        prefs = CfdTools.getPreferencesLocation()
+        FreeCAD.ParamGet(prefs).SetBool("AddFilenameToOutput", self.form.cb_add_filename_to_output.isChecked())
 
     def foamDirChanged(self, text):
         self.foam_dir = text

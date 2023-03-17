@@ -70,7 +70,7 @@ class CfdMeshTools:
 
         self.progressCallback = None
 
-    def writeMesh(self):
+    def writeMesh(self, profile_name):
         self.setupMeshCaseDir()
         CfdTools.cfdMessage("Exporting mesh refinement data ...\n")
         if self.progressCallback:
@@ -81,10 +81,8 @@ class CfdMeshTools:
         if self.progressCallback:
             self.progressCallback("Exporting the part surfaces ...")
         self.writePartFile()
-        self.writeMeshCase()
-        CfdTools.cfdMessage("Wrote mesh case to {}\n".format(self.meshCaseDir))
-        if self.progressCallback:
-            self.progressCallback("Mesh case written successfully")
+        self.writeMeshCase(profile_name)
+
 
     def processExtrusions(self):
         """ Find and process any extrusion objects """
@@ -584,7 +582,7 @@ class CfdMeshTools:
         else:
             print('No mesh was created.')
 
-    def writeMeshCase(self):
+    def writeMeshCase(self, host_profile):
         """ Collect case settings, and finally build a runnable case. """
         CfdTools.cfdMessage("Populating mesh dictionaries in folder {}\n".format(self.meshCaseDir))
 
@@ -709,14 +707,20 @@ class CfdMeshTools:
         if CfdTools.getFoamRuntime() != 'WindowsDocker':
             self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
 
+        # set the number of threads and processes
+        # these were set appropriately when the host was selected
         if self.mesh_obj.NumberOfProcesses <= 1:
-            self.settings['ParallelMesh'] = False
-            self.settings['NumberOfProcesses'] = 1
+                self.settings['ParallelMesh'] = False
+                self.settings['NumberOfProcesses'] = 1
         else:
-            self.settings['ParallelMesh'] = True
-            self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
+                self.settings['ParallelMesh'] = True
+                self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
+
         self.settings['NumberOfThreads'] = self.mesh_obj.NumberOfThreads
 
+        if self.progressCallback:
+            self.progressCallback("Mesh case will use " + str(self.settings['NumberOfProcesses']) + " processes and " + str(self.settings['NumberOfThreads']) + " threads per process.")
+            self.progressCallback("0 threads per process means use all available (if NumberOfProcesses = 1) or use 1 per process (if NumberOfProcesses > 1)")
         TemplateBuilder(self.meshCaseDir, self.template_path, self.settings)
 
         # Update Allmesh permission - will fail silently on Windows
@@ -726,7 +730,34 @@ class CfdMeshTools:
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
 
         self.analysis.NeedsMeshRewrite = False
-        CfdTools.cfdMessage("Successfully wrote meshCase to folder {}\n".format(self.meshCaseDir))
+        CfdTools.cfdMessage("Successfully wrote meshCase to local folder {}\n".format(self.meshCaseDir))
+        if self.progressCallback:
+            self.progressCallback("Successfully wrote meshCase to local folder {}\n".format(self.meshCaseDir))
+
+        #if this is a remote mesh, copy the mesh case folder from the local mesh case dir
+        # to the remote host's directory
+        if host_profile != "local":
+            profile_prefs = CfdTools.getPreferencesLocation() +"/Hosts/" + host_profile
+            remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
+            remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
+            remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+
+            # rsync the meshCase directory to the remote host's output directory
+            # Typical useage: rsync -r --delete /tmp/meshCase me@david:/tmp
+            try:
+                CfdTools.runFoamCommand("rsync -r --delete " + self.meshCaseDir + " " + remote_user + "@" + remote_hostname + \
+                                    ":" + remote_output_path)
+            except Exception as e:
+                CfdTools.cfdMessage("Could not copy meshCase to remote host: " + str(e))
+                if self.progressCallback:
+                    self.progressCallback("Could not copy meshCase to remote host: " + str(e))
+            else:
+                CfdTools.cfdMessage("Successfully copied local meshCase to folder " + remote_output_path + " on remote host " + remote_hostname + "\n" )
+                if self.progressCallback:
+                    self.progressCallback("Successfully copied local meshCase to folder " + remote_output_path + " on remote host " + remote_hostname + "\n")
+        if self.progressCallback:
+                self.progressCallback("Mesh case write process is complete.")
+
 
 def writeSurfaceMeshFromShape(shape, path, name, mesh_obj):
     prefs = CfdTools.getPreferencesLocation()
