@@ -732,9 +732,9 @@ class CfdMeshTools:
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
 
         self.analysis.NeedsMeshRewrite = False
-        CfdTools.cfdMessage("Successfully wrote meshCase to local folder {}\n".format(self.meshCaseDir))
+        CfdTools.cfdMessage("Wrote meshCase to local folder {}\n".format(self.meshCaseDir))
         if self.progressCallback:
-            self.progressCallback("Successfully wrote meshCase to local folder {}\n".format(self.meshCaseDir))
+            self.progressCallback("Wrote meshCase to local folder {}\n".format(self.meshCaseDir))
 
         #if this is a remote mesh, copy the mesh case folder from the local mesh case dir
         # to the remote host's directory
@@ -753,16 +753,16 @@ class CfdMeshTools:
             # not using --remove-source-files because the workstation uses it to determine what actions are
             # appropriate to do on the remote host, ie has a meshCase been written.
             try:
-                CfdTools.runFoamCommand("rsync -r --delete " + self.meshCaseDir + " " + remote_user + "@" + remote_hostname + \
+                CfdTools.runFoamCommand("rsync -r --delete --remove-source-files " + self.meshCaseDir + " " + remote_user + "@" + remote_hostname + \
                                     ":" + remote_output_path)
             except Exception as e:
-                CfdTools.cfdMessage("Could not copy meshCase to remote host: " + str(e))
+                CfdTools.cfdMessage("Could not move mesh case to remote host: " + str(e))
                 if self.progressCallback:
-                    self.progressCallback("Could not copy meshCase to remote host: " + str(e))
+                    self.progressCallback("Could not move mesh case to remote host: " + str(e))
             else:
-                CfdTools.cfdMessage("Successfully copied local meshCase to folder " + remote_output_path + " on remote host " + remote_hostname + "\n" )
+                CfdTools.cfdMessage("Moved mesh case to " + remote_hostname + ":" + remote_output_path + "\n" )
                 if self.progressCallback:
-                    self.progressCallback("Successfully copied local meshCase to folder " + remote_output_path + " on remote host " + remote_hostname + "\n")
+                    self.progressCallback("Moved mesh case to " + remote_hostname + ":" + remote_output_path + "\n")
         if self.progressCallback:
                 self.progressCallback("Mesh case write process is complete.")
 

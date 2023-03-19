@@ -72,10 +72,15 @@
 # I did not use worker threads to install cfMesh.  I just ran the processes from the ssh command line.
 #
 # TODO:
-# - get cfMesh URL control working
-# - get About Remote Processing document window working
+
+# - fix downloadInstallCFMesh   Its broken due to using profiles.  Doesn't stop installing if a step fails.
+#   Also requires the working directory folder to be present.  Fails if it isn't.
+# - get About Remote Processing document window working - put User's Guide in it
 # - put the remote host computer fields in a container like Docker, OpenFOAM, etc.
 # - get tooltips working
+# - OpenFOAM doesn't need the number of threads and processes like the meshers do.  Remove one.
+
+# Done: get cfMesh URL control working
 # Done: implement host profiles so that multiple remote hosts can be used
 # Done: store and load the use remote processing boolean
 # Done: enable and disable all the controls with the cb_use_remote_processing checkbox result
@@ -325,6 +330,7 @@ class CfdRemotePreferencePage:
 
         self.form.pb_download_install_cfMesh.setEnabled(value)
         self.form.le_cfmesh_url.setEnabled(value)
+        self.form.le_cfmesh_url.setText(CFMESH_URL)
 
         self.form.cb_copy_back.setEnabled(value)
         self.form.cb_delete_remote_results.setEnabled(value)
@@ -728,7 +734,6 @@ class CfdRemotePreferencePage:
         print("Error: saveSettings has been depreciated.")
         CfdTools.setRemoteFoamDir(self.foam_dir)
         CfdTools.setParaviewPath(self.paraview_path)
-        CfdTools.setRemoteGmshPath(self.gmsh_path)
         prefs = self.prefs_location
         FreeCAD.ParamGet(prefs).SetString("RemoteOutputPath", self.remote_output_dir)
         FreeCAD.ParamGet(prefs).SetBool("UseDocker",self.form.cb_docker_sel.isChecked())
@@ -1083,7 +1088,7 @@ class CfdRemotePreferencePage:
            except Exception as e:
                  #print(e)
                  gmsh_msg = "Cannot run 'gmsh' on " + self.hostname + ". \n"
-                 gmsh_msg += "Please install gmsh on the remote host."
+                 gmsh_msg += "Please install gmsh on the remote host.\n"
                  return_message += gmsh_msg
                  print(gmsh_msg)
 
@@ -1232,8 +1237,9 @@ class CfdRemotePreferencePage:
         # If the user reruns the build after fully or partially building previously
         # this routine will fail.
 
-        # Get the username and hostname for the remote host
+        # TODO this routine assumes the output dir exists.  Will fail if it doesn't.  Fix this.
 
+        # Get the username and hostname for the remote host
         remote_user = self.username
         remote_hostname = self.hostname
         ssh_prefix = "ssh -tt " + remote_user + "@" + remote_hostname + " "
@@ -1245,7 +1251,7 @@ class CfdRemotePreferencePage:
         # cfMesh is installed in the user's home directory, not the output directory
 
         command = "EOT\n"
-        #command += "cd " + working_dir + "\n"
+        command += "cd " + working_dir + "\n"
         command += "mkdir cfMesh" + "\n"
         command += "exit \n"
         command += "EOT"
@@ -1310,6 +1316,9 @@ class CfdRemotePreferencePage:
         except:
              self.consoleMessage("Could not build cfMesh: " + command_result)
              return
+
+
+
 
 
     # old version, not used anymore.  Doesn't handle remote install

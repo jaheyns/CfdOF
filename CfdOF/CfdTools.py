@@ -979,7 +979,6 @@ def makeRunCommand(cmd, dir, source_env=True):
         cmdline = ['bash', '-c', source + cd + cmd]
         return cmdline
 
-
 def runFoamCommand(cmdline, case=None):
     """
     Run a command in the OpenFOAM environment and wait until finished. Return output as (stdout, stderr, combined)

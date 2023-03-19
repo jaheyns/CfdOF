@@ -35,23 +35,30 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt
     from PySide.QtGui import QApplication
 
+# ********************************************************************************************************
 # LinuxGuy123's Notes
 #
 # TODOs (there are some in the code as well)
 #
-#- add filename to the output path.  (addFilenameToOutput) For both local and remote useRemoteProcessing.
+# -add filename to the output path.  (addFilenameToOutput) For both local and remote useRemoteProcessing.
 # It is already saved in prefs, for both local and remote hosts. You can get it with
 # FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0)
 #
-#- copy the mesh back to the local computer for Edit and Paraview buttons
+# -check on the number of cores that are being asked for and used by OpenFOAM
 #
-#- makeRunCommand is using the local OF install dir to build the remote run command.  It works but it isn't correct.
-# The remote run is not calling the source command to set up OF usage.  It is relying on the shell to do that, through
-# bashrc and OF working directly from the command line.
+# -makeRunCommand is using the local OF bash command to build the remote run command.  It works but it isn't correct.
+# The remote run is not calling the source command to set up OF usage.  It is relying on the bash shell  on the remote host
+# to do that, through bashrc and OF working directly from the command line.
 #
-#- enable and disable buttons appropriately when running and when done
+# -enable and disable buttons appropriately when running and when done
 #
 # global vars are used for stuff that should be passed via the solver object.
+#
+# -edit case doesn't copy the case back to the server after the edit is done.
+#
+# -remote solving has not been tested in macros
+#
+#- presently does not set the number of threads that the solver uses properly.  Must be done manually.
 
 class TaskPanelCfdSolverControl:
     def __init__(self, solver_runner_obj):
@@ -163,7 +170,7 @@ class TaskPanelCfdSolverControl:
                   self.add_filename_to_output = False
                   """
              else:
-                  #set the vars to the remote host parameters
+                  # set the vars to the remote host parameters
                   # most of these aren't used, at least not in this page
                   hostPrefs = self.host_prefs_location
                   self.hostname = FreeCAD.ParamGet(hostPrefs).GetString("Hostname", "")
@@ -174,13 +181,22 @@ class TaskPanelCfdSolverControl:
                   #self.foam_threads = FreeCAD.ParamGet(hostPrefs).GetInt("FoamThreads")
                   self.foam_dir = FreeCAD.ParamGet(hostPrefs).GetString("FoamDir", "")
                   self.output_path = FreeCAD.ParamGet(hostPrefs).GetString("OutputPath","")
-                  self.add_filename_to_output = FreeCAD.ParamGet(hostPrefs).GetBool("AddFilenameToOutput")
 
-                  #now set the control values
+                  # these are used
+                  self.add_filename_to_output = FreeCAD.ParamGet(hostPrefs).GetBool("AddFilenameToOutput")
+                  self.copy_back = FreeCAD.ParamGet(hostPrefs).GetBool("CopyBack")
+                  self.delete_remote_results = FreeCAD.ParamGet(hostPrefs).GetBool("DeleteRemoteResults")
+
+
+                  # now set the control values
+                  # leaving these in in case we pass parameters like these to the solver
+                  # object some day.
+
                   #self.mesh_obj.NumberOfProcesses = self.mesh_processes
                   #self.mesh_obj.NumberOfThreads = self.mesh_threads
 
                   #TODO: fix these, if we need to.
+                  # Leaving these in in case we add controls to set these someday
                   #self.form.le_mesh_processes.setText(str(self.mesh_processes))
                   #self.form.le_mesh_threads.setText(str(self.mesh_threads))
 
@@ -212,7 +228,15 @@ class TaskPanelCfdSolverControl:
 
     def updateUI(self):
         solverDirectory = os.path.join(self.working_dir, self.solver_object.InputCaseName)
-        self.form.pb_edit_inp.setEnabled(os.path.exists(solverDirectory))
+
+        if self.profile_name == 'local':
+            self.form.pb_edit_inp.setEnabled(os.path.exists(solverDirectory))
+
+        # TODO: enable local editing of the solver case
+        else:
+            self.form.pb_edit_inp.setEnabled(False)
+
+        # TODO: Paraview is enabled even though the solver hasn't been run yet.  Fix this ?
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(solverDirectory, "pv.foam")))
         self.form.pb_run_solver.setEnabled(os.path.exists(os.path.join(solverDirectory, "Allrun")))
 
@@ -299,6 +323,7 @@ class TaskPanelCfdSolverControl:
         self.Start = time.time()
 
         # Check for changes that require remesh
+        # TODO: This will not run the mesher on a remote host.  Fix this ?
         if FreeCAD.GuiUp and (
                 self.analysis_object.NeedsMeshRewrite or 
                 self.analysis_object.NeedsCaseRewrite or 
@@ -357,15 +382,19 @@ class TaskPanelCfdSolverControl:
                             self.consoleMessage("Mesher started ...")
                             return
 
-                    #run remotely
+                    # run remotely
+                    # not implemented
                     else:
-                        pass
+                        self.consoleMessage("Meshing from within the solver is not implemented for remote hosts.")
+                        self.consoleMessage("Generate the mesh from the mesh object instead.")
+                        return
                         """
                         remote_user = self.username
                         remote_hostname = self.hostname
 
                         # create the ssh connection command
-                        ssh_prefix = 'ssh -tt ' + remote_user + '@' + remote_hostname + ' '
+                        # use ssh -t, not ssh -tt
+                        ssh_prefix = 'ssh -t' + remote_user + '@' + remote_hostname + ' '
 
                         # Get the working directory for the mesh
                         working_dir = self.output_path
@@ -376,7 +405,7 @@ class TaskPanelCfdSolverControl:
                         command += 'cd ' + working_dir + '/meshCase \n'
                         command += './Allrun \n'
                         command += 'exit \n'
-                        command += 'EOT'
+                        command += 'EOT \n'
                         command = ssh_prefix + ' << '  + command
 
                         cmd = CfdTools.makeRunCommand(command,None)
@@ -425,27 +454,10 @@ class TaskPanelCfdSolverControl:
 
         # running remotely
         else:            
-            #remote_user = self.username
-            #remote_hostname = self.hostname
-
-            # create the ssh connection command
-            ssh_prefix = 'ssh -tt ' + self.username + '@' + self.hostname + ' '
-
-            # Get the working directory for the mesh
-            #working_dir = self.output_path
-            #TODO: add filename to the path if selected
-
-            # create the command to do the actual work
-            #command = 'EOT \n'
-            #command += 'cd ' + working_dir + '/meshCase \n'
-            #command += './Allrun \n'
-            #command += 'exit \n'
-            #command += 'EOT'
-            #command = ssh_prefix + ' << '  + command
-            #cmd = CfdTools.makeRunCommand(command,None)
 
             # This must be kept in one doCommand because of the if statement
             # The only difference between this command and the local command is "  cmd = CfdTools.makeRunCommand('" + command + "',None)"
+            # TODO: Test the macro code.
             FreeCADGui.doCommand(
                 "if proxy.running_from_macro:\n" +
                 "  analysis_object = FreeCAD.ActiveDocument." + self.analysis_object.Name + "\n" +
@@ -456,10 +468,11 @@ class TaskPanelCfdSolverControl:
                 "  from CfdOF.Solve.CfdRunnableFoam import CfdRunnableFoam\n" +
                 "  solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)\n" +
 
-                # create the command to do the actual work
-                "  ssh_prefix = 'ssh -tt ' + '" + self.username + "'+ '@' +'" + self.hostname + "'\n" +
-                "  command = 'EOT \\n' \n" +
-                "  command += 'cd ' + '" + self.working_dir + "' + '/case \\n' \n" +
+                #  create the command to do the actual work
+                #  was ssh -tt but then the shell wouldn't exit
+                "  ssh_prefix = 'ssh -t ' + '" + self.username + "'+ '@' +'" + self.hostname + "'\n" +
+                "  #command = 'EOT \\n' \n" +
+                "  command = 'cd ' + '" + self.working_dir + "' + '/case \\n' \n" +
                 "  command += './Allrun \\n' \n" +
                 "  command += 'exit \\n' \n" +
                 "  command += 'EOT' \n" +
@@ -473,18 +486,37 @@ class TaskPanelCfdSolverControl:
                 "  solver_process.start(cmd,env_vars= env_vars)\n" +
                 "  solver_process.waitForFinished()")
 
+
+            """
+            # This was used for testing
             # create the command to do the actual work
             ssh_prefix = 'ssh -tt ' + self.username + '@' + self.hostname
             command = 'EOT \n'
             command += 'cd ' + self.working_dir + '/case \n'
             command += './Allrun \n'
             command += 'exit \n '
-            command += 'EOT'
+            command += 'EOT \n'
             command = ssh_prefix + ' << '  + command + ' \n'
             print("Code command:" + command)
-            cmd = CfdTools.makeRunCommand(command,None)           # was "  cmd = solver_runner.get_solver_cmd(solver_directory)\n" +
+            cmd = CfdTools.makeRunCommand(command,None)           # was cmd = solver_runner.get_solver_cmd(solver_directory)\n" +
             print("Code cmd:")
             print(cmd)
+            """
+
+            # create the command to do the actual work
+            command = 'ssh -t ' + self.username + '@' + self.hostname   # was -tt
+            command += '<< EOT \n'
+            command += ' cd ' + self.working_dir + '/case \n'
+            command += './Allrun \n'
+            command += 'exit \n '
+            command += 'EOT \n'
+            print("Code command:" + command)
+
+            #cmd = ['bash', '-c', command]
+            #print("Code cmd:")
+            #print(cmd)
+
+            cmd = CfdTools.makeRunCommand(command,None)
 
             working_dir = CfdTools.getOutputPath(self.analysis_object)
             case_name = self.solver_object.InputCaseName
@@ -519,7 +551,51 @@ class TaskPanelCfdSolverControl:
 
     def solverFinished(self, exit_code):
         if exit_code == 0:
-            self.consoleMessage("Simulation finished successfully")
+            self.consoleMessage("Simulation finished")
+
+            #check if there is work to do on the remote host
+            if self.profile_name != 'local':
+                # copy the solver case back to the workstation?
+                # this code is also used in TaskPanelCfdMesh.py for copying the mesh case to the workstation
+                if self.copy_back:
+                    local_prefs = CfdTools.getPreferencesLocation()
+                    profile_prefs = local_prefs +"/Hosts/" + self.profile_name
+
+                    remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
+                    remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
+                    remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+                    local_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+
+                    # if we are deleting the solver and mesh case on the server
+                    # if we delete the mesh case we'll need to remesh before running the solver
+
+                    if self.delete_remote_results:
+                        deleteStr = "--remove-source-files "
+                    else:
+                        deleteStr = ""
+
+                    # rsync the solver case result on the server to the workstation's output directory
+                    # Typical useage: rsync -r  --delete --remove-source-files me@david/tmp/case /tmp
+                    # --remove-source-files removes the files that get transfered
+                    # --delete removes files from the destination that didn't get transfered
+
+                    try:
+                        CfdTools.runFoamCommand("rsync -r --delete " + deleteStr +  remote_user + "@" + remote_hostname + ":" + remote_output_path + "/case " +  \
+                                    local_output_path)
+                    except Exception as e:
+                        CfdTools.cfdMessage("Could not copy solver case back to local computer: " + str(e))
+                        self.consoleMessage("Could not copy solver case back to local computer: " + str(e))
+
+                    else:
+                        CfdTools.cfdMessage("Copied solver case to " + local_output_path + "\n" )
+                        self.consoleMessage("Copied solver case to " + local_output_path + "\n" )
+
+                # the mesh case is still on the server
+                # delete the mesh case result on the server ?
+                # for now we'll leave it there
+                if self.delete_remote_results:
+                    pass
+
         else:
             self.consoleMessage("Simulation exited with error", 'Error')
         self.solver_runner.solverFinished()

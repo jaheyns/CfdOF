@@ -154,7 +154,7 @@ class CfdCaseWriterFoam:
 
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         if self.progressCallback:
-            self.progressCallback("Case written locally successfully")
+            self.progressCallback("Case written locally")
 
         # if using a remote host, copy the case folder from the local case dir
         # to the remote host's directory
@@ -172,18 +172,22 @@ class CfdCaseWriterFoam:
 
             # rsync the meshCase directory to the remote host's output directory
             # Typical useage: rsync -r --delete /tmp/ me@david:/tmp
+            # --remove-source-files removes the files that get transfered
+            # --delete removes files from the destination that didn't get transfered
+            #
+
             try:
-                CfdTools.runFoamCommand("rsync -r --delete " + self.case_folder + " " + remote_user + "@" + remote_hostname + \
+                CfdTools.runFoamCommand("rsync -r --delete --remove-source-files " + self.case_folder + " " + remote_user + "@" + remote_hostname + \
                                         ":" + remote_output_path)
             except Exception as e:
-                CfdTools.cfdMessage("Could not copy case to remote host: " + str(e))
+                CfdTools.cfdMessage("Could not move case to remote host: " + str(e))
                 if self.progressCallback:
-                    self.progressCallback("Could not copy case to remote host: " + str(e))
+                    self.progressCallback("Could not move case to remote host: " + str(e))
                     return False
             else:
-                CfdTools.cfdMessage("Successfully copied local case to folder " + remote_output_path + " on remote host " + remote_hostname + "\n" )
+                CfdTools.cfdMessage("Moved solver case to " + remote_hostname + ":" + remote_output_path + "\n" )
                 if self.progressCallback:
-                    self.progressCallback("Successfully copied local case to folder " + remote_output_path + " on remote host " + remote_hostname + "\n")
+                    self.progressCallback("Moved solver case to " + remote_hostname + ":" + remote_output_path + "\n")
 
         return True
 
