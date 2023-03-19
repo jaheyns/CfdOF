@@ -233,6 +233,7 @@ class TaskPanelCfdMesh:
               #self.output_path = FreeCAD.ParamGet(Prefs).GetString("OutputPath","")
               self.output_path = ""
               self.add_filename_to_output = False
+              # Not sure if this causes a side effect or not.
               case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
               self.form.pb_delete_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
 
@@ -247,7 +248,9 @@ class TaskPanelCfdMesh:
               self.foam_processes = FreeCAD.ParamGet(hostPrefs).GetInt("FoamProcesses")
               self.foam_threads = FreeCAD.ParamGet(hostPrefs).GetInt("FoamThreads")
               self.foam_dir = FreeCAD.ParamGet(hostPrefs).GetString("FoamDir", "")
-              self.output_path = FreeCAD.ParamGet(hostPrefs).GetString("OutputPath","")
+
+              #self.output_path = FreeCAD.ParamGet(hostPrefs).GetString("OutputPath","")
+              self.output_path = CfdTools.getDefaultOutputPath(self.profile_name)
               self.add_filename_to_output = FreeCAD.ParamGet(hostPrefs).GetBool("AddFilenameToOutput")
               self.copy_back = FreeCAD.ParamGet(hostPrefs).GetBool("CopyBack")
               self.delete_remote_results = FreeCAD.ParamGet(hostPrefs).GetBool("DeleteRemoteResults")
@@ -396,7 +399,9 @@ class TaskPanelCfdMesh:
         # remote host is being used without copy_back
         # no local results to work on so disable these controls
         else:
-            self.form.pb_copy_to_host.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
+            #self.form.pb_copy_to_host.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
+            local_dir = CfdTools.getDefaultOutputPath('local')
+            self.form.pb_copy_to_host.setEnabled(os.path.exists(os.path.join(local_dir, "meshCase")))
             #TODO should check if the mesh is present on the remote host
             self.form.pb_delete_mesh.setEnabled(True)
             # remote hosts don't support these functions yet
@@ -654,9 +659,9 @@ class TaskPanelCfdMesh:
                  FreeCADGui.doCommand("ssh_prefix = 'ssh -t ' + remote_user + '@' + remote_hostname + ' '")
 
                  # Get the working directory for the mesh
-                 FreeCADGui.doCommand("working_dir = FreeCAD.ParamGet(profile_prefs).GetString('OutputPath', '')")
+                 #FreeCADGui.doCommand("working_dir = FreeCAD.ParamGet(profile_prefs).GetString('OutputPath', '')")
+                 FreeCADGui.doCommand("working_dir = CfdTools.getDefaultOutputPath('" + self.profile_name + "' )")
                  #FreeCADGui.doCommand("print('working directory:' + working_dir)")
-
 
                  # create the command to do the actual work
                  FreeCADGui.doCommand("command = 'EOT \\n' \n" +
@@ -718,6 +723,9 @@ class TaskPanelCfdMesh:
             self.consoleMessage(print_err, 'Error')
 
     def meshFinished(self, exit_code):
+        if self.form.cb_notify.isChecked():
+            #print("Beeping now")
+            QApplication.beep()
         if exit_code == 0:
             self.consoleMessage('Meshing completed')
             self.analysis_obj.NeedsMeshRerun = False
@@ -732,8 +740,8 @@ class TaskPanelCfdMesh:
 
                     remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
                     remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
-                    remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
-                    local_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+                    remote_output_path = CfdTools.getDefaultOutputPath(self.profile_name)
+                    local_output_path = CfdTools.getDefaultOutputPath('local')
 
                     #case_path = os.path.abspath(self.mesh_obj.Proxy.cart_mesh.meshCaseDir)
                     # If this ^ is used as the destination dir, it will put the remote meshCase dir in the
@@ -793,10 +801,8 @@ class TaskPanelCfdMesh:
         # local host
         if self.hostname == 'local':
             #TODO Check if the meshCase exists
-            local_prefs = CfdTools.getPreferencesLocation()
-            local_output_path = FreeCAD.ParamGet(local_prefs).GetString("DefaultOutputPath","")
+            local_output_path = CfdTools.getDefaultOutputPath('local')
             print("Local output path:" + local_output_path)
-
 
             # create the command to do the actual work
             # TODO  This won't work on a Windows or Mac machine Fix it
@@ -822,12 +828,13 @@ class TaskPanelCfdMesh:
             profile_prefs = local_prefs +"/Hosts/" + self.profile_name
             #remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
             remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
-            remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+            #remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+            remote_output_path = CfdTools.getDefaultOutputPath(self.profile_name)
 
             # create the command to do the actual work
-            command = 'ssh -tt ' + self.username + '@' + self.hostname   # was -tt
-            #command += ' << EOT \n'
-            command = 'cd ' + remote_output_path + '\n'
+            command = 'ssh -tt ' + self.username + '@' + self.hostname + " "   # was -tt
+            command += ' << EOT \n'
+            command += 'cd ' + remote_output_path + '\n'
             command += 'rm -rf meshCase ' + '\n'
             command += 'exit \n '
             command += 'EOT \n'
@@ -859,8 +866,13 @@ class TaskPanelCfdMesh:
 
             remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
             remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
-            remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
-            local_output_path = FreeCAD.ParamGet(local_prefs).GetString("DefaultOutputPath","")
+
+            #remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+            #local_output_path = FreeCAD.ParamGet(local_prefs).GetString("DefaultOutputPath","")
+
+            remote_output_path = CfdTools.getDefaultOutputPath(self.profile_name)
+            local_output_path = CfdTools.getDefaultOutputPath('local')
+
 
             #case_path = os.path.abspath(self.mesh_obj.Proxy.cart_mesh.meshCaseDir)
             # If this ^ is used as the destination dir, it will put the remote meshCase dir in the

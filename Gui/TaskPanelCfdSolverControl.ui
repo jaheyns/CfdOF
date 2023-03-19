@@ -107,6 +107,13 @@
      <property name="verticalSpacing">
       <number>8</number>
      </property>
+     <item row="0" column="0">
+      <widget class="QPushButton" name="pb_write_inp">
+       <property name="text">
+        <string>Write OF case</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="1">
       <widget class="QPushButton" name="terminateSolver">
        <property name="enabled">
@@ -114,16 +121,6 @@
        </property>
        <property name="text">
         <string>Stop</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="pb_run_solver">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Run OF case</string>
        </property>
       </widget>
      </item>
@@ -137,10 +134,20 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QPushButton" name="pb_write_inp">
+     <item row="1" column="0">
+      <widget class="QPushButton" name="pb_run_solver">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="text">
-        <string>Write OF case</string>
+        <string>Run OF case</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QCheckBox" name="cb_notify">
+       <property name="text">
+        <string>Notify when Run OF case is done</string>
        </property>
       </widget>
      </item>

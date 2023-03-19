@@ -744,7 +744,8 @@ class CfdMeshTools:
             profile_prefs = CfdTools.getPreferencesLocation() +"/Hosts/" + host_profile
             remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
             remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
-            remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+            #remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+            remote_output_path = CfdTools.getDefaultOutputPath(host_profile)
 
             # rsync the meshCase directory to the remote host's output directory
             # Typical useage: rsync -r --remove-source-files --delete /tmp/meshCase me@david:/tmp

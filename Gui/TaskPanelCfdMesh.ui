@@ -425,7 +425,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0,0,0,0,0,0">
+    <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,0,0,0,0,0,0,0,0">
      <property name="leftMargin">
       <number>8</number>
      </property>
@@ -441,6 +441,20 @@
      <property name="spacing">
       <number>8</number>
      </property>
+     <item row="7" column="1">
+      <widget class="QPushButton" name="pb_delete_mesh">
+       <property name="text">
+        <string>Delete mesh case on host</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QPushButton" name="pb_copy_to_host">
+       <property name="text">
+        <string>Copy local mesh case to host</string>
+       </property>
+      </widget>
+     </item>
      <item row="6" column="0">
       <widget class="QPushButton" name="pb_run_mesh">
        <property name="text">
@@ -469,17 +483,10 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
-      <widget class="QPushButton" name="pb_copy_to_host">
+     <item row="8" column="0">
+      <widget class="QCheckBox" name="cb_notify">
        <property name="text">
-        <string>Copy local mesh case to host</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QPushButton" name="pb_delete_mesh">
-       <property name="text">
-        <string>Delete mesh case</string>
+        <string>Notify when Run mesh is complete</string>
        </property>
       </widget>
      </item>

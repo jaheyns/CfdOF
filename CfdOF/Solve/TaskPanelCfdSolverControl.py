@@ -156,6 +156,7 @@ class TaskPanelCfdSolverControl:
              # set the vars to the local parameters
              if profile_name == "local":
                   self.hostname = "local"
+                  self.output_path = CfdTools.getDefaultOutputPath('local')
                   # the local code doesn't use these vars, so don't set them
                   # dangerous.
                   """
@@ -180,10 +181,12 @@ class TaskPanelCfdSolverControl:
                   #self.foam_processes = FreeCAD.ParamGet(hostPrefs).GetInt("FoamProcesses")
                   #self.foam_threads = FreeCAD.ParamGet(hostPrefs).GetInt("FoamThreads")
                   self.foam_dir = FreeCAD.ParamGet(hostPrefs).GetString("FoamDir", "")
-                  self.output_path = FreeCAD.ParamGet(hostPrefs).GetString("OutputPath","")
+
+                  #self.output_path = FreeCAD.ParamGet(hostPrefs).GetString("OutputPath","")
+                  self.output_path = CfdTools.getDefaultOutputPath(self.profile_name)
 
                   # these are used
-                  self.add_filename_to_output = FreeCAD.ParamGet(hostPrefs).GetBool("AddFilenameToOutput")
+                  #self.add_filename_to_output = FreeCAD.ParamGet(hostPrefs).GetBool("AddFilenameToOutput")
                   self.copy_back = FreeCAD.ParamGet(hostPrefs).GetBool("CopyBack")
                   self.delete_remote_results = FreeCAD.ParamGet(hostPrefs).GetBool("DeleteRemoteResults")
 
@@ -431,6 +434,7 @@ class TaskPanelCfdSolverControl:
                 "if proxy.running_from_macro:\n" +
                 "  analysis_object = FreeCAD.ActiveDocument." + self.analysis_object.Name + "\n" +
                 "  solver_object = FreeCAD.ActiveDocument." + self.solver_object.Name + "\n" +
+
                 "  working_dir = CfdTools.getOutputPath(analysis_object)\n" +
                 "  case_name = solver_object.InputCaseName\n" +
                 "  solver_directory = os.path.abspath(os.path.join(working_dir, case_name))\n" +
@@ -462,6 +466,8 @@ class TaskPanelCfdSolverControl:
                 "if proxy.running_from_macro:\n" +
                 "  analysis_object = FreeCAD.ActiveDocument." + self.analysis_object.Name + "\n" +
                 "  solver_object = FreeCAD.ActiveDocument." + self.solver_object.Name + "\n" +
+
+                # TODO: this might be wrong
                 "  working_dir = CfdTools.getOutputPath(analysis_object)\n" +
                 "  case_name = solver_object.InputCaseName\n" +
                 "  solver_directory = os.path.abspath(os.path.join(working_dir, case_name))\n" +
@@ -504,9 +510,11 @@ class TaskPanelCfdSolverControl:
             """
 
             # create the command to do the actual work
+            remote_working_dir = CfdTools.getDefaultOutputPath(self.profile_name)
+
             command = 'ssh -t ' + self.username + '@' + self.hostname   # was -tt
             command += '<< EOT \n'
-            command += ' cd ' + self.working_dir + '/case \n'
+            command += ' cd ' + remote_working_dir + '/case \n'
             command += './Allrun \n'
             command += 'exit \n '
             command += 'EOT \n'
@@ -518,6 +526,7 @@ class TaskPanelCfdSolverControl:
 
             cmd = CfdTools.makeRunCommand(command,None)
 
+            # TODO not sure this is correct anymore
             working_dir = CfdTools.getOutputPath(self.analysis_object)
             case_name = self.solver_object.InputCaseName
             solver_directory = os.path.abspath(os.path.join(working_dir, case_name))
@@ -550,6 +559,9 @@ class TaskPanelCfdSolverControl:
         # Note: solverFinished will still be called
 
     def solverFinished(self, exit_code):
+        if self.form.cb_notify.isChecked():
+            #print("Beeping now")
+            QApplication.beep()
         if exit_code == 0:
             self.consoleMessage("Simulation finished")
 
@@ -563,8 +575,11 @@ class TaskPanelCfdSolverControl:
 
                     remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
                     remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
-                    remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
-                    local_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+                    #remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+                    #local_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+
+                    remote_output_path = CfdTools.getDefaultOutputPath(self.profile_name)
+                    local_output_path = CfdTools.getDefaultOutputPath('local')
 
                     # if we are deleting the solver and mesh case on the server
                     # if we delete the mesh case we'll need to remesh before running the solver

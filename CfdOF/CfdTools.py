@@ -40,6 +40,7 @@ import math
 from datetime import timedelta
 import FreeCAD
 from FreeCAD import Units
+#import App
 import Part
 import BOPTools
 from BOPTools import SplitFeatures
@@ -88,16 +89,59 @@ QUANTITY_PROPERTIES = ['App::PropertyQuantity',
 
 docker_container = None
 
-def getDefaultOutputPath():
-    prefs = getPreferencesLocation()
-    output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
-    if not output_path:
-        output_path = tempfile.gettempdir()
-    output_path = os.path.normpath(output_path)
-    return output_path
+
+# Modified by LinuxGuy to handle add_filename_to_path
+# This is called default because it is used in the mesh and solver objects
+# but can be over ridden by the user
+def getDefaultOutputPath(profile = 'local'):
+
+    # host is local
+    if profile == 'local':
+        prefs = getPreferencesLocation()
+        output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+        if not output_path:
+            output_path = tempfile.gettempdir()
+        print("Root output path:" + output_path)
+
+        add_filename = FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput")
+        print("AddFilenameToOutput:" + str(add_filename))
+
+        if add_filename:
+            #TODO: might want to warn the user if they haven't saved the filename yet
+            App = FreeCAD
+            filename = App.ActiveDocument.Name
+            if filename:
+                output_path += "/" + filename
+
+        output_path = os.path.normpath(output_path)
+        print("Output path:" + output_path)
+        return output_path
+
+    #remote case
+    else:
+        prefs = getPreferencesLocation()
+        hostprefs = prefs +"/Hosts/" + profile
+        output_path = FreeCAD.ParamGet(hostprefs).GetString("OutputPath", "")
+
+        if not output_path:
+            #TODO: might want to warn the user if they haven't saved the filename yet
+            output_path = tempfile.gettempdir()
+
+        if FreeCAD.ParamGet(hostprefs).GetBool("AddFilenameToOutput"):
+            App = FreeCAD
+            filename = App.ActiveDocument.Name
+            if filename:
+                output_path += "/" + filename
+        # the local computer might be Windows and the remote one Linux
+        # so don't normalize the path to the local OS
+        #output_path = os.path.normpath(output_path)
+        print("Output path:" + output_path)
+        return output_path
+
 
 # TODO: Is this used anymore ?
 def getDefaultRemoteOutputPath():
+    print("Error: getDefaultRemoteOutputPath is depreciated.")
     prefs = getPreferencesLocation()
     output_path = FreeCAD.ParamGet(prefs).GetString("DefaultRemoteOutputPath", "")
     if not output_path:
@@ -504,6 +548,7 @@ def getPreferencesLocation():
     # Set parameter location
     return "User parameter:BaseApp/Preferences/Mod/CfdOF"
 
+
 def setFoamDir(installation_path):
     prefs = getPreferencesLocation()
     # Set OpenFOAM install path in parameters
@@ -723,6 +768,8 @@ def getRemoteGmshPath():
     # Ensure parameters exist for future editing
     setGmshPath(gmsh_path)
     return gmsh_path
+
+
 
 
 def translatePath(p):
