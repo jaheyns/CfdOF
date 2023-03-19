@@ -146,6 +146,13 @@ class CfdPreferencePage:
     def __del__(self):
         self.cleanUp()
 
+    # This is a special version that only returns the base output path.
+    # The version in CfdTools.py returns the full output path, with the filename appended
+    def getDefaultOutputPath(self):
+        prefs = CfdTools.getPreferencesLocation()
+        output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+        return output_path
+
     def cleanUp(self):
         if self.thread and self.thread.isRunning():
             FreeCAD.Console.PrintError("Terminating a pending install task\n")
@@ -180,7 +187,8 @@ class CfdPreferencePage:
         self.initial_gmsh_path = str(self.gmsh_path)
         self.form.le_gmsh_path.setText(self.gmsh_path)
 
-        self.output_dir = CfdTools.getDefaultOutputPath()
+        #self.output_dir = CfdTools.getDefaultOutputPath()
+        self.output_dir = self.getDefaultOutputPath()
         self.form.le_output_dir.setText(self.output_dir)
 
         if FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0):
@@ -194,11 +202,11 @@ class CfdPreferencePage:
         self.setDownloadURLs()
 
         # disable add_filename_to_output for now.
-        self.form.cb_add_filename_to_output.setEnabled(False)
-        #if FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0):
-        #    self.form.cb_add_filename_to_output.setChecked(True)
-        #else:
-        #    self.form.cb_add_filename_to_output.setChecked(False)
+        # self.form.cb_add_filename_to_output.setEnabled(False)
+        if FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0):
+            self.form.cb_add_filename_to_output.setChecked(True)
+        else:
+            self.form.cb_add_filename_to_output.setChecked(False)
 
     def consoleMessage(self, message="", colour_type=None):
         message = escape(message)

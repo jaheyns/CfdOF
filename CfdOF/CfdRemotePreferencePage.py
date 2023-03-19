@@ -334,14 +334,14 @@ class CfdRemotePreferencePage:
 
         self.form.cb_copy_back.setEnabled(value)
         self.form.cb_delete_remote_results.setEnabled(value)
+        self.form.cb_add_filename_to_output.setEnabled(value)
+
 
         # Controls below here are not yet operational regardless of if remote processing
         # is enabled or not.  So they are disabled.  Change this as new functionality
         # is added to the page
         value = False
 
-        # not implmented yet
-        self.form.cb_add_filename_to_output.setEnabled(value)
 
         self.form.pb_about_remote_processing.setEnabled(value)
 

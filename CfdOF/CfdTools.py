@@ -93,6 +93,7 @@ docker_container = None
 # Modified by LinuxGuy to handle add_filename_to_path
 # This is called default because it is used in the mesh and solver objects
 # but can be over ridden by the user
+# WARNING: this routine returns the path with the filename add if enabled in Preferences
 def getDefaultOutputPath(profile = 'local'):
 
     # host is local
@@ -104,7 +105,7 @@ def getDefaultOutputPath(profile = 'local'):
         print("Root output path:" + output_path)
 
         add_filename = FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput")
-        print("AddFilenameToOutput:" + str(add_filename))
+        #print("AddFilenameToOutput:" + str(add_filename))
 
         if add_filename:
             #TODO: might want to warn the user if they haven't saved the filename yet
