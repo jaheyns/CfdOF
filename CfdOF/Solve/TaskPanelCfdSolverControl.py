@@ -40,10 +40,6 @@ if FreeCAD.GuiUp:
 #
 # TODOs (there are some in the code as well)
 #
-# -add filename to the output path.  (addFilenameToOutput) For both local and remote useRemoteProcessing.
-# It is already saved in prefs, for both local and remote hosts. You can get it with
-# FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0)
-#
 # -check on the number of cores that are being asked for and used by OpenFOAM
 #
 # -makeRunCommand is using the local OF bash command to build the remote run command.  It works but it isn't correct.

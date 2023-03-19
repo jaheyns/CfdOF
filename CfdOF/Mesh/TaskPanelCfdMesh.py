@@ -29,11 +29,6 @@
 # -This code uses (dangerous) global vars to access things like profile_name, hostname, output dir, etc.
 # The profile_name, hostname, output dir should be attached to the mesh object and used from it.
 #
-# -Add use filename extension to the output path.  For both local and remote processing.
-# The value is already saved in prefs for both local and hosts
-# You can get it with FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput",0)
-# Should be appended to the mesh object   ?
-#
 # -the ParaView button gets enabled as soon as the mesh case is written before the results are
 # available.   This should be fixed.  See updateUI.
 #
@@ -52,9 +47,8 @@
 #
 # -remote meshing has not been tested in macros.
 #
-# -cfMesh runs only 1 mesh process on the remote machine if 1,0 is selected for processes, threads.  If you run 8 threads, for example, it
-# doesn't ever finish
-# the meshing process stack on the remote host is this.  Looks legit, but never finishes.
+# -cfMesh runs only 1 mesh process on the remote machine if 1,0 is selected for processes, threads.  If you run 8 threads (1,8) for example, it
+# doesn't ever finish the meshing process stack on the remote host is this.  Looks legit, but never finishes.
 #
 # $ ps aux | grep Mesh
 #me        134162  0.0  0.0 174292 17336 ?        Sl   21:58   0:00 mpiexec -np 8 /home/me/OpenFOAM/me-2206/platforms/linux64GccDPInt32Opt/bin/cartesianMesh -parallel
