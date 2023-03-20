@@ -159,10 +159,13 @@ class CfdCaseWriterFoam:
         # if using a remote host, copy the case folder from the local case dir
         # to the remote host's directory
         if profile_name != "local":
+
             profile_prefs = CfdTools.getPreferencesLocation() +"/Hosts/" + profile_name
             remote_user = ParamGet(profile_prefs).GetString("Username", "")
             remote_hostname = ParamGet(profile_prefs).GetString("Hostname", "")
-            remote_output_path = ParamGet(profile_prefs).GetString("OutputPath","")
+
+            #remote_output_path = ParamGet(profile_prefs).GetString("OutputPath","")
+            remote_output_path = CfdTools.getDefaultOutputPath(profile_name)
 
             #print("remote_user:" + remote_user)
             #print("remote_hostname:" + remote_hostname)
