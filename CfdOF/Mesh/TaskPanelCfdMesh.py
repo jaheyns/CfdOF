@@ -529,23 +529,11 @@ class TaskPanelCfdMesh:
             self.mesh_obj.Proxy.check_mesh_process = CfdConsoleProcess(
                 stdout_hook=self.gotOutputLines, stderr_hook=self.gotErrorLines)
             FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
-                                 "  mesh_process = CfdConsoleProcess.CfdConsoleProcess()\n" +
-                                 "  mesh_process.start(cmd, env_vars=env_vars)\n" +
-                                 "  mesh_process.waitForFinished()\n" +
                                  "  proxy.check_mesh_process = CfdConsoleProcess()\n" +
                                  "  proxy.check_mesh_process.start(cmd, env_vars=env_vars)\n" +
                                  "  proxy.check_mesh_process.waitForFinished()\n" +
                                  "else:\n" +
-                                 #"  proxy.mesh_process.start(cmd, env_vars=env_vars)"+
                                  "  proxy.check_mesh_process.start(cmd, env_vars=env_vars)")
-
-            if self.mesh_obj.Proxy.mesh_process.waitForStarted():
-                self.form.pb_check_mesh.setEnabled(False)   # Prevent user running a second instance
-                self.form.pb_run_mesh.setEnabled(False)
-                self.form.pb_write_mesh.setEnabled(False)
-                self.form.pb_stop_mesh.setEnabled(False)
-                self.form.pb_paraview.setEnabled(False)
-                self.form.pb_load_mesh.setEnabled(False)
 
 
             if self.mesh_obj.Proxy.check_mesh_process.waitForStarted():
@@ -599,15 +587,9 @@ class TaskPanelCfdMesh:
             FreeCADGui.doCommand("from CfdOF.Mesh import CfdMeshTools")
             FreeCADGui.doCommand("from CfdOF import CfdTools")
             FreeCADGui.doCommand("from CfdOF import CfdConsoleProcess")
-
-            FreeCADGui.doCommand("from FreeCAD import ParamGet")
             
             FreeCADGui.doCommand("cart_mesh = " +
                                  "CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
-            
-
-            FreeCADGui.doCommand("cart_mesh = "
-                                 "    CfdMeshTools.CfdMeshTools(FreeCAD.ActiveDocument." + self.mesh_obj.Name + ")")
 
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
@@ -631,6 +613,7 @@ class TaskPanelCfdMesh:
                                       "  mesh_process.waitForFinished()\n" +
                                       "else:\n" +
                                       "  proxy.mesh_process.start(cmd, env_vars=env_vars)")
+
 
             # run on remote host
             else:
@@ -678,6 +661,7 @@ class TaskPanelCfdMesh:
                                       "  mesh_process.waitForFinished()\n" +
                                       "else:\n" +
                                       "  proxy.mesh_process.start(runCommand)")
+
 
             if self.mesh_obj.Proxy.mesh_process.waitForStarted():
                 # enable/disable the correct buttons

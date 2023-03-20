@@ -82,6 +82,9 @@ class CfdMeshTools:
             self.progressCallback("Exporting the part surfaces ...")
         self.writePartFile()
         self.writeMeshCase(profile_name)
+        CfdTools.cfdMessage("Wrote mesh case to {}\n".format(self.meshCaseDir))
+        if self.progressCallback:
+             self.progressCallback("Mesh case written successfully")
 
 
     def processExtrusions(self):
