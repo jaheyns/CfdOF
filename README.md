@@ -272,8 +272,6 @@ in order to provide sufficient information.
 
 ## Development
 
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/alerts/)[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/context:python)
-
 If you would like to get involved in the development of CfdOF, please refer to the [Contribution guidelines](CONTRIBUTING.md)
 and [Roadmap](ROADMAP.md).
 
