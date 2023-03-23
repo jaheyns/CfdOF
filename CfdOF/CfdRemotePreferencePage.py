@@ -1230,6 +1230,8 @@ class CfdRemotePreferencePage:
 
     #**********************************************************************************************
     # TODO: Update to use profiles
+    # TODO: Check if cfmesh is already installed before installing in case the user
+    # accidentally pushes the button
     def remoteDownloadInstallCfMesh(self):
 
         #TODO: this routine doesn't clean up after itself if it fails

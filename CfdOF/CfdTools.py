@@ -156,6 +156,8 @@ def getDefaultRemoteOutputPath():
     return output_path
 
 
+# This used to be called by CfdCaseWriterFoam, but isn't anymore.
+# Not sure what uses it
 def getOutputPath(analysis):
     if analysis and 'OutputPath' in analysis.PropertiesList:
         output_path = analysis.OutputPath
@@ -170,6 +172,7 @@ def getOutputPath(analysis):
         output_path = os.path.join(os.path.dirname(FreeCAD.ActiveDocument.FileName), output_path)
     output_path = os.path.normpath(output_path)
     return output_path
+
 
 # TODO  Is this used anymore ?
 def getRemoteOutputPath(analysis):
