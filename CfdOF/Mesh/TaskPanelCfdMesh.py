@@ -237,8 +237,11 @@ class TaskPanelCfdMesh:
               hostPrefs = self.host_prefs_location
               self.hostname = FreeCAD.ParamGet(hostPrefs).GetString("Hostname", "")
               self.username = FreeCAD.ParamGet(hostPrefs).GetString("Username", "")
+
+              # This is loading defaults.  The user may change this number
               self.mesh_processes = FreeCAD.ParamGet(hostPrefs).GetInt("MeshProcesses")
               self.mesh_threads = FreeCAD.ParamGet(hostPrefs).GetInt("MeshThreads")
+
               self.foam_processes = FreeCAD.ParamGet(hostPrefs).GetInt("FoamProcesses")
               self.foam_threads = FreeCAD.ParamGet(hostPrefs).GetInt("FoamThreads")
               self.foam_dir = FreeCAD.ParamGet(hostPrefs).GetString("FoamDir", "")
@@ -250,8 +253,11 @@ class TaskPanelCfdMesh:
               self.delete_remote_results = FreeCAD.ParamGet(hostPrefs).GetBool("DeleteRemoteResults")
 
               #now set the control values
-              self.mesh_obj.NumberOfProcesses = self.mesh_processes
-              self.mesh_obj.NumberOfThreads = self.mesh_threads
+              #read these from the parameters in case they've been edited
+              self.mesh_obj.NumberOfProcesses = FreeCAD.ParamGet(hostPrefs).GetInt("MeshProcesses")
+              self.mesh_obj.NumberOfThreads = FreeCAD.ParamGet(hostPrefs).GetInt("MeshThreads")
+
+
 
               # disable if using a remote host
               self.form.pb_edit_mesh.setEnabled(False)

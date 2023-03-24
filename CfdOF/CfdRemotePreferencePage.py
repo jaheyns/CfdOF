@@ -1237,9 +1237,14 @@ class CfdRemotePreferencePage:
         #TODO: this routine doesn't clean up after itself if it fails
         # Nor does it check for a full or partial build
         # If the user reruns the build after fully or partially building previously
-        # this routine will fail.
+        # this routine will fail because the cfmesh directory is already present.
 
         # TODO this routine assumes the output dir exists.  Will fail if it doesn't.  Fix this.
+
+        # TODO: if the remote host is missingzlib-dev, this routine fails silently and then the user will get
+        # an error /usr/bin/ld: checkSurfaceMesh.C:(.text.startup+0xabc): undefined reference to `Foam::triSurf::~triSurf()'
+        # when the solver is run  See here: https://forum.freecad.org/viewtopic.php?style=10&t=60010
+        # This appears to be a problem with the local install process as well.
 
         # Get the username and hostname for the remote host
         remote_user = self.username

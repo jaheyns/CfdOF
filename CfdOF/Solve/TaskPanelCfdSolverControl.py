@@ -40,7 +40,7 @@ if FreeCAD.GuiUp:
 #
 # TODOs (there are some in the code as well)
 #
-# -check on the number of cores that are being asked for and used by OpenFOAM
+# - the solver
 #
 # -makeRunCommand is using the local OF bash command to build the remote run command.  It works but it isn't correct.
 # The remote run is not calling the source command to set up OF usage.  It is relying on the bash shell  on the remote host
@@ -54,7 +54,9 @@ if FreeCAD.GuiUp:
 #
 # -remote solving has not been tested in macros
 #
-#- presently does not set the number of threads that the solver uses properly.  Must be done manually.
+#- presently does not set the number of threads that the solver uses properly.  Must be done manually.  Not sure where
+# the default is set.  It runs with the number of cores in the editor, but that should be set to the preferences value
+# when the host is changed.  It doesn't. The field name is "ParallelCores" as far as I can tell.
 
 class TaskPanelCfdSolverControl:
     def __init__(self, solver_runner_obj):
@@ -172,6 +174,8 @@ class TaskPanelCfdSolverControl:
                   hostPrefs = self.host_prefs_location
                   self.hostname = FreeCAD.ParamGet(hostPrefs).GetString("Hostname", "")
                   self.username = FreeCAD.ParamGet(hostPrefs).GetString("Username", "")
+
+
                   #self.mesh_processes = FreeCAD.ParamGet(hostPrefs).GetInt("MeshProcesses")
                   #self.mesh_threads = FreeCAD.ParamGet(hostPrefs).GetInt("MeshThreads")
                   #self.foam_processes = FreeCAD.ParamGet(hostPrefs).GetInt("FoamProcesses")
@@ -193,21 +197,6 @@ class TaskPanelCfdSolverControl:
 
                   #self.mesh_obj.NumberOfProcesses = self.mesh_processes
                   #self.mesh_obj.NumberOfThreads = self.mesh_threads
-
-                  #TODO: fix these, if we need to.
-                  # Leaving these in in case we add controls to set these someday
-                  #self.form.le_mesh_processes.setText(str(self.mesh_processes))
-                  #self.form.le_mesh_threads.setText(str(self.mesh_threads))
-
-                  #self.form.le_hostname.setText(self.hostname)
-                  #self.form.le_username.setText(self.username)
-
-                  #self.form.le_foam_processes.setText(str(self.foam_processes))
-                  #self.form.le_foam_threads.setText(str(self.foam_threads))
-                  #self.form.le_foam_dir.setText(self.foam_dir)
-                  #self.form.le_output_path.setText(self.output_path)
-                  #self.form.cb_add_filename_to_output.setChecked(self.add_filename_to_output)
-
 
     # this gets called when the user changes the profile
     def profileChanged(self):
@@ -426,6 +415,7 @@ class TaskPanelCfdSolverControl:
         # if running on local host
         if self.profile_name == "local":
             # This must be kept in one doCommand because of the if statement
+            # TODO: check that the doCommand code is the same as the inline code
             FreeCADGui.doCommand(
                 "if proxy.running_from_macro:\n" +
                 "  analysis_object = FreeCAD.ActiveDocument." + self.analysis_object.Name + "\n" +

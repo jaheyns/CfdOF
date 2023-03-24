@@ -53,9 +53,9 @@ class CfdCaseWriterFoam:
         self.dynamic_mesh_refinement_obj = CfdTools.getDynamicMeshAdaptation(self.mesh_obj)
         self.mesh_generated = False
 
-        # LG123 changed this
-        # self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
-        self.working_dir = CfdTools.getDefaultOutputPath('local')
+        # LG123 changed this for testing
+        self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
+        #self.working_dir = CfdTools.getDefaultOutputPath('local')
 
         self.progressCallback = None
 
