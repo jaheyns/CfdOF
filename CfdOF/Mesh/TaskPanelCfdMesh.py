@@ -566,6 +566,10 @@ class TaskPanelCfdMesh:
         CfdTools.openFileManager(case_path)
 
     def runMesh(self):
+
+        #disable the run button so a second instance isn't started
+        self.form.pb_run_mesh.setEnabled(False)
+
         if CfdTools.getFoamRuntime() == "PosixDocker":
             CfdTools.startDocker()
 
