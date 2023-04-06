@@ -1,0 +1,30 @@
+%{%(ExtrusionSettings/ExtrusionsPresent%)
+%:True
+%{%(ExtrusionSettings/Extrusions%)
+%{%(ExtrusionSettings/Extrusions/%(0%)/ExtrusionType%)
+%:2DPlanar
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      changeDictionaryDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+boundary
+{
+%{%(ExtrusionSettings/Extrusions/%(0%)/FrontFaceList%)
+    %(0%)
+    {
+        type        empty;
+    }
+
+%}
+}
+
+// ************************************************************************* //
+%}
+%} system/changeDictionaryDict.%(0%)
+%}

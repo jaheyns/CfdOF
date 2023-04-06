@@ -34,7 +34,7 @@ then
 fi
 
 # Copy mesh from mesh case dir if available
-MESHDIR="/tmp/meshCaseDamBreak3D"
+MESHDIR="../meshCaseDamBreak3D"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
     rm -rf constant/polyMesh
@@ -68,8 +68,7 @@ runCommand decomposePar -force
 # Pick up number of parallel processes
 NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
 
-# Mesh renumbering
-runParallel $NPROC renumberMesh -overwrite
+# Mesh renumbering does not work in Foundation with dynamic mesh
 
 # Run application in parallel
 runParallel $NPROC interFoam
