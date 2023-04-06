@@ -16,8 +16,6 @@ once they have been well honed.
 
 
 ## Source code contributions
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/alerts/)[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/context:python)
-
 It is asked that developers only add functionality or code that is working and can be tested. Dead code, even
 portions included for possible future functionality, reduces function clarity and increases the maintenance overhead. 
 Our philosophy is 'Do the basics well' and therefore robust operation takes precedence over extended functionality.

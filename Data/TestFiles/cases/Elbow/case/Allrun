@@ -34,7 +34,7 @@ then
 fi
 
 # Copy mesh from mesh case dir if available
-MESHDIR="/tmp/meshCaseElbow"
+MESHDIR="../meshCaseElbow"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
     rm -rf constant/polyMesh

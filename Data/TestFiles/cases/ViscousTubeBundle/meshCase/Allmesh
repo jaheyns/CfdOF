@@ -38,13 +38,18 @@ runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/Cut_Geometry.stl" 
 
 runCommand cartesianMesh
 
+# Slight abuse of flattenMesh to make patch flat before extrusion
+# Change patch type to empty first
+cp system/changeDictionaryDict.0 system/changeDictionaryDict
+runCommand changeDictionary
+rm system/changeDictionaryDict
+runCommand flattenMesh
 cp system/extrudeMeshDict.0 system/extrudeMeshDict
 # Refinement history is not processed by extrudeMesh
 rm -f constant/polyMesh/{cellLevel,pointLevel,level0Edge,refinementHistory}
 runCommand extrudeMesh
 mv log.extrudeMesh log.extrudeMesh.0
 rm system/extrudeMeshDict
-runCommand flattenMesh
 
 # Extract surface mesh and convert to mm for visualisation in FreeCAD
 if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ] || [ $WM_PROJECT_VERSION == "v1906" ]
