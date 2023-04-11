@@ -19,7 +19,6 @@
 # ***************************************************************************
 
 import FreeCAD
-import Part
 import Mesh
 import os
 import tempfile

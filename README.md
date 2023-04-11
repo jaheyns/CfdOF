@@ -2,14 +2,14 @@
 
 This workbench aims to help users set up and run CFD analyses within the [FreeCAD](https://freecadweb.org)
 modeller, and serves as a front-end (GUI) for the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
-It guides the user in selecting the relevant physics, specifying the material properties, generating a mesh, assigning 
-boundary conditions and choosing the solver settings before running the simulation. Best practices are specified to 
+It guides the user in selecting the relevant physics, specifying the material properties, generating a mesh, assigning
+boundary conditions and choosing the solver settings before running the simulation. Best practices are specified to
 maximise the stability of the solvers.
 
-![screenshot](https://forum.freecadweb.org/download/file.php?id=35618)
+![screenshot](Doc/Resources/boiler.png)
 
 Disclaimer:
-This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via 
+This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via
 www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 
 ## Features
@@ -66,9 +66,9 @@ The CfdOF workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (at least version 0.18.4 / git commit 16146)](https://www.freecadweb.org/downloads.php)
- or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)  
-- OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2112](http://openfoam.com/download)  
-- [Paraview](http://www.paraview.org/)  
+ or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)
+- OpenFOAM [Foundation versions 5-9](http://openfoam.org/download/) or [ESI-OpenCFD versions 1706-2112](http://openfoam.com/download)
+- [Paraview](http://www.paraview.org/)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
 - [HiSA (High Speed Aerodynamic Solver)](https://hisa.gitlab.io)
 - [Gmsh (version 2.13 or later)](http://gmsh.info/) - optional, for generating tetrahedral meshes
@@ -98,13 +98,12 @@ Note: The CfdOF workbench can be updated at any time through the Addon manager.
 ##### Dependency installation
 
 Dependencies can be checked and installed conveniently from the CfdOF Preferences panel in FreeCAD.
-In the FreeCAD window, select Edit | Preferences ... and choose "CfdOF".
+In the FreeCAD window, select Edit | Preferences ... and choose "CfdOF".  The dependencies can be installed as
+individual components or as part of a docker container (refer to the **Docker container install** section below).
 
-The OpenFOAM installation is via the 
+The OpenFOAM installation is via the
 [OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php), and
 the [BlueCFD Core](https://bluecfd.github.io/Core/) port of OpenFOAM is also supported.
-The [OpenCFD docker package](https://www.openfoam.com/download/install-binary-windows.php) is also currently supported 
-but has some issues.
 
 OpenFOAM can be installed manually using the above links, or by clicking the relevant
 button in the Preferences panel described above. If you experience problems running OpenFOAM in CfdOF, please make
@@ -177,11 +176,9 @@ conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CfdOF".
 
-However, in Linux, manual installation is required for
-OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openfoam.org/download/) versions),
-[Paraview](http://www.paraview.org/) and
-[Gmsh](http://gmsh.info/) (optional). They should be
-installed using the links above or your distribution's package
+The dependencies can be installed manually, or as part of a docker container (refer to Docker container install below). Manual
+installation may be undertaken for OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openfoam.org/download/)
+versions), [Paraview](http://www.paraview.org/) and [Gmsh](http://gmsh.info/) (optional) by using the links above or your distribution's package
 manager. Note, however, that the OpenFOAM packages bundled in
 some Linux distributions may be out of date or incomplete; for example,
 the standard Debian and Ubuntu packages do not include the build command 'wmake'
@@ -190,10 +187,10 @@ We therefore recommend installation of the packages supplied through
 the official websites above.
 
 Set the OpenFOAM install directory in the preferences
-panel - examples of typical install locations are /usr/lib/openfoam/openfoam2112, 
-/opt/openfoam9 or /home/user/OpenFOAM/OpenFOAM-9.x (it will be automatically 
+panel - examples of typical install locations are /usr/lib/openfoam/openfoam2112,
+/opt/openfoam9 or /home/user/OpenFOAM/OpenFOAM-9.x (it will be automatically
 detected in common default install
-locations). Note that if you have loaded the desired OpenFOAM 
+locations). Note that if you have loaded the desired OpenFOAM
 environment already before starting FreeCAD, the install directory should be left blank.
 
 cfMesh and HiSA can be installed using the Preferences panel described above,
@@ -204,12 +201,45 @@ not already done so yourself. Note that this is a lengthy process.
 Choosing the "Check dependencies" option will verify that all
 prerequisites have been successfully installed.
 
+#### Docker container install
+
+Docker containers offer a convenient way of providing pre-compiled program packages for both windows and linux. macOS can also be supported but
+assistance will be required to setup a container.  Please leave a message on the [forum](https://forum.freecadweb.org/viewforum.php?f=37).
+
+##### Docker on Windows
+
+The preferred docker run-time for Windows is via [podman](https://podman.io/) as currently this provides fast filesystem integration.
+[Docker Desktop](https://www.docker.com/products/docker-desktop/) may also be used.
+
+1. Install [podman](https://github.com/containers/podman/releases/download/v4.2.1/podman-v4.2.1.msi) (or [docker desktop](https://www.docker.com/products/docker-desktop/)).
+2. If using podman, open a cmd window and issue the following commands:
+   * `podman machine init`
+   * `podman machine start`
+   * `podman machine set --rootful`
+3. Edit &rarr; Preferences &rarr; CfdOF: Press the _Install Paraview_ button.
+4. Edit &rarr; Preferences &rarr; CfdOF: Select _Use docker_.
+5. Press the _Install Docker Container_ button. There is no need to install gmsh, cfmesh and HISA as they are included in the docker image.
+6. If using podman, fast WSL file system integration can be enabled:
+   * Create a new subdirectory (for example `cfdof`) in the following firectory created by podman:
+   `\\wsl$\podman-machine-default\home\user`
+   * In the cfdof preference page, set the default output directory as above:
+   `\\wsl$\podman-machine-default\home\user\cfdof`
+7. Press the _Run dependency checker_ button.
+
+##### Docker on Linux
+1. Install docker using these [instructions](https://www.linuxtechi.com/install-docker-engine-on-debian/) (or similar).
+2. Install paraview as per the package installation instructions for your distribution
+   (for example `sudo apt-get install paraview` on debian).
+3. Edit &rarr; Preferences &rarr; CfdOF: Select _Use docker_.
+4. Press the _Install Docker Container_ button. There is no need to install gmsh, cfmesh and HISA as they are included in the docker image.
+5. Press the _Run dependency checker_ button.
+
 ## Documentation
 
 At present there is no formal documentation for CfdOF apart from this README.
 However, demonstration cases
 are provided inside the 'Demos' folder of the
-[CfdOF workbench directory](https://gitlab.com/opensimproject/cfdof). These aim
+[CfdOF workbench directory](https://github.com/jaheyns/cfdof). These aim
 to provide a basic overview of features and best practices. The examples are run
 by loading and executing the macro files ending in '.FCMacro' in the various sub-directories
 in the 'Demos' directory. Where there are several numbered files, these should be run in order
@@ -235,14 +265,12 @@ Gaps smaller than the mesh spacing are also allowed.
 
 Please discuss issues on the [CfdOF FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37)
 for community assistance.
-Bugs can be reported on the [Gitlab project site](https://gitlab.com/opensimproject/cfdof).
+Bugs can be reported on the [Github project site](https://github.com/jaheyns/cfdof).
 
 Please first read the [guidelines for reporting bugs](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359)
 in order to provide sufficient information.
 
 ## Development
-
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/alerts/)[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/jaheyns/CfdOF.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jaheyns/CfdOF/context:python)
 
 If you would like to get involved in the development of CfdOF, please refer to the [Contribution guidelines](CONTRIBUTING.md)
 and [Roadmap](ROADMAP.md).
@@ -254,25 +282,21 @@ and [Roadmap](ROADMAP.md).
 This development was made possible through initial funding from [Eskom Holdings SOC Ltd](http://www.eskom.co.za)
 and the [Council for Scientific and Industrial Research](https://www.csir.co.za) (South Africa).
 
-### Developers
+### Contributors
 
-The code has been primarily developed by
 * Oliver Oxtoby (CSIR, 2016-2018; private 2019-) <oliveroxtoby@gmail.com>
 * Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>
 * Alfred Bogaers (CSIR, 2016-2018) <alfredbogaers@gmail.com>
-* Jonathan Bergh (2022-)
-
-### Contributors
-
-We acknowledge other significant contributions from
-* Qingfeng Xia (2015) - Original framework
-* Michael Hindley (2016) - Initial concept
-* Klaus Sembritzki (2017) - Multiphase extension
-* Thomas Schrader (2017-) <info@schraderundschrader.de> - Testing and user assistance
+* Jonathan Bergh (2022)
+* Qingfeng Xia (2015)
+* Thomas Schrader (2017-) <info@schraderundschrader.de>
+* Michael Hindley (2016)
+* Mark Mackenzie (CNF, 2022)
+* Katy Akmal (2022) [Forum: @KAKM]
+* Adrian Insaurralde (2022)
+* Klaus Sembritzki (2017)
 
 ### Dedication
 
 CfdOF is dedicated to the memory of Michael Hindley. It is thanks to his irrepressible enthusiasm for
 FreeCAD and open source software that this workbench exists. Rest in peace.
-
-![screenshot](Doc/Resources/drone.png)

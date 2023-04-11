@@ -24,7 +24,6 @@
 import FreeCAD
 from FreeCAD import Units
 import os
-import shutil
 import tempfile
 from CfdOF import CfdTools
 import math
@@ -235,11 +234,13 @@ class CfdMeshTools:
 
         # Check for and filter duplicates
         bc_match_per_shape_face = [-1] * len(mesh_face_list)
+        bc_matched = [False] * len(bc_group)
         for k in range(len(bc_matched_faces)):
             match = bc_matched_faces[k][1]
             prev_k = bc_match_per_shape_face[match]
+            nb, ri, si = bc_matched_faces[k][0]
+            bc_matched[nb] = True
             if prev_k >= 0:
-                nb, ri, si = bc_matched_faces[k][0]
                 nb2, ri2, si2 = bc_matched_faces[prev_k][0]
                 bc = bc_group[nb]
                 bc2 = bc_group[nb2]
@@ -338,7 +339,15 @@ class CfdMeshTools:
         bc_mr_matched_faces = []
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
             bc_mr_matched_faces = CfdTools.matchFaces(boundary_face_list, mr_face_list)
+            for k in range(len(bc_mr_matched_faces)):
+                nb, ri, si = bc_mr_matched_faces[k][0]
+                bc_matched[nb] = True
 
+        for bc_id, matched in enumerate(bc_matched):
+            if not matched and not bc_group[bc_id].DefaultBoundary:
+                CfdTools.cfdWarning(
+                    "No part of the boundary '{}' matched any part of the geometry '{}' being meshed\n".format(
+                        bc_group[bc_id].Label, self.mesh_obj.Part.Label))
         # Handle baffles
         for bc_id, bc_obj in enumerate(bc_group):
             if bc_obj.BoundaryType == 'baffle':
@@ -550,12 +559,11 @@ class CfdMeshTools:
                             patch_shape = Part.makeCompound([faces[f] for f in patch_faces])
                             CfdTools.cfdMessage(
                                 "Triangulating part {}, patch {}\n".format(self.part_obj.Label, patch_name))
-                            mesh_stl = writeSurfaceMeshFromShape(
-                                patch_shape, self.triSurfaceDir, patch_name, self.mesh_obj)
+                            writeSurfaceMeshFromShape(patch_shape, self.triSurfaceDir, patch_name, self.mesh_obj)
                             # Append to the main file
                             with open(os.path.join(self.triSurfaceDir, patch_name + '.stl'), 'r') as fid2:
-                                for l in fid2:
-                                    fid.write(l)
+                                for ln in fid2:
+                                    fid.write(ln)
 
     def loadSurfMesh(self):
         if not self.error:
@@ -735,7 +743,7 @@ def writeSurfaceMeshFromShape(shape, path, name, mesh_obj):
                 'OutputFileName': output_file_name, 
                 'AngularMeshDensity': mesh_obj.STLAngularMeshDensity, 
                 'ScalingFactor': scaling_factor}
-            TemplateBuilder.TemplateBuilder(
+            TemplateBuilder(
                 tmpdirname, os.path.join(CfdTools.getModulePath(), "Data", "Templates", "surfaceMesh"), settings)
             shape.exportBrep(os.path.join(tmpdirname, name+'.brep'))
             # Run gmsh...

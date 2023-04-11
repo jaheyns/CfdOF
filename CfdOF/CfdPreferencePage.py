@@ -38,6 +38,7 @@ import FreeCAD
 from CfdOF import CfdTools
 import tempfile
 from contextlib import closing
+from xml.sax.saxutils import escape
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -45,6 +46,7 @@ if FreeCAD.GuiUp:
     from PySide import QtGui
     from PySide.QtCore import Qt, QObject, QThread
     from PySide.QtGui import QApplication
+
 
 # Constants
 OPENFOAM_URL = \
@@ -65,13 +67,15 @@ HISA_URL_MINGW = \
     "https://sourceforge.net/projects/hisa/files/hisa-master-binaries-{}.zip/download"
 HISA_FILE_BASE = "hisa-master"
 HISA_FILE_EXT = ".zip"
+DOCKER_URL = \
+    "docker.io/mmcker/cfdof-openfoam"
 
 # Tasks for the worker thread
 DOWNLOAD_OPENFOAM = 1
 DOWNLOAD_PARAVIEW = 2
 DOWNLOAD_CFMESH = 3
 DOWNLOAD_HISA = 4
-
+DOWNLOAD_DOCKER = 5
 
 class CloseDetector(QObject):
     def __init__(self, obj, callback):
@@ -110,6 +114,11 @@ class CfdPreferencePage:
 
         self.form.tb_choose_output_dir.clicked.connect(self.chooseOutputDir)
         self.form.le_output_dir.textChanged.connect(self.outputDirChanged)
+
+        self.form.cb_docker_sel.clicked.connect(self.dockerCheckboxClicked)
+        self.form.pb_download_install_docker.clicked.connect(self.downloadInstallDocker)
+
+        self.dockerCheckboxClicked()
 
         self.ev_filter = CloseDetector(self.form, self.cleanUp)
         self.form.installEventFilter(self.ev_filter)
@@ -151,6 +160,8 @@ class CfdPreferencePage:
         CfdTools.setGmshPath(self.gmsh_path)
         prefs = CfdTools.getPreferencesLocation()
         FreeCAD.ParamGet(prefs).SetString("DefaultOutputPath", self.output_dir)
+        FreeCAD.ParamGet(prefs).SetBool("UseDocker",self.form.cb_docker_sel.isChecked())
+        FreeCAD.ParamGet(prefs).SetString("DockerURL",self.form.le_docker_url.text())
 
     def loadSettings(self):
         # Don't set the autodetected location, since the user might want to allow that to vary according
@@ -171,11 +182,23 @@ class CfdPreferencePage:
         self.output_dir = CfdTools.getDefaultOutputPath()
         self.form.le_output_dir.setText(self.output_dir)
 
+        if FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0):
+            self.form.cb_docker_sel.setCheckState(Qt.Checked)
+        
+        # Set usedocker and enable/disable download buttons 
+        self.dockerCheckboxClicked()
+
+        self.form.le_docker_url.setText(FreeCAD.ParamGet(prefs).GetString("DockerURL", DOCKER_URL))
+
         self.setDownloadURLs()
 
-    def consoleMessage(self, message="", color="#000000"):
+    def consoleMessage(self, message="", colour_type=None):
+        message = escape(message)
         message = message.replace('\n', '<br>')
-        self.console_message = self.console_message + '<font color="{0}">{1}</font><br>'.format(color, message)
+        if colour_type:
+            self.console_message += '<font color="{0}">{1}</font><br>'.format(CfdTools.getColour(colour_type), message)
+        else:
+            self.console_message += message+'<br>'
         self.form.textEdit_Output.setText(self.console_message)
         self.form.textEdit_Output.moveCursor(QtGui.QTextCursor.End)
 
@@ -250,8 +273,7 @@ class CfdPreferencePage:
         CfdTools.setGmshPath(self.gmsh_path)
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.consoleMessage("Checking dependencies...")
-        msg = CfdTools.checkCfdDependencies()
-        self.consoleMessage(msg)
+        CfdTools.checkCfdDependencies(lambda msg:  (print(msg), self.consoleMessage(msg)))
         CfdTools.setFoamDir(self.initial_foam_dir)
         CfdTools.setParaviewPath(self.initial_paraview_path)
         CfdTools.setGmshPath(self.initial_gmsh_path)
@@ -281,7 +303,7 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickOpenFoamFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose OpenFOAM install file', filter="*.exe")
+        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose OpenFOAM install file', filter="*.exe")
         if f and os.access(f, os.R_OK):
             self.form.le_openfoam_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
@@ -292,7 +314,7 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickParaviewFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose ParaView install file', filter="*.exe")
+        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose ParaView install file', filter="*.exe")
         if f and os.access(f, os.R_OK):
             self.form.le_paraview_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
@@ -313,7 +335,7 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickCfMeshFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose cfMesh archive', filter="*.zip")
+        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose cfMesh archive', filter="*.zip")
         if f and os.access(f, os.R_OK):
             self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
@@ -334,13 +356,13 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickHisaFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(title='Choose HiSA archive', filter="*.zip")
+        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose HiSA archive', filter="*.zip")
         if f and os.access(f, os.R_OK):
             self.form.le_hisa_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
 
     def createThread(self):
         if self.thread and self.thread.isRunning():
-            self.consoleMessage("Busy - please wait...", '#FF0000')
+            self.consoleMessage("Busy - please wait...", 'Error')
             return False
         else:
             self.thread = CfdPreferencePageThread()
@@ -354,7 +376,7 @@ class CfdPreferencePage:
         self.consoleMessage(msg)
 
     def threadError(self, msg):
-        self.consoleMessage(msg, '#FF0000')
+        self.consoleMessage(msg, 'Error')
         self.consoleMessage("Download unsuccessful")
 
     def threadFinished(self, status):
@@ -402,6 +424,11 @@ class CfdPreferencePage:
                     self.consoleMessage("Install completed")
             # Reset foam dir for now in case the user presses 'Cancel'
             CfdTools.setFoamDir(self.initial_foam_dir)
+        elif self.thread.task == DOWNLOAD_DOCKER:
+            if status:
+                self.consoleMessage("Download completed")            
+            else:
+                self.consoleMessage("Download unsuccessful")
         self.thread = None
 
     def installFinished(self, exit_code):
@@ -423,6 +450,25 @@ class CfdPreferencePage:
         print(text, end='')
         return ''
 
+    def dockerCheckboxClicked(self):
+        if CfdTools.docker_container==None:
+            CfdTools.docker_container = CfdTools.DockerContainer()
+        CfdTools.docker_container.usedocker = self.form.cb_docker_sel.isChecked()
+        self.form.pb_download_install_docker.setEnabled(CfdTools.docker_container.usedocker)
+        self.form.pb_download_install_openfoam.setEnabled(not CfdTools.docker_container.usedocker)
+        self.form.pb_download_install_hisa.setEnabled(not CfdTools.docker_container.usedocker)
+        self.form.pb_download_install_cfMesh.setEnabled(not CfdTools.docker_container.usedocker)
+        self.form.gb_docker.setVisible(CfdTools.docker_container.docker_cmd!=None or CfdTools.docker_container.usedocker)
+
+    def downloadInstallDocker(self):
+        # Set foam dir and output dir in preparation for using docker
+        CfdTools.setFoamDir(self.form.le_foam_dir.text())
+        self.saveSettings()
+        if self.createThread():
+            self.thread.task = DOWNLOAD_DOCKER
+            self.thread.docker_url = self.form.le_docker_url.text() 
+            self.thread.start()
+
 class CfdPreferencePageSignals(QObject):
     error = QtCore.Signal(str)  # Signal in PySide, pyqtSignal in PyQt
     finished = QtCore.Signal(bool)
@@ -442,9 +488,11 @@ class CfdPreferencePageThread(QThread):
         self.paraview_url = None
         self.cfmesh_url = None
         self.hisa_url = None
+        self.docker_url = None
 
     def run(self):
         self.quit = False
+
         try:
             if self.task == DOWNLOAD_OPENFOAM:
                 self.downloadOpenFoam()
@@ -454,6 +502,8 @@ class CfdPreferencePageThread(QThread):
                 self.downloadCfMesh()
             elif self.task == DOWNLOAD_HISA:
                 self.downloadHisa()
+            elif self.task == DOWNLOAD_DOCKER:
+                self.downloadDocker()
         except Exception as e:
             if self.quit:
                 self.signals.finished.emit(False)  # Exit quietly since UI already destroyed
@@ -461,7 +511,7 @@ class CfdPreferencePageThread(QThread):
             else:
                 self.signals.error.emit(str(e))
                 self.signals.finished.emit(False)
-                raise
+                return
         self.signals.finished.emit(True)
 
     def downloadFile(self, url, **kwargs):
@@ -490,7 +540,7 @@ class CfdPreferencePageThread(QThread):
         self.signals.status.emit("Downloading {}, please wait...".format(name))
         try:
             if hasattr(ssl, 'create_default_context'):
-                context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+                context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
             else:
                 context = None
             # Download
@@ -574,5 +624,15 @@ class CfdPreferencePageThread(QThread):
                     '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; );  }}'.
                     format(HISA_FILE_BASE, CfdTools.translatePath(filename)))
 
+    def downloadDocker(self):
+        self.signals.status.emit("Downloading Docker image, please wait until 'Download completed' message shown below")
+        if CfdTools.docker_container.container_id!=None:
+            CfdTools.docker_container.stop_container()
+        cmd = '{} pull {}'.format(CfdTools.docker_container.docker_cmd, self.docker_url)
+        if 'docker'in CfdTools.docker_container.docker_cmd:
+            cmd = cmd.replace('docker.io/','')
+
+        CfdTools.runFoamCommand(cmd)
+    
     def downloadStatus(self, blocks, block_size, total_size):
         self.signals.downloadProgress.emit(blocks*block_size, total_size)

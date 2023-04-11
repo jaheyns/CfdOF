@@ -2,11 +2,11 @@
 <package format="1">
     <name>CfdOF</name>
     <description>Computational Fluid Dynamics (CFD) for FreeCAD based on OpenFOAM</description>
-    <version>1.17.4</version>
+    <version>1.21.8</version>
     <maintainer email="oliveroxtoby@gmail.com">Oliver Oxtoby</maintainer>
     <license file="LICENSE">LGPL-2</license>
-    <url type="repository" branch="master">https://gitlab.com/opensimproject/CfdOF</url>
-    <url type="documentation">https://gitlab.com/opensimproject/CfdOF/README.md</url>
+    <url type="repository" branch="master">https://github.com/jaheyns/CfdOF</url>
+    <url type="documentation">https://github.com/jaheyns/CfdOF/README.md</url>
     <freecadmin>0.18.4</freecadmin>
     <content>
         <workbench>

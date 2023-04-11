@@ -9,6 +9,7 @@ runParallel()
     sol="${sol%.*}"
     shift
     if [ -f log."$sol" ]; then rm log."$sol"; fi
+    export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workarond for open-mpi/docker bug
     mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
     err=$?
     if [ ! $err -eq 0 ]; then exit $err; fi
@@ -69,7 +70,12 @@ export OMP_NUM_THREADS=%(NumberOfThreads%)
 runCommand preparePar
 export MPI_BUFFER_SIZE=200000000
 runParallel $NPROC cartesianMesh
-runCommand reconstructParMesh -constant -fullMatch
+if [ -z $FOAM_API ]
+then
+    runCommand reconstructParMesh -constant
+else
+    runCommand reconstructParMesh -constant -fullMatch
+fi
 %:False
 %{%(NumberOfThreads%)
 %:0
@@ -117,6 +123,20 @@ fi
 
 %{%(ExtrusionSettings/ExtrusionsPresent%)
 %:True
+%{%(ExtrusionSettings/Extrude2DPlanar%)
+%:True
+# Slight abuse of flattenMesh to make patch flat before extrusion
+# Change patch type to empty first
+%{%(ExtrusionSettings/Extrusions%)
+%{%(ExtrusionSettings/Extrusions/%(0%)/ExtrusionType%)
+%:2DPlanar
+cp system/changeDictionaryDict.%(0%) system/changeDictionaryDict
+runCommand changeDictionary
+rm system/changeDictionaryDict
+%}
+%}
+runCommand flattenMesh
+%}
 %{%(ExtrusionSettings/Extrusions%)
 cp system/extrudeMeshDict.%(0%) system/extrudeMeshDict
 %{%(ExtrusionSettings/Extrusions/%(0%)/KeepExistingMesh%)
@@ -127,10 +147,6 @@ rm -f constant/polyMesh/{cellLevel,pointLevel,level0Edge,refinementHistory}
 runCommand extrudeMesh
 mv log.extrudeMesh log.extrudeMesh.%(0%)
 rm system/extrudeMeshDict
-%}
-%{%(ExtrusionSettings/Extrude2DPlanar%)
-%:True
-runCommand flattenMesh
 %}
 
 %}

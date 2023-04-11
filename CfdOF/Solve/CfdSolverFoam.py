@@ -84,6 +84,8 @@ class CfdSolverFoam(object):
                           "Parallel analysis on multiple CPU cores")
         addObjectProperty(obj, "ParallelCores", 4, "App::PropertyInteger", "Solver",
                           "Number of cores on which to run parallel analysis")
+        addObjectProperty(obj, "PurgeWrite", 0, "App::PropertyInteger", "Solver",
+                          "Sets a limit on the number of time directories that are stored by overwriting time directories on a cyclic basis.  Set to 0 to disable")
 
         addObjectProperty(obj, "MaxIterations", 2000, "App::PropertyInteger", "IterationControl",
                           "Maximum number of iterations to run steady-state analysis")
@@ -160,10 +162,11 @@ class ViewProviderCfdSolverFoam:
 
     def setEdit(self, vobj, mode):
         if CfdTools.getActiveAnalysis():
-            from CfdOF.Solve.CfdRunnableFoam import CfdRunnableFoam
-            foam_runnable = CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
-            from CfdOF.Solve import TaskPanelCfdSolverControl
+            from CfdOF.Solve import CfdRunnableFoam
             import importlib
+            importlib.reload(CfdRunnableFoam)
+            foam_runnable = CfdRunnableFoam.CfdRunnableFoam(CfdTools.getActiveAnalysis(), self.Object)
+            from CfdOF.Solve import TaskPanelCfdSolverControl
             importlib.reload(TaskPanelCfdSolverControl)
             self.taskd = TaskPanelCfdSolverControl.TaskPanelCfdSolverControl(foam_runnable)
             self.taskd.obj = vobj.Object

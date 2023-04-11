@@ -1,0 +1,34 @@
+%{%(dynamicMeshEnabled%)
+%:True
+%{%(dynamicMesh/Type%)
+%:shock
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+type            shockRefinement;
+UInf            (%(dynamicMesh/ReferenceVelocityDirection%));
+absolute        true;
+minCompLevel    %(dynamicMesh/RefinementLevel%);
+maxCompLevel    %(dynamicMesh/RefinementLevel%);
+minExpLevel     %(dynamicMesh/RefinementLevel%);
+maxExpLevel     %(dynamicMesh/RefinementLevel%);
+
+compSensCoeff   0.0;
+expSensCoeff    -1.0;
+
+%{%(dynamicMesh/WriteFields%)
+%:True
+saveMarkedCells true;
+%:False
+saveMarkedCells false;
+%}
+
+%}
+%}

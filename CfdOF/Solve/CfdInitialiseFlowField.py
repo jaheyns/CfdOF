@@ -119,10 +119,10 @@ class CfdInitialVariables:
                           "Turbulent viscosity")
 
         addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
-        addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLink", "", "U boundary")
-        addObjectProperty(obj, 'BoundaryP', None, "App::PropertyLink", "", "P boundary")
-        addObjectProperty(obj, 'BoundaryT', None, "App::PropertyLink", "", "T boundary")
-        addObjectProperty(obj, 'BoundaryTurb', None, "App::PropertyLink", "", "Turbulence boundary")
+        addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLinkGlobal", "", "U boundary")
+        addObjectProperty(obj, 'BoundaryP', None, "App::PropertyLinkGlobal", "", "P boundary")
+        addObjectProperty(obj, 'BoundaryT', None, "App::PropertyLinkGlobal", "", "T boundary")
+        addObjectProperty(obj, 'BoundaryTurb', None, "App::PropertyLinkGlobal", "", "Turbulence boundary")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

@@ -80,7 +80,7 @@
       <item row="0" column="1">
        <widget class="QLabel" name="label_rellen">
         <property name="text">
-         <string>Relative element size:</string>
+         <string>Relative element size</string>
         </property>
        </widget>
       </item>
@@ -121,7 +121,7 @@
       <item row="3" column="0">
        <widget class="QLabel" name="label_refinethick">
         <property name="text">
-         <string>Refinement thickness:</string>
+         <string>Refinement thickness</string>
         </property>
        </widget>
       </item>
@@ -411,7 +411,7 @@
       <item row="0" column="1">
        <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>Extrusion type:</string>
+         <string>Extrusion type</string>
         </property>
        </widget>
       </item>
@@ -428,7 +428,7 @@
       <item row="2" column="1">
        <widget class="QLabel" name="thicknessLabel">
         <property name="text">
-         <string>Thickness:</string>
+         <string>Thickness</string>
         </property>
        </widget>
       </item>
@@ -448,7 +448,7 @@
       <item row="3" column="1">
        <widget class="QLabel" name="angleLabel">
         <property name="text">
-         <string>Angle:</string>
+         <string>Angle</string>
         </property>
        </widget>
       </item>
@@ -468,7 +468,7 @@
       <item row="4" column="1">
        <widget class="QLabel" name="numLayersLabel">
         <property name="text">
-         <string>Number of layers:</string>
+         <string>Number of layers</string>
         </property>
        </widget>
       </item>
@@ -485,7 +485,7 @@
       <item row="5" column="1">
        <widget class="QLabel" name="ratioLabel">
         <property name="text">
-         <string>Expansion ratio:</string>
+         <string>Expansion ratio</string>
         </property>
        </widget>
       </item>
@@ -510,7 +510,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_11">
            <property name="text">
-            <string>Axis point:</string>
+            <string>Axis point</string>
            </property>
           </widget>
          </item>
@@ -556,7 +556,7 @@
          <item row="1" column="0">
           <widget class="QLabel" name="label_12">
            <property name="text">
-            <string>Axis direction:</string>
+            <string>Axis direction</string>
            </property>
           </widget>
          </item>
@@ -692,6 +692,7 @@
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
+          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>
@@ -747,6 +748,7 @@
        <widget class="QLabel" name="label">
         <property name="font">
          <font>
+          <weight>75</weight>
           <bold>true</bold>
          </font>
         </property>

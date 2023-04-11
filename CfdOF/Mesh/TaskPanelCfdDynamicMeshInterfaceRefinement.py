@@ -21,21 +21,21 @@
 
 import os
 from math import ceil
-import FreeCAD
 import FreeCADGui
 from CfdOF import CfdTools
-from CfdOF.CfdTools import setQuantity, getQuantity, indexOrDefault
-from CfdOF.Mesh import CfdDynamicMeshRefinement
+from CfdOF.CfdTools import indexOrDefault, setQuantity, getQuantity, storeIfChanged
 
 
-class TaskPanelCfdDynamicMeshRefinement:
-    def __init__(self, obj):
+class TaskPanelCfdDynamicMeshInterfaceRefinement:
+    def __init__(self, obj, physics_model, material_objs):
         FreeCADGui.Selection.clearSelection()
         self.obj = obj
 
+        self.physics_model = physics_model
+        self.material_objs = material_objs
 
         self.form = FreeCADGui.PySideUic.loadUi(
-                    os.path.join(CfdTools.getModulePath(), 'Gui', "TaskPanelCfdDynamicMeshRefinement.ui"))
+                    os.path.join(CfdTools.getModulePath(), 'Gui', "TaskPanelCfdDynamicMeshInterfaceRefinement.ui"))
 
         self.load()
 
@@ -46,18 +46,21 @@ class TaskPanelCfdDynamicMeshRefinement:
     def load(self):
         """ fills the widgets """
 
-        # Mesh controls
+        # Add volume fraction fields
+        if self.physics_model.Phase != 'Single':
+            mat_names = []
+            for m in self.material_objs:
+                mat_names.append(m.Label)
+            self.form.cb_fluid.clear()
+            items = mat_names[:-1]
+            self.form.cb_fluid.addItems(items)
+            idx = indexOrDefault(items, self.obj.Phase, 0)
+            self.form.cb_fluid.setCurrentIndex(idx)
+        else:
+            self.form.cb_fluid.clear()
         self.form.sb_refinement_interval.setValue(self.obj.RefinementInterval)
         self.form.sb_max_refinement_levels.setValue(self.obj.MaxRefinementLevel)
         self.form.sb_no_buffer_layers.setValue(self.obj.BufferLayers)
-        setQuantity(self.form.if_max_cells, self.obj.MaxRefinementCells)
-
-        # Trigger field
-        self.form.le_refinement_field.setText(self.obj.RefinementField)
-        setQuantity(self.form.if_unrefine_level, self.obj.UnRefinementLevel)
-        setQuantity(self.form.if_lower_refinement, self.obj.LowerRefinementLevel)
-        setQuantity(self.form.if_upper_refinement, self.obj.UpperRefinementLevel)
-
         self.form.cb_write_refinement_volscalarfield.setChecked(self.obj.WriteFields)
 
     def updateUI(self):
@@ -67,18 +70,11 @@ class TaskPanelCfdDynamicMeshRefinement:
         doc = FreeCADGui.getDocument(self.obj.Document)
         doc.resetEdit()
 
-        # Macro script
-        FreeCADGui.doCommand("\nobj = FreeCAD.ActiveDocument.{}".format(self.obj.Name))
-        FreeCADGui.doCommand("obj.RefinementInterval = {}".format(int(self.form.sb_refinement_interval.value())))
-        FreeCADGui.doCommand("obj.MaxRefinementLevel = {}".format(int(self.form.sb_max_refinement_levels.value())))
-        FreeCADGui.doCommand("obj.BufferLayers = {}".format(int(self.form.sb_no_buffer_layers.value())))
-        FreeCADGui.doCommand(
-            "obj.MaxRefinementCells = {}".format(int(ceil(float(getQuantity(self.form.if_max_cells))))))
-        FreeCADGui.doCommand("obj.RefinementField = '{}'".format(self.form.le_refinement_field.text()))
-        FreeCADGui.doCommand("obj.LowerRefinementLevel = {}".format(getQuantity(self.form.if_lower_refinement)))
-        FreeCADGui.doCommand("obj.UpperRefinementLevel = {}".format(getQuantity(self.form.if_upper_refinement)))
-        FreeCADGui.doCommand("obj.UnRefinementLevel = {}".format(int(float(getQuantity(self.form.if_unrefine_level)))))
-        FreeCADGui.doCommand("obj.WriteFields = {}".format(self.form.cb_write_refinement_volscalarfield.isChecked()))
+        storeIfChanged(self.obj, 'Phase', self.form.cb_fluid.currentText())
+        storeIfChanged(self.obj, 'RefinementInterval', int(self.form.sb_refinement_interval.value()))
+        storeIfChanged(self.obj, 'MaxRefinementLevel', int(self.form.sb_max_refinement_levels.value()))
+        storeIfChanged(self.obj, 'BufferLayers', int(self.form.sb_no_buffer_layers.value()))
+        storeIfChanged(self.obj, 'WriteFields', self.form.cb_write_refinement_volscalarfield.isChecked())
 
         # Finalise
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")

@@ -9,6 +9,7 @@ runParallel()
     sol="${sol%.*}"
     shift
     if [ -f log."$sol" ]; then rm log."$sol"; fi
+    export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workarond for open-mpi/docker bug
     mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
     err=$?
     if [ ! $err -eq 0 ]; then exit $err; fi
@@ -36,7 +37,7 @@ fi
 MESHDIR="../meshCaseElbow"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
-    rm -r constant/polyMesh 2> /dev/null
+    rm -rf constant/polyMesh
     cp -r "$MESHDIR"/constant/polyMesh constant/polyMesh
 elif [ ! -f constant/polyMesh/faces ]
 then

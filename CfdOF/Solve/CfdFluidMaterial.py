@@ -84,7 +84,7 @@ class CfdMaterial:
 
     def initProperties(self, obj):
         # Not currently used, but required for parent class
-        addObjectProperty(obj, "References", [], "App::PropertyLinkSubList", "Material", "List of material shapes")
+        addObjectProperty(obj, "References", [], "App::PropertyLinkSubListGlobal", "Material", "List of material shapes")
 
         # Compatibility with FEM material object
         if addObjectProperty(

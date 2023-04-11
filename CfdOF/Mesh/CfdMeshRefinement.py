@@ -88,7 +88,7 @@ class CfdMeshRefinement:
 
     def initProperties(self, obj):
         # Common to all
-        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "List of mesh refinement objects"):
+        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubListGlobal", "", "List of mesh refinement objects"):
             # Backward compat
             if 'References' in obj.PropertiesList:
                 doc = FreeCAD.getDocument(obj.Document.Name)
@@ -156,8 +156,7 @@ class CfdMeshRefinement:
         shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
             shape = Part.Shape()
-        if not CfdTools.isSameGeometry(obj.Shape, shape):
-            obj.Shape = shape
+        obj.Shape = shape
         if FreeCAD.GuiUp:
             vobj = obj.ViewObject
             vobj.Transparency = 20
@@ -198,7 +197,12 @@ class ViewProviderCfdMeshRefinement:
     def updateData(self, obj, prop):
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
         if analysis_obj and not analysis_obj.Proxy.loading:
-            analysis_obj.NeedsMeshRewrite = True
+            if prop == 'Shape':
+                # Updates to the shape should be taken care of via links in 
+                # ShapeRefs
+                pass
+            else:
+                analysis_obj.NeedsMeshRewrite = True
 
     def onChanged(self, vobj, prop):
         return

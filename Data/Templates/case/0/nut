@@ -73,13 +73,15 @@ boundaryField
 %:default
         type        nutkRoughWallFunction;
 %}
-        Ks          %(boundaries/%(0%)/RoughnessHeight%); //TODO
-        Cs          %(boundaries/%(0%)/RoughnessConstant%); //TODO
+        Ks          uniform %(boundaries/%(0%)/RoughnessHeight%);
+        Cs          uniform %(boundaries/%(0%)/RoughnessConstant%);
         value       uniform 0;
     }
 %}
 %:constraint
 %[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
 %:default
 %[0/_boundary_calculated%]
 %}

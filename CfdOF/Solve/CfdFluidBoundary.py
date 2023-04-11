@@ -75,20 +75,20 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
 # For each sub-type, whether the basic tab is enabled, the panel numbers to show (ignored if false), whether
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
 # whether volume fraction panel is shown, whether thermal GUI is shown,
-# rows of thermal UI to show (all shown if None), whether periodic panel is shown
+# rows of thermal UI to show (all shown if None)
 BOUNDARY_UI = [[[False, [], False, False, False, True, None, False],  # No slip
                 [False, [], False, False, False, True, None, False],  # Slip
                 [True, [2], False, False, False, True, None, False],  # Partial slip
                 [True, [0], False, False, False, True, None, False],  # Translating wall
-                [True, [0], False, False, False, True, None, False]],  # Rough
-               [[True, [0, 1, 6], True, True, True, True, [2], False],  # Velocity
+                [True, [0, 6], False, False, False, True, None, False]],  # Rough
+               [[True, [0, 1], True, True, True, True, [2], False],  # Velocity
                 [True, [3], False, True, True, True, [2], False],  # Vol flow rate
                 [True, [4], False, True, True, True, [2], False],  # Mass Flow rate
                 [True, [1], False, True, True, True, [2], False],  # Total pressure
-                [True, [0, 1], False, True, True, True, [2], False]],    # Static pressure
+                [True, [0, 1], False, True, True, True, [2], False]],  # Static pressure
                [[True, [0, 1], False, False, True, True, [2], False],  # Static pressure
                 [True, [0, 1], False, False, True, True, [2], False],  # Uniform velocity
-                [False, [], False, False, False, False, None], False],  # Outflow
+                [False, [], False, False, False, False, None, False]],  # Outflow
                [[True, [1], False, True, True, True, [2], False],  # Opening
                 [True, [0, 1], False, True, False, True, [2], False]],  # Far-field
                [[False, [], False, False, False, False, None, False],  # Symmetry plane
@@ -254,7 +254,7 @@ class CfdFluidBoundary:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubList", "", "Boundary faces"):
+        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubListGlobal", "", "Boundary faces"):
             # Backward compat
             if 'References' in obj.PropertiesList:
                 doc = FreeCAD.getDocument(obj.Document.Name)
@@ -312,6 +312,11 @@ class CfdFluidBoundary:
                           "Porous screen mesh diameter")
         addObjectProperty(obj, 'ScreenSpacing', '2 mm', "App::PropertyLength", "Baffle",
                           "Porous screen mesh spacing")
+
+        addObjectProperty(obj, 'RoughnessHeight', '0 mm', "App::PropertyQuantity", "Turbulence",
+                          "Sand-grain roughness")
+        addObjectProperty(obj, 'RoughnessConstant', '0.5', "App::PropertyQuantity", "Turbulence",
+                          "Coefficient of roughness [0.5-1]")
 
         addObjectProperty(obj, 'ThermalBoundaryType', THERMAL_BOUNDARY_TYPES, "App::PropertyEnumeration", "Thermal",
                           "Type of thermal boundary")
@@ -396,8 +401,7 @@ class CfdFluidBoundary:
         shape = CfdTools.makeShapeFromReferences(obj.ShapeRefs, False)
         if shape is None:
             shape = Part.Shape()
-        if not CfdTools.isSameGeometry(shape, obj.Shape):
-            obj.Shape = shape
+        obj.Shape = shape
         self.updateBoundaryColors(obj)
 
     def updateBoundaryColors(self, obj):
@@ -466,13 +470,16 @@ class ViewProviderCfdFluidBoundary:
 
     def updateData(self, obj, prop):
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        if prop == 'ShapeRefs' or prop == 'Shape':
-            # Only a change to the shape allocation or geometry affects mesh
-            if analysis_obj and not analysis_obj.Proxy.loading:
+        if analysis_obj and not analysis_obj.Proxy.loading:
+            if prop == 'Shape':
+                # Updates to the shape should be taken care of via links in 
+                # ShapeRefs
+                pass
+            elif prop == 'ShapeRefs':
+                # Only a change to the shape allocation or geometry affects mesh
                 analysis_obj.NeedsMeshRewrite = True
-        else:
-            # Else mark case itself as needing updating
-            if analysis_obj and not analysis_obj.Proxy.loading:
+            else:
+                # Else mark case itself as needing updating
                 analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
@@ -489,7 +496,6 @@ class ViewProviderCfdFluidBoundary:
             return False
         material_objs = CfdTools.getMaterials(analysis_object)
 
-        from CfdOF.Solve import TaskPanelCfdFluidBoundary
         import importlib
         importlib.reload(TaskPanelCfdFluidBoundary)
         self.taskd = TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)

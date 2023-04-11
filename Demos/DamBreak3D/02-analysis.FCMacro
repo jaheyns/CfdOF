@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Macro Begin: /home/oliver/.local/share/FreeCAD/Macro/analysis.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++
 import FreeCAD
 import CfdPhysicsSelection
 import CfdFluidMaterial
@@ -116,5 +115,3 @@ FreeCAD.ActiveDocument.InitialisationZone.ShapeRefs = [
 (FreeCAD.ActiveDocument.getObject('Box002'), ('Solid1',))]
 
 FreeCAD.getDocument('Unnamed').getObject('CfdSolver').EndTime = '10.000 s'
-
-# Macro End: /home/oliver/.local/share/FreeCAD/Macro/analysis.FCMacro +++++++++++++++++++++++++++++++++++++++++++++++++

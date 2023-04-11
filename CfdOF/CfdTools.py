@@ -44,6 +44,7 @@ import Part
 import BOPTools
 from BOPTools import SplitFeatures
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
+from CfdOF.CfdConsoleProcess import removeAppimageEnvironment
 from PySide import QtCore
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -80,6 +81,7 @@ QUANTITY_PROPERTIES = ['App::PropertyQuantity',
                        'App::PropertyForce',
                        'App::PropertyPressure']
 
+docker_container = None
 
 def getDefaultOutputPath():
     prefs = getPreferencesLocation()
@@ -97,6 +99,11 @@ def getOutputPath(analysis):
         output_path = ""
     if not output_path:
         output_path = getDefaultOutputPath()
+    if not os.path.isabs(output_path):
+        if not FreeCAD.ActiveDocument.FileName:
+            raise RuntimeError("The output directory is specified as a path relative to the current file's location; " 
+                "however, it needs to be saved in order to determine this.")
+        output_path = os.path.join(os.path.dirname(FreeCAD.ActiveDocument.FileName), output_path)
     output_path = os.path.normpath(output_path)
     return output_path
 
@@ -139,20 +146,12 @@ def getPhysicsModel(analysis_object):
     return physics_model
 
 
-def getDynamicMeshAdaptation(analysis_object):
-    is_present = False
-    mesh_obj = getMesh(analysis_object)
-
-    if mesh_obj is None:
-        return is_present
-    else:
-        for i in mesh_obj.Group:
-            if "DynamicMeshRefinement" in i.Name:
-                dynamic_mesh_adaption_model = i
-                is_present = True
-        if not is_present:
-            dynamic_mesh_adaption_model = None
-        return dynamic_mesh_adaption_model
+def getDynamicMeshAdaptation(mesh_object):
+    dynamic_mesh_adaption_model = None
+    for i in mesh_object.Group:
+        if i.Name.startswith("DynamicMeshInterfaceRefinement") or i.Name.startswith("DynamicMeshShockRefinement"):
+            dynamic_mesh_adaption_model = i
+    return dynamic_mesh_adaption_model
 
 
 def getMeshObject(analysis_object):
@@ -364,6 +363,14 @@ def formatTimer(seconds):
     return str(timedelta(seconds=seconds)).split('.', 2)[0].lstrip('0').lstrip(':')
 
 
+def getColour(type):
+    """ 
+    type: 'Error', 'Warning', 'Logging', 'Text' 
+    """
+    col_int = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/OutputWindow").GetUnsigned('color'+type)
+    return '#{:08X}'.format(col_int)[:-2]
+
+
 def setQuantity(inputField, quantity):
     """
     Set the quantity (quantity object or unlocalised string) into the inputField correctly
@@ -473,8 +480,79 @@ def setFoamDir(installation_path):
     # Set OpenFOAM install path in parameters
     FreeCAD.ParamGet(prefs).SetString("InstallationPath", installation_path)
 
+def startDocker():
+    global docker_container
+    if docker_container==None:
+        docker_container = DockerContainer()
+    if docker_container.container_id==None:
+        if "podman" in docker_container.docker_cmd:
+            # Start podman machine if not already started
+            exit_code = checkPodmanMachineRunning()
+            if exit_code==2:
+                startPodmanMachine()
+                if checkPodmanMachineRunning():
+                    print("Aborting docker container initialization")
+                    return 1
+            elif exit_code==1:
+                print("Aborting docker container initialization")
+                return 1
+        docker_container.start_container()
+        if docker_container.container_id != None:
+            print("Docker image {} started. ID = {}".format(docker_container.image_name, docker_container.container_id))
+            return 0
+        else:
+            print("Docker start appears to have failed")
+            return 1
+
+def checkPodmanMachineRunning():
+    print("Checking podman machine running")
+    cmd = "podman machine list"
+    proc = QtCore.QProcess()
+    proc.start(cmd)
+    proc.waitForFinished()
+    line = ""
+    while proc.canReadLine():
+        line = str(proc.readLine().data(), encoding="utf-8")
+        if len(line)>0:
+            print(line)
+    if "Currently running" in line:
+        print("Podman machine running")
+        return 0
+    elif line[-9:]=="DISK SIZE":
+        print("Podman machine not initialized - please refer to readme")
+        return 1
+    else:
+        print("Podman machine not running")
+        return 2
+
+def startPodmanMachine():
+    print("Attempting podman machine start")
+    cmd = "podman machine start"
+    proc = QtCore.QProcess()
+    proc.start(cmd)
+    proc.waitForFinished()
+    line = ""
+    while proc.canReadLine():
+        line = str(proc.readLine().data(), encoding="utf-8")
+        if len(line)>0:
+            print(line)
+    cmd = "podman machine set --rootful"
+    proc = QtCore.QProcess()
+    proc.start(cmd)
+    proc.waitForFinished()
+    line = ""
+    while proc.canReadLine():
+        line = str(proc.readLine().data(), encoding="utf-8")
+        if len(line)>0:
+            print(line)
 
 def getFoamDir():
+    global docker_container
+    if docker_container==None:
+        docker_container = DockerContainer()
+    if docker_container.usedocker:
+        return ""
+        
     prefs = getPreferencesLocation()
     # Get OpenFOAM install path from parameters
     installation_path = FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
@@ -492,6 +570,12 @@ def getFoamDir():
 
 
 def getFoamRuntime():
+    global docker_container
+    if docker_container==None:
+        docker_container = DockerContainer()
+    if docker_container.usedocker:
+        return 'PosixDocker'
+
     installation_path = getFoamDir()
     if installation_path is None:
         raise IOError("OpenFOAM installation path not set and not detected")
@@ -720,6 +804,11 @@ def makeRunCommand(cmd, dir, source_env=True):
     Generate native command to run the specified Linux command in the relevant environment,
     including changing to the specified working directory if applicable
     """
+
+    if getFoamRuntime() == "PosixDocker" and ' pull ' in cmd:
+        # Case where running from Install Docker thread
+        return cmd.split()
+
     installation_path = getFoamDir()
     if installation_path is None:
         raise IOError("OpenFOAM installation directory not found")
@@ -730,9 +819,19 @@ def makeRunCommand(cmd, dir, source_env=True):
     if source_env and len(installation_path):
         env_setup_script = "{}/etc/bashrc".format(installation_path)
         source = 'source "{}" && '.format(env_setup_script)
+
+    if getFoamRuntime() == "PosixDocker":
+        # Set source for docker container
+        source = 'source /etc/bashrc && '
+        
     cd = ""
     if dir:
         cd = 'cd "{}" && '.format(translatePath(dir))
+    
+    if getFoamRuntime() == "PosixDocker":
+        prefs = getPreferencesLocation()
+        if dir:
+            cd = cd.replace(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""),'/tmp').replace('\\','/')
 
     if getFoamRuntime() == "MinGW":
         # .bashrc will exit unless shell is interactive, so we have to manually load the foam bashrc
@@ -743,6 +842,18 @@ def makeRunCommand(cmd, dir, source_env=True):
                     'export PATH=$FOAM_LIBBIN/msmpi:$FOAM_LIBBIN:$WM_THIRD_PARTY_DIR/platforms/linux64MingwDPInt32/lib:$PATH; '
                      + cd + cmd]
         return cmdline
+
+    if getFoamRuntime() == "PosixDocker":
+        global docker_container
+        if docker_container.output_path_used!=FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""):
+            print("Output path changed - restarting container")
+            docker_container.stop_container()
+            docker_container.start_container()
+        if platform.system() == 'Windows' and FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")[:5]=='\\\\wsl' and cmd[:5] == './All':
+            cmd = 'chmod 744 {0} && {0}'.format(cmd)  # If using windows wsl$ output directory, need to make the command executable
+        cmdline = [docker_container.docker_cmd, 'exec', docker_container.container_id, 'bash', '-c', source + cd + cmd]
+        return cmdline
+
     if getFoamRuntime() == "WindowsDocker":
         foamVersion = os.path.split(installation_path)[-1].lstrip('v')
         cmdline = ['powershell.exe',
@@ -857,6 +968,7 @@ def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook
         print("Running ", ' '.join(cmds), " -> ", logFile)
     else:
         print("Running ", ' '.join(cmds))
+
     proc.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
     if not proc.waitForStarted():
         raise Exception("Unable to start command " + ' '.join(cmds))
@@ -896,14 +1008,14 @@ def convertMesh(case, mesh_file, scale):
         print("Error: mesh scaling ratio is must be a float or integer\n")
 
 
-def checkCfdDependencies():
+def checkCfdDependencies(msgFn):
     FC_MAJOR_VER_REQUIRED = 0
     FC_MINOR_VER_REQUIRED = 18
     FC_PATCH_VER_REQUIRED = 4
     FC_COMMIT_REQUIRED = 16146
 
     CF_MAJOR_VER_REQUIRED = 1
-    CF_MINOR_VER_REQUIRED = 16
+    CF_MINOR_VER_REQUIRED = 20
 
     HISA_MAJOR_VER_REQUIRED = 1
     HISA_MINOR_VER_REQUIRED = 6
@@ -938,40 +1050,32 @@ def checkCfdDependencies():
            (patch_ver < FC_PATCH_VER_REQUIRED or
             (patch_ver == FC_PATCH_VER_REQUIRED and
              gitver < FC_COMMIT_REQUIRED)))))):
-        fc_msg = "FreeCAD version ({}.{}.{}) ({}) must be at least {}.{}.{} ({})".format(
+        msgFn("FreeCAD version (currently {}.{}.{} ({})) must be at least {}.{}.{} ({})".format(
             int(ver[0]), minor_ver, patch_ver, gitver,
-            FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED)
-        print(fc_msg)
-        message += fc_msg + '\n'
+            FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED))
 
     # check openfoam
     print("Checking for OpenFOAM:")
     try:
         foam_dir = getFoamDir()
-        sys_msg = "System: {}\nRuntime: {}\nOpenFOAM directory: {}".format(
-            platform.system(), getFoamRuntime(), foam_dir if len(foam_dir) else "(system installation)")
-        print(sys_msg)
-        message += sys_msg + '\n'
+        msgFn("System: {}\nRuntime: {}\nOpenFOAM directory: {}".format(
+            platform.system(), getFoamRuntime(), foam_dir if len(foam_dir) else "(system installation)"))
     except IOError as e:
-        ofmsg = "Could not find OpenFOAM installation: " + str(e)
-        print(ofmsg)
-        message += ofmsg + '\n'
+        msgFn("Could not find OpenFOAM installation: " + str(e))
     else:
         if foam_dir is None:
-            ofmsg = "OpenFOAM installation path not set and OpenFOAM environment neither pre-loaded before " + \
-                    "running FreeCAD nor detected in standard locations"
-            print(ofmsg)
-            message += ofmsg + '\n'
+            msgFn("OpenFOAM installation path not set and OpenFOAM environment neither pre-loaded before " + \
+                  "running FreeCAD nor detected in standard locations")
         else:
+            if getFoamRuntime() == "PosixDocker":
+                startDocker()
             try:
                 if getFoamRuntime() == "MinGW":
                     foam_ver = runFoamCommand("echo $FOAM_API")[0]
                 else:
                     foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")[0]
             except Exception as e:
-                runmsg = "OpenFOAM installation found, but unable to run command: " + str(e)
-                message += runmsg + '\n'
-                print(runmsg)
+                msgFn("OpenFOAM installation found, but unable to run command: " + str(e))
                 raise
             else:
                 foam_ver = foam_ver.rstrip()
@@ -984,45 +1088,38 @@ def checkCfdDependencies():
                         foam_ver = int(foam_ver.split('.')[0])
                         if getFoamRuntime() == "MinGW":
                             if foam_ver < 2012 or foam_ver > 2206:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + \
-                                         " is not currently supported with MinGW installation"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + \
+                                      " is not currently supported with MinGW installation")
                         if foam_ver >= 1000:  # Plus version
                             if foam_ver < 1706:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                         "Minimum version 1706 or 5 required"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
+                                      "Minimum version 1706 or 5 required")
                             if foam_ver > 2206:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                         "Last tested version is 2206"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
+                                      "Last tested version is 2206")
                         else:  # Foundation version
                             if foam_ver < 5:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                         "Minimum version 5 or 1706 required"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
+                                      "Minimum version 5 or 1706 required")
                             if foam_ver > 9:
-                                vermsg = "OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                         "Last tested version is 9"
-                                message += vermsg + "\n"
-                                print(vermsg)
+                                msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
+                                      "Last tested version is 9")
                     except ValueError:
-                        vermsg = "Error parsing OpenFOAM version string " + foam_ver
-                        message += vermsg + "\n"
-                        print(vermsg)
+                        msgFn("Error parsing OpenFOAM version string " + foam_ver)
                 # Check for wmake
-                if getFoamRuntime() != "MinGW":
+                if getFoamRuntime() != "MinGW" and getFoamRuntime() != "PosixDocker":
                     try:
                         runFoamCommand("wmake -help")
                     except subprocess.CalledProcessError:
-                        wmakemsg = "OpenFOAM installation does not include 'wmake'. " + \
-                                   "Installation of cfMesh and HiSA will not be possible."
-                        message += wmakemsg + "\n"
-                        print(wmakemsg)
+                        msgFn("OpenFOAM installation does not include 'wmake'. " + \
+                              "Installation of cfMesh and HiSA will not be possible.")
+
+                # Check for mpiexec
+                try:
+                    runFoamCommand("mpiexec --help")
+                except subprocess.CalledProcessError:
+                    msgFn("MPI is not installed. " + \
+                            "Parallel execution will not be possible.")
 
                 # Check for cfMesh
                 try:
@@ -1033,14 +1130,10 @@ def checkCfdDependencies():
                         int(cfmesh_ver[0]) < CF_MAJOR_VER_REQUIRED or
                         (int(cfmesh_ver[0]) == CF_MAJOR_VER_REQUIRED and
                          int(cfmesh_ver[1]) < CF_MINOR_VER_REQUIRED)):
-                        vermsg = "cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
-                                                                              CF_MINOR_VER_REQUIRED)
-                        message += vermsg + "\n"
-                        print(vermsg)
+                        msgFn("cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
+                                                                           CF_MINOR_VER_REQUIRED))
                 except subprocess.CalledProcessError:
-                    cfmesh_msg = "cfMesh (CfdOF version) not found"
-                    message += cfmesh_msg + '\n'
-                    print(cfmesh_msg)
+                    msgFn("cfMesh (CfdOF version) not found")
 
                 # Check for HiSA
                 try:
@@ -1053,15 +1146,11 @@ def checkCfdDependencies():
                          (int(hisa_ver[1]) < HISA_MINOR_VER_REQUIRED or
                           (int(hisa_ver[1]) == HISA_MINOR_VER_REQUIRED and
                            int(hisa_ver[2]) < HISA_PATCH_VER_REQUIRED)))):
-                        vermsg = "HiSA version {}.{}.{} required".format(HISA_MAJOR_VER_REQUIRED,
-                                                                         HISA_MINOR_VER_REQUIRED,
-                                                                         HISA_PATCH_VER_REQUIRED)
-                        message += vermsg + "\n"
-                        print(vermsg)
+                        msgFn("HiSA version {}.{}.{} required".format(HISA_MAJOR_VER_REQUIRED,
+                                                                      HISA_MINOR_VER_REQUIRED,
+                                                                      HISA_PATCH_VER_REQUIRED))
                 except subprocess.CalledProcessError:
-                    hisa_msg = "HiSA not found"
-                    message += hisa_msg + '\n'
-                    print(hisa_msg)
+                    msgFn("HiSA not found")
 
         # Check for paraview
         print("Checking for paraview:")
@@ -1076,13 +1165,9 @@ def checkCfdDependencies():
             except subprocess.CalledProcessError:
                 failed = True
         if failed or not os.path.exists(paraview_cmd):
-            pv_msg = "Paraview executable '" + paraview_cmd + "' not found."
-            message += pv_msg + '\n'
-            print(pv_msg)
+            msgFn("Paraview executable '" + paraview_cmd + "' not found.")
         else:
-            pv_msg = "Paraview executable: {}".format(paraview_cmd)
-            message += pv_msg + '\n'
-            print(pv_msg)
+            msgFn("Paraview executable: {}".format(paraview_cmd))
 
         # Check for paraview python support
         if not failed:
@@ -1102,67 +1187,50 @@ def checkCfdDependencies():
                 else:
                     pvpython_cmd = paraview_cmd.rstrip('paraview')+'pvpython'
             if failed or not os.path.exists(pvpython_cmd):
-                pv_msg = "Python support in paraview not found. Please install paraview python packages."
-                message += pv_msg + '\n'
-                print(pv_msg)
+                msgFn("Python support in paraview not found. Please install paraview python packages.")
 
     print("Checking Plot module:")
 
     try:
         import matplotlib
     except ImportError:
-        matplot_msg = "Could not load matplotlib package (required by Plot module)"
-        message += matplot_msg + '\n'
-        print(matplot_msg)
+        msgFn("Could not load matplotlib package (required by Plot module)")
 
     plot_ok = False
     if major_ver > 0 or minor_ver >= 20:
         try:
-            from FreeCAD.Plot import Plot  # Build-in plot module
+            from FreeCAD.Plot import Plot  # Built-in plot module
             plot_ok = True
         except ImportError:
-            plot_msg = "Could not load Plot module\nAttempting to use Plot workbench instead"
-            message += plot_msg + "\n"
-            print(plot_msg)
+            msgFn("Could not load Plot module\nAttempting to use Plot workbench instead")
     if not plot_ok:
         try:
             from CfdOF.compat import Plot  # Plot workbench
         except ImportError:
-            plot_msg = "Could not load legacy Plot module"
-            message += plot_msg + '\n'
-            print(plot_msg)
+            msgFn("Could not load legacy Plot module")
 
     print("Checking for gmsh:")
     # check that gmsh version 2.13 or greater is installed
     gmshversion = ""
     gmsh_exe = getGmshExecutable()
     if gmsh_exe is None:
-        gmsh_msg = "gmsh not found (optional)"
-        message += gmsh_msg + '\n'
-        print(gmsh_msg)
+        msgFn("gmsh not found (optional)")
     else:
-        gmsh_msg = "gmsh executable: " + gmsh_exe
-        message += gmsh_msg + '\n'
-        print(gmsh_msg)
+        msgFn("gmsh executable: " + gmsh_exe)
         try:
             # Needs to be runnable from OpenFOAM environment
             gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")[2]
         except (OSError, subprocess.CalledProcessError):
-            gmsh_msg = "gmsh could not be run from OpenFOAM environment"
-            message += gmsh_msg + '\n'
-            print(gmsh_msg)
+            msgFn("gmsh could not be run from OpenFOAM environment")
         if len(gmshversion) > 1:
             # Only the last line contains gmsh version number
             gmshversion = gmshversion.rstrip().split()
             gmshversion = gmshversion[-1]
             versionlist = gmshversion.split(".")
             if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
-                gmsh_ver_msg = "gmsh version is older than minimum required (2.13)"
-                message += gmsh_ver_msg + '\n'
-                print(gmsh_ver_msg)
+                msgFn("gmsh version is older than minimum required (2.13)")
 
-    print("Completed CFD dependency check")
-    return message
+    msgFn("Completed CFD dependency check")
 
 
 def getParaviewExecutable():
@@ -1194,6 +1262,8 @@ def getGmshExecutable():
     if not gmsh_cmd:
         # Otherwise, see if the command 'gmsh' is in the path.
         gmsh_cmd = shutil.which("gmsh")
+    if getFoamRuntime() == "PosixDocker":
+        gmsh_cmd='gmsh'
     return gmsh_cmd
 
 
@@ -1206,25 +1276,35 @@ def startParaview(case_path, script_name, console_message_fn):
         # If not found, try to run from the OpenFOAM environment, in case a bundled version is available from there
         paraview_cmd = "$(which paraview)"  # 'which' required due to mingw weirdness(?) on Windows
         try:
-            console_message_fn("Running " + paraview_cmd + " " + arg)
-            proc = startFoamApplication([paraview_cmd, arg], case_path, log_name=None)
+            cmds = [paraview_cmd, arg]
+            cmd = ' '.join(cmds)
+            console_message_fn("Running " + cmd)
+            args = makeRunCommand(cmd, case_path)
+            paraview_cmd = args[0]
+            args = args[1:] if len(args) > 1 else []
+            proc.setProgram(paraview_cmd)
+            proc.setArguments([arg])
+            proc.setProcessEnvironment(getRunEnvironment())
+            success = proc.startDetached()
+            if not success:
+                raise Exception("Unable to start command " + cmd)
             console_message_fn("Paraview started")
         except QtCore.QProcess.ProcessError:
             console_message_fn("Error starting paraview")
     else:
         console_message_fn("Running " + paraview_cmd + " " + arg)
+        proc.setProgram(paraview_cmd)
+        proc.setArguments([arg])
         proc.setWorkingDirectory(case_path)
-
         env = QtCore.QProcessEnvironment.systemEnvironment()
         removeAppimageEnvironment(env)
         proc.setProcessEnvironment(env)
-
-        proc.start(paraview_cmd, [arg])
-        if proc.waitForStarted():
+        success = proc.startDetached()
+        if success:
             console_message_fn("Paraview started")
         else:
             console_message_fn("Error starting paraview")
-    return proc
+    return success
 
 
 def startGmsh(working_dir, args, console_message_fn, stdout_fn=None, stderr_fn=None):
@@ -1242,28 +1322,6 @@ def startGmsh(working_dir, args, console_message_fn, stdout_fn=None, stderr_fn=N
         else:
             console_message_fn("Error starting GMSH")
     return proc
-
-
-def removeAppimageEnvironment(env):
-    """
-    When running from an AppImage, the changes to the system environment can interfere with the running of
-    external commands. This tries to remove them.
-    """
-    if env.contains("APPIMAGE"):
-        # Strip any value starting with the appimage directory, to attempt to revert to the system environment
-        appdir = env.value("APPDIR")
-        keys = env.keys()
-        for k in keys:
-            vals = env.value(k).split(':')
-            newvals = ''
-            for val in vals:
-                if not val.startswith(appdir):
-                    newvals += val + ':'
-            newvals = newvals.rstrip(':')
-            if newvals:
-                env.insert(k, newvals)
-            else:
-                env.remove(k)
 
 
 def floatEqual(a, b):
@@ -1558,7 +1616,6 @@ def importMaterials():
 
 
 def addMatDir(mat_dir, materials):
-    import glob
     import importFCMat
     mat_file_extension = ".FCMat"
     ext_len = len(mat_file_extension)
@@ -1671,6 +1728,9 @@ class CfdSynchronousFoamProcess:
         self.outputAll = ""
 
     def run(self, cmdline, case=None):
+        if getFoamRuntime() == "PosixDocker" and ' pull ' not in cmdline:
+            if startDocker():
+                return 1
         print("Running ", cmdline)
         self.process.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
         if not self.process.waitForFinished():
@@ -1684,3 +1744,111 @@ class CfdSynchronousFoamProcess:
     def readError(self, output):
         self.outputErr += output
         self.outputAll += output
+
+# Only one container is needed. Start one for the CfdOF workbench as required
+class DockerContainer:
+    container_id = None
+    usedocker = False
+    output_path_used = None
+    docker_cmd = None
+    
+    def __init__(self):
+        self.image_name = None
+        import shutil
+        
+        if shutil.which('podman') is not None:
+            self.docker_cmd = shutil.which('podman')
+        elif shutil.which('docker') is not None:
+            self.docker_cmd = shutil.which('docker')
+        else:
+            self.docker_cmd = None
+
+        if self.docker_cmd is not None:
+            self.docker_cmd = self.docker_cmd.split(os.path.sep)[-1]
+
+    def start_container(self):
+        prefs = getPreferencesLocation()
+        self.image_name = FreeCAD.ParamGet(prefs).GetString("DockerURL", "")
+        output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+        
+        if not output_path:
+            output_path = tempfile.gettempdir()
+        output_path = os.path.normpath(output_path)
+        
+        if not os.path.isdir(output_path):
+            print("Default output directory not found")
+            return 1
+        
+        if DockerContainer.container_id != None:
+            print("Attempting to start container but id already set")
+
+        container_ls = self.query_docker_container_ls() 
+        if container_ls != None:
+            print("Docker container {} running but not started by CfdOF - it may not be configured correctly - stopping container.".format(container_ls))
+            self.stop_container(alien = True)
+
+        if self.image_name == "":
+            print("Docker image name not set")
+            return 1
+
+        if self.docker_cmd == None:
+            print("Need to install either podman or docker")
+            return 1
+
+        if platform.system() == 'Windows':
+            out_d = output_path.split(os.sep)
+            if len(out_d)>2 and out_d[2][:3] == 'wsl':
+                output_path = '/' + '/'.join(out_d[4:])
+
+        cmd = "{0} run -t -d -u 1000:1000 -v {1}:/tmp {2}".format(self.docker_cmd, output_path, self.image_name)
+
+        if 'docker' in self.docker_cmd:
+            cmd = cmd.replace('docker.io/','')
+        proc = QtCore.QProcess()
+        proc.start(cmd)
+        self.getContainerID()
+        if self.container_id != None:
+            self.output_path_used = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+            return 0
+        else:
+            return 1
+
+    """ Stop docker container and remove """
+    def stop_container(self, alien = False):
+        if DockerContainer.container_id == None and alien:
+            DockerContainer.container_id = self.query_docker_container_ls()
+        if DockerContainer.container_id != None:
+            print("Stopping docker container {}".format(DockerContainer.container_id))
+            cmd = "{} container rm -f {}".format(self.docker_cmd, DockerContainer.container_id)
+            proc = QtCore.QProcess()
+            proc.start(cmd)
+            if not proc.waitForFinished():
+                print("Stop docker container {} failed".format(DockerContainer.container_id))
+            else:
+                while proc.canReadLine():
+                    line = proc.readLine()
+            DockerContainer.container_id = None
+            DockerContainer.output_path_used = None
+        else:
+            print("No docker container to stop")
+                    
+    def getContainerID(self):
+        import time
+        timer_counts = 0
+        while timer_counts < 10 and DockerContainer.container_id == None:
+            time.sleep(1)
+            DockerContainer.container_id = self.query_docker_container_ls()
+            timer_counts = timer_counts + 1
+        
+    def query_docker_container_ls(self):
+        cmd = "{} container ls".format(self.docker_cmd)
+        proc = QtCore.QProcess()
+        proc.start(cmd)
+        proc.waitForFinished()
+        while proc.canReadLine():
+            line = proc.readLine()
+            cnt_lst = str(line.data(), encoding="utf-8").split()
+            if  len(cnt_lst)>0 and cnt_lst[1].replace(':latest','').replace('docker.io/','') == self.image_name.replace(':latest','').replace('docker.io/',''):
+                return(cnt_lst[0])
+        return(None)
+

@@ -22,7 +22,6 @@
 # **************************************************************************/
 
 import sys
-from PySide import QtCore
 
 
 class CfdOFWorkbench(Workbench):
@@ -56,14 +55,17 @@ class CfdOFWorkbench(Workbench):
         from CfdOF.Solve.CfdFluidBoundary import CommandCfdFluidBoundary
         from CfdOF.Solve.CfdZone import CommandCfdPorousZone
         from CfdOF.Solve.CfdZone import CommandCfdInitialisationZone
-        from CfdOF.Mesh.CfdDynamicMeshRefinement import CommandDynamicMeshRefinement
+        from CfdOF.Mesh.CfdDynamicMeshRefinement import CommandGroupDynamicMeshRefinement, \
+            CommandDynamicMeshInterfaceRefinement, CommandDynamicMeshShockRefinement
         from CfdOF.PostProcess.CfdReportingFunction import CommandCfdReportingFunction
         from CfdOF.Solve.CfdScalarTransportFunction import CommandCfdScalarTransportFunction
 
         FreeCADGui.addCommand('Cfd_Analysis', CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', CommandCfdMeshFromShape())
         FreeCADGui.addCommand('Cfd_MeshRegion', CommandMeshRegion())
-        FreeCADGui.addCommand('Cfd_DynamicMeshRefinement', CommandDynamicMeshRefinement())
+        FreeCADGui.addCommand('Cfd_DynamicMeshInterfaceRefinement', CommandDynamicMeshInterfaceRefinement())
+        FreeCADGui.addCommand('Cfd_DynamicMeshShockRefinement', CommandDynamicMeshShockRefinement())
+        FreeCADGui.addCommand('Cfd_GroupDynamicMeshRefinement', CommandGroupDynamicMeshRefinement())
         FreeCADGui.addCommand('Cfd_PhysicsModel', CommandCfdPhysicsSelection())
         FreeCADGui.addCommand('Cfd_FluidMaterial', CommandCfdFluidMaterial())
         FreeCADGui.addCommand('Cfd_FluidBoundary', CommandCfdFluidBoundary())
@@ -75,22 +77,38 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
 
         cmdlst = ['Cfd_Analysis',
-                  'Cfd_MeshFromShape', 'Cfd_MeshRegion', 'Cfd_DynamicMeshRefinement',
+                  'Cfd_MeshFromShape', 'Cfd_MeshRegion', 
+                  ("Dynamic mesh refinement", ['Cfd_DynamicMeshInterfaceRefinement','Cfd_DynamicMeshShockRefinement',]),
+                  ('Cfd_GroupDynamicMeshRefinement',),
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_FluidBoundary', 'Cfd_InitialiseInternal',
                   'Cfd_InitialisationZone', 'Cfd_PorousZone',
                   'Cfd_ReportingFunctions', 'Cfd_ScalarTransportFunctions',
                   'Cfd_SolverControl']
 
-        self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), cmdlst)
+        for cmd in cmdlst:
+            if isinstance(cmd, tuple):
+                if len(cmd) == 1:
+                    self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), [cmd[0]])
+                else:
+                    self.appendMenu([str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), cmd[0]], cmd[1])
+            else:
+                self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), [cmd])
+                self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), [cmd])
 
-        cmdlst.remove('Cfd_DynamicMeshRefinement')
-        self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), cmdlst)
+        from CfdOF import CfdTools
+        prefs = CfdTools.getPreferencesLocation()
+        CfdTools.DockerContainer.usedocker = FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0)    
 
         # TODO enable QtCore translation here
 
     def GetClassName(self):
         return "Gui::PythonWorkbench"
+
+    def __del__(sef):
+        from CfdOF import CfdTools
+        if CfdTools.DockerContainer.container_id != None:
+            CfdTools.docker_container.stop_container()
 
 import CfdOF
 FreeCADGui.addWorkbench(CfdOFWorkbench())

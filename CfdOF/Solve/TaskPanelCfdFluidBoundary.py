@@ -103,6 +103,9 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputWireDiameter, self.obj.ScreenWireDiameter)
         setQuantity(self.form.inputSpacing, self.obj.ScreenSpacing)
 
+        setQuantity(self.form.inputRoughnessHeight, self.obj.RoughnessHeight)
+        setQuantity(self.form.inputRoughnessConstant, self.obj.RoughnessConstant)
+
         # Thermal
         self.form.comboThermalBoundaryType.addItems(CfdFluidBoundary.THERMAL_BOUNDARY_NAMES)
         thi = indexOrDefault(CfdFluidBoundary.THERMAL_BOUNDARY_TYPES, self.obj.ThermalBoundaryType, 0)
@@ -443,6 +446,8 @@ class TaskPanelCfdFluidBoundary:
 
         # Wall
         storeIfChanged(self.obj, 'SlipRatio', getQuantity(self.form.inputSlipRatio))
+        storeIfChanged(self.obj, 'RoughnessHeight', getQuantity(self.form.inputRoughnessHeight))
+        storeIfChanged(self.obj, 'RoughnessConstant', getQuantity(self.form.inputRoughnessConstant))
 
         # Thermal
         storeIfChanged(self.obj, 'Temperature', getQuantity(self.form.inputTemperature))

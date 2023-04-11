@@ -27,29 +27,27 @@ e.g. (there are many more!):
 * Expose parallel option in GUI
 
 ## Solver
+* Add a mechanism to specify surface tension coefficients between each pair of fluids
+  (with future extensibility to other pairwise interfacial properties).
 * Add cyclic boundary conditions
 * Add ability to import / export existing OF cases / results
 * Improve organisation of source code
 * Improve edge detection for meshing?
 * Expose parallel run option in GUI
-* Add a mechanism to specify surface tension coefficients between each pair of fluids
-  (with future extensibility to other pairwise interfacial properties).
 
 ## Documentation
 * Formal documentation should be added to FreeCAD Wiki.
 
 ## Testing
 * More 'demo' cases are needed, which are specified as macros and run during the testing runs
-  * Multiphase case(s)
   * Cases with postprocessing
   * Buoyant case(s)
 * Additional unit tests which also test the functionality of the task panels, are needed. Currently testing is only
   done based on macros. Somehow, interaction with the GUI itself needs to be simulated.
 
-## Future scheduled tasks
+## Future-scheduled tasks
 * On release of FreeCAD v0.21, stop supporting FreeCAD <= 0.19
     * Remove metadata.txt
     * Remove legacy python 2 code and python2/3 switches
-    * Switch repository in Addon manager to gitlab
     * Remove backward-compatible plot code in compat/
     * Update version requirement in package.xml and dependency checker

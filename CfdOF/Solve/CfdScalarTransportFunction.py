@@ -57,10 +57,10 @@ class CommandCfdScalarTransportFunction:
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CfdScalarTransportFunction object")
         FreeCADGui.doCommand("")
-        FreeCADGui.doCommand("from CfdOF.Solve import CommandCfdScalarTransportFunctions")
+        FreeCADGui.doCommand("from CfdOF.Solve import CfdScalarTransportFunction")
         FreeCADGui.doCommand("from CfdOF import CfdTools")
         FreeCADGui.doCommand(
-            "CfdTools.getActiveAnalysis().addObject(CommandCfdScalarTransportFunctions.makeCfdScalarTransportFunction())")
+            "CfdTools.getActiveAnalysis().addObject(CfdScalarTransportFunction.makeCfdScalarTransportFunction())")
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 

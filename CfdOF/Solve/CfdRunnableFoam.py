@@ -146,6 +146,9 @@ class CfdRunnableFoam(CfdRunnable):
         self.initResiduals()
         self.initMonitors()
 
+        if CfdTools.getFoamRuntime() == "PosixDocker":
+            CfdTools.startDocker()
+
         # Environment is sourced in run script, so no need to include in run command
         cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
         return cmd
@@ -176,7 +179,7 @@ class CfdRunnableFoam(CfdRunnable):
                             TimePlot(title=rf.Label, y_label=rf.SampleFieldName, is_log=False)
 
     def process_output(self, text):
-        log_lines = text.split('\n')
+        log_lines = text.split('\n')[:-1]
         prev_niter = self.niter
         for line in log_lines:
             line = line.rstrip()
@@ -273,9 +276,9 @@ class CfdRunnableFoam(CfdRunnable):
             if self.in_forcecoeffs_section:
                 fc = self.force_coeffs[self.in_forcecoeffs_section]
                 if (("Cd" in split) or ("Cd:" in split)) and self.niter-1 > len(fc['cdCoeffs']):
-                    fc['cdCoeffs'].append(float(split[2]))
+                    fc['cdCoeffs'].append(float(split[2] if split[1] == '=' else split[1]))
                 if (("Cl" in split) or ("Cl:" in split)) and self.niter-1 > len(fc['clCoeffs']):
-                    fc['clCoeffs'].append(float(split[2]))
+                    fc['clCoeffs'].append(float(split[2] if split[1] == '=' else split[1]))
 
         # Update plots
         if self.niter > 1 and self.niter > prev_niter:

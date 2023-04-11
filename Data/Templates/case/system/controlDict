@@ -26,7 +26,7 @@ writeControl    timeStep;
 
 writeInterval   %(solver/SteadyWriteInterval%);
 
-purgeWrite      0;
+purgeWrite      %(solver/PurgeWrite%);
 
 %:Transient
 deltaT          %(solver/TimeStep%);
@@ -37,7 +37,7 @@ writeControl    adjustableRunTime;
 
 writeInterval   %(solver/TransientWriteInterval%);
 
-purgeWrite      0;
+purgeWrite      %(solver/PurgeWrite%);
 
 %{%(solver/SolverName%)
 %:hisa
@@ -84,6 +84,22 @@ functions
 %{%(physics/TurbulenceModel%)
 %:kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
 %[system/_functions_DESRegions%]
+%}
+%{%(dynamicMeshEnabled%)
+%:True
+%{%(dynamicMesh/Type%)
+%:shock
+shockRefinement
+{
+    #include "meshRefinement"
+}
+
+%}
+%}
+%{%(solver/SolverName%)
+%:hisa
+#includeFunc MachNo
+
 %}
 }
 

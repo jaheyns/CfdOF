@@ -29,7 +29,6 @@ from CfdTools import setQuantity, getQuantity
 import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore, QtGui
 from CfdOF import CfdTools
 from CfdOF.CfdTools import getQuantity, setQuantity, storeIfChanged
 
