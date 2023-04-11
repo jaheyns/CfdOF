@@ -1514,6 +1514,91 @@
              </widget>
             </item>
             <item>
+             <widget class="QFrame" name="frame_2">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QFormLayout" name="formLayout_2">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>8</number>
+               </property>
+               <property name="rightMargin">
+                <number>8</number>
+               </property>
+               <property name="bottomMargin">
+                <number>8</number>
+               </property>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_7">
+                 <property name="text">
+                  <string>Roughness height (Ks):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="Gui::InputField" name="inputRoughnessHeight">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                 <property name="singleStep" stdset="0">
+                  <double>0.100000000000000</double>
+                 </property>
+                 <property name="minimum" stdset="0">
+                  <double>0.000000000000000</double>
+                 </property>
+                 <property name="unit" stdset="0">
+                  <string notr="true">mm</string>
+                 </property>
+                 <property name="format" stdset="0">
+                  <number>0</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_11">
+                 <property name="text">
+                  <string>Roughness constant (Cs):</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="Gui::InputField" name="inputRoughnessConstant">
+                 <property name="text">
+                  <string>0</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                 </property>
+                 <property name="singleStep" stdset="0">
+                  <double>0.100000000000000</double>
+                 </property>
+                 <property name="minimum" stdset="0">
+                  <double>0.500000000000000</double>
+                 </property>
+                 <property name="maximum" stdset="0">
+                  <double>1.000000000000000</double>
+                 </property>
+                 <property name="unit" stdset="0">
+                  <string notr="true"/>
+                 </property>
+                 <property name="format" stdset="0">
+                  <number>0</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
              <widget class="QFrame" name="frame6">
               <property name="frameShape">
                <enum>QFrame::NoFrame</enum>
@@ -1983,91 +2068,6 @@
               </layout>
              </widget>
             </item>
-            <item>
-             <widget class="QFrame" name="frame_2">
-              <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
-              </property>
-              <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
-              </property>
-              <layout class="QFormLayout" name="formLayout_2">
-               <property name="leftMargin">
-                <number>0</number>
-               </property>
-               <property name="topMargin">
-                <number>8</number>
-               </property>
-               <property name="rightMargin">
-                <number>8</number>
-               </property>
-               <property name="bottomMargin">
-                <number>8</number>
-               </property>
-               <item row="0" column="0">
-                <widget class="QLabel" name="label_7">
-                 <property name="text">
-                  <string>Roughness height (Ks):</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="Gui::InputField" name="inputRoughnessHeight">
-                 <property name="text">
-                  <string>0</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                 <property name="singleStep" stdset="0">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="minimum" stdset="0">
-                  <double>0.000000000000000</double>
-                 </property>
-                 <property name="unit" stdset="0">
-                  <string notr="true">mm</string>
-                 </property>
-                 <property name="format" stdset="0">
-                  <number>0</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QLabel" name="label_11">
-                 <property name="text">
-                  <string>Roughness constant (Cs):</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="Gui::InputField" name="inputRoughnessConstant">
-                 <property name="text">
-                  <string>0</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                 </property>
-                 <property name="singleStep" stdset="0">
-                  <double>0.100000000000000</double>
-                 </property>
-                 <property name="minimum" stdset="0">
-                  <double>0.500000000000000</double>
-                 </property>
-                 <property name="maximum" stdset="0">
-                    <double>1.00000000000000</double>
-                   </property>
-                   <property name="unit" stdset="0">
-                  <string notr="true"></string>
-                 </property>
-                 <property name="format" stdset="0">
-                  <number>0</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
            </layout>
           </item>
          </layout>
@@ -2201,8 +2201,6 @@
   <tabstop>radioButtonPorousCoeff</tabstop>
   <tabstop>radioButtonPorousScreen</tabstop>
   <tabstop>inputPressureDropCoeff</tabstop>
-  <tabstop>inputRoughnessCoefficient</tabstop>
-  <tabstop>inputRoughnessFactor</tabstop>
   <tabstop>comboFluid</tabstop>
   <tabstop>inputVolumeFraction</tabstop>
   <tabstop>comboThermalBoundaryType</tabstop>
@@ -2225,7 +2223,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupPorous"/>
   <buttongroup name="buttonGroupPeriodic"/>
+  <buttongroup name="buttonGroupPorous"/>
  </buttongroups>
 </ui>
