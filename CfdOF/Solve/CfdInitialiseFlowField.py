@@ -94,7 +94,7 @@ class CfdInitialVariables:
         addObjectProperty(obj, 'Ux', '0 m/s', "App::PropertySpeed", "Flow", "Velocity (x component)")
         addObjectProperty(obj, 'Uy', '0 m/s', "App::PropertySpeed", "Flow", "Velocity (y component)")
         addObjectProperty(obj, 'Uz', '0 m/s', "App::PropertySpeed", "Flow", "Velocity (z component)")
-        addObjectProperty(obj, 'Pressure', '0 Pa', "App::PropertyPressure", "Flow", "Static pressure")
+        addObjectProperty(obj, 'Pressure', '100 kPa', "App::PropertyPressure", "Flow", "Static pressure")
         addObjectProperty(obj, 'UseInletTemperatureValue', False, "App::PropertyBool", "Thermal",
                           "Initialise with temperature value from inlet")
         addObjectProperty(obj, 'Temperature', '293 K', "App::PropertyQuantity", "Thermal", "Temperature")

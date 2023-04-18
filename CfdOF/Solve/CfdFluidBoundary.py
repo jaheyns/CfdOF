@@ -290,7 +290,7 @@ class CfdFluidBoundary:
                           "Face describing direction (normal)")
         addObjectProperty(obj, 'ReverseNormal', False, "App::PropertyBool", "Flow",
                           "Direction is inward-pointing if true")
-        addObjectProperty(obj, 'Pressure', '0 Pa', "App::PropertyPressure", "Flow",
+        addObjectProperty(obj, 'Pressure', '100 kPa', "App::PropertyPressure", "Flow",
                           "Static pressure")
         addObjectProperty(obj, 'SlipRatio', '0', "App::PropertyQuantity", "Flow",
                           "Slip ratio")
