@@ -31,6 +31,7 @@ class CfdOFWorkbench(Workbench):
         from CfdOF import CfdTools
         from PySide import QtCore
         from CfdOF.CfdPreferencePage import CfdPreferencePage
+        from CfdOF.CfdRemotePreferencePage import CfdRemotePreferencePage
 
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "cfd.svg")
         self.__class__.Icon = icon_path
@@ -40,6 +41,7 @@ class CfdOFWorkbench(Workbench):
         icons_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons")
         QtCore.QDir.addSearchPath("icons", icons_path)
         FreeCADGui.addPreferencePage(CfdPreferencePage, "CfdOF")
+        FreeCADGui.addPreferencePage(CfdRemotePreferencePage, "CfdOF")
 
     def Initialize(self):
         # Must import QtCore in this function, not at the beginning of this file for translation support

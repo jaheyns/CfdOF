@@ -51,6 +51,7 @@ class CfdConsoleProcess:
     def __del__(self):
         self.terminate()
 
+    #TODO document what the format of cmd is for developers
     def start(self, cmd, env_vars=None, working_dir=None):
         """ Start process and return immediately """
         self.print_next_error_lines = 0
@@ -79,12 +80,18 @@ class CfdConsoleProcess:
                 self.process.write(b"terminate\n")
                 self.process.waitForBytesWritten()  # 'flush'
             else:
+                print("Process has been terminated")
                 self.process.terminate()
             self.process.waitForFinished()
 
     def finished(self, exit_code):
+        print("Process has finished")
         if self.finishedHook:
+            #print("finished hook was called with exit code:" + str(exit_code))
             self.finishedHook(exit_code)
+        else:
+            pass
+            #print("Error: finished wasn't hooked to a handler")
 
     def readStdout(self):
         # Ensure only complete lines are passed on

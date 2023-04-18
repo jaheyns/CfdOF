@@ -24,7 +24,8 @@
 
 import os
 import os.path
-from FreeCAD import Units
+#import FreeCAD
+from FreeCAD import Units, ParamGet
 from CfdOF import CfdTools
 from CfdOF.TemplateBuilder import TemplateBuilder
 from CfdOF.CfdTools import cfdMessage
@@ -51,12 +52,16 @@ class CfdCaseWriterFoam:
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
         self.dynamic_mesh_refinement_obj = CfdTools.getDynamicMeshAdaptation(self.mesh_obj)
         self.mesh_generated = False
+
+        # LG123 changed this for testing
         self.working_dir = CfdTools.getOutputPath(self.analysis_obj)
+        #self.working_dir = CfdTools.getDefaultOutputPath('local')
+
         self.progressCallback = None
 
         self.settings = None
 
-    def writeCase(self):
+    def writeCase(self, profile_name):
         """ writeCase() will collect case settings, and finally build a runnable case. """
         cfdMessage("Writing case to folder {}\n".format(self.working_dir))
         if not os.path.exists(self.working_dir):
@@ -155,8 +160,44 @@ class CfdCaseWriterFoam:
 
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         if self.progressCallback:
-            self.progressCallback("Case written successfully")
-            
+            self.progressCallback("Case written locally")
+
+        # if using a remote host, copy the case folder from the local case dir
+        # to the remote host's directory
+        if profile_name != "local":
+
+            profile_prefs = CfdTools.getPreferencesLocation() +"/Hosts/" + profile_name
+            remote_user = ParamGet(profile_prefs).GetString("Username", "")
+            remote_hostname = ParamGet(profile_prefs).GetString("Hostname", "")
+
+            #remote_output_path = ParamGet(profile_prefs).GetString("OutputPath","")
+            remote_output_path = CfdTools.getDefaultOutputPath(profile_name)
+
+            #print("remote_user:" + remote_user)
+            #print("remote_hostname:" + remote_hostname)
+            #print("remote_output_path:" + remote_output_path)
+            #print("self.case_folder:" + self.case_folder)
+            #print("self.working_dir:" + self.working_dir)
+
+            # rsync the meshCase directory to the remote host's output directory
+            # Typical useage: rsync -r --delete /tmp/ me@david:/tmp
+            # --remove-source-files removes the files that get transfered
+            # --delete removes files from the destination that didn't get transfered
+            #
+
+            try:
+                CfdTools.runFoamCommand("rsync -r --delete --remove-source-files " + self.case_folder + " " + remote_user + "@" + remote_hostname + \
+                                        ":" + remote_output_path)
+            except Exception as e:
+                CfdTools.cfdMessage("Could not move case to remote host: " + str(e))
+                if self.progressCallback:
+                    self.progressCallback("Could not move case to remote host: " + str(e))
+                    return False
+            else:
+                CfdTools.cfdMessage("Moved solver case to " + remote_hostname + ":" + remote_output_path + "\n" )
+                if self.progressCallback:
+                    self.progressCallback("Moved solver case to " + remote_hostname + ":" + remote_output_path + "\n")
+
         return True
 
     def getSolverName(self):

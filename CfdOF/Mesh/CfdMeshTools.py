@@ -70,7 +70,7 @@ class CfdMeshTools:
 
         self.progressCallback = None
 
-    def writeMesh(self):
+    def writeMesh(self, profile_name):
         self.setupMeshCaseDir()
         CfdTools.cfdMessage("Exporting mesh refinement data ...\n")
         if self.progressCallback:
@@ -81,10 +81,11 @@ class CfdMeshTools:
         if self.progressCallback:
             self.progressCallback("Exporting the part surfaces ...")
         self.writePartFile()
-        self.writeMeshCase()
+        self.writeMeshCase(profile_name)
         CfdTools.cfdMessage("Wrote mesh case to {}\n".format(self.meshCaseDir))
         if self.progressCallback:
-            self.progressCallback("Mesh case written successfully")
+             self.progressCallback("Mesh case written successfully")
+
 
     def processExtrusions(self):
         """ Find and process any extrusion objects """
@@ -586,7 +587,7 @@ class CfdMeshTools:
         else:
             print('No mesh was created.')
 
-    def writeMeshCase(self):
+    def writeMeshCase(self, host_profile):
         """ Collect case settings, and finally build a runnable case. """
         CfdTools.cfdMessage("Populating mesh dictionaries in folder {}\n".format(self.meshCaseDir))
 
@@ -711,14 +712,20 @@ class CfdMeshTools:
         if CfdTools.getFoamRuntime() != 'WindowsDocker':
             self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
 
+        # set the number of threads and processes
+        # these were set appropriately when the host was selected
         if self.mesh_obj.NumberOfProcesses <= 1:
-            self.settings['ParallelMesh'] = False
-            self.settings['NumberOfProcesses'] = 1
+                self.settings['ParallelMesh'] = False
+                self.settings['NumberOfProcesses'] = 1
         else:
-            self.settings['ParallelMesh'] = True
-            self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
+                self.settings['ParallelMesh'] = True
+                self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
+
         self.settings['NumberOfThreads'] = self.mesh_obj.NumberOfThreads
 
+        if self.progressCallback:
+            self.progressCallback("Mesh case will use " + str(self.settings['NumberOfProcesses']) + " processes and " + str(self.settings['NumberOfThreads']) + " threads per process.")
+            self.progressCallback("0 threads per process means use all available (if NumberOfProcesses = 1) or use 1 per process (if NumberOfProcesses > 1)")
         TemplateBuilder(self.meshCaseDir, self.template_path, self.settings)
 
         # Update Allmesh permission - will fail silently on Windows
@@ -728,7 +735,41 @@ class CfdMeshTools:
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
 
         self.analysis.NeedsMeshRewrite = False
-        CfdTools.cfdMessage("Successfully wrote meshCase to folder {}\n".format(self.meshCaseDir))
+        CfdTools.cfdMessage("Wrote meshCase to local folder {}\n".format(self.meshCaseDir))
+        if self.progressCallback:
+            self.progressCallback("Wrote meshCase to local folder {}\n".format(self.meshCaseDir))
+
+        #if this is a remote mesh, copy the mesh case folder from the local mesh case dir
+        # to the remote host's directory
+        if host_profile != "local":
+            #this code is also used in reverse in TaskPanelCfdMesh.py for copyback after the meshing is done
+            # TODO: make it a function ?
+            profile_prefs = CfdTools.getPreferencesLocation() +"/Hosts/" + host_profile
+            remote_user = FreeCAD.ParamGet(profile_prefs).GetString("Username", "")
+            remote_hostname = FreeCAD.ParamGet(profile_prefs).GetString("Hostname", "")
+            #remote_output_path = FreeCAD.ParamGet(profile_prefs).GetString("OutputPath","")
+            remote_output_path = CfdTools.getDefaultOutputPath(host_profile)
+
+            # rsync the meshCase directory to the remote host's output directory
+            # Typical useage: rsync -r --remove-source-files --delete /tmp/meshCase me@david:/tmp
+            # --remove-source-files removes the files that get transfered
+            # --delete removes files from the destination that didn't get transfered
+            # not using --remove-source-files because the workstation uses it to determine what actions are
+            # appropriate to do on the remote host, ie has a meshCase been written.
+            try:
+                CfdTools.runFoamCommand("rsync -r --delete --remove-source-files " + self.meshCaseDir + " " + remote_user + "@" + remote_hostname + \
+                                    ":" + remote_output_path)
+            except Exception as e:
+                CfdTools.cfdMessage("Could not move mesh case to remote host: " + str(e))
+                if self.progressCallback:
+                    self.progressCallback("Could not move mesh case to remote host: " + str(e))
+            else:
+                CfdTools.cfdMessage("Moved mesh case to " + remote_hostname + ":" + remote_output_path + "\n" )
+                if self.progressCallback:
+                    self.progressCallback("Moved mesh case to " + remote_hostname + ":" + remote_output_path + "\n")
+        if self.progressCallback:
+                self.progressCallback("Mesh case write process is complete.")
+
 
 def writeSurfaceMeshFromShape(shape, path, name, mesh_obj):
     prefs = CfdTools.getPreferencesLocation()

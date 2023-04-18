@@ -40,12 +40,18 @@ import math
 from datetime import timedelta
 import FreeCAD
 from FreeCAD import Units
+#import App
 import Part
 import BOPTools
 from BOPTools import SplitFeatures
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
 from CfdOF.CfdConsoleProcess import removeAppimageEnvironment
 from PySide import QtCore
+
+# added for runCommand
+from PySide.QtCore import QProcess  # I added
+from PySide.QtGui import QApplication # I added
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
@@ -83,15 +89,75 @@ QUANTITY_PROPERTIES = ['App::PropertyQuantity',
 
 docker_container = None
 
-def getDefaultOutputPath():
+
+# Modified by LinuxGuy to handle add_filename_to_path
+# This is called default because it is used in the mesh and solver objects
+# but can be over ridden by the user
+# WARNING: this routine returns the path with the filename add if enabled in Preferences
+def getDefaultOutputPath(profile = 'local'):
+
+    # host is local
+    if profile == 'local':
+        prefs = getPreferencesLocation()
+        output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+        if not output_path:
+            output_path = tempfile.gettempdir()
+        print("Root output path:" + output_path)
+
+        add_filename = FreeCAD.ParamGet(prefs).GetBool("AddFilenameToOutput")
+        #print("AddFilenameToOutput:" + str(add_filename))
+
+        if add_filename:
+            #TODO: might want to warn the user if they haven't saved the filename yet
+            App = FreeCAD
+            filename = App.ActiveDocument.Name
+            if filename:
+                output_path += "/" + filename
+
+        output_path = os.path.normpath(output_path)
+        print("Output path:" + output_path)
+        return output_path
+
+    #remote case
+    else:
+        prefs = getPreferencesLocation()
+        hostprefs = prefs +"/Hosts/" + profile
+        output_path = FreeCAD.ParamGet(hostprefs).GetString("OutputPath", "")
+
+        if not output_path:
+            #TODO: might want to warn the user if they haven't saved the filename yet
+            output_path = tempfile.gettempdir()
+
+        if FreeCAD.ParamGet(hostprefs).GetBool("AddFilenameToOutput"):
+            App = FreeCAD
+            filename = App.ActiveDocument.Name
+            if filename:
+                output_path += "/" + filename
+        # the local computer might be Windows and the remote one Linux
+        # so don't normalize the path to the local OS
+        #output_path = os.path.normpath(output_path)
+        print("Output path:" + output_path)
+        return output_path
+
+
+# TODO: Is this used anymore ?
+def getDefaultRemoteOutputPath():
+    print("Error: getDefaultRemoteOutputPath is depreciated.")
     prefs = getPreferencesLocation()
-    output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+    output_path = FreeCAD.ParamGet(prefs).GetString("DefaultRemoteOutputPath", "")
     if not output_path:
-        output_path = tempfile.gettempdir()
-    output_path = os.path.normpath(output_path)
+        #TODO: fix this so it will run on the server
+        #should be /home/username from the reference page
+        # output_path = tempfile.gettempdir()
+        output_path = ""
+    # assume the remote computer is Linux and
+    # don't adjust the output path
+    # output_path = os.path.normpath(output_path)
     return output_path
 
 
+# This used to be called by CfdCaseWriterFoam, but isn't anymore.
+# Not sure what uses it
 def getOutputPath(analysis):
     if analysis and 'OutputPath' in analysis.PropertiesList:
         output_path = analysis.OutputPath
@@ -105,6 +171,20 @@ def getOutputPath(analysis):
                 "however, it needs to be saved in order to determine this.")
         output_path = os.path.join(os.path.dirname(FreeCAD.ActiveDocument.FileName), output_path)
     output_path = os.path.normpath(output_path)
+    return output_path
+
+
+# TODO  Is this used anymore ?
+def getRemoteOutputPath(analysis):
+    if analysis and 'RemoteOutputPath' in analysis.PropertiesList:
+        output_path = analysis.RemoteOutputPath
+    else:
+        output_path = ""
+    if not output_path:
+        output_path = getDefaultRemoteOutputPath()
+    # Assume the remote computer is Linux and don't
+    # adjust the path
+    # output_path = os.path.normpath(output_path)
     return output_path
 
 
@@ -480,6 +560,20 @@ def setFoamDir(installation_path):
     # Set OpenFOAM install path in parameters
     FreeCAD.ParamGet(prefs).SetString("InstallationPath", installation_path)
 
+#not used anymore
+def setRemoteFoamDir(remote_installation_path):
+    print("Error: setRemoteFoamDir is depreciated.")
+    prefs = getPreferencesLocation()
+    # Set OpenFOAM remote install path in parameters
+    FreeCAD.ParamGet(prefs).SetString("RemoteInstallationPath", remote_installation_path)
+
+# not used anymore
+def getRemoteFoamDir():
+    print("Error: getRemoteFoamDir is depreciated.")
+    prefs = getPreferencesLocation()
+    # Set OpenFOAM remote install path in parameters
+    return FreeCAD.ParamGet(prefs).GetString("RemoteInstallationPath", "")
+
 def startDocker():
     global docker_container
     if docker_container==None:
@@ -642,7 +736,6 @@ def setParaviewPath(paraview_path):
     # Set Paraview install path in parameters
     FreeCAD.ParamGet(prefs).SetString("ParaviewPath", paraview_path)
 
-
 def getParaviewPath():
     prefs = getPreferencesLocation()
     # Get path from parameters
@@ -657,6 +750,12 @@ def setGmshPath(gmsh_path):
     # Set Paraview install path in parameters
     FreeCAD.ParamGet(prefs).SetString("GmshPath", gmsh_path)
 
+# not used anymore
+def setRemoteGmshPath(gmsh_path):
+    print("Error: setRemoteGmshPath is depreciated.")
+    prefs = getPreferencesLocation()
+    # Set Paraview install path in parameters
+    FreeCAD.ParamGet(prefs).SetString("RemoteGmshPath", gmsh_path)
 
 def getGmshPath():
     prefs = getPreferencesLocation()
@@ -665,6 +764,18 @@ def getGmshPath():
     # Ensure parameters exist for future editing
     setGmshPath(gmsh_path)
     return gmsh_path
+
+# not used anymore
+def getRemoteGmshPath():
+    print("Error: getRemoteGmshPath is depreciated.")
+    prefs = getPreferencesLocation()
+    # Get path from parameters
+    gmsh_path = FreeCAD.ParamGet(prefs).GetString("RemoteGmshPath", "")
+    # Ensure parameters exist for future editing
+    setGmshPath(gmsh_path)
+    return gmsh_path
+
+
 
 
 def translatePath(p):
@@ -798,7 +909,13 @@ def getRunEnvironment():
     else:
         return {}
 
-
+# This routine is used by both the remote meshing process and the remote solver process
+# to convert the remote command into a command that will run with CfDConsole process
+# However, it adds a bash call that it doesn't need to and it sources the OpenFOAM init file
+# on the local computer, which it doesn't have to.   When a remote host is used, it is assumed
+# that OpenFOAM will run from the command line.  This means its init file is run in bashrc file.
+# This is probably a dangerous assumption and this routine should be changed to work with remote
+# hosts and source the OpenFOAM init file.
 def makeRunCommand(cmd, dir, source_env=True):
     """
     Generate native command to run the specified Linux command in the relevant environment,
@@ -915,7 +1032,6 @@ def makeRunCommand(cmd, dir, source_env=True):
         cmdline = ['bash', '-c', source + cd + cmd]
         return cmdline
 
-
 def runFoamCommand(cmdline, case=None):
     """
     Run a command in the OpenFOAM environment and wait until finished. Return output as (stdout, stderr, combined)
@@ -930,6 +1046,7 @@ def runFoamCommand(cmdline, case=None):
     if exit_code:
         raise subprocess.CalledProcessError(exit_code, cmdline)
     return proc.output, proc.outputErr, proc.outputAll
+
 
 
 def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook=None, stderr_hook=None):
@@ -1232,6 +1349,71 @@ def checkCfdDependencies(msgFn):
 
     msgFn("Completed CFD dependency check")
 
+#******************************************************************************
+# Done: TODO: right now this routine returns the error code of the outermost process, ie the one called with cmd parameter.
+# So if you call ssh, for example, and it runs successfully, it will return no error, no matter what happens to the command
+# that was used in ssh.  This should be changed.  If one gets an error message via stderr, this routine should
+# return an error code, regardless of how ssh itself ran.
+#
+# TODO: add a timer so that the process times out if it doesn't create any output or do anything.
+# If ssh credentials aren't set up properly on the remote host, it will ask for a password and not echo that to stdout or stderr.
+# Thus the process will be stuck.
+#
+# This routine is not needed.  runFoamCommand does the same thing but is integrated into CfdTools already.
+# The only routines that use runCommand are ping and ssh test in RemotePreferences.py. Those routines should be
+# rewritten with runFoamCommand and put in CfdTools.
+#
+# When that happens, this routine can be deleted.
+
+def runCommand(cmd, args=[]):
+
+   process = QProcess()
+   returnValue = 0
+
+   def handleStdout():
+       #print("In Stdout handler")
+       data = process.readAllStandardOutput()
+       message = bytes(data).decode("utf8")
+       print(message)
+
+   def handleStderr():
+       nonlocal returnValue
+       #print("In Stderr handler")
+       data = process.readAllStandardError()
+       message = bytes(data).decode("utf8")
+       print("Error:" + message)
+       returnValue = -1
+
+   def handleFinished(self, exitCode):
+       nonlocal returnValue
+       print("Command done.")
+       if ((exitCode == QProcess.NormalExit) and (returnValue == 0)):
+           returnValue = 0
+       else:
+           returnValue = -1
+
+   # connect the events to handlers
+   process.readyReadStandardOutput.connect(handleStdout)
+   process.readyReadStandardError.connect(handleStderr)
+   process.finished.connect(handleFinished)
+
+   # debug
+   message = "Remotely executing: " + cmd
+   for arg in args:
+       message = message + " " + arg
+   print(message)
+
+   # start the command process
+   process.start(cmd, args)
+
+   # wait for the process to get started
+   process.waitForStarted()
+
+   # process application events while waiting for it to finish
+   while(process.state() == QProcess.Running):
+       QApplication.processEvents()
+   return(returnValue)
+
 
 def getParaviewExecutable():
     # If path of paraview executable specified, use that
@@ -1265,6 +1447,22 @@ def getGmshExecutable():
     if getFoamRuntime() == "PosixDocker":
         gmsh_cmd='gmsh'
     return gmsh_cmd
+
+def getRemoteGmshExecutable():
+    # If path of gmsh executable specified, use that
+    gmsh_cmd = getGmshPath()
+    if not gmsh_cmd:
+        # On Windows, use gmsh supplied
+        if platform.system() == "Windows":
+            # Use forward slashes to avoid escaping problems
+            gmsh_cmd = '/'.join([FreeCAD.getHomePath().rstrip('/'), 'bin', 'gmsh.exe'])
+    if not gmsh_cmd:
+        # Otherwise, see if the command 'gmsh' is in the path.
+        gmsh_cmd = shutil.which("gmsh")
+    if getFoamRuntime() == "PosixDocker":
+        gmsh_cmd='gmsh'
+    return gmsh_cmd
+
 
 
 def startParaview(case_path, script_name, console_message_fn):
@@ -1732,6 +1930,11 @@ class CfdSynchronousFoamProcess:
             if startDocker():
                 return 1
         print("Running ", cmdline)
+
+        mycmdline = makeRunCommand(cmdline,case)
+        print("cmdline in CfdSynFoamProcess:")
+        print(mycmdline)
+
         self.process.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
         if not self.process.waitForFinished():
             raise Exception("Unable to run command " + cmdline)
@@ -1744,6 +1947,8 @@ class CfdSynchronousFoamProcess:
     def readError(self, output):
         self.outputErr += output
         self.outputAll += output
+
+
 
 # Only one container is needed. Start one for the CfdOF workbench as required
 class DockerContainer:
