@@ -60,10 +60,6 @@ SIMPLE
     // Non-orthogonal correctors for robustness on tet meshes. Porous baffles require a
     // higher number of corrections.
     nNonOrthogonalCorrectors 5;
-%{%(solver/SolverName%)
-%:buoyantSimpleFoam
-    momentumPredictor no;
-%}
     consistent no;  // Setting this impairs stability of porous baffles
 
     residualControl
