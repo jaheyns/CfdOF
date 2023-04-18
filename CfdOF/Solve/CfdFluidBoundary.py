@@ -328,16 +328,16 @@ class CfdFluidBoundary:
                           "Wall heat transfer coefficient")
 
         # Periodic
-        addObjectProperty(obj, 'RotationalPeriodic', True, "App::PropertyBool", "Periodic",
-                          "Whether to use rotational or translational periodics")
+        addObjectProperty(obj, 'RotationalPeriodic', False, "App::PropertyBool", "Periodic",
+                          "Rotational or translational periodicity")
         addObjectProperty(obj, 'PeriodicCentreOfRotation', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
                           "Periodic", "Centre of rotation for rotational periodics")
-        addObjectProperty(obj, 'PeriodicCentreOfRotationAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
+        addObjectProperty(obj, 'PeriodicCentreOfRotationAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyVector",
                           "Periodic", "Axis of rotational for rotational periodics")
         addObjectProperty(obj, 'PeriodicSeparationVector', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
                           "Periodic", "Separation vector for translational periodics")
         addObjectProperty(obj, 'PeriodicPartner', '', "App::PropertyString", "Periodic",
-                          "Partner patch for the current periodic")
+                          "Partner patch for the slave periodic")
         addObjectProperty(obj, 'PeriodicMaster', True, "App::PropertyBool", "Periodic",
                           "Whether the current patch is the master or slave patch")
 

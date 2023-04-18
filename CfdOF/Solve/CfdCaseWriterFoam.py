@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -719,29 +719,26 @@ class CfdCaseWriterFoam:
 
             if bcSubType == 'cyclicAMI':
                 settings['createPatchesForPeriodics'] = True
-                if bc_obj.RotationalPeriodic:
-                    print(f'IS MASTER: {bc_obj.PeriodicMaster}')
-                    print(f'PARTNER: {bc_obj.PeriodicPartner}')
+                if bc_obj.PeriodicMaster:
+                    slave_bc_obj = None
+                    slave_bc_id = -1
+                    for bc_id2, bc_obj2 in enumerate(bc_group):
+                        if bc_obj2.PeriodicPartner == bc_obj.Label:
+                            slave_bc_obj = bc_obj2
+                            slave_bc_id = bc_id2
+                            break
+                    if slave_bc_obj is None:
+                        raise ValueError("No periodic slave boundary linked to master boundary {} was found.".format(
+                            bc_obj.Label))
                     settings['createPeriodics'][bc_obj.Label] = {
                         'PeriodicMaster': bc_obj.PeriodicMaster,
-                        'PeriodicPartner': bc_obj.PeriodicPartner,
-                        'RotationalPeriodic': bc_obj.RotationalPeriodic,
-                        'PeriodicCentreOfRotation': tuple(p for p in bc_obj.PeriodicCentreOfRotation),
-                        'PeriodicCentreOfRotationAxis': tuple(p for p in bc_obj.PeriodicCentreOfRotationAxis),
+                        'PeriodicPartner': slave_bc_obj.Label if bc_obj.PeriodicMaster else slave_bc_obj.PeriodicPartner,
+                        'RotationalPeriodic': slave_bc_obj.RotationalPeriodic,
+                        'PeriodicCentreOfRotation': tuple(p for p in slave_bc_obj.PeriodicCentreOfRotation),
+                        'PeriodicCentreOfRotationAxis': tuple(p for p in slave_bc_obj.PeriodicCentreOfRotationAxis),
+                        'PeriodicSeparationVector': tuple(p for p in slave_bc_obj.PeriodicSeparationVector),
                         'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
-                        'PatchNamesListSlave': '"patch_'+str(bc_id+1)+'_.*"'}
-                    print(f'{settings["createPeriodics"]}')
-                else:
-                    print(f'IS MASTER: {bc_obj.PeriodicMaster}')
-                    print(f'PARTNER: {bc_obj.PeriodicPartner}')
-                    settings['createPeriodics'][bc_obj.Label] = {
-                        'PeriodicMaster': bc_obj.PeriodicMaster,
-                        'PeriodicPartner': bc_obj.PeriodicPartner,
-                        'RotationalPeriodic': bc_obj.RotationalPeriodic,
-                        'PeriodicSeparationVector': tuple(p for p in bc_obj.PeriodicSeparationVector),
-                        'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
-                        'PatchNamesListSlave': '"patch_'+str(bc_id+1)+'_.*"'}
-                    print(f'{settings["createPeriodics"]}')
+                        'PatchNamesListSlave': '"patch_'+str(slave_bc_id+1)+'_.*"'}
 
         # Set up default BC for unassigned faces
         settings['createPatches']['defaultFaces'] = {

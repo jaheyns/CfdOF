@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -115,6 +115,8 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputHeatTransferCoeff, self.obj.HeatTransferCoeff)
 
         # Periodics
+        self.form.buttonGroupMasterSlavePeriodic.setId(self.form.radioButtonMasterPeriodic, 0)
+        self.form.buttonGroupMasterSlavePeriodic.setId(self.form.radioButtonSlavePeriodic, 1)
         self.form.buttonGroupPeriodic.setId(self.form.rb_rotational_periodic, 0)
         self.form.buttonGroupPeriodic.setId(self.form.rb_translational_periodic, 1)
 
@@ -126,9 +128,12 @@ class TaskPanelCfdFluidBoundary:
 
         self.form.comboBoxPeriodicPartner.addItems(periodic_patches)
         pi = self.form.comboBoxPeriodicPartner.findText(self.obj.PeriodicPartner, QtCore.Qt.MatchFixedString)
+        if pi < 0 and len(periodic_patches):
+            pi = 0
         self.form.comboBoxPeriodicPartner.setCurrentIndex(pi)
 
-        self.form.checkBoxMasterPeriodic.setChecked(self.obj.PeriodicMaster)
+        self.form.radioButtonMasterPeriodic.setChecked(self.obj.PeriodicMaster)
+        self.form.radioButtonSlavePeriodic.setChecked(not self.obj.PeriodicMaster)
         self.form.rb_rotational_periodic.setChecked(self.obj.RotationalPeriodic)
         self.form.rb_translational_periodic.setChecked(not self.obj.RotationalPeriodic)
         setQuantity(self.form.input_corx, self.obj.PeriodicCentreOfRotation.x)
@@ -198,9 +203,10 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.updateUI)
         self.form.checkBoxDefaultBoundary.stateChanged.connect(self.updateUI)
-        self.form.rb_rotational_periodic.toggled.connect(self.periodicTypeChanged)
-        self.form.rb_translational_periodic.toggled.connect(self.periodicTypeChanged)
-        self.form.checkBoxMasterPeriodic.stateChanged.connect(self.enablePeriodicTypes)
+        self.form.radioButtonMasterPeriodic.toggled.connect(self.updateUI)
+        self.form.radioButtonSlavePeriodic.toggled.connect(self.updateUI)
+        self.form.rb_rotational_periodic.toggled.connect(self.updateUI)
+        self.form.rb_translational_periodic.toggled.connect(self.updateUI)
 
         # Face list selection panel - modifies obj.ShapeRefs passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
@@ -216,7 +222,7 @@ class TaskPanelCfdFluidBoundary:
 
         self.form.basicFrame.setVisible(tab_enabled)
         if tab_enabled:
-            is_srf = CfdTools.propsToDict(CfdTools.getPhysicsModel(CfdTools.getActiveAnalysis()))['SRFModelEnabled']
+            is_srf = CfdTools.getPhysicsModel(CfdTools.getActiveAnalysis()).SRFModelEnabled
             self.form.cb_relative_srf.setVisible(is_srf)
 
         for panel_i in range(self.form.layoutBasicValues.count()):
@@ -292,6 +298,7 @@ class TaskPanelCfdFluidBoundary:
         periodic_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][7]
         if periodic_enabled:
             self.form.periodicFrame.setVisible(True)
+            self.form.frameSlave.setVisible(not self.form.radioButtonMasterPeriodic.isChecked())
             if self.form.rb_rotational_periodic.isChecked():
                 self.form.rotationalFrame.setVisible(True)
                 self.form.translationalFrame.setVisible(False)
@@ -300,8 +307,6 @@ class TaskPanelCfdFluidBoundary:
                 self.form.translationalFrame.setVisible(True)
         else:
             self.form.periodicFrame.setVisible(False)
-
-        self.enablePeriodicTypes()
 
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
@@ -320,22 +325,6 @@ class TaskPanelCfdFluidBoundary:
         self.form.labelBoundaryDescription.setText(CfdFluidBoundary.SUBTYPES_HELPTEXT[type_index][subtype_index])
         self.obj.BoundarySubType = CfdFluidBoundary.SUBTYPES[type_index][self.form.comboSubtype.currentIndex()]
         self.updateUI()
-
-    def periodicTypeChanged(self):
-        if self.form.rb_rotational_periodic.isChecked():
-            self.form.rotationalFrame.setVisible(True)
-            self.form.translationalFrame.setVisible(False)
-        else:
-            self.form.rotationalFrame.setVisible(False)
-            self.form.translationalFrame.setVisible(True)
-
-    def enablePeriodicTypes(self):
-        if self.form.checkBoxMasterPeriodic.isChecked():
-            self.form.rotationalFrame.setEnabled(True)
-            self.form.translationalFrame.setEnabled(True)
-        else:
-            self.form.rotationalFrame.setEnabled(False)
-            self.form.translationalFrame.setEnabled(False)
 
     def buttonDirectionClicked(self):
         self.selecting_direction = not self.selecting_direction
@@ -475,7 +464,7 @@ class TaskPanelCfdFluidBoundary:
         storeIfChanged(self.obj, 'PeriodicSeparationVector', separation_vector)
 
         storeIfChanged(self.obj, 'PeriodicPartner', self.form.comboBoxPeriodicPartner.currentText())
-        storeIfChanged(self.obj, 'PeriodicMaster', self.form.checkBoxMasterPeriodic.isChecked())
+        storeIfChanged(self.obj, 'PeriodicMaster', self.form.radioButtonMasterPeriodic.isChecked())
 
         # Turbulence
         if self.turb_model in CfdFluidBoundary.TURBULENT_INLET_SPEC:

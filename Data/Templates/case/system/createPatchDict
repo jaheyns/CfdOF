@@ -27,20 +27,20 @@ patches
     }
 %}
 %}
-
 %{%(createPatchesFromSnappyBaffles%)
 %:True
+
 %{%(createPatchesSnappyBaffles%)
 %[system/_createPatch_snappybaffles%]
 %}
 %}
 %{%(createPatchesForPeriodics%)
 %:True
+
 %{%(createPeriodics%)
 %[system/_createPatch_periodics%]
 %}
 %}
-
 );
 
 
