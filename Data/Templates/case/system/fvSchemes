@@ -80,6 +80,8 @@ ddtSchemes
 %{%(solver/SolverName%)
 %:hisa
     default         dualTime rPseudoDeltaT backward;
+%:interFoam multiphaseInterFoam
+    default         CrankNicolson 0.9;
 %:default
     default         backward;
 %}
