@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -27,7 +27,7 @@ import os.path
 import FreeCAD
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtGui
+    from PySide import QtGui, QtCore
     from PySide.QtGui import QFormLayout
 from CfdOF import CfdTools
 from CfdOF.CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
@@ -93,6 +93,7 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputSlipRatio, self.obj.SlipRatio)
         setQuantity(self.form.inputVolFlowRate, self.obj.VolFlowRate)
         setQuantity(self.form.inputMassFlowRate, self.obj.MassFlowRate)
+        self.form.cb_relative_srf.setChecked(self.obj.RelativeToFrame)
 
         buttonId = indexOrDefault(CfdFluidBoundary.POROUS_METHODS, self.obj.PorousBaffleMethod, 0)
         selButton = self.form.buttonGroupPorous.button(buttonId)
@@ -112,6 +113,38 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputTemperature, self.obj.Temperature)
         setQuantity(self.form.inputHeatFlux, self.obj.HeatFlux)
         setQuantity(self.form.inputHeatTransferCoeff, self.obj.HeatTransferCoeff)
+
+        # Periodics
+        self.form.buttonGroupMasterSlavePeriodic.setId(self.form.radioButtonMasterPeriodic, 0)
+        self.form.buttonGroupMasterSlavePeriodic.setId(self.form.radioButtonSlavePeriodic, 1)
+        self.form.buttonGroupPeriodic.setId(self.form.rb_rotational_periodic, 0)
+        self.form.buttonGroupPeriodic.setId(self.form.rb_translational_periodic, 1)
+
+        boundary_patches = CfdTools.getCfdBoundaryGroup(self.analysis_obj)
+        periodic_patches = []
+        for patch in boundary_patches:
+            if patch.BoundarySubType == 'cyclicAMI' and patch.Label != self.obj.Label:
+                periodic_patches.append(patch.Label)
+
+        self.form.comboBoxPeriodicPartner.addItems(periodic_patches)
+        pi = self.form.comboBoxPeriodicPartner.findText(self.obj.PeriodicPartner, QtCore.Qt.MatchFixedString)
+        if pi < 0 and len(periodic_patches):
+            pi = 0
+        self.form.comboBoxPeriodicPartner.setCurrentIndex(pi)
+
+        self.form.radioButtonMasterPeriodic.setChecked(self.obj.PeriodicMaster)
+        self.form.radioButtonSlavePeriodic.setChecked(not self.obj.PeriodicMaster)
+        self.form.rb_rotational_periodic.setChecked(self.obj.RotationalPeriodic)
+        self.form.rb_translational_periodic.setChecked(not self.obj.RotationalPeriodic)
+        setQuantity(self.form.input_corx, self.obj.PeriodicCentreOfRotation.x)
+        setQuantity(self.form.input_cory, self.obj.PeriodicCentreOfRotation.y)
+        setQuantity(self.form.input_corz, self.obj.PeriodicCentreOfRotation.z)
+        setQuantity(self.form.input_axisx, self.obj.PeriodicCentreOfRotationAxis.x)
+        setQuantity(self.form.input_axisy, self.obj.PeriodicCentreOfRotationAxis.y)
+        setQuantity(self.form.input_axisz, self.obj.PeriodicCentreOfRotationAxis.z)
+        setQuantity(self.form.input_sepx, self.obj.PeriodicSeparationVector.x)
+        setQuantity(self.form.input_sepy, self.obj.PeriodicSeparationVector.y)
+        setQuantity(self.form.input_sepz, self.obj.PeriodicSeparationVector.z)
 
         # Turbulence
         if self.turb_model is not None:
@@ -170,6 +203,10 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.updateUI)
         self.form.checkBoxDefaultBoundary.stateChanged.connect(self.updateUI)
+        self.form.radioButtonMasterPeriodic.toggled.connect(self.updateUI)
+        self.form.radioButtonSlavePeriodic.toggled.connect(self.updateUI)
+        self.form.rb_rotational_periodic.toggled.connect(self.updateUI)
+        self.form.rb_translational_periodic.toggled.connect(self.updateUI)
 
         # Face list selection panel - modifies obj.ShapeRefs passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
@@ -184,6 +221,9 @@ class TaskPanelCfdFluidBoundary:
         tab_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][0]
 
         self.form.basicFrame.setVisible(tab_enabled)
+        if tab_enabled:
+            is_srf = CfdTools.getPhysicsModel(CfdTools.getActiveAnalysis()).SRFModelEnabled
+            self.form.cb_relative_srf.setVisible(is_srf)
 
         for panel_i in range(self.form.layoutBasicValues.count()):
             if isinstance(self.form.layoutBasicValues.itemAt(panel_i), QtGui.QWidgetItem):
@@ -201,9 +241,11 @@ class TaskPanelCfdFluidBoundary:
 
         turb_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][3]
         self.form.turbulenceFrame.setVisible(turb_enabled and self.turb_model is not None)
+
         alpha_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][4]
         self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)
-        if self.physics_model.Thermal != 'None' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
+
+        if not self.physics_model.Thermal == 'None' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
             self.form.thermalFrame.setVisible(True)
             selected_rows = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6]
             for rowi in range(self.form.layoutThermal.count()):
@@ -252,6 +294,19 @@ class TaskPanelCfdFluidBoundary:
                     item = self.form.layoutThermal.itemAt(rowi, role)
                     if isinstance(item, QtGui.QWidgetItem):
                         item.widget().setVisible(rowi-2 in panel_numbers)
+
+        periodic_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][7]
+        if periodic_enabled:
+            self.form.periodicFrame.setVisible(True)
+            self.form.frameSlave.setVisible(not self.form.radioButtonMasterPeriodic.isChecked())
+            if self.form.rb_rotational_periodic.isChecked():
+                self.form.rotationalFrame.setVisible(True)
+                self.form.translationalFrame.setVisible(False)
+            else:
+                self.form.rotationalFrame.setVisible(False)
+                self.form.translationalFrame.setVisible(True)
+        else:
+            self.form.periodicFrame.setVisible(False)
 
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
@@ -373,6 +428,8 @@ class TaskPanelCfdFluidBoundary:
         storeIfChanged(self.obj, 'MassFlowRate', getQuantity(self.form.inputMassFlowRate))
         storeIfChanged(self.obj, 'VolFlowRate', getQuantity(self.form.inputVolFlowRate))
 
+        storeIfChanged(self.obj, 'RelativeToFrame', self.form.cb_relative_srf.isChecked())
+
         # Pressure
         storeIfChanged(self.obj, 'Pressure', getQuantity(self.form.inputPressure))
 
@@ -385,6 +442,29 @@ class TaskPanelCfdFluidBoundary:
         storeIfChanged(self.obj, 'Temperature', getQuantity(self.form.inputTemperature))
         storeIfChanged(self.obj, 'HeatFlux', getQuantity(self.form.inputHeatFlux))
         storeIfChanged(self.obj, 'HeatTransferCoeff', getQuantity(self.form.inputHeatTransferCoeff))
+
+        # Periodic
+        storeIfChanged(self.obj, 'RotationalPeriodic', self.form.rb_rotational_periodic.isChecked())
+        centre_of_rotation = FreeCAD.Vector(
+            self.form.input_corx.property("quantity").Value,
+            self.form.input_cory.property("quantity").Value,
+            self.form.input_corz.property("quantity").Value)
+        storeIfChanged(self.obj, 'PeriodicCentreOfRotation', centre_of_rotation)
+
+        rotation_axis = FreeCAD.Vector(
+            self.form.input_axisx.property("quantity").Value,
+            self.form.input_axisy.property("quantity").Value,
+            self.form.input_axisz.property("quantity").Value)
+        storeIfChanged(self.obj, 'PeriodicCentreOfRotationAxis', rotation_axis)
+
+        separation_vector = FreeCAD.Vector(
+            self.form.input_sepx.property("quantity").Value,
+            self.form.input_sepy.property("quantity").Value,
+            self.form.input_sepz.property("quantity").Value)
+        storeIfChanged(self.obj, 'PeriodicSeparationVector', separation_vector)
+
+        storeIfChanged(self.obj, 'PeriodicPartner', self.form.comboBoxPeriodicPartner.currentText())
+        storeIfChanged(self.obj, 'PeriodicMaster', self.form.radioButtonMasterPeriodic.isChecked())
 
         # Turbulence
         if self.turb_model in CfdFluidBoundary.TURBULENT_INLET_SPEC:

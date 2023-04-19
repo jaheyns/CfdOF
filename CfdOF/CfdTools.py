@@ -530,6 +530,8 @@ def getPatchType(bcType, bcSubType):
             return 'wedge'
         elif bcSubType == 'empty':
             return 'empty'
+        elif bcSubType == 'cyclicAMI':
+            return 'cyclicAMI'
         else:
             return 'patch'
     else:

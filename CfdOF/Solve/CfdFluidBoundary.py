@@ -23,9 +23,9 @@
 # ***************************************************************************
 
 import os
-import FreeCAD
 from pivy import coin
 import Part
+import FreeCAD
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 if FreeCAD.GuiUp:
@@ -42,14 +42,15 @@ SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translatin
             ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure"],
             ["Static pressure", "Uniform velocity", "Extrapolated"],
             ["Ambient pressure", "Far-field"],
-            ["Symmetry"],
+            ["Symmetry", "Periodic"],
             ["Porous Baffle"]]
 
 SUBTYPES = [["fixedWall", "slipWall", "partialSlipWall", "translatingWall", "roughWall"],
-            ["uniformVelocityInlet", "volumetricFlowRateInlet", "massFlowRateInlet", "totalPressureInlet", "staticPressureInlet"],
+            ["uniformVelocityInlet", "volumetricFlowRateInlet", "massFlowRateInlet", "totalPressureInlet",
+             "staticPressureInlet"],
             ["staticPressureOutlet", "uniformVelocityOutlet", "outFlowOutlet"],
             ["totalPressureOpening", "farField"],
-            ["symmetry"],
+            ["symmetry", "cyclicAMI"],
             ["porousBaffle"]]
 
 SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
@@ -67,30 +68,32 @@ SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
                       "All fields extrapolated; possibly unstable"],
                      ["Boundary open to surroundings with total pressure specified",
                       "Characteristic-based non-reflecting boundary"],
-                     ["Symmetry of flow quantities about boundary face"],
+                     ["Symmetry of flow quantities about boundary face",
+                      "Rotationally or translationally periodic flows between two boundary faces"],
                      ["Permeable screen"]]
 
 # For each sub-type, whether the basic tab is enabled, the panel numbers to show (ignored if false), whether
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
 # whether volume fraction panel is shown, whether thermal GUI is shown,
 # rows of thermal UI to show (all shown if None)
-BOUNDARY_UI = [[[False, [], False, False, False, True, None],  # No slip
-                [False, [], False, False, False, True, None],  # Slip
-                [True, [2], False, False, False, True, None],  # Partial slip
-                [True, [0], False, False, False, True, None],  # Translating wall
-                [True, [0, 6], False, False, False, True, None]],  # Rough
-               [[True, [0, 1], True, True, True, True, [2]],  # Velocity
-                [True, [3], False, True, True, True, [2]],  # Vol flow rate
-                [True, [4], False, True, True, True, [2]],  # Mass Flow rate
-                [True, [1], False, True, True, True, [2]],  # Total pressure
-                [True, [0, 1], False, True, True, True, [2]]],  # Static pressure
-               [[True, [0, 1], False, False, True, True, [2]],  # Static pressure
-                [True, [0, 1], False, False, True, True, [2]],  # Uniform velocity
-                [False, [], False, False, False, False, None]],  # Outflow
-               [[True, [1], False, True, True, True, [2]],  # Opening
-                [True, [0, 1], False, True, False, True, [2]]],  # Far-field
-               [[False, [], False, False, False, False, None]],  # Symmetry plane
-               [[True, [5], False, False, False, False, None]]]  # Permeable screen
+BOUNDARY_UI = [[[False, [], False, False, False, True, None, False],  # No slip
+                [False, [], False, False, False, True, None, False],  # Slip
+                [True, [2], False, False, False, True, None, False],  # Partial slip
+                [True, [0], False, False, False, True, None, False],  # Translating wall
+                [True, [0, 6], False, False, False, True, None, False]],  # Rough
+               [[True, [0, 1], True, True, True, True, [2], False],  # Velocity
+                [True, [3], False, True, True, True, [2], False],  # Vol flow rate
+                [True, [4], False, True, True, True, [2], False],  # Mass Flow rate
+                [True, [1], False, True, True, True, [2], False],  # Total pressure
+                [True, [0, 1], False, True, True, True, [2], False]],  # Static pressure
+               [[True, [0, 1], False, False, True, True, [2], False],  # Static pressure
+                [True, [0, 1], False, False, True, True, [2], False],  # Uniform velocity
+                [False, [], False, False, False, False, None, False]],  # Outflow
+               [[True, [1], False, True, True, True, [2], False],  # Opening
+                [True, [0, 1], False, True, False, True, [2], False]],  # Far-field
+               [[False, [], False, False, False, False, None, False],  # Symmetry plane
+                [False, [], False, False, False, False, None, True]],  # Periodic
+               [[True, [5], False, False, False, False, None, False]]]  # Permeable screen
 
 # For each turbulence model: Name, label, help text, displayed rows
 TURBULENT_INLET_SPEC = {'kOmegaSST':
@@ -287,7 +290,7 @@ class CfdFluidBoundary:
                           "Face describing direction (normal)")
         addObjectProperty(obj, 'ReverseNormal', False, "App::PropertyBool", "Flow",
                           "Direction is inward-pointing if true")
-        addObjectProperty(obj, 'Pressure', '0 Pa', "App::PropertyPressure", "Flow",
+        addObjectProperty(obj, 'Pressure', '100 kPa', "App::PropertyPressure", "Flow",
                           "Static pressure")
         addObjectProperty(obj, 'SlipRatio', '0', "App::PropertyQuantity", "Flow",
                           "Slip ratio")
@@ -295,6 +298,9 @@ class CfdFluidBoundary:
                           "Volume flow rate")
         addObjectProperty(obj, 'MassFlowRate', '0 kg/s', "App::PropertyQuantity", "Flow",
                           "Mass flow rate")
+
+        addObjectProperty(obj, 'RelativeToFrame', False, "App::PropertyBool", "Flow",
+                          "Relative velocity")
 
         if addObjectProperty(obj, 'PorousBaffleMethod', POROUS_METHODS, "App::PropertyEnumeration",
                              "Baffle", "Baffle"):
@@ -320,6 +326,20 @@ class CfdFluidBoundary:
                           "Wall heat flux")
         addObjectProperty(obj, 'HeatTransferCoeff', '0 W/m^2/K', "App::PropertyQuantity", "Thermal",
                           "Wall heat transfer coefficient")
+
+        # Periodic
+        addObjectProperty(obj, 'RotationalPeriodic', False, "App::PropertyBool", "Periodic",
+                          "Rotational or translational periodicity")
+        addObjectProperty(obj, 'PeriodicCentreOfRotation', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
+                          "Periodic", "Centre of rotation for rotational periodics")
+        addObjectProperty(obj, 'PeriodicCentreOfRotationAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyVector",
+                          "Periodic", "Axis of rotational for rotational periodics")
+        addObjectProperty(obj, 'PeriodicSeparationVector', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
+                          "Periodic", "Separation vector for translational periodics")
+        addObjectProperty(obj, 'PeriodicPartner', '', "App::PropertyString", "Periodic",
+                          "Partner patch for the slave periodic")
+        addObjectProperty(obj, 'PeriodicMaster', True, "App::PropertyBool", "Periodic",
+                          "Whether the current patch is the master or slave patch")
 
         # Turbulence
         all_turb_specs = []

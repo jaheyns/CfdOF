@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -122,6 +122,7 @@ class CfdCaseWriterFoam:
         self.processSolverSettings()
         self.processFluidProperties()
         self.processBoundaryConditions()
+        self.processReferenceFrames()
         self.processInitialConditions()
         CfdTools.clearCase(self.case_folder)
 
@@ -143,6 +144,7 @@ class CfdCaseWriterFoam:
             self.processDynamicMeshRefinement()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
+        self.settings['createPatchesForPeriodics'] = False
         cfdMessage("Matching boundary conditions ...\n")
         if self.progressCallback:
             self.progressCallback("Matching boundary conditions ...")
@@ -213,6 +215,8 @@ class CfdCaseWriterFoam:
                         else:
                             if self.porous_zone_objs or self.porousBafflesPresent():
                                 solver = 'porousSimpleFoam'
+                            elif self.physics_model.SRFModelEnabled:
+                                solver = 'SRFSimpleFoam'
                             else:
                                 solver = 'simpleFoam'
                     else:
@@ -310,13 +314,13 @@ class CfdCaseWriterFoam:
 
     def processBoundaryConditions(self):
         """ Compute any quantities required before case build """
-        settings = self.settings
         # Copy keys so that we can delete while iterating
+        settings = self.settings
         bc_names = list(settings['boundaries'].keys())
         for bc_name in bc_names:
             bc = settings['boundaries'][bc_name]
             if not bc['VelocityIsCartesian']:
-                veloMag = bc['VelocityMag']
+                velo_mag = bc['VelocityMag']
                 face = bc['DirectionFace'].split(':')
                 print(bc['ShapeRefs'])
                 if not face[0] and len(bc['ShapeRefs']):
@@ -332,7 +336,7 @@ class CfdCaseWriterFoam:
                             n = elt.normalAt(0.5, 0.5)
                             if bc['ReverseNormal']:
                                n = [-ni for ni in n]
-                            velocity = [ni*veloMag for ni in n]
+                            velocity = [ni*velo_mag for ni in n]
                             bc['Ux'] = velocity[0]
                             bc['Uy'] = velocity[1]
                             bc['Uz'] = velocity[2]
@@ -345,7 +349,7 @@ class CfdCaseWriterFoam:
                         raise RuntimeError(str(bc['DirectionFace']) + ", specified for velocity direction in boundary '" + bc_name + "', is not a valid, planar face.")
                     else:
                         raise RuntimeError(str("No face specified for velocity direction in boundary '" + bc_name + "'"))
-            if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
+            if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
                 bc['KinematicPressure'] = bc['Pressure']/settings['fluidProperties'][0]['Density']
 
             if bc['PorousBaffleMethod'] == 'porousScreen':
@@ -396,6 +400,7 @@ class CfdCaseWriterFoam:
                 if settings['boundaries'].get('defaultFaces'):
                     raise ValueError("More than one default boundary defined")
                 settings['boundaries']['defaultFaces'] = bc
+
         if not settings['boundaries'].get('defaultFaces'):
             settings['boundaries']['defaultFaces'] = {
                 'BoundaryType': 'wall',
@@ -428,11 +433,16 @@ class CfdCaseWriterFoam:
     def parseFaces(self, shape_refs):
         pass
 
+    def processReferenceFrames(self):
+        if self.settings['solver']['SolverName'] == 'SRFSimpleFoam':
+            self.settings['physics']['SRFModelCoR'] = tuple(p for p in self.settings['physics']['SRFModelCoR'])
+            self.settings['physics']['SRFModelAxis'] = tuple(p for p in self.settings['physics']['SRFModelAxis'])
+
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
         settings = self.settings
         initial_values = settings['initialValues']
-        if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
+        if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
             mat_prop = settings['fluidProperties'][0]
             initial_values['KinematicPressure'] = initial_values['Pressure'] / mat_prop['Density']
         if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
@@ -452,7 +462,8 @@ class CfdCaseWriterFoam:
             initial_values['VolumeFractions'] = alphas_new
 
         if initial_values['PotentialFlowP']:
-            if settings['solver']['SolverName'] not in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'hisa']:
+            if settings['solver']['SolverName'] not in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam',
+                                                        'hisa']:
                 raise RuntimeError("Selected solver does not support potential pressure initialisation.")
 
         physics = settings['physics']
@@ -723,6 +734,7 @@ class CfdCaseWriterFoam:
         settings = self.settings
         settings['createPatches'] = {}
         settings['createPatchesSnappyBaffles'] = {}
+        settings['createPeriodics'] = {}
         bc_group = self.bc_group
 
         defaultPatchType = "patch"
@@ -730,10 +742,13 @@ class CfdCaseWriterFoam:
             bcType = bc_obj.BoundaryType
             bcSubType = bc_obj.BoundarySubType
             patchType = CfdTools.getPatchType(bcType, bcSubType)
-            settings['createPatches'][bc_obj.Label] = {
-                'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
-                'PatchType': patchType
-            }
+
+            if not bcType == 'baffle' and not bcSubType == 'cyclicAMI':
+                settings['createPatches'][bc_obj.Label] = {
+                    'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
+                    'PatchType': patchType
+                }
+
             if bc_obj.DefaultBoundary:
                 defaultPatchType = patchType
 
@@ -742,6 +757,29 @@ class CfdCaseWriterFoam:
                 settings['createPatchesSnappyBaffles'][bc_obj.Label] = {
                     'PatchNamesList': '"'+bc_obj.Name+'_[^_]*"',
                     'PatchNamesListSlave': '"'+bc_obj.Name+'_.*_slave"'}
+
+            if bcSubType == 'cyclicAMI':
+                settings['createPatchesForPeriodics'] = True
+                if bc_obj.PeriodicMaster:
+                    slave_bc_obj = None
+                    slave_bc_id = -1
+                    for bc_id2, bc_obj2 in enumerate(bc_group):
+                        if bc_obj2.PeriodicPartner == bc_obj.Label:
+                            slave_bc_obj = bc_obj2
+                            slave_bc_id = bc_id2
+                            break
+                    if slave_bc_obj is None:
+                        raise ValueError("No periodic slave boundary linked to master boundary {} was found.".format(
+                            bc_obj.Label))
+                    settings['createPeriodics'][bc_obj.Label] = {
+                        'PeriodicMaster': bc_obj.PeriodicMaster,
+                        'PeriodicPartner': slave_bc_obj.Label if bc_obj.PeriodicMaster else slave_bc_obj.PeriodicPartner,
+                        'RotationalPeriodic': slave_bc_obj.RotationalPeriodic,
+                        'PeriodicCentreOfRotation': tuple(p for p in slave_bc_obj.PeriodicCentreOfRotation),
+                        'PeriodicCentreOfRotationAxis': tuple(p for p in slave_bc_obj.PeriodicCentreOfRotationAxis),
+                        'PeriodicSeparationVector': tuple(p for p in slave_bc_obj.PeriodicSeparationVector),
+                        'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
+                        'PatchNamesListSlave': '"patch_'+str(slave_bc_id+1)+'_.*"'}
 
         # Set up default BC for unassigned faces
         settings['createPatches']['defaultFaces'] = {

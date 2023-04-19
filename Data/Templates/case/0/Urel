@@ -1,13 +1,12 @@
 %{%(solver/SolverName%)
 %:SRFSimpleFoam
-%:default
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       volVectorField;
-    object      U;
+    object      Urel;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -28,9 +27,6 @@ boundaryField
     %(0%)
     {
 %{%(solver/SolverName%)
-%:hisa
-        type        boundaryCorrectedFixedValue;
-        value       uniform (0 0 0);
 %:default
         // movingWallVelocity reduces to fixedValue if the mesh is not moving
         type        movingWallVelocity;
@@ -65,21 +61,15 @@ boundaryField
     %(0%)
     {
 %{%(solver/SolverName%)
-%:hisa
-        type                characteristicVelocityInletOutletVelocity;
-        U                   ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
-        p                   %(boundaries/%(0%)/Pressure%);
-        T                   %(boundaries/%(0%)/Temperature%);
-%:default
-        // Fix all three components of velocity on inflow and only the normal component on outflow,
-        // in order to be well-posed if there are some faces on the patch which are actually outflows.
-        type                fixedNormalInletOutletVelocity;
-        fixTangentialInflow yes;
-        normalVelocity
-        {
-            type            fixedValue;
-            value           uniform ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
-        }
+%:SRFSimpleFoam
+        type                SRFVelocity;
+        inletValue          uniform ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+%{%(boundaries/%(0%)/RelativeToFrame%)
+%:True
+        relative            yes;
+%:False
+        relative            no;
+%}
 %}
         value               uniform ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
     }
@@ -103,30 +93,9 @@ boundaryField
         value           $internalField;
     }
 %:totalPressureInlet
-%{%(solver/SolverName%)
-%:hisa
-    %(0%)
-    {
-        type                characteristicPressureInletOutletVelocity;
-        U                   (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
-        p                   %(boundaries/%(0%)/Pressure%);
-        T                   %(boundaries/%(0%)/T%);
-        value               $internalField;
-    }
-%:default
 %[0/_U_boundary_pressureInletOutletVelocity%]
-%}
 %:staticPressureInlet
 %{%(solver/SolverName%)
-%:hisa
-    %(0%)
-    {
-        type                characteristicPressureInletOutletVelocity;
-        U                   (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
-        p                   %(boundaries/%(0%)/Pressure%);
-        T                   %(boundaries/%(0%)/T%);
-        value               $internalField;
-    }
 %:default
 %[0/_U_boundary_pressureInletOutletVelocity%]
 %}
@@ -135,15 +104,6 @@ boundaryField
 %{%(boundaries/%(0%)/BoundarySubType%)
 %:staticPressureOutlet
 %{%(solver/SolverName%)
-%:hisa
-    %(0%)
-    {
-        type                characteristicPressureInletOutletVelocity;
-        U                   ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
-        p                   %(boundaries/%(0%)/Pressure%);
-        T                   %(boundaries/%(0%)/Temperature%);
-        value               $internalField;
-    }
 %:default
 %[0/_U_boundary_pressureInletOutletVelocity%]
 %}
@@ -151,11 +111,6 @@ boundaryField
     %(0%)
     {
 %{%(solver/SolverName%)
-%:hisa
-        type                characteristicVelocityInletOutletVelocity;
-        U                   ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
-        p                   %(boundaries/%(0%)/Pressure%);
-        T                   %(boundaries/%(0%)/Temperature%);
 %:default
         // Fix only the normal component on outflow and all three components of velocity on inflow,
         // in order to be well-posed on outflow and also in case there are any faces with inflowing velocity.
@@ -173,7 +128,7 @@ boundaryField
     %(0%)
     {
         type        inletOutlet;
-        inletValue  uniform (0 0 0);
+        inletValue  (0 0 0);
         //TODO: We need to write an out-flowing value here so that adjustPhi can have an adjustable flux to work
         //TODO: with at iteration 1
         value       $internalField;
@@ -191,24 +146,15 @@ boundaryField
         value       $internalField;
     }
 %:default
-%{%(solver/SolverName%)
-%:hisa
-    %(0%)
-    {
-        type        characteristicPressureInletOutletVelocity;
-        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
-        p           %(boundaries/%(0%)/Pressure%);
-        T           %(boundaries/%(0%)/Temperature%);
-        value       $internalField;
-    }
-%:default
 %[0/_U_boundary_pressureInletOutletVelocity%]
-%}
 %}
 %:constraint
 %[0/_boundary_constraint%]
 %:baffle
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:porousBaffle
 %[0/_boundary_cyclic_baffle%]
+%}
 %}
 
 %}

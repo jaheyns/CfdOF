@@ -1,0 +1,45 @@
+%{%(createPeriodics/%(0%)/PeriodicMaster%)
+%:True
+    {
+        name %(0%)_master;
+        patchInfo
+        {
+            type cyclicAMI;
+            neighbourPatch %(0%)_slave;
+
+%{%(createPeriodics/%(0%)/RotationalPeriodic%)
+%:True
+            transform rotational;
+            rotationAxis ( %(createPeriodics/%(0%)/PeriodicCentreOfRotationAxis%) );
+            rotationCentre ( %(createPeriodics/%(0%)/PeriodicCentreOfRotation%) );
+%:False
+            transform translational;
+            separationVector ( %(createPeriodics/%(0%)/PeriodicSeparationVector%) );
+%}
+        }
+
+        constructFrom patches;
+        patches ( %(createPeriodics/%(0%)/PatchNamesList%) );
+    }
+    {
+        name %(0%)_slave;
+        patchInfo
+        {
+            type cyclicAMI;
+            neighbourPatch %(0%)_master;
+
+%{%(createPeriodics/%(0%)/RotationalPeriodic%)
+%:True
+            transform rotational;
+            rotationAxis ( %(createPeriodics/%(0%)/PeriodicCentreOfRotationAxis%) );
+            rotationCentre ( %(createPeriodics/%(0%)/PeriodicCentreOfRotation%) );
+%:False
+            transform translational;
+            separationVector ( %(createPeriodics/%(0%)/PeriodicSeparationVector%) );
+%}
+        }
+
+        constructFrom patches;
+        patches ( %(createPeriodics/%(0%)/PatchNamesListSlave%) );
+    }
+%}

@@ -36,6 +36,7 @@ DES_MODELS = ['kOmegaSSTDES', 'kOmegaSSTDDES', 'kOmegaSSTIDDES', 'SpalartAllmara
               'SpalartAllmarasIDDES']
 LES_MODELS = ['kEqn', 'Smagorinsky', 'WALE']
 
+
 class TaskPanelCfdPhysicsSelection:
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
@@ -50,6 +51,7 @@ class TaskPanelCfdPhysicsSelection:
         self.form.radioButtonIncompressible.toggled.connect(self.updateUI)
         self.form.radioButtonCompressible.toggled.connect(self.updateUI)
         self.form.viscousCheckBox.stateChanged.connect(self.updateUI)
+        self.form.srfCheckBox.stateChanged.connect(self.updateUI)
         self.form.radioButtonLaminar.toggled.connect(self.updateUI)
         self.form.radioButtonRANS.toggled.connect(self.updateUI)
         self.form.radioButtonDES.toggled.connect(self.updateUI)
@@ -58,6 +60,15 @@ class TaskPanelCfdPhysicsSelection:
         self.load()
 
     def load(self):
+
+        self.form.radioButtonSteady.toggled.connect(self.updateUI)
+        self.form.radioButtonTransient.toggled.connect(self.updateUI)
+        self.form.radioButtonSinglePhase.toggled.connect(self.updateUI)
+        self.form.radioButtonFreeSurface.toggled.connect(self.updateUI)
+        self.form.radioButtonIncompressible.toggled.connect(self.updateUI)
+        self.form.radioButtonCompressible.toggled.connect(self.updateUI)
+        self.form.checkBoxHighMach.toggled.connect(self.updateUI)
+        self.form.srfCheckBox.toggled.connect(self.updateUI)
 
         # Time
         if self.obj.Time == 'Steady':
@@ -103,6 +114,19 @@ class TaskPanelCfdPhysicsSelection:
         setQuantity(self.form.gy, self.obj.gy)
         setQuantity(self.form.gz, self.obj.gz)
 
+        # SRF model
+        self.form.srfCheckBox.setChecked(self.obj.SRFModelEnabled)
+
+        setQuantity(self.form.inputSRFCoRx, self.obj.SRFModelCoR.x)
+        setQuantity(self.form.inputSRFCoRy, self.obj.SRFModelCoR.y)
+        setQuantity(self.form.inputSRFCoRz, self.obj.SRFModelCoR.z)
+
+        setQuantity(self.form.inputSRFAxisx, self.obj.SRFModelAxis.x)
+        setQuantity(self.form.inputSRFAxisy, self.obj.SRFModelAxis.y)
+        setQuantity(self.form.inputSRFAxisz, self.obj.SRFModelAxis.z)
+
+        setQuantity(self.form.inputSRFRPM, self.obj.SRFModelRPM)
+
         self.updateUI()
 
     def updateUI(self):
@@ -128,6 +152,15 @@ class TaskPanelCfdPhysicsSelection:
         self.form.gravityFrame.setEnabled(
             self.form.radioButtonFreeSurface.isChecked() or
             (self.form.radioButtonCompressible.isChecked() and not self.form.checkBoxHighMach.isChecked()))
+
+        # SRF model
+        srf_capable = (self.form.radioButtonSteady.isChecked() and not self.form.radioButtonCompressible.isChecked())
+        srf_should_be_unchecked = (self.form.radioButtonCompressible.isChecked() or self.form.radioButtonTransient.isChecked()
+                               or self.form.radioButtonFreeSurface.isChecked())
+        self.form.srfCheckBox.setEnabled(srf_capable)
+        if srf_should_be_unchecked:
+            self.form.srfCheckBox.setChecked(False)
+        self.form.srfFrame.setEnabled(self.form.srfCheckBox.isChecked())
 
         # Free surface
         if self.form.radioButtonFreeSurface.isChecked():
@@ -212,6 +245,20 @@ class TaskPanelCfdPhysicsSelection:
         storeIfChanged(self.obj, 'gx', getQuantity(self.form.gx))
         storeIfChanged(self.obj, 'gy', getQuantity(self.form.gy))
         storeIfChanged(self.obj, 'gz', getQuantity(self.form.gz))
+
+        if self.form.srfCheckBox.isChecked():
+            storeIfChanged(self.obj, 'SRFModelEnabled', self.form.srfCheckBox.isChecked())
+            storeIfChanged(self.obj, 'SRFModelRPM', self.form.inputSRFRPM.text())
+            centre_of_rotation = FreeCAD.Vector(
+                self.form.inputSRFCoRx.property("quantity").Value,
+                self.form.inputSRFCoRy.property("quantity").Value,
+                self.form.inputSRFCoRz.property("quantity").Value)
+            storeIfChanged(self.obj, 'SRFModelCoR', centre_of_rotation)
+            model_axis = FreeCAD.Vector(
+                self.form.inputSRFAxisx.property("quantity").Value,
+                self.form.inputSRFAxisy.property("quantity").Value,
+                self.form.inputSRFAxisz.property("quantity").Value)
+            storeIfChanged(self.obj, 'SRFModelAxis', model_axis)
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

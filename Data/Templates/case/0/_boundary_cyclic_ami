@@ -1,0 +1,13 @@
+%{%(boundaries/%(0%)/PeriodicMaster%)
+%:True
+    %(0%)_master
+    {
+        type        cyclicAMI;
+    }
+
+    %(0%)_slave
+    {
+        type        cyclicAMI;
+    }
+
+%}
