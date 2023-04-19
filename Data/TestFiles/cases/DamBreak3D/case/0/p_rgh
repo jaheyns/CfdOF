@@ -15,7 +15,7 @@ FoamFile
 
 dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform 0.0;
+internalField   uniform 100000.0;
 
 boundaryField
 {
@@ -23,7 +23,7 @@ boundaryField
     open
     {
         type        totalPressure;
-        p0          uniform 0.0;
+        p0          uniform 100000.0;
         value       $internalField;
     }
 

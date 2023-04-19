@@ -27,7 +27,6 @@ patches
         constructFrom patches;
         patches ( "patch_1_.*" );
     }
-
     {
         name wall;
         patchInfo
@@ -37,7 +36,6 @@ patches
         constructFrom patches;
         patches ( "patch_2_.*" );
     }
-
     {
         name defaultFaces;
         patchInfo
@@ -47,8 +45,6 @@ patches
         constructFrom patches;
         patches ( "patch_0_0" "patch_0_1" );
     }
-
-
 );
 
 

@@ -27,7 +27,6 @@ patches
         constructFrom patches;
         patches ( "patch_1_.*" );
     }
-
     {
         name outlet;
         patchInfo
@@ -37,7 +36,6 @@ patches
         constructFrom patches;
         patches ( "patch_2_.*" );
     }
-
     {
         name wall;
         patchInfo
@@ -47,7 +45,6 @@ patches
         constructFrom patches;
         patches ( "patch_3_.*" );
     }
-
     {
         name slip;
         patchInfo
@@ -57,7 +54,6 @@ patches
         constructFrom patches;
         patches ( "patch_4_.*" );
     }
-
     {
         name defaultFaces;
         patchInfo
@@ -67,8 +63,6 @@ patches
         constructFrom patches;
         patches ( "patch_0_0" );
     }
-
-
 );
 
 
