@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>427</width>
-    <height>2267</height>
+    <width>421</width>
+    <height>2154</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -861,27 +861,20 @@
                  <property name="frameShadow">
                   <enum>QFrame::Raised</enum>
                  </property>
-                 <layout class="QFormLayout" name="layoutCart">
+                 <layout class="QHBoxLayout" name="horizontalLayout">
                   <property name="leftMargin">
                    <number>0</number>
                   </property>
                   <property name="topMargin">
-                   <number>8</number>
+                   <number>0</number>
                   </property>
                   <property name="rightMargin">
-                   <number>8</number>
+                   <number>0</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>8</number>
+                   <number>0</number>
                   </property>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_Ux">
-                    <property name="text">
-                     <string>Ux</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
+                  <item>
                    <widget class="Gui::InputField" name="inputCartX">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -906,14 +899,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="label_Uy">
-                    <property name="text">
-                     <string>Uy</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
+                  <item>
                    <widget class="Gui::InputField" name="inputCartY">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -938,14 +924,7 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="label_Uz">
-                    <property name="text">
-                     <string>Uz</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1">
+                  <item>
                    <widget class="Gui::InputField" name="inputCartZ">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -992,13 +971,13 @@
                    <number>0</number>
                   </property>
                   <property name="topMargin">
-                   <number>8</number>
+                   <number>0</number>
                   </property>
                   <property name="rightMargin">
-                   <number>8</number>
+                   <number>0</number>
                   </property>
                   <property name="bottomMargin">
-                   <number>8</number>
+                   <number>0</number>
                   </property>
                   <item row="0" column="0">
                    <widget class="QLabel" name="label_2">
@@ -1384,10 +1363,22 @@
                <item>
                 <widget class="QStackedWidget" name="stackedWidgetPorous">
                  <property name="currentIndex">
-                  <number>0</number>
+                  <number>1</number>
                  </property>
                  <widget class="QWidget" name="pagePorousCoeff">
                   <layout class="QFormLayout" name="horzLayout_5">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
                    <item row="0" column="0">
                     <widget class="QLabel" name="label_4">
                      <property name="sizePolicy">
@@ -1397,7 +1388,7 @@
                       </sizepolicy>
                      </property>
                      <property name="text">
-                      <string>Pressure loss coefficient:</string>
+                      <string>Pressure loss coefficient</string>
                      </property>
                     </widget>
                    </item>
@@ -1436,10 +1427,22 @@
                    <property name="fieldGrowthPolicy">
                     <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
                    </property>
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
                    <item row="0" column="0">
                     <widget class="QLabel" name="label_4">
                      <property name="text">
-                      <string>Wire diameter:</string>
+                      <string>Wire diameter</string>
                      </property>
                     </widget>
                    </item>
@@ -1474,7 +1477,7 @@
                    <item row="1" column="0">
                     <widget class="QLabel" name="label_4">
                      <property name="text">
-                      <string>Spacing of square openings:</string>
+                      <string>Spacing</string>
                      </property>
                      <property name="wordWrap">
                       <bool>false</bool>
@@ -1610,6 +1613,18 @@
                <enum>QFrame::Raised</enum>
               </property>
               <layout class="QHBoxLayout" name="relativeLayout">
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
                <item>
                 <widget class="QCheckBox" name="cb_relative_srf">
                  <property name="text">
@@ -1793,49 +1808,21 @@
                 <property name="bottomMargin">
                  <number>0</number>
                 </property>
-                <item row="3" column="0">
-                 <widget class="QLabel" name="label_corx">
+                <item row="2" column="0" colspan="3">
+                 <widget class="QLabel" name="label_7">
                   <property name="text">
-                   <string>x</string>
+                   <string>Centre of rotation</string>
                   </property>
                  </widget>
                 </item>
-                <item row="5" column="0">
-                 <widget class="QLabel" name="label_corz">
+                <item row="6" column="0" colspan="3">
+                 <widget class="QLabel" name="label_11">
                   <property name="text">
-                   <string>z</string>
+                   <string>Rotational axis</string>
                   </property>
                  </widget>
                 </item>
                 <item row="4" column="0">
-                 <widget class="QLabel" name="label_cory">
-                  <property name="text">
-                   <string>y</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="8" column="0">
-                 <widget class="QLabel" name="label_cory">
-                  <property name="text">
-                   <string>y</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="7" column="0">
-                 <widget class="QLabel" name="label_cory">
-                  <property name="text">
-                   <string>x</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="9" column="0">
-                 <widget class="QLabel" name="label_cory">
-                  <property name="text">
-                   <string>z</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="3" column="1" colspan="2">
                  <widget class="Gui::InputField" name="input_corx">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1860,7 +1847,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="1" colspan="2">
+                <item row="4" column="1">
                  <widget class="Gui::InputField" name="input_cory">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1885,14 +1872,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="2" column="0" colspan="3">
-                 <widget class="QLabel" name="label_7">
-                  <property name="text">
-                   <string>Centre of rotation</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="5" column="1" colspan="2">
+                <item row="4" column="2">
                  <widget class="Gui::InputField" name="input_corz">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1917,14 +1897,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="6" column="0" colspan="3">
-                 <widget class="QLabel" name="label_11">
-                  <property name="text">
-                   <string>Rotational axis</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="7" column="1" colspan="2">
+                <item row="8" column="0">
                  <widget class="Gui::InputField" name="input_axisx">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1949,7 +1922,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="8" column="1" colspan="2">
+                <item row="8" column="1">
                  <widget class="Gui::InputField" name="input_axisy">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1974,7 +1947,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="9" column="1" colspan="2">
+                <item row="8" column="2">
                  <widget class="Gui::InputField" name="input_axisz">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2018,7 +1991,7 @@
                  <number>8</number>
                 </property>
                 <property name="rightMargin">
-                 <number>8</number>
+                 <number>0</number>
                 </property>
                 <property name="bottomMargin">
                  <number>8</number>
@@ -2026,28 +1999,14 @@
                 <property name="spacing">
                  <number>8</number>
                 </property>
+                <item row="1" column="4" colspan="3">
+                 <widget class="QLabel" name="label_12">
+                  <property name="text">
+                   <string>Separation vector</string>
+                  </property>
+                 </widget>
+                </item>
                 <item row="3" column="4">
-                 <widget class="QLabel" name="label_sepy">
-                  <property name="text">
-                   <string>y</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="4">
-                 <widget class="QLabel" name="label_sepx">
-                  <property name="text">
-                   <string>x</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="4" column="4">
-                 <widget class="QLabel" name="label_sepz">
-                  <property name="text">
-                   <string>z</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="5" colspan="2">
                  <widget class="Gui::InputField" name="input_sepx">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2072,7 +2031,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="3" column="5" colspan="2">
+                <item row="3" column="5">
                  <widget class="Gui::InputField" name="input_sepy">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2097,7 +2056,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="4" column="5" colspan="2">
+                <item row="3" column="6">
                  <widget class="Gui::InputField" name="input_sepz">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -2119,13 +2078,6 @@
                   </property>
                   <property name="format" stdset="0">
                    <number>0</number>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="4" colspan="3">
-                 <widget class="QLabel" name="label_12">
-                  <property name="text">
-                   <string>Separation vector</string>
                   </property>
                  </widget>
                 </item>
@@ -2252,8 +2204,6 @@
   <tabstop>checkBoxDefaultBoundary</tabstop>
   <tabstop>radioButtonCart</tabstop>
   <tabstop>radioButtonMagNormal</tabstop>
-  <tabstop>inputCartX</tabstop>
-  <tabstop>inputCartY</tabstop>
   <tabstop>inputCartZ</tabstop>
   <tabstop>inputVelocityMag</tabstop>
   <tabstop>lineDirection</tabstop>
@@ -2288,8 +2238,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupPorous"/>
-  <buttongroup name="buttonGroupPeriodic"/>
   <buttongroup name="buttonGroupMasterSlavePeriodic"/>
+  <buttongroup name="buttonGroupPeriodic"/>
+  <buttongroup name="buttonGroupPorous"/>
  </buttongroups>
 </ui>
