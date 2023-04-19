@@ -21,9 +21,18 @@
 # *                                                                         *
 # ***************************************************************************
 
-from PySide import QtCore
+import sys
 import math
+from PySide import QtCore
 import FreeCAD
+
+# If for any reason PyQt5 has been imported, we need to unload it temporarily
+# to prevent matplotlib using the PyQt backend instead of PySide
+if 'PyQt5.QtCore' in sys.modules:
+    del sys.modules['PyQt5.QtCore']
+    reload_PyQt5 = True
+else:
+    reload_PyQt5 = False
 
 if int(FreeCAD.Version()[0]) == 0 and int(FreeCAD.Version()[1].split('.')[0]) < 20:
     from CfdOF.compat import Plot  # Plot workbench
@@ -33,9 +42,11 @@ else:
     except ImportError:
         from CfdOF.compat import Plot  # Fallback to compat (should be unnecessary once 0.20 is stable)
 
+if reload_PyQt5:
+    import PyQt5.QtCore
+
 from FreeCAD import Units
 from CfdOF import CfdTools
-
 
 class TimePlot:
     def __init__(self, title, y_label, is_log):
