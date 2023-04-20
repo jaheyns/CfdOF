@@ -19,14 +19,13 @@ obj = FreeCAD.ActiveDocument.PhysicsModel
 obj.Time = 'Steady'
 obj.Phase = 'Single'
 obj.Flow = 'HighMachCompressible'
-obj.Thermal = 'Energy'
 obj.Turbulence = 'RANS'
 obj.TurbulenceModel = 'kOmegaSST'
 obj.gx = '0 m/s^2'
 obj.gy = '-9,81 m/s^2'
 obj.gz = '0 m/s^2'
 
-FreeCAD.ActiveDocument.FluidProperties.Material = {'CardName': 'Air', 'AuthorAndLicense': 'Air', 'Name': 'Air', 'Description': 'Standard air properties at 20 Degrees Celsius and 1 atm', 'Density': '1.20 kg/m^3', 'DynamicViscosity': '1.80e-5 kg/m/s', 'MolarMass': '0.0289643897748887 kg/mol', 'Cp': '1004.703 J/kg/K', 'SutherlandTemperature': '110.4 K', 'SutherlandRefViscosity': '1.716e-5 kg/m/s', 'SutherlandRefTemperature': '273.15 K'}
+FreeCAD.ActiveDocument.FluidProperties.Material = {'CardName': 'AirCompressible', 'AuthorAndLicense': '', 'Name': 'Air', 'Type': 'Compressible', 'Description': 'Compressible air properties', 'MolarMass': '0.0289643897748887 kg/mol', 'Cp': '1004.703 J/kg/K', 'SutherlandTemperature': '110.4 K', 'SutherlandRefViscosity': '1.716e-5 kg/m/s', 'SutherlandRefTemperature': '273.15 K'}
 
 FreeCAD.ActiveDocument.getObject('CfdSolver').MaxIterations = 1000
 

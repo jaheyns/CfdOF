@@ -120,7 +120,7 @@ class TaskPanelCfdReportingFunction:
             self.form.coefficientFrame.setVisible(coefficient_frame_enabled)
             self.form.spatialFrame.setVisible(spatial_bin_frame_enabled)
 
-        if self.physics_obj.Flow == 'Incompressible':
+        if self.physics_obj.Flow == 'Isothermal':
             self.form.inputReferenceDensity.setVisible(False)
             self.form.labelRefDensity.setVisible(False)
         else:

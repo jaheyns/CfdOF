@@ -50,8 +50,7 @@ Gui.ActiveDocument.getObject("Compound001").Visibility=True
 
 obj = FreeCAD.ActiveDocument.PhysicsModel
 obj.Time = 'Steady'
-obj.Flow = 'Incompressible'
-obj.Thermal = 'None'
+obj.Flow = 'Isothermal'
 obj.Turbulence = 'RANS'
 obj.TurbulenceModel = 'kOmegaSST'
 obj.gx = '0 mm/s^2'

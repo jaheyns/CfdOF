@@ -161,7 +161,7 @@ class TaskPanelCfdInitialiseInternalFlowField:
             self.form.turbulencePropertiesFrame.setVisible(False)
 
         # Thermal / energy
-        if self.physicsModel.Thermal == 'Energy':
+        if self.physicsModel.Flow != 'Isothermal':
             self.form.energyFrame.setVisible(not use_inlet_temp)
         else:
             self.form.thermalPropertiesFrame.setVisible(False)

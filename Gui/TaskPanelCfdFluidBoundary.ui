@@ -2238,8 +2238,8 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroupMasterSlavePeriodic"/>
-  <buttongroup name="buttonGroupPeriodic"/>
   <buttongroup name="buttonGroupPorous"/>
+  <buttongroup name="buttonGroupPeriodic"/>
+  <buttongroup name="buttonGroupMasterSlavePeriodic"/>
  </buttongroups>
 </ui>

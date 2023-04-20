@@ -48,8 +48,7 @@ class TaskPanelCfdPhysicsSelection:
         self.form.radioButtonTransient.toggled.connect(self.updateUI)
         self.form.radioButtonSinglePhase.toggled.connect(self.updateUI)
         self.form.radioButtonFreeSurface.toggled.connect(self.updateUI)
-        self.form.radioButtonIncompressible.toggled.connect(self.updateUI)
-        self.form.radioButtonCompressible.toggled.connect(self.updateUI)
+        self.form.checkBoxIsothermal.stateChanged.connect(self.updateUI)
         self.form.viscousCheckBox.stateChanged.connect(self.updateUI)
         self.form.srfCheckBox.stateChanged.connect(self.updateUI)
         self.form.radioButtonLaminar.toggled.connect(self.updateUI)
@@ -60,15 +59,6 @@ class TaskPanelCfdPhysicsSelection:
         self.load()
 
     def load(self):
-
-        self.form.radioButtonSteady.toggled.connect(self.updateUI)
-        self.form.radioButtonTransient.toggled.connect(self.updateUI)
-        self.form.radioButtonSinglePhase.toggled.connect(self.updateUI)
-        self.form.radioButtonFreeSurface.toggled.connect(self.updateUI)
-        self.form.radioButtonIncompressible.toggled.connect(self.updateUI)
-        self.form.radioButtonCompressible.toggled.connect(self.updateUI)
-        self.form.checkBoxHighMach.toggled.connect(self.updateUI)
-        self.form.srfCheckBox.toggled.connect(self.updateUI)
 
         # Time
         if self.obj.Time == 'Steady':
@@ -83,14 +73,8 @@ class TaskPanelCfdPhysicsSelection:
             self.form.radioButtonFreeSurface.toggle()
 
         # Flow
-        if self.obj.Flow == 'Incompressible':
-            self.form.radioButtonIncompressible.toggle()
-        elif self.obj.Flow == 'Compressible':
-            self.form.radioButtonCompressible.toggle()
-            self.form.checkBoxHighMach.setChecked(False)
-        elif self.obj.Flow == 'HighMachCompressible':
-            self.form.radioButtonCompressible.toggle()
-            self.form.checkBoxHighMach.setChecked(True)
+        self.form.checkBoxIsothermal.setChecked(self.obj.Flow == 'Isothermal')
+        self.form.checkBoxHighMach.setChecked(self.obj.Flow == 'HighMachCompressible')
 
         # Turbulence
         if self.obj.Turbulence == 'Inviscid':
@@ -151,12 +135,13 @@ class TaskPanelCfdPhysicsSelection:
         # Gravity
         self.form.gravityFrame.setEnabled(
             self.form.radioButtonFreeSurface.isChecked() or
-            (self.form.radioButtonCompressible.isChecked() and not self.form.checkBoxHighMach.isChecked()))
+            (not self.form.checkBoxIsothermal.isChecked() and not self.form.checkBoxHighMach.isChecked()))
 
         # SRF model
-        srf_capable = (self.form.radioButtonSteady.isChecked() and not self.form.radioButtonCompressible.isChecked())
-        srf_should_be_unchecked = (self.form.radioButtonCompressible.isChecked() or self.form.radioButtonTransient.isChecked()
-                               or self.form.radioButtonFreeSurface.isChecked())
+        srf_capable = (self.form.radioButtonSteady.isChecked() and self.form.checkBoxIsothermal.isChecked())
+        srf_should_be_unchecked = ((not self.form.checkBoxIsothermal.isChecked()) 
+                                   or self.form.radioButtonTransient.isChecked()
+                                   or self.form.radioButtonFreeSurface.isChecked())
         self.form.srfCheckBox.setEnabled(srf_capable)
         if srf_should_be_unchecked:
             self.form.srfCheckBox.setChecked(False)
@@ -164,14 +149,15 @@ class TaskPanelCfdPhysicsSelection:
 
         # Free surface
         if self.form.radioButtonFreeSurface.isChecked():
-            self.form.radioButtonCompressible.setEnabled(False)
-            if self.form.radioButtonCompressible.isChecked():
-                self.form.radioButtonIncompressible.toggle()
+            self.form.checkBoxIsothermal.setChecked(True)
+            self.form.checkBoxIsothermal.setEnabled(False)
         else:
-            self.form.radioButtonCompressible.setEnabled(True)
+            self.form.checkBoxIsothermal.setEnabled(True)
 
         # High Mach capability
-        self.form.checkBoxHighMach.setEnabled(self.form.radioButtonCompressible.isChecked())
+        self.form.checkBoxHighMach.setEnabled(not self.form.checkBoxIsothermal.isChecked())
+        if self.form.checkBoxIsothermal.isChecked():
+            self.form.checkBoxHighMach.setChecked(False)
 
         # Viscous 
         if self.form.viscousCheckBox.isChecked():
@@ -218,15 +204,13 @@ class TaskPanelCfdPhysicsSelection:
         elif self.form.radioButtonFreeSurface.isChecked():
             storeIfChanged(self.obj, 'Phase', 'FreeSurface')
 
-        if self.form.radioButtonIncompressible.isChecked():
-            storeIfChanged(self.obj, 'Flow', 'Incompressible')
-            storeIfChanged(self.obj, 'Thermal', 'None')
-        elif self.form.radioButtonCompressible.isChecked():
+        if self.form.checkBoxIsothermal.isChecked():
+            storeIfChanged(self.obj, 'Flow', 'Isothermal')
+        elif not self.form.checkBoxIsothermal.isChecked():
             if self.form.checkBoxHighMach.isChecked():
                 storeIfChanged(self.obj, 'Flow', 'HighMachCompressible')
             else:
-                storeIfChanged(self.obj, 'Flow', 'Compressible')
-            storeIfChanged(self.obj, 'Thermal', 'Energy')
+                storeIfChanged(self.obj, 'Flow', 'NonIsothermal')
 
         if self.form.viscousCheckBox.isChecked():
             if self.form.radioButtonLaminar.isChecked():

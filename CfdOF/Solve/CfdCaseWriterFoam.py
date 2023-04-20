@@ -167,20 +167,17 @@ class CfdCaseWriterFoam:
         solver = None
         if self.physics_model.Phase == 'Single':
             if len(self.material_objs) == 1:
-                if self.physics_model.Flow == 'Incompressible':
-                    if self.physics_model.Thermal == 'None':
-                        if self.physics_model.Time == 'Transient':
-                            solver = 'pimpleFoam'
-                        else:
-                            if self.porous_zone_objs or self.porousBafflesPresent():
-                                solver = 'porousSimpleFoam'
-                            elif self.physics_model.SRFModelEnabled:
-                                solver = 'SRFSimpleFoam'
-                            else:
-                                solver = 'simpleFoam'
+                if self.physics_model.Flow == 'Isothermal':
+                    if self.physics_model.Time == 'Transient':
+                        solver = 'pimpleFoam'
                     else:
-                        raise RuntimeError("Only isothermal simulation currently supported for incompressible flow.")
-                elif self.physics_model.Flow == 'Compressible':
+                        if self.porous_zone_objs or self.porousBafflesPresent():
+                            solver = 'porousSimpleFoam'
+                        elif self.physics_model.SRFModelEnabled:
+                            solver = 'SRFSimpleFoam'
+                        else:
+                            solver = 'simpleFoam'
+                elif self.physics_model.Flow == 'NonIsothermal':
                     if self.physics_model.Time == 'Transient':
                         solver = 'buoyantPimpleFoam'
                     else:
@@ -193,7 +190,7 @@ class CfdCaseWriterFoam:
                 raise RuntimeError("Only one material object may be present for single phase simulation.")
         elif self.physics_model.Phase == 'FreeSurface':
             if self.physics_model.Time == 'Transient':
-                if self.physics_model.Thermal == 'None':
+                if self.physics_model.Flow == 'Isothermal':
                     if len(self.material_objs) == 2:
                         solver = 'interFoam'
                     elif len(self.material_objs) > 2:
@@ -239,13 +236,13 @@ class CfdCaseWriterFoam:
         for material_obj in self.material_objs:
             mp = material_obj.Material
             mp['Name'] = material_obj.Label
+            # Add type if absent
+            mat_type = mp.get('Type', 'Isothermal')
+            mp['Type'] = mat_type
 
             # Check compatibility between physics and material type
-            mat_type = mp['Type']
             flow_type = self.physics_model.Flow
-            print(mat_type)
-            print(flow_type)
-            if ((flow_type == 'Incompressible') != (mat_type == 'Isothermal')) or \
+            if ((flow_type == 'Isothermal') != (mat_type == 'Isothermal')) or \
                (flow_type == 'HighMachCompressible' and mat_type != 'Compressible'):
                 raise ValueError("The material type of object '{}' is not compatible with the selected flow physics. "
                                  "Please modify the material properties.".format(mp['Name']))
@@ -466,7 +463,7 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("No boundary selected to copy initial pressure value from.")
 
-        if physics['Thermal'] == 'Energy' and initial_values['UseInletTemperatureValue']:
+        if physics['Flow'] != 'Isothermal' and initial_values['UseInletTemperatureValue']:
             inlet_bc = settings['boundaries'][initial_values['BoundaryT'].Label]
             if inlet_bc['BoundaryType'] == 'inlet':
                 if inlet_bc['ThermalBoundaryType'] == 'fixedValue':

@@ -13,8 +13,7 @@ analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
 
 obj = FreeCAD.ActiveDocument.PhysicsModel
 obj.Time = 'Steady'
-obj.Flow = 'Incompressible'
-obj.Thermal = 'None'
+obj.Flow = 'Isothermal'
 obj.Turbulence = 'Laminar'
 obj.gx = '0 mm/s^2'
 obj.gy = '-9810 mm/s^2'

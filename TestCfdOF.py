@@ -94,7 +94,7 @@ class BlockTest(unittest.TestCase):
         self.analysis.addObject(self.physics_object)
         phys = self.physics_object
         phys.Time = 'Steady'
-        phys.Flow = 'Incompressible'
+        phys.Flow = 'Isothermal'
         phys.Turbulence = 'Laminar'
         self.active_doc.recompute()
 

@@ -106,13 +106,23 @@ class CfdPhysicsModel:
                              "Resolve time dependence"):
             obj.Time = 'Steady'
 
-        if addObjectProperty(obj, "Flow", ['Incompressible', 'Compressible', 'HighMachCompressible'],
-                             "App::PropertyEnumeration", "Physics modelling", "Flow algorithm"):
-            obj.Flow = 'Incompressible'
+        # Backward compat - convert old, imprecise 'Incompressible' and 'Compressible' to Isothermal/NonIsothermal
+        prev_flow = None
+        if 'Flow' in obj.PropertiesList:
+            prev_flow = obj.Flow
+            obj.removeProperty('Flow')
 
-        if addObjectProperty(obj, "Thermal", ['None', 'Energy'], "App::PropertyEnumeration", "Physics modelling",
-                             "Thermal modelling"):
-            obj.Thermal = 'None'
+        if addObjectProperty(obj, "Flow", ['Isothermal', 'NonIsothermal', 'HighMachCompressible'],
+                             "App::PropertyEnumeration", "Physics modelling", "Flow algorithm"):
+            obj.Flow = 'Isothermal'
+
+        if prev_flow:
+            if prev_flow == 'Incompressible':
+                obj.Flow = 'Isothermal'
+            elif prev_flow == 'Compressible':
+                obj.Flow = 'NonIsothermal'
+            else:
+                obj.Flow = prev_flow
 
         if addObjectProperty(obj, "Phase", ['Single', 'FreeSurface'], "App::PropertyEnumeration", "Physics modelling",
                              "Type of phases present"):
@@ -140,7 +150,7 @@ class CfdPhysicsModel:
 
         # SRF model
         addObjectProperty(obj, 'SRFModelEnabled', False, "App::PropertyBool", "Reference frame",
-                          "SRF enabled")
+                          "Single Rotating Frame model enabled")
 
         addObjectProperty(obj, 'SRFModelRPM', '0', "App::PropertyQuantity", "Reference frame", "Rotational speed")
 

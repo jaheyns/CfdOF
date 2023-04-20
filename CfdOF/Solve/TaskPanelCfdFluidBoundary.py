@@ -245,7 +245,7 @@ class TaskPanelCfdFluidBoundary:
         alpha_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][4]
         self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)
 
-        if not self.physics_model.Thermal == 'None' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
+        if not self.physics_model.Flow == 'Isothermal' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
             self.form.thermalFrame.setVisible(True)
             selected_rows = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6]
             for rowi in range(self.form.layoutThermal.count()):

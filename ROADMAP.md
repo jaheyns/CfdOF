@@ -16,10 +16,7 @@ displayed as a point on the model so that the user has feedback on their locatio
 could instead be directed to the log, so that the report view is cleaner and more readable 
 for the user. Generally improve the logging and messages that are printed there.
 (see FreeCAD.Console.PrintLog/PrintMessage/PrintWarning/PrintError.)
-* Test and provide more elegant errors or fallbacks for invalid/unexpected/unusual sequences of actions,
-e.g. (there are many more!):
-    * Switching a case to/from incompressible and compressible and trying to write it without
-    re-setting the material properties to a valid type
+* Test and provide more elegant errors or fallbacks for invalid/unexpected/unusual sequences of actions
 * Test and fix running under WSL on Windows
   
 ## Meshing

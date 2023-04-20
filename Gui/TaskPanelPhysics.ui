@@ -335,8 +335,8 @@
          <property name="bottomMargin">
           <number>0</number>
          </property>
-         <item row="2" column="1">
-          <widget class="QRadioButton" name="radioButtonCompressible">
+         <item row="2" column="0">
+          <widget class="QCheckBox" name="checkBoxIsothermal">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -344,11 +344,11 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Compressible</string>
+            <string>Isothermal</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="3" column="0">
           <widget class="QCheckBox" name="checkBoxHighMach">
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -358,19 +358,6 @@
            </property>
            <property name="text">
             <string>High Mach number</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QRadioButton" name="radioButtonIncompressible">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Incompressible</string>
            </property>
           </widget>
          </item>
@@ -716,9 +703,7 @@
   <tabstop>radioButtonSteady</tabstop>
   <tabstop>radioButtonTransient</tabstop>
   <tabstop>radioButtonSinglePhase</tabstop>
-  <tabstop>radioButtonIncompressible</tabstop>
-  <tabstop>radioButtonCompressible</tabstop>
-  <tabstop>checkBoxHighMach</tabstop>
+  <tabstop>checkBoxIsothermal</tabstop>
   <tabstop>viscousCheckBox</tabstop>
   <tabstop>srfCheckBox</tabstop>
   <tabstop>radioButtonLaminar</tabstop>

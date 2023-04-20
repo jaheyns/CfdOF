@@ -42,17 +42,17 @@ class TaskPanelCfdFluidProperties:
 
         self.material = self.obj.Material
 
-        self.form.compressibleCheckBox.setVisible(self.physics_obj.Flow == "Compressible")
+        self.form.compressibleCheckBox.setVisible(self.physics_obj.Flow == "NonIsothermal")
         # Make sure it is checked in the default case since object was initialised with Isothermal
         self.form.compressibleCheckBox.setChecked(self.material.get('Type') != "Incompressible")
         self.form.compressibleCheckBox.stateChanged.connect(self.compressibleCheckBoxChanged)
 
         self.text_boxes = {}
         self.fields = []
-        if self.physics_obj.Flow == 'Incompressible':
+        if self.physics_obj.Flow == 'Isothermal':
             material_type = 'Isothermal'
         else:
-            if self.physics_obj.Flow == "Compressible" and not self.form.compressibleCheckBox.isChecked():
+            if self.physics_obj.Flow == 'NonIsothermal' and not self.form.compressibleCheckBox.isChecked():
                 material_type = 'Incompressible'
             else:
                 material_type = 'Compressible'
