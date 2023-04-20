@@ -239,6 +239,17 @@ class CfdCaseWriterFoam:
         for material_obj in self.material_objs:
             mp = material_obj.Material
             mp['Name'] = material_obj.Label
+
+            # Check compatibility between physics and material type
+            mat_type = mp['Type']
+            flow_type = self.physics_model.Flow
+            print(mat_type)
+            print(flow_type)
+            if ((flow_type == 'Incompressible') != (mat_type == 'Isothermal')) or \
+               (flow_type == 'HighMachCompressible' and mat_type != 'Compressible'):
+                raise ValueError("The material type of object '{}' is not compatible with the selected flow physics. "
+                                 "Please modify the material properties.".format(mp['Name']))
+
             if 'Density' in mp:
                 mp['Density'] = Units.Quantity(mp['Density']).getValueAs("kg/m^3").Value
             if 'DynamicViscosity' in mp:
