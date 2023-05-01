@@ -1116,9 +1116,12 @@ def checkCfdDependencies(msgFn):
 
                 # Check for mpiexec
                 try:
-                    runFoamCommand("mpiexec --help")
+                    if platform.system() == "Windows":
+                        runFoamCommand('"$(which mpiexec)" -help')
+                    else:
+                        runFoamCommand("mpiexec --help")
                 except subprocess.CalledProcessError:
-                    msgFn("MPI is not installed. " + \
+                    msgFn("MPI was not found. " + \
                             "Parallel execution will not be possible.")
 
                 # Check for cfMesh
