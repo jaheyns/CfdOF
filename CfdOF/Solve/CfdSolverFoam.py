@@ -97,6 +97,10 @@ class CfdSolverFoam(object):
                           "Total time to run transient solution")
         addObjectProperty(obj, "TimeStep", "0.001 s", "App::PropertyQuantity", "TimeStepControl",
                           "Time step increment")
+        addObjectProperty(obj, "MaxCFLNumber", 5, "App::PropertyFloat", "TimeStepControl",
+                          "Maximum CFL number for transient simulations")
+        addObjectProperty(obj, "MaxInterfaceCFLNumber", 5, "App::PropertyFloat", "TimeStepControl",
+                          "Maximum free-surface CFL number for transient simulations")
         addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "TimeStepControl",
                           "Output time interval")
 
