@@ -248,18 +248,7 @@ class TaskPanelCfdFluidBoundary:
         if not self.physics_model.Flow == 'Isothermal' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
             self.form.thermalFrame.setVisible(True)
             selected_rows = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6]
-            for rowi in range(self.form.layoutThermal.count()):
-                for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
-                    item = self.form.layoutThermal.itemAt(rowi, role)
-                    if item:
-                        if isinstance(item, QtGui.QWidgetItem):
-                            item.widget().setVisible(selected_rows is None)
-            if selected_rows:
-                for row_enabled in selected_rows:
-                    for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
-                        item = self.form.layoutThermal.itemAt(row_enabled, role)
-                        if item:
-                            item.widget().setVisible(True)
+            CfdTools.enableLayoutRows(self.form.layoutThermal, selected_rows)
         else:
             self.form.thermalFrame.setVisible(False)
 
@@ -276,11 +265,7 @@ class TaskPanelCfdFluidBoundary:
                 CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][2][index])
             panel_numbers = CfdFluidBoundary.TURBULENT_INLET_SPEC[self.turb_model][3][index]
             # Enables specified rows of a QFormLayout
-            for rowi in range(self.form.layoutTurbulenceValues.count()):
-                for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
-                    item = self.form.layoutTurbulenceValues.itemAt(rowi, role)
-                    if isinstance(item, QtGui.QWidgetItem):
-                        item.widget().setVisible(rowi in panel_numbers)
+            CfdTools.enableLayoutRows(self.form.layoutTurbulenceValues, panel_numbers)
 
         # Thermal model, set visible gui components
         if CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][6] is None:
@@ -288,12 +273,8 @@ class TaskPanelCfdFluidBoundary:
             index = self.form.comboThermalBoundaryType.currentIndex()
             self.form.labelThermalDescription.setText(CfdFluidBoundary.THERMAL_HELPTEXT[index])
             panel_numbers = CfdFluidBoundary.BOUNDARY_THERMALTAB[index]
-            # Enables specified rows of a QFormLayout
-            for rowi in range(2, self.form.layoutThermal.count()):  # Input values only start at row 2 of this form
-                for role in [QFormLayout.LabelRole, QFormLayout.FieldRole, QFormLayout.SpanningRole]:
-                    item = self.form.layoutThermal.itemAt(rowi, role)
-                    if isinstance(item, QtGui.QWidgetItem):
-                        item.widget().setVisible(rowi-2 in panel_numbers)
+            # Input values only start at row 2 of this form
+            CfdTools.enableLayoutRows(self.form.layoutThermal, [0, 1] + [rowi+2 for rowi in panel_numbers])
 
         periodic_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][7]
         if periodic_enabled:

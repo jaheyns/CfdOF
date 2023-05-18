@@ -216,7 +216,7 @@
            </widget>
           </item>
           <item>
-           <layout class="QFormLayout" name="layoutTurbulenceValues">
+           <layout class="QGridLayout" name="layoutTurbulenceValues">
             <property name="topMargin">
              <number>8</number>
             </property>
@@ -226,14 +226,17 @@
             <property name="bottomMargin">
              <number>8</number>
             </property>
-            <item row="1" column="0">
+            <property name="verticalSpacing">
+             <number>6</number>
+            </property>
+            <item row="0" column="0">
              <widget class="QLabel" name="labelTurbulentKineticEnergy">
               <property name="text">
                <string>Turbulent kinetic energy (k)</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="0" column="1">
              <widget class="Gui::InputField" name="inputKineticEnergy">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -261,14 +264,14 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="1" column="0">
              <widget class="QLabel" name="labelTurbulentDissapationRate">
               <property name="text">
                <string>Dissipation rate (ε)</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="1" column="1">
              <widget class="Gui::InputField" name="inputDissipationRate">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -296,14 +299,14 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="2" column="0">
              <widget class="QLabel" name="labelTurbulentSpecificDissapationRate">
               <property name="text">
                <string>Specific dissipation rate (ω)</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="2" column="1">
              <widget class="Gui::InputField" name="inputSpecificDissipationRate">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -331,189 +334,14 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="labelTurbulentIntensityValue">
               <property name="text">
                <string>Turbulence intensity (I)</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="labelTurbulentLengthValue">
-              <property name="text">
-               <string>Length scale (l)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="Gui::InputField" name="inputLengthScale">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true">mm</string>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="labelNuTildaValue">
-              <property name="text">
-               <string>Modified turbulent viscosity (ṽ)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
-             <widget class="Gui::InputField" name="inputNuTilda">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true">m^2/s^1</string>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="labelIntermittencyValue">
-              <property name="text">
-               <string>Intermittency (γ)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="1">
-             <widget class="Gui::InputField" name="inputGammaInt">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.001000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true"/>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="0">
-             <widget class="QLabel" name="labelMomentumThicknessValue">
-              <property name="text">
-               <string>Momentum Thickness (Reθ)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="8" column="1">
-             <widget class="Gui::InputField" name="inputReThetat">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.001000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true"/>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="labelMomentumThicknessValue">
-              <property name="text">
-               <string>Turbulent viscosity (v)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
-             <widget class="Gui::InputField" name="inputTurbulentViscosity">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>0.001000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true">m^2/s^1</string>
-              </property>
-              <property name="format" stdset="0">
-               <number>0</number>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
+            <item row="3" column="1">
              <widget class="QFrame" name="frame">
               <property name="frameShape">
                <enum>QFrame::NoFrame</enum>
@@ -593,8 +421,180 @@
               </layout>
              </widget>
             </item>
-            <item row="0" column="0">
-             <layout class="QVBoxLayout" name="verticalLayout_4"/>
+            <item row="4" column="0">
+             <widget class="QLabel" name="labelTurbulentLengthValue">
+              <property name="text">
+               <string>Length scale (l)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="Gui::InputField" name="inputLengthScale">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true">mm</string>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="labelNuTildaValue">
+              <property name="text">
+               <string>Modified turbulent viscosity (ṽ)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="Gui::InputField" name="inputNuTilda">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true">m^2/s^1</string>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0">
+             <widget class="QLabel" name="labelIntermittencyValue">
+              <property name="text">
+               <string>Intermittency (γ)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1">
+             <widget class="Gui::InputField" name="inputGammaInt">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.001000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true"/>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="labelMomentumThicknessValue">
+              <property name="text">
+               <string>Momentum Thickness (Reθ)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1">
+             <widget class="Gui::InputField" name="inputReThetat">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.001000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true"/>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0">
+             <widget class="QLabel" name="labelMomentumThicknessValue">
+              <property name="text">
+               <string>Turbulent viscosity (v)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="Gui::InputField" name="inputTurbulentViscosity">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>0.001000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true">m^2/s^1</string>
+              </property>
+              <property name="format" stdset="0">
+               <number>0</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -630,17 +630,32 @@
            </widget>
           </item>
           <item>
-           <layout class="QFormLayout" name="layoutThermal">
-            <item row="0" column="0">
-             <widget class="QLabel" name="labelThermalBoundaryType">
+           <layout class="QGridLayout" name="layoutThermal">
+            <item row="2" column="1">
+             <widget class="Gui::InputField" name="inputTemperature">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Type</string>
+               <string>0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="minimum" stdset="0">
+               <double>0.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true">K</string>
+              </property>
+              <property name="format" stdset="0">
+               <string>g</string>
               </property>
              </widget>
             </item>
@@ -670,55 +685,23 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
-             <widget class="QLabel" name="labelThermalDescription">
+            <item row="3" column="0">
+             <widget class="QLabel" name="labelHeatFlux">
               <property name="text">
-               <string/>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
+               <string>Heat flux</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="labelTemperature">
-              <property name="text">
-               <string>Temperature</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="Gui::InputField" name="inputTemperature">
+            <item row="0" column="0">
+             <widget class="QLabel" name="labelThermalBoundaryType">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-              <property name="singleStep" stdset="0">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="minimum" stdset="0">
-               <double>0.000000000000000</double>
-              </property>
-              <property name="unit" stdset="0">
-               <string notr="true">K</string>
-              </property>
-              <property name="format" stdset="0">
-               <string>g</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="labelHeatFlux">
-              <property name="text">
-               <string>Heat flux</string>
+               <string>Type</string>
               </property>
              </widget>
             </item>
@@ -747,10 +730,10 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="labelHTCeoff">
+            <item row="2" column="0">
+             <widget class="QLabel" name="labelTemperature">
               <property name="text">
-               <string>Heat transfer coeff</string>
+               <string>Temperature</string>
               </property>
              </widget>
             </item>
@@ -782,6 +765,23 @@
               </property>
              </widget>
             </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="labelHTCeoff">
+              <property name="text">
+               <string>Heat transfer coefficient</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="labelThermalDescription">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>
@@ -801,6 +801,9 @@
           </property>
           <item>
            <layout class="QVBoxLayout" name="layoutBasicValues">
+            <property name="spacing">
+             <number>0</number>
+            </property>
             <item>
              <widget class="QFrame" name="frame1">
               <property name="frameShape">
@@ -2204,6 +2207,8 @@
   <tabstop>checkBoxDefaultBoundary</tabstop>
   <tabstop>radioButtonCart</tabstop>
   <tabstop>radioButtonMagNormal</tabstop>
+  <tabstop>inputCartX</tabstop>
+  <tabstop>inputCartY</tabstop>
   <tabstop>inputCartZ</tabstop>
   <tabstop>inputVelocityMag</tabstop>
   <tabstop>lineDirection</tabstop>
@@ -2215,13 +2220,13 @@
   <tabstop>inputMassFlowRate</tabstop>
   <tabstop>radioButtonPorousCoeff</tabstop>
   <tabstop>radioButtonPorousScreen</tabstop>
-  <tabstop>inputPressureDropCoeff</tabstop>
+  <tabstop>inputWireDiameter</tabstop>
+  <tabstop>inputSpacing</tabstop>
+  <tabstop>inputRoughnessHeight</tabstop>
+  <tabstop>inputRoughnessConstant</tabstop>
+  <tabstop>cb_relative_srf</tabstop>
   <tabstop>comboFluid</tabstop>
   <tabstop>inputVolumeFraction</tabstop>
-  <tabstop>comboThermalBoundaryType</tabstop>
-  <tabstop>inputTemperature</tabstop>
-  <tabstop>inputHeatFlux</tabstop>
-  <tabstop>inputHeatTransferCoeff</tabstop>
   <tabstop>comboTurbulenceSpecification</tabstop>
   <tabstop>inputKineticEnergy</tabstop>
   <tabstop>inputDissipationRate</tabstop>
@@ -2232,14 +2237,27 @@
   <tabstop>inputGammaInt</tabstop>
   <tabstop>inputReThetat</tabstop>
   <tabstop>inputTurbulentViscosity</tabstop>
-  <tabstop>inputSpacing</tabstop>
-  <tabstop>inputWireDiameter</tabstop>
+  <tabstop>radioButtonMasterPeriodic</tabstop>
+  <tabstop>radioButtonSlavePeriodic</tabstop>
+  <tabstop>comboBoxPeriodicPartner</tabstop>
+  <tabstop>rb_translational_periodic</tabstop>
+  <tabstop>rb_rotational_periodic</tabstop>
+  <tabstop>input_corx</tabstop>
+  <tabstop>input_cory</tabstop>
+  <tabstop>input_corz</tabstop>
+  <tabstop>input_axisx</tabstop>
+  <tabstop>input_axisy</tabstop>
+  <tabstop>input_axisz</tabstop>
+  <tabstop>input_sepx</tabstop>
+  <tabstop>input_sepy</tabstop>
+  <tabstop>input_sepz</tabstop>
+  <tabstop>inputPressureDropCoeff</tabstop>
  </tabstops>
  <resources/>
  <connections/>
  <buttongroups>
   <buttongroup name="buttonGroupPorous"/>
-  <buttongroup name="buttonGroupPeriodic"/>
   <buttongroup name="buttonGroupMasterSlavePeriodic"/>
+  <buttongroup name="buttonGroupPeriodic"/>
  </buttongroups>
 </ui>
