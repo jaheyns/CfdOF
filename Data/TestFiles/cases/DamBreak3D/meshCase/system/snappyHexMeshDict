@@ -127,6 +127,7 @@ addLayersControls
     nSmoothThickness 10;
     maxFaceThicknessRatio 0.5;
     maxThicknessToMedialRatio 0.3;
+    minMedialAxisAngle 90;
     minMedianAxisAngle 90;
     nBufferCellsNoExtrude 0;
     nLayerIter 50;
