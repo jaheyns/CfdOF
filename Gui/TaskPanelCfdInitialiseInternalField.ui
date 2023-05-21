@@ -203,7 +203,7 @@
             <double>0.000000000000000</double>
            </property>
            <property name="unit" stdset="0">
-            <string notr="true">rad/s</string>
+            <string notr="true">1/s</string>
            </property>
            <property name="format" stdset="0">
             <string>g</string>

@@ -89,6 +89,6 @@ init.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary001
 init.Pressure = '0 kg/(mm*s^2)'
 init.VolumeFractions = {}
 init.Temperature = '293 K'
-init.omega = '57.3 deg/s'
+init.omega = '1 1/s'
 init.k = '10000 mm^2/s^2'
 

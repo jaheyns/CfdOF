@@ -33,7 +33,7 @@ purgeWrite      0;
 
 adjustTimeStep  yes;
 
-maxCo           5;
+maxCo           5.0;
 
 writeFormat     ascii;
 

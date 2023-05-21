@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -26,6 +26,7 @@ import os
 from pivy import coin
 import Part
 import FreeCAD
+from FreeCAD import Units
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 if FreeCAD.GuiUp:
@@ -355,7 +356,7 @@ class CfdFluidBoundary:
         # k omega SST
         addObjectProperty(obj, 'TurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
                           "Turbulent kinetic energy")
-        addObjectProperty(obj, 'SpecificDissipationRate', '1 rad/s', "App::PropertyQuantity", "Turbulence",
+        addObjectProperty(obj, 'SpecificDissipationRate', '1 1/s', "App::PropertyQuantity", "Turbulence",
                           "Specific turbulent dissipation rate")
 
         # k epsilon

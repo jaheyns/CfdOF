@@ -1642,8 +1642,9 @@ def propsToDict(obj):
     for k in obj.PropertiesList:
         if obj.getTypeIdOfProperty(k) in QUANTITY_PROPERTIES:
             q = Units.Quantity(getattr(obj, k))
-            # q.Value is in FreeCAD internal units, which is same as SI except for mm instead of m
-            d[k] = q.Value/1000**q.Unit.Signature[0]
+            # q.Value is in FreeCAD internal units, which is same as SI except for mm instead of m and deg instead of 
+            # rad
+            d[k] = q.Value/1000**q.Unit.Signature[0]/(180/math.pi)**q.Unit.Signature[7]
         else:
             d[k] = getattr(obj, k)
     return d

@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -26,6 +26,7 @@
 import os
 import os.path
 import FreeCAD
+from FreeCAD import Units
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -101,7 +102,7 @@ class CfdInitialVariables:
         addObjectProperty(obj, 'UseInletTurbulenceValues', False, "App::PropertyBool", "Turbulence",
                           "Initialise turbulence with values from inlet")
         addObjectProperty(obj, 'k', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence", "Turbulent kinetic energy")
-        addObjectProperty(obj, 'omega', '1 rad/s', "App::PropertyQuantity", "Turbulence",
+        addObjectProperty(obj, 'omega', '1 1/s', "App::PropertyQuantity", "Turbulance", 
                           "Specific turbulent dissipation rate")
         addObjectProperty(obj, 'epsilon', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
                           "Turbulent dissipation rate")

@@ -83,7 +83,7 @@ CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
 App.ActiveDocument.CfdFluidBoundary.Label = 'open'
 FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'open'
 FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'totalPressureOpening'
-App.ActiveDocument.CfdFluidBoundary.SpecificDissipationRate = '57.3 deg/s'
+App.ActiveDocument.CfdFluidBoundary.SpecificDissipationRate = '1 1/s'
 FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
 (FreeCAD.ActiveDocument.getObject('Box'), ('Face6',))]
 FreeCAD.ActiveDocument.recompute()
@@ -93,14 +93,14 @@ from CfdOF import CfdTools
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
 ### End command Cfd_FluidBoundary
 App.ActiveDocument.CfdFluidBoundary001.Label = 'wall'
-App.ActiveDocument.CfdFluidBoundary001.SpecificDissipationRate = '57.3 deg/s'
+App.ActiveDocument.CfdFluidBoundary001.SpecificDissipationRate = '1 1/s'
 App.ActiveDocument.CfdFluidBoundary001.DefaultBoundary = True
 FreeCAD.ActiveDocument.recompute()
 # Gui.runCommand('Cfd_InitialiseInternal',0)
 # Gui.Selection.clearSelection()
 App.ActiveDocument.InitialiseFields.PotentialFlow = False
 App.ActiveDocument.InitialiseFields.VolumeFractions = {'water': '0.0'}
-App.ActiveDocument.InitialiseFields.omega = '57.3 deg/s'
+App.ActiveDocument.InitialiseFields.omega = '1 1/s'
 # Gui.Selection.addSelection('Unnamed','InitialiseFields')
 # App.getDocument('Unnamed').getObject('InitialiseFields').ViewObject.doubleClicked()
 FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary
