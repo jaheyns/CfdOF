@@ -14,12 +14,7 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-%{%(physics/TurbulenceModel%)
-%:kEqn
-internalField   uniform %(initialValues/kEqnk%);
-%:default
 internalField   uniform %(initialValues/k%);
-%}
 
 boundaryField
 {

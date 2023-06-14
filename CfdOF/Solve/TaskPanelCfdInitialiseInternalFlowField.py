@@ -103,15 +103,16 @@ class TaskPanelCfdInitialiseInternalFlowField:
         # Use INLET turbulence values (k, omega, epsilon etc)
         use_inlet_turb = self.obj.UseInletTurbulenceValues
         self.form.checkUseInletValuesTurb.setChecked(use_inlet_turb)
-        setQuantity(self.form.inputk, self.obj.k)
+        setQuantity(self.form.inputkEpsk, self.obj.k)
         setQuantity(self.form.inputEpsilon, self.obj.epsilon)
+        setQuantity(self.form.inputkOmegak, self.obj.k)
         setQuantity(self.form.inputOmega, self.obj.omega)
         setQuantity(self.form.inputnuTilda, self.obj.nuTilda)
         setQuantity(self.form.inputGammaInt, self.obj.gammaInt)
         setQuantity(self.form.inputReThetat, self.obj.ReThetat)
         setQuantity(self.form.inputTurbulentViscosity, self.obj.nut)
-        setQuantity(self.form.inputkEqnKineticEnergy, self.obj.kEqnk)
-        setQuantity(self.form.inputkEqnTurbulentViscosity, self.obj.kEqnNut)
+        setQuantity(self.form.inputkEqnKineticEnergy, self.obj.k)
+        setQuantity(self.form.inputkEqnTurbulentViscosity, self.obj.nut)
 
         use_inlet_temp = self.obj.UseInletTemperatureValue
         self.form.checkUseInletValuesThermal.setChecked(use_inlet_temp)
@@ -250,16 +251,20 @@ class TaskPanelCfdInitialiseInternalFlowField:
 
         # Turbulence
         storeIfChanged(self.obj, 'UseInletTurbulenceValues', self.form.checkUseInletValuesTurb.isChecked())
-        storeIfChanged(self.obj, 'nuTilda', getQuantity(self.form.inputnuTilda))
+        if self.form.kEpsilonFrame.isVisible():
+            storeIfChanged(self.obj, 'k', getQuantity(self.form.inputkEpsk))
         storeIfChanged(self.obj, 'epsilon', getQuantity(self.form.inputEpsilon))
+        if self.form.kOmegaSSTFrame.isVisible():
+            storeIfChanged(self.obj, 'k', getQuantity(self.form.inputkOmegak))
         storeIfChanged(self.obj, 'omega', getQuantity(self.form.inputOmega))
-        storeIfChanged(self.obj, 'k', getQuantity(self.form.inputk))
+        storeIfChanged(self.obj, 'nuTilda', getQuantity(self.form.inputnuTilda))
         storeIfChanged(self.obj, 'gammaInt', getQuantity(self.form.inputGammaInt))
         storeIfChanged(self.obj, 'ReThetat', getQuantity(self.form.inputReThetat))
-        # LES
-        storeIfChanged(self.obj, 'nut', getQuantity(self.form.inputTurbulentViscosity))
-        storeIfChanged(self.obj, 'kEqnk', getQuantity(self.form.inputkEqnKineticEnergy))
-        storeIfChanged(self.obj, 'kEqnNut', getQuantity(self.form.inputkEqnTurbulentViscosity))
+        if self.form.lesModelsFrame.isVisible():        
+            storeIfChanged(self.obj, 'nut', getQuantity(self.form.inputTurbulentViscosity))
+        if self.form.leskEqnFrame.isVisible():
+            storeIfChanged(self.obj, 'k', getQuantity(self.form.inputkEqnKineticEnergy))
+            storeIfChanged(self.obj, 'nut', getQuantity(self.form.inputkEqnTurbulentViscosity))
 
         boundaryU = self.form.comboBoundaryU.currentData()
         boundaryP = self.form.comboBoundaryP.currentData()

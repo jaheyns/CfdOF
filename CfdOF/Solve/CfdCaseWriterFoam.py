@@ -497,8 +497,8 @@ class CfdCaseWriterFoam:
                     elif inlet_bc['TurbulenceInletSpecification'] == 'TurbulentViscosity':
                         initial_values['nut'] = inlet_bc['TurbulentViscosity']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'TurbulentViscosityAndK':
-                        initial_values['kEqnk'] = inlet_bc['kEqnTurbulentKineticEnergy']
-                        initial_values['kEqnNut'] = inlet_bc['kEqnTurbulentViscosity']
+                        initial_values['k'] = inlet_bc['kEqnTurbulentKineticEnergy']
+                        initial_values['nut'] = inlet_bc['kEqnTurbulentViscosity']
                     elif inlet_bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
                         if inlet_bc['BoundarySubType'] == 'uniformVelocityInlet' or \
                            inlet_bc['BoundarySubType'] == 'farField':

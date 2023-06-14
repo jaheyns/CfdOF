@@ -13,9 +13,7 @@ FoamFile
 dimensions      [0 2 -1 0 0 0 0];
 
 %{%(physics/TurbulenceModel%)
-%:kEqn
-internalField   uniform %(initialValues/kEqnNut%);
-%:Smagorinsky WALE
+%:kEqn Smagorinsky WALE
 internalField   uniform %(initialValues/nut%);
 %:default
 internalField   uniform 0;
