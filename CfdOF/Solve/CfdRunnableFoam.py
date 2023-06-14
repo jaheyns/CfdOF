@@ -188,7 +188,7 @@ class CfdRunnableFoam(CfdRunnable):
             # Only record the first residual per outer iteration
             if line.startswith(u"Time = "):
                 try:
-                    time_val = float(line.lstrip(u"Time = "))
+                    time_val = float(line.lstrip(u"Time = ").rstrip("s"))
                 except ValueError:
                     pass
                 else:
