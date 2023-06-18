@@ -229,7 +229,7 @@ class TaskPanelCfdSolverControl:
             "  working_dir = CfdTools.getOutputPath(analysis_object)\n" +
             "  case_name = solver_object.InputCaseName\n" +
             "  solver_directory = os.path.abspath(os.path.join(working_dir, case_name))\n" +
-            "  from CfdOF.Solve.CfdRunnableFoam import CfdRunnableFoam\n" +
+            "  from CfdOF.Solve import CfdRunnableFoam\n" +
             "  solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)\n" +
             "  cmd = solver_runner.get_solver_cmd(solver_directory)\n" +
             "  env_vars = solver_runner.getRunEnvironment()\n" +
