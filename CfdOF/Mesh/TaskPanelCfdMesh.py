@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -136,8 +136,8 @@ class TaskPanelCfdMesh:
         self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
         self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(case_path, "pv.foam")))
-        self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
-        self.form.pb_check_mesh.setEnabled(os.path.exists(os.path.join(case_path, "mesh_outside.stl")))
+        self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "surfaceMesh.vtk")))
+        self.form.pb_check_mesh.setEnabled(os.path.exists(os.path.join(case_path, "surfaceMesh.vtk")))
         
         utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
         if utility == "snappyHexMesh":
@@ -396,7 +396,7 @@ class TaskPanelCfdMesh:
         self.mesh_obj.Proxy.cart_mesh.loadSurfMesh()
         self.analysis_obj.NeedsMeshRewrite = prev_write_mesh
         self.consoleMessage('Triangulated representation of the surface mesh is shown - ', timed=False)
-        self.consoleMessage("Please view in Paraview for accurate display.\n", timed=False)
+        self.consoleMessage("Please use Paraview for full mesh visualisation.\n", timed=False)
 
     def pbClearMeshClicked(self):
         prev_write_mesh = self.analysis_obj.NeedsMeshRewrite

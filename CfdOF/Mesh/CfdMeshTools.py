@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -567,19 +567,10 @@ class CfdMeshTools:
 
     def loadSurfMesh(self):
         if not self.error:
-            # NOTE: FemMesh does not support multi element stl
-            # fem_mesh = Fem.read(os.path.join(self.meshCaseDir,'mesh_outside.stl'))
-            # This is a temp work around to remove multiple solids, but is not very efficient
-            import Mesh
             import Fem
-            stl = os.path.join(self.meshCaseDir, 'mesh_outside.stl')
-            ast = os.path.join(self.meshCaseDir, 'mesh_outside.ast')
-            mesh = Mesh.Mesh(stl)
-            mesh.write(ast)
-            os.remove(stl)
-            os.rename(ast, stl)
-            fem_mesh = Fem.read(stl)
-            fem_mesh_obj = FreeCAD.ActiveDocument.addObject("Fem::FemMeshObject", self.mesh_obj.Name+"_Surf_Vis")
+            vtk = os.path.join(self.meshCaseDir, 'surfaceMesh.vtk')
+            fem_mesh = Fem.read(vtk)
+            fem_mesh_obj = FreeCAD.ActiveDocument.addObject("Fem::FemMeshObject", self.mesh_obj.Name+"SurfaceMesh")
             fem_mesh_obj.FemMesh = fem_mesh
             self.mesh_obj.addObject(fem_mesh_obj)
             print('  Finished loading mesh.')
