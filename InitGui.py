@@ -59,6 +59,7 @@ class CfdOFWorkbench(Workbench):
             CommandDynamicMeshInterfaceRefinement, CommandDynamicMeshShockRefinement
         from CfdOF.PostProcess.CfdReportingFunction import CommandCfdReportingFunction
         from CfdOF.Solve.CfdScalarTransportFunction import CommandCfdScalarTransportFunction
+        from CfdOF.CfdReloadWorkbench import CommandCfdReloadWorkbench
 
         FreeCADGui.addCommand('Cfd_Analysis', CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', CommandCfdMeshFromShape())
@@ -75,6 +76,7 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_SolverControl', CommandCfdSolverFoam())
         FreeCADGui.addCommand('Cfd_ReportingFunctions', CommandCfdReportingFunction())
         FreeCADGui.addCommand('Cfd_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
+        FreeCADGui.addCommand('Cfd_ReloadWorkbench', CommandCfdReloadWorkbench())
 
         cmdlst = ['Cfd_Analysis',
                   'Cfd_MeshFromShape', 'Cfd_MeshRegion', 
@@ -95,6 +97,8 @@ class CfdOFWorkbench(Workbench):
             else:
                 self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), [cmd])
                 self.appendToolbar(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "CfdOF")), [cmd])
+
+        self.appendMenu(str(QtCore.QT_TRANSLATE_NOOP("Cfd", "&CfdOF")), ['Cfd_ReloadWorkbench'])
 
         from CfdOF import CfdTools
         prefs = CfdTools.getPreferencesLocation()

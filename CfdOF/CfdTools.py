@@ -37,6 +37,8 @@ import platform
 import subprocess
 import sys
 import math
+import importlib
+import types
 from datetime import timedelta
 import FreeCAD
 from FreeCAD import Units
@@ -46,6 +48,7 @@ from BOPTools import SplitFeatures
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
 from CfdOF.CfdConsoleProcess import removeAppimageEnvironment
 from PySide import QtCore
+import CfdOF
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
@@ -1723,6 +1726,32 @@ def executeMacro(macro_name):
     macro_contents += open(macro_name).read()
     exec(compile(macro_contents, macro_name, 'exec'), {'__file__': macro_name})    
 
+
+def reloadWorkbench():
+    """ Code obtained from David_D at https://forum.freecad.org/viewtopic.php?t=34658#p291438 """
+    reload_module = CfdOF
+    
+    fn = reload_module.__file__
+    fn_dir = os.path.dirname(fn) + os.sep
+    module_visit = {fn}
+    del fn
+
+    def reloadWorkbenchRecursive(module):
+        importlib.reload(module)
+
+        for module_child in vars(module).values():
+            if isinstance(module_child, types.ModuleType):
+                fn_child = getattr(module_child, "__file__", None)
+                if (fn_child is not None) and fn_child.startswith(fn_dir):
+                    if fn_child not in module_visit:
+                        FreeCAD.Console.PrintMessage("Reloading: {}, from: {}\n".format(
+                            fn_child, module
+                            ))
+                        module_visit.add(fn_child)
+                        reloadWorkbenchRecursive(module_child)
+
+    return reloadWorkbenchRecursive(reload_module)
+   
 
 class CfdSynchronousFoamProcess:
     def __init__(self):
