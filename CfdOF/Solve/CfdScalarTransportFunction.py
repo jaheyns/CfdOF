@@ -64,10 +64,6 @@ class CommandCfdScalarTransportFunction:
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
-if FreeCAD.GuiUp:
-    FreeCADGui.addCommand('Cfd_ScalarTransportFunction', CommandCfdScalarTransportFunction())
-
-
 class CfdScalarTransportFunction:
 
     def __init__(self, obj):

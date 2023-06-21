@@ -110,43 +110,31 @@ class TaskPanelCfdSolverControl:
         from CfdOF.Solve import CfdCaseWriterFoam
         import importlib
         importlib.reload(CfdCaseWriterFoam)
-        if self.check_prerequisites_helper():
-            self.consoleMessage("Case writer called")
-            self.form.pb_paraview.setEnabled(False)
-            self.form.pb_edit_inp.setEnabled(False)
-            self.form.pb_run_solver.setEnabled(False)
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            try:
-                FreeCADGui.doCommand("FreeCAD.ActiveDocument." + self.solver_object.Name + ".Proxy.case_writer = "
-                                     "CfdCaseWriterFoam.CfdCaseWriterFoam(FreeCAD.ActiveDocument." +
-                                     self.solver_runner.analysis.Name + ")")
-                FreeCADGui.doCommand("writer = FreeCAD.ActiveDocument." +
-                                     self.solver_object.Name + ".Proxy.case_writer")
-                writer = self.solver_object.Proxy.case_writer
-                writer.progressCallback = self.consoleMessage
-                FreeCADGui.doCommand("writer.writeCase()")
-            except Exception as e:
-                self.consoleMessage("Error writing case:", 'Error')
-                self.consoleMessage(type(e).__name__ + ": " + str(e), 'Error')
-                self.consoleMessage("Write case setup file failed", 'Error')
-                raise
-            else:
-                self.analysis_object.NeedsCaseRewrite = False
-            finally:
-                QApplication.restoreOverrideCursor()
-            self.updateUI()
-            self.form.pb_run_solver.setEnabled(True)
+        self.consoleMessage("Case writer called")
+        self.form.pb_paraview.setEnabled(False)
+        self.form.pb_edit_inp.setEnabled(False)
+        self.form.pb_run_solver.setEnabled(False)
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            FreeCADGui.doCommand("FreeCAD.ActiveDocument." + self.solver_object.Name + ".Proxy.case_writer = "
+                                    "CfdCaseWriterFoam.CfdCaseWriterFoam(FreeCAD.ActiveDocument." +
+                                    self.solver_runner.analysis.Name + ")")
+            FreeCADGui.doCommand("writer = FreeCAD.ActiveDocument." +
+                                    self.solver_object.Name + ".Proxy.case_writer")
+            writer = self.solver_object.Proxy.case_writer
+            writer.progressCallback = self.consoleMessage
+            FreeCADGui.doCommand("writer.writeCase()")
+        except Exception as e:
+            self.consoleMessage("Error writing case:", 'Error')
+            self.consoleMessage(type(e).__name__ + ": " + str(e), 'Error')
+            self.consoleMessage("Write case setup file failed", 'Error')
+            raise
         else:
-            self.consoleMessage("Case check failed", 'Error')
-
-    def check_prerequisites_helper(self):
-        self.consoleMessage("Checking dependencies...")
-
-        message = self.solver_runner.check_prerequisites()
-        if message != "":
-            self.consoleMessage(message, 'Error')
-            return False
-        return True
+            self.analysis_object.NeedsCaseRewrite = False
+        finally:
+            QApplication.restoreOverrideCursor()
+        self.updateUI()
+        self.form.pb_run_solver.setEnabled(True)
 
     def editSolverInputFile(self):
         case_path = os.path.join(self.working_dir, self.solver_object.InputCaseName)
@@ -231,15 +219,15 @@ class TaskPanelCfdSolverControl:
             "  solver_directory = os.path.abspath(os.path.join(working_dir, case_name))\n" +
             "  from CfdOF.Solve import CfdRunnableFoam\n" +
             "  solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)\n" +
-            "  cmd = solver_runner.get_solver_cmd(solver_directory)\n" +
+            "  cmd = solver_runner.getSolverCmd(solver_directory)\n" +
             "  env_vars = solver_runner.getRunEnvironment()\n" +
-            "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=solver_runner.process_output)\n" +
+            "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=solver_runner.processOutput)\n" +
             "  solver_process.start(cmd, env_vars=env_vars)\n" +
             "  solver_process.waitForFinished()\n")
         working_dir = CfdTools.getOutputPath(self.analysis_object)
         case_name = self.solver_object.InputCaseName
         solver_directory = os.path.abspath(os.path.join(working_dir, case_name))
-        cmd = self.solver_runner.get_solver_cmd(solver_directory)
+        cmd = self.solver_runner.getSolverCmd(solver_directory)
         env_vars = self.solver_runner.getRunEnvironment()
         self.solver_object.Proxy.solver_process = CfdConsoleProcess(finished_hook=self.solverFinished,
                                                                     stdout_hook=self.gotOutputLines,
@@ -284,7 +272,7 @@ class TaskPanelCfdSolverControl:
             self.consoleMessage("Mesher exited with error", 'Error')
 
     def gotOutputLines(self, lines):
-        self.solver_runner.process_output(lines)
+        self.solver_runner.processOutput(lines)
 
     def gotErrorLines(self, lines):
         print_err = self.solver_object.Proxy.solver_process.processErrorOutput(lines)

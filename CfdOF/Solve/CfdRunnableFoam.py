@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -62,9 +62,6 @@ class CfdRunnable(QObject, object):
         else:
             raise Exception('No active analysis found')
 
-    def check_prerequisites(self):
-        return ""
-
 
 class CfdRunnableFoam(CfdRunnable):
     update_residual_signal = Signal(list, list, list, list)
@@ -75,14 +72,36 @@ class CfdRunnableFoam(CfdRunnable):
         self.forces = {}
         self.force_coeffs = {}
         self.probes = {}
+        self.postproc_readers = []
 
-        self.constructAncillaryPlotters()
+        self.constructReportingFunctionPlotters()
 
         self.initResiduals()
         self.initMonitors()
 
-    def check_prerequisites(self):
-        return ""
+    def constructReportingFunctionPlotters(self):
+        reporting_functions = CfdTools.getReportingFunctionsGroup(CfdTools.getActiveAnalysis())
+        if reporting_functions is not None:
+            for rf in reporting_functions:
+                if rf.ReportingFunctionType == "Force":
+                    self.forces[rf.Label] = {}
+                    if rf.Label not in self.solver.Proxy.forces_plotters:
+                        self.solver.Proxy.forces_plotters[rf.Label] = \
+                            TimePlot(title=rf.Label, y_label="Force [N]", is_log=False)
+                elif rf.ReportingFunctionType == "ForceCoefficients":
+                    self.force_coeffs[rf.Label] = {}
+                    if rf.Label not in self.solver.Proxy.force_coeffs_plotters:
+                        self.solver.Proxy.force_coeffs_plotters[rf.Label] = \
+                            TimePlot(title=rf.Label, y_label="Coefficient", is_log=False)
+                elif rf.ReportingFunctionType == 'Probes':
+                    self.probes[rf.Label] = {
+                        'field': rf.SampleFieldName, 
+                        'points': [rf.ProbePosition]}
+                    if rf.Label not in self.solver.Proxy.probes_plotters:
+                        self.solver.Proxy.probes_plotters[rf.Label] = \
+                            TimePlot(title=rf.Label, y_label=rf.SampleFieldName, is_log=False)
+                    else:
+                        self.solver.Proxy.probes_plotters[rf.Label].y_label = rf.SampleFieldName
 
     def initResiduals(self):
         self.UxResiduals = []
@@ -108,41 +127,51 @@ class CfdRunnableFoam(CfdRunnable):
         self.solver.Proxy.residual_plotter.reInitialise(self.analysis)
 
     def initMonitors(self):
-
-        self.in_forces_section = None
-        self.in_forcecoeffs_section = None
+        working_dir = CfdTools.getOutputPath(self.analysis)
+        case_name = self.solver.InputCaseName
+        solver_dir = os.path.abspath(os.path.join(working_dir, case_name))
+        self.postproc_readers = []
 
         for fn in self.forces:
-            f = self.forces[fn]
-
-            f['pressureXForces'] = []
-            f['pressureYForces'] = []
-            f['pressureZForces'] = []
-
-            f['viscousXForces'] = []
-            f['viscousYForces'] = []
-            f['viscousZForces'] = []
-
-        for fn in self.solver.Proxy.forces_plotters:
+            # OpenCFD
+            file_name = os.path.join(solver_dir, 'postProcessing', fn, '0', 'force.dat')
+            legends = ["$F_X$ (pressure)", "$F_Y$ (pressure)", "$F_Z$ (pressure)", 
+                       "$F_X$ (viscous)", "$F_Y$ (viscous)", "$F_Z$ (viscous)"]
+            self.postproc_readers += [PostProcessingReader(
+                file_name, [4, 5, 6, 7, 8, 9], legends, self.solver.Proxy.forces_plotters[fn])]
+            # Foundation
+            file_name = os.path.join(solver_dir, 'postProcessing', fn, '0', 'forces.dat')
+            legends = ["$F${} (pressure)", "$F${} (viscous)"]
+            self.postproc_readers += [PostProcessingReader(
+                file_name, [1, 2], legends, self.solver.Proxy.forces_plotters[fn])]
             self.solver.Proxy.forces_plotters[fn].reInitialise(self.analysis)
 
         for fcn in self.force_coeffs:
-            fc = self.force_coeffs[fcn]
-            fc['cdCoeffs'] = []
-            fc['clCoeffs'] = []
-        for fcn in self.solver.Proxy.force_coeffs_plotters:
+            legends = ["$C_D$", "$C_L$"]
+            # OpenCFD
+            file_name = os.path.join(solver_dir, 'postProcessing', fcn, '0', 'coefficient.dat')
+            self.postproc_readers += [PostProcessingReader(
+                file_name, [1, 4], legends, self.solver.Proxy.force_coeffs_plotters[fcn])]
+            # Foundation
+            file_name = os.path.join(solver_dir, 'postProcessing', fcn, '0', 'forceCoeffs.dat')
+            self.postproc_readers += [PostProcessingReader(
+                file_name, [2, 3], legends, self.solver.Proxy.force_coeffs_plotters[fcn])]
             self.solver.Proxy.force_coeffs_plotters[fcn].reInitialise(self.analysis)
 
         for pn in self.probes:
             p = self.probes[pn]
-            p['file'] = None
-            p['time'] = []
-            p['values'] = [[]]
-        for pn in self.solver.Proxy.probes_plotters:
+            file_name = os.path.join(solver_dir, 'postProcessing', pn, '0', p['field'])
+            legends = []
+            for pi in p['points']:
+                points_str = '({}, {}, {}) m'.format(
+                    *(Units.Quantity(pij, Units.Length).getValueAs('m') for pij in (pi.x, pi.y, pi.z)))
+                legends.append('{}{{}} @ '.format(p['field']) + points_str)
+            self.postproc_readers += [PostProcessingReader(
+                file_name, range(1, len(p['points'])+1), legends, self.solver.Proxy.probes_plotters[pn])]
             self.solver.Proxy.probes_plotters[pn].reInitialise(self.analysis)
 
 
-    def get_solver_cmd(self, case_dir):
+    def getSolverCmd(self, case_dir):
         self.initResiduals()
         self.initMonitors()
 
@@ -156,29 +185,7 @@ class CfdRunnableFoam(CfdRunnable):
     def getRunEnvironment(self):
         return CfdTools.getRunEnvironment()
 
-    def constructAncillaryPlotters(self):
-        reporting_functions = CfdTools.getReportingFunctionsGroup(CfdTools.getActiveAnalysis())
-        if reporting_functions is not None:
-            for rf in reporting_functions:
-                if rf.ReportingFunctionType == "Force":
-                    self.forces[rf.Label] = {}
-                    if rf.Label not in self.solver.Proxy.forces_plotters:
-                        self.solver.Proxy.forces_plotters[rf.Label] = \
-                            TimePlot(title=rf.Label, y_label="Force [N]", is_log=False)
-                elif rf.ReportingFunctionType == "ForceCoefficients":
-                    self.force_coeffs[rf.Label] = {}
-                    if rf.Label not in self.solver.Proxy.force_coeffs_plotters:
-                        self.solver.Proxy.force_coeffs_plotters[rf.Label] = \
-                            TimePlot(title=rf.Label, y_label="Coefficient", is_log=False)
-                elif rf.ReportingFunctionType == 'Probes':
-                    self.probes[rf.Label] = {
-                        'field': rf.SampleFieldName, 
-                        'points': [rf.ProbePosition]}
-                    if rf.Label not in self.solver.Proxy.probes_plotters:
-                        self.solver.Proxy.probes_plotters[rf.Label] = \
-                            TimePlot(title=rf.Label, y_label=rf.SampleFieldName, is_log=False)
-
-    def process_output(self, text):
+    def processOutput(self, text):
         log_lines = text.split('\n')[:-1]
         prev_niter = self.niter
         for line in log_lines:
@@ -207,15 +214,6 @@ class CfdRunnableFoam(CfdRunnable):
                 # Don't increment counter on first outer iter as this was already done with time
                 if self.latest_outer_iter > 1:
                     self.niter += 1
-
-            if line.startswith(u"forces") and (line.endswith(u"write:") or line.endswith(u"execute:")):
-                self.in_forces_section = split[1]
-            if line.startswith(u"forceCoeffs") and (line.endswith(u"write:") or line.endswith(u"execute:")):
-                self.in_forcecoeffs_section = split[1]
-            if not line.strip():
-                # Blank line
-                self.in_forces_section = None
-                self.in_forcecoeffs_section = None
 
             # Add a point to the time axis for each outer iteration
             if self.niter > len(self.time):
@@ -260,26 +258,6 @@ class CfdRunnableFoam(CfdRunnable):
             if "ReThetat," in split and self.niter > len(self.ReThetatResiduals):
                 self.ReThetatResiduals.append(float(split[7].split(',')[0]))
 
-            # Force monitors
-            if self.in_forces_section:
-                f = self.forces[self.in_forces_section]
-                if (("Pressure" in split) or ("pressure" in split)) and self.niter-1 > len(f['pressureXForces']):
-                    f['pressureXForces'].append(float(split[2].lstrip("(")))
-                    f['pressureYForces'].append(float(split[3]))
-                    f['pressureZForces'].append(float(split[4].rstrip(")")))
-                if (("Viscous" in split) or ("viscous" in split)) and self.niter-1 > len(f['viscousXForces']):
-                    f['viscousXForces'].append(float(split[2].lstrip("(")))
-                    f['viscousYForces'].append(float(split[3]))
-                    f['viscousZForces'].append(float(split[4].rstrip(")")))
-
-            # Force coefficient monitors
-            if self.in_forcecoeffs_section:
-                fc = self.force_coeffs[self.in_forcecoeffs_section]
-                if (("Cd" in split) or ("Cd:" in split)) and self.niter-1 > len(fc['cdCoeffs']):
-                    fc['cdCoeffs'].append(float(split[2] if split[1] == '=' else split[1]))
-                if (("Cl" in split) or ("Cl:" in split)) and self.niter-1 > len(fc['clCoeffs']):
-                    fc['clCoeffs'].append(float(split[2] if split[1] == '=' else split[1]))
-
         # Update plots
         if self.niter > 1 and self.niter > prev_niter:
             self.solver.Proxy.residual_plotter.updateValues(self.time, OrderedDict([
@@ -296,70 +274,75 @@ class CfdRunnableFoam(CfdRunnable):
                 ('$\\gamma$', self.gammaIntResiduals),
                 ('$Re_{\\theta}$', self.ReThetatResiduals)]))
 
-            for fn in self.forces:
-                f = self.forces[fn]
-                self.solver.Proxy.forces_plotters[fn].updateValues(self.time, OrderedDict([
-                    ('$Pressure_x$', f['pressureXForces']),
-                    ('$Pressure_y$', f['pressureYForces']),
-                    ('$Pressure_z$', f['pressureZForces']),
-                    ('$Viscous_x$', f['viscousXForces']),
-                    ('$Viscous_y$', f['viscousYForces']),
-                    ('$Viscous_z$', f['viscousZForces'])]))
-
-            for fcn in self.force_coeffs:
-                fc = self.force_coeffs[fcn]
-                self.solver.Proxy.force_coeffs_plotters[fcn].updateValues(self.time, OrderedDict([
-                    ('$C_D$', fc['cdCoeffs']),
-                    ('$C_L$', fc['clCoeffs'])
-                ]))
-
-        # Probes
-        for pn in self.probes:
-            p = self.probes[pn]
-            if p['file'] is None:
-                working_dir = CfdTools.getOutputPath(self.analysis)
-                case_name = self.solver.InputCaseName
-                solver_dir = os.path.abspath(os.path.join(working_dir, case_name))
-                try:
-                    f = open(os.path.join(solver_dir, 'postProcessing', pn, '0', p['field']))
-                    p['file'] = f
-                except OSError:
-                    pass
-            if p['file']:
-                ntimes = len(p['time'])
-                is_vector = False
-                
-                for l in p['file'].readlines():
-                    l = l.strip()
-                    if len(l) and not l.startswith('#'):
-                        s = l.split()
-                        p['time'].append(float(s[0]))
-                        
-                        if s[1].startswith('('):
-                            is_vector = True
-                        while len(p['values']) < len(s)-1:
-                            p['values'].append([])
-                        for i in range(1, len(s)):
-                            s[i] = s[i].lstrip('(').rstrip(')')
-                            p['values'][i-1].append(float(s[i]))
-
-                if len(p['time']) > ntimes:
-                    legends = []
-                    for pi in p['points']:
-                        points_str = '({}, {}, {}) m'.format(
-                            *(Units.Quantity(pij, Units.Length).getValueAs('m') for pij in (pi.x, pi.y, pi.z)))
-                        if is_vector:
-                            legends.append('{}$_x$ @ '.format(p['field']) + points_str)
-                            legends.append('{}$_y$ @ '.format(p['field']) + points_str)
-                            legends.append('{}$_z$ @ '.format(p['field']) + points_str)
-                        else:
-                            legends.append('${}$ @ '.format(p['field']) + points_str)
-                    self.solver.Proxy.probes_plotters[pn].updateValues(p['time'], OrderedDict(
-                        zip(legends, p['values'])))
+        # postProcessing readers
+        for r in self.postproc_readers:
+            r.read()
 
     def solverFinished(self):
-        for pn in self.probes:
-            p = self.probes[pn]
-            if p['file']:
-                p['file'].close()
-                p['file'] = None
+        for r in self.postproc_readers:
+            r.end()
+
+
+class PostProcessingReader:
+    def __init__(self, file_name, column_numbers, legends, plotter):
+        self.file_name = file_name
+        self.file = None
+        self.time = []
+        self.column_numbers = column_numbers
+        self.column_legends = legends
+        self.legends = []
+        self.values = []
+        self.plotter = plotter
+
+    def read(self):
+        if self.file is None:
+            try:
+                self.file = open(self.file_name)
+            except OSError:
+                pass
+        if self.file:
+            ntimes = len(self.time)
+            
+            for l in self.file.readlines():
+                l = l.strip()
+                if len(l) and not l.startswith('#'):
+                    s = l.split()
+                    self.time.append(float(s[0]))
+                    
+                    col_num = 1
+                    val_num = 0
+                    output_num = 0
+                    in_vector = False
+                    for i in range(1, len(s)):
+                        if s[i].startswith('('):
+                            in_vector = True
+                        v = s[i].lstrip('(').rstrip(')')
+                        if v and col_num in self.column_numbers:
+                            while len(self.values) < val_num+1:
+                                if in_vector:
+                                    self.legends.append(self.column_legends[output_num].format('$_x$'))
+                                    self.legends.append(self.column_legends[output_num].format('$_y$'))
+                                    self.legends.append(self.column_legends[output_num].format('$_z$'))
+                                    self.values.append([])
+                                    self.values.append([])
+                                    self.values.append([])
+                                else:
+                                    self.legends.append(self.column_legends[output_num].format(''))
+                                    self.values.append([])
+                            self.values[val_num].append(float(v))
+                            val_num += 1
+                        if s[i].endswith(')'):
+                            in_vector = False
+                        if v and not in_vector:
+                            if col_num in self.column_numbers:
+                                output_num += 1
+                            col_num += 1
+
+            if len(self.time) > ntimes:
+                self.plotter.updateValues(self.time, OrderedDict(
+                    zip(self.legends, self.values)))
+
+    def end(self):
+        if self.file:
+            self.file.close()
+            self.file = None

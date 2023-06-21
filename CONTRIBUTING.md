@@ -28,7 +28,7 @@ Windows) as the workbench will be loaded from this location. After installing th
 Addon Manager, you should be able to use Git for source code management directly from this directory. 
 A symlink can be used in Linux if you wish to work in a more convenient location.
 
-To contribute code, we suggest forking the CfdOF repository via the Gitlab GUI, and issuing a Merge Request with your 
+To contribute code, we suggest forking the CfdOF repository via the Github GUI, and issuing a Merge Request with your 
 bug fix and/or new feature. The repository workflow we use is based on the 
 [Github-flow](http://scottchacon.com/2011/08/31/github-flow.html) philosophy.
 Essentially, we ask all developers to submit merge requests for self-contained, tested and working features. 

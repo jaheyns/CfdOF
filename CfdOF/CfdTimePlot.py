@@ -109,7 +109,7 @@ class TimePlot:
                 # Decrease in increments of 10
                 ax.set_ylim([10**(math.floor(math.log10(last_values_min))), 1])
 
-            while float(self.times[-1]) > self.ax_lim:
+            while len(self.times) and float(self.times[-1]) > self.ax_lim:
                 # Increase scale by 10%
                 self.ax_lim *= 1.1
             ax.set_xlim([0, self.ax_lim])
