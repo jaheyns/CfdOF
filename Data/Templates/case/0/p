@@ -31,6 +31,8 @@ boundaryField
 %{%(boundaries/%(0%)/BoundaryType%)
 %:constraint
 %[0/_boundary_constraint%]
+%:baffle
+%[0/_boundary_cyclic_baffle%]
 %:default
 %[0/_boundary_calculated%]
 %}
