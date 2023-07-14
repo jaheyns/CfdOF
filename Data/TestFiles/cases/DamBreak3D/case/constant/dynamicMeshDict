@@ -13,7 +13,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh   dynamicRefineFvMesh;
+// OpenCFD:
+
+dynamicFvMesh    dynamicRefineFvMesh;
+dynamicFvMeshLibs ("libhisaMeshRebalancing.so");
 
 dynamicRefineFvMeshCoeffs
 {
@@ -35,9 +38,54 @@ dynamicRefineFvMeshCoeffs
         (rhoPhi none)
         (ghf none)
         (alphaPhiUn none)
+        (alphaPhi0.water none)
+        (alphaPhi0.air none)
     );
-
     dumpLevel       false;
+
+    rebalance yes;
+    maxLoadImbalance 0.1;
+}
+
+
+// Foundation:
+
+topoChanger
+{
+    type refiner;
+    libs            ("libfvMeshTopoChangers.so" "libhisaMeshRebalancing.so");
+
+    refineInterval  5;
+    field           alpha.water;
+
+    lowerRefineLevel 0.001;
+    upperRefineLevel 0.999;
+
+    unrefineLevel   10;
+    nBufferLayers   3;
+    maxRefinement   1;
+    maxCells        20000000;
+
+    correctFluxes
+    (
+        (phi none)
+        (nHatf none)
+        (rhoPhi none)
+        (ghf none)
+        (alphaPhiUn none)
+        (alphaPhi.water none)
+        (alphaPhi.air none)
+    );
+    dumpLevel       false;
+}
+
+distributor
+{
+    type            distributor;
+    libs            ("libfvMeshDistributors.so");
+
+    redistributionInterval  1;
+    maxImbalance    0.1;
 }
 
 //************************************************************************ //

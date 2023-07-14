@@ -249,15 +249,7 @@ snGradSchemes
 
 wallDist
 {
-%{%(solver/SolverName%)
-%:hisa
-    method    Poisson;
-    epsilon   0.1;     // Smaller = more accurate but less stable
-    tolerance 1e-5;
-    maxIter   10;
-%:default
     method meshWave;
-%}
 }
 
 

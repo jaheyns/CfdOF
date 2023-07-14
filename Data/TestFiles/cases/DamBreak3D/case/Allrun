@@ -26,7 +26,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2206"
+FOAMDIR="/usr/lib/openfoam/openfoam2212"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -51,6 +51,16 @@ then
     echo \"libmomentumTransportModels.so\" > system/turbulenceLib
 else
     echo \"libturbulenceModels.so\" > system/turbulenceLib
+fi
+
+# Detect availability of 'internal' patch type
+if which foamInfo > /dev/null && foamInfo internalFvPatchField > /dev/null 2>&1
+then
+    echo "type internal;" > 0/helperPatchFieldType
+    echo "type internal;" > system/helperPatchType
+else
+    echo "type fixedValue;" > 0/helperPatchFieldType
+    echo "type patch;" > system/helperPatchType
 fi
 
 # Update patch name and type

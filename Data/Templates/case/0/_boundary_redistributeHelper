@@ -1,0 +1,9 @@
+%{%(dynamicMeshEnabled%)
+%:True
+
+    redistributeHelper
+    {
+        #include "helperPatchFieldType";
+        value $internalField;
+    }
+%}

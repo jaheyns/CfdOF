@@ -45,6 +45,18 @@ patches
         constructFrom patches;
         patches ( "patch_0_0" "patch_0_1" );
     }
+
+    {
+        // Empty patch for temporary storage during
+        // parallel redistribution using Foundation
+        name redistributeHelper;
+        patchInfo
+        {
+            #include "helperPatchType";
+        }
+        constructFrom patches;
+        patches ();
+    }
 );
 
 

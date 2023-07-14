@@ -40,6 +40,12 @@ boundaryField
         value       uniform (0 0 0);
     }
 
+
+    redistributeHelper
+    {
+        #include "helperPatchFieldType";
+        value $internalField;
+    }
 }
 
 // ************************************************************************* //

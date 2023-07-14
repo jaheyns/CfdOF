@@ -56,6 +56,19 @@ else
     echo \"libturbulenceModels.so\" > system/turbulenceLib
 fi
 
+%{%(dynamicMeshEnabled%)
+%:True
+# Detect availability of 'internal' patch type
+if which foamInfo > /dev/null && foamInfo internalFvPatchField > /dev/null 2>&1
+then
+    echo "type internal;" > 0/helperPatchFieldType
+    echo "type internal;" > system/helperPatchType
+else
+    echo "type fixedValue;" > 0/helperPatchFieldType
+    echo "type patch;" > system/helperPatchType
+fi
+
+%}
 # Update patch name and type
 runCommand createPatch -overwrite
 
@@ -145,7 +158,8 @@ runParallel $NPROC %(solver/SolverName%)
 # Mesh renumbering
 runCommand renumberMesh -overwrite
 %:True
-# Mesh renumbering does not work in Foundation with dynamic mesh
+# Mesh renumbering does not currently work in Foundation with dynamic mesh
+# runCommand renumberMesh -overwrite
 %}
 
 %{%(initialValues/PotentialFlow%)

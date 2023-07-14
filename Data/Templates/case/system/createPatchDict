@@ -41,6 +41,21 @@ patches
 %[system/_createPatch_periodics%]
 %}
 %}
+%{%(dynamicMeshEnabled%)
+%:True
+
+    {
+        // Empty patch for temporary storage during
+        // parallel redistribution using Foundation
+        name redistributeHelper;
+        patchInfo
+        {
+            #include "helperPatchType";
+        }
+        constructFrom patches;
+        patches ();
+    }
+%}
 );
 
 

@@ -86,7 +86,7 @@
          <number>0</number>
         </property>
         <property name="minimum">
-         <double>1.000000000000000</double>
+         <double>0</double>
         </property>
        </widget>
       </item>

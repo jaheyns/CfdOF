@@ -26,7 +26,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2206"
+FOAMDIR="/usr/lib/openfoam/openfoam2212"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -51,16 +51,6 @@ runCommand extrudeMesh
 mv log.extrudeMesh log.extrudeMesh.0
 rm system/extrudeMeshDict
 
+
 # Extract surface mesh and convert to mm for visualisation in FreeCAD
-if [ ! -z $FOAM_API ] && [ $FOAM_API -ge 1906 ] || [ $WM_PROJECT_VERSION == "v1906" ]
-then
-    runCommand surfaceMeshExtract mesh_outside.stl
-else
-    runCommand surfaceMeshTriangulate mesh_outside.stl
-fi
-if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
-then
-    runCommand surfaceTransformPoints "scale=(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
-else
-    runCommand surfaceTransformPoints -scale "(1000 1000 1000)" mesh_outside.stl mesh_outside.stl
-fi
+runCommand foamToSurface -scale 1000 -tri surfaceMesh.vtk

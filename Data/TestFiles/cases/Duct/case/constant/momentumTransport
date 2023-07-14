@@ -8,42 +8,9 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      nut;
+    class       dictionary;
+    object      momentumTransport;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -1 0 0 0 0];
-
-internalField   uniform 0;
-
-boundaryField
-{
-
-    open
-    {
-        type        calculated;
-        value       $internalField;
-    }
-
-    wall
-    {
-        type        nutkWallFunction;
-        value       uniform 0;
-    }
-
-    defaultFaces
-    {
-        type        nutkWallFunction;
-        value       uniform 0;
-    }
-
-
-    redistributeHelper
-    {
-        #include "helperPatchFieldType";
-        value $internalField;
-    }
-}
-
-// ************************************************************************* //
+#include "turbulenceProperties"

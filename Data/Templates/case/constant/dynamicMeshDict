@@ -10,7 +10,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh   dynamicRefineFvMesh;
+// OpenCFD:
+
+dynamicFvMesh    dynamicRefineFvMesh;
+dynamicFvMeshLibs ("libhisaMeshRebalancing.so");
 
 dynamicRefineFvMeshCoeffs
 {
@@ -34,6 +37,13 @@ dynamicRefineFvMeshCoeffs
         (rhoPhi none)
         (ghf none)
         (alphaPhiUn none)
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+%{%(fluidProperties%)
+        (alphaPhi0.%(fluidProperties/%(0%)/Name%) none)
+%}
+%:default
+%}
     );
 %:shock
     refineInterval  %(dynamicMesh/RefinementInterval%(physics/Time%)%);
@@ -49,13 +59,82 @@ dynamicRefineFvMeshCoeffs
         (phi none)
     );
 %}
-
 %{%(dynamicMesh/WriteFields%)
 %:True
     dumpLevel       true;
 %:False
     dumpLevel       false;
 %}
+
+    rebalance yes;
+    maxLoadImbalance 0.1;
+}
+
+
+// Foundation:
+
+topoChanger
+{
+    type refiner;
+    libs            ("libfvMeshTopoChangers.so" "libhisaMeshRebalancing.so");
+
+%{%(dynamicMesh/Type%)
+%:interface
+    refineInterval  %(dynamicMesh/RefinementInterval%);
+    field           alpha.%(dynamicMesh/Phase%);
+
+    lowerRefineLevel 0.001;
+    upperRefineLevel 0.999;
+
+    unrefineLevel   10;
+    nBufferLayers   %(dynamicMesh/BufferLayers%);
+    maxRefinement   %(dynamicMesh/MaxRefinementLevel%);
+    maxCells        20000000;
+
+    correctFluxes
+    (
+        (phi none)
+        (nHatf none)
+        (rhoPhi none)
+        (ghf none)
+        (alphaPhiUn none)
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+%{%(fluidProperties%)
+        (alphaPhi.%(fluidProperties/%(0%)/Name%) none)
+%}
+%:default
+%}
+    );
+%:shock
+    refineInterval  %(dynamicMesh/RefinementInterval%(physics/Time%)%);
+    field           refinementControl;
+    lowerRefineLevel 0.5;
+    upperRefineLevel 1.5;
+    unrefineLevel   -0.5;
+    nBufferLayers   %(dynamicMesh/BufferLayers%);
+    maxRefinement   20;
+    maxCells        2000000000;
+    correctFluxes
+    (
+        (phi none)
+    );
+%}
+%{%(dynamicMesh/WriteFields%)
+%:True
+    dumpLevel       true;
+%:False
+    dumpLevel       false;
+%}
+}
+
+distributor
+{
+    type            distributor;
+    libs            ("libfvMeshDistributors.so");
+
+    redistributionInterval  1;
+    maxImbalance    0.1;
 }
 
 //************************************************************************ //

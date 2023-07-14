@@ -150,5 +150,6 @@ rm system/extrudeMeshDict
 %}
 
 %}
+
 # Extract surface mesh and convert to mm for visualisation in FreeCAD
 runCommand foamToSurface -scale 1000 -tri surfaceMesh.vtk

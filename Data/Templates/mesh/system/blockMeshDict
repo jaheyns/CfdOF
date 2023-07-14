@@ -23,14 +23,14 @@ cellsZ  %(SnappySettings/BlockMesh/cellsZ%);
 
 vertices
 (
-    ( $xMin  $yMin  $zMin)
-    ( $xMax  $yMin  $zMin)
-    ( $xMax  $yMax  $zMin)
-    ( $xMin  $yMax  $zMin)
-    ( $xMin  $yMin  $zMax)
-    ( $xMax  $yMin  $zMax)
-    ( $xMax  $yMax  $zMax)
-    ( $xMin  $yMax  $zMax)
+    ( $xMin  $yMin  $zMin )
+    ( $xMax  $yMin  $zMin )
+    ( $xMax  $yMax  $zMin )
+    ( $xMin  $yMax  $zMin )
+    ( $xMin  $yMin  $zMax )
+    ( $xMax  $yMin  $zMax )
+    ( $xMax  $yMax  $zMax )
+    ( $xMin  $yMax  $zMax )
 );
 
 blocks
@@ -44,6 +44,54 @@ edges
 
 boundary
 (
+    xMin
+    {
+        type patch;
+        faces
+        (
+            (0 4 7 3)
+        );
+    }
+    xMax
+    {
+        type patch;
+        faces
+        (
+            (1 5 6 2)
+        );
+    }
+    yMin
+    {
+        type patch;
+        faces
+        (
+            (0 1 2 3)
+        );
+    }
+    yMax
+    {
+        type patch;
+        faces
+        (
+            (4 5 6 7)
+        );
+    }
+    zMin
+    {
+        type patch;
+        faces
+        (
+            (1 0 4 5)
+        );
+    }
+    zMax
+    {
+        type patch;
+        faces
+        (
+            (3 7 6 2)
+        );
+    }
 );
 
 // ************************************************************************* //

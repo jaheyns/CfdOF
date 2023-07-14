@@ -39,6 +39,7 @@ boundaryField
 %[0/_boundary_cyclic_baffle%]
 %}
 %}
+%[0/_boundary_redistributeHelper%]
 }
 %} 0/%(scalarTransportFunctions/%(0%)/FieldName%)
 %}
