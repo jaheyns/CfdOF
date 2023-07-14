@@ -2,7 +2,8 @@ blank_issues_enabled: false
 contact_links:
   - name: CfdOF Community Support
     url: https://forum.freecad.org/viewforum.php?f=37
-    about: Please ask and answer support questions here. Please note that this is a community, open-source project and unfortunately we do not have the resources to provide a support service.
+    about: Please note that this is a community, open-source project and unfortunately we do not have the resources to 
+    provide a support service. Please use this forum to ask questions and provide help to other users.
   - name: CfdOF useful information
     url: https://forum.freecadweb.org/viewtopic.php?f=37&t=33492
-    about: Some frequently-encountered issues, and informatiion on asking for help on the forum.
+    about: Some frequently-encountered issues, and information about asking for help on the forum.
