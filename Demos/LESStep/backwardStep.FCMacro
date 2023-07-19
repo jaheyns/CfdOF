@@ -38,6 +38,7 @@ obj.gz = '0 mm/s^2'
 
 FreeCAD.ActiveDocument.FluidProperties.Material = {'Name': 'Air', 'Description': 'Standard air properties at 20 Degrees Celsius and 1 atm', 'Density': '1.20 kg/m^3', 'DynamicViscosity': '1.80e-5 kg/m/s', 'MolarMass': '0.0289643897748887 kg/mol', 'Cp': '1004.703 J/kg/K', 'SutherlandConstant': '1.4579326545176254e-06 kg/m/s/K^0.5', 'SutherlandTemperature': '110.4 K'}
 
+FreeCAD.ActiveDocument.CfdSolver.StartFrom = "latestTime"
 FreeCAD.ActiveDocument.CfdSolver.WritePrecision = 16
 
 from CfdOF.Solve import CfdFluidBoundary
