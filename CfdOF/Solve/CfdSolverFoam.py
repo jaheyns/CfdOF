@@ -33,6 +33,10 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
 
 
+# Constants
+START_FROM = ["startTime", "latestTime"]
+
+
 def makeCfdSolverFoam(name="CfdSolver"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
     CfdSolverFoam(obj)
@@ -95,6 +99,11 @@ class CfdSolverFoam(object):
                           "Iteration output interval")
         addObjectProperty(obj, "ConvergenceTol", 1e-3, "App::PropertyFloat", "IterationControl",
                           "Global absolute solution convergence criterion")
+
+        if addObjectProperty(obj, "StartFrom", START_FROM,
+                             "App::PropertyEnumeration", "TimeStepControl",
+                             "Whether to restart or resume solving"):
+            obj.StartFrom = START_FROM[0]
         addObjectProperty(obj, "EndTime", "1 s", "App::PropertyQuantity", "TimeStepControl",
                           "Total time to run transient solution")
         addObjectProperty(obj, "TimeStep", "0.001 s", "App::PropertyQuantity", "TimeStepControl",

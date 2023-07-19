@@ -10,7 +10,7 @@ FoamFile
 
 application     %(solver/SolverName%);
 
-startFrom       startTime;
+startFrom       %(solver/StartFrom%);
 
 startTime       0;
 

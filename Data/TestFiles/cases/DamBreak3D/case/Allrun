@@ -73,7 +73,7 @@ runCommand topoSet -dict system/topoSetZonesDict
 runCommand setFields
 
 # Parallel decomposition
-runCommand decomposePar -force
+runCommand decomposePar -force -ifRequired
 
 # Pick up number of parallel processes
 NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
