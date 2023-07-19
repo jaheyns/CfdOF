@@ -37,7 +37,7 @@ maxCo           5.0;
 
 writeFormat     ascii;
 
-writePrecision  8;
+writePrecision  16;
 
 runTimeModifiable true;
 

@@ -86,6 +86,8 @@ class CfdSolverFoam(object):
                           "Number of cores on which to run parallel analysis")
         addObjectProperty(obj, "PurgeWrite", 0, "App::PropertyInteger", "Solver",
                           "Sets a limit on the number of time directories that are stored by overwriting time directories on a cyclic basis.  Set to 0 to disable")
+        addObjectProperty(obj, "WritePrecision", 8, "App::PropertyInteger", "Solver",
+                          "Precision of quantities written at each timestep")
 
         addObjectProperty(obj, "MaxIterations", 2000, "App::PropertyInteger", "IterationControl",
                           "Maximum number of iterations to run steady-state analysis")
