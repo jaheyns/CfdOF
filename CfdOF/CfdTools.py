@@ -1115,7 +1115,8 @@ def checkCfdDependencies(msgFn):
                         runFoamCommand("wmake -help")
                     except subprocess.CalledProcessError:
                         msgFn("OpenFOAM installation does not include 'wmake'. " + \
-                              "Installation of cfMesh and HiSA will not be possible.")
+                              "Installation of cfMesh and HiSA will not be possible. " + \
+                              "An OpenFOAM 'development' package should be installed if available.")
 
                 # Check for mpiexec
                 try:

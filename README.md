@@ -184,7 +184,10 @@ some Linux distributions may be out of date or incomplete; for example,
 the standard Debian and Ubuntu packages do not include the build command 'wmake'
 and therefore cannot be used with the optional components 'HiSA' and 'cfMesh'.
 We therefore recommend installation of the packages supplied through
-the official websites above.
+the official websites above. Please make sure the install the 'development'
+package where available (usually named with the suffix '-devel' or '-dev') to 
+be sure that the optional components 'HiSA' and 'cfMesh' can be compiled
+with 'wmake'.
 
 Set the OpenFOAM install directory in the preferences
 panel - examples of typical install locations are /usr/lib/openfoam/openfoam2212,
