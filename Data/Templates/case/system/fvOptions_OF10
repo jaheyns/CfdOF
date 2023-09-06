@@ -1,0 +1,38 @@
+%{%(scalarTransportFunctionsEnabled%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(scalarTransportFunctions%)
+%(0%)
+{
+    type            semiImplicitSource;
+    selectionMode   points;
+    points
+    (
+        ( %(scalarTransportFunctions/%(0%)/InjectionPoint%) )
+    );
+
+    volumeMode      absolute;
+    sources
+    {
+        %(scalarTransportFunctions/%(0%)/FieldName%)
+        {
+            explicit %(scalarTransportFunctions/%(0%)/InjectionRate%);
+            implicit 0;
+        }
+    }
+
+}
+
+%}
+
+// ************************************************************************* //
+%}

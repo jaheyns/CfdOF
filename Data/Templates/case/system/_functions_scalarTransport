@@ -5,12 +5,18 @@
         libs            ("libsolverFunctionObjects.so");
 
         field           %(scalarTransportFunctions/%(0%)/FieldName%);
+        writeControl    writeTime;
 
 %{%(scalarTransportFunctions/%(0%)/DiffusivityFixed%)
 %:True
+        diffusion       constant;
         D               %(scalarTransportFunctions/%(0%)/DiffusivityFixedValue%);
-
+%:False
+        diffusion       viscosity;
+        alphal          1;
+        alphat          1;
 %}
+
 %{%(scalarTransportFunctions/%(0%)/RestrictToPhase%)
 %:True
         phase           alpha.%(scalarTransportFunctions/%(0%)/PhaseName%);
