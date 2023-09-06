@@ -1013,9 +1013,9 @@ def convertMesh(case, mesh_file, scale):
 
 def checkCfdDependencies(msgFn):
     FC_MAJOR_VER_REQUIRED = 0
-    FC_MINOR_VER_REQUIRED = 18
-    FC_PATCH_VER_REQUIRED = 4
-    FC_COMMIT_REQUIRED = 16146
+    FC_MINOR_VER_REQUIRED = 20
+    FC_PATCH_VER_REQUIRED = 0
+    FC_COMMIT_REQUIRED = 29177
 
     CF_MAJOR_VER_REQUIRED = 1
     CF_MINOR_VER_REQUIRED = 21
@@ -1204,17 +1204,11 @@ def checkCfdDependencies(msgFn):
         msgFn("Could not load matplotlib package (required by Plot module)")
 
     plot_ok = False
-    if major_ver > 0 or minor_ver >= 20:
-        try:
-            from FreeCAD.Plot import Plot  # Built-in plot module
-            plot_ok = True
-        except ImportError:
-            msgFn("Could not load Plot module\nAttempting to use Plot workbench instead")
-    if not plot_ok:
-        try:
-            from CfdOF.compat import Plot  # Plot workbench
-        except ImportError:
-            msgFn("Could not load legacy Plot module")
+    try:
+        from FreeCAD.Plot import Plot  # Built-in plot module
+        plot_ok = True
+    except ImportError:
+        msgFn("Could not load Plot module")
 
     print("Checking for gmsh:")
     # check that gmsh version 2.13 or greater is installed
@@ -1427,62 +1421,40 @@ def matchFaces(faces1, faces2):
     Note that faces1 and faces2 are sorted in place and can be re-used for faster subsequent searches
     """
 
-    if sys.version_info >= (3,):  # Python 3
+    def compKeyFn(key):
+        class K(object):
+            def __init__(self, val, *args):
+                self.val = key(val)
 
-        def compKeyFn(key):
-            class K(object):
-                def __init__(self, val, *args):
-                    self.val = key(val)
+            def __eq__(self, other):
+                return floatEqual(self.val, other.val)
 
-                def __eq__(self, other):
-                    return floatEqual(self.val, other.val)
+            def __ne__(self, other):
+                return not floatEqual(self.val, other.val)
 
-                def __ne__(self, other):
-                    return not floatEqual(self.val, other.val)
+            def __lt__(self, other):
+                return self.val < other.val and not floatEqual(self.val, other.val)
 
-                def __lt__(self, other):
-                    return self.val < other.val and not floatEqual(self.val, other.val)
+            def __gt__(self, other):
+                return self.val > other.val and not floatEqual(self.val, other.val)
 
-                def __gt__(self, other):
-                    return self.val > other.val and not floatEqual(self.val, other.val)
+            def __le__(self, other):
+                return self.val < other.val or floatEqual(self.val, other.val)
 
-                def __le__(self, other):
-                    return self.val < other.val or floatEqual(self.val, other.val)
+            def __ge__(self, other):
+                return self.val > other.val or floatEqual(self.val, other.val)
 
-                def __ge__(self, other):
-                    return self.val > other.val or floatEqual(self.val, other.val)
+        return K
 
-            return K
+    # Sort face list by first vertex, x then y then z in case all in plane
+    faces1.sort(key=compKeyFn(lambda bf: bf[0].Vertexes[0].Point.z))
+    faces1.sort(key=compKeyFn(lambda bf: bf[0].Vertexes[0].Point.y))
+    faces1.sort(key=compKeyFn(lambda bf: bf[0].Vertexes[0].Point.x))
 
-        # Sort face list by first vertex, x then y then z in case all in plane
-        faces1.sort(key=compKeyFn(lambda bf: bf[0].Vertexes[0].Point.z))
-        faces1.sort(key=compKeyFn(lambda bf: bf[0].Vertexes[0].Point.y))
-        faces1.sort(key=compKeyFn(lambda bf: bf[0].Vertexes[0].Point.x))
-
-        # Same on other face list
-        faces2.sort(key=compKeyFn(lambda mf: mf[0].Vertexes[0].Point.z))
-        faces2.sort(key=compKeyFn(lambda mf: mf[0].Vertexes[0].Point.y))
-        faces2.sort(key=compKeyFn(lambda mf: mf[0].Vertexes[0].Point.x))
-
-    else:  # Python 2
-
-        def compFn(x, y):
-            if floatEqual(x, y):
-                return 0
-            elif x < y:
-                return -1
-            else:
-                return 1
-
-        # Sort face list by first vertex, x then y then z in case all in plane
-        faces1.sort(cmp=compFn, key=lambda bf: bf[0].Vertexes[0].Point.z)
-        faces1.sort(cmp=compFn, key=lambda bf: bf[0].Vertexes[0].Point.y)
-        faces1.sort(cmp=compFn, key=lambda bf: bf[0].Vertexes[0].Point.x)
-
-        # Same on other face list
-        faces2.sort(cmp=compFn, key=lambda mf: mf[0].Vertexes[0].Point.z)
-        faces2.sort(cmp=compFn, key=lambda mf: mf[0].Vertexes[0].Point.y)
-        faces2.sort(cmp=compFn, key=lambda mf: mf[0].Vertexes[0].Point.x)
+    # Same on other face list
+    faces2.sort(key=compKeyFn(lambda mf: mf[0].Vertexes[0].Point.z))
+    faces2.sort(key=compKeyFn(lambda mf: mf[0].Vertexes[0].Point.y))
+    faces2.sort(key=compKeyFn(lambda mf: mf[0].Vertexes[0].Point.x))
 
     # Find faces with matching first vertex
     i = 0

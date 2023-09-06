@@ -25,12 +25,8 @@ import os
 import os.path
 import platform
 import sys
-if sys.version_info >= (3,):  # Python 3
-    import urllib.request as urlrequest
-    import urllib.parse as urlparse
-else:
-    import urllib as urlrequest
-    import urlparse
+import urllib.request as urlrequest
+import urllib.parse as urlparse
 
 import ssl
 import ctypes

@@ -65,8 +65,8 @@ for instructions.
 The CfdOF workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
-- [Latest release version of FreeCAD (at least version 0.18.4 / git commit 16146)](https://www.freecadweb.org/downloads.php)
- or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD/releases)
+- [Latest release version of FreeCAD (at least version 0.20.0 / git commit 29177)](https://www.freecadweb.org/downloads.php)
+ or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
 - OpenFOAM [Foundation versions 9-10](http://openfoam.org/download/) or [ESI-OpenCFD versions 2006-2212](http://openfoam.com/download)
 - [Paraview](http://www.paraview.org/)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
@@ -79,7 +79,7 @@ which can be automatically installed (see below for instructions).
 
 The latest
 [release](https://www.freecadweb.org/downloads.php)
-or [development](https://github.com/FreeCAD/FreeCAD/releases)
+or [development](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
 FreeCAD build can be obtained (64 bit version) and installed
 by respectively running the installer or extracting the .7z archive to a directory
 \<FreeCAD-directory\>. In the latter case, FreeCAD can be run in place
@@ -137,17 +137,15 @@ prerequisites have been successfully installed.
 #### Linux
 
 AppImages of the latest [release](https://www.freecadweb.org/downloads.php)
-or [development](https://github.com/FreeCAD/FreeCAD/releases)
+or [development](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
 versions of FreeCAD can be downloaded and run directly
 without installation. Note that you will
 have to enable execution permission on the downloaded file to run it.
-The [Ubuntu PPA daily build](https://www.freecadweb.org/wiki/Install_on_Unix)
-packages are an alternative binary option. Otherwise, FreeCAD can be built
-from the source code at
-https://github.com/FreeCAD/FreeCAD .
+Otherwise, FreeCAD can be built
+from the source code at https://github.com/FreeCAD/FreeCAD .
 
 Note:
-* Installations of FreeCAD via Linux package managers (including the PPA daily build above)
+* Installations of FreeCAD via Linux package managers
 make use of your local Python installation. Therefore you might need to install additional
 Python packages to get full functionality. The dependency checker (see below) can help to diagnose
 this.

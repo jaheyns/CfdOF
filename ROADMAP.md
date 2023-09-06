@@ -41,10 +41,3 @@ for the user. Generally improve the logging and messages that are printed there.
   * Buoyant case(s)
 * Additional unit tests which also test the functionality of the task panels, are needed. Currently testing is only
   done based on macros. Somehow, interaction with the GUI itself needs to be simulated.
-
-## Future-scheduled tasks
-* On release of FreeCAD v0.21, stop supporting FreeCAD <= 0.19
-    * Remove metadata.txt
-    * Remove legacy python 2 code and python2/3 switches
-    * Remove backward-compatible plot code in compat/
-    * Update version requirement in package.xml and dependency checker
