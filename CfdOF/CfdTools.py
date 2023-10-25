@@ -1024,6 +1024,14 @@ def checkCfdDependencies(msgFn):
     HISA_MINOR_VER_REQUIRED = 9
     HISA_PATCH_VER_REQUIRED = 4
 
+    MIN_FOUNDATION_VERSION = 9
+    MIN_OCFD_VERSION = 2206
+    MIN_MINGW_VERSION = 2206
+
+    MAX_FOUNDATION_VERSION = 10
+    MAX_OCFD_VERSION = 2306
+    MAX_MINGW_VERSION = 2306
+
     message = ""
     FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
 
@@ -1090,23 +1098,25 @@ def checkCfdDependencies(msgFn):
                         foam_ver = foam_ver.lstrip('v')
                         foam_ver = int(foam_ver.split('.')[0])
                         if getFoamRuntime() == "MinGW":
-                            if foam_ver < 2012 or foam_ver > 2206:
+                            if foam_ver < MIN_MINGW_VERSION or foam_ver > MAX_MINGW_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + \
                                       " is not currently supported with MinGW installation")
                         if foam_ver >= 1000:  # Plus version
-                            if foam_ver < 2006:
+                            if foam_ver < MIN_OCFD_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                      "Minimum version 2006 or 9 required for full functionality")
-                            if foam_ver > 2212:
+                                      "Minimum version " + MIN_OCFD_VERSION + " or " + MIN_FOUNDATION_VERSION + \
+                                      " required for full functionality")
+                            if foam_ver > MAX_OCFD_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                      "Last tested version is 2212")
+                                      "Last tested version is " + MAX_OCFD_VERSION)
                         else:  # Foundation version
-                            if foam_ver < 9:
+                            if foam_ver < MIN_FOUNDATION_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                      "Minimum version 9 or 2006 required for full functionality")
-                            if foam_ver > 10:
+                                      "Minimum version " + MIN_OCFD_VERSION + " or " + MIN_FOUNDATION_VERSION + \
+                                      " required for full functionality")
+                            if foam_ver > MAX_FOUNDATION_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                      "Last tested version is 10")
+                                      "Last tested version is " + MAX_FOUNDATION_VERSION)
                     except ValueError:
                         msgFn("Error parsing OpenFOAM version string " + foam_ver)
                 # Check for wmake

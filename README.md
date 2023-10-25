@@ -67,7 +67,7 @@ which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (at least version 0.20.0 / git commit 29177)](https://www.freecadweb.org/downloads.php)
  or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
-- OpenFOAM [Foundation versions 9-10](http://openfoam.org/download/) or [ESI-OpenCFD versions 2006-2212](http://openfoam.com/download)
+- OpenFOAM [Foundation versions 9-10](http://openfoam.org/download/) or [ESI-OpenCFD versions 2006-2306](http://openfoam.com/download)
 - [Paraview](http://www.paraview.org/)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
 - [HiSA (High Speed Aerodynamic Solver)](https://hisa.gitlab.io)
@@ -188,7 +188,7 @@ be sure that the optional components 'HiSA' and 'cfMesh' can be compiled
 with 'wmake'.
 
 Set the OpenFOAM install directory in the preferences
-panel - examples of typical install locations are /usr/lib/openfoam/openfoam2212,
+panel - examples of typical install locations are /usr/lib/openfoam/openfoam2306,
 /opt/openfoam10 or /home/user/OpenFOAM/OpenFOAM-10.x (it will be automatically
 detected in common default install
 locations). Note that if you have loaded the desired OpenFOAM
