@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -25,8 +25,10 @@ import os
 import os.path
 import platform
 import sys
-import urllib.request as urlrequest
-import urllib.parse as urlparse
+import urllib.request
+import urllib.parse
+import urllib.error
+import certifi
 
 import ssl
 import ctypes
@@ -46,7 +48,7 @@ if FreeCAD.GuiUp:
 
 # Constants
 OPENFOAM_URL = \
-    "https://sourceforge.net/projects/openfoam/files/v2206/OpenFOAM-v2206-windows-mingw.exe/download"
+    "https://sourceforge.net/projects/openfoam/files/v2306/OpenFOAM-v2306-windows-mingw.exe/download"
 OPENFOAM_FILE_EXT = ".exe"
 PARAVIEW_URL = \
     "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v5.10&type=binary&os=Windows&downloadFile=ParaView-5.10.1-Windows-Python3.9-msvc2017-AMD64.exe"
@@ -301,7 +303,7 @@ class CfdPreferencePage:
     def pickOpenFoamFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose OpenFOAM install file', filter="*.exe")
         if f and os.access(f, os.R_OK):
-            self.form.le_openfoam_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
+            self.form.le_openfoam_url.setText(urllib.parse.urljoin('file:', urllib.request.pathname2url(f)))
 
     def downloadInstallParaview(self):
         if self.createThread():
@@ -312,7 +314,7 @@ class CfdPreferencePage:
     def pickParaviewFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose ParaView install file', filter="*.exe")
         if f and os.access(f, os.R_OK):
-            self.form.le_paraview_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
+            self.form.le_paraview_url.setText(urllib.parse.urljoin('file:', urllib.request.pathname2url(f)))
 
     def downloadInstallCfMesh(self):
         if not self.showAdministratorWarningMessage():
@@ -333,7 +335,7 @@ class CfdPreferencePage:
     def pickCfMeshFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose cfMesh archive', filter="*.zip")
         if f and os.access(f, os.R_OK):
-            self.form.le_cfmesh_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
+            self.form.le_cfmesh_url.setText(urllib.parse.urljoin('file:', urllib.request.pathname2url(f)))
 
     def downloadInstallHisa(self):
         if not self.showAdministratorWarningMessage():
@@ -354,7 +356,7 @@ class CfdPreferencePage:
     def pickHisaFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose HiSA archive', filter="*.zip")
         if f and os.access(f, os.R_OK):
-            self.form.le_hisa_url.setText(urlparse.urljoin('file:', urlrequest.pathname2url(f)))
+            self.form.le_hisa_url.setText(urllib.parse.urljoin('file:', urllib.request.pathname2url(f)))
 
     def createThread(self):
         if self.thread and self.thread.isRunning():
@@ -515,7 +517,7 @@ class CfdPreferencePageThread(QThread):
         context = kwargs.get('context', None)
         reporthook = kwargs.get('reporthook', None)
         suffix = kwargs.get('suffix', '')
-        with closing(urlrequest.urlopen(url, context=context)) as response:  # For Python < 3.3 backward compatibility
+        with closing(urllib.request.urlopen(url, context=context)) as response:  # For Python < 3.3 backward compatibility
             download_len = int(response.info().get('Content-Length', 0))
             with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp_file:
                 i = 0
@@ -536,7 +538,7 @@ class CfdPreferencePageThread(QThread):
         self.signals.status.emit("Downloading {}, please wait...".format(name))
         try:
             if hasattr(ssl, 'create_default_context'):
-                context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+                context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=certifi.where())
             else:
                 context = None
             # Download
