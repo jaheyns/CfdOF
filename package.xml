@@ -15,7 +15,6 @@
             <icon>Gui/Icons/cfd.svg</icon>
             <depend>Plot</depend>
             <depend>matplotlib</depend>
-            <depend>Materials</depend>
             <depend optional="true">certifi</depend>
         </workbench>
     </content>
