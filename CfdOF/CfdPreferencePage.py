@@ -28,7 +28,6 @@ import sys
 import urllib.request
 import urllib.parse
 import urllib.error
-import certifi
 
 import ssl
 import ctypes
@@ -538,7 +537,12 @@ class CfdPreferencePageThread(QThread):
         self.signals.status.emit("Downloading {}, please wait...".format(name))
         try:
             if hasattr(ssl, 'create_default_context'):
-                context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=certifi.where())
+                try:
+                    import certifi
+                except ImportError:
+                    context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+                else:
+                    context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=certifi.where())
             else:
                 context = None
             # Download
