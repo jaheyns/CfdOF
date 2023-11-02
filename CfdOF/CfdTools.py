@@ -69,7 +69,7 @@ FOAM_DIR_DEFAULTS = {'Windows': ['C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v*',
 
 PARAVIEW_PATH_DEFAULTS = {
                     "Windows": ["C:\\Program Files\\ParaView *\\bin\\paraview.exe"],
-                    "Linux": [],
+                    "Linux": ["/usr/bin/paraview", "/usr/local/bin/paraview"],
                     "Darwin": []
                     }
 
@@ -1030,7 +1030,7 @@ def checkCfdDependencies(msgFn):
 
     MAX_FOUNDATION_VERSION = 10
     MAX_OCFD_VERSION = 2306
-    MAX_MINGW_VERSION = 2306
+    MAX_MINGW_VERSION = 2212
 
     message = ""
     FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")

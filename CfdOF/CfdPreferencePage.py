@@ -47,7 +47,7 @@ if FreeCAD.GuiUp:
 
 # Constants
 OPENFOAM_URL = \
-    "https://sourceforge.net/projects/openfoam/files/v2306/OpenFOAM-v2306-windows-mingw.exe/download"
+    "https://sourceforge.net/projects/openfoam/files/v2212/OpenFOAM-v2212-windows-mingw.exe/download"
 OPENFOAM_FILE_EXT = ".exe"
 PARAVIEW_URL = \
     "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v5.10&type=binary&os=Windows&downloadFile=ParaView-5.10.1-Windows-Python3.9-msvc2017-AMD64.exe"
