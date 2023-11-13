@@ -115,6 +115,11 @@ Some users experience problems using a location inside C:\Program Files due to r
 imposed by Windows User Account Control. It is therefore suggested to install to an alternative
 location, preferably in your home directory.
 
+If OpenFOAM is installed with administrator privileges using the above packages, then Microsoft MPI
+will also optionally be installed. If not, then it will be necessary to download and
+install it manually from [here](https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi#ms-mpi-downloads).
+MPI is needed in order to run in parallel.
+
 Set the OpenFOAM install directory in the preferences
 panel to the install directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed)
 for the MinGW package, or the BlueCFD install directory.
