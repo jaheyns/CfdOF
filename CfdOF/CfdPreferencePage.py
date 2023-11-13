@@ -557,7 +557,8 @@ class CfdPreferencePageThread(QThread):
     def downloadOpenFoam(self):
         filename = self.download(self.openfoam_url, OPENFOAM_FILE_EXT, "OpenFOAM")
         if QtCore.QProcess().startDetached(filename):
-            self.signals.status.emit("OpenFOAM installer launched - please complete the installation")
+            self.signals.status.emit(
+                "OpenFOAM installer launched - please complete the installation and restart FreeCAD")
         else:
             raise Exception("Failed to launch OpenFOAM installer")
 
