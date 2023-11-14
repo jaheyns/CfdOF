@@ -13,6 +13,7 @@ del __shape__
 
 App.ActiveDocument.addObject('Part::Refine','body001').Source=App.ActiveDocument.body001
 App.ActiveDocument.ActiveObject.Label=App.ActiveDocument.body001.Label
+body1Ref = App.ActiveDocument.ActiveObject
 Gui.ActiveDocument.body001.hide()
 
 App.ActiveDocument.recompute()
@@ -27,6 +28,7 @@ del __shape__
 
 App.ActiveDocument.addObject('Part::Refine','fin1001').Source=App.ActiveDocument.fin1001
 App.ActiveDocument.ActiveObject.Label=App.ActiveDocument.fin1001.Label
+fin1Ref = App.ActiveDocument.ActiveObject
 Gui.ActiveDocument.fin1001.hide()
 
 App.ActiveDocument.recompute()
@@ -40,6 +42,7 @@ del __shape__
 
 App.ActiveDocument.addObject('Part::Refine','fin2001').Source=App.ActiveDocument.fin2001
 App.ActiveDocument.ActiveObject.Label=App.ActiveDocument.fin2001.Label
+fin2Ref = App.ActiveDocument.ActiveObject
 Gui.ActiveDocument.fin2001.hide()
 
 App.ActiveDocument.recompute()
@@ -52,6 +55,7 @@ App.ActiveDocument.getObject("fin3001").purgeTouched()
 del __shape__
 App.ActiveDocument.addObject('Part::Refine','fin3001').Source=App.ActiveDocument.fin3001
 App.ActiveDocument.ActiveObject.Label=App.ActiveDocument.fin3001.Label
+fin3Ref = App.ActiveDocument.ActiveObject
 Gui.ActiveDocument.fin3001.hide()
 
 App.ActiveDocument.recompute()
@@ -64,6 +68,7 @@ del __shape__
 
 App.ActiveDocument.addObject('Part::Refine','fin4001').Source=App.ActiveDocument.fin4001
 App.ActiveDocument.ActiveObject.Label=App.ActiveDocument.fin4001.Label
+fin4Ref = App.ActiveDocument.ActiveObject
 Gui.ActiveDocument.fin4001.hide()
 
 App.ActiveDocument.recompute()
@@ -76,7 +81,7 @@ App.ActiveDocument.removeObject('fin4')
 App.ActiveDocument.recompute()
 
 App.activeDocument().addObject("Part::Compound","Compound")
-App.activeDocument().Compound.Links = [App.activeDocument().body001001,App.activeDocument().fin1001001,App.activeDocument().fin2001001,App.activeDocument().fin3001001,App.activeDocument().fin4001001,]
+App.activeDocument().Compound.Links = [body1Ref,fin1Ref,fin2Ref,fin3Ref,fin4Ref,]
 App.ActiveDocument.recompute()
 
 App.ActiveDocument.addObject("Part::Box","Box")
