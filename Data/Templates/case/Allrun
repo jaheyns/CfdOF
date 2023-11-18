@@ -132,14 +132,6 @@ fi
 # Pick up number of parallel processes
 NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
 
-%{%(dynamicMeshEnabled%)
-%:False
-# Mesh renumbering
-runParallel $NPROC renumberMesh -overwrite
-%:True
-# Mesh renumbering does not work in Foundation with dynamic mesh
-%}
-
 %{%(initialValues/PotentialFlow%)
 %:True
 # Initialise flow
