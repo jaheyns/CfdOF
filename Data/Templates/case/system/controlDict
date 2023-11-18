@@ -56,7 +56,7 @@ maxAlphaCo      %(solver/MaxInterfaceCFLNumber%);
 %}
 writeFormat     ascii;
 
-writePrecision  %(solver/WritePrecision%);
+writePrecision  15;
 
 runTimeModifiable true;
 
