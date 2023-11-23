@@ -816,7 +816,10 @@ def makeRunCommand(cmd, dir, source_env=True):
     if installation_path is None:
         raise IOError("OpenFOAM installation directory not found")
 
-    FreeCAD.Console.PrintMessage('Executing: {} in {}\n'.format(cmd, dir))
+    if dir is None:
+        FreeCAD.Console.PrintMessage('Executing: {}\n'.format(cmd))
+    else:
+        FreeCAD.Console.PrintMessage('Executing: {} in {}\n'.format(cmd, dir))
 
     source = ""
     if source_env and len(installation_path):
@@ -1104,19 +1107,19 @@ def checkCfdDependencies(msgFn):
                         if foam_ver >= 1000:  # Plus version
                             if foam_ver < MIN_OCFD_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                      "Minimum version " + MIN_OCFD_VERSION + " or " + MIN_FOUNDATION_VERSION + \
+                                      "Minimum version " + str(MIN_OCFD_VERSION) + " or " + str(MIN_FOUNDATION_VERSION) + \
                                       " required for full functionality")
                             if foam_ver > MAX_OCFD_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                      "Last tested version is " + MAX_OCFD_VERSION)
+                                      "Last tested version is " + str(MAX_OCFD_VERSION))
                         else:  # Foundation version
                             if foam_ver < MIN_FOUNDATION_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                      "Minimum version " + MIN_OCFD_VERSION + " or " + MIN_FOUNDATION_VERSION + \
+                                      "Minimum version " + str(MIN_OCFD_VERSION) + " or " + str(MIN_FOUNDATION_VERSION) + \
                                       " required for full functionality")
                             if foam_ver > MAX_FOUNDATION_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                      "Last tested version is " + MAX_FOUNDATION_VERSION)
+                                      "Last tested version is " + str(MAX_FOUNDATION_VERSION))
                     except ValueError:
                         msgFn("Error parsing OpenFOAM version string " + foam_ver)
                 # Check for wmake
