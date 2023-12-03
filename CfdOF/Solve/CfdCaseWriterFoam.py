@@ -127,15 +127,15 @@ class CfdCaseWriterFoam:
         self.processInitialisationZoneProperties()
 
         if self.reporting_functions:
-            cfdMessage('Reporting functions present')
+            cfdMessage('Reporting functions present\n')
             self.processReportingFunctions()
 
         if self.scalar_transport_objs:
-            cfdMessage('Scalar transport functions present')
+            cfdMessage('Scalar transport functions present\n')
             self.processScalarTransportFunctions()
 
         if self.dynamic_mesh_refinement_obj:
-            cfdMessage('Dynamic mesh adaptation rule present')
+            cfdMessage('Dynamic mesh adaptation rule present\n')
             self.processDynamicMeshRefinement()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
