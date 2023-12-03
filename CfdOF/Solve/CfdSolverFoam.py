@@ -75,6 +75,7 @@ class CommandCfdSolverFoam:
 class CfdSolverFoam(object):
     """ Solver-specific properties """
     def __init__(self, obj):
+        self.Type = "CfdSolverFoam"
         self.Object = obj  # keep a ref to the DocObj for nonGui usage
         obj.Proxy = self  # link between App::DocumentObject to  this object
 
@@ -127,11 +128,24 @@ class CfdSolverFoam(object):
     def onChanged(self, obj, prop):
         return
 
+    def __getstate__(self):
+        return self.Type
+
+    def __setstate__(self, state):
+        if state:
+            self.Type = state
+
 
 class _CfdSolverFoam:
     """ Backward compatibility for old class name when loading from file """
     def onDocumentRestored(self, obj):
         CfdSolverFoam(obj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
 
 
 class ViewProviderCfdSolverFoam:
@@ -204,9 +218,21 @@ class ViewProviderCfdSolverFoam:
             self.taskd = None
         FreeCADGui.Control.closeDialog()
 
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
 
 class _ViewProviderCfdSolverFoam:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdSolverFoam(vobj)
         new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

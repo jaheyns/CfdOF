@@ -101,6 +101,12 @@ class CfdScalarTransportFunction:
     def execute(self, obj):
         pass
 
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
 
 class ViewProviderCfdScalarTransportFunction:
 
@@ -153,9 +159,21 @@ class ViewProviderCfdScalarTransportFunction:
         FreeCADGui.Control.closeDialog()
         return
 
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
 
 class _ViewProviderCfdScalarTransportFunction:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdScalarTransportFunction(vobj)
         new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

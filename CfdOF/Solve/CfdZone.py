@@ -190,11 +190,23 @@ class CfdZone:
         else:
             fp.Shape = Part.Shape()
 
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
 
 class _CfdZone:
     """ Backward compatibility for old class name when loading from file """
     def onDocumentRestored(self, obj):
         CfdZone(obj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
 
 
 class ViewProviderCfdZone:
@@ -269,9 +281,21 @@ class ViewProviderCfdZone:
         FreeCADGui.Control.closeDialog()
         return
 
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
 
 class _ViewProviderCfdZone:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdZone(vobj)
         new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

@@ -169,6 +169,12 @@ class _CfdPhysicsModel:
     def onDocumentRestored(self, obj):
         CfdPhysicsModel(obj)
 
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
 
 class ViewProviderCfdPhysicsSelection:
     def __init__(self, vobj):
@@ -217,9 +223,21 @@ class ViewProviderCfdPhysicsSelection:
             self.taskd = None
         FreeCADGui.Control.closeDialog()
 
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
 
 class _ViewProviderPhysicsSelection:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdPhysicsSelection(vobj)
         new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None

@@ -166,9 +166,21 @@ class ViewProviderCfdFluidMaterial:
             self.taskd = None
         FreeCADGui.Control.closeDialog()
 
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
+
 
 class _ViewProviderCfdFluidMaterial:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdFluidMaterial(vobj)
         new_proxy.attach(vobj)
+
+    def __getstate__(self):
+        return None
+
+    def __setstate__(self, state):
+        return None
