@@ -132,23 +132,11 @@ class CfdReportingFunction:
     def execute(self, obj):
         pass
 
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-
 
 class _CfdReportingFunctions:
     """ Backward compatibility for old class name when loading from file """
     def onDocumentRestored(self, obj):
         CfdReportingFunction(obj)
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
 
 
 class ViewProviderCfdReportingFunction:
@@ -218,21 +206,9 @@ class ViewProviderCfdReportingFunction:
         FreeCADGui.Control.closeDialog()
         return
 
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-
 
 class _ViewProviderCfdReportingFunctions:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdReportingFunction(vobj)
         new_proxy.attach(vobj)
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None

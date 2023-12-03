@@ -313,12 +313,6 @@ class ViewProviderCfdDynamicMeshInterfaceRefinement:
             FreeCADGui.Control.showTaskView()
         return True
 
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-
 
 class ViewProviderCfdDynamicMeshRefinement:
     """ Backward compatibility for old class name when loading from file """
@@ -326,24 +320,12 @@ class ViewProviderCfdDynamicMeshRefinement:
         new_proxy = ViewProviderCfdDynamicMeshInterfaceRefinement(vobj)
         new_proxy.attach(vobj)
 
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-
 
 class _ViewProviderCfdDynamicMeshRefinement:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdDynamicMeshInterfaceRefinement(vobj)
         new_proxy.attach(vobj)
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
 
 
 class ViewProviderCfdDynamicMeshShockRefinement:
@@ -409,9 +391,3 @@ class ViewProviderCfdDynamicMeshShockRefinement:
             FreeCAD.Console.PrintError('Task dialog already open\n')
             FreeCADGui.Control.showTaskView()
         return True
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None

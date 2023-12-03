@@ -101,7 +101,6 @@ class CfdCaseWriterFoam:
             'initialisationZonesPresent': len(self.initialisation_zone_objs) > 0,
             'zones': {o.Label: {'PartNameList': tuple(r[0].Name for r in o.ShapeRefs)} for o in self.zone_objs},
             'zonesPresent': len(self.zone_objs) > 0,
-            'meshType': self.mesh_obj.Proxy.Type,
             'meshDimension': self.mesh_obj.ElementDimension,
             'meshDir': os.path.relpath(os.path.join(self.working_dir, self.mesh_obj.CaseName), self.case_folder),
             'solver': CfdTools.propsToDict(self.solver_obj),

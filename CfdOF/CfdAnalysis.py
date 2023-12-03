@@ -168,22 +168,9 @@ class ViewProviderCfdAnalysis:
                     doc.getObject(obj.Name).ViewObject.LineColor = (0.5, 0.5, 0.5)
                     doc.getObject(obj.Name).ViewObject.PointColor = (0.5, 0.5, 0.5)
 
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-
 
 class _ViewProviderCfdAnalysis:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdAnalysis(vobj)
         new_proxy.attach(vobj)
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-

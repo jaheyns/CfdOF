@@ -423,23 +423,11 @@ class CfdFluidBoundary:
             else:
                 vobj.ShapeColor = (1.0, 1.0, 1.0)  # White
 
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-
 
 class _CfdFluidBoundary:
     """ Backward compatibility for old class name when loading from file """
     def onDocumentRestored(self, obj):
         CfdFluidBoundary(obj)
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
 
 
 class ViewProviderCfdFluidBoundary:
@@ -520,21 +508,9 @@ class ViewProviderCfdFluidBoundary:
             self.taskd = None
         FreeCADGui.Control.closeDialog()
 
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-
 
 class _ViewProviderCfdFluidBoundary:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdFluidBoundary(vobj)
         new_proxy.attach(vobj)
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None

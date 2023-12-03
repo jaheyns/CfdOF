@@ -66,7 +66,6 @@ The CfdOF workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (at least version 0.20.0 / git commit 29177)](https://www.freecadweb.org/downloads.php)
- or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
 - OpenFOAM [Foundation versions 9-10](http://openfoam.org/download/) or [ESI-OpenCFD versions 2006-2306](http://openfoam.com/download)
 - [Paraview](http://www.paraview.org/)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
@@ -77,13 +76,8 @@ which can be automatically installed (see below for instructions).
 
 #### Windows
 
-The latest
-[release](https://www.freecadweb.org/downloads.php)
-or [development](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
-FreeCAD build can be obtained (64 bit version) and installed
-by respectively running the installer or extracting the .7z archive to a directory
-\<FreeCAD-directory\>. In the latter case, FreeCAD can be run in place
-(\<FreeCAD-directory\>\bin\FreeCAD.exe).
+The latest FreeCAD [release](https://www.freecadweb.org/downloads.php)
+can be obtained (64 bit version) and installed by running the installer.
 
 CfdOF itself is installed into FreeCAD using the Addon manager:
 
@@ -142,8 +136,7 @@ prerequisites have been successfully installed.
 #### Linux
 
 AppImages of the latest [release](https://www.freecadweb.org/downloads.php)
-or [development](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
-versions of FreeCAD can be downloaded and run directly
+version of FreeCAD can be downloaded and run directly
 without installation. Note that you will
 have to enable execution permission on the downloaded file to run it.
 Otherwise, FreeCAD can be built

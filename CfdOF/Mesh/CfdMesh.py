@@ -86,7 +86,6 @@ class CfdMesh:
     known_element_dimensions = ['2D', '3D']
 
     def __init__(self, obj):
-        self.Type = "CfdMesh"
         self.Object = obj
         obj.Proxy = self
         self.initProperties(obj)
@@ -147,24 +146,11 @@ class CfdMesh:
     def execute(self, obj):
         pass
 
-    def __getstate__(self):
-        return self.Type
-
-    def __setstate__(self, state):
-        if state:
-            self.Type = state
-
 
 class _CfdMesh:
     """ Backward compatibility for old class name when loading from file """
     def onDocumentRestored(self, obj):
         CfdMesh(obj)
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
 
 
 class ViewProviderCfdMesh:
@@ -250,21 +236,9 @@ class ViewProviderCfdMesh:
             FreeCAD.Console.PrintError("Error in onDelete: " + str(err))
         return True
 
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-
 
 class _ViewProviderCfdMesh:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdMesh(vobj)
         new_proxy.attach(vobj)
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None

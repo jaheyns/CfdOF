@@ -190,21 +190,9 @@ class ViewProviderCfdInitialiseInternalFlowField:
             self.taskd = None
         FreeCADGui.Control.closeDialog()
 
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
-
 
 class _ViewProviderCfdInitialseInternalFlowField:
     """ Backward compatibility for old class name when loading from file """
     def attach(self, vobj):
         new_proxy = ViewProviderCfdInitialiseInternalFlowField(vobj)
         new_proxy.attach(vobj)
-
-    def __getstate__(self):
-        return None
-
-    def __setstate__(self, state):
-        return None
