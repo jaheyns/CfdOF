@@ -175,6 +175,13 @@ class _CfdPhysicsModel:
     def __setstate__(self, state):
         return None
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
+        return None
+
 
 class ViewProviderCfdPhysicsSelection:
     def __init__(self, vobj):
@@ -229,6 +236,13 @@ class ViewProviderCfdPhysicsSelection:
     def __setstate__(self, state):
         return None
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
+        return None
+
 
 class _ViewProviderPhysicsSelection:
     """ Backward compatibility for old class name when loading from file """
@@ -240,4 +254,11 @@ class _ViewProviderPhysicsSelection:
         return None
 
     def __setstate__(self, state):
+        return None
+
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
         return None

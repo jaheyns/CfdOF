@@ -319,6 +319,13 @@ class ViewProviderCfdDynamicMeshInterfaceRefinement:
     def __setstate__(self, state):
         return None
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
+        return None
+
 
 class ViewProviderCfdDynamicMeshRefinement:
     """ Backward compatibility for old class name when loading from file """
@@ -332,6 +339,13 @@ class ViewProviderCfdDynamicMeshRefinement:
     def __setstate__(self, state):
         return None
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
+        return None
+
 
 class _ViewProviderCfdDynamicMeshRefinement:
     """ Backward compatibility for old class name when loading from file """
@@ -343,6 +357,13 @@ class _ViewProviderCfdDynamicMeshRefinement:
         return None
 
     def __setstate__(self, state):
+        return None
+
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
         return None
 
 
@@ -414,4 +435,11 @@ class ViewProviderCfdDynamicMeshShockRefinement:
         return None
 
     def __setstate__(self, state):
+        return None
+
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
         return None

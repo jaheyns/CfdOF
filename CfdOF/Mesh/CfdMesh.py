@@ -154,6 +154,14 @@ class CfdMesh:
         if state:
             self.Type = state
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return self.Type
+
+    def loads(self, state):
+        if state:
+            self.Type = state
+
 
 class _CfdMesh:
     """ Backward compatibility for old class name when loading from file """
@@ -164,6 +172,13 @@ class _CfdMesh:
         return None
 
     def __setstate__(self, state):
+        return None
+
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
         return None
 
 
@@ -256,6 +271,13 @@ class ViewProviderCfdMesh:
     def __setstate__(self, state):
         return None
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
+        return None
+
 
 class _ViewProviderCfdMesh:
     """ Backward compatibility for old class name when loading from file """
@@ -267,4 +289,11 @@ class _ViewProviderCfdMesh:
         return None
 
     def __setstate__(self, state):
+        return None
+
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
         return None

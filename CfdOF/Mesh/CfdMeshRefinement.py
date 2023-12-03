@@ -236,6 +236,13 @@ class ViewProviderCfdMeshRefinement:
     def __setstate__(self, state):
         return None
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
+        return None
+
 
 class _ViewProviderCfdMeshRefinement:
     """ Backward compatibility for old class name when loading from file """
@@ -247,4 +254,11 @@ class _ViewProviderCfdMeshRefinement:
         return None
 
     def __setstate__(self, state):
+        return None
+
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
         return None

@@ -138,6 +138,13 @@ class CfdReportingFunction:
     def __setstate__(self, state):
         return None
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
+        return None
+
 
 class _CfdReportingFunctions:
     """ Backward compatibility for old class name when loading from file """
@@ -148,6 +155,13 @@ class _CfdReportingFunctions:
         return None
 
     def __setstate__(self, state):
+        return None
+
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
         return None
 
 
@@ -224,6 +238,13 @@ class ViewProviderCfdReportingFunction:
     def __setstate__(self, state):
         return None
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
+        return None
+
 
 class _ViewProviderCfdReportingFunctions:
     """ Backward compatibility for old class name when loading from file """
@@ -235,4 +256,11 @@ class _ViewProviderCfdReportingFunctions:
         return None
 
     def __setstate__(self, state):
+        return None
+
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+    def dumps(self):
+        return None
+
+    def loads(self, state):
         return None
