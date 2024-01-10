@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -89,6 +89,7 @@ class TaskPanelCfdZone:
             self.form.checkAlpha.stateChanged.connect(self.updateUI)
             self.form.checkVelocity.stateChanged.connect(self.updateUI)
             self.form.checkPressure.stateChanged.connect(self.updateUI)
+            self.form.checkTemperature.stateChanged.connect(self.updateUI)
             self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
 
             material_objs = CfdTools.getMaterials(CfdTools.getParentAnalysisObject(obj))
@@ -96,6 +97,9 @@ class TaskPanelCfdZone:
             if len(material_objs) > 1:
                 fluid_names = [m.Label for m in material_objs]
                 self.form.comboFluid.addItems(fluid_names[:-1])
+
+            physics_obj = CfdTools.getPhysicsModel(self.analysis_obj)
+            self.form.frameTemperature.setVisible(physics_obj.Flow != 'Isothermal')
 
         self.load()
         self.comboFluidChanged()
@@ -147,6 +151,8 @@ class TaskPanelCfdZone:
             setQuantity(self.form.inputUz, self.obj.Uz)
             self.form.checkPressure.setChecked(self.obj.PressureSpecified)
             setQuantity(self.form.inputPressure, self.obj.Pressure)
+            self.form.checkTemperature.setChecked(self.obj.TemperatureSpecified)
+            setQuantity(self.form.inputTemperature, self.obj.Temperature)
             self.form.checkAlpha.setChecked(self.obj.VolumeFractionSpecified)
             self.alphas = self.obj.VolumeFractions
 
@@ -161,6 +167,7 @@ class TaskPanelCfdZone:
         self.form.inputUy.setEnabled(velo_checked)
         self.form.inputUz.setEnabled(velo_checked)
         self.form.inputPressure.setEnabled(self.form.checkPressure.isChecked())
+        self.form.inputTemperature.setEnabled(self.form.checkTemperature.isChecked())
         self.form.inputVolumeFraction.setEnabled(self.form.checkAlpha.isChecked())
         self.form.comboFluid.setEnabled(self.form.checkAlpha.isChecked())
 
@@ -295,6 +302,8 @@ class TaskPanelCfdZone:
             storeIfChanged(self.obj, 'Uz', getQuantity(self.form.inputUz))
             storeIfChanged(self.obj, 'PressureSpecified', self.form.checkPressure.isChecked())
             storeIfChanged(self.obj, 'Pressure', getQuantity(self.form.inputPressure))
+            storeIfChanged(self.obj, 'TemperatureSpecified', self.form.checkTemperature.isChecked())
+            storeIfChanged(self.obj, 'Temperature', getQuantity(self.form.inputTemperature))
             storeIfChanged(self.obj, 'VolumeFractionSpecified', self.form.checkAlpha.isChecked())
             storeIfChanged(self.obj, 'VolumeFractions', self.alphas)
 

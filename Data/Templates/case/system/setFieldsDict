@@ -35,14 +35,23 @@ regions
 %{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
             volScalarFieldValue p_rgh %(initialisationZones/%(2%)/Pressure%)
-%:simpleFoam porousSimpleFoam pimpleFoam
+%:simpleFoam porousSimpleFoam pimpleFoam SRFSimpleFoam
             volScalarFieldValue p %(initialisationZones/%(2%)/KinematicPressure%)
 %:default
             volScalarFieldValue p %(initialisationZones/%(2%)/Pressure%)
 %}
+%:Temperature
+%{%(physics/Flow%)
+%:Isothermal
+%:default
+            volScalarFieldValue T %(initialisationZones/%(2%)/Temperature%)
+%}
 %:VolumeFractions
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
 %{%(initialisationZones/%(2%)/VolumeFractions%)
             volScalarFieldValue alpha.%(0%) %(initialisationZones/%(3%)/VolumeFractions/%(0%)%)
+%}
 %}
 %}
 %}
@@ -70,9 +79,14 @@ regions
 %:default
             volScalarFieldValue p %(initialisationZones/%(2%)/Pressure%)
 %}
+%:Temperature
+            volScalarFieldValue T %(initialisationZones/%(2%)/Temperature%)
 %:VolumeFractions
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
 %{%(initialisationZones/%(2%)/VolumeFractions%)
             volScalarFieldValue alpha.%(0%) %(initialisationZones/%(3%)/VolumeFractions/%(0%)%)
+%}
 %}
 %}
 %}

@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -169,6 +169,10 @@ class CfdZone:
                               "Initialisation zone", "Whether the zone initialises pressure")
             addObjectProperty(obj, 'Pressure', '0 kg/m/s^2', "App::PropertyPressure",
                               "Initialisation zone", "Static pressure")
+            addObjectProperty(obj, "TemperatureSpecified", False, "App::PropertyBool",
+                              "Initialisation zone", "Whether the zone initialises temperature")
+            addObjectProperty(obj, 'Temperature', '293 K', "App::PropertyTemperature",
+                              "Initialisation zone", "Temperature")
             addObjectProperty(obj, "VolumeFractionSpecified", True, "App::PropertyBool",
                               "Initialisation zone", "Whether the zone initialises volume fraction")
             addObjectProperty(obj, "VolumeFractions", {}, "App::PropertyMap",

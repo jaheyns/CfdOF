@@ -893,7 +893,14 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
-      <item row="5" column="0" colspan="2">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="checkVelocity">
+        <property name="text">
+         <string>Set velocity</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0" colspan="2">
        <widget class="QFrame" name="frameVolumeFraction">
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -955,17 +962,16 @@
         </layout>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QCheckBox" name="checkPressure">
-        <property name="text">
-         <string>Set pressure</string>
+      <item row="4" column="0">
+       <widget class="Gui::InputField" name="inputPressure">
+        <property name="unit" stdset="0">
+         <string notr="true">kg/m/s^2</string>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="checkVelocity">
-        <property name="text">
-         <string>Set velocity</string>
+        <property name="singleStep" stdset="0">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="format" stdset="0">
+         <number>0</number>
         </property>
        </widget>
       </item>
@@ -1032,17 +1038,55 @@
         </layout>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="Gui::InputField" name="inputPressure">
-        <property name="unit" stdset="0">
-         <string notr="true">kg/m/s^2</string>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="checkPressure">
+        <property name="text">
+         <string>Set pressure</string>
         </property>
-        <property name="singleStep" stdset="0">
-         <double>100.000000000000000</double>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QFrame" name="frameTemperature">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
         </property>
-        <property name="format" stdset="0">
-         <number>0</number>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QCheckBox" name="checkTemperature">
+           <property name="text">
+            <string>Set temperature</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Gui::InputField" name="inputTemperature">
+            <property name="unit" stdset="0">
+             <string notr="true">K</string>
+            </property>
+            <property name="singleStep" stdset="0">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="format" stdset="0">
+             <number>0</number>
+            </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
      </layout>
@@ -1071,23 +1115,43 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>e1x</tabstop>
-  <tabstop>e2x</tabstop>
-  <tabstop>e3x</tabstop>
-  <tabstop>e1y</tabstop>
-  <tabstop>e2y</tabstop>
-  <tabstop>e3y</tabstop>
+  <tabstop>comboBoxCorrelation</tabstop>
   <tabstop>e1z</tabstop>
+  <tabstop>e1y</tabstop>
+  <tabstop>e1x</tabstop>
   <tabstop>e2z</tabstop>
+  <tabstop>e2y</tabstop>
+  <tabstop>e2x</tabstop>
   <tabstop>e3z</tabstop>
+  <tabstop>e3y</tabstop>
+  <tabstop>e3x</tabstop>
+  <tabstop>dx</tabstop>
+  <tabstop>fx</tabstop>
+  <tabstop>dy</tabstop>
+  <tabstop>fy</tabstop>
+  <tabstop>dz</tabstop>
+  <tabstop>fz</tabstop>
+  <tabstop>inputOuterDiameter</tabstop>
   <tabstop>inputTubeAxisX</tabstop>
   <tabstop>inputTubeAxisY</tabstop>
   <tabstop>inputTubeAxisZ</tabstop>
+  <tabstop>inputTubeSpacing</tabstop>
   <tabstop>inputBundleLayerNormalX</tabstop>
   <tabstop>inputBundleLayerNormalY</tabstop>
   <tabstop>inputBundleLayerNormalZ</tabstop>
   <tabstop>inputAspectRatio</tabstop>
   <tabstop>comboAspectRatio</tabstop>
+  <tabstop>inputVelocityEstimate</tabstop>
+  <tabstop>checkVelocity</tabstop>
+  <tabstop>inputUx</tabstop>
+  <tabstop>inputUz</tabstop>
+  <tabstop>inputUy</tabstop>
+  <tabstop>checkPressure</tabstop>
+  <tabstop>inputPressure</tabstop>
+  <tabstop>checkTemperature</tabstop>
+  <tabstop>inputTemperature</tabstop>
+  <tabstop>checkAlpha</tabstop>
+  <tabstop>comboFluid</tabstop>
   <tabstop>inputVolumeFraction</tabstop>
  </tabstops>
  <resources/>

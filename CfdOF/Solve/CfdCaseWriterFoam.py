@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -664,11 +664,24 @@ class CfdCaseWriterFoam:
 
     def processInitialisationZoneProperties(self):
         settings = self.settings
-        if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
-            # Make sure the first n-1 alpha values exist, and write the n-th one
-            # consistently for multiphaseInterFoam
-            for zone_name in settings['initialisationZones']:
-                z = settings['initialisationZones'][zone_name]
+        
+        for zone_name in settings['initialisationZones']:
+            z = settings['initialisationZones'][zone_name]
+
+            if not z['VolumeFractionSpecified']:
+                del z['VolumeFractions']
+            if not z['VelocitySpecified']:
+                del z['Ux']
+                del z['Uy']
+                del z['Uz']
+            if not z['PressureSpecified']:
+                del z['Pressure']
+            if not z['TemperatureSpecified']:
+                del z['Temperature']
+
+            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
+                # Make sure the first n-1 alpha values exist, and write the n-th one
+                # consistently for multiphaseInterFoam
                 sum_alpha = 0.0
                 if 'VolumeFractions' in z:
                     alphas_new = {}
@@ -682,6 +695,10 @@ class CfdCaseWriterFoam:
                             alphas_new[alpha_name] = alpha
                             sum_alpha += alpha
                     z['VolumeFractions'] = alphas_new
+        
+            if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
+                if 'Pressure' in z:
+                    z['KinematicPressure'] = z['Pressure']/settings['fluidProperties'][0]['Density']
 
     def bafflesPresent(self):
         for b in self.bc_group:

@@ -82,7 +82,8 @@ QUANTITY_PROPERTIES = ['App::PropertyQuantity',
                        'App::PropertySpeed',
                        'App::PropertyAcceleration',
                        'App::PropertyForce',
-                       'App::PropertyPressure']
+                       'App::PropertyPressure',
+                       'App::PropertyTemperature']
 
 docker_container = None
 
