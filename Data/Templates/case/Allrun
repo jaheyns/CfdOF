@@ -58,13 +58,14 @@ fi
 
 %{%(dynamicMeshEnabled%)
 %:True
+mkdir -p 0/include
 # Detect availability of 'internal' patch type
 if which foamInfo > /dev/null && foamInfo internalFvPatchField > /dev/null 2>&1
 then
-    echo "type internal;" > 0/helperPatchFieldType
+    echo "type internal;" > 0/include/helperPatchFieldType
     echo "type internal;" > system/helperPatchType
 else
-    echo "type fixedValue;" > 0/helperPatchFieldType
+    echo "type fixedValue;" > 0/include/helperPatchFieldType
     echo "type patch;" > system/helperPatchType
 fi
 

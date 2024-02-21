@@ -42,7 +42,8 @@ echo "libturbulenceModels.so" > system/turbulenceLib
 %{%(dynamicMeshEnabled%)
 %:True
 # Set 'internal' patch type
-echo "type fixedValue;" > 0/helperPatchFieldType
+mkdir 0/include
+echo "type fixedValue;" > 0/include/helperPatchFieldType
 echo "type patch;" > system/helperPatchType
 
 %}
