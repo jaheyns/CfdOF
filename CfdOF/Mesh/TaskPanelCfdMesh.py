@@ -257,10 +257,10 @@ class TaskPanelCfdMesh:
                 stdout_hook=self.gotOutputLines, stderr_hook=self.gotErrorLines)
             FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
                                  "  proxy.check_mesh_process = CfdConsoleProcess()\n" +
-                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars)\n" +
+                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.meshCaseDir)\n" +
                                  "  proxy.check_mesh_process.waitForFinished()\n" +
                                  "else:\n" +
-                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars)")
+                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.meshCaseDir)")
             if self.mesh_obj.Proxy.check_mesh_process.waitForStarted():
                 self.consoleMessage("Mesh check started ...")
             else:
@@ -315,16 +315,19 @@ class TaskPanelCfdMesh:
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
-            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)")
+            if CfdTools.getFoamRuntime() == "MinGW":
+                FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('Allmesh.bat', source_env=False)")
+            else:
+                FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             FreeCADGui.doCommand("proxy.running_from_macro = True")
             self.mesh_obj.Proxy.running_from_macro = False
             FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
                                  "  mesh_process = CfdConsoleProcess.CfdConsoleProcess()\n" +
-                                 "  mesh_process.start(cmd, env_vars=env_vars)\n" +
+                                 "  mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.meshCaseDir)\n" +
                                  "  mesh_process.waitForFinished()\n" +
                                  "else:\n" +
-                                 "  proxy.mesh_process.start(cmd, env_vars=env_vars)")
+                                 "  proxy.mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.meshCaseDir)")
             if self.mesh_obj.Proxy.mesh_process.waitForStarted():
                 self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
                 self.form.pb_stop_mesh.setEnabled(True)

@@ -34,4 +34,10 @@ writeInterval       1;
 
 writePrecision      15;
 
+libs
+(
+    "libscotchDecomp.so"
+);
+
+
 // ************************************************************************* //

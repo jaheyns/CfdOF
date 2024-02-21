@@ -687,10 +687,13 @@ class CfdMeshTools:
            self.mesh_obj.MeshUtility == "snappyHexMesh" and len(self.snappy_settings['MeshRegions']) > 0:
             mesh_region_present = True
 
+        installation_path = CfdTools.getFoamDir()
+
         self.settings = {
             'Name': self.part_obj.Name,
             'MeshPath': self.meshCaseDir,
             'FoamRuntime': CfdTools.getFoamRuntime(),
+            'TranslatedFoamPath': CfdTools.translatePath(installation_path),
             'MeshUtility': self.mesh_obj.MeshUtility,
             'MeshRegionPresent': mesh_region_present,
             'CfSettings': self.cf_settings,
@@ -699,8 +702,9 @@ class CfdMeshTools:
             'ExtrusionSettings': self.extrusion_settings,
             'ConvertToDualMesh': self.mesh_obj.ConvertToDualMesh
         }
-        if CfdTools.getFoamRuntime() != 'WindowsDocker':
-            self.settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
+
+        if CfdTools.getFoamRuntime() == "MinGW":
+            self.settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
 
         if self.mesh_obj.NumberOfProcesses <= 1:
             self.settings['ParallelMesh'] = False

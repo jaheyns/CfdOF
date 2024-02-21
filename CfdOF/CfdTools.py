@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -675,7 +675,7 @@ def translatePath(p):
     """
     Transform path to the perspective of the Linux subsystem in which OpenFOAM is run (e.g. mingw)
     """
-    if platform.system() == 'Windows':
+    if getFoamRuntime().startswith('BlueCFD'):
         return fromWindowsPath(p)
     else:
         return p
@@ -685,7 +685,7 @@ def reverseTranslatePath(p):
     """
     Transform path from the perspective of the OpenFOAM subsystem to the host system
     """
-    if platform.system() == 'Windows':
+    if getFoamRuntime().startswith('BlueCFD'):
         return toWindowsPath(p)
     else:
         return p
@@ -789,12 +789,7 @@ def getRunEnvironment():
     """
     Return native environment settings necessary for running on relevant platform
     """
-    if getFoamRuntime() == "MinGW":
-        return {"MSYSTEM": "MSYS",
-                "USERNAME": "ofuser",
-                "USER": "ofuser",
-                "HOME": "/home/ofuser"}
-    elif getFoamRuntime().startswith("BlueCFD"):
+    if getFoamRuntime().startswith("BlueCFD"):
         return {"MSYSTEM": "MINGW64",
                 "USERNAME": "ofuser",
                 "USER": "ofuser",
@@ -803,7 +798,7 @@ def getRunEnvironment():
         return {}
 
 
-def makeRunCommand(cmd, dir, source_env=True):
+def makeRunCommand(cmd, dir=None, source_env=True):
     """
     Generate native command to run the specified Linux command in the relevant environment,
     including changing to the specified working directory if applicable
@@ -824,8 +819,13 @@ def makeRunCommand(cmd, dir, source_env=True):
 
     source = ""
     if source_env and len(installation_path):
-        env_setup_script = "{}/etc/bashrc".format(installation_path)
-        source = 'source "{}" && '.format(env_setup_script)
+        if getFoamRuntime() == "MinGW":
+            foam_dir = getFoamDir()
+            foam_version = os.path.split(installation_path)[-1].lstrip('v')
+            source = 'call {}\\setEnvVariables-v{}.bat && '.format(foam_dir, foam_version)
+        else:
+            env_setup_script = "{}/etc/bashrc".format(installation_path)
+            source = 'source "{}" && '.format(env_setup_script)
 
     if getFoamRuntime() == "PosixDocker":
         # Set source for docker container
@@ -833,7 +833,10 @@ def makeRunCommand(cmd, dir, source_env=True):
         
     cd = ""
     if dir:
-        cd = 'cd "{}" && '.format(translatePath(dir))
+        if getFoamRuntime() == "MinGW":
+            cd = 'cd {} && '.format(translatePath(dir))
+        else:
+            cd = 'cd "{}" && '.format(translatePath(dir))
     
     if getFoamRuntime() == "PosixDocker":
         prefs = getPreferencesLocation()
@@ -841,13 +844,7 @@ def makeRunCommand(cmd, dir, source_env=True):
             cd = cd.replace(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""),'/tmp').replace('\\','/')
 
     if getFoamRuntime() == "MinGW":
-        # .bashrc will exit unless shell is interactive, so we have to manually load the foam bashrc
-        foamVersion = os.path.split(installation_path)[-1].lstrip('v')
-        cmdline = ['{}\\msys64\\usr\\bin\\bash'.format(installation_path), '--login', '-O', 'expand_aliases', '-c',
-                    'echo Sourcing OpenFOAM environment...; '
-                    'source $HOME/OpenFOAM/OpenFOAM-v{}/etc/bashrc; '.format(foamVersion) +
-                    'export PATH=$FOAM_LIBBIN/msmpi:$FOAM_LIBBIN:$WM_THIRD_PARTY_DIR/platforms/linux64MingwDPInt32/lib:$PATH; '
-                     + cd + cmd]
+        cmdline = [os.environ['COMSPEC'], '/V:ON', '/C', source + cd + cmd]
         return cmdline
 
     if getFoamRuntime() == "PosixDocker":
@@ -991,30 +988,6 @@ def runFoamApplication(cmd, case, log_name=''):
     return proc.exitCode()
 
 
-def convertMesh(case, mesh_file, scale):
-    """
-    Convert gmsh created UNV mesh to FOAM. A scaling of 1e-3 is prescribed as the CAD is always in mm while FOAM
-    uses SI units (m).
-    """
-
-    if mesh_file.find(".unv") > 0:
-        mesh_file = translatePath(mesh_file)
-        cmdline = ['ideasUnvToFoam', '"{}"'.format(mesh_file)]
-        runFoamApplication(cmdline, case)
-        # changeBoundaryType(case, 'defaultFaces', 'wall')  # rename default boundary type to wall
-        # Set in the correct patch types
-        cmdline = ['changeDictionary']
-        runFoamApplication(cmdline, case)
-    else:
-        raise Exception("Error: Only supporting unv mesh files.")
-
-    if scale and isinstance(scale, numbers.Number):
-        cmdline = ['transformPoints', '-scale', '"({} {} {})"'.format(scale, scale, scale)]
-        runFoamApplication(cmdline, case)
-    else:
-        print("Error: mesh scaling ratio is must be a float or integer\n")
-
-
 def checkCfdDependencies(msgFn):
     FC_MAJOR_VER_REQUIRED = 0
     FC_MINOR_VER_REQUIRED = 20
@@ -1058,6 +1031,7 @@ def checkCfdDependencies(msgFn):
         # If we don't have the git version, assume it's OK.
         gitver = FC_COMMIT_REQUIRED
 
+    msgFn("FreeCAD version: {}.{}".format(major_ver, minor_ver))
     if (major_ver < FC_MAJOR_VER_REQUIRED or
         (major_ver == FC_MAJOR_VER_REQUIRED and
          (minor_ver < FC_MINOR_VER_REQUIRED or
@@ -1086,7 +1060,7 @@ def checkCfdDependencies(msgFn):
                 startDocker()
             try:
                 if getFoamRuntime() == "MinGW":
-                    foam_ver = runFoamCommand("echo $FOAM_API")[0]
+                    foam_ver = runFoamCommand("echo !WM_PROJECT_VERSION!")[0]
                 else:
                     foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")[0]
             except Exception as e:
@@ -1096,6 +1070,7 @@ def checkCfdDependencies(msgFn):
                 foam_ver = foam_ver.rstrip()
                 if foam_ver:
                     foam_ver = foam_ver.split()[-1]
+                msgFn("OpenFOAM version: " + foam_ver.lstrip('v'))
                 if foam_ver and foam_ver != 'dev' and foam_ver != 'plus':
                     try:
                         # Isolate major version number
@@ -1134,10 +1109,13 @@ def checkCfdDependencies(msgFn):
 
                 # Check for mpiexec
                 try:
-                    if platform.system() == "Windows":
-                        runFoamCommand('"$(which mpiexec)" -help')
+                    if getFoamRuntime() == "MinGW":
+                        runFoamCommand("mpiexec -help")
                     else:
-                        runFoamCommand("mpiexec --help")
+                        if platform.system() == "Windows":
+                            runFoamCommand('"$(which mpiexec)" -help')
+                        else:
+                            runFoamCommand("mpiexec --help")
                 except subprocess.CalledProcessError:
                     msgFn("MPI was not found. " + \
                             "Parallel execution will not be possible.")
@@ -1146,6 +1124,7 @@ def checkCfdDependencies(msgFn):
                 try:
                     cfmesh_ver = runFoamCommand("cartesianMesh -version")[0]
                     cfmesh_ver = cfmesh_ver.rstrip().split()[-1]
+                    msgFn("cfMesh-CfdOF version: " + cfmesh_ver)
                     cfmesh_ver = cfmesh_ver.split('.')
                     if (not cfmesh_ver or len(cfmesh_ver) != 2 or
                         int(cfmesh_ver[0]) < CF_MAJOR_VER_REQUIRED or
@@ -1160,6 +1139,7 @@ def checkCfdDependencies(msgFn):
                 try:
                     hisa_ver = runFoamCommand("hisa -version")[0]
                     hisa_ver = hisa_ver.rstrip().split()[-1]
+                    msgFn("HiSA version: " + hisa_ver)
                     hisa_ver = hisa_ver.split('.')
                     if (not hisa_ver or len(hisa_ver) != 3 or
                         int(hisa_ver[0]) < HISA_MAJOR_VER_REQUIRED or
@@ -1217,10 +1197,8 @@ def checkCfdDependencies(msgFn):
     except ImportError:
         msgFn("Could not load matplotlib package (required by Plot module)")
 
-    plot_ok = False
     try:
         from FreeCAD.Plot import Plot  # Built-in plot module
-        plot_ok = True
     except ImportError:
         msgFn("Could not load Plot module")
 
@@ -1234,12 +1212,25 @@ def checkCfdDependencies(msgFn):
         msgFn("gmsh executable: " + gmsh_exe)
         try:
             # Needs to be runnable from OpenFOAM environment
-            gmshversion = runFoamCommand("'" + gmsh_exe + "'" + " -version")[2]
+            gmshversion = runFoamCommand('"' + gmsh_exe + '"' + " -version")[2]
         except (OSError, subprocess.CalledProcessError):
             msgFn("gmsh could not be run from OpenFOAM environment")
+        if getFoamRuntime() == "MinGW":
+            # For some reason the output of gmsh -version gets lost when running via the command prompt, so try to run
+            # directly to get hold of this
+            from PySide.QtCore import QProcess, QTextStream
+            proc = QProcess()
+            proc.setProgram(gmsh_exe)
+            proc.setArguments(['-version'])
+            proc.start()
+            if proc.waitForFinished():
+                gmshversion = proc.readAllStandardOutput() + proc.readAllStandardError()
+                gmshversion = QTextStream(gmshversion).readAll()
+        gmshversion = gmshversion.rstrip()
+        msgFn("gmsh version: " + gmshversion)
         if len(gmshversion) > 1:
             # Only the last line contains gmsh version number
-            gmshversion = gmshversion.rstrip().split()
+            gmshversion = gmshversion.split()
             gmshversion = gmshversion[-1]
             versionlist = gmshversion.split(".")
             if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
@@ -1277,6 +1268,7 @@ def getGmshExecutable():
     if not gmsh_cmd:
         # Otherwise, see if the command 'gmsh' is in the path.
         gmsh_cmd = shutil.which("gmsh")
+    gmsh_cmd = os.path.normpath(gmsh_cmd)
     if getFoamRuntime() == "PosixDocker":
         gmsh_cmd='gmsh'
     return gmsh_cmd

@@ -69,7 +69,25 @@ class CfdConsoleProcess:
                    '-u',  # Prevent python from buffering stdout
                    os.path.join(os.path.dirname(__file__), "WindowsRunWrapper.py")] + cmd
         FreeCAD.Console.PrintLog("CfdConsoleProcess running command: {}\n".format(cmd))
-        self.process.start(cmd[0], cmd[1:])
+        self.process.setProgram(cmd[0])
+        if platform.system() == "Windows":
+            has_cmd = False
+            for i, c in enumerate(cmd[1:]):
+                f = os.path.basename(c).lower()
+                if f == 'cmd' or f == 'cmd.exe':
+                    has_cmd = True
+                elif has_cmd and c.lower() == '/c':
+                    self.process.setArguments(cmd[1:(i+1)])
+                    # cmd.exe doesn't follow normal quoting rules for its /c argument, to this must be added unprocessed
+                    # using setNativeArguments
+                    s = '/S /C ' + '"' + ' '.join(cmd[(i+2):]).replace('\\', '\\\\') + '"'
+                    self.process.setNativeArguments(s)
+                    break
+            if not has_cmd:
+                self.process.setArguments(cmd[1:])
+        else:
+            self.process.setArguments(cmd[1:])
+        self.process.start()
 
     def terminate(self):
         if self.process.state() != self.process.NotRunning:

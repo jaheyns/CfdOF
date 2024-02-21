@@ -179,7 +179,11 @@ class CfdRunnableFoam(CfdRunnable):
             CfdTools.startDocker()
 
         # Environment is sourced in run script, so no need to include in run command
-        cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
+        if CfdTools.getFoamRuntime() == "MinGW":
+            cmd = CfdTools.makeRunCommand('Allrun.bat', case_dir, source_env=False)
+        else:
+            cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
+
         return cmd
 
     def getRunEnvironment(self):

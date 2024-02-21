@@ -1,57 +1,44 @@
-#!/bin/bash
-
-runCommand()
+function runCommand([string]$cmd)
 {
-    sol=$(basename -- "$1")
-    sol="${sol%.*}"
-    if [ -f log."$sol" ]; then rm log."$sol"; fi
-    "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
-    err=$?
-    if [ ! $err -eq 0 ]; then exit $err; fi
+    $sol = (Split-Path -Leaf $cmd)
+    & $cmd $args 2>&1 | tee log.$sol
+    $err = $LASTEXITCODE
+    if( ! $LASTEXITCODE -eq 0 )
+    {
+        exit $err
+    }
 }
 
-runParallel()
+function runParallel([int]$NumProcs, [string]$cmd)
 {
-    nproc="$1"
-    shift
-    exe="$(which $1)"
-    sol=$(basename -- "$1")
-    sol="${sol%.*}"
-    shift
-    if [ -f log."$sol" ]; then rm log."$sol"; fi
-    export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workaround for open-mpi/docker bug
-    mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
-    err=$?
-    if [ ! $err -eq 0 ]; then exit $err; fi
+    $sol = (Split-Path -Leaf $cmd)
+    & mpiexec -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
+    $err = $LASTEXITCODE
+    if( ! $LASTEXITCODE -eq 0 )
+    {
+        exit $err
+    }
 }
+
+# Set piping to file to ascii
+$PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
 %{%(MeshUtility%)
 %:gmsh
-GMSH_EXE='%(GmshSettings/Executable%)'
+$GMSH_EXE = "%(GmshSettings/Executable%)"
 %{%(NumberOfThreads%)
 %:0
-NTHREADS=$(nproc)
+$NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
 %:default
-NTHREADS=%(NumberOfThreads%)
+$NTHREADS = %(NumberOfThreads%)
 %}
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/%(Name%)_Geometry.geo"
 
 %}
-# Unset and source bashrc
-%{%(FoamRuntime%)
-%:Posix
-FOAMDIR="%(TranslatedFoamPath%)"
-%}
-if [ ! -z "$FOAMDIR" ]
-then
-    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
-    source "$FOAMDIR/etc/bashrc"
-fi
-
 %{%(ParallelMesh%)
 %:True
 # Pick up number of parallel processes
-NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
+$NPROC = foamDictionary -entry numberOfSubdomains -value system/decomposeParDict
 
 %}
 %{%(MeshUtility%)
@@ -63,24 +50,19 @@ runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/%(Name%)_Geometry.
 %:True
 %{%(NumberOfThreads%)
 %:0
-export OMP_NUM_THREADS=1
+$Env:OMP_NUM_THREADS = 1
 %:default
-export OMP_NUM_THREADS=%(NumberOfThreads%)
+$Env:OMP_NUM_THREADS = %(NumberOfThreads%)
 %}
 runCommand preparePar
-export MPI_BUFFER_SIZE=200000000
+$Env:MPI_BUFFER_SIZE = 200000000
 runParallel $NPROC cartesianMesh
-if [ -z $FOAM_API ]
-then
-    runCommand reconstructParMesh -constant
-else
-    runCommand reconstructParMesh -constant -fullMatch
-fi
+runCommand reconstructParMesh -constant -fullMatch
 %:False
 %{%(NumberOfThreads%)
 %:0
 %:default
-export OMP_NUM_THREADS=%(NumberOfThreads%)
+$Env:OMP_NUM_THREADS = %(NumberOfThreads%)
 %}
 runCommand cartesianMesh
 %}
@@ -88,13 +70,7 @@ runCommand cartesianMesh
 runCommand blockMesh
 
 # Extract feature edges
-which surfaceFeatures > /dev/null 2>&1
-if [ $? == 0 ]
-then
-    runCommand surfaceFeatures
-else
-    runCommand surfaceFeatureExtract
-fi
+runCommand surfaceFeatureExtract
 
 %{%(ParallelMesh%)
 %:True
@@ -113,12 +89,7 @@ runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
 
 %}
-if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
-then
-    runCommand transformPoints "scale=(0.001 0.001 0.001)"
-else
-    runCommand transformPoints -scale "(0.001 0.001 0.001)"
-fi
+runCommand transformPoints -scale "(0.001 0.001 0.001)"
 %}
 
 %{%(ExtrusionSettings/ExtrusionsPresent%)
@@ -142,7 +113,10 @@ cp system/extrudeMeshDict.%(0%) system/extrudeMeshDict
 %{%(ExtrusionSettings/Extrusions/%(0%)/KeepExistingMesh%)
 %:False
 # Refinement history is not processed by extrudeMesh
-rm -f constant/polyMesh/{cellLevel,pointLevel,level0Edge,refinementHistory}
+rm -ErrorAction SilentlyContinue constant/polyMesh/cellLevel
+rm -ErrorAction SilentlyContinue constant/polyMesh/pointLevel
+rm -ErrorAction SilentlyContinue constant/polyMesh/level0Edge
+rm -ErrorAction SilentlyContinue constant/polyMesh/refinementHistory
 %}
 runCommand extrudeMesh
 mv log.extrudeMesh log.extrudeMesh.%(0%)

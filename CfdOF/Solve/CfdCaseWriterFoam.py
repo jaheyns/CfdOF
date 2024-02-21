@@ -218,12 +218,14 @@ class CfdCaseWriterFoam:
         solver_settings['SolverName'] = self.getSolverName()
 
     def processSystemSettings(self):
+        installation_path = CfdTools.getFoamDir()
         system_settings = self.settings['system']
         system_settings['FoamRuntime'] = CfdTools.getFoamRuntime()
         system_settings['CasePath'] = self.case_folder
-        system_settings['FoamPath'] = CfdTools.getFoamDir()
-        if CfdTools.getFoamRuntime() != 'WindowsDocker':
-            system_settings['TranslatedFoamPath'] = CfdTools.translatePath(CfdTools.getFoamDir())
+        system_settings['FoamPath'] = installation_path
+        system_settings['TranslatedFoamPath'] = CfdTools.translatePath(installation_path)
+        if CfdTools.getFoamRuntime() == "MinGW":
+            system_settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
 
     def setupMesh(self, updated_mesh_path, scale):
         if os.path.exists(updated_mesh_path):

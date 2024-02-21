@@ -34,6 +34,10 @@ def processStdin():
             if line.rstrip() == "terminate":
                 print("Wrapper process received terminate command")
                 process.send_signal(signal.CTRL_BREAK_EVENT)
+                with process.stdin:
+                    # The CTRL+BREAK puts (some versions of?) PowerShell into Debug mode - exit that
+                    process.stdin.write('q\n')
+                    process.stdin.write('Y\n')
 
 
 def processStdout():
