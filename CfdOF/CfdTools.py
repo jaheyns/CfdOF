@@ -590,7 +590,7 @@ def getFoamRuntime():
             runtime = 'BlueCFD'
         elif os.path.exists(os.path.join(installation_path, "..", "msys64", "home", "ofuser", ".blueCFDCore")):
             runtime = 'BlueCFD2'
-        elif os.path.exists(os.path.join(installation_path, "msys64", "home", "ofuser")):
+        elif os.path.exists(os.path.join(installation_path, "msys64", "home", "ofuser", ".bashrc")):
             runtime = 'MinGW'
         elif os.path.exists(os.path.join(installation_path, "Windows", "Scripts")):
             runtime = 'WindowsDocker'
@@ -822,7 +822,7 @@ def makeRunCommand(cmd, dir=None, source_env=True):
         if getFoamRuntime() == "MinGW":
             foam_dir = getFoamDir()
             foam_version = os.path.split(installation_path)[-1].lstrip('v')
-            source = 'call {}\\setEnvVariables-v{}.bat && '.format(foam_dir, foam_version)
+            source = 'call "{}\\setEnvVariables-v{}.bat" && '.format(foam_dir, foam_version)
         else:
             env_setup_script = "{}/etc/bashrc".format(installation_path)
             source = 'source "{}" && '.format(env_setup_script)
