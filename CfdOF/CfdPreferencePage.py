@@ -575,9 +575,14 @@ class CfdPreferencePageThread(QThread):
         if CfdTools.getFoamRuntime() == "MinGW":
             self.user_dir = None
             self.signals.status.emit("Installing cfMesh...")
-            CfdTools.runFoamCommand(
-                '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
-                    format(CfdTools.translatePath(filename)))
+            if CfdTools.getFoamRuntime() == "MinGW":
+                CfdTools.runFoamCommand(
+                    "PowerShell -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
+                        format(CfdTools.translatePath(filename)))
+            else:
+                CfdTools.runFoamCommand(
+                    '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
+                        format(CfdTools.translatePath(filename)))
         else:
             self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR")[0].rstrip().split('\n')[-1]
             # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
@@ -604,9 +609,14 @@ class CfdPreferencePageThread(QThread):
         if CfdTools.getFoamRuntime() == "MinGW":
             self.user_dir = None
             self.signals.status.emit("Installing HiSA...")
-            CfdTools.runFoamCommand(
-                '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
-                    format(CfdTools.translatePath(filename)))
+            if CfdTools.getFoamRuntime() == "MinGW":
+                CfdTools.runFoamCommand(
+                    "PowerShell -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
+                        format(CfdTools.translatePath(filename)))
+            else:
+                CfdTools.runFoamCommand(
+                    '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
+                        format(CfdTools.translatePath(filename)))
         else:
             self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR")[0].rstrip().split('\n')[-1]
             # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
