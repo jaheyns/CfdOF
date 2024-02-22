@@ -40,7 +40,7 @@ boundaryField
 
     redistributeHelper
     {
-        #include "helperPatchFieldType";
+        #include "include/helperPatchFieldType";
         value $internalField;
     }
 }

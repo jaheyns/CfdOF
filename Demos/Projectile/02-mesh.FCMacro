@@ -48,7 +48,7 @@ FreeCAD.ActiveDocument.MeshRefinement.FirstLayerHeight = '0.0 mm'
 FreeCAD.ActiveDocument.MeshRefinement.RegionEdgeRefinement = 1.0
 FreeCAD.ActiveDocument.MeshRefinement.Internal = False
 FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('body001001'), ('',))]
+(FreeCAD.ActiveDocument.getObject('body002'), ('',))]
 FreeCAD.ActiveDocument.recompute()
 
 from CfdOF.Mesh import CfdMeshRefinement
@@ -61,10 +61,10 @@ FreeCAD.ActiveDocument.MeshRefinement001.FirstLayerHeight = '0.0 mm'
 FreeCAD.ActiveDocument.MeshRefinement001.RegionEdgeRefinement = 1.0
 FreeCAD.ActiveDocument.MeshRefinement001.Internal = False
 FreeCAD.ActiveDocument.MeshRefinement001.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('fin2001001'), ('',)),
-(FreeCAD.ActiveDocument.getObject('fin1001001'), ('',)),
-(FreeCAD.ActiveDocument.getObject('fin3001001'), ('',)),
-(FreeCAD.ActiveDocument.getObject('fin4001001'), ('',))]
+(FreeCAD.ActiveDocument.getObject('fin2002'), ('',)),
+(FreeCAD.ActiveDocument.getObject('fin1002'), ('',)),
+(FreeCAD.ActiveDocument.getObject('fin3002'), ('',)),
+(FreeCAD.ActiveDocument.getObject('fin4002'), ('',))]
 FreeCAD.ActiveDocument.recompute()
 
 App.ActiveDocument.addObject("Part::Cylinder","Cylinder")

@@ -26,7 +26,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2212"
+FOAMDIR="/home/oliver/OpenFOAM/OpenFOAM-plus"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -57,7 +57,10 @@ fi
 runCommand createPatch -overwrite
 
 # Parallel decomposition
-runCommand decomposePar -force -ifRequired
+if [ ! -d processor0 ]
+then
+    runCommand decomposePar -force
+fi
 
 # Pick up number of parallel processes
 NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)

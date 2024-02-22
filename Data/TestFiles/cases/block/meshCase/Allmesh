@@ -1,20 +1,5 @@
 #!/bin/bash
 
-runParallel()
-{
-    nproc="$1"
-    shift
-    exe="$(which $1)"
-    sol=$(basename -- "$1")
-    sol="${sol%.*}"
-    shift
-    if [ -f log."$sol" ]; then rm log."$sol"; fi
-    export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workarond for open-mpi/docker bug
-    mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
-    err=$?
-    if [ ! $err -eq 0 ]; then exit $err; fi
-}
-
 runCommand()
 {
     sol=$(basename -- "$1")
@@ -25,12 +10,27 @@ runCommand()
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
-GMSH_EXE='/usr/local/bin/gmsh'
-export NTHREADS=$(nproc)
+runParallel()
+{
+    nproc="$1"
+    shift
+    exe="$(which $1)"
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    shift
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workaround for open-mpi/docker bug
+    mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+GMSH_EXE='/tmp/.mount_FreeCAuAaXsd/usr/bin/gmsh'
+NTHREADS=$(nproc)
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Box_Geometry.geo"
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2212"
+FOAMDIR="/home/oliver/OpenFOAM/OpenFOAM-plus"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null

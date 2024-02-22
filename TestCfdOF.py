@@ -434,7 +434,8 @@ def compareInpFiles(file_name1, file_name2):
     file1 = open(file_name1, 'r')
     f1 = file1.readlines()
     file1.close()
-    lf1 = [l for l in f1 if not l.startswith("FOAMDIR=") and not l.startswith("GMSH_EXE=")]
+    lf1 = [l for l in f1 if not l.startswith("FOAMDIR=") and not l.startswith("GMSH_EXE=")
+           and not l.startswith("set FOAMDIR") and not l.startswith("call %FOAMDIR%")]
     lf1 = forceUnixLineEnds(lf1)
     file2 = open(file_name2, 'r')
     f2 = file2.readlines()
