@@ -7,4 +7,4 @@ call %FOAMDIR%/setEnvVariables-v%(system/FoamVersion%).bat
 cd %CWD%
 
 REM Run PowerShell script
-PowerShell -File Allrun.ps1
+type Allrun.ps1 | PowerShell -NoProfile -

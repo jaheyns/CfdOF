@@ -577,7 +577,7 @@ class CfdPreferencePageThread(QThread):
             self.signals.status.emit("Installing cfMesh...")
             if CfdTools.getFoamRuntime() == "MinGW":
                 CfdTools.runFoamCommand(
-                    "PowerShell -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
+                    "PowerShell -NoProfile -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
                         format(CfdTools.translatePath(filename)))
             else:
                 CfdTools.runFoamCommand(
@@ -611,7 +611,7 @@ class CfdPreferencePageThread(QThread):
             self.signals.status.emit("Installing HiSA...")
             if CfdTools.getFoamRuntime() == "MinGW":
                 CfdTools.runFoamCommand(
-                    "PowerShell -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
+                    "PowerShell -NoProfile -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
                         format(CfdTools.translatePath(filename)))
             else:
                 CfdTools.runFoamCommand(

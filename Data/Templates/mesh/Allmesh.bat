@@ -7,4 +7,4 @@ call %FOAMDIR%/setEnvVariables-v%(FoamVersion%).bat
 cd %CWD%
 
 REM Run PowerShell script
-PowerShell -File Allmesh.ps1
+type Allmesh.ps1 | PowerShell -NoProfile -
