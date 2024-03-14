@@ -608,6 +608,17 @@ def getFoamRuntime():
     return runtime
 
 
+def getSystemHostfileRequired(analysis):
+    if analysis and 'UseHostfile' in analysis.PropertiesList:
+        use_hostfile = analysis.UseHostfile
+    return use_hostfile
+    
+    
+def getSystemHostfileName(analysis):
+    if analysis and 'UseHostfile' in analysis.PropertiesList:
+        hostfile_name = analysis.HostfileName
+    return hostfile_name
+
 def findInDefaultPaths(paths):
     for d in paths.get(platform.system(), []):
         d = glob.glob(os.path.expandvars(os.path.expanduser(d)))

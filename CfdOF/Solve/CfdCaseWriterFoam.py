@@ -224,6 +224,9 @@ class CfdCaseWriterFoam:
         system_settings['CasePath'] = self.case_folder
         system_settings['FoamPath'] = installation_path
         system_settings['TranslatedFoamPath'] = CfdTools.translatePath(installation_path)
+        system_settings['hostFileRequired'] = CfdTools.getSystemHostfileRequired(self.analysis_obj)
+        if system_settings['hostFileRequired'] == True:
+            system_settings['hostFileName'] = CfdTools.getSystemHostfileName(self.analysis_obj)
         if CfdTools.getFoamRuntime() == "MinGW":
             system_settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
 
