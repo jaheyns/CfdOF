@@ -57,6 +57,8 @@ class CfdAnalysis:
         addObjectProperty(obj, 'NeedsMeshRewrite', True, "App::PropertyBool", "", "Mesh setup needs to be re-written")
         addObjectProperty(obj, 'NeedsCaseRewrite', True, "App::PropertyBool", "", "Case setup needs to be re-written")
         addObjectProperty(obj, 'NeedsMeshRerun', True, "App::PropertyBool", "", "Mesher needs to be re-run before running solver")
+        addObjectProperty(obj, 'UseHostfile', False, "App::PropertyBool", "", "Use a hostfile for parallel cluster runs")
+        addObjectProperty(obj, 'HostfileName', "mpi_hostfile", "App::PropertyString", "", "Hostfile name")
 
     def onDocumentRestored(self, obj):
         self.loading = False
