@@ -41,6 +41,7 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 * Unit/regression testing
 * Case builder using an extensible template structure
 * Macro scripting
+* Support for distributed parallel (cluster) runs via mpiexec & --hostfile
 
 ### Platforms supported
 
