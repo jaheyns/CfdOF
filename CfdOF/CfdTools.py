@@ -556,7 +556,7 @@ def getFoamDir():
         docker_container = DockerContainer()
     if docker_container.usedocker:
         return ""
-        
+
     prefs = getPreferencesLocation()
     # Get OpenFOAM install path from parameters
     installation_path = FreeCAD.ParamGet(prefs).GetString("InstallationPath", "")
@@ -606,18 +606,6 @@ def getFoamRuntime():
         raise IOError("The directory {} is not a recognised OpenFOAM installation".format(installation_path))
 
     return runtime
-
-
-def getSystemHostfileRequired(analysis):
-    if analysis and 'UseHostfile' in analysis.PropertiesList:
-        use_hostfile = analysis.UseHostfile
-    return use_hostfile
-
-
-def getSystemHostfileName(analysis):
-    if analysis and 'UseHostfile' in analysis.PropertiesList:
-        hostfile_name = analysis.HostfileName
-    return hostfile_name
 
 
 def findInDefaultPaths(paths):

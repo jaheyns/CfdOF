@@ -156,7 +156,7 @@ class CfdCaseWriterFoam:
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         if self.progressCallback:
             self.progressCallback("Case written successfully")
-            
+
         return True
 
     def getSolverName(self):
@@ -224,9 +224,9 @@ class CfdCaseWriterFoam:
         system_settings['CasePath'] = self.case_folder
         system_settings['FoamPath'] = installation_path
         system_settings['TranslatedFoamPath'] = CfdTools.translatePath(installation_path)
-        system_settings['hostFileRequired'] = CfdTools.getSystemHostfileRequired(self.analysis_obj)
+        system_settings['hostFileRequired'] = self.analysis_obj.UseHostfile
         if system_settings['hostFileRequired'] == True:
-            system_settings['hostFileName'] = CfdTools.getSystemHostfileName(self.analysis_obj)
+            system_settings['hostFileName'] = self.analysis_obj.HostfileName
         if CfdTools.getFoamRuntime() == "MinGW":
             system_settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
 
