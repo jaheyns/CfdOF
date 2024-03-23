@@ -106,6 +106,8 @@ class CfdPreferencePage:
         self.form.pb_download_install_hisa.clicked.connect(self.downloadInstallHisa)
         self.form.tb_pick_hisa_file.clicked.connect(self.pickHisaFile)
 
+	self.form.beside_fcstd_checkbox(self.besideFCStdCheckbox)
+
         self.form.le_openfoam_url.setText(OPENFOAM_URL)
         self.form.le_paraview_url.setText(PARAVIEW_URL)
 
@@ -181,7 +183,7 @@ class CfdPreferencePage:
 
         if FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0):
             self.form.cb_docker_sel.setCheckState(Qt.Checked)
-        
+
         # Set usedocker and enable/disable download buttons 
         self.dockerCheckboxClicked()
 
@@ -262,6 +264,10 @@ class CfdPreferencePage:
         if d and os.access(d, os.W_OK):
             self.output_dir = os.path.abspath(d)
         self.form.le_output_dir.setText(self.output_dir)
+
+    def beside_fcstd_checkbox(self):
+        if self.besideFCStdCheckbox.isSelected():
+            print("Is selected")
 
     def runDependencyChecker(self):
         # Temporarily apply the foam dir selection and paraview path selection
