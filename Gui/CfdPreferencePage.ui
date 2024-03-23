@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>909</height>
+    <height>1040</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,6 +34,26 @@
      <property name="verticalSpacing">
       <number>6</number>
      </property>
+     <item row="3" column="1">
+      <widget class="QToolButton" name="tb_choose_paraview_path">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QToolButton" name="tb_choose_output_dir">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_7">
        <property name="font">
@@ -44,6 +64,36 @@
        </property>
        <property name="text">
         <string>OpenFOAM install directory</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_outputdir">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Default output directory</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QToolButton" name="tb_choose_gmsh_path">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QToolButton" name="tb_choose_foam_dir">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>...</string>
        </property>
       </widget>
      </item>
@@ -60,18 +110,21 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QToolButton" name="tb_choose_foam_dir">
+     <item row="8" column="0">
+      <widget class="QLineEdit" name="le_output_dir">
        <property name="enabled">
         <bool>true</bool>
        </property>
-       <property name="text">
-        <string>...</string>
+       <property name="toolTip">
+        <string>The directory to which case folders are written. Used unless overridden on a per-analysis basis.</string>
+       </property>
+       <property name="readOnly">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_outputdir">
+     <item row="4" column="0">
+      <widget class="QLabel" name="label_5">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -79,7 +132,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Default output directory</string>
+        <string>gmsh executable path</string>
        </property>
       </widget>
      </item>
@@ -109,59 +162,16 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QToolButton" name="tb_choose_paraview_path">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QToolButton" name="tb_choose_output_dir">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QLineEdit" name="le_output_dir">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="toolTip">
-        <string>The directory to which case folders are written. Used unless overridden on a per-analysis basis.</string>
-       </property>
-       <property name="readOnly">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_5">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>gmsh executable path</string>
-       </property>
-      </widget>
-     </item>
      <item row="5" column="0">
       <widget class="QLineEdit" name="le_gmsh_path"/>
      </item>
-     <item row="5" column="1">
-      <widget class="QToolButton" name="tb_choose_gmsh_path">
+     <item row="7" column="0" alignment="Qt::AlignRight">
+      <widget class="QCheckBox" name="besideFCStdCheckbox">
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
        <property name="text">
-        <string>...</string>
+        <string>Beside .FCStd:               </string>
        </property>
       </widget>
      </item>
@@ -372,10 +382,19 @@
         <string>HiSA</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="2" column="2">
-         <widget class="QPushButton" name="pb_download_install_hisa">
+        <item row="1" column="2" colspan="2">
+         <widget class="QLineEdit" name="le_hisa_url"/>
+        </item>
+        <item row="2" column="3">
+         <widget class="QToolButton" name="tb_pick_hisa_file">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string>Install HiSA</string>
+           <string>Choose existing file ...</string>
           </property>
          </widget>
         </item>
@@ -392,21 +411,12 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="3">
-         <widget class="QToolButton" name="tb_pick_hisa_file">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
+        <item row="2" column="2">
+         <widget class="QPushButton" name="pb_download_install_hisa">
           <property name="text">
-           <string>Choose existing file ...</string>
+           <string>Install HiSA</string>
           </property>
          </widget>
-        </item>
-        <item row="1" column="2" colspan="2">
-         <widget class="QLineEdit" name="le_hisa_url"/>
         </item>
        </layout>
       </widget>
@@ -417,14 +427,14 @@
         <string>Docker Container</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
+        <item row="0" column="0">
          <widget class="QLabel" name="label_2">
           <property name="text">
            <string>Use docker:</string>
           </property>
-         </widget>		
-       </item>
-       <item row="0" column="1">
+         </widget>
+        </item>
+        <item row="0" column="1">
          <widget class="QCheckBox" name="cb_docker_sel"/>
         </item>
         <item row="1" column="0">
@@ -446,7 +456,7 @@
         </item>
        </layout>
       </widget>
-     </item>   
+     </item>
     </layout>
    </item>
    <item>
