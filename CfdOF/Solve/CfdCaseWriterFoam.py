@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
-# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2022-2024 Jonathan Bergh <bergh.jonathan@gmail.com>     *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -156,7 +156,7 @@ class CfdCaseWriterFoam:
         cfdMessage("Successfully wrote case to folder {}\n".format(self.working_dir))
         if self.progressCallback:
             self.progressCallback("Case written successfully")
-            
+
         return True
 
     def getSolverName(self):
@@ -224,6 +224,9 @@ class CfdCaseWriterFoam:
         system_settings['CasePath'] = self.case_folder
         system_settings['FoamPath'] = installation_path
         system_settings['TranslatedFoamPath'] = CfdTools.translatePath(installation_path)
+        system_settings['hostFileRequired'] = self.analysis_obj.UseHostfile
+        if system_settings['hostFileRequired'] == True:
+            system_settings['hostFileName'] = self.analysis_obj.HostfileName
         if CfdTools.getFoamRuntime() == "MinGW":
             system_settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
 
