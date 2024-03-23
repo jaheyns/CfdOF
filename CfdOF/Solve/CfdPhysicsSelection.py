@@ -124,7 +124,7 @@ class CfdPhysicsModel:
             else:
                 obj.Flow = prev_flow
 
-        if addObjectProperty(obj, "Phase", ['Single', 'FreeSurface'], "App::PropertyEnumeration", "Physics modelling",
+        if addObjectProperty(obj, "Phase", ['Single', 'FreeSurface', 'Eulerian'], "App::PropertyEnumeration", "Physics modelling",
                              "Type of phases present"):
             obj.Phase = 'Single'
 

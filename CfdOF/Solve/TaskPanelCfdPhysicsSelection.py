@@ -71,6 +71,8 @@ class TaskPanelCfdPhysicsSelection:
             self.form.radioButtonSinglePhase.toggle()
         elif self.obj.Phase == 'FreeSurface':
             self.form.radioButtonFreeSurface.toggle()
+        elif self.obj.Phase == 'Eulerian':
+            self.form.radioButtonEulerian.toggle()
 
         # Flow
         self.form.checkBoxIsothermal.setChecked(self.obj.Flow == 'Isothermal')
@@ -139,7 +141,7 @@ class TaskPanelCfdPhysicsSelection:
 
         # SRF model
         srf_capable = (self.form.radioButtonSteady.isChecked() and self.form.checkBoxIsothermal.isChecked())
-        srf_should_be_unchecked = ((not self.form.checkBoxIsothermal.isChecked()) 
+        srf_should_be_unchecked = ((not self.form.checkBoxIsothermal.isChecked())
                                    or self.form.radioButtonTransient.isChecked()
                                    or self.form.radioButtonFreeSurface.isChecked())
         self.form.srfCheckBox.setEnabled(srf_capable)
@@ -159,7 +161,7 @@ class TaskPanelCfdPhysicsSelection:
         if self.form.checkBoxIsothermal.isChecked():
             self.form.checkBoxHighMach.setChecked(False)
 
-        # Viscous 
+        # Viscous
         if self.form.viscousCheckBox.isChecked():
             self.form.turbulenceFrame.setVisible(True)
             # RANS
@@ -203,7 +205,8 @@ class TaskPanelCfdPhysicsSelection:
             storeIfChanged(self.obj, 'Phase', 'Single')
         elif self.form.radioButtonFreeSurface.isChecked():
             storeIfChanged(self.obj, 'Phase', 'FreeSurface')
-
+        elif self.form.radioButtonEulerian.isChecked():
+            storeIfChanged(self.obj, 'Phase', 'Eulerian')
         if self.form.checkBoxIsothermal.isChecked():
             storeIfChanged(self.obj, 'Flow', 'Isothermal')
         elif not self.form.checkBoxIsothermal.isChecked():
