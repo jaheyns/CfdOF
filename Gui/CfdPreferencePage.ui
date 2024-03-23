@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>1040</height>
+    <height>1069</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -166,7 +166,7 @@
       <widget class="QLineEdit" name="le_gmsh_path"/>
      </item>
      <item row="7" column="0" alignment="Qt::AlignRight">
-      <widget class="QCheckBox" name="besideFCStdCheckbox">
+      <widget class="QCheckBox" name="cb_beside_FCStd">
        <property name="layoutDirection">
         <enum>Qt::RightToLeft</enum>
        </property>

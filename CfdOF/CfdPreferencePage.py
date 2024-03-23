@@ -106,18 +106,20 @@ class CfdPreferencePage:
         self.form.pb_download_install_hisa.clicked.connect(self.downloadInstallHisa)
         self.form.tb_pick_hisa_file.clicked.connect(self.pickHisaFile)
 
-	self.form.beside_fcstd_checkbox(self.besideFCStdCheckbox)
-
         self.form.le_openfoam_url.setText(OPENFOAM_URL)
         self.form.le_paraview_url.setText(PARAVIEW_URL)
 
         self.form.tb_choose_output_dir.clicked.connect(self.chooseOutputDir)
         self.form.le_output_dir.textChanged.connect(self.outputDirChanged)
 
+        # Docker
         self.form.cb_docker_sel.clicked.connect(self.dockerCheckboxClicked)
         self.form.pb_download_install_docker.clicked.connect(self.downloadInstallDocker)
-
         self.dockerCheckboxClicked()
+
+        # beside FCStd
+        self.form.cb_beside_FCStd.stateChanged.connect(self.besideFCStdClicked)
+        #self.besideFCStdClicked()
 
         self.ev_filter = CloseDetector(self.form, self.cleanUp)
         self.form.installEventFilter(self.ev_filter)
@@ -141,6 +143,8 @@ class CfdPreferencePage:
         self.form.gb_openfoam.setVisible(platform.system() == 'Windows')
         self.form.gb_paraview.setVisible(platform.system() == 'Windows')
 
+        self.loadSettings()
+
     def __del__(self):
         self.cleanUp()
 
@@ -161,6 +165,7 @@ class CfdPreferencePage:
         FreeCAD.ParamGet(prefs).SetString("DefaultOutputPath", self.output_dir)
         FreeCAD.ParamGet(prefs).SetBool("UseDocker",self.form.cb_docker_sel.isChecked())
         FreeCAD.ParamGet(prefs).SetString("DockerURL",self.form.le_docker_url.text())
+        FreeCAD.ParamGet(prefs).SetBool("UserFCStdDir",self.form.cb_beside_FCStd.isChecked())
 
     def loadSettings(self):
         # Don't set the autodetected location, since the user might want to allow that to vary according
@@ -181,15 +186,25 @@ class CfdPreferencePage:
         self.output_dir = CfdTools.getDefaultOutputPath()
         self.form.le_output_dir.setText(self.output_dir)
 
+        # Use Docker - set usedocker and enable/disable download buttons
         if FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0):
             self.form.cb_docker_sel.setCheckState(Qt.Checked)
 
-        # Set usedocker and enable/disable download buttons 
         self.dockerCheckboxClicked()
-
         self.form.le_docker_url.setText(FreeCAD.ParamGet(prefs).GetString("DockerURL", DOCKER_URL))
-
         self.setDownloadURLs()
+
+        # Use besideFCStd option - set beside_FCStd and disable/enable outputpath
+        if FreeCAD.ParamGet(prefs).GetBool("UseFCStdDir", 0):
+            self.form.cb_beside_FCStd.setCheckState(Qt.Checked)
+            #self.form.le_output_dir.setEnabled(False)
+            #self.form.le_output_dir.setText('./FoamAnalysis')
+        else:
+            self.form.cb_beside_FCStd.setCheckState(Qt.Unchecked)
+            #self.form.le_output_dir.setEnabled(True)
+            #self.form.le_output_dir.setText('/tmp')
+
+        self.besideFCStdClicked()
 
     def consoleMessage(self, message="", colour_type=None):
         message = escape(message)
@@ -265,9 +280,15 @@ class CfdPreferencePage:
             self.output_dir = os.path.abspath(d)
         self.form.le_output_dir.setText(self.output_dir)
 
-    def beside_fcstd_checkbox(self):
-        if self.besideFCStdCheckbox.isSelected():
-            print("Is selected")
+    def besideFCStdClicked(self):
+        if self.form.cb_beside_FCStd.isChecked():
+            self.form.cb_beside_FCStd.setCheckState(Qt.Checked)
+            self.form.le_output_dir.setEnabled(False)
+            self.form.le_output_dir.setText('./FoamAnalysis')
+        else:
+            self.form.cb_beside_FCStd.setCheckState(Qt.Unchecked)
+            self.form.le_output_dir.setEnabled(True)
+            self.form.le_output_dir.setText('/tmp')
 
     def runDependencyChecker(self):
         # Temporarily apply the foam dir selection and paraview path selection
@@ -420,7 +441,7 @@ class CfdPreferencePage:
                             'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                     else:
                         self.install_process = CfdTools.startFoamApplication(
-                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake", 
+                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake",
                             "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
                             'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                 else:
@@ -429,7 +450,7 @@ class CfdPreferencePage:
             CfdTools.setFoamDir(self.initial_foam_dir)
         elif self.thread.task == DOWNLOAD_DOCKER:
             if status:
-                self.consoleMessage("Download completed")            
+                self.consoleMessage("Download completed")
             else:
                 self.consoleMessage("Download unsuccessful")
         self.thread = None
