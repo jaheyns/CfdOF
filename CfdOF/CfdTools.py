@@ -830,14 +830,14 @@ def makeRunCommand(cmd, dir=None, source_env=True):
     if getFoamRuntime() == "PosixDocker":
         # Set source for docker container
         source = 'source /etc/bashrc && '
-        
+
     cd = ""
     if dir:
         if getFoamRuntime() == "MinGW":
             cd = 'cd {} && '.format(translatePath(dir))
         else:
             cd = 'cd "{}" && '.format(translatePath(dir))
-    
+
     if getFoamRuntime() == "PosixDocker":
         prefs = getPreferencesLocation()
         if dir:
@@ -1680,7 +1680,7 @@ def enableLayoutRows(layout, selected_rows):
 
 
 def clearCase(case_path, backup_path=None):
-    """ 
+    """
     Remove and recreate contents of the case directory, optionally backing up 
     Does not remove the directory entry itself as this requires paraview to be reloaded
     """
@@ -1709,7 +1709,7 @@ def executeMacro(macro_name):
 def reloadWorkbench():
     """ Code obtained from David_D at https://forum.freecad.org/viewtopic.php?t=34658#p291438 """
     reload_module = CfdOF
-    
+
     fn = reload_module.__file__
     fn_dir = os.path.dirname(fn) + os.sep
     module_visit = {fn}
@@ -1730,7 +1730,7 @@ def reloadWorkbench():
                         reloadWorkbenchRecursive(module_child)
 
     return reloadWorkbenchRecursive(reload_module)
-   
+
 
 class CfdSynchronousFoamProcess:
     def __init__(self):
@@ -1763,11 +1763,11 @@ class DockerContainer:
     usedocker = False
     output_path_used = None
     docker_cmd = None
-    
+
     def __init__(self):
         self.image_name = None
         import shutil
-        
+
         if shutil.which('podman') is not None:
             self.docker_cmd = shutil.which('podman')
         elif shutil.which('docker') is not None:
@@ -1782,15 +1782,15 @@ class DockerContainer:
         prefs = getPreferencesLocation()
         self.image_name = FreeCAD.ParamGet(prefs).GetString("DockerURL", "")
         output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
-        
+
         if not output_path:
             output_path = tempfile.gettempdir()
         output_path = os.path.normpath(output_path)
-        
+
         if not os.path.isdir(output_path):
             print("Default output directory not found")
             return 1
-        
+
         if DockerContainer.container_id != None:
             print("Attempting to start container but id already set")
 
@@ -1843,7 +1843,7 @@ class DockerContainer:
             DockerContainer.output_path_used = None
         else:
             print("No docker container to stop")
-                    
+
     def getContainerID(self):
         import time
         timer_counts = 0
@@ -1851,7 +1851,7 @@ class DockerContainer:
             time.sleep(1)
             DockerContainer.container_id = self.query_docker_container_ls()
             timer_counts = timer_counts + 1
-        
+
     def query_docker_container_ls(self):
         cmd = "{} container ls".format(self.docker_cmd)
         proc = QtCore.QProcess()
