@@ -20,6 +20,7 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
 * Support for various RANS, LES and DES turbulent flow models
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
+* Compressible Eulerian-Eulerian multiphase flow (multiphaseEulerianFoam)
 * Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
 * Porous regions and porous baffles
