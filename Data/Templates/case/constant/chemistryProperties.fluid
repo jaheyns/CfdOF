@@ -1,0 +1,39 @@
+%{%(solver/SolverName%)
+%:reactingMultiphaseEulerFoam
+%{%(initialValues/VolumeFractions%)
+%[_header%]
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      chemistryProperties.%(0%);
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+chemistryType
+{
+    solver            EulerImplicit;
+}
+
+chemistry           on;
+
+initialChemicalTimeStep 1e-07;
+
+EulerImplicitCoeffs
+{
+    cTauChem        1;
+}
+
+odeCoeffs
+{
+    solver          Rosenbrock43;
+    absTol          1e-8;
+    relTol          0.01;
+}
+
+#include "reactions.gas"
+
+// ************************************************************************* //
+%}  constant/chemistryProperties.%(0%)
+%}

@@ -1,0 +1,23 @@
+%{%(solver/SolverName%)
+%:reactingMultiphaseEulerFoam
+%{%(initialValues/VolumeFractions%)
+%[_header%]
+FoamFile
+{
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      combustionProperties.%(0%);
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+combustionModel PaSR;
+
+PaSRCoeffs
+{
+    Cmix                1.0;
+}
+
+// ************************************************************************* //
+%} constant/combustionProperties.%(0%)
+%}
