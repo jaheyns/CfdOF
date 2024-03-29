@@ -288,6 +288,13 @@ def getScalarTransportFunctionsGroup(analysis_object):
     return group
 
 
+# Reactions
+def getReactionModels(analysis_object):
+    group = []
+    # TODO complete
+    return group
+
+
 # Mesh
 def getMeshRefinementObjs(mesh_obj):
     from CfdOF.Mesh.CfdMeshRefinement import CfdMeshRefinement

@@ -79,7 +79,7 @@ class TaskPanelCfdPhysicsSelection:
         self.form.checkBoxHighMach.setChecked(self.obj.Flow == 'HighMachCompressible')
 
         # Reactions
-        self.form.checkBoxReacting.setChecked(self.obj.ReactingModelEnabled)
+        self.form.checkBoxReacting.setChecked(self.obj.ReactionModelsEnabled)
 
         # Turbulence
         if self.obj.Turbulence == 'Inviscid':
@@ -262,7 +262,7 @@ class TaskPanelCfdPhysicsSelection:
             storeIfChanged(self.obj, 'SRFModelAxis', model_axis)
 
         if self.form.checkBoxReacting.isChecked():
-            storeIfChanged(self.obj, 'ReactingModelEnabled', self.form.checkBoxReacting.isChecked())
+            storeIfChanged(self.obj, 'ReactionModelsEnabled', self.form.checkBoxReacting.isChecked())
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

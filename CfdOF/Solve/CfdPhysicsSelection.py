@@ -161,7 +161,7 @@ class CfdPhysicsModel:
                           "Axis of rotation (SRF)")
 
         # Reacting model
-        addObjectProperty(obj, 'ReactingModelEnabled', False, "App::PropertyBool", "Physics modelling",
+        addObjectProperty(obj, 'ReactionModelsEnabled', False, "App::PropertyBool", "Physics modelling",
                           "Reaction models enabled")
 
     def onDocumentRestored(self, obj):

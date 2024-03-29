@@ -45,6 +45,7 @@ class CfdCaseWriterFoam:
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
         self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
+        self.reaction_models = CfdTools.getReactionModels(analysis_obj)
         self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
@@ -90,6 +91,7 @@ class CfdCaseWriterFoam:
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
             'reportingFunctionsEnabled': False,
+            'reactionsEnabled': False,
             'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
             'scalarTransportFunctionsEnabled': False,
             'dynamicMesh': {},
@@ -137,6 +139,12 @@ class CfdCaseWriterFoam:
         if self.dynamic_mesh_refinement_obj:
             cfdMessage('Dynamic mesh adaptation rule present\n')
             self.processDynamicMeshRefinement()
+
+        #TODO remove
+        print("HERE")
+        if True: #self.reaction_models:
+            cfdMessage('Reactions present\n')
+            self.processReactions()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         self.settings['createPatchesForPeriodics'] = False
@@ -202,10 +210,7 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("Only transient analysis is supported for free surface flow simulation.")
         elif self.physics_model.Phase == 'Eulerian':
-            if self.physics_model.ReactingModelEnabled == 'Reacting':
-                solver = 'reactingMultiphaseEulerFoam'
-            else:
-                solver = 'multiphaseEulerFoam'
+            solver = 'multiphaseEulerFoam'
         else:
             raise RuntimeError(self.physics_model.Phase + " phase model currently not supported.")
 
@@ -589,6 +594,11 @@ class CfdCaseWriterFoam:
             stf['InjectionPoint'] = tuple(
                 Units.Quantity(p, Units.Length).getValueAs('m') for p in stf['InjectionPoint'])
 
+    # Process reactions and reactions models
+    def processReactions(self):
+        settings = self.settings
+        settings['reactionsEnabled'] = True
+
     # Mesh related
     def processDynamicMeshRefinement(self):
         settings = self.settings
@@ -597,14 +607,14 @@ class CfdCaseWriterFoam:
         # Check whether cellLevel supported
         if self.mesh_obj.MeshUtility not in ['cfMesh', 'snappyHexMesh']:
             raise RuntimeError("Dynamic mesh refinement is only supported by cfMesh and snappyHexMesh")
-    
+
         # Check whether 2D extrusion present
         mesh_refinements = CfdTools.getMeshRefinementObjs(self.mesh_obj)
         for mr in mesh_refinements:
             if mr.Extrusion:
                 if mr.ExtrusionType == '2DPlanar' or mr.ExtrusionType == '2DWedge':
                     raise RuntimeError("Dynamic mesh refinement will not work with 2D or wedge mesh")
-        
+
         settings['dynamicMesh'] = CfdTools.propsToDict(self.dynamic_mesh_refinement_obj)
         if isinstance(self.dynamic_mesh_refinement_obj.Proxy, CfdDynamicMeshRefinement.CfdDynamicMeshShockRefinement):
             settings['dynamicMesh']['Type'] = 'shock'
@@ -674,7 +684,7 @@ class CfdCaseWriterFoam:
 
     def processInitialisationZoneProperties(self):
         settings = self.settings
-        
+
         for zone_name in settings['initialisationZones']:
             z = settings['initialisationZones'][zone_name]
 

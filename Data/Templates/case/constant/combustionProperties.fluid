@@ -1,5 +1,5 @@
-%{%(solver/SolverName%)
-%:reactingMultiphaseEulerFoam
+%{%(reactionsEnabled%)
+%:True
 %{%(initialValues/VolumeFractions%)
 %[_header%]
 FoamFile
