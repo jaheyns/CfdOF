@@ -119,7 +119,7 @@ class CfdPreferencePage:
 
         # beside FCStd
         self.form.cb_beside_FCStd.stateChanged.connect(self.besideFCStdClicked)
-        #self.besideFCStdClicked()
+        self.besideFCStdClicked()
 
         self.ev_filter = CloseDetector(self.form, self.cleanUp)
         self.form.installEventFilter(self.ev_filter)
@@ -143,8 +143,6 @@ class CfdPreferencePage:
         self.form.gb_openfoam.setVisible(platform.system() == 'Windows')
         self.form.gb_paraview.setVisible(platform.system() == 'Windows')
 
-        self.loadSettings()
-
     def __del__(self):
         self.cleanUp()
 
@@ -165,7 +163,7 @@ class CfdPreferencePage:
         FreeCAD.ParamGet(prefs).SetString("DefaultOutputPath", self.output_dir)
         FreeCAD.ParamGet(prefs).SetBool("UseDocker",self.form.cb_docker_sel.isChecked())
         FreeCAD.ParamGet(prefs).SetString("DockerURL",self.form.le_docker_url.text())
-        FreeCAD.ParamGet(prefs).SetBool("UserFCStdDir",self.form.cb_beside_FCStd.isChecked())
+        FreeCAD.ParamGet(prefs).SetBool("UseFCStdDir",self.form.cb_beside_FCStd.isChecked())
 
     def loadSettings(self):
         # Don't set the autodetected location, since the user might want to allow that to vary according
@@ -197,12 +195,8 @@ class CfdPreferencePage:
         # Use besideFCStd option - set beside_FCStd and disable/enable outputpath
         if FreeCAD.ParamGet(prefs).GetBool("UseFCStdDir", 0):
             self.form.cb_beside_FCStd.setCheckState(Qt.Checked)
-            #self.form.le_output_dir.setEnabled(False)
-            #self.form.le_output_dir.setText('./FoamAnalysis')
         else:
             self.form.cb_beside_FCStd.setCheckState(Qt.Unchecked)
-            #self.form.le_output_dir.setEnabled(True)
-            #self.form.le_output_dir.setText('/tmp')
 
         self.besideFCStdClicked()
 
@@ -673,6 +667,6 @@ class CfdPreferencePageThread(QThread):
             cmd = cmd.replace('docker.io/','')
 
         CfdTools.runFoamCommand(cmd)
-    
+
     def downloadStatus(self, blocks, block_size, total_size):
         self.signals.downloadProgress.emit(blocks*block_size, total_size)
