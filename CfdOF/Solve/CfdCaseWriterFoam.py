@@ -202,7 +202,10 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("Only transient analysis is supported for free surface flow simulation.")
         elif self.physics_model.Phase == 'Eulerian':
-            solver = 'multiphaseEulerFoam'
+            if self.physics_model.ReactingModelEnabled == 'Reacting':
+                solver = 'reactingMultiphaseEulerFoam'
+            else:
+                solver = 'multiphaseEulerFoam'
         else:
             raise RuntimeError(self.physics_model.Phase + " phase model currently not supported.")
 

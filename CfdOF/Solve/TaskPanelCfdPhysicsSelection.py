@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>   *
 # *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
-# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2022-2024 Jonathan Bergh <bergh.jonathan@gmail.com>     *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -78,6 +78,9 @@ class TaskPanelCfdPhysicsSelection:
         self.form.checkBoxIsothermal.setChecked(self.obj.Flow == 'Isothermal')
         self.form.checkBoxHighMach.setChecked(self.obj.Flow == 'HighMachCompressible')
 
+        # Reactions
+        self.form.checkBoxReacting.setChecked(self.obj.ReactingModelEnabled)
+
         # Turbulence
         if self.obj.Turbulence == 'Inviscid':
             self.form.viscousCheckBox.setChecked(False)
@@ -149,17 +152,28 @@ class TaskPanelCfdPhysicsSelection:
             self.form.srfCheckBox.setChecked(False)
         self.form.srfFrame.setEnabled(self.form.srfCheckBox.isChecked())
 
-        # Free surface
+        # Multiphase - Free surface
         if self.form.radioButtonFreeSurface.isChecked():
             self.form.checkBoxIsothermal.setChecked(True)
             self.form.checkBoxIsothermal.setEnabled(False)
         else:
             self.form.checkBoxIsothermal.setEnabled(True)
 
+        # Multiphase - Eulerian
+        if self.form.radioButtonEulerian.isChecked():
+            pass # Placeholder, do nothing at the moment
+
         # High Mach capability
         self.form.checkBoxHighMach.setEnabled(not self.form.checkBoxIsothermal.isChecked())
         if self.form.checkBoxIsothermal.isChecked():
             self.form.checkBoxHighMach.setChecked(False)
+
+        # Reaction model
+        reacting_capable = (self.form.radioButtonEulerian.isChecked())
+        reacting_should_be_unchecked = (not self.form.radioButtonEulerian.isChecked())
+        if reacting_should_be_unchecked:
+            self.form.checkBoxReacting.setChecked(False)
+        self.form.checkBoxReacting.setEnabled(reacting_capable)
 
         # Viscous
         if self.form.viscousCheckBox.isChecked():
@@ -246,6 +260,9 @@ class TaskPanelCfdPhysicsSelection:
                 self.form.inputSRFAxisy.property("quantity").Value,
                 self.form.inputSRFAxisz.property("quantity").Value)
             storeIfChanged(self.obj, 'SRFModelAxis', model_axis)
+
+        if self.form.checkBoxReacting.isChecked():
+            storeIfChanged(self.obj, 'ReactingModelEnabled', self.form.checkBoxReacting.isChecked())
 
     def reject(self):
         doc = FreeCADGui.getDocument(self.obj.Document)
