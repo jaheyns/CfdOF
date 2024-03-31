@@ -1,15 +1,15 @@
 %{%(solver/SolverName%)
 %:multiphaseEulerFoam
-%:default
 %{%(physics/Turbulence%)
 %:RANS DES LES
+%{%(initialValues/VolumeFractions%)
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      nut;
+    object      nut.%(0%);
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,5 +92,6 @@ boundaryField
 }
 
 // ************************************************************************* //
+%} 0/nut.%(0%)
 %}
 %}

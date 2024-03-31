@@ -140,9 +140,7 @@ class CfdCaseWriterFoam:
             cfdMessage('Dynamic mesh adaptation rule present\n')
             self.processDynamicMeshRefinement()
 
-        #TODO remove
-        print("HERE")
-        if True: #self.reaction_models:
+        if self.reaction_models:
             cfdMessage('Reactions present\n')
             self.processReactions()
 
@@ -210,7 +208,10 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("Only transient analysis is supported for free surface flow simulation.")
         elif self.physics_model.Phase == 'Eulerian':
-            solver = 'multiphaseEulerFoam'
+            if len(self.material_objs) >= 2:
+                solver = 'multiphaseEulerFoam'
+            else:
+                raise RuntimeError("At least two material objects must be present for Eulerian multiphase simulation.")
         else:
             raise RuntimeError(self.physics_model.Phase + " phase model currently not supported.")
 
@@ -341,7 +342,7 @@ class CfdCaseWriterFoam:
                 beta = (1-wireDiam/spacing)**2
                 bc['PressureDropCoeff'] = CD*(1-beta)
 
-            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
+            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam', 'multiphaseEulerFoam']:
                 # Make sure the first n-1 alpha values exist, and write the n-th one
                 # consistently for multiphaseInterFoam
                 sum_alpha = 0.0
@@ -349,7 +350,7 @@ class CfdCaseWriterFoam:
                 for i, m in enumerate(settings['fluidProperties']):
                     alpha_name = m['Name']
                     if i == len(settings['fluidProperties']) - 1:
-                        if settings['solver']['SolverName'] == 'multiphaseInterFoam':
+                        if settings['solver']['SolverName'] == 'multiphaseInterFoam' or settings['solver']['SolverName'] == 'multiphaseEulerFoam':
                             alphas_new[alpha_name] = 1.0 - sum_alpha
                     else:
                         alpha = Units.Quantity(bc.get('VolumeFractions', {}).get(alpha_name, '0')).Value
@@ -427,7 +428,7 @@ class CfdCaseWriterFoam:
         if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
             mat_prop = settings['fluidProperties'][0]
             initial_values['KinematicPressure'] = initial_values['Pressure'] / mat_prop['Density']
-        if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
+        if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam', 'multiphaseEulerFoam']:
             # Make sure the first n-1 alpha values exist, and write the n-th one
             # consistently for multiphaseInterFoam
             sum_alpha = 0.0
@@ -435,7 +436,7 @@ class CfdCaseWriterFoam:
             for i, m in enumerate(settings['fluidProperties']):
                 alpha_name = m['Name']
                 if i == len(settings['fluidProperties'])-1:
-                    if settings['solver']['SolverName'] == 'multiphaseInterFoam':
+                    if settings['solver']['SolverName'] == 'multiphaseInterFoam' or settings['solver']['SolverName'] == 'multiphaseEulerFoam':
                         alphas_new[alpha_name] = 1.0-sum_alpha
                 else:
                     alpha = Units.Quantity(initial_values.get('VolumeFractions', {}).get(alpha_name, '0')).Value
@@ -580,7 +581,7 @@ class CfdCaseWriterFoam:
                 rf['Pitch'] = tuple(p for p in pitch_axis)
 
             settings['reportingFunctions'][name]['ProbePosition'] = tuple(
-                Units.Quantity(p, Units.Length).getValueAs('m') 
+                Units.Quantity(p, Units.Length).getValueAs('m')
                 for p in settings['reportingFunctions'][name]['ProbePosition'])
 
     def processScalarTransportFunctions(self):
@@ -699,7 +700,7 @@ class CfdCaseWriterFoam:
             if not z['TemperatureSpecified']:
                 del z['Temperature']
 
-            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
+            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam', 'multiphaseEulerFoam']:
                 # Make sure the first n-1 alpha values exist, and write the n-th one
                 # consistently for multiphaseInterFoam
                 sum_alpha = 0.0
@@ -708,14 +709,14 @@ class CfdCaseWriterFoam:
                     for i, m in enumerate(settings['fluidProperties']):
                         alpha_name = m['Name']
                         if i == len(settings['fluidProperties'])-1:
-                            if settings['solver']['SolverName'] == 'multiphaseInterFoam':
+                            if settings['solver']['SolverName'] == 'multiphaseInterFoam' or settings['solver']['SolverName'] == 'multiphaseEulerFoam':
                                 alphas_new[alpha_name] = 1.0-sum_alpha
                         else:
                             alpha = Units.Quantity(z['VolumeFractions'].get(alpha_name, '0')).Value
                             alphas_new[alpha_name] = alpha
                             sum_alpha += alpha
                     z['VolumeFractions'] = alphas_new
-        
+
             if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
                 if 'Pressure' in z:
                     z['KinematicPressure'] = z['Pressure']/settings['fluidProperties'][0]['Density']

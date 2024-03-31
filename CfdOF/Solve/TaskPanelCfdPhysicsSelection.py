@@ -169,11 +169,13 @@ class TaskPanelCfdPhysicsSelection:
             self.form.checkBoxHighMach.setChecked(False)
 
         # Reaction model
-        reacting_capable = (self.form.radioButtonEulerian.isChecked())
-        reacting_should_be_unchecked = (not self.form.radioButtonEulerian.isChecked())
-        if reacting_should_be_unchecked:
-            self.form.checkBoxReacting.setChecked(False)
-        self.form.checkBoxReacting.setEnabled(reacting_capable)
+        #reacting_capable = (self.form.radioButtonEulerian.isChecked())
+        #reacting_should_be_unchecked = (not self.form.radioButtonEulerian.isChecked())
+        #if reacting_should_be_unchecked:
+        #    self.form.checkBoxReacting.setChecked(False)
+        #self.form.checkBoxReacting.setEnabled(reacting_capable)
+        self.form.checkBoxReacting.setChecked(False)
+        self.form.checkBoxReacting.setVisible(False)
 
         # Viscous
         if self.form.viscousCheckBox.isChecked():

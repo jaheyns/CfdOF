@@ -1,17 +1,17 @@
 %{%(solver/SolverName%)
 %:multiphaseEulerFoam
-%:default
 %{%(physics/Turbulence%)
 %:RANS DES
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES kOmegaSSTLM
+%{%(initialValues/VolumeFractions%)
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      omega;
+    object      omega.%(0%);
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,6 +78,7 @@ boundaryField
 }
 
 // ************************************************************************* //
+%} 0/omega.%(0%)
 %}
 %}
 %}

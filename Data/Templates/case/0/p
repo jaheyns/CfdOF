@@ -12,7 +12,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 %{%(solver/SolverName%)
-%:simpleFoam porousSimpleFoam pimpleFoam SRFSimpleFoam
+%:simpleFoam porousSimpleFoam pimpleFoam SRFSimpleFoam multiphaseEulerFoam
 dimensions      [0 2 -2 0 0 0 0];
 
 internalField   uniform %(initialValues/KinematicPressure%);

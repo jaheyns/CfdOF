@@ -117,6 +117,7 @@ runCommand createBaffles -overwrite
 runCommand changeDictionary
 
 %}
+
 %{%(initialValues/PotentialFlow%)
 %:True
 %{%(solver/SolverName%)

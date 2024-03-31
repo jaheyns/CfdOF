@@ -1,21 +1,45 @@
 %{%(solver/SolverName%)
-%:multiphaseEulerFoam reactingMultiphaseEulerFoam
+%:multiphaseEulerFoam
 %{%(initialValues/VolumeFractions%)
 %[_header%]
 FoamFile
 {
+    version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
     object      physicalProperties.%(0%);
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-viscosityModel constant;
+thermoType
+{
+    type            heRhoThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
 
-nu [0 2 -1 0 0 0 0] 1.48e-05;
-rho [1 -3 0 0 0 0 0] 1;
+mixture
+{
+    specie
+    {
+        molWeight   28.9;
+    }
+    thermodynamics
+    {
+        Cp          1007;
+        Hf          0;
+    }
+    transport
+    {
+        mu          1.84e-05;
+        Pr          0.7;
+    }
+}
 
 // ************************************************************************* //
-%} constant/physicalProperties.%(0%)
-%}
+%} constant/physicalProperties.%(0%)                                                           
+%} 
