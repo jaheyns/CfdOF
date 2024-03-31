@@ -3,7 +3,7 @@
 # *   (c) qingfeng xia @ iesensor.com 2016                                  *
 # *   Copyright (c) 2017 Andrew Gill (CSIR) <agill@csir.co.za>              *
 # *   Copyright (c) 2019-2021 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
-# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2022-2024 Jonathan Bergh <bergh.jonathan@gmail.com>     *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -60,6 +60,7 @@ class CfdOFWorkbench(Workbench):
         from CfdOF.PostProcess.CfdReportingFunction import CommandCfdReportingFunction
         from CfdOF.Solve.CfdScalarTransportFunction import CommandCfdScalarTransportFunction
         from CfdOF.CfdReloadWorkbench import CommandCfdReloadWorkbench
+        from CfdOF.Solve.CfdPhasePhysicsSelection import CommandCfdPhasePhysicsSelection
 
         FreeCADGui.addCommand('Cfd_Analysis', CommandCfdAnalysis())
         FreeCADGui.addCommand('Cfd_MeshFromShape', CommandCfdMeshFromShape())
@@ -77,12 +78,16 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_ReportingFunctions', CommandCfdReportingFunction())
         FreeCADGui.addCommand('Cfd_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
         FreeCADGui.addCommand('Cfd_ReloadWorkbench', CommandCfdReloadWorkbench())
+        FreeCADGui.addCommand('Cfd_PhasePhysicsSelection', CommandCfdPhasePhysicsSelection())
 
         cmdlst = ['Cfd_Analysis',
-                  'Cfd_MeshFromShape', 'Cfd_MeshRegion', 
+                  'Cfd_MeshFromShape', 'Cfd_MeshRegion',
                   ("Dynamic mesh refinement", ['Cfd_DynamicMeshInterfaceRefinement','Cfd_DynamicMeshShockRefinement',]),
                   ('Cfd_GroupDynamicMeshRefinement',),
-                  'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
+                  'Cfd_PhysicsModel',
+                  ("Advanced physics model selection", ['Cfd_PhasePhysicsSelection']),
+                  ('Cfd_PhasePhysicsSelection',),
+                  'Cfd_FluidMaterial',
                   'Cfd_FluidBoundary', 'Cfd_InitialiseInternal',
                   'Cfd_InitialisationZone', 'Cfd_PorousZone',
                   'Cfd_ReportingFunctions', 'Cfd_ScalarTransportFunctions',
