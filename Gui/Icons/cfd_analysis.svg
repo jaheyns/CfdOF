@@ -2,81 +2,117 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="128"
-   height="128"
-   viewBox="0 0 128 128"
+   width="64"
+   height="64"
+   id="svg2869"
    version="1.1"
-   id="svg32610"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
-   sodipodi:docname="cfd_analysis.svg">
+   viewBox="0 0 64 64"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs2871">
+    <linearGradient
+       id="linearGradient5">
+      <stop
+         style="stop-color:#ef2929;stop-opacity:1;"
+         offset="0"
+         id="stop19" />
+      <stop
+         style="stop-color:#ef2929;stop-opacity:0;"
+         offset="1"
+         id="stop20" />
+    </linearGradient>
+    <linearGradient
+       id="swatch18">
+      <stop
+         style="stop-color:#ef2929;stop-opacity:1;"
+         offset="0"
+         id="stop18" />
+    </linearGradient>
+    <linearGradient
+       id="swatch15">
+      <stop
+         style="stop-color:#3d0000;stop-opacity:1;"
+         offset="0"
+         id="stop15" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5-1">
+      <stop
+         style="stop-color:#ef2929;stop-opacity:1;"
+         offset="0"
+         id="stop5" />
+      <stop
+         style="stop-color:#ef2929;stop-opacity:0;"
+         offset="1"
+         id="stop6" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3836-9">
+      <stop
+         style="stop-color:#a40000;stop-opacity:1"
+         offset="0"
+         id="stop3838-8" />
+      <stop
+         style="stop-color:#ef2929;stop-opacity:1"
+         offset="1"
+         id="stop3840-1" />
+    </linearGradient>
+  </defs>
   <metadata
-     id="metadata6975">
+     id="metadata2874">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>[maxwxyz]</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:relation>https://www.freecad.org/wiki/index.php?title=Artwork</dc:relation>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>FreeCAD</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:identifier>FreeCAD/src/</dc:identifier>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>FreeCAD LGPL2+</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:date>2024</dc:date>
       </cc:Work>
     </rdf:RDF>
   </metadata>
-  <sodipodi:namedview
-     id="namedview32612"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:document-units="px"
-     showgrid="false"
-     units="px"
-     inkscape:zoom="4.0718557"
-     inkscape:cx="49.117653"
-     inkscape:cy="69.378686"
-     inkscape:window-width="1848"
-     inkscape:window-height="1016"
-     inkscape:window-x="72"
-     inkscape:window-y="27"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
-  <defs
-     id="defs32607" />
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1">
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:129.39729309px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#4aa02c;fill-opacity:1;stroke:none;stroke-width:3.23493838"
-       x="11.75737"
-       y="94.331131"
+     id="layer3"
+     style="display:inline">
+    <path
+       d="M 43.571395,44.569684 40.278594,34.48023 H 23.721406 l -3.2928,10.089454 H 10.053181 L 26.08228,2.0084236 H 37.855592 L 53.946819,44.569684 Z M 37.979848,26.942131 Q 33.413419,13.228592 32.8232,11.431045 32.264045,9.6334995 32.015532,8.5897628 30.990416,12.300826 26.144408,26.942131 Z"
        id="text47959"
-       transform="scale(1.0351076,0.96608314)"><tspan
-         sodipodi:role="line"
-         id="tspan47957"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:129.39729309px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#4aa02c;fill-opacity:1;stroke-width:3.23493838"
-         x="11.75737"
-         y="94.331131">A</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:46.78996658px;line-height:1.25;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#3a3a3a;fill-opacity:1;stroke:none;stroke-width:5.29487133;stroke-miterlimit:4;stroke-dasharray:none"
-       x="6.447041"
-       y="138.27887"
+       style="font-weight:bold;font-size:61.4616px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans, Bold';fill:#8ae234;stroke-width:2;stroke:#17230b;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round;stroke-opacity:1"
+       aria-label="A" />
+    <path
+       d="m 18.247529,49.545008 q -2.061399,0 -3.192223,1.319636 -1.130823,1.309639 -1.130823,3.658992 0,4.888651 4.323046,4.888651 1.81403,0 4.393723,-0.769787 v 2.599283 q -2.120296,0.749793 -4.735327,0.749793 -3.757634,0 -5.748356,-1.929467 -1.990721,-1.939466 -1.990721,-5.558468 0,-2.279372 0.977691,-3.9889 0.977692,-1.719526 2.803502,-2.629275 1.837589,-0.919746 4.299488,-0.919746 2.509016,0 5.041591,1.029716 l -1.177942,2.519305 q -0.965912,-0.389892 -1.943604,-0.679813 -0.977692,-0.28992 -1.920045,-0.28992 z M 29.897373,61.791631 H 26.30465 v -14.61597 h 9.871154 v 2.5393 h -6.278431 v 3.768961 h 5.842592 v 2.529303 h -5.842592 z m 23.935779,-7.447946 q 0,3.609005 -2.426561,5.528476 -2.41478,1.91947 -6.985194,1.91947 h -4.876679 v -14.61597 h 5.406752 q 4.217032,0 6.549357,1.889479 2.332325,1.88948 2.332325,5.278545 z m -3.792973,0.07997 q 0,-4.708703 -4.900238,-4.708703 h -1.943604 v 9.517377 h 1.566662 q 5.27718,0 5.27718,-4.808674 z"
        id="text59887"
-       transform="scale(1.0854799,0.92125152)"><tspan
-         sodipodi:role="line"
-         id="tspan59885"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:46.78996658px;font-family:sans-serif;-inkscape-font-specification:'sans-serif, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;fill:#3a3a3a;fill-opacity:1;stroke-width:5.29487133;stroke-miterlimit:4;stroke-dasharray:none"
-         x="6.447041"
-         y="138.27887">CFD</tspan></text>
+       style="font-weight:bold;font-size:22.2245px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans, Bold';fill:#eeeeec;stroke-width:2;stroke:#eeeeec;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round"
+       aria-label="CFD" />
+    <path
+       d="m 27.464844,4.0078125 h 9.007812 L 51.052734,42.570312 H 45.023437 L 41.730469,32.480469 H 22.269531 l -3.292969,10.089843 h -6.033203 z m 2.623047,4.0488281 C 29.422307,10.466147 27.475451,16.555603 24.246094,26.3125 L 23.375,28.941406 h 17.378906 l -0.875,-2.632812 c -3.038505,-9.125 -4.752352,-14.270617 -5.146484,-15.470703 l -0.0098,-0.0293 C 34.361532,9.6461071 34.111758,8.7603864 33.960937,8.1269531 Z"
+       id="path16"
+       style="font-weight:bold;font-size:61.4616px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans, Bold';fill:#4aa02c;stroke-width:2;stroke:#8be236;stroke-opacity:1;stroke-dasharray:none;stroke-linejoin:round;stroke-linecap:round"
+       aria-label="A" />
+    <path
+       d="m 18.247529,49.545008 q -2.061399,0 -3.192223,1.319636 -1.130823,1.309639 -1.130823,3.658992 0,4.888651 4.323046,4.888651 1.81403,0 4.393723,-0.769787 v 2.599283 q -2.120296,0.749793 -4.735327,0.749793 -3.757634,0 -5.748356,-1.929467 -1.990721,-1.939466 -1.990721,-5.558468 0,-2.279372 0.977691,-3.9889 0.977692,-1.719526 2.803502,-2.629275 1.837589,-0.919746 4.299488,-0.919746 2.509016,0 5.041591,1.029716 l -1.177942,2.519305 q -0.965912,-0.389892 -1.943604,-0.679813 -0.977692,-0.28992 -1.920045,-0.28992 z M 29.897373,61.791631 H 26.30465 v -14.61597 h 9.871154 v 2.5393 h -6.278431 v 3.768961 h 5.842592 v 2.529303 h -5.842592 z m 23.935779,-7.447946 q 0,3.609005 -2.426561,5.528476 -2.41478,1.91947 -6.985194,1.91947 h -4.876679 v -14.61597 h 5.406752 q 4.217032,0 6.549357,1.889479 2.332325,1.88948 2.332325,5.278545 z m -3.792973,0.07997 q 0,-4.708703 -4.900238,-4.708703 h -1.943604 v 9.517377 h 1.566662 q 5.27718,0 5.27718,-4.808674 z"
+       id="path17"
+       style="font-weight:bold;font-size:22.2245px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans, Bold';fill:#3a3a3a;stroke-width:5.29489"
+       aria-label="CFD" />
   </g>
 </svg>
