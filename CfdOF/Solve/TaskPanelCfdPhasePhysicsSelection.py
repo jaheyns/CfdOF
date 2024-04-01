@@ -26,19 +26,19 @@ if FreeCAD.GuiUp:
 from CfdOF import CfdTools
 from CfdOF.CfdTools import getQuantity, setQuantity, storeIfChanged
 
-MULTIPHASE_SYSTEM = ['Basic', 'Population balance', 'Thermal Phase Change', 'Interface Composition Phase Change']
-PHASE_MODELS = ['Pure Phase Model', 'Pure Isothermal Model', 'Reacting Phase Model']
+MULTIPHASE_SYSTEM = ['Basic', 'Population balance', 'Thermal Phase Change', 'Thermal Phase Change Population Balance', 'Interface Composition Phase Change', 'Interface Composition Phase Change Population Balance']
+PHASE_MODELS = ['Pure', 'Pure Isothermal', 'Pure Stationary', 'Pure Stationay Isothermal', 'Reacting', 'Multicomponent', 'Multicomponent Isothermal']
 
 DRAG_MODELS = ['SchillerNauman', 'IshiiZuber']
-LIFT_MODELS = ['constant', 'Tomiyama']
-SURFACE_TENSION_MODELS = ['constant']
-TURBULENT_DISPERSION_MODELS = ['Burns']
-WALL_LUBRICATION_MODELS = ['Antal']
-VIRTUAL_MASS_MODELS = ['constant']
+LIFT_MODELS = ['none', 'constantCoefficient', 'wallDamped', 'Tomiyama']
+SURFACE_TENSION_MODELS = ['none', 'constant']
+TURBULENT_DISPERSION_MODELS = ['none', 'constantCoefficient', 'Gosman', 'LopezDeBertodano', 'Burns']
+WALL_LUBRICATION_MODELS = ['none', 'Frank', 'Tomiyama', 'Antal']
+VIRTUAL_MASS_MODELS = ['none', 'constantCoefficient', 'Lamb']
 INTERFACE_COMPRESSION_MODELS = ['']
 
-HEAT_TRANSFER_MODELS = ['RanzMarshall']
-PHASE_TRANSFER_MODELS = ['constant']
+HEAT_TRANSFER_MODELS = ['Gunn', 'spherical', 'RanzMarshall', 'constantNu']
+PHASE_TRANSFER_MODELS = ['deposition', 'reactionDriven']
 
 
 class TaskPanelCfdPhasePhysicsSelection:

@@ -11,3 +11,5 @@ DensityPolynomial = 746.025 1.93017 -0.00365471
 CpPolynomial = 9850.69 -48.6714 0.13736 -0.000127063
 DynamicViscosityPolynomial = 0.116947 -0.00100532 2.90283e-6 -2.80572e-9
 ThermalConductivityPolynomial = -0.710696 0.0071857 -9.29827e-6
+BubbleDiameter = 1e-5 m
+SurfaceTensionCoefficient = 0.07 N/m

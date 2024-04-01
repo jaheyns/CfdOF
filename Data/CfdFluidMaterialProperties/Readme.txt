@@ -10,7 +10,7 @@ reference.
 
 Each material has a Type keyword identifying the kind of modelling
 it is compatible with. Only those compatible with the physics model
-selected will we shown in the GUI:
+selected will be shown in the GUI:
 - Isothermal: Denotes properties at fixed temperature and pressure,
 for use in incompressible, isothermal solvers
 - Incompressible: Properties modelled as dependent on temperature but

@@ -126,6 +126,7 @@ class TaskPanelCfdPhysicsSelection:
         # Steady / transient
         if self.form.radioButtonSteady.isChecked():
             self.form.radioButtonFreeSurface.setEnabled(False)
+            self.form.radioButtonEulerian.setEnabled(False)
             if self.form.radioButtonDES.isChecked() or self.form.radioButtonLES.isChecked():
                 self.form.radioButtonRANS.toggle()
             self.form.radioButtonDES.setEnabled(False)
@@ -134,6 +135,7 @@ class TaskPanelCfdPhysicsSelection:
                 self.form.radioButtonSinglePhase.toggle()
         else:
             self.form.radioButtonFreeSurface.setEnabled(True)
+            self.form.radioButtonEulerian.setEnabled(True)
             self.form.radioButtonDES.setEnabled(True)
             self.form.radioButtonLES.setEnabled(True)
 

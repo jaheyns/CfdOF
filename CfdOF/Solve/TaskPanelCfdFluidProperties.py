@@ -41,12 +41,15 @@ class TaskPanelCfdFluidProperties:
                                                              'Gui', "TaskPanelCfdFluidProperties.ui"))
 
         self.material = self.obj.Material
+        self.all_materials = CfdTools.getMaterials(CfdTools.getActiveAnalysis())
 
         self.form.compressibleCheckBox.setVisible(self.physics_obj.Flow == "NonIsothermal")
         # Make sure it is checked in the default case since object was initialised with Isothermal
         self.form.compressibleCheckBox.setChecked(self.material.get('Type') != "Incompressible")
         self.form.compressibleCheckBox.stateChanged.connect(self.compressibleCheckBoxChanged)
 
+        self.form.otherPhaseLabel.setVisible(self.physics_obj.Phase == 'FreeSurface' or self.physics_obj.Phase == 'Eulerian')
+        
         self.text_boxes = {}
         self.fields = []
         if self.physics_obj.Flow == 'Isothermal':
@@ -88,13 +91,13 @@ class TaskPanelCfdFluidProperties:
             self.form.propertiesLayout.removeRow(0)
 
         if self.material['Type'] == 'Isothermal':
-            self.fields = ['Density', 'DynamicViscosity']
+            self.fields = ['Density', 'DynamicViscosity', 'BubbleDiameter', 'SurfaceTensionCoefficient']
         elif self.material['Type'] == 'Incompressible':
             self.fields = ['MolarMass', 'DensityPolynomial', 'CpPolynomial', 'DynamicViscosityPolynomial',
-                           'ThermalConductivityPolynomial']
+                           'ThermalConductivityPolynomial', 'BubbleDiameter', 'SurfaceTensionCoefficient']
         else:
             self.fields = ['MolarMass', 'Cp', 'SutherlandTemperature', 'SutherlandRefTemperature',
-                           'SutherlandRefViscosity']
+                           'SutherlandRefViscosity', 'BubbleDiameter', 'SurfaceTensionCoefficient']
 
         self.text_boxes = {}
         for name in self.fields:
@@ -108,6 +111,20 @@ class TaskPanelCfdFluidProperties:
                 self.text_boxes[name] = widget
                 widget.setText(val)
                 widget.textChanged.connect(self.manualEdit)
+            elif name.endswith("SurfaceTensionCoefficient"):
+                for material in self.all_materials:
+                    if material.Label != self.material['Name']:
+                        widget = FreeCADGui.UiLoader().createWidget("Gui::InputField")
+                        widget.setObjectName(name)
+                        widget.setProperty("format", "g")
+                        val = self.material.get(name, '0')
+                        widget.setProperty("unit", val)
+                        widget.setProperty("minimum", 0)
+                        widget.setProperty("singleStep", 0.1)
+                        self.form.otherPhaseLayout.addRow(name+material.Label+":", widget)
+                        self.text_boxes[name] = widget
+                        setQuantity(widget, val)
+                        widget.valueChanged.connect(self.manualEdit)
             else:
                 widget = FreeCADGui.UiLoader().createWidget("Gui::InputField")
                 widget.setObjectName(name)

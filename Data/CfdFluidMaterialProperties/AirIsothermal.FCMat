@@ -8,3 +8,5 @@ Type = Isothermal
 Description = Standard air properties at 20 Degrees Celsius and 1 atm
 Density = 1.20 kg/m^3
 DynamicViscosity = 1.80e-5 kg/m/s
+BubbleDiameter = 1e-5 m
+SurfaceTensionCoefficient = 0.07 N/m

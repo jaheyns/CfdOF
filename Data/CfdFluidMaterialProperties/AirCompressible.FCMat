@@ -11,3 +11,5 @@ Cp = 1004.703 J/kg/K
 SutherlandTemperature = 110.4 K
 SutherlandRefViscosity = 1.716e-5 kg/m/s
 SutherlandRefTemperature = 273.15 K
+BubbleDiameter = 1e-5 m
+SurfaceTensionCoefficient = 0.07 N/m
