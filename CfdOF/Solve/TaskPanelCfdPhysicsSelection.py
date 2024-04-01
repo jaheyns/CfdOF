@@ -131,7 +131,7 @@ class TaskPanelCfdPhysicsSelection:
                 self.form.radioButtonRANS.toggle()
             self.form.radioButtonDES.setEnabled(False)
             self.form.radioButtonLES.setEnabled(False)
-            if self.form.radioButtonFreeSurface.isChecked():
+            if self.form.radioButtonFreeSurface.isChecked() or self.form.radioButtonEulerian.isChecked():
                 self.form.radioButtonSinglePhase.toggle()
         else:
             self.form.radioButtonFreeSurface.setEnabled(True)
@@ -163,7 +163,7 @@ class TaskPanelCfdPhysicsSelection:
 
         # Multiphase - Eulerian
         if self.form.radioButtonEulerian.isChecked():
-            pass # Placeholder, do nothing at the moment
+            pass
 
         # High Mach capability
         self.form.checkBoxHighMach.setEnabled(not self.form.checkBoxIsothermal.isChecked())
