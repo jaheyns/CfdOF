@@ -70,7 +70,7 @@ FOAM_DIR_DEFAULTS = {'Windows': ['C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v*',
 PARAVIEW_PATH_DEFAULTS = {
                     "Windows": ["C:\\Program Files\\ParaView *\\bin\\paraview.exe"],
                     "Linux": ["/usr/bin/paraview", "/usr/local/bin/paraview"],
-                    "Darwin": []
+                    "Darwin": ["/Applications/Paraview-*.app/Contents/MacOS/paraview"]
                     }
 
 QUANTITY_PROPERTIES = ['App::PropertyQuantity',
@@ -1165,10 +1165,28 @@ def checkCfdDependencies(msgFn):
                 runFoamCommand('which paraview')
             except subprocess.CalledProcessError:
                 failed = True
-        if failed or not os.path.exists(paraview_cmd):
+        if failed or not os.path.isfile(paraview_cmd):
             msgFn("Paraview executable '" + paraview_cmd + "' not found.")
         else:
             msgFn("Paraview executable: {}".format(paraview_cmd))
+            from PySide.QtCore import QProcess, QTextStream
+            proc = QProcess()
+            proc.setProgram(paraview_cmd)
+            proc.setArguments(['--version'])
+            env = QtCore.QProcessEnvironment.systemEnvironment()
+            removeAppimageEnvironment(env)
+            proc.setProcessEnvironment(env)
+            proc.start()
+            if proc.waitForFinished():
+                pvversion = proc.readAllStandardOutput() + proc.readAllStandardError()
+                pvversion = QTextStream(pvversion).readAll()
+                pvversion = pvversion.split()[-1].rstrip()
+                msgFn("Paraview version: " + pvversion)
+                versionlist = pvversion.split(".")
+                if int(versionlist[0]) < 5:
+                    msgFn("Paraview version is older than minimum required (5)")
+            else:
+                msgFn("Unable to run paraview")
 
         # Check for paraview python support
         if not failed:
@@ -1185,9 +1203,14 @@ def checkCfdDependencies(msgFn):
             else:
                 if platform.system() == 'Windows':
                     pvpython_cmd = paraview_cmd.rstrip('paraview.exe')+'pvpython.exe'
+                elif platform.system() == "MacOS":
+                    pvpython_cmd = paraview_cmd.rstrip('paraview')
+                    dirs = os.path.split(pvpython_cmd)                  
+                    if dirs[1] == 'MacOS':
+                        pvpython_cmd = os.path.join(dirs[0], 'bin', 'pvpython') 
                 else:
                     pvpython_cmd = paraview_cmd.rstrip('paraview')+'pvpython'
-            if failed or not os.path.exists(pvpython_cmd):
+            if failed or not os.path.isfile(pvpython_cmd):
                 msgFn("Python support in paraview not found. Please install paraview python packages.")
 
     print("Checking Plot module:")
