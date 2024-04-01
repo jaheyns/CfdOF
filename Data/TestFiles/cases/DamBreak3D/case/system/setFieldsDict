@@ -26,8 +26,6 @@ regions
         set "Box002";
         fieldValues
         (
-            volScalarFieldValue p_rgh 0.0
-            volVectorFieldValue U ( 0.0 0.0 0.0 )
             volScalarFieldValue alpha.water 1.0
         );
     }
@@ -38,8 +36,6 @@ regions
         option all;
         fieldValues
         (
-            volScalarFieldValue p_rgh 0.0
-            volVectorFieldValue U ( 0.0 0.0 0.0 )
             volScalarFieldValue alpha.water 1.0
         );
     }

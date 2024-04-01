@@ -12,11 +12,11 @@ function runCommand([string]$cmd)
 function runParallel([int]$NumProcs, [string]$cmd)
 {
     $sol = (Split-Path -Leaf $cmd)
-%{%(system/hostFileRequired%)
+%{%(hostFileRequired%)
 %:False
     & mpiexec -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
 %:True
-    & mpiexec --hostfile %(system/hostFileName%) -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
+    & mpiexec --hostfile %(hostFileName%) -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
 %}
     $err = $LASTEXITCODE
     if( ! $LASTEXITCODE -eq 0 )

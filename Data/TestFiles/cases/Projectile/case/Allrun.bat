@@ -4,7 +4,7 @@ REM Source runtime environment
 set FOAMDIR="/home/oliver/OpenFOAM/OpenFOAM-plus"
 set CWD=%CD%
 call %FOAMDIR%/setEnvVariables-vNone.bat
-cd %CWD%
+cd /d %CWD%
 
 REM Run PowerShell script
-PowerShell -File Allrun.ps1
+type Allrun.ps1 | PowerShell -NoProfile -
