@@ -703,6 +703,10 @@ class CfdMeshTools:
             'ConvertToDualMesh': self.mesh_obj.ConvertToDualMesh
         }
 
+        self.settings['hostFileRequired'] = self.analysis.UseHostfile
+        if self.settings['hostFileRequired'] == True:
+            self.settings['hostFileName'] = self.analysis.HostfileName
+
         if CfdTools.getFoamRuntime() == "MinGW":
             self.settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
 
