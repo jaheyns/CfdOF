@@ -1204,10 +1204,12 @@ def checkCfdDependencies(msgFn):
                 if platform.system() == 'Windows':
                     pvpython_cmd = paraview_cmd.rstrip('paraview.exe')+'pvpython.exe'
                 elif platform.system() == "Darwin":
-                    pvpython_cmd = paraview_cmd.rstrip('paraview')
+                    pvpython_cmd = paraview_cmd.rstrip('paraview').rstrip('/')
                     dirs = os.path.split(pvpython_cmd)                  
                     if dirs[1] == 'MacOS':
                         pvpython_cmd = os.path.join(dirs[0], 'bin', 'pvpython') 
+                    else:
+                        pvpython_cmd = os.path.join(paraview_cmd, 'pvpython')
                 else:
                     pvpython_cmd = paraview_cmd.rstrip('paraview')+'pvpython'
             if failed or not os.path.isfile(pvpython_cmd):
