@@ -1203,7 +1203,7 @@ def checkCfdDependencies(msgFn):
             else:
                 if platform.system() == 'Windows':
                     pvpython_cmd = paraview_cmd.rstrip('paraview.exe')+'pvpython.exe'
-                elif platform.system() == "MacOS":
+                elif platform.system() == "Darwin":
                     pvpython_cmd = paraview_cmd.rstrip('paraview')
                     dirs = os.path.split(pvpython_cmd)                  
                     if dirs[1] == 'MacOS':
@@ -1657,7 +1657,7 @@ def propsToDict(obj):
 
 def openFileManager(case_path):
     case_path = os.path.abspath(case_path)
-    if platform.system() == 'MacOS':
+    if platform.system() == 'Darwin':
         subprocess.Popen(['open', '--', case_path])
     elif platform.system() == 'Linux':
         subprocess.Popen(['xdg-open', case_path])
