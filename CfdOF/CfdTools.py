@@ -70,7 +70,7 @@ FOAM_DIR_DEFAULTS = {'Windows': ['C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v*',
 PARAVIEW_PATH_DEFAULTS = {
                     "Windows": ["C:\\Program Files\\ParaView *\\bin\\paraview.exe"],
                     "Linux": ["/usr/bin/paraview", "/usr/local/bin/paraview"],
-                    "Darwin": ["/Applications/Paraview-*.app/Contents/MacOS/paraview"]
+                    "Darwin": ["/Applications/ParaView-*.app/Contents/MacOS/paraview"]
                     }
 
 QUANTITY_PROPERTIES = ['App::PropertyQuantity',
