@@ -35,7 +35,12 @@ runParallel()
 GMSH_EXE='%(GmshSettings/Executable%)'
 %{%(NumberOfThreads%)
 %:0
-NTHREADS=$(nproc)
+if [[ $OSTYPE == 'darwin'* ]]
+then
+    NTHREADS=$(sysctl -n hw.logicalcpu)
+else
+    NTHREADS=$(nproc)
+fi
 %:default
 NTHREADS=%(NumberOfThreads%)
 %}

@@ -391,10 +391,16 @@ class CfdPreferencePage:
                             "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
                             'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                     else:
-                        self.install_process = CfdTools.startFoamApplication(
-                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake", 
-                            "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
-                            'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
+                        if os.system() == 'Darwin':
+                            self.install_process = CfdTools.startFoamApplication(
+                                "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake", 
+                                "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                                'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
+                        else:
+                            self.install_process = CfdTools.startFoamApplication(
+                                "export WM_NCOMPPROCS=`nproc`; ./Allwmake", 
+                                "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                                'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                 else:
                     self.consoleMessage("Install completed")
             # Reset foam dir for now in case the user presses 'Cancel'
@@ -413,10 +419,16 @@ class CfdPreferencePage:
                             "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
                             'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                     else:
-                        self.install_process = CfdTools.startFoamApplication(
-                            "export WM_NCOMPPROCS=`nproc`; ./Allwmake", 
-                            "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
-                            'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
+                        if os.system() == 'Darwin':
+                            self.install_process = CfdTools.startFoamApplication(
+                                "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake", 
+                                "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                                'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
+                        else:
+                            self.install_process = CfdTools.startFoamApplication(
+                                "export WM_NCOMPPROCS=`nproc`; ./Allwmake", 
+                                "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                                'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                 else:
                     self.consoleMessage("Install completed")
             # Reset foam dir for now in case the user presses 'Cancel'
