@@ -391,7 +391,7 @@ class CfdPreferencePage:
                             "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
                             'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                     else:
-                        if os.system() == 'Darwin':
+                        if platform.system() == 'Darwin':
                             self.install_process = CfdTools.startFoamApplication(
                                 "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake", 
                                 "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
@@ -419,7 +419,7 @@ class CfdPreferencePage:
                             "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
                             'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                     else:
-                        if os.system() == 'Darwin':
+                        if platform.system() == 'Darwin':
                             self.install_process = CfdTools.startFoamApplication(
                                 "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake", 
                                 "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
