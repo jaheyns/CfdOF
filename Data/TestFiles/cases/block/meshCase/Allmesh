@@ -25,8 +25,13 @@ runParallel()
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
-GMSH_EXE='/tmp/.mount_FreeCAuAaXsd/usr/bin/gmsh'
-NTHREADS=$(nproc)
+GMSH_EXE='/usr/local/bin/gmsh'
+if [[ $OSTYPE == 'darwin'* ]]
+then
+    NTHREADS=$(sysctl -n hw.logicalcpu)
+else
+    NTHREADS=$(nproc)
+fi
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Box_Geometry.geo"
 
 # Unset and source bashrc
