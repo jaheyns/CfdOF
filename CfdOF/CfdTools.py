@@ -1179,12 +1179,14 @@ def checkCfdDependencies(msgFn):
             proc.start()
             if proc.waitForFinished():
                 pvversion = proc.readAllStandardOutput() + proc.readAllStandardError()
-                pvversion = QTextStream(pvversion).readAll()
-                pvversion = pvversion.split()[-1].rstrip()
-                msgFn("Paraview version: " + pvversion)
-                versionlist = pvversion.split(".")
-                if int(versionlist[0]) < 5:
-                    msgFn("Paraview version is older than minimum required (5)")
+                pvversion = QTextStream(pvversion).readAll().split()
+                # The --version flag doesn't seem to work on Winodws, so quietly ignore if nothing returned
+                if len(pvversion):
+                    pvversion = pvversion[-1].rstrip()
+                    msgFn("Paraview version: " + pvversion)
+                    versionlist = pvversion.split(".")
+                    if int(versionlist[0]) < 5:
+                        msgFn("Paraview version is older than minimum required (5)")
             else:
                 msgFn("Unable to run paraview")
 
