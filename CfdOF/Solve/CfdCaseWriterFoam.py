@@ -103,8 +103,7 @@ class CfdCaseWriterFoam:
             'zonesPresent': len(self.zone_objs) > 0,
             'meshType': self.mesh_obj.Proxy.Type,
             'meshDimension': self.mesh_obj.ElementDimension,
-            'meshDir': os.path.relpath(
-                os.path.join(self.working_dir, self.mesh_obj.CaseName), self.case_folder).replace('\\', '/'),
+            'meshDir': os.path.relpath(os.path.join(self.working_dir, self.mesh_obj.CaseName), self.case_folder),
             'solver': CfdTools.propsToDict(self.solver_obj),
             'system': {},
             'runChangeDictionary': False
@@ -113,6 +112,8 @@ class CfdCaseWriterFoam:
         if CfdTools.DockerContainer.usedocker:
             mesh_d = self.settings['meshDir'].split(os.sep)
             self.settings['meshDir'] = '/tmp/{}'.format(mesh_d[-1])
+        else:
+            self.settings['meshDir'] = self.settings['meshDir'].replace('\\', '/')
 
         self.processSystemSettings()
         self.processSolverSettings()
