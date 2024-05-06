@@ -93,7 +93,7 @@ class TaskPanelCfdSolverControl:
             self.form.l_time.setText('Time: ' + CfdTools.formatTimer(time.time() - self.Start))
 
     def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Close)
+        return QtGui.QDialogButtonBox.Close
 
     def reject(self):
         FreeCADGui.ActiveDocument.resetEdit()
