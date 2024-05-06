@@ -98,7 +98,7 @@ class TaskPanelCfdMesh:
         self.Timer.start()
 
     def getStandardButtons(self):
-        return int(QtGui.QDialogButtonBox.Close)
+        return QtGui.QDialogButtonBox.Close
         # def reject() is called on close button
 
     def reject(self):

@@ -27,7 +27,7 @@ import os
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 from pivy import coin
-from PySide2 import QtCore
+from PySide import QtCore
 
 
 def makeCfdScalarTransportFunction(name="ScalarTransportFunction"):

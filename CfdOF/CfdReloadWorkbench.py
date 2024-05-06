@@ -22,7 +22,7 @@ import os
 import FreeCAD
 import FreeCADGui
 from CfdOF import CfdTools
-from PySide2 import QtCore
+from PySide import QtCore
 
 
 class CommandCfdReloadWorkbench:
