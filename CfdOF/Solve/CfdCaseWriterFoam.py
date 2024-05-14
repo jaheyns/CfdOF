@@ -39,11 +39,21 @@ class CfdCaseWriterFoam:
 
         self.analysis_obj = analysis_obj
         self.solver_obj = CfdTools.getSolver(analysis_obj)
+        if not self.solver_obj:
+            raise RuntimeError("No solver object was found in analysis " + analysis_obj.Label)
         self.physics_model = CfdTools.getPhysicsModel(analysis_obj)
+        if not self.physics_model:
+            raise RuntimeError("No physics model was found in analysis " + analysis_obj.Label)
         self.mesh_obj = CfdTools.getMesh(analysis_obj)
+        if not self.mesh_obj:
+            raise RuntimeError("No mesh object was found in analysis " + analysis_obj.Label)
         self.material_objs = CfdTools.getMaterials(analysis_obj)
+        if not self.material_objs:
+            raise RuntimeError("No material properties were found in analysis " + analysis_obj.Label)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
+        if not self.initial_conditions:
+            raise RuntimeError("No initial conditions object was found in analysis " + analysis_obj.Label)
         self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
         self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
