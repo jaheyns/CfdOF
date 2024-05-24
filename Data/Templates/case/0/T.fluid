@@ -1,0 +1,176 @@
+%{%(solver/SolverName%)
+%:multiphaseEulerFoam
+%{%(initialValues/VolumeFractions%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      T.%(0%);
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform %(initialValues/Temperature%);
+
+boundaryField
+{
+
+%{%(boundaries%)
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%{%(boundaries/%(0%)/ThermalBoundaryType%)
+%:fixedValue
+    %(0%)
+    {
+%{%(solver/SolverName%)
+%:hisa
+        type        boundaryCorrectedFixedValue;
+%:default
+        type        fixedValue;
+%}
+        value       uniform %(boundaries/%(0%)/Temperature%);
+    }
+%:zeroGradient
+    %(0%)
+    {
+%{%(solver/SolverName%)
+%:hisa
+        type        characteristicWallTemperature;
+%:default
+        type        zeroGradient;
+%}
+        value       $internalField;
+    }
+%:fixedGradient
+    %(0%)
+    {
+        type        fixedGradient;
+        gradient    uniform %(boundaries/%(0%)/HeatFlux%);
+    }
+%:heatTransferCoeff
+    %(0%)
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        Ta              constant %(boundaries/%(0%)/Temperature%);
+        h               uniform %(boundaries/%(0%)/HeatTransferCoeff%);
+        kappaMethod     fluidThermo;
+        value           $internalField;
+    }
+%}
+%:inlet
+%{%(solver/SolverName%)
+%:hisa
+    %(0%)
+    {
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:uniformVelocityInlet
+        type        characteristicVelocityInletOutletTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+%:staticPressureInlet totalPressureInlet
+        type        characteristicPressureInletOutletTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+%:default
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+%}
+    }
+%:default
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+    }
+%}
+%:outlet
+%{%(solver/SolverName%)
+%:hisa
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:staticPressureOutlet
+    %(0%)
+    {
+        type        characteristicPressureInletOutletTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       $internalField;
+    }
+%:uniformVelocityOutlet
+    %(0%)
+    {
+        type        characteristicVelocityInletOutletTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       $internalField;
+    }
+%:default
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+    }
+%}
+%:default
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
+        value       uniform %(boundaries/%(0%)/Temperature%);
+    }
+%}
+%:open
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:farField
+    %(0%)
+    {
+        type        characteristicFarfieldTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+        value       $internalField;
+    }
+%:default
+    %(0%)
+    {
+%{%(solver/SolverName%)
+%:hisa
+        type        characteristicPressureInletOutletTemperature;
+        U           ( %(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%) );
+        p           %(boundaries/%(0%)/Pressure%);
+        T           %(boundaries/%(0%)/Temperature%);
+%:default
+        type        inletOutlet;
+        inletValue  uniform %(boundaries/%(0%)/Temperature%);
+        value       $internalField;
+%}
+    }
+%}
+%:constraint
+%[0/_boundary_constraint%]
+%:baffle
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:porousBaffle
+%[0/_boundary_cyclic_baffle%]
+%}
+%}
+
+%}
+%[0/_boundary_redistributeHelper%]
+}
+
+// ************************************************************************* //
+%} 0/T.%(0%)
+%}

@@ -1,5 +1,7 @@
 %{%(solver/SolverName%)
-%:interFoam multiphaseInterFoam multiphaseEulerFoam
+%:multiphaseEulerFoam
+%{%(physics/Turbulence%)
+%:RANS DES LES
 %{%(initialValues/VolumeFractions%)
 %[_header%]
 FoamFile
@@ -7,13 +9,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      alpha.%(0%);
+    object      alphat.%(0%);
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+dimensions      [1 -1 -1 0 0 0 0];
 
-internalField   uniform %(initialValues/VolumeFractions/%(0%)%);
+internalField   uniform 0;
 
 boundaryField
 {
@@ -21,18 +23,28 @@ boundaryField
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
 %:wall
-%[0/_boundary_zeroGradient%]
-%:inlet outlet open
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall translatingWall partialSlipWall
     %(0%)
     {
-        type        inletOutlet;
-        inletValue  uniform %(boundaries/%(0%)/VolumeFractions/%(1%)%);
-        value       $internalField;
+        type        compressible::alphatWallFunction;
+        value       uniform 0;
     }
+%:slipWall
+%[0/_boundary_zeroGradient%]
+%:roughWall
+    %(0%)
+    {
+        type        compressible::alphatWallFunction;
+        value       uniform 0;
+    }
+%}
 %:constraint
 %[0/_boundary_constraint%]
 %:baffle
 %[0/_boundary_cyclic_baffle%]
+%:default
+%[0/_boundary_calculated%]
 %}
 
 %}
@@ -40,5 +52,6 @@ boundaryField
 }
 
 // ************************************************************************* //
-%} 0/alpha.%(0%)
+%} 0/alphat.%(0%)
+%}
 %}

@@ -1,13 +1,13 @@
 %{%(solver/SolverName%)
-%:SRFSimpleFoam multiphaseEulerFoam
-%:default
+%:multiphaseEulerFoam
+%{%(initialValues/VolumeFractions%)
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       volVectorField;
-    object      U;
+    object      U.%(0%);
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -216,4 +216,5 @@ boundaryField
 }
 
 // ************************************************************************* //
+%} 0/U.%(0%)
 %}

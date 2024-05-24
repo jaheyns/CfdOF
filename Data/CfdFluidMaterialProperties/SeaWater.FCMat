@@ -8,3 +8,5 @@ Type = Isothermal
 Description = Sea water (30%) at 20 Degrees Celsius and 1 atm
 Density = 1025 kg/m^3
 DynamicViscosity = 1.07e-3 kg/m/s 
+BubbleDiameter = 1e-5 m
+SurfaceTensionCoefficient = 0.07 N/m

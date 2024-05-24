@@ -1,23 +1,23 @@
 %{%(solver/SolverName%)
 %:multiphaseEulerFoam
-%:default
 %{%(physics/Turbulence%)
-%:RANS DES
+%:RANS DES LES
 %{%(physics/TurbulenceModel%)
-%:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES kOmegaSSTLM
+%:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES kEpsilon kOmegaSSTLM kEqn
+%{%(initialValues/VolumeFractions%)
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      omega;
+    object      k.%(0%);
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 -1 0 0 0 0];
+dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform %(initialValues/omega%);
+internalField   uniform %(initialValues/k%);
 
 boundaryField
 {
@@ -31,7 +31,7 @@ boundaryField
 %:fixedWall translatingWall partialSlipWall roughWall
     %(0%)
     {
-        type        omegaWallFunction;
+        type        kqRWallFunction;
         value       $internalField;
     }
 %:slipWall
@@ -43,15 +43,21 @@ boundaryField
     %(0%)
     {
         type        inletOutlet;
-        inletValue  uniform %(boundaries/%(0%)/SpecificDissipationRate%);
+        inletValue  uniform %(boundaries/%(0%)/TurbulentKineticEnergy%);
         value       $internalField;
     }
 %:intensityAndLengthScale
     %(0%)
     {
-        type            turbulentMixingLengthFrequencyInlet;
-        mixingLength    %(boundaries/%(0%)/TurbulenceLengthScale%);
-        value           $internalField;
+        type        turbulentIntensityKineticEnergyInlet;
+        intensity   %(boundaries/%(0%)/TurbulenceIntensity%);
+        value       $internalField;
+    }
+%:TurbulentViscosityAndK
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/kEqnTurbulentKineticEnergy%);
     }
 %:default
     %(0%)
@@ -78,6 +84,7 @@ boundaryField
 }
 
 // ************************************************************************* //
+%} 0/k.%(0%)
 %}
 %}
 %}

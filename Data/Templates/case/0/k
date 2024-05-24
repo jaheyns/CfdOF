@@ -1,3 +1,6 @@
+%{%(solver/SolverName%)
+%:multiphaseEulerFoam
+%:default
 %{%(physics/Turbulence%)
 %:RANS DES LES
 %{%(physics/TurbulenceModel%)
@@ -81,5 +84,6 @@ boundaryField
 }
 
 // ************************************************************************* //
+%}
 %}
 %}

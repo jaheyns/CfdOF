@@ -80,7 +80,7 @@ SIMPLE
 PIMPLE
 {
 %{%(solver/SolverName%)
-%:interFoam multiphaseInterFoam
+%:interFoam multiphaseInterFoam multiphaseEulerFoam
     nOuterCorrectors 1;
     nNonOrthogonalCorrectors 2;
     nCorrectors         3;
@@ -172,7 +172,7 @@ solvers
 
 %}
 %{%(solver/SolverName%)
-%:interFoam multiphaseInterFoam
+%:interFoam multiphaseInterFoam multiphaseEulerFoam
     "alpha.*"
     {
         nAlphaCorr      1;

@@ -55,6 +55,7 @@ class CfdCaseWriterFoam:
         if not self.initial_conditions:
             raise RuntimeError("No initial conditions object was found in analysis " + analysis_obj.Label)
         self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
+        self.reaction_models = CfdTools.getReactionModels(analysis_obj)
         self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
@@ -100,6 +101,7 @@ class CfdCaseWriterFoam:
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
             'reportingFunctionsEnabled': False,
+            'reactionsEnabled': False,
             'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
             'scalarTransportFunctionsEnabled': False,
             'dynamicMesh': {},
@@ -149,6 +151,10 @@ class CfdCaseWriterFoam:
         if self.dynamic_mesh_refinement_obj:
             cfdMessage('Dynamic mesh adaptation rule present\n')
             self.processDynamicMeshRefinement()
+
+        if self.reaction_models:
+            cfdMessage('Reactions present\n')
+            self.processReactions()
 
         self.settings['createPatchesFromSnappyBaffles'] = False
         self.settings['createPatchesForPeriodics'] = False
@@ -213,6 +219,11 @@ class CfdCaseWriterFoam:
                     raise RuntimeError("Only isothermal analysis is currently supported for free surface flow simulation.")
             else:
                 raise RuntimeError("Only transient analysis is supported for free surface flow simulation.")
+        elif self.physics_model.Phase == 'Eulerian':
+            if len(self.material_objs) >= 2:
+                solver = 'multiphaseEulerFoam'
+            else:
+                raise RuntimeError("At least two material objects must be present for Eulerian multiphase simulation.")
         else:
             raise RuntimeError(self.physics_model.Phase + " phase model currently not supported.")
 
@@ -343,7 +354,7 @@ class CfdCaseWriterFoam:
                 beta = (1-wireDiam/spacing)**2
                 bc['PressureDropCoeff'] = CD*(1-beta)
 
-            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
+            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam', 'multiphaseEulerFoam']:
                 # Make sure the first n-1 alpha values exist, and write the n-th one
                 # consistently for multiphaseInterFoam
                 sum_alpha = 0.0
@@ -351,7 +362,7 @@ class CfdCaseWriterFoam:
                 for i, m in enumerate(settings['fluidProperties']):
                     alpha_name = m['Name']
                     if i == len(settings['fluidProperties']) - 1:
-                        if settings['solver']['SolverName'] == 'multiphaseInterFoam':
+                        if settings['solver']['SolverName'] == 'multiphaseInterFoam' or settings['solver']['SolverName'] == 'multiphaseEulerFoam':
                             alphas_new[alpha_name] = 1.0 - sum_alpha
                     else:
                         alpha = Units.Quantity(bc.get('VolumeFractions', {}).get(alpha_name, '0')).Value
@@ -429,7 +440,7 @@ class CfdCaseWriterFoam:
         if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
             mat_prop = settings['fluidProperties'][0]
             initial_values['KinematicPressure'] = initial_values['Pressure'] / mat_prop['Density']
-        if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
+        if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam', 'multiphaseEulerFoam']:
             # Make sure the first n-1 alpha values exist, and write the n-th one
             # consistently for multiphaseInterFoam
             sum_alpha = 0.0
@@ -437,7 +448,7 @@ class CfdCaseWriterFoam:
             for i, m in enumerate(settings['fluidProperties']):
                 alpha_name = m['Name']
                 if i == len(settings['fluidProperties'])-1:
-                    if settings['solver']['SolverName'] == 'multiphaseInterFoam':
+                    if settings['solver']['SolverName'] == 'multiphaseInterFoam' or settings['solver']['SolverName'] == 'multiphaseEulerFoam':
                         alphas_new[alpha_name] = 1.0-sum_alpha
                 else:
                     alpha = Units.Quantity(initial_values.get('VolumeFractions', {}).get(alpha_name, '0')).Value
@@ -582,7 +593,7 @@ class CfdCaseWriterFoam:
                 rf['Pitch'] = tuple(p for p in pitch_axis)
 
             settings['reportingFunctions'][name]['ProbePosition'] = tuple(
-                Units.Quantity(p, Units.Length).getValueAs('m') 
+                Units.Quantity(p, Units.Length).getValueAs('m')
                 for p in settings['reportingFunctions'][name]['ProbePosition'])
 
     def processScalarTransportFunctions(self):
@@ -596,6 +607,11 @@ class CfdCaseWriterFoam:
             stf['InjectionPoint'] = tuple(
                 Units.Quantity(p, Units.Length).getValueAs('m') for p in stf['InjectionPoint'])
 
+    # Process reactions and reactions models
+    def processReactions(self):
+        settings = self.settings
+        settings['reactionsEnabled'] = True
+
     # Mesh related
     def processDynamicMeshRefinement(self):
         settings = self.settings
@@ -604,14 +620,14 @@ class CfdCaseWriterFoam:
         # Check whether cellLevel supported
         if self.mesh_obj.MeshUtility not in ['cfMesh', 'snappyHexMesh']:
             raise RuntimeError("Dynamic mesh refinement is only supported by cfMesh and snappyHexMesh")
-    
+
         # Check whether 2D extrusion present
         mesh_refinements = CfdTools.getMeshRefinementObjs(self.mesh_obj)
         for mr in mesh_refinements:
             if mr.Extrusion:
                 if mr.ExtrusionType == '2DPlanar' or mr.ExtrusionType == '2DWedge':
                     raise RuntimeError("Dynamic mesh refinement will not work with 2D or wedge mesh")
-        
+
         settings['dynamicMesh'] = CfdTools.propsToDict(self.dynamic_mesh_refinement_obj)
         if isinstance(self.dynamic_mesh_refinement_obj.Proxy, CfdDynamicMeshRefinement.CfdDynamicMeshShockRefinement):
             settings['dynamicMesh']['Type'] = 'shock'
@@ -681,7 +697,7 @@ class CfdCaseWriterFoam:
 
     def processInitialisationZoneProperties(self):
         settings = self.settings
-        
+
         for zone_name in settings['initialisationZones']:
             z = settings['initialisationZones'][zone_name]
 
@@ -696,7 +712,7 @@ class CfdCaseWriterFoam:
             if not z['TemperatureSpecified']:
                 del z['Temperature']
 
-            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
+            if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam', 'multiphaseEulerFoam']:
                 # Make sure the first n-1 alpha values exist, and write the n-th one
                 # consistently for multiphaseInterFoam
                 sum_alpha = 0.0
@@ -705,14 +721,14 @@ class CfdCaseWriterFoam:
                     for i, m in enumerate(settings['fluidProperties']):
                         alpha_name = m['Name']
                         if i == len(settings['fluidProperties'])-1:
-                            if settings['solver']['SolverName'] == 'multiphaseInterFoam':
+                            if settings['solver']['SolverName'] == 'multiphaseInterFoam' or settings['solver']['SolverName'] == 'multiphaseEulerFoam':
                                 alphas_new[alpha_name] = 1.0-sum_alpha
                         else:
                             alpha = Units.Quantity(z['VolumeFractions'].get(alpha_name, '0')).Value
                             alphas_new[alpha_name] = alpha
                             sum_alpha += alpha
                     z['VolumeFractions'] = alphas_new
-        
+
             if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
                 if 'Pressure' in z:
                     z['KinematicPressure'] = z['Pressure']/settings['fluidProperties'][0]['Density']

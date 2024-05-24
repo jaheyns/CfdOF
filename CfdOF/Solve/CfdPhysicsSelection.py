@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>        *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
-# *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2022-2024 Jonathan Bergh <bergh.jonathan@gmail.com>     *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -124,7 +124,7 @@ class CfdPhysicsModel:
             else:
                 obj.Flow = prev_flow
 
-        if addObjectProperty(obj, "Phase", ['Single', 'FreeSurface'], "App::PropertyEnumeration", "Physics modelling",
+        if addObjectProperty(obj, "Phase", ['Single', 'FreeSurface', 'Eulerian'], "App::PropertyEnumeration", "Physics modelling",
                              "Type of phases present"):
             obj.Phase = 'Single'
 
@@ -159,6 +159,10 @@ class CfdPhysicsModel:
 
         addObjectProperty(obj, 'SRFModelAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Reference frame",
                           "Axis of rotation (SRF)")
+
+        # Reacting model
+        addObjectProperty(obj, 'ReactionModelsEnabled', False, "App::PropertyBool", "Physics modelling",
+                          "Reaction models enabled")
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

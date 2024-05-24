@@ -20,12 +20,14 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 * Incompressible, laminar flow (simpleFoam, pimpleFoam)
 * Support for various RANS, LES and DES turbulent flow models
 * Incompressible free-surface flow (interFoam, multiphaseInterFoam)
+* Compressible Eulerian-Eulerian multiphase flow (multiphaseEulerianFoam)
 * Compressible buoyant flow (buoyantSimpleFoam, buoyantPimpleFoam)
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
 * Porous regions and porous baffles
 * Basic material database
 * Flow initialisation with a potential solver
 * Solution of arbitrary passive scalar transport functions
+* Single phase and multiphase combustion modelling
 #### Meshing
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
 * Cut-cell Cartesian meshing with baffles (snappyHexMesh)
@@ -294,7 +296,7 @@ and the [Council for Scientific and Industrial Research](https://www.csir.co.za)
 * Oliver Oxtoby (CSIR, 2016-2018; private 2019-) <oliveroxtoby@gmail.com>
 * Johan Heyns (CSIR, 2016-2018) <jaheyns@gmail.com>
 * Alfred Bogaers (CSIR, 2016-2018) <alfredbogaers@gmail.com>
-* Jonathan Bergh (2022)
+* Jonathan Bergh (2022-)
 * Qingfeng Xia (2015)
 * Thomas Schrader (2017-) <info@schraderundschrader.de>
 * Michael Hindley (2016)

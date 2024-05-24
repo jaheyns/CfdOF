@@ -8,3 +8,5 @@ Type = Isothermal
 Description = Gasoline at 20 Degrees Celsius and 1 atm
 Density = 680 kg/m^3
 DynamicViscosity = 2.92e-4 kg/m/s 
+BubbleDiameter = 1e-5 m
+SurfaceTensionCoefficient = 0.07 N/m

@@ -1,13 +1,13 @@
 %{%(solver/SolverName%)
 %:multiphaseEulerFoam
-%:default
+%{%(initialValues/VolumeFractions%)
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      turbulenceProperties;
+    object      momentumTransport.%(0%);
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,4 +53,6 @@ LES
 %:default
 simulationType laminar;
 %}
+
+%} constant/momentumTransport.%(0%)
 %}

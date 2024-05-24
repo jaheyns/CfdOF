@@ -1,10 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>        *
-# *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
-# *   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>   *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
-# *   Copyright (c) 2022-2024 Jonathan Bergh <bergh.jonathan@gmail.com>     *
+# *   Copyright (c) 2024 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -30,19 +26,27 @@ if FreeCAD.GuiUp:
 from CfdOF import CfdTools
 from CfdOF.CfdTools import getQuantity, setQuantity, storeIfChanged
 
+MULTIPHASE_SYSTEM = ['Basic', 'Population balance', 'Thermal Phase Change', 'Thermal Phase Change Population Balance', 'Interface Composition Phase Change', 'Interface Composition Phase Change Population Balance']
+PHASE_MODELS = ['Pure', 'Pure Isothermal', 'Pure Stationary', 'Pure Stationay Isothermal', 'Reacting', 'Multicomponent', 'Multicomponent Isothermal']
 
-RANS_MODELS = ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM']
-DES_MODELS = ['kOmegaSSTDES', 'kOmegaSSTDDES', 'kOmegaSSTIDDES', 'SpalartAllmarasDES', 'SpalartAllmarasDDES',
-              'SpalartAllmarasIDDES']
-LES_MODELS = ['kEqn', 'Smagorinsky', 'WALE']
+DRAG_MODELS = ['SchillerNauman', 'IshiiZuber']
+LIFT_MODELS = ['none', 'constantCoefficient', 'wallDamped', 'Tomiyama']
+SURFACE_TENSION_MODELS = ['none', 'constant']
+TURBULENT_DISPERSION_MODELS = ['none', 'constantCoefficient', 'Gosman', 'LopezDeBertodano', 'Burns']
+WALL_LUBRICATION_MODELS = ['none', 'Frank', 'Tomiyama', 'Antal']
+VIRTUAL_MASS_MODELS = ['none', 'constantCoefficient', 'Lamb']
+INTERFACE_COMPRESSION_MODELS = ['']
+
+HEAT_TRANSFER_MODELS = ['Gunn', 'spherical', 'RanzMarshall', 'constantNu']
+PHASE_TRANSFER_MODELS = ['deposition', 'reactionDriven']
 
 
-class TaskPanelCfdPhysicsSelection:
+class TaskPanelCfdPhasePhysicsSelection:
     def __init__(self, obj):
         FreeCADGui.Selection.clearSelection()
         self.sel_server = None
         self.obj = obj
-        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(CfdTools.getModulePath(), 'Gui', "TaskPanelPhysics.ui"))
+        self.form = FreeCADGui.PySideUic.loadUi(os.path.join(CfdTools.getModulePath(), 'Gui', "TaskPanelPhasePhysics.ui"))
 
         self.form.radioButtonSteady.toggled.connect(self.updateUI)
         self.form.radioButtonTransient.toggled.connect(self.updateUI)
@@ -126,16 +130,14 @@ class TaskPanelCfdPhysicsSelection:
         # Steady / transient
         if self.form.radioButtonSteady.isChecked():
             self.form.radioButtonFreeSurface.setEnabled(False)
-            self.form.radioButtonEulerian.setEnabled(False)
             if self.form.radioButtonDES.isChecked() or self.form.radioButtonLES.isChecked():
                 self.form.radioButtonRANS.toggle()
             self.form.radioButtonDES.setEnabled(False)
             self.form.radioButtonLES.setEnabled(False)
-            if self.form.radioButtonFreeSurface.isChecked() or self.form.radioButtonEulerian.isChecked():
+            if self.form.radioButtonFreeSurface.isChecked():
                 self.form.radioButtonSinglePhase.toggle()
         else:
             self.form.radioButtonFreeSurface.setEnabled(True)
-            self.form.radioButtonEulerian.setEnabled(True)
             self.form.radioButtonDES.setEnabled(True)
             self.form.radioButtonLES.setEnabled(True)
 
@@ -160,24 +162,6 @@ class TaskPanelCfdPhysicsSelection:
             self.form.checkBoxIsothermal.setEnabled(False)
         else:
             self.form.checkBoxIsothermal.setEnabled(True)
-
-        # Multiphase - Eulerian
-        if self.form.radioButtonEulerian.isChecked():
-            pass
-
-        # High Mach capability
-        self.form.checkBoxHighMach.setEnabled(not self.form.checkBoxIsothermal.isChecked())
-        if self.form.checkBoxIsothermal.isChecked():
-            self.form.checkBoxHighMach.setChecked(False)
-
-        # Reaction model
-        #reacting_capable = (self.form.radioButtonEulerian.isChecked())
-        #reacting_should_be_unchecked = (not self.form.radioButtonEulerian.isChecked())
-        #if reacting_should_be_unchecked:
-        #    self.form.checkBoxReacting.setChecked(False)
-        #self.form.checkBoxReacting.setEnabled(reacting_capable)
-        self.form.checkBoxReacting.setChecked(False)
-        self.form.checkBoxReacting.setVisible(False)
 
         # Viscous
         if self.form.viscousCheckBox.isChecked():
