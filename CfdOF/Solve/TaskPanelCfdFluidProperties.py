@@ -30,6 +30,12 @@ if FreeCAD.GuiUp:
 from CfdOF import CfdTools
 from CfdOF.CfdTools import setQuantity, getQuantity, storeIfChanged
 
+# The properties presented for each fluid type
+ALL_FIELDS = {'Isothermal': ['Density', 'DynamicViscosity'],
+              'Incompressible': ['MolarMass', 'DensityPolynomial', 'CpPolynomial', 'DynamicViscosityPolynomial',
+                    'ThermalConductivityPolynomial'],
+              'Compressible': ['MolarMass', 'Cp', 'SutherlandTemperature', 'SutherlandRefTemperature',
+                    'SutherlandRefViscosity']}
 
 class TaskPanelCfdFluidProperties:
     """ Task Panel for FluidMaterial objects """
@@ -45,20 +51,12 @@ class TaskPanelCfdFluidProperties:
         self.form.compressibleCheckBox.setVisible(self.physics_obj.Flow == "NonIsothermal")
         # Make sure it is checked in the default case since object was initialised with Isothermal
         self.form.compressibleCheckBox.setChecked(self.material.get('Type') != "Incompressible")
-        self.form.compressibleCheckBox.stateChanged.connect(self.compressibleCheckBoxChanged)
+        self.form.compressibleCheckBox.stateChanged.connect(self.updateUI)
 
         self.text_boxes = {}
         self.fields = []
-        if self.physics_obj.Flow == 'Isothermal':
-            material_type = 'Isothermal'
-        else:
-            if self.physics_obj.Flow == 'NonIsothermal' and not self.form.compressibleCheckBox.isChecked():
-                material_type = 'Incompressible'
-            else:
-                material_type = 'Compressible'
-        self.material['Type'] = material_type
-        self.createUIBasedOnPhysics()
-        self.populateMaterialsList()
+        self.createUI()
+        self.updateUI()
 
         self.form.PredefinedMaterialLibraryComboBox.currentIndexChanged.connect(self.selectPredefined)
 
@@ -76,50 +74,58 @@ class TaskPanelCfdFluidProperties:
 
         self.form.saveButton.clicked.connect(self.saveCustomMaterial)
         self.form.saveButton.setVisible(False)
-        #Hide unless material edited
+        #Hide unless materially edited
 
-    def compressibleCheckBoxChanged(self):
-        self.material['Type'] = 'Compressible' if self.form.compressibleCheckBox.isChecked() else 'Incompressible'
-        self.createUIBasedOnPhysics()
-        self.populateMaterialsList()
+    def createUI(self):
+        layouts = {'Isothermal': self.form.frame_isothermal.layout(), 
+                   'Incompressible': self.form.frame_incompressible.layout(), 
+                   'Compressible': self.form.frame_compressible.layout()}
 
-    def createUIBasedOnPhysics(self):
-        for rowi in range(self.form.propertiesLayout.rowCount()):
-            self.form.propertiesLayout.removeRow(0)
+        self.all_text_boxes = {'Isothermal': {}, 'Incompressible': {}, 'Compressible': {}}
+        for k in ['Isothermal', 'Incompressible', 'Compressible']:
+            layout = layouts[k]
+            fields = ALL_FIELDS[k]
+            text_boxes = self.all_text_boxes[k]
 
-        if self.material['Type'] == 'Isothermal':
-            self.fields = ['Density', 'DynamicViscosity']
-        elif self.material['Type'] == 'Incompressible':
-            self.fields = ['MolarMass', 'DensityPolynomial', 'CpPolynomial', 'DynamicViscosityPolynomial',
-                           'ThermalConductivityPolynomial']
+            for name in fields:
+                if name.endswith("Polynomial"):
+                    widget = FreeCADGui.UiLoader().createWidget("QLineEdit")
+                    widget.setObjectName(name)
+                    widget.setToolTip(
+                        "Enter coefficients of temperature-polynomial starting from constant followed by higher powers")
+                    val = self.material.get(name, '0')
+                    layout.addRow(name + ":", widget)
+                    text_boxes[name] = widget
+                    widget.setText(val)
+                    widget.textChanged.connect(self.manualEdit)
+                else:
+                    widget = FreeCADGui.UiLoader().createWidget("Gui::InputField")
+                    widget.setObjectName(name)
+                    widget.setProperty("format", "g")
+                    val = self.material.get(name, '0')
+                    widget.setProperty("unit", val)
+                    widget.setProperty("minimum", 0)
+                    widget.setProperty("singleStep", 0.1)
+                    layout.addRow(name+":", widget)
+                    text_boxes[name] = widget
+                    setQuantity(widget, val)
+                    widget.valueChanged.connect(self.manualEdit)
+
+    def updateUI(self):
+        if self.physics_obj.Flow == 'Isothermal':
+            material_type = 'Isothermal'
         else:
-            self.fields = ['MolarMass', 'Cp', 'SutherlandTemperature', 'SutherlandRefTemperature',
-                           'SutherlandRefViscosity']
-
-        self.text_boxes = {}
-        for name in self.fields:
-            if name.endswith("Polynomial"):
-                widget = FreeCADGui.UiLoader().createWidget("QLineEdit")
-                widget.setObjectName(name)
-                widget.setToolTip(
-                    "Enter coefficients of temperature-polynomial starting from constant followed by higher powers")
-                val = self.material.get(name, '0')
-                self.form.propertiesLayout.addRow(name + ":", widget)
-                self.text_boxes[name] = widget
-                widget.setText(val)
-                widget.textChanged.connect(self.manualEdit)
+            if self.physics_obj.Flow == 'NonIsothermal' and not self.form.compressibleCheckBox.isChecked():
+                material_type = 'Incompressible'
             else:
-                widget = FreeCADGui.UiLoader().createWidget("Gui::InputField")
-                widget.setObjectName(name)
-                widget.setProperty("format", "g")
-                val = self.material.get(name, '0')
-                widget.setProperty("unit", val)
-                widget.setProperty("minimum", 0)
-                widget.setProperty("singleStep", 0.1)
-                self.form.propertiesLayout.addRow(name+":", widget)
-                self.text_boxes[name] = widget
-                setQuantity(widget, val)
-                widget.valueChanged.connect(self.manualEdit)
+                material_type = 'Compressible'
+        self.material['Type'] = material_type
+        self.fields = ALL_FIELDS[self.material['Type']]
+        self.text_boxes = self.all_text_boxes[self.material['Type']]
+        self.form.frame_isothermal.setVisible(self.material['Type'] == 'Isothermal')
+        self.form.frame_incompressible.setVisible(self.material['Type'] == 'Incompressible')
+        self.form.frame_compressible.setVisible(self.material['Type'] == 'Compressible')
+        self.populateMaterialsList()
 
     def populateMaterialsList(self):
         self.form.PredefinedMaterialLibraryComboBox.clear()
