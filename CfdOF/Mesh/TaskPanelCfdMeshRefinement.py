@@ -82,8 +82,7 @@ class TaskPanelCfdMeshRefinement:
                                             "surface")
         self.form.if_numlayer.setToolTip("Number of boundary layers if the reference surface is an external or "
                                          "mesh patch")
-        self.form.if_expratio.setToolTip("Expansion ratio of boundary layers (limited to be greater than 1.0 and "
-                                         "smaller than 1.2)")
+        self.form.if_expratio.setToolTip("Expansion ratio of boundary layers")
         self.form.if_firstlayerheight.setToolTip("Maximum first cell height (ignored if set to 0.0)")
         self.form.if_edgerefinement.setToolTip("Number of edge or feature refinement levels")
 
