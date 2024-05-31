@@ -51,7 +51,7 @@ The major version number is incremented when there is a change which breaks back
 (FCStd files). This is avoided wherever possible, and phased conversion periods where an old format is accepted and the 
 new format written out, are preferred. The minor version number is incremented when there is a new feature in a release,
 or a significant enhancement to existing functionality. The patch version is updated when a release contains only
-a minor bug fix or fixes. Please increment the version number in ```package.xml``` and ```metadata.txt``` when 
+a minor bug fix or fixes. Please increment the version number in ```package.xml``` when 
 submitting a merge request.
 
 ### Style guide
@@ -81,7 +81,7 @@ the behaviour of the QtDesigner software (see below).
       used within FreeCAD)
     - __class_attribute (Double leading underscore)
 9. Python allows both single quotes ('...') and double quotes ("...") for strings. As a convention, please use single 
-   quotes for internal string onstants and double quotes for user-facing communication. The rule of thumb is that 
+   quotes for internal string constants and double quotes for user-facing communication. The rule of thumb is that 
    if a string should be translated, use double quotes. However, this is not a hard-and-fast rule and can be broken 
    for convenience e.g. when quotes are contained in a string.
    
