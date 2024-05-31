@@ -495,7 +495,7 @@ class CfdMeshTools:
                             snappy_settings['BoundaryLayers'][self.patch_names[k][mr_id + 1]] = \
                             {
                                 'NumberLayers': mr_obj.NumberLayers,
-                                'ExpansionRatio': expratio,
+                                'ExpansionRatio': mr_obj.ExpansionRatio,
                                 # 'FinalLayerHeight': self.scale * Units.Quantity(mr_obj.FinalLayerHeight).Value
                             }
 
