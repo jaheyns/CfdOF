@@ -1178,7 +1178,7 @@ def checkCfdDependencies(msgFn):
             proc.setProcessEnvironment(env)
             proc.start()
             if proc.waitForFinished():
-                pvversion = proc.readAllStandardOutput() + proc.readAllStandardError()
+                pvversion = proc.readAllStandardOutput()
                 pvversion = QTextStream(pvversion).readAll().split()
                 # The --version flag doesn't seem to work on Winodws, so quietly ignore if nothing returned
                 if len(pvversion):
