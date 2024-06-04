@@ -1,6 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -17,8 +17,6 @@
 # *   see <https://www.gnu.org/licenses/>.                                  *
 # *                                                                         *
 # ***************************************************************************
-
-from __future__ import print_function
 
 import FreeCAD
 import FreeCADGui
@@ -54,7 +52,10 @@ class CommandCfdMeshFromShape:
     def IsActive(self):
         sel = FreeCADGui.Selection.getSelection()
         analysis = CfdTools.getActiveAnalysis()
-        return analysis is not None and sel and len(sel) == 1 and sel[0].isDerivedFrom("Part::Feature")
+        existing_mesh = CfdTools.getMesh(analysis)
+        return existing_mesh is not None or (
+            analysis is not None and sel and len(sel) == 1 and sel[0].isDerivedFrom("Part::Feature") and
+            not sel[0].Shape.isNull())
 
     def Activated(self):
         FreeCAD.ActiveDocument.openTransaction("Create CFD mesh")
@@ -75,7 +76,7 @@ class CommandCfdMeshFromShape:
                                 "CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
                         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
             else:
-                print("ERROR: You cannot have more than one mesh object")
+                FreeCADGui.activeDocument().setEdit(mesh_obj.Name)
         FreeCADGui.Selection.clearSelection()
 
 
