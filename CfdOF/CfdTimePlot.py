@@ -26,6 +26,8 @@ import math
 from PySide import QtCore
 import FreeCAD
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
+
 # If for any reason PyQt5 has been imported, we need to unload it temporarily
 # to prevent matplotlib using the PyQt backend instead of PySide
 if 'PyQt5.QtCore' in sys.modules:
