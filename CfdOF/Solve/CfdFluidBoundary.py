@@ -34,6 +34,8 @@ if FreeCAD.GuiUp:
     from PySide import QtCore
     from CfdOF.Solve import TaskPanelCfdFluidBoundary
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
+
 # Constants
 BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Open", "Constraint", "Baffle"]
 
@@ -233,9 +235,9 @@ class CommandCfdFluidBoundary:
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "boundary.svg")
         return {
             'Pixmap': icon_path,
-            'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_FluidBoundary", "Fluid boundary"),
+            'MenuText': QT_TRANSLATE_NOOP("Cfd_FluidBoundary", "Fluid boundary"),
             'Accel': "C, W",
-            'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_FluidBoundary", "Creates a CFD fluid boundary")}
+            'ToolTip': QT_TRANSLATE_NOOP("Cfd_FluidBoundary", "Creates a CFD fluid boundary")}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None

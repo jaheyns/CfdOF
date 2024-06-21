@@ -19,11 +19,13 @@
 # ***************************************************************************
 
 import os
+
 import FreeCAD
 import FreeCADGui
 from CfdOF import CfdTools
 from PySide import QtCore
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
 
 class CommandCfdReloadWorkbench:
 
@@ -31,9 +33,9 @@ class CommandCfdReloadWorkbench:
         pass
 
     def GetResources(self):
-        return {'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_ReloadWorkbench",
+        return {'MenuText': QT_TRANSLATE_NOOP("Cfd_ReloadWorkbench",
                                                      "Reload CfdOF workbench"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_ReloadWorkbench",
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_ReloadWorkbench",
                                                     "Reload source files from disk")}
 
     def IsActive(self):

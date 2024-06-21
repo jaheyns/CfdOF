@@ -30,8 +30,8 @@ from CfdOF.CfdTools import addObjectProperty
 from CfdOF.CfdTimePlot import TimePlot
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
 
 # Constants
 START_FROM = ["startTime", "latestTime"]
@@ -49,9 +49,9 @@ class CommandCfdSolverFoam:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "solver.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Solver job control"),
+                'MenuText': QT_TRANSLATE_NOOP("Cfd_SolverControl", "Solver job control"),
                 'Accel': "S, C",
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_SolverControl", "Edit properties and run solver")}
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_SolverControl", "Edit properties and run solver")}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None
