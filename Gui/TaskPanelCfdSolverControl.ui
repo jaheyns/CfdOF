@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AnalysisControl</class>
- <widget class="QWidget" name="AnalysisControl">
+ <class>TaskPanelCfdSolverControl</class>
+ <widget class="QWidget" name="TaskPanelCfdSolverControl">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -147,7 +147,7 @@
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Paraview</string>
+        <string notr="true">ParaView</string>
        </property>
       </widget>
      </item>
