@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>TaskPanelPhysics</class>
+ <widget class="QWidget" name="TaskPanelPhysics">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -101,7 +101,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
         <property name="singleStep" stdset="0">
          <double>1000.000000000000000</double>
@@ -123,7 +123,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
         <property name="singleStep" stdset="0">
          <double>1000.000000000000000</double>
@@ -145,7 +145,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
         <property name="singleStep" stdset="0">
          <double>1000.000000000000000</double>
@@ -203,7 +203,7 @@
          <string notr="true">rev/s</string>
         </property>
         <property name="format" stdset="0">
-         <string>g</string>
+         <string notr="true">g</string>
         </property>
        </widget>
       </item>
@@ -223,7 +223,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
         <property name="singleStep" stdset="0">
          <double>1000.000000000000000</double>
@@ -245,7 +245,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
         <property name="singleStep" stdset="0">
          <double>1000.000000000000000</double>
@@ -267,7 +267,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
         <property name="singleStep" stdset="0">
          <double>1000.000000000000000</double>
@@ -495,22 +495,31 @@
          </item>
          <item row="2" column="0">
           <widget class="QRadioButton" name="radioButtonDES">
+           <property name="toolTip">
+            <string>Detached Eddy Simulation</string>
+           </property>
            <property name="text">
-            <string>DES</string>
+            <string notr="true">DES</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
           <widget class="QRadioButton" name="radioButtonRANS">
+           <property name="toolTip">
+            <string>Reynolds Averaged Navier-Stokes</string>
+           </property>
            <property name="text">
-            <string>RANS</string>
+            <string notr="true">RANS</string>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
           <widget class="QRadioButton" name="radioButtonLES">
+           <property name="toolTip">
+            <string>Large Eddy Simulation</string>
+           </property>
            <property name="text">
-            <string>LES</string>
+            <string notr="true">LES</string>
            </property>
           </widget>
          </item>
@@ -617,7 +626,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
         <property name="singleStep" stdset="0">
          <double>1000.000000000000000</double>
@@ -639,7 +648,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
         <property name="singleStep" stdset="0">
          <double>1000.000000000000000</double>
@@ -661,7 +670,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>0</string>
+         <string notr="true">0</string>
         </property>
         <property name="singleStep" stdset="0">
          <double>1000.000000000000000</double>

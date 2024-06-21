@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>TaskPanelCfdMeshRefinement</class>
+ <widget class="QWidget" name="TaskPanelCfdMeshRefinement">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -255,7 +255,7 @@
                  <string extracomment="Select 0 to use default value"/>
                 </property>
                 <property name="text">
-                 <string>0.0</string>
+                 <string notr="true">0.0</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -270,7 +270,7 @@
                  <string notr="true">mm</string>
                 </property>
                 <property name="format" stdset="0">
-                 <string>g</string>
+                 <string notr="true">g</string>
                 </property>
                </widget>
               </item>
@@ -294,7 +294,7 @@
          <string extracomment="Select 0 to use default value"/>
         </property>
         <property name="text">
-         <string>0.0</string>
+         <string notr="true">0.0</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -309,7 +309,7 @@
          <string notr="true">mm</string>
         </property>
         <property name="format" stdset="0">
-         <string>2</string>
+         <string notr="true">2</string>
         </property>
        </widget>
       </item>
@@ -441,7 +441,7 @@
          <string notr="true">mm</string>
         </property>
         <property name="format" stdset="0">
-         <string>g</string>
+         <string notr="true">g</string>
         </property>
        </widget>
       </item>
@@ -461,7 +461,7 @@
          <string notr="true">deg</string>
         </property>
         <property name="format" stdset="0">
-         <string>g</string>
+         <string notr="true">g</string>
         </property>
        </widget>
       </item>
@@ -516,7 +516,7 @@
             <string notr="true"/>
            </property>
            <property name="format" stdset="0">
-            <string>g</string>
+            <string notr="true">g</string>
            </property>
           </widget>
          </item>
@@ -529,7 +529,7 @@
             <string notr="true"/>
            </property>
            <property name="format" stdset="0">
-            <string>g</string>
+            <string notr="true">g</string>
            </property>
           </widget>
          </item>
@@ -542,7 +542,7 @@
             <string notr="true">mm</string>
            </property>
            <property name="format" stdset="0">
-            <string>g</string>
+            <string notr="true">g</string>
            </property>
           </widget>
          </item>
@@ -555,7 +555,7 @@
             <string notr="true"/>
            </property>
            <property name="format" stdset="0">
-            <string>g</string>
+            <string notr="true">g</string>
            </property>
           </widget>
          </item>
@@ -568,7 +568,7 @@
             <string notr="true">mm</string>
            </property>
            <property name="format" stdset="0">
-            <string>g</string>
+            <string notr="true">g</string>
            </property>
           </widget>
          </item>
@@ -588,7 +588,7 @@
             <string notr="true">mm</string>
            </property>
            <property name="format" stdset="0">
-            <string>g</string>
+            <string notr="true">g</string>
            </property>
           </widget>
          </item>
