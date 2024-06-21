@@ -31,6 +31,8 @@ from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 from CfdOF.Solve import TaskPanelCfdFluidProperties
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
+translate = FreeCAD.Qt.translate
 
 def makeCfdFluidMaterial(name):
     obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
@@ -46,14 +48,14 @@ class CommandCfdFluidMaterial:
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "material.svg")
         return {
             'Pixmap': icon_path,
-            'MenuText': 'Add fluid properties',
-            'ToolTip': 'Add fluid properties'}
+            'MenuText': QT_TRANSLATE_NOOP("Cfd_FluidMaterial", "Add fluid properties"),
+            'ToolTip': QT_TRANSLATE_NOOP("Cfd_FluidMaterial", "Add fluid properties")}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None
 
     def Activated(self):
-        FreeCAD.Console.PrintMessage("Set fluid properties \n")
+        FreeCAD.Console.PrintMessage(translate("Console", "Set fluid properties \n"))
         FreeCAD.ActiveDocument.openTransaction("Set CfdFluidMaterialProperty")
         FreeCADGui.doCommand("from CfdOF import CfdTools")
         FreeCADGui.doCommand("from CfdOF.Solve import CfdFluidMaterial")
