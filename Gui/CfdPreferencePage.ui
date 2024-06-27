@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>1040</height>
+    <height>1069</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,6 +34,36 @@
      <property name="verticalSpacing">
       <number>6</number>
      </property>
+     <item row="3" column="1">
+      <widget class="QToolButton" name="tb_choose_paraview_path">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLineEdit" name="le_gmsh_path">
+       <property name="toolTip">
+        <string>The full path to the gmsh executable. Leave blank to use the system search path.</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLineEdit" name="le_paraview_path">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>The full path of the ParaView executable. Leave blank to use system search path or default install locations.</string>
+       </property>
+       <property name="readOnly">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label_7">
        <property name="font">
@@ -44,42 +74,6 @@
        </property>
        <property name="text">
         <string>OpenFOAM install directory</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLineEdit" name="le_foam_dir">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="toolTip">
-        <string>The OpenFOAM install folder (e.g. 'OpenFOAM-xxx'). Leave blank to use $WM_PROJECT_DIR environment setting or search standard locations.</string>
-       </property>
-       <property name="readOnly">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QToolButton" name="tb_choose_foam_dir">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_outputdir">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Default output directory</string>
        </property>
       </widget>
      </item>
@@ -96,29 +90,6 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLineEdit" name="le_paraview_path">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="toolTip">
-        <string>The full path of the ParaView executable. Leave blank to use search path.</string>
-       </property>
-       <property name="readOnly">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QToolButton" name="tb_choose_paraview_path">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>...</string>
-       </property>
-      </widget>
-     </item>
      <item row="7" column="1">
       <widget class="QToolButton" name="tb_choose_output_dir">
        <property name="enabled">
@@ -129,16 +100,33 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
-      <widget class="QLineEdit" name="le_output_dir">
+     <item row="1" column="0">
+      <widget class="QLineEdit" name="le_foam_dir">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <property name="toolTip">
-        <string>The directory to which case folders are written. Used unless overridden on a per-analysis basis.</string>
+        <string>The OpenFOAM install folder. Leave blank to use $WM_PROJECT_DIR environment setting or standard install locations.</string>
        </property>
        <property name="readOnly">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QToolButton" name="tb_choose_foam_dir">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QToolButton" name="tb_choose_gmsh_path">
+       <property name="text">
+        <string>...</string>
        </property>
       </widget>
      </item>
@@ -155,13 +143,39 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
-      <widget class="QLineEdit" name="le_gmsh_path"/>
-     </item>
-     <item row="5" column="1">
-      <widget class="QToolButton" name="tb_choose_gmsh_path">
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_outputdir">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
-        <string>...</string>
+        <string>Default output directory</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLineEdit" name="le_output_dir">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="toolTip">
+        <string>The directory to which case folders are written. Used unless overridden on a per-analysis basis. Use a '.' to denote the location of the current saved document, or leave blank to use a temporary directory.</string>
+       </property>
+       <property name="readOnly">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0" colspan="2">
+      <widget class="QCheckBox" name="cb_append_doc_name">
+       <property name="toolTip">
+        <string>Create the output in a subdirectory with the name of the current saved document.</string>
+       </property>
+       <property name="text">
+        <string>Append document name to output directory</string>
        </property>
       </widget>
      </item>

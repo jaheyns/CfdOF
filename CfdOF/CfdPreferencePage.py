@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -157,6 +157,7 @@ class CfdPreferencePage:
         CfdTools.setGmshPath(self.gmsh_path)
         prefs = CfdTools.getPreferencesLocation()
         FreeCAD.ParamGet(prefs).SetString("DefaultOutputPath", self.output_dir)
+        FreeCAD.ParamGet(prefs).SetBool("AppendDocNameToOutputPath",self.form.cb_append_doc_name.isChecked())
         FreeCAD.ParamGet(prefs).SetBool("UseDocker",self.form.cb_docker_sel.isChecked())
         FreeCAD.ParamGet(prefs).SetString("DockerURL",self.form.le_docker_url.text())
 
@@ -178,6 +179,8 @@ class CfdPreferencePage:
 
         self.output_dir = CfdTools.getDefaultOutputPath()
         self.form.le_output_dir.setText(self.output_dir)
+        if FreeCAD.ParamGet(prefs).GetBool("AppendDocNameToOutputPath", 0):
+            self.form.cb_append_doc_name.setCheckState(Qt.Checked)
 
         if FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0):
             self.form.cb_docker_sel.setCheckState(Qt.Checked)
