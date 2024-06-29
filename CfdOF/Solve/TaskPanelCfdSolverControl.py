@@ -188,9 +188,12 @@ class TaskPanelCfdSolverControl:
                         stderr_hook=self.gotErrorLines)
 
                     cart_mesh.error = False
-                    cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
+                    if CfdTools.getFoamRuntime() == "MinGW":
+                        cmd = CfdTools.makeRunCommand('Allmesh.bat', source_env=False)
+                    else:
+                        cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
                     env_vars = CfdTools.getRunEnvironment()
-                    self.solver_object.Proxy.solver_process.start(cmd, env_vars=env_vars)
+                    self.solver_object.Proxy.solver_process.start(cmd, working_dir=cart_mesh.meshCaseDir, env_vars=env_vars)
                     if self.solver_object.Proxy.solver_process.waitForStarted():
                         # Setting solve button to inactive to ensure that two instances of the same simulation aren't started
                         # simultaneously
