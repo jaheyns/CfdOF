@@ -64,6 +64,7 @@ class CfdOFWorkbench(Workbench):
             CommandDynamicMeshInterfaceRefinement, CommandDynamicMeshShockRefinement
         from CfdOF.PostProcess.CfdReportingFunction import CommandCfdReportingFunction
         from CfdOF.Solve.CfdScalarTransportFunction import CommandCfdScalarTransportFunction
+        from CfdOF.CfdOpenPreferencesPage import CommandCfdOpenPreferencesPage
         from CfdOF.CfdReloadWorkbench import CommandCfdReloadWorkbench
 
         FreeCADGui.addCommand('Cfd_Analysis', CommandCfdAnalysis())
@@ -81,11 +82,13 @@ class CfdOFWorkbench(Workbench):
         FreeCADGui.addCommand('Cfd_SolverControl', CommandCfdSolverFoam())
         FreeCADGui.addCommand('Cfd_ReportingFunctions', CommandCfdReportingFunction())
         FreeCADGui.addCommand('Cfd_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
+        FreeCADGui.addCommand('Cfd_OpenPreferences', CommandCfdOpenPreferencesPage())
         FreeCADGui.addCommand('Cfd_ReloadWorkbench', CommandCfdReloadWorkbench())
 
         cmdlst = ['Cfd_Analysis',
-                  'Cfd_MeshFromShape', 'Cfd_MeshRegion', 
-                  (QT_TRANSLATE_NOOP("Workbench", "Dynamic mesh refinement"), ['Cfd_DynamicMeshInterfaceRefinement','Cfd_DynamicMeshShockRefinement',]),
+                  'Cfd_MeshFromShape', 'Cfd_MeshRegion',
+                  (QT_TRANSLATE_NOOP("Workbench", "Dynamic mesh refinement"),
+                   ['Cfd_DynamicMeshInterfaceRefinement','Cfd_DynamicMeshShockRefinement',]),
                   ('Cfd_GroupDynamicMeshRefinement',),
                   'Cfd_PhysicsModel', 'Cfd_FluidMaterial',
                   'Cfd_FluidBoundary', 'Cfd_InitialiseInternal',
@@ -103,7 +106,8 @@ class CfdOFWorkbench(Workbench):
                 self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&CfdOF"), [cmd])
                 self.appendToolbar(QT_TRANSLATE_NOOP("Workbench", "CfdOF"), [cmd])
 
-        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&CfdOF"), ["Cfd_ReloadWorkbench"])
+        self.appendMenu(QT_TRANSLATE_NOOP("Workbench", "&CfdOF"),
+                        ["Cfd_OpenPreferences", "Cfd_ReloadWorkbench"])
 
         from CfdOF import CfdTools
         prefs = CfdTools.getPreferencesLocation()
