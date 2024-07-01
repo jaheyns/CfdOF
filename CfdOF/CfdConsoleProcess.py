@@ -30,6 +30,7 @@ from PySide import QtCore
 from PySide.QtCore import QProcess, QTextStream
 import FreeCAD
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
 
 class CfdConsoleProcess:
     """

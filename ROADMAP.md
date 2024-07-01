@@ -5,7 +5,7 @@ please consider tackling one of these items.
 
 ## General
 
-* Add translations
+* Finish translation support
     * See the guide here: https://wiki.freecadweb.org/Translating_an_external_workbench
     * Forum topic: https://forum.freecadweb.org/viewtopic.php?f=10&t=36413
 * Visualisation of point locations. At various places a point is specified - e.g. an internal 

@@ -34,6 +34,7 @@ from CfdOF.CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChan
 from CfdOF import CfdFaceSelectWidget
 from CfdOF.Solve import CfdFluidBoundary
 
+translate = FreeCAD.Qt.translate
 
 class TaskPanelCfdFluidBoundary:
     """ Task panel for adding fluid boundary """
@@ -323,7 +324,9 @@ class TaskPanelCfdFluidBoundary:
 
         # start SelectionObserver and parse the function to add the References to the widget
         if self.selecting_direction:
-            FreeCAD.Console.PrintMessage("Select face to define direction\n")
+            FreeCAD.Console.PrintMessage(
+                translate("Console", "Select face to define direction\n")
+            )
             FreeCADGui.Selection.addObserver(self)
         else:
             FreeCADGui.Selection.removeObserver(self)
@@ -354,7 +357,9 @@ class TaskPanelCfdFluidBoundary:
                         self.selecting_direction = False
                         self.form.lineDirection.setText(selection[0] + ':' + selection[1])  # TODO: Display label, not name
                     else:
-                        FreeCAD.Console.PrintMessage('Face must be planar\n')
+                        FreeCAD.Console.PrintMessage(
+                            translate("Console", "Face must be planar\n")
+                        )
 
         self.form.buttonDirection.setChecked(self.selecting_direction)
 
@@ -370,7 +375,9 @@ class TaskPanelCfdFluidBoundary:
         except SystemError:
             pass
 
-        FreeCAD.Console.PrintMessage(value + " is not a valid, planar face\n")
+        FreeCAD.Console.PrintMessage(
+            value + translate("Console", " is not a valid, planar face\n")
+        )
 
     def getMaterialName(self, index):
         return self.material_objs[index].Label

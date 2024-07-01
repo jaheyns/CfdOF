@@ -35,6 +35,7 @@ if FreeCAD.GuiUp:
     from PySide import QtGui
     from PySide.QtCore import QTimer
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
 
 class CfdFaceSelectWidget:
     def __init__(self, parent_widget, obj, allow_obj_sel, allow_face_sel, allow_solid_sel,

@@ -30,6 +30,7 @@ from pivy import coin
 from CfdOF.Mesh import TaskPanelCfdDynamicMeshInterfaceRefinement
 from CfdOF.Mesh import TaskPanelCfdDynamicMeshShockRefinement
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
 
 class CommandGroupDynamicMeshRefinement:
     def GetCommands(self):
@@ -38,9 +39,9 @@ class CommandGroupDynamicMeshRefinement:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh_dynamic.svg")
         return {#'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Dynamic mesh refinement"),
+                'MenuText': QT_TRANSLATE_NOOP("Cfd_GroupDynamicMeshRefinement", "Dynamic mesh refinement"),
                 'Accel': "M, D",
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Allows adaptive refinement of the mesh")}
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_GroupDynamicMeshRefinement", "Allows adaptive refinement of the mesh")}
 
     def IsActive(self):
         sel = FreeCADGui.Selection.getSelection()
@@ -82,9 +83,9 @@ class CommandDynamicMeshInterfaceRefinement:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh_dynamic.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Interface dynamic refinement"),
+                'MenuText': QT_TRANSLATE_NOOP("Cfd_DynamicMeshInterfaceRefinement", "Interface dynamic refinement"),
                 'Accel': "M, D",
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", 
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_DynamicMeshInterfaceRefinement",
                 "Activates adaptive mesh refinement at free-surface interfaces")}
 
     def IsActive(self):
@@ -99,7 +100,7 @@ class CommandDynamicMeshInterfaceRefinement:
                 physics = CfdTools.getPhysicsModel(analysis)
                 if physics:
                     free_surf = (physics.Phase == 'FreeSurface')
-        
+
         return mesh_selected and free_surf
 
     def Activated(self):
@@ -135,9 +136,9 @@ class CommandDynamicMeshShockRefinement:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh_dynamic.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", "Shockwave dynamic refinement"),
+                'MenuText': QT_TRANSLATE_NOOP("Cfd_DynamicMeshShockRefinement", "Shockwave dynamic refinement"),
                 'Accel': "M, S",
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_DynamicMesh", 
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_DynamicMeshShockRefinement",
                 "Activates adaptive mesh refinement for shocks")}
 
     def IsActive(self):

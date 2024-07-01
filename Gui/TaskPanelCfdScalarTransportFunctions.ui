@@ -97,7 +97,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -172,7 +172,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -197,7 +197,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -222,7 +222,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -247,7 +247,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

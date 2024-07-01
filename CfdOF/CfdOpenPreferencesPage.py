@@ -1,6 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2023 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2024 hasecilu <hasecilu@tuta.io>                        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -18,29 +18,23 @@
 # *                                                                         *
 # ***************************************************************************
 
-import os
-
-import FreeCAD
 import FreeCADGui
-from CfdOF import CfdTools
-from PySide import QtCore
 
 from PySide.QtCore import QT_TRANSLATE_NOOP
 
-class CommandCfdReloadWorkbench:
+
+class CommandCfdOpenPreferencesPage:
 
     def __init__(self):
         pass
 
     def GetResources(self):
-        return {'MenuText': QT_TRANSLATE_NOOP("Cfd_ReloadWorkbench",
-                                                     "Reload CfdOF workbench"),
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_ReloadWorkbench",
-                                                    "Reload source files from disk")}
-
+        return {'MenuText': QT_TRANSLATE_NOOP("Cfd_OpenPreferences",
+                                                "Open preferences"),
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_OpenPreferences",
+                                                "Open the CfdOF preferences page")}
     def IsActive(self):
         return True
 
     def Activated(self):
-        CfdTools.reloadWorkbench()
-
+        FreeCADGui.showPreferences("CfdOF")

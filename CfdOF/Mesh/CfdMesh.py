@@ -25,6 +25,7 @@ from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 import os
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
 
 MESHER_DESCRIPTIONS = ['cfMesh', 'snappyHexMesh', 'gmsh (tetrahedral)', 'gmsh (polyhedral)']
 MESHERS = ['cfMesh', 'snappyHexMesh', 'gmsh', 'gmsh']
@@ -44,9 +45,9 @@ class CommandCfdMeshFromShape:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                'MenuText': QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
                                                      "CFD mesh"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
                                                     "Create a mesh using cfMesh, snappyHexMesh or gmsh")}
 
     def IsActive(self):

@@ -33,6 +33,8 @@ from pivy import coin
 import Part
 from CfdOF.Mesh import TaskPanelCfdMeshRefinement
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
+
 # Constants
 EXTRUSION_NAMES = ["2D planar mesh", "2D wedge mesh", "Patch-normal", "Rotational"]
 EXTRUSION_TYPES = ["2DPlanar", "2DWedge", "PatchNormal", "Rotational"]
@@ -56,9 +58,9 @@ class CommandMeshRegion:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh_region.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshRegion", "Mesh refinement"),
+                'MenuText': QT_TRANSLATE_NOOP("Cfd_MeshRegion", "Mesh refinement"),
                 'Accel': "M, R",
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_MeshRegion", "Creates a mesh refinement")}
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_MeshRegion", "Creates a mesh refinement")}
 
     def IsActive(self):
         sel = FreeCADGui.Selection.getSelection()

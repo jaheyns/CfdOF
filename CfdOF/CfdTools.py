@@ -54,6 +54,8 @@ if FreeCAD.GuiUp:
     from PySide import QtGui
     from PySide.QtGui import QFormLayout, QGridLayout
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
+translate = FreeCAD.Qt.translate
 
 # Some standard install locations that are searched if an install directory is not specified
 # Supports variable expansion and Unix-style globs (in which case the last lexically-sorted match will be used)
@@ -1013,7 +1015,9 @@ def checkCfdDependencies(msgFn):
     MAX_MINGW_VERSION = 2212
 
     message = ""
-    FreeCAD.Console.PrintMessage("Checking CFD workbench dependencies...\n")
+    FreeCAD.Console.PrintMessage(
+        translate("Console", "Checking CFD workbench dependencies...\n")
+    )
 
     # Check FreeCAD version
     print("Checking FreeCAD version")

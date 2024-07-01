@@ -30,6 +30,8 @@ if FreeCAD.GuiUp:
 from CfdOF import CfdTools
 from CfdOF.CfdTools import setQuantity, getQuantity, storeIfChanged
 
+translate = FreeCAD.Qt.translate
+
 # The properties presented for each fluid type
 ALL_FIELDS = {'Isothermal': ['Density', 'DynamicViscosity'],
               'Incompressible': ['MolarMass', 'DensityPolynomial', 'CpPolynomial', 'DynamicViscosityPolynomial',
@@ -190,7 +192,9 @@ class TaskPanelCfdFluidProperties:
             for key in self.material:
                 if key != 'Name':
                     f.write(key + ' = ' + self.material[key] + '\n')
-            FreeCAD.Console.PrintMessage("Custom material saved\n")
+            FreeCAD.Console.PrintMessage(
+                translate("Console", "Custom material saved\n")
+            )
 
     def accept(self):
         doc = FreeCADGui.getDocument(self.obj.Document)

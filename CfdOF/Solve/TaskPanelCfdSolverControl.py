@@ -35,6 +35,7 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt
     from PySide.QtGui import QApplication
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
 
 class TaskPanelCfdSolverControl:
     def __init__(self, solver_runner_obj):

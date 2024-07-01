@@ -248,7 +248,7 @@
      <item row="5" column="0">
       <widget class="QGroupBox" name="gb_openfoam">
        <property name="title">
-        <string>OpenFOAM</string>
+        <string notr="true">OpenFOAM</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="2" column="2">
@@ -293,7 +293,7 @@
      <item row="6" column="0">
       <widget class="QGroupBox" name="gb_paraview">
        <property name="title">
-        <string>ParaView</string>
+        <string notr="true">ParaView</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
         <item row="2" column="2">
@@ -338,7 +338,7 @@
      <item row="7" column="0">
       <widget class="QGroupBox" name="gb_cfmesh">
        <property name="title">
-        <string>cfMesh</string>
+        <string notr="true">cfMesh</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="1" column="0">
@@ -383,7 +383,7 @@
      <item row="8" column="0">
       <widget class="QGroupBox" name="gb_hisa">
        <property name="title">
-        <string>HiSA</string>
+        <string notr="true">HiSA</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="2" column="2">
@@ -434,7 +434,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Use docker:</string>
+           <string>Use Docker:</string>
           </property>
          </widget>
         </item>

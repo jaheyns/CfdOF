@@ -34,6 +34,7 @@ from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 from CfdOF.Solve import TaskPanelCfdInitialiseInternalFlowField
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
 
 def makeCfdInitialFlowField(name="InitialiseFields"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
@@ -49,9 +50,9 @@ class CommandCfdInitialiseInternalFlowField:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "initialise.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_InitialiseInternal", "Initialise"),
+                'MenuText': QT_TRANSLATE_NOOP("Cfd_InitialiseInternal", "Initialise"),
                 'Accel': "",
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP(
+                'ToolTip': QT_TRANSLATE_NOOP(
                     "Cfd_InitialiseInternal",
                     "Initialise internal flow variables based on the selected physics model")}
 

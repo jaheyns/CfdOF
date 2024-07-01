@@ -29,6 +29,8 @@ from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 import os
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
+
 # Constants
 OBJECT_NAMES = ["Force", "ForceCoefficients", "Probes"]
 OBJECT_DESCRIPTIONS = ["Calculate forces on patches", "Calculate force coefficients from patches",
@@ -52,9 +54,9 @@ class CommandCfdReportingFunction:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "monitor.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
+                'MenuText': QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
                                                      "Reporting function"),
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
                                                     "Create a reporting function for the current case")}
 
     def IsActive(self):

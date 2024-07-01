@@ -30,6 +30,7 @@ if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
 
+from PySide.QtCore import QT_TRANSLATE_NOOP
 
 def makeCfdAnalysis(name):
     """ Create a Cfd Analysis group object """
@@ -90,9 +91,9 @@ class CommandCfdAnalysis:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "cfd_analysis.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QtCore.QT_TRANSLATE_NOOP("Cfd_Analysis", "Analysis container"),
+                'MenuText': QT_TRANSLATE_NOOP("Cfd_Analysis", "Analysis container"),
                 'Accel': "N, C",
-                'ToolTip': QtCore.QT_TRANSLATE_NOOP("Cfd_Analysis", "Creates an analysis container with a CFD solver")}
+                'ToolTip': QT_TRANSLATE_NOOP("Cfd_Analysis", "Creates an analysis container with a CFD solver")}
 
     def IsActive(self):
         return FreeCAD.ActiveDocument is not None

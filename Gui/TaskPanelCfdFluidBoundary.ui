@@ -245,7 +245,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -280,7 +280,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -315,7 +315,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -377,7 +377,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>0</string>
+                  <string notr="true">0</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -411,7 +411,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>%</string>
+                  <string notr="true">%</string>
                  </property>
                  <property name="textFormat">
                   <enum>Qt::AutoText</enum>
@@ -437,7 +437,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -472,7 +472,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -507,7 +507,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -542,7 +542,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -577,7 +577,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -640,7 +640,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -655,7 +655,7 @@
                <string notr="true">K</string>
               </property>
               <property name="format" stdset="0">
-               <string>g</string>
+               <string notr="true">g</string>
               </property>
              </widget>
             </item>
@@ -714,7 +714,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -726,7 +726,7 @@
                <string notr="true">W/m^2</string>
               </property>
               <property name="format" stdset="0">
-               <string>g</string>
+               <string notr="true">g</string>
               </property>
              </widget>
             </item>
@@ -746,7 +746,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>0</string>
+               <string notr="true">0</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -761,7 +761,7 @@
                <string notr="true">W/m^2/K</string>
               </property>
               <property name="format" stdset="0">
-               <string>g</string>
+               <string notr="true">g</string>
               </property>
              </widget>
             </item>
@@ -886,7 +886,7 @@
                      </sizepolicy>
                     </property>
                     <property name="text">
-                     <string>0</string>
+                     <string notr="true">0</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -911,7 +911,7 @@
                      </sizepolicy>
                     </property>
                     <property name="text">
-                     <string>0</string>
+                     <string notr="true">0</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -936,7 +936,7 @@
                      </sizepolicy>
                     </property>
                     <property name="text">
-                     <string>0</string>
+                     <string notr="true">0</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -998,7 +998,7 @@
                      </sizepolicy>
                     </property>
                     <property name="text">
-                     <string>0</string>
+                     <string notr="true">0</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1119,7 +1119,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>0</string>
+                  <string notr="true">0</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1175,7 +1175,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>0</string>
+                  <string notr="true">0</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1237,7 +1237,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>0</string>
+                  <string notr="true">0</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1293,7 +1293,7 @@
                   </sizepolicy>
                  </property>
                  <property name="text">
-                  <string>0</string>
+                  <string notr="true">0</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1404,7 +1404,7 @@
                       </sizepolicy>
                      </property>
                      <property name="text">
-                      <string>0</string>
+                      <string notr="true">0</string>
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1458,7 +1458,7 @@
                       </sizepolicy>
                      </property>
                      <property name="text">
-                      <string>0</string>
+                      <string notr="true">0</string>
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1496,7 +1496,7 @@
                       </sizepolicy>
                      </property>
                      <property name="text">
-                      <string>0</string>
+                      <string notr="true">0</string>
                      </property>
                      <property name="alignment">
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1553,7 +1553,7 @@
                <item row="0" column="1">
                 <widget class="Gui::InputField" name="inputRoughnessHeight">
                  <property name="text">
-                  <string>0</string>
+                  <string notr="true">0</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1582,7 +1582,7 @@
                <item row="1" column="1">
                 <widget class="Gui::InputField" name="inputRoughnessConstant">
                  <property name="text">
-                  <string>0</string>
+                  <string notr="true">0</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1834,7 +1834,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string notr="true">0</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1859,7 +1859,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string notr="true">0</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1884,7 +1884,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string notr="true">0</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1909,7 +1909,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string notr="true">0</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1934,7 +1934,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string notr="true">0</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1959,7 +1959,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string notr="true">0</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2018,7 +2018,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string notr="true">0</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2043,7 +2043,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string notr="true">0</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2068,7 +2068,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>0</string>
+                   <string notr="true">0</string>
                   </property>
                   <property name="alignment">
                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2125,7 +2125,7 @@
           <item row="2" column="1">
            <widget class="Gui::InputField" name="inputVolumeFraction">
             <property name="text">
-             <string>0</string>
+             <string notr="true">0</string>
             </property>
             <property name="singleStep" stdset="0">
              <double>0.100000000000000</double>
@@ -2140,7 +2140,7 @@
              <string notr="true"/>
             </property>
             <property name="format" stdset="0">
-             <string>g</string>
+             <string notr="true">g</string>
             </property>
            </widget>
           </item>

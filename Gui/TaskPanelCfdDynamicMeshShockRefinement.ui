@@ -159,7 +159,7 @@
         <item>
          <widget class="Gui::InputField" name="inputReferenceVelocityX">
           <property name="text">
-           <string>0</string>
+           <string notr="true">0</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -178,7 +178,7 @@
         <item>
          <widget class="Gui::InputField" name="inputReferenceVelocityY">
           <property name="text">
-           <string>0</string>
+           <string notr="true">0</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -197,7 +197,7 @@
         <item>
          <widget class="Gui::InputField" name="inputReferenceVelocityZ">
           <property name="text">
-           <string>0</string>
+           <string notr="true">0</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
