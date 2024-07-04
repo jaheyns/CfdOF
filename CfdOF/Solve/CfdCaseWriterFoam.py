@@ -69,8 +69,15 @@ class CfdCaseWriterFoam:
     def writeCase(self):
         """ writeCase() will collect case settings, and finally build a runnable case. """
         cfdMessage("Writing case to folder {}\n".format(self.working_dir))
-        if not os.path.exists(self.working_dir):
-            raise IOError("Path " + self.working_dir + " does not exist.")
+        # Try to create the path
+        try:
+            os.makedirs(self.working_dir)
+        except OSError as exc:
+            import errno
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
 
         # Perform initialisation here rather than __init__ in case of path changes
         self.case_folder = os.path.join(self.working_dir, self.solver_obj.InputCaseName)
