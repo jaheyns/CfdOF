@@ -11,7 +11,7 @@ import CfdZone
 ### Begin command Std_Workbench
 # Gui.activateWorkbench("CfdOFWorkbench")
 ### End command Std_Workbench
-### Begin command Cfd_Analysis
+### Begin command CfdOF_Analysis
 from CfdOF import CfdAnalysis
 from CfdOF import CfdTools
 analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
@@ -24,15 +24,15 @@ from CfdOF.Solve import CfdInitialiseFlowField
 analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
 from CfdOF.Solve import CfdSolverFoam
 analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
-### End command Cfd_Analysis
+### End command CfdOF_Analysis
 # Gui.Selection.addSelection('Unnamed','Box')
-### Begin command Cfd_MeshFromShape
+### Begin command CfdOF_MeshFromShape
 from CfdOF.Mesh import CfdMesh
 CfdMesh.makeCfdMesh('Box_Mesh')
 App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Compound
 from CfdOF import CfdTools
 CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
-### End command Cfd_MeshFromShape
+### End command CfdOF_MeshFromShape
 # Gui.Selection.clearSelection()
 App.ActiveDocument.Box_Mesh.CharacteristicLengthMax = '30.0 mm'
 App.ActiveDocument.Box_Mesh.MeshUtility = 'snappyHexMesh'
@@ -40,18 +40,18 @@ App.ActiveDocument.Box_Mesh.PointInMesh = {'x': '500.0 mm', 'y': '500.0 mm', 'z'
 # Gui.Selection.addSelection('Unnamed','Box_Mesh')
 FreeCAD.getDocument('Unnamed').getObject('Box_Mesh').NumberOfProcesses = 4
 
-### Begin command Cfd_MeshRegion
+### Begin command CfdOF_MeshRegion
 
 from CfdOF.Mesh import CfdMeshRefinement
 CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Box_Mesh)
-### End command Cfd_MeshRegion
+### End command CfdOF_MeshRegion
 # Gui.Selection.clearSelection()
 App.ActiveDocument.MeshRefinement.RelativeLength = 0.5
 App.ActiveDocument.MeshRefinement.RefinementThickness = '20.0 mm'
 FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
 (FreeCAD.ActiveDocument.getObject('Box001'), ('',))]
 FreeCAD.ActiveDocument.recompute()
-# Gui.runCommand('Cfd_PhysicsModel',0)
+# Gui.runCommand('CfdOF_PhysicsModel',0)
 App.ActiveDocument.PhysicsModel.Time = 'Transient'
 App.ActiveDocument.PhysicsModel.Phase = 'FreeSurface'
 App.ActiveDocument.PhysicsModel.Turbulence = 'RANS'
@@ -65,20 +65,20 @@ App.ActiveDocument.FluidProperties.Label = 'water'
 # Gui.Selection.addSelection('Unnamed','Box002')
 # Gui.Selection.clearSelection()
 # Gui.Selection.addSelection('Unnamed','FluidProperties')
-### Begin command Cfd_FluidMaterial
+### Begin command CfdOF_FluidMaterial
 from CfdOF import CfdTools
 from CfdOF.Solve import CfdFluidMaterial
 CfdTools.getActiveAnalysis().addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
 App.ActiveDocument.FluidProperties001.Label = 'air'
-### End command Cfd_FluidMaterial
+### End command CfdOF_FluidMaterial
 # Gui.Selection.clearSelection()
 # Gui.Selection.addSelection('Unnamed','FluidProperties001')
 # Gui.Selection.addSelection('Unnamed','Box','Face6',1586.26,644.823,1000)
-### Begin command Cfd_FluidBoundary
+### Begin command CfdOF_FluidBoundary
 from CfdOF.Solve import CfdFluidBoundary
 from CfdOF import CfdTools
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
-### End command Cfd_FluidBoundary
+### End command CfdOF_FluidBoundary
 # Gui.Selection.clearSelection()
 App.ActiveDocument.CfdFluidBoundary.Label = 'open'
 FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'open'
@@ -87,16 +87,16 @@ App.ActiveDocument.CfdFluidBoundary.SpecificDissipationRate = '1 1/s'
 FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
 (FreeCAD.ActiveDocument.getObject('Box'), ('Face6',))]
 FreeCAD.ActiveDocument.recompute()
-### Begin command Cfd_FluidBoundary
+### Begin command CfdOF_FluidBoundary
 from CfdOF.Solve import CfdFluidBoundary
 from CfdOF import CfdTools
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
-### End command Cfd_FluidBoundary
+### End command CfdOF_FluidBoundary
 App.ActiveDocument.CfdFluidBoundary001.Label = 'wall'
 App.ActiveDocument.CfdFluidBoundary001.SpecificDissipationRate = '1 1/s'
 App.ActiveDocument.CfdFluidBoundary001.DefaultBoundary = True
 FreeCAD.ActiveDocument.recompute()
-# Gui.runCommand('Cfd_InitialiseInternal',0)
+# Gui.runCommand('CfdOF_InitialiseInternal',0)
 # Gui.Selection.clearSelection()
 App.ActiveDocument.InitialiseFields.PotentialFlow = False
 App.ActiveDocument.InitialiseFields.VolumeFractions = {'water': '0.0'}
@@ -104,12 +104,12 @@ App.ActiveDocument.InitialiseFields.omega = '1 1/s'
 # Gui.Selection.addSelection('Unnamed','InitialiseFields')
 # App.getDocument('Unnamed').getObject('InitialiseFields').ViewObject.doubleClicked()
 FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary
-### Begin command Cfd_InitialisationZone
+### Begin command CfdOF_InitialisationZone
 
 from CfdOF.Solve import CfdZone
 from CfdOF import CfdTools
 CfdTools.getActiveAnalysis().addObject(CfdZone.makeCfdInitialisationZone())
-### End command Cfd_InitialisationZone
+### End command CfdOF_InitialisationZone
 App.ActiveDocument.InitialisationZone.VolumeFractions = {'water': '1.0'}
 FreeCAD.ActiveDocument.InitialisationZone.ShapeRefs = [
 (FreeCAD.ActiveDocument.getObject('Box002'), ('Solid1',))]

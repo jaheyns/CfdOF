@@ -45,9 +45,9 @@ class CommandCfdMeshFromShape:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                'MenuText': QT_TRANSLATE_NOOP("CfdOF_MeshFromShape",
                                                      "CFD mesh"),
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_MeshFromShape",
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_MeshFromShape",
                                                     "Create a mesh using cfMesh, snappyHexMesh or gmsh")}
 
     def IsActive(self):

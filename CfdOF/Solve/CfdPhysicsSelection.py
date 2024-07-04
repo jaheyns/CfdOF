@@ -49,9 +49,9 @@ class CommandCfdPhysicsSelection:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "physics.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QT_TRANSLATE_NOOP("Cfd_PhysicsModel", "Select models"),
+                'MenuText': QT_TRANSLATE_NOOP("CfdOF_PhysicsModel", "Select models"),
                 'Accel': "",
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_PhysicsModel", "Select the physics model")}
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_PhysicsModel", "Select the physics model")}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None

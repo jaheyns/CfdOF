@@ -2,12 +2,12 @@
 
 # Gui.runCommand('Std_DlgMacroRecord',0)
 # Gui.Selection.addSelection('modifiedFinner','Compound_Mesh')
-### Begin command Cfd_GroupDynamicMeshRefinement
+### Begin command CfdOF_GroupDynamicMeshRefinement
 
 from CfdOF.Mesh import CfdDynamicMeshRefinement
 from CfdOF import CfdTools
 CfdDynamicMeshRefinement.makeCfdDynamicMeshShockRefinement(App.ActiveDocument.Compound_Mesh)
-### End command Cfd_GroupDynamicMeshRefinement
+### End command CfdOF_GroupDynamicMeshRefinement
 # Gui.Selection.clearSelection()
 App.ActiveDocument.DynamicMeshShockRefinement.ReferenceVelocityDirection = App.Vector (-1.0, 0.0, 0.0)
 App.ActiveDocument.DynamicMeshShockRefinement.RelativeElementSize = 0.007
