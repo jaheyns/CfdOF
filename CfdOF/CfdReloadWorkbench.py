@@ -33,9 +33,9 @@ class CommandCfdReloadWorkbench:
         pass
 
     def GetResources(self):
-        return {'MenuText': QT_TRANSLATE_NOOP("Cfd_ReloadWorkbench",
+        return {'MenuText': QT_TRANSLATE_NOOP("CfdOF_ReloadWorkbench",
                                                      "Reload CfdOF workbench"),
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_ReloadWorkbench",
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_ReloadWorkbench",
                                                     "Reload source files from disk")}
 
     def IsActive(self):

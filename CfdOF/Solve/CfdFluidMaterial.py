@@ -48,8 +48,8 @@ class CommandCfdFluidMaterial:
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "material.svg")
         return {
             'Pixmap': icon_path,
-            'MenuText': QT_TRANSLATE_NOOP("Cfd_FluidMaterial", "Add fluid properties"),
-            'ToolTip': QT_TRANSLATE_NOOP("Cfd_FluidMaterial", "Add fluid properties")}
+            'MenuText': QT_TRANSLATE_NOOP("CfdOF_FluidMaterial", "Add fluid properties"),
+            'ToolTip': QT_TRANSLATE_NOOP("CfdOF_FluidMaterial", "Add fluid properties")}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None

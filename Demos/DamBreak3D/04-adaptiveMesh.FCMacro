@@ -3,12 +3,12 @@
 import FreeCAD
 
 # Gui.runCommand('Std_DlgMacroRecord',0)
-### Begin command Cfd_DynamicMeshInterfaceRefinement
+### Begin command CfdOF_DynamicMeshInterfaceRefinement
 
 from CfdOF.Mesh import CfdDynamicMeshRefinement
 from CfdOF import CfdTools
 CfdDynamicMeshRefinement.makeCfdDynamicMeshInterfaceRefinement(App.ActiveDocument.Box_Mesh)
-### End command Cfd_DynamicMeshInterfaceRefinement
+### End command CfdOF_DynamicMeshInterfaceRefinement
 
 obj = FreeCAD.ActiveDocument.DynamicMeshInterfaceRefinement
 obj.RefinementInterval = 5

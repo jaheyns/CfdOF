@@ -235,9 +235,9 @@ class CommandCfdFluidBoundary:
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "boundary.svg")
         return {
             'Pixmap': icon_path,
-            'MenuText': QT_TRANSLATE_NOOP("Cfd_FluidBoundary", "Fluid boundary"),
+            'MenuText': QT_TRANSLATE_NOOP("CfdOF_FluidBoundary", "Fluid boundary"),
             'Accel': "C, W",
-            'ToolTip': QT_TRANSLATE_NOOP("Cfd_FluidBoundary", "Creates a CFD fluid boundary")}
+            'ToolTip': QT_TRANSLATE_NOOP("CfdOF_FluidBoundary", "Creates a CFD fluid boundary")}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None

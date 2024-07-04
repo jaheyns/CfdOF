@@ -54,9 +54,9 @@ class CommandCfdReportingFunction:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "monitor.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
+                'MenuText': QT_TRANSLATE_NOOP("CfdOF_ReportingFunctions",
                                                      "Reporting function"),
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_ReportingFunctions",
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_ReportingFunctions",
                                                     "Create a reporting function for the current case")}
 
     def IsActive(self):

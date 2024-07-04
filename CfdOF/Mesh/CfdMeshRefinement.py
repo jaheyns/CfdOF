@@ -58,9 +58,9 @@ class CommandMeshRegion:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "mesh_region.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QT_TRANSLATE_NOOP("Cfd_MeshRegion", "Mesh refinement"),
+                'MenuText': QT_TRANSLATE_NOOP("CfdOF_MeshRegion", "Mesh refinement"),
                 'Accel': "M, R",
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_MeshRegion", "Creates a mesh refinement")}
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_MeshRegion", "Creates a mesh refinement")}
 
     def IsActive(self):
         sel = FreeCADGui.Selection.getSelection()

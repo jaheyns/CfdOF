@@ -84,16 +84,16 @@ class _CfdAnalysis:
 
 
 class CommandCfdAnalysis:
-    """ The Cfd_Analysis command definition """
+    """ The CfdOF_Analysis command definition """
     def __init__(self):
         pass
 
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "cfd_analysis.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QT_TRANSLATE_NOOP("Cfd_Analysis", "Analysis container"),
+                'MenuText': QT_TRANSLATE_NOOP("CfdOF_Analysis", "Analysis container"),
                 'Accel': "N, C",
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_Analysis", "Creates an analysis container with a CFD solver")}
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_Analysis", "Creates an analysis container with a CFD solver")}
 
     def IsActive(self):
         return FreeCAD.ActiveDocument is not None

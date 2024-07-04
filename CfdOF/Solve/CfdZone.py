@@ -66,9 +66,9 @@ class CommandCfdPorousZone:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "porous.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QT_TRANSLATE_NOOP("Cfd_PorousZone", "Porous zone"),
+                'MenuText': QT_TRANSLATE_NOOP("CfdOF_PorousZone", "Porous zone"),
                 'Accel': "",
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_PorousZone", "Select and create a porous zone")}
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_PorousZone", "Select and create a porous zone")}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None
@@ -86,9 +86,9 @@ class CommandCfdInitialisationZone:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "alpha.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QT_TRANSLATE_NOOP("Cfd_InitialisationZone", "Initialisation zone"),
+                'MenuText': QT_TRANSLATE_NOOP("CfdOF_InitialisationZone", "Initialisation zone"),
                 'Accel': "",
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_InitialisationZone",
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_InitialisationZone",
                                                     "Select and create an initialisation zone")}
 
     def IsActive(self):

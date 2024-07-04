@@ -49,9 +49,9 @@ class CommandCfdSolverFoam:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "solver.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QT_TRANSLATE_NOOP("Cfd_SolverControl", "Solver job control"),
+                'MenuText': QT_TRANSLATE_NOOP("CfdOF_SolverControl", "Solver job control"),
                 'Accel': "S, C",
-                'ToolTip': QT_TRANSLATE_NOOP("Cfd_SolverControl", "Edit properties and run solver")}
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_SolverControl", "Edit properties and run solver")}
 
     def IsActive(self):
         return CfdTools.getActiveAnalysis() is not None

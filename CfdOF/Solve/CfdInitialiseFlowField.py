@@ -50,10 +50,10 @@ class CommandCfdInitialiseInternalFlowField:
     def GetResources(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "initialise.svg")
         return {'Pixmap': icon_path,
-                'MenuText': QT_TRANSLATE_NOOP("Cfd_InitialiseInternal", "Initialise"),
+                'MenuText': QT_TRANSLATE_NOOP("CfdOF_InitialiseInternal", "Initialise"),
                 'Accel': "",
                 'ToolTip': QT_TRANSLATE_NOOP(
-                    "Cfd_InitialiseInternal",
+                    "CfdOF_InitialiseInternal",
                     "Initialise internal flow variables based on the selected physics model")}
 
     def IsActive(self):

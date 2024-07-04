@@ -2,6 +2,223 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="es_AR" sourcelanguage="en">
 <context>
+    <name>CfdOF_Analysis</name>
+    <message>
+        <location filename="../CfdOF/CfdAnalysis.py" line="94"/>
+        <source>Analysis container</source>
+        <translation>Contenedor de análisis</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdAnalysis.py" line="96"/>
+        <source>Creates an analysis container with a CFD solver</source>
+        <translation>Crea un contenedor de para el análisis con un solucionador CFD</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_DynamicMeshInterfaceRefinement</name>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="86"/>
+        <source>Interface dynamic refinement</source>
+        <translation>Refinamiento dinámico de interfaz</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="88"/>
+        <source>Activates adaptive mesh refinement at free-surface interfaces</source>
+        <translation>Activa el refinamiento de malla adaptativo en las interfaces de superficie libre</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_DynamicMeshShockRefinement</name>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="139"/>
+        <source>Shockwave dynamic refinement</source>
+        <translation>Refinamiento dinámico de onda de choque</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="141"/>
+        <source>Activates adaptive mesh refinement for shocks</source>
+        <translation>Activa el refinamiento de malla adaptativo para choques</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_FluidBoundary</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="238"/>
+        <source>Fluid boundary</source>
+        <translation>Frontera de fluido</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="240"/>
+        <source>Creates a CFD fluid boundary</source>
+        <translation>Crea una frontera de fluido CFD</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_FluidMaterial</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="52"/>
+        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="51"/>
+        <source>Add fluid properties</source>
+        <translation>Agregar propiedades de fluido</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_GroupDynamicMeshRefinement</name>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="42"/>
+        <source>Dynamic mesh refinement</source>
+        <translation>Refinamiento de malla dinámico</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="44"/>
+        <source>Allows adaptive refinement of the mesh</source>
+        <translation>Permite un refinamiento adaptativo de la malla</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_InitialisationZone</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="89"/>
+        <source>Initialisation zone</source>
+        <translation>Zona de inicialización</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="91"/>
+        <source>Select and create an initialisation zone</source>
+        <translation>Selecciona y crea una zona de inicialización</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_InitialiseInternal</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="53"/>
+        <source>Initialise</source>
+        <translation>Inicializar</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="55"/>
+        <source>Initialise internal flow variables based on the selected physics model</source>
+        <translation>Inicializa variables de flujo interno basado en el modelo de física seleccionado</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_MeshFromShape</name>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="48"/>
+        <source>CFD mesh</source>
+        <translation>Malla CFD</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="50"/>
+        <source>Create a mesh using cfMesh, snappyHexMesh or gmsh</source>
+        <translation>Crea una malla usando cfMesh,snappyHexMesh o gmsh</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_MeshRegion</name>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="61"/>
+        <source>Mesh refinement</source>
+        <translation>Refinamiento de malla</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="63"/>
+        <source>Creates a mesh refinement</source>
+        <translation>Crea un refinamiento de malla</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_OpenPreferences</name>
+    <message>
+        <location filename="../CfdOF/CfdOpenPreferencesPage.py" line="32"/>
+        <source>Open preferences</source>
+        <translation>Abrir preferencias</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdOpenPreferencesPage.py" line="34"/>
+        <source>Opens the CfdOF preferences page</source>
+        <translation>Abre la página de preferencias de CfdOF</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_PhysicsModel</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="52"/>
+        <source>Select models</source>
+        <translation>Seleccionar modelos</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="54"/>
+        <source>Select the physics model</source>
+        <translation>Selecciona el modelo físico</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_PorousZone</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="69"/>
+        <source>Porous zone</source>
+        <translation>Zona porosa</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="71"/>
+        <source>Select and create a porous zone</source>
+        <translation>Selecciona y crea una zona porosa</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_ReloadWorkbench</name>
+    <message>
+        <location filename="../CfdOF/CfdReloadWorkbench.py" line="36"/>
+        <source>Reload CfdOF workbench</source>
+        <translation>Recargar el entorno de trabajo CfdOF</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdReloadWorkbench.py" line="38"/>
+        <source>Reload source files from disk</source>
+        <translation>Recarga los archivos fuente desde el disco</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_ReportingFunctions</name>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="57"/>
+        <source>Reporting function</source>
+        <translation>Función de informe</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="59"/>
+        <source>Create a reporting function for the current case</source>
+        <translation>Crea una función de informe para el caso actual</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_ScalarTransportFunctions</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="50"/>
+        <source>Cfd scalar transport function</source>
+        <translation>Función de transporte escalar CFD</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="52"/>
+        <source>Create a scalar transport function</source>
+        <translation>Crea una función de transporte escalar</translation>
+    </message>
+</context>
+<context>
+    <name>CfdOF_SolverControl</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="52"/>
+        <source>Solver job control</source>
+        <translation>Control del trabajo del solucionador</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="54"/>
+        <source>Edit properties and run solver</source>
+        <translation>Editar propiedades y ejecutar solucionador</translation>
+    </message>
+</context>
+<context>
     <name>CfdPreferencePage</name>
     <message>
         <location filename="../Gui/CfdPreferencePage.ui" line="14"/>
@@ -136,223 +353,6 @@
         <location filename="../Gui/CfdPreferencePage.ui" line="489"/>
         <source>Output</source>
         <translation>Salida</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_Analysis</name>
-    <message>
-        <location filename="../CfdOF/CfdAnalysis.py" line="94"/>
-        <source>Analysis container</source>
-        <translation>Contenedor de análisis</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/CfdAnalysis.py" line="96"/>
-        <source>Creates an analysis container with a CFD solver</source>
-        <translation>Crea un contenedor de para el análisis con un solucionador CFD</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_DynamicMeshInterfaceRefinement</name>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="86"/>
-        <source>Interface dynamic refinement</source>
-        <translation>Refinamiento dinámico de interfaz</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="88"/>
-        <source>Activates adaptive mesh refinement at free-surface interfaces</source>
-        <translation>Activa el refinamiento de malla adaptativo en las interfaces de superficie libre</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_DynamicMeshShockRefinement</name>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="139"/>
-        <source>Shockwave dynamic refinement</source>
-        <translation>Refinamiento dinámico de onda de choque</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="141"/>
-        <source>Activates adaptive mesh refinement for shocks</source>
-        <translation>Activa el refinamiento de malla adaptativo para choques</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_FluidBoundary</name>
-    <message>
-        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="238"/>
-        <source>Fluid boundary</source>
-        <translation>Frontera de fluido</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="240"/>
-        <source>Creates a CFD fluid boundary</source>
-        <translation>Crea una frontera de fluido CFD</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_FluidMaterial</name>
-    <message>
-        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="52"/>
-        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="51"/>
-        <source>Add fluid properties</source>
-        <translation>Agregar propiedades de fluido</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_GroupDynamicMeshRefinement</name>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="42"/>
-        <source>Dynamic mesh refinement</source>
-        <translation>Refinamiento de malla dinámico</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="44"/>
-        <source>Allows adaptive refinement of the mesh</source>
-        <translation>Permite un refinamiento adaptativo de la malla</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_InitialisationZone</name>
-    <message>
-        <location filename="../CfdOF/Solve/CfdZone.py" line="89"/>
-        <source>Initialisation zone</source>
-        <translation>Zona de inicialización</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Solve/CfdZone.py" line="91"/>
-        <source>Select and create an initialisation zone</source>
-        <translation>Selecciona y crea una zona de inicialización</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_InitialiseInternal</name>
-    <message>
-        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="53"/>
-        <source>Initialise</source>
-        <translation>Inicializar</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="55"/>
-        <source>Initialise internal flow variables based on the selected physics model</source>
-        <translation>Inicializar variables de flujo interno basado en el modelo de física seleccionado</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_MeshFromShape</name>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdMesh.py" line="48"/>
-        <source>CFD mesh</source>
-        <translation>Malla CFD</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdMesh.py" line="50"/>
-        <source>Create a mesh using cfMesh, snappyHexMesh or gmsh</source>
-        <translation>Crear una malla usando cfMesh,snappyHexMesh o gmsh</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_MeshRegion</name>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="61"/>
-        <source>Mesh refinement</source>
-        <translation>Refinamiento de malla</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="63"/>
-        <source>Creates a mesh refinement</source>
-        <translation>Crear un refinamiento de malla</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_OpenPreferences</name>
-    <message>
-        <location filename="../CfdOF/CfdOpenPreferencesPage.py" line="32"/>
-        <source>Open preferences</source>
-        <translation>Abrir preferencias</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/CfdOpenPreferencesPage.py" line="34"/>
-        <source>Open the CfdOF preferences page</source>
-        <translation>Abrir la página de preferencias de CfdOF</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_PhysicsModel</name>
-    <message>
-        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="52"/>
-        <source>Select models</source>
-        <translation>Seleccionar modelos</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="54"/>
-        <source>Select the physics model</source>
-        <translation>Selecciona el modelo físico</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_PorousZone</name>
-    <message>
-        <location filename="../CfdOF/Solve/CfdZone.py" line="69"/>
-        <source>Porous zone</source>
-        <translation>Zona porosa</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Solve/CfdZone.py" line="71"/>
-        <source>Select and create a porous zone</source>
-        <translation>Selecciona y crea una zona porosa</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_ReloadWorkbench</name>
-    <message>
-        <location filename="../CfdOF/CfdReloadWorkbench.py" line="36"/>
-        <source>Reload CfdOF workbench</source>
-        <translation>Recargar el entorno de trabajo CfdOF</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/CfdReloadWorkbench.py" line="38"/>
-        <source>Reload source files from disk</source>
-        <translation>Recargar los archivos fuente desde el disco</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_ReportingFunctions</name>
-    <message>
-        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="57"/>
-        <source>Reporting function</source>
-        <translation>Función de informe</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="59"/>
-        <source>Create a reporting function for the current case</source>
-        <translation>Crear una función de informe para el caso actual</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_ScalarTransportFunctions</name>
-    <message>
-        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="50"/>
-        <source>Cfd scalar transport function</source>
-        <translation>Función de transporte escalar CFD</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="52"/>
-        <source>Create a scalar transport function</source>
-        <translation>Crea una función de transporte escalar</translation>
-    </message>
-</context>
-<context>
-    <name>Cfd_SolverControl</name>
-    <message>
-        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="52"/>
-        <source>Solver job control</source>
-        <translation>Control del trabajo del solucionador</translation>
-    </message>
-    <message>
-        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="54"/>
-        <source>Edit properties and run solver</source>
-        <translation>Editar propiedades y ejecutar solucionador</translation>
     </message>
 </context>
 <context>
