@@ -74,7 +74,7 @@ class CfdCaseWriterFoam:
             os.makedirs(self.working_dir)
         except OSError as exc:
             import errno
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
+            if exc.errno == errno.EEXIST and os.path.isdir(self.working_dir):
                 pass
             else:
                 raise
