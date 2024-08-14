@@ -71,6 +71,13 @@ class CfdAnalysis:
         # Set while we are loading from file
         self.loading = True
 
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+
+    def loads(self, state_dict):
+        self.__dict__ = state_dict
+        # Set while we are loading from file
+        self.loading = True
+
 
 class _CfdAnalysis:
     """ Backward compatibility for old class name when loading from file """
@@ -78,6 +85,13 @@ class _CfdAnalysis:
         CfdAnalysis(obj)
 
     def __setstate__(self, state_dict):
+        self.__dict__ = state_dict
+        # Set while we are loading from file
+        self.loading = True
+
+    # dumps and loads replace __getstate__ and __setstate__ post v. 0.21.2
+
+    def loads(self, state_dict):
         self.__dict__ = state_dict
         # Set while we are loading from file
         self.loading = True

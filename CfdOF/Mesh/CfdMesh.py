@@ -201,13 +201,12 @@ class ViewProviderCfdMesh:
         self.Object = vobj.Object
 
     def updateData(self, obj, prop):
-        gui_doc = FreeCADGui.getDocument(obj.Document)
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        num_refinement_objs = CfdTools.getMeshRefinementObjs(obj)
+        num_refinement_objs = len(CfdTools.getMeshRefinementObjs(obj))
         num_dyn_refinement_objs = (0 if CfdTools.getDynamicMeshAdaptation(obj) is None else 1)
-        # Ignore this notification since already accounted for during editing of
-        # properties themselves
         if prop == "_GroupTouched":
+            # Ignore this notification since already accounted for during editing of
+            # properties themselves
             return
         elif prop == "Group":
             if analysis_obj and not analysis_obj.Proxy.loading:
