@@ -204,11 +204,8 @@ class ViewProviderCfdMesh:
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
         num_refinement_objs = len(CfdTools.getMeshRefinementObjs(obj))
         num_dyn_refinement_objs = (0 if CfdTools.getDynamicMeshAdaptation(obj) is None else 1)
-        if prop == "_GroupTouched":
-            # Ignore this notification since already accounted for during editing of
-            # properties themselves
-            return
-        elif prop == "Group":
+        print(prop)
+        if prop == "Group":
             if analysis_obj and not analysis_obj.Proxy.loading:
                 if num_refinement_objs != self.num_refinement_objs:
                     analysis_obj.NeedsMeshRewrite = True
