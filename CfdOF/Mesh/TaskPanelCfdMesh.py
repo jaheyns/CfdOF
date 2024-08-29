@@ -361,6 +361,7 @@ class TaskPanelCfdMesh:
         print_err = self.mesh_obj.Proxy.mesh_process.processErrorOutput(lines)
         if print_err is not None:
             self.consoleMessage(print_err, 'Error')
+            self.check_mesh_error = True
 
     def meshFinished(self, exit_code):
         if exit_code == 0:

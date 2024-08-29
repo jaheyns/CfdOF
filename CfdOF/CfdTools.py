@@ -839,7 +839,7 @@ def makeRunCommand(cmd, dir=None, source_env=True):
     cd = ""
     if dir:
         if getFoamRuntime() == "MinGW":
-            cd = 'cd {} && '.format(translatePath(dir))
+            cd = 'cd /d "{}" && '.format(translatePath(dir))
         else:
             cd = 'cd "{}" && '.format(translatePath(dir))
     
