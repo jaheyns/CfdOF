@@ -8,15 +8,6 @@ FoamFile
     object      meshQualityDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-%{%(MeshUtility%)
-%:snappyHexMesh
-
-// Include defaults parameters from master dictionary
-#includeIfPresent "$FOAM_ETC/caseDicts/meshQualityDict"
-#includeIfPresent "$FOAM_ETC/caseDicts/mesh/generation/meshQualityDict"
-
-// ************************************************************************* //
-%:default
 
 //- Maximum non-orthogonality allowed. Set to 180 to disable.
 maxNonOrtho 90;
@@ -72,4 +63,3 @@ minVolRatio 0.0001;
 minTriangleTwist -1;
 
 // ************************************************************************* //
-%}
