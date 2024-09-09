@@ -200,8 +200,10 @@ class ViewProviderCfdPhysicsSelection:
 
     def updateData(self, obj, prop):
         analysis_obj = CfdTools.getParentAnalysisObject(obj)
-        if analysis_obj and not analysis_obj.Proxy.loading:
-            analysis_obj.NeedsCaseRewrite = True
+        # Ignore Shape updates as these relate to linked patches
+        if prop != 'Shape':
+            if analysis_obj and not analysis_obj.Proxy.loading:
+                analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
         return

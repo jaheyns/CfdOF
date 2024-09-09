@@ -215,7 +215,13 @@ class ViewProviderCfdMesh:
             self.num_dyn_refinement_objs = num_dyn_refinement_objs
         else:
             if analysis_obj and not analysis_obj.Proxy.loading:
-                analysis_obj.NeedsMeshRewrite = True
+                if prop == "_GroupTouched":
+                    if (analysis_obj and analysis_obj.Proxy.ignore_next_grouptouched):
+                        analysis_obj.Proxy.ignore_next_grouptouched = False
+                    else:
+                        analysis_obj.NeedsMeshRewrite = True
+                else:
+                    analysis_obj.NeedsMeshRewrite = True
 
     def onChanged(self, vobj, prop):
         CfdTools.setCompSolid(vobj)

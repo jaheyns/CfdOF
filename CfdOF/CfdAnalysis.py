@@ -46,6 +46,7 @@ class CfdAnalysis:
     """ The CFD analysis group """
     def __init__(self, obj):
         self.loading = False
+        self.ignore_next_grouptouched = False
         obj.Proxy = self
         self.Type = "CfdAnalysis"
         self.initProperties(obj)

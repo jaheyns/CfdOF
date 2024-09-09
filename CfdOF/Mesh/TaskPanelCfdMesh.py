@@ -400,7 +400,8 @@ class TaskPanelCfdMesh:
         prev_write_mesh = self.analysis_obj.NeedsMeshRewrite
         self.mesh_obj.Proxy.cart_mesh.loadSurfMesh()
         self.analysis_obj.NeedsMeshRewrite = prev_write_mesh
-        self.consoleMessage('Triangulated representation of the surface mesh is shown - ', timed=False)
+        self.analysis_obj.Proxy.ignore_next_grouptouched = True
+        self.consoleMessage("Triangulated representation of the surface mesh is shown - ", timed=False)
         self.consoleMessage("Please use Paraview for full mesh visualisation.\n", timed=False)
 
     def pbClearMeshClicked(self):
@@ -409,6 +410,7 @@ class TaskPanelCfdMesh:
             if m.isDerivedFrom("Fem::FemMeshObject"):
                 FreeCAD.ActiveDocument.removeObject(m.Name)
         self.analysis_obj.NeedsMeshRewrite = prev_write_mesh
+        self.analysis_obj.Proxy.ignore_next_grouptouched = True
         FreeCAD.ActiveDocument.recompute()
 
     def searchPointInMesh(self):
