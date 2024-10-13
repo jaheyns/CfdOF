@@ -91,7 +91,7 @@ class CfdConsoleProcess:
         self.process.start()
 
     def terminate(self):
-        if self.process.state() != self.process.NotRunning:
+        if self.process.state() != QProcess.NotRunning:
             if platform.system() == "Windows":
                 # terminate() doesn't operate and kill() doesn't allow cleanup and leaves mpi processes running
                 # Instead, instruct wrapper program to kill child process and itself cleanly with ctrl-break signal
@@ -151,11 +151,11 @@ class CfdConsoleProcess:
         # For some reason waitForFinished doesn't always return - so we resort to a failsafe timeout:
         while True:
             ret = self.process.waitForFinished(1000)
-            if self.process.error() != self.process.Timedout:
+            if self.process.error() != QProcess.Timedout:
                 self.readStdout()
                 self.readStderr()
                 return ret
-            if self.process.state() == self.process.NotRunning:
+            if self.process.state() == QProcess.NotRunning:
                 self.readStdout()
                 self.readStderr()
                 return True
