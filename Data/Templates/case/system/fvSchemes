@@ -31,13 +31,17 @@ divSchemes
     default         none;
     // Use second-order accurate convection
     // Bounded schemes for steady-state solution
-    div(phi,U)      bounded Gauss linearUpwindV grad(U);
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam
+    div(phi,U)      bounded Gauss linearUpwindV grad(U);
     div(phi,K)      bounded Gauss upwind;
     div(phi,h)      bounded Gauss upwind;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+%:SRFSimpleFoam
+    div(phi,Urel)      bounded Gauss linearUpwindV grad(U);
+    div((nuEff*dev2(T(grad(Urel))))) Gauss linear;
 %:default
+    div(phi,U)      bounded Gauss linearUpwindV grad(U);
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
 %}
     div(div(phi,U)) Gauss linear;

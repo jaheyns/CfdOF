@@ -452,10 +452,12 @@ class CfdCaseWriterFoam:
                     sum_alpha += alpha
             initial_values['VolumeFractions'] = alphas_new
 
+        if initial_values['PotentialFlow']:
+            if settings['solver']['SolverName'] in ['SRFSimpleFoam']:
+                raise RuntimeError("Selected solver does not support potential flow velocity initialisation.")
         if initial_values['PotentialFlowP']:
-            if settings['solver']['SolverName'] not in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam',
-                                                        'hisa']:
-                raise RuntimeError("Selected solver does not support potential pressure initialisation.")
+            if settings['solver']['SolverName'] not in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'hisa']:
+                raise RuntimeError("Selected solver does not support potential flow pressure initialisation.")
 
         physics = settings['physics']
 

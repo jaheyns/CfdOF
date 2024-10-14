@@ -155,7 +155,12 @@ solvers
         relTol          0;
     }
 
+%{%(solver/SolverName%)
+%:SRFSimpleFoam
+    Urel
+%:default
     U
+%}
     {
         solver           smoothSolver;
         smoother         symGaussSeidel;
@@ -164,7 +169,12 @@ solvers
         nSweeps          1;
     }
 
+%{%(solver/SolverName%)
+%:SRFSimpleFoam
+    UrelFinal
+%:default
     UFinal
+%}
     {
         $U;
         relTol           0;
@@ -200,7 +210,7 @@ solvers
 
     hFinal
     {
-        $U;
+        $h;
         relTol           0;
     }
 
@@ -303,7 +313,12 @@ relaxationFactors
 %:Steady
     equations
     {
+%{%(solver/SolverName%)
+%:SRFSimpleFoam
+        Urel            0.6;
+%:default
         U               0.6;
+%}
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam
         h               0.6;

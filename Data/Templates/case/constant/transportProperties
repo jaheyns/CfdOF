@@ -1,5 +1,5 @@
 %{%(solver/SolverName%)
-%:simpleFoam porousSimpleFoam pimpleFoam interFoam multiphaseInterFoam
+%:simpleFoam porousSimpleFoam SRFSimpleFoam pimpleFoam interFoam multiphaseInterFoam
 %[_header%]
 FoamFile
 {
@@ -11,7 +11,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 %{%(solver/SolverName%)
-%:simpleFoam porousSimpleFoam pimpleFoam
+%:simpleFoam porousSimpleFoam SRFSimpleFoam pimpleFoam
 transportModel  Newtonian;
 
 nu              [0 2 -1 0 0 0 0] %(fluidProperties/0/KinematicViscosity%);
