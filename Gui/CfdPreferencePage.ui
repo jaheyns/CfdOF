@@ -454,7 +454,7 @@
         <item row="2" column="0" colspan="2">
          <widget class="QPushButton" name="pb_download_install_docker">
           <property name="text">
-           <string>Install Docker Container</string>
+           <string>Install Docker Image</string>
           </property>
          </widget>
         </item>
@@ -498,7 +498,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QTextEdit" name="textEdit_Output">
+      <widget class="QTextBrowser" name="textEdit_Output">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
