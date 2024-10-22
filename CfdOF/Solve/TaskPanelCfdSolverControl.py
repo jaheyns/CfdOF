@@ -224,14 +224,17 @@ class TaskPanelCfdSolverControl:
             "  from CfdOF.Solve import CfdRunnableFoam\n" +
             "  solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)\n" +
             "  cmd = solver_runner.getSolverCmd(solver_directory)\n" +
-            "  env_vars = solver_runner.getRunEnvironment()\n" +
-            "  solver_process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=solver_runner.processOutput)\n" +
-            "  solver_process.start(cmd, env_vars=env_vars, working_dir=solver_directory)\n" +
-            "  solver_process.waitForFinished()\n")
+            "  if cmd is not None:\n" +
+            "    env_vars = solver_runner.getRunEnvironment()\n" +
+            "    solver_process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=solver_runner.processOutput)\n" +
+            "    solver_process.start(cmd, env_vars=env_vars, working_dir=solver_directory)\n" +
+            "    solver_process.waitForFinished()\n")
         working_dir = CfdTools.getOutputPath(self.analysis_object)
         case_name = self.solver_object.InputCaseName
         solver_directory = os.path.abspath(os.path.join(working_dir, case_name))
         cmd = self.solver_runner.getSolverCmd(solver_directory)
+        if cmd is None:
+            return
         env_vars = self.solver_runner.getRunEnvironment()
         self.solver_object.Proxy.solver_process = CfdConsoleProcess(finished_hook=self.solverFinished,
                                                                     stdout_hook=self.gotOutputLines,
@@ -250,6 +253,13 @@ class TaskPanelCfdSolverControl:
         QApplication.restoreOverrideCursor()
 
     def killSolverProcess(self):
+        if CfdTools.getFoamRuntime() == "PosixDocker":
+            FreeCADGui.doCommand("from CfdOF import CfdConsoleProcess")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('killall Allrun', None, source_env=False)")
+            FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
+            FreeCADGui.doCommand("kill_process = CfdConsoleProcess.CfdConsoleProcess()\n" +
+                                 "kill_process.start(cmd, env_vars=env_vars)\n" +
+                                 "kill_process.waitForFinished()\n" )
         self.consoleMessage("Solver manually stopped")
         self.solver_object.Proxy.solver_process.terminate()
         # Note: solverFinished will still be called
