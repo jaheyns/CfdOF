@@ -236,8 +236,6 @@ class TaskPanelCfdMesh:
         self.consoleMessage(message)
 
     def checkMeshClicked(self):
-        if CfdTools.getFoamRuntime() == "PosixDocker":
-            CfdTools.startDocker()
         self.Start = time.time()
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -285,9 +283,6 @@ class TaskPanelCfdMesh:
         CfdTools.openFileManager(case_path)
 
     def runMesh(self):
-        if CfdTools.getFoamRuntime() == "PosixDocker":
-            CfdTools.startDocker()
-
         self.Start = time.time()
 
         # Check for changes that require mesh re-write
@@ -347,6 +342,13 @@ class TaskPanelCfdMesh:
             QApplication.restoreOverrideCursor()
 
     def killMeshProcess(self):
+        if CfdTools.getFoamRuntime() == "PosixDocker":
+            FreeCADGui.doCommand("from CfdOF import CfdConsoleProcess")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('killall Allmesh', None, source_env=False)")
+            FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
+            FreeCADGui.doCommand("kill_process = CfdConsoleProcess.CfdConsoleProcess()\n" +
+                                 "kill_process.start(cmd, env_vars=env_vars)\n" +
+                                 "kill_process.waitForFinished()\n" )
         self.consoleMessage("Meshing manually stopped")
         self.error_message = 'Meshing interrupted'
         self.mesh_obj.Proxy.mesh_process.terminate()
