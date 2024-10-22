@@ -494,8 +494,8 @@ def startDocker():
     if docker_container==None:
         docker_container = DockerContainer()
     if docker_container.container_id==None:
-        if "podman" in docker_container.docker_cmd:
-            # Start podman machine if not already started
+        if "podman" in docker_container.docker_cmd and platform.system() != "Linux":
+            # Start podman machine if not already started, and we are on either MacOS or windows
             exit_code = checkPodmanMachineRunning()
             if exit_code==2:
                 startPodmanMachine()
@@ -510,8 +510,10 @@ def startDocker():
             print("Docker image {} started. ID = {}".format(docker_container.image_name, docker_container.container_id))
             return 0
         else:
-            print("Docker start appears to have failed")
+            print(f"Unable to start {docker_container.docker_cmd} container. Refer to README for installation instructions.")
             return 1
+    else:
+        return 0 # startDocker() called but already running 
 
 def checkPodmanMachineRunning():
     print("Checking podman machine running")
@@ -537,15 +539,6 @@ def checkPodmanMachineRunning():
 def startPodmanMachine():
     print("Attempting podman machine start")
     cmd = "podman machine start"
-    proc = QtCore.QProcess()
-    proc.start(cmd)
-    proc.waitForFinished()
-    line = ""
-    while proc.canReadLine():
-        line = str(proc.readLine().data(), encoding="utf-8")
-        if len(line)>0:
-            print(line)
-    cmd = "podman machine set --rootful"
     proc = QtCore.QProcess()
     proc.start(cmd)
     proc.waitForFinished()
@@ -854,13 +847,19 @@ def makeRunCommand(cmd, dir=None, source_env=True):
 
     if getFoamRuntime() == "PosixDocker":
         global docker_container
+        if docker_container.container_id is None:
+            if startDocker():
+                return("echo docker failure") # Need to return a string - shouldn't actually be used
         if docker_container.output_path_used!=FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""):
             print("Output path changed - restarting container")
             docker_container.stop_container()
             docker_container.start_container()
         if platform.system() == 'Windows' and FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")[:5]=='\\\\wsl' and cmd[:5] == './All':
             cmd = 'chmod 744 {0} && {0}'.format(cmd)  # If using windows wsl$ output directory, need to make the command executable
+        if 'podman' in docker_container.docker_cmd: 
+            cmd = f'export OMPI_ALLOW_RUN_AS_ROOT=1 && export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 && {cmd}'
         cmdline = [docker_container.docker_cmd, 'exec', docker_container.container_id, 'bash', '-c', source + cd + cmd]
+        print('Using command: ' + ' '.join(cmdline))
         return cmdline
 
     if getFoamRuntime() == "WindowsDocker":
@@ -1064,7 +1063,8 @@ def checkCfdDependencies(msgFn):
                   "running FreeCAD nor detected in standard locations")
         else:
             if getFoamRuntime() == "PosixDocker":
-                startDocker()
+                if startDocker():
+                    return
             try:
                 if getFoamRuntime() == "MinGW":
                     foam_ver = runFoamCommand("echo !WM_PROJECT_VERSION!")[0]
@@ -1777,7 +1777,6 @@ class CfdSynchronousFoamProcess:
         if getFoamRuntime() == "PosixDocker" and ' pull ' not in cmdline:
             if startDocker():
                 return 1
-        print("Running ", cmdline)
         self.process.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
         if not self.process.waitForFinished():
             raise Exception("Unable to run command " + cmdline)
@@ -1846,12 +1845,29 @@ class DockerContainer:
             if len(out_d)>2 and out_d[2][:3] == 'wsl':
                 output_path = '/' + '/'.join(out_d[4:])
 
-        cmd = "{0} run -t -d -u 1000:1000 -v {1}:/tmp {2}".format(self.docker_cmd, output_path, self.image_name)
+        if 'podman' in self.docker_cmd: # podman runs without root privileges, so the user in the container can be root.
+            usr_str = '-u 0:0'
+        else:
+            if platform.system() == 'Windows':
+                usr_str = "-u 1000:1000" # Windows under docker
+            else:
+                usr_str = "-u {}:{}".format(os.getuid(),os.getgid())
+
+        podman_opts = ''
+        if 'podman' in self.docker_cmd:        
+            podman_opts = '--security-opt label=disable' # Allows /tmp to be mounted to the podman container
+
+        cmd = "{0} run -t -d {1} {2} -v {3}:/tmp {4}".format(self.docker_cmd, podman_opts, usr_str, output_path, self.image_name)
 
         if 'docker' in self.docker_cmd:
             cmd = cmd.replace('docker.io/','')
+        print("Starting docker with command " + cmd)
         proc = QtCore.QProcess()
         proc.start(cmd)
+        proc.waitForFinished()
+        if proc.exitCode():
+            print("Command exited with error code {}".format(proc.exitCode()))
+            return 1
         self.getContainerID()
         if self.container_id != None:
             self.output_path_used = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
