@@ -211,35 +211,56 @@ prerequisites have been successfully installed.
 #### Docker container install
 
 Docker containers offer a convenient way of providing pre-compiled program packages for both windows and linux. macOS can also be supported but
-assistance will be required to setup a container.  Please leave a message on the [forum](https://forum.freecadweb.org/viewforum.php?f=37).
+assistance may be required to get this to work.  Please leave a message on the [forum](https://forum.freecadweb.org/viewforum.php?f=37).
 
 ##### Docker on Windows
 
-The preferred docker run-time for Windows is via [podman](https://podman.io/) as currently this provides fast filesystem integration.
-[Docker Desktop](https://www.docker.com/products/docker-desktop/) may also be used.
+[Podman](https://podman.io/) is the preferred docker run-time for Windows as using the WSL fast file system integration appears to offer performance benefits. [Docker Desktop](https://www.docker.com/products/docker-desktop/) may also be used.
 
-1. Install [podman](https://github.com/containers/podman/releases/download/v4.2.1/podman-v4.2.1.msi) (or [docker desktop](https://www.docker.com/products/docker-desktop/)).
-2. If using podman, open a cmd window and issue the following commands:
-   * `podman machine init`
-   * `podman machine start`
-   * `podman machine set --rootful`
+1. To use podman:
+    1. If an old version of podman is installed, remove it by opening a cmd window and typing the following commands:
+        * `podman machine stop podman-machine-default`
+        * `podman machine rm podman-machine-default`
+        * Agree to the deletion of files.
+    2. Install [podman](https://github.com/containers/podman/releases) .
+    3. Open a `cmd` (or terminal) window and issue the following commands:
+        * `podman machine init`
+        * `podman machine start` Note, the set rootful command should not be used.
+        * `wsl -d podman-machine-default`
+        * `sudo usermod --add-subuids 10000-75535 $USER`
+        * `sudo usermod --add-subgids 10000-75535 $USER`
+        * `podman system migrate`
+        * `mkdir -p /home/user/cfdof` This command makes a directory for WSL fast file system integration 
+        * `exit`
+        * `exit` (A second time to return to the cmd prompt).
+    4. In the cfdof preference page, set the _Default output directory_ to use the WSL fast file system integration directory (created above):
+        * `\\wsl$\podman-machine-default\home\user\cfdof`
+2. To use Docker:
+    * Install [docker desktop](https://www.docker.com/products/docker-desktop/))
 3. Edit &rarr; Preferences &rarr; CfdOF: Press the _Install Paraview_ button.
 4. Edit &rarr; Preferences &rarr; CfdOF: Select _Use docker_.
 5. Press the _Install Docker Container_ button. There is no need to install gmsh, cfmesh and HISA as they are included in the docker image.
-6. If using podman, fast WSL file system integration can be enabled:
-   * Create a new subdirectory (for example `cfdof`) in the following firectory created by podman:
-   `\\wsl$\podman-machine-default\home\user`
-   * In the cfdof preference page, set the default output directory as above:
-   `\\wsl$\podman-machine-default\home\user\cfdof`
-7. Press the _Run dependency checker_ button.
+6. Press the _Run dependency checker_ button.
 
 ##### Docker on Linux
-1. Install docker using these [instructions](https://www.linuxtechi.com/install-docker-engine-on-debian/) (or similar).
-2. Install paraview as per the package installation instructions for your distribution
+
+Either docker or podman may be used on linux; however, podman is preferred.
+
+1. If podman is not installed by default, install docker or podman. Typical installation instructions are shown below for a debian based system. Similar instructions will be available for other distributions.
+    1. Docker installation
+        * `sudo apt install docker.io`
+        * `sudo usermod -aG docker $USER`
+        * Logout and log back into the session to update the user's groups (or, `sudo su $USER` can be used if Freecad is run from the current terminal window).
+    2. Podman installation
+        * `sudo apt install -y podman crun`
+        * `sudo usermod --add-subuids 10000-75535 $USER`
+        * `sudo usermod --add-subgids 10000-75535 $USER`
+        * `podman system migrate`
+3. Install paraview as per the package installation instructions for your distribution
    (for example `sudo apt-get install paraview` on debian).
-3. Edit &rarr; Preferences &rarr; CfdOF: Select _Use docker_.
-4. Press the _Install Docker Container_ button. There is no need to install gmsh, cfmesh and HISA as they are included in the docker image.
-5. Press the _Run dependency checker_ button.
+4. Edit &rarr; Preferences &rarr; CfdOF: Select _Use docker_.
+5. Press the _Install Docker Container_ button. There is no need to install gmsh, cfmesh and HISA as they are included in the docker image.
+6. Press the _Run dependency checker_ button.
 
 ## Documentation
 
@@ -298,7 +319,7 @@ and the [Council for Scientific and Industrial Research](https://www.csir.co.za)
 * Qingfeng Xia (2015)
 * Thomas Schrader (2017-) <info@schraderundschrader.de>
 * Michael Hindley (2016)
-* Mark Mackenzie (CNF, 2022)
+* Mark Mackenzie [Forum: @markrmau]
 * Katy Akmal (2022) [Forum: @KAKM]
 * Adrian Insaurralde (2022)
 * Klaus Sembritzki (2017)
