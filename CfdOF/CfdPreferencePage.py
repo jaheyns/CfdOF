@@ -139,6 +139,7 @@ class CfdPreferencePage:
 
         self.form.gb_openfoam.setVisible(platform.system() == 'Windows')
         self.form.gb_paraview.setVisible(platform.system() == 'Windows')
+        self.form.textEdit_Output.setOpenExternalLinks(True)
 
     def __del__(self):
         self.cleanUp()
@@ -441,7 +442,8 @@ class CfdPreferencePage:
             if status:
                 self.consoleMessage("Download completed")            
             else:
-                self.consoleMessage("Download unsuccessful")
+                self.consoleMessage('Docker or podman installation problem. \n \
+                    Refer to the <a href="https://github.com/jaheyns/CfdOF#docker-container-install">Readme</a> for details.')
         self.thread = None
 
     def installFinished(self, exit_code):
@@ -466,12 +468,15 @@ class CfdPreferencePage:
     def dockerCheckboxClicked(self):
         if CfdTools.docker_container==None:
             CfdTools.docker_container = CfdTools.DockerContainer()
+        if CfdTools.docker_container.docker_cmd==None and self.form.cb_docker_sel.isChecked():
+            self.consoleMessage('This function requires installation of either docker or podman. \n \
+            Refer to the <a href="https://github.com/jaheyns/CfdOF#docker-container-install">Readme</a> for details.')
+            self.form.cb_docker_sel.setCheckState(Qt.Unchecked)
         CfdTools.docker_container.usedocker = self.form.cb_docker_sel.isChecked()
         self.form.pb_download_install_docker.setEnabled(CfdTools.docker_container.usedocker)
         self.form.pb_download_install_openfoam.setEnabled(not CfdTools.docker_container.usedocker)
         self.form.pb_download_install_hisa.setEnabled(not CfdTools.docker_container.usedocker)
         self.form.pb_download_install_cfMesh.setEnabled(not CfdTools.docker_container.usedocker)
-        self.form.gb_docker.setVisible(CfdTools.docker_container.docker_cmd!=None or CfdTools.docker_container.usedocker)
 
     def downloadInstallDocker(self):
         # Set foam dir and output dir in preparation for using docker
@@ -654,6 +659,16 @@ class CfdPreferencePageThread(QThread):
                     format(HISA_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadDocker(self):
+        if "podman" in CfdTools.docker_container.docker_cmd and platform.system() != "Linux":
+            # Start podman machine if not already started, and we are on either MacOS or windows
+            exit_code = CfdTools.checkPodmanMachineRunning()
+            if exit_code==2:
+                CfdTools.startPodmanMachine()
+                if CfdTools.checkPodmanMachineRunning():
+                    print("Couldn't start podman machine. Aborting docker download")
+            elif exit_code==1:
+                print("Aborting docker download")
+                return
         self.signals.status.emit("Downloading Docker image, please wait until 'Download completed' message shown below")
         if CfdTools.docker_container.container_id!=None:
             CfdTools.docker_container.stop_container()
@@ -662,6 +677,6 @@ class CfdPreferencePageThread(QThread):
             cmd = cmd.replace('docker.io/','')
 
         CfdTools.runFoamCommand(cmd)
-    
+
     def downloadStatus(self, blocks, block_size, total_size):
         self.signals.downloadProgress.emit(blocks*block_size, total_size)
