@@ -203,7 +203,7 @@ class ViewProviderCfdReportingFunction:
             analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
-        CfdTools.setCompSolid(vobj)
+        #CfdTools.setCompSolid(vobj)
         return
 
     def doubleClicked(self, vobj):

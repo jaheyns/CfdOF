@@ -500,7 +500,8 @@ class ViewProviderCfdFluidBoundary:
                 analysis_obj.NeedsCaseRewrite = True
 
     def onChanged(self, vobj, prop):
-        CfdTools.setCompSolid(vobj)
+        #CfdTools.setCompSolid(vobj)
+        return
 
     def setEdit(self, vobj, mode):
         analysis_object = CfdTools.getParentAnalysisObject(self.Object)

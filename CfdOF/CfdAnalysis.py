@@ -162,7 +162,7 @@ class ViewProviderCfdAnalysis:
 
     def onChanged(self, vobj, prop):
         self.makePartTransparent(vobj)
-        CfdTools.setCompSolid(vobj)
+        #CfdTools.setCompSolid(vobj)
         return
 
     def doubleClicked(self, vobj):

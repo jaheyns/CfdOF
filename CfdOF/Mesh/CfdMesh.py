@@ -224,7 +224,8 @@ class ViewProviderCfdMesh:
                     analysis_obj.NeedsMeshRewrite = True
 
     def onChanged(self, vobj, prop):
-        CfdTools.setCompSolid(vobj)
+        #CfdTools.setCompSolid(vobj)
+        return
 
     def setEdit(self, vobj, mode):
         for obj in FreeCAD.ActiveDocument.Objects:
