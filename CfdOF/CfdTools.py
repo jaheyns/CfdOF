@@ -1010,7 +1010,7 @@ def checkCfdDependencies(msgFn):
     MIN_MINGW_VERSION = 2206
 
     MAX_FOUNDATION_VERSION = 10
-    MAX_OCFD_VERSION = 2306
+    MAX_OCFD_VERSION = 2312
     MAX_MINGW_VERSION = 2212
 
     message = ""
