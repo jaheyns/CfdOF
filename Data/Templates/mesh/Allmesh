@@ -80,11 +80,11 @@ export OMP_NUM_THREADS=%(NumberOfThreads%)
 runCommand preparePar
 export MPI_BUFFER_SIZE=200000000
 runParallel $NPROC cartesianMesh
-if [ -z $FOAM_API ]
+if [ ! -z $FOAM_API ] || [ $WM_PROJECT_VERSION -lt 11 ] 2>/dev/null
 then
-    runCommand reconstructParMesh -constant
-else
     runCommand reconstructParMesh -constant -fullMatch
+else
+    runCommand reconstructPar -constant
 fi
 %:False
 %{%(NumberOfThreads%)
@@ -110,7 +110,12 @@ fi
 %:True
 runCommand decomposePar
 runParallel $NPROC snappyHexMesh -overwrite
-runCommand reconstructParMesh -constant
+if [ ! -z $FOAM_API ] || [ $WM_PROJECT_VERSION -lt 11 ] 2>/dev/null
+then    
+    runCommand reconstructParMesh -constant
+else
+    runCommand reconstructPar -constant
+fi
 %:False
 runCommand snappyHexMesh -overwrite
 %}
@@ -123,11 +128,11 @@ runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
 
 %}
-if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
+if [ ! -z $FOAM_API ] || [ $WM_PROJECT_VERSION -lt 9 ] 2>/dev/null
 then
-    runCommand transformPoints "scale=(0.001 0.001 0.001)"
-else
     runCommand transformPoints -scale "(0.001 0.001 0.001)"
+else
+    runCommand transformPoints "scale=(0.001 0.001 0.001)"
 fi
 %}
 

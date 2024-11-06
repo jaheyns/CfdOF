@@ -1,0 +1,21 @@
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+%{%(fluidProperties%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      physicalProperties.%(fluidProperties/%(0%)/Name%);
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+viscosityModel  constant;
+nu              %(fluidProperties/%(0%)/KinematicViscosity%);
+rho             %(fluidProperties/%(0%)/Density%);
+
+
+// ************************************************************************* //
+%} constant/physicalProperties.%(fluidProperties/%(0%)/Name%)
+%}

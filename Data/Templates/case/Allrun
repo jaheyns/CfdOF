@@ -169,7 +169,25 @@ rm -f processor*/0/phi
 
 %}
 # Run application in parallel
-runParallel $NPROC %(solver/SolverName%)
+# Detect new foamRun in Foundation versions >= 11 and translate solver
+which foamRun > /dev/null 2>&1
+if [ $? == 0 ]
+then
+%{%(solver/SolverName%)
+%:simpleFoam pimpleFoam
+    runParallel $NPROC foamRun -solver incompressibleFluid
+%:buoyantSimpleFoam buoyantPimpleFoam
+    runParallel $NPROC foamRun -solver fluid
+%:interFoam
+    runParallel $NPROC foamRun -solver incompressibleVoF
+%:multiphaseInterFoam
+    runParallel $NPROC foamRun -solver incompressibleMultiphaseVoF
+%:default
+    runCommand %(solver/SolverName%)
+%}
+else
+    runParallel $NPROC %(solver/SolverName%)
+fi
 %:False
 %{%(dynamicMeshEnabled%)
 %:False
@@ -203,6 +221,24 @@ rm -f 0/phi
 
 %}
 # Run application
-runCommand %(solver/SolverName%)
+# Detect new foamRun in Foundation versions >= 11 and translate solver
+which foamRun > /dev/null 2>&1
+if [ $? == 0 ]
+then
+%{%(solver/SolverName%)
+%:simpleFoam pimpleFoam
+    runCommand foamRun -solver incompressibleFluid
+%:buoyantSimpleFoam buoyantPimpleFoam
+    runCommand foamRun -solver fluid
+%:interFoam
+    runCommand foamRun -solver incompressibleVoF
+%:multiphaseInterFoam
+    runCommand foamRun -solver incompressibleMultiphaseVoF
+%:default
+    runCommand %(solver/SolverName%)
+%}
+else
+    runCommand %(solver/SolverName%)
+fi
 %}
 

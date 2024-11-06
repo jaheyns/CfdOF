@@ -1,0 +1,23 @@
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      phaseProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+phases
+(
+%{%(fluidProperties%)
+%(fluidProperties/%(0%)/Name%)
+%}
+);
+
+sigma 0.0;
+
+// ************************************************************************* //
+%}
