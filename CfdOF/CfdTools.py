@@ -1862,15 +1862,14 @@ class DockerContainer:
             QApplication.processEvents()
             time.sleep(0.1)
 
-        output, error = proc.communicate()
+        output, _ = proc.communicate()
         if proc.returncode:
             print("Command exited with error code {}".format(proc.returncode))
             if output is not None:
-                print("Command output:", output.decode('utf-8'))
-            if error is not None:
-                print("Command error:", error.decode('utf-8'))
+                print("Command output:", output.decode('utf-8').strip())
             return 1
         self.container_id = output.decode('utf-8').split('\n')[0][:12]
+        print("Docker container started with id:", self.container_id)
 
         self.output_path_used = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
         return 0
