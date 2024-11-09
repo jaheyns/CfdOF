@@ -32,7 +32,6 @@ import os.path
 import glob
 import shutil
 import tempfile
-import numbers
 import platform
 import subprocess
 import sys
@@ -44,17 +43,18 @@ import FreeCAD
 from FreeCAD import Units
 import Part
 import BOPTools
-from BOPTools import SplitFeatures
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
 from CfdOF.CfdConsoleProcess import removeAppimageEnvironment
 from PySide import QtCore
 import CfdOF
+import time
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
     from PySide.QtGui import QFormLayout, QGridLayout
 
 from PySide.QtCore import QT_TRANSLATE_NOOP
+from PySide.QtWidgets import QApplication
 translate = FreeCAD.Qt.translate
 
 # Some standard install locations that are searched if an install directory is not specified
@@ -107,7 +107,7 @@ def getOutputPath(analysis):
         output_path = getDefaultOutputPath()
     if not os.path.isabs(output_path):
         if not FreeCAD.ActiveDocument.FileName:
-            raise RuntimeError("The output directory is specified as a path relative to the current file's location; " 
+            raise RuntimeError("The output directory is specified as a path relative to the current file's location; "
                 "however, it needs to be saved in order to determine this.")
         output_path = os.path.join(os.path.dirname(FreeCAD.ActiveDocument.FileName), output_path)
     prefs = getPreferencesLocation()
@@ -373,8 +373,8 @@ def formatTimer(seconds):
 
 
 def getColour(type):
-    """ 
-    type: 'Error', 'Warning', 'Logging', 'Text' 
+    """
+    type: 'Error', 'Warning', 'Logging', 'Text'
     """
     col_int = FreeCAD.ParamGet("User parameter:BaseApp/Preferences/OutputWindow").GetUnsigned('color'+type)
     return '#{:08X}'.format(col_int)[:-2]
@@ -513,7 +513,7 @@ def startDocker():
             print(f"Unable to start {docker_container.docker_cmd} container. Refer to README for installation instructions.")
             return 1
     else:
-        return 0 # startDocker() called but already running 
+        return 0 # startDocker() called but already running
 
 def checkPodmanMachineRunning():
     print("Checking podman machine running")
@@ -828,14 +828,14 @@ def makeRunCommand(cmd, dir=None, source_env=True):
     if getFoamRuntime() == "PosixDocker":
         # Set source for docker container
         source = 'source /etc/bashrc && '
-        
+
     cd = ""
     if dir:
         if getFoamRuntime() == "MinGW":
             cd = 'cd /d "{}" && '.format(translatePath(dir))
         else:
             cd = 'cd "{}" && '.format(translatePath(dir))
-    
+
     if getFoamRuntime() == "PosixDocker":
         prefs = getPreferencesLocation()
         if dir:
@@ -852,11 +852,10 @@ def makeRunCommand(cmd, dir=None, source_env=True):
                 return("echo docker failure") # Need to return a string - shouldn't actually be used
         if docker_container.output_path_used!=FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""):
             print("Output path changed - restarting container")
-            docker_container.stop_container()
             docker_container.start_container()
         if platform.system() == 'Windows' and FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")[:5]=='\\\\wsl' and cmd[:5] == './All':
             cmd = 'chmod 744 {0} && {0}'.format(cmd)  # If using windows wsl$ output directory, need to make the command executable
-        if 'podman' in docker_container.docker_cmd: 
+        if 'podman' in docker_container.docker_cmd:
             cmd = f'export OMPI_ALLOW_RUN_AS_ROOT=1 && export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 && {cmd}'
         cmdline = [docker_container.docker_cmd, 'exec', docker_container.container_id, 'bash', '-c', source + cd + cmd]
         print('Using command: ' + ' '.join(cmdline))
@@ -1214,9 +1213,9 @@ def checkCfdDependencies(msgFn):
                     pvpython_cmd = paraview_cmd.rstrip('paraview.exe')+'pvpython.exe'
                 elif platform.system() == "Darwin":
                     pvpython_cmd = paraview_cmd.rstrip('paraview').rstrip('/')
-                    dirs = os.path.split(pvpython_cmd)                  
+                    dirs = os.path.split(pvpython_cmd)
                     if dirs[1] == 'MacOS':
-                        pvpython_cmd = os.path.join(dirs[0], 'bin', 'pvpython') 
+                        pvpython_cmd = os.path.join(dirs[0], 'bin', 'pvpython')
                     else:
                         pvpython_cmd = os.path.join(paraview_cmd, 'pvpython')
                 else:
@@ -1658,7 +1657,7 @@ def propsToDict(obj):
     for k in obj.PropertiesList:
         if obj.getTypeIdOfProperty(k) in QUANTITY_PROPERTIES:
             q = Units.Quantity(getattr(obj, k))
-            # q.Value is in FreeCAD internal units, which is same as SI except for mm instead of m and deg instead of 
+            # q.Value is in FreeCAD internal units, which is same as SI except for mm instead of m and deg instead of
             # rad
             d[k] = q.Value/1000**q.Unit.Signature[0]/(180/math.pi)**q.Unit.Signature[7]
         else:
@@ -1714,8 +1713,8 @@ def enableLayoutRows(layout, selected_rows):
 
 
 def clearCase(case_path, backup_path=None):
-    """ 
-    Remove and recreate contents of the case directory, optionally backing up 
+    """
+    Remove and recreate contents of the case directory, optionally backing up
     Does not remove the directory entry itself as this requires paraview to be reloaded
     """
     if backup_path:
@@ -1737,13 +1736,13 @@ def clearCase(case_path, backup_path=None):
 def executeMacro(macro_name):
     macro_contents = "import FreeCAD\nimport FreeCADGui\nimport FreeCAD as App\nimport FreeCADGui as Gui\n"
     macro_contents += open(macro_name).read()
-    exec(compile(macro_contents, macro_name, 'exec'), {'__file__': macro_name})    
+    exec(compile(macro_contents, macro_name, 'exec'), {'__file__': macro_name})
 
 
 def reloadWorkbench():
     """ Code obtained from David_D at https://forum.freecad.org/viewtopic.php?t=34658#p291438 """
     reload_module = CfdOF
-    
+
     fn = reload_module.__file__
     fn_dir = os.path.dirname(fn) + os.sep
     module_visit = {fn}
@@ -1764,7 +1763,7 @@ def reloadWorkbench():
                         reloadWorkbenchRecursive(module_child)
 
     return reloadWorkbenchRecursive(reload_module)
-   
+
 
 class CfdSynchronousFoamProcess:
     def __init__(self):
@@ -1796,11 +1795,11 @@ class DockerContainer:
     usedocker = False
     output_path_used = None
     docker_cmd = None
-    
+
     def __init__(self):
         self.image_name = None
         import shutil
-        
+
         if shutil.which('podman') is not None:
             self.docker_cmd = shutil.which('podman')
         elif shutil.which('docker') is not None:
@@ -1815,22 +1814,17 @@ class DockerContainer:
         prefs = getPreferencesLocation()
         self.image_name = FreeCAD.ParamGet(prefs).GetString("DockerURL", "")
         output_path = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
-        
+
         if not output_path:
             output_path = tempfile.gettempdir()
         output_path = os.path.normpath(output_path)
-        
+
         if not os.path.isdir(output_path):
             print("Default output directory not found")
             return 1
-        
+
         if DockerContainer.container_id != None:
             print("Attempting to start container but id already set")
-
-        container_ls = self.query_docker_container_ls() 
-        if container_ls != None:
-            print("Docker container {} running but not started by CfdOF - it may not be configured correctly - stopping container.".format(container_ls))
-            self.stop_container(alien = True)
 
         if self.image_name == "":
             print("Docker image name not set")
@@ -1846,71 +1840,39 @@ class DockerContainer:
                 output_path = '/' + '/'.join(out_d[4:])
 
         if 'podman' in self.docker_cmd: # podman runs without root privileges, so the user in the container can be root.
-            usr_str = '-u 0:0'
+            usr_str = '-u0:0'
         else:
             if platform.system() == 'Windows':
-                usr_str = "-u 1000:1000" # Windows under docker
+                usr_str = "-u1000:1000" # Windows under docker
             else:
-                usr_str = "-u {}:{}".format(os.getuid(),os.getgid())
+                usr_str = "-u{}:{}".format(os.getuid(),os.getgid())
 
-        podman_opts = ''
-        if 'podman' in self.docker_cmd:        
-            podman_opts = '--security-opt label=disable' # Allows /tmp to be mounted to the podman container
+        cmd = [self.docker_cmd, "run", "-t", "-d", usr_str, "-v" + output_path + ":/tmp", self.image_name]
 
-        cmd = "{0} run -t -d {1} {2} -v {3}:/tmp {4}".format(self.docker_cmd, podman_opts, usr_str, output_path, self.image_name)
+        if 'podman' in self.docker_cmd:
+            cmd.append("--security-opt=label=disable") # Allows /tmp to be mounted to the podman container
 
-        if 'docker' in self.docker_cmd:
-            cmd = cmd.replace('docker.io/','')
-        print("Starting docker with command " + cmd)
-        proc = QtCore.QProcess()
-        proc.start(cmd)
-        proc.waitForFinished()
-        if proc.exitCode():
-            print("Command exited with error code {}".format(proc.exitCode()))
+        # if 'docker' in self.docker_cmd:
+        #     cmd = cmd.replace('docker.io/','')
+
+        print("Starting docker with command:", ' '.join(cmd))
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        while proc.poll() is None:
+            QApplication.processEvents()
+            time.sleep(0.1)
+
+        output, error = proc.communicate()
+        if proc.returncode:
+            print("Command exited with error code {}".format(proc.returncode))
+            if output is not None:
+                print("Command output:", output.decode('utf-8'))
+            if error is not None:
+                print("Command error:", error.decode('utf-8'))
             return 1
-        self.getContainerID()
-        if self.container_id != None:
-            self.output_path_used = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
-            return 0
-        else:
-            return 1
+        self.container_id = output.decode('utf-8').split('\n')[0][:12]
 
-    """ Stop docker container and remove """
-    def stop_container(self, alien = False):
-        if DockerContainer.container_id == None and alien:
-            DockerContainer.container_id = self.query_docker_container_ls()
-        if DockerContainer.container_id != None:
-            print("Stopping docker container {}".format(DockerContainer.container_id))
-            cmd = "{} container rm -f {}".format(self.docker_cmd, DockerContainer.container_id)
-            proc = QtCore.QProcess()
-            proc.start(cmd)
-            if not proc.waitForFinished():
-                print("Stop docker container {} failed".format(DockerContainer.container_id))
-            else:
-                while proc.canReadLine():
-                    line = proc.readLine()
-            DockerContainer.container_id = None
-            DockerContainer.output_path_used = None
-        else:
-            print("No docker container to stop")
-                    
-    def getContainerID(self):
-        import time
-        timer_counts = 0
-        while timer_counts < 10 and DockerContainer.container_id == None:
-            time.sleep(1)
-            DockerContainer.container_id = self.query_docker_container_ls()
-            timer_counts = timer_counts + 1
-        
-    def query_docker_container_ls(self):
-        cmd = "{} container ls".format(self.docker_cmd)
-        proc = QtCore.QProcess()
-        proc.start(cmd)
-        proc.waitForFinished()
-        while proc.canReadLine():
-            line = proc.readLine()
-            cnt_lst = str(line.data(), encoding="utf-8").split()
-            if  len(cnt_lst)>0 and cnt_lst[1].replace(':latest','').replace('docker.io/','') == self.image_name.replace(':latest','').replace('docker.io/',''):
-                return(cnt_lst[0])
-        return(None)
+        self.output_path_used = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
+        return 0
+
 
