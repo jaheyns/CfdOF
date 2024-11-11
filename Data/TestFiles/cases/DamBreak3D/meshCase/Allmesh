@@ -26,7 +26,7 @@ runParallel()
 }
 
 # Unset and source bashrc
-FOAMDIR="/home/oliver/OpenFOAM/OpenFOAM-plus"
+FOAMDIR="/usr/lib/openfoam/openfoam2312"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -49,7 +49,12 @@ fi
 
 runCommand decomposePar
 runParallel $NPROC snappyHexMesh -overwrite
-runCommand reconstructParMesh -constant
+if [ ! -z $FOAM_API ] || [ $WM_PROJECT_VERSION -lt 11 ] 2>/dev/null
+then    
+    runCommand reconstructParMesh -constant
+else
+    runCommand reconstructPar -constant
+fi
 
 
 # Extract surface mesh and convert to mm for visualisation in FreeCAD

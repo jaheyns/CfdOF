@@ -1,7 +1,7 @@
 @echo off
 
 REM Source runtime environment
-set FOAMDIR="/home/oliver/OpenFOAM/OpenFOAM-plus"
+set FOAMDIR="/usr/lib/openfoam/openfoam2312"
 set CWD=%CD%
 call %FOAMDIR%/setEnvVariables-vNone.bat
 cd /d %CWD%

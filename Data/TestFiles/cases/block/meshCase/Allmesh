@@ -35,7 +35,7 @@ fi
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Box_Geometry.geo"
 
 # Unset and source bashrc
-FOAMDIR="/home/oliver/OpenFOAM/OpenFOAM-plus"
+FOAMDIR="/usr/lib/openfoam/openfoam2312"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -44,11 +44,11 @@ fi
 
 runCommand gmshToFoam "gmsh/Box_Geometry.msh"
 
-if [ -z $FOAM_API ] && ( [ $WM_PROJECT_VERSION == "dev" ] || [ $WM_PROJECT_VERSION -ge 9 ] )
+if [ ! -z $FOAM_API ] || [ $WM_PROJECT_VERSION -lt 9 ] 2>/dev/null
 then
-    runCommand transformPoints "scale=(0.001 0.001 0.001)"
-else
     runCommand transformPoints -scale "(0.001 0.001 0.001)"
+else
+    runCommand transformPoints "scale=(0.001 0.001 0.001)"
 fi
 
 

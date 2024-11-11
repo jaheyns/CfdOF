@@ -26,7 +26,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/home/oliver/OpenFOAM/OpenFOAM-plus"
+FOAMDIR="/usr/lib/openfoam/openfoam2312"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -69,5 +69,12 @@ NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDic
 runParallel $NPROC renumberMesh -overwrite
 
 # Run application in parallel
-runParallel $NPROC pimpleFoam
+# Detect new foamRun in Foundation versions >= 11 and translate solver
+which foamRun > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    runParallel $NPROC foamRun -solver incompressibleFluid
+else
+    runParallel $NPROC pimpleFoam
+fi
 

@@ -23,7 +23,7 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
-$GMSH_EXE = "/tmp/.mount_FreeCAuAaXsd/usr/bin/gmsh"
+$GMSH_EXE = "/usr/local/bin/gmsh"
 $NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Pad_Geometry.geo"
 
