@@ -1850,7 +1850,7 @@ class DockerContainer:
         cmd = [self.docker_cmd, "run", "-t", "-d", usr_str, "-v" + output_path + ":/tmp", self.image_name]
 
         if 'podman' in self.docker_cmd:
-            cmd.append("--security-opt=label=disable") # Allows /tmp to be mounted to the podman container
+            cmd.insert(2, "--security-opt=label=disable") # Allows /tmp to be mounted to the podman container
 
         # if 'docker' in self.docker_cmd:
         #     cmd = cmd.replace('docker.io/','')
