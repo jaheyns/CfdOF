@@ -48,12 +48,12 @@ from CfdOF.CfdConsoleProcess import removeAppimageEnvironment
 from PySide import QtCore
 import CfdOF
 import time
+import atexit
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
     from PySide.QtGui import QFormLayout, QGridLayout
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
 from PySide.QtWidgets import QApplication
 translate = FreeCAD.Qt.translate
 
@@ -1823,8 +1823,10 @@ class DockerContainer:
             print("Default output directory not found")
             return 1
 
-        if DockerContainer.container_id != None:
+        if self.container_id is not None:
             print("Attempting to start container but id already set")
+            print("Clear container first...")
+            self.clean_container()
 
         if self.image_name == "":
             print("Docker image name not set")
@@ -1874,4 +1876,15 @@ class DockerContainer:
         self.output_path_used = FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")
         return 0
 
-
+    def clean_container(self):
+        if self.container_id is not None:
+            cmd = [self.docker_cmd, "stop", self.container_id]
+            print("Stopping docker with command:", ' '.join(cmd))
+            proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            output, _ = proc.communicate()
+            if proc.returncode:
+                print("Command exited with error code {}".format(proc.returncode))
+                if output is not None:
+                    print("Command output:", output.decode('utf-8').strip())
+                return 1
+            self.container_id = None

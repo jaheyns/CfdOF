@@ -121,15 +121,16 @@ class CfdOFWorkbench(Workbench):
 
         from CfdOF import CfdTools
         prefs = CfdTools.getPreferencesLocation()
-        CfdTools.DockerContainer.usedocker = FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0)    
+        CfdTools.DockerContainer.usedocker = FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0)
 
     def GetClassName(self):
         return "Gui::PythonWorkbench"
 
     def __del__(sef):
         from CfdOF import CfdTools
-        if CfdTools.DockerContainer.container_id != None:
-            CfdTools.docker_container.stop_container()
+        if CfdTools.docker_container is not None:
+            CfdTools.docker_container.clean_container()
+            print("Container stopped.")
 
 import CfdOF
 FreeCADGui.addWorkbench(CfdOFWorkbench())
