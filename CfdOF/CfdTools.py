@@ -1318,7 +1318,7 @@ def startParaview(case_path, script_name, console_message_fn):
         try:
             cmds = [paraview_cmd, arg]
             cmd = ' '.join(cmds)
-            console_message_fn("Running " + cmd)
+            console_message_fn(f"Running {cmd} at {case_path}")
             args = makeRunCommand(cmd, case_path)
             paraview_cmd = args[0]
             args = args[1:] if len(args) > 1 else []
@@ -1332,7 +1332,7 @@ def startParaview(case_path, script_name, console_message_fn):
         except QtCore.QProcess.ProcessError:
             console_message_fn("Error starting paraview")
     else:
-        console_message_fn("Running " + paraview_cmd + " " + arg)
+        console_message_fn(f"Running {paraview_cmd} {arg} at {case_path}")
         proc.setProgram(paraview_cmd)
         proc.setArguments([arg])
         proc.setWorkingDirectory(case_path)
