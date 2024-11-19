@@ -1,6 +1,6 @@
 # ***************************************************************************
 # *                                                                         *
-# *   Copyright (c) 2023 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
+# *   Copyright (c) 2024 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -24,23 +24,61 @@ import FreeCAD
 import FreeCADGui
 from CfdOF import CfdTools
 from PySide import QtCore
+import TestCfdOF
+from TestCfdOF import runCfdUnitTests, updateReferenceFiles, cleanCfdUnitTests
 
 from PySide.QtCore import QT_TRANSLATE_NOOP
 
-class CommandCfdReloadWorkbench:
+
+class CommandCfdRunTests:
 
     def __init__(self):
         pass
 
     def GetResources(self):
-        return {'MenuText': QT_TRANSLATE_NOOP("CfdOF_ReloadWorkbench",
-                                              "Reload CfdOF workbench"),
-                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_ReloadWorkbench",
-                "Attempt to reload all CfdOF source files from disk. May break open documents!")}
+        return {'MenuText': QT_TRANSLATE_NOOP("CfdOF_RunTests",
+                                                     "Run CfdOF tests"),
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_RunTests",
+                                                    "Run CfdOF tests")}
 
     def IsActive(self):
         return True
 
     def Activated(self):
-        CfdTools.reloadWorkbench()
+        runCfdUnitTests()
 
+
+class CommandCfdUpdateTestData:
+
+    def __init__(self):
+        pass
+
+    def GetResources(self):
+        return {'MenuText': QT_TRANSLATE_NOOP("CfdOF_UpdateTestData",
+                                                     "Update test reference data"),
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_UpdateTestData",
+                                                    "Use latest test run as new reference data for tests")}
+
+    def IsActive(self):
+        return True
+
+    def Activated(self):
+        updateReferenceFiles()
+
+
+class CommandCfdCleanTests:
+
+    def __init__(self):
+        pass
+
+    def GetResources(self):
+        return {'MenuText': QT_TRANSLATE_NOOP("CfdOF_CleanTests",
+                                                     "Clean CfdOF tests"),
+                'ToolTip': QT_TRANSLATE_NOOP("CfdOF_CleanTests",
+                                                    "Clean up temporary data created by CfdOF unit tests")}
+
+    def IsActive(self):
+        return True
+
+    def Activated(self):
+        cleanCfdUnitTests()

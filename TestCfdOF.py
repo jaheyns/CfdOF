@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2021-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2021-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -202,6 +202,12 @@ class BlockTest(unittest.TestCase):
         taskd.closing()
 
     def test_new_analysis(self):
+        # Unset the appending of the document name to the output path to get a predictable place where
+        # files are stored
+        prefs = CfdTools.getPreferencesLocation()
+        original_append_setting = FreeCAD.ParamGet(prefs).GetBool("AppendDocNameToOutputPath", 0)
+        FreeCAD.ParamGet(prefs).SetBool("AppendDocNameToOutputPath", 0)
+
         fccPrint('--------------- Start of CFD tests ---------------')
         fccPrint('Checking CFD {} analysis ...'.format(self.__class__.__doc_name))
         self.createNewAnalysis()
@@ -266,14 +272,12 @@ class BlockTest(unittest.TestCase):
         comparePaths(mesh_ref_dir, mesh_case_dir, self)
         comparePaths(ref_dir, case_dir, self)
 
-        #shutil.rmtree(mesh_case_dir)
-        #shutil.rmtree(case_dir)
-
         fccPrint('--------------- End of CFD tests ---------------')
+
+        FreeCAD.ParamGet(prefs).SetBool("AppendDocNameToOutputPath", original_append_setting)
 
     def tearDown(self):
         FreeCAD.closeDocument(self.__class__.__doc_name)
-        pass
 
 
 class MacroTest:
@@ -281,9 +285,6 @@ class MacroTest:
 
     def __init__(self, var):
         self.child_instance = None
-
-    def setUp(self):
-        pass
 
     def writeCaseFiles(self):
         analysis = CfdTools.getActiveAnalysis()
@@ -294,6 +295,12 @@ class MacroTest:
         self.writer.writeCase()
 
     def runTest(self, dir_name, macro_names):
+        # Unset the appending of the document name to the output path to get a predictable place where
+        # files are stored
+        prefs = CfdTools.getPreferencesLocation()
+        original_append_setting = FreeCAD.ParamGet(prefs).GetBool("AppendDocNameToOutputPath", 0)
+        FreeCAD.ParamGet(prefs).SetBool("AppendDocNameToOutputPath", 0);
+
         fccPrint('--------------- Start of CFD tests ---------------')
         for m in macro_names:
             macro_name = os.path.join(home_path, "Demos", dir_name, m)
@@ -316,10 +323,9 @@ class MacroTest:
         case_dir = self.writer.case_folder
         comparePaths(ref_dir, case_dir, self.child_instance)
 
-        #shutil.rmtree(mesh_case_dir)
-        #shutil.rmtree(case_dir)
-
         fccPrint('--------------- End of CFD tests ---------------')
+
+        FreeCAD.ParamGet(prefs).SetBool("AppendDocNameToOutputPath", original_append_setting)
 
     def closeDoc(self):
         FreeCAD.closeDocument(FreeCAD.ActiveDocument.Name)
@@ -475,8 +481,57 @@ def comparePaths(ref_dir, case_dir, unit_test):
             unit_test.assertFalse(ret, "File \'{}\' test failed.\n{}".format(file, ret))
 
 
+def updateReferenceDirectory(ref_dir, case_dir):
+    """ For every file in ref_dir, copy the corresponding one in case_dir """
+    """ over to ref_dir """
+    fccPrint("Updating files in {} from those in {}".format(case_dir, ref_dir))
+    for path, directories, files in os.walk(ref_dir):
+        for file in files:
+            ref_file = os.path.join(path, file)
+            case_file = os.path.join(case_dir, os.path.relpath(path, ref_dir), file)
+            #fccPrint('Copying {} to {}'.format(case_file, ref_file))
+            shutil.copyfile(case_file, ref_file)
+
+
 def runCfdUnitTests():
     suite = unittest.TestSuite()
     suite.addTest(unittest.defaultTestLoader.loadTestsFromName("TestCfdOF"))
     r = unittest.TextTestRunner()
     r.run(suite)
+
+
+def updateReferenceFiles():
+    """ Update all the reference files with those from runs just completed """
+
+    for item in os.scandir(os.path.join(test_file_dir, "cases")):
+        if item.is_dir():
+            dir_name = item.name
+            mesh_ref_dir = os.path.join(test_file_dir, "cases", dir_name, "meshCase")
+            mesh_case_dir = os.path.join(temp_dir, "meshCase"+dir_name)
+            if os.path.exists(mesh_case_dir):
+                updateReferenceDirectory(mesh_ref_dir, mesh_case_dir)
+            else:
+                fccPrint("Test output data not found in {} - skipping".format(mesh_case_dir))
+
+            ref_dir = os.path.join(test_file_dir, "cases", dir_name, "case")
+            case_dir = os.path.join(temp_dir, "case"+dir_name)
+            if os.path.exists(case_dir):
+                updateReferenceDirectory(ref_dir, case_dir)
+            else:
+                fccPrint("Test output data not found in {} - skipping".format(case_dir))
+
+
+def cleanCfdUnitTests():
+    """ Clean up unit test data from temporary directory """
+
+    for path, directories, files in os.walk(test_file_dir):
+        for dir_name in directories:
+            mesh_case_dir = os.path.join(temp_dir, "meshCase"+dir_name)
+            if os.path.exists(mesh_case_dir):
+                fccPrint("Cleaning directory {}".format(mesh_case_dir))
+                shutil.rmtree(mesh_case_dir)
+
+            case_dir = os.path.join(temp_dir, "case"+dir_name)
+            if os.path.exists(case_dir):
+                fccPrint("Cleaning directory {}".format(case_dir))
+                shutil.rmtree(case_dir)
