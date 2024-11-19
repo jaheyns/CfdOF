@@ -11,7 +11,8 @@ pfoam.CaseType = 'Decomposed Case'
 %:False
 pfoam.CaseType = 'Reconstructed Case'
 %}
-pfoam.Decomposepolyhedra = 0
+if hasattr(pfoam, 'Decomposepolyhedra'):
+    pfoam.Decomposepolyhedra = 0
 
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
