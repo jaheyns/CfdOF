@@ -18,19 +18,20 @@
 # *                                                                         *
 # ***************************************************************************
 
-import FreeCAD
-import FreeCADGui
-from PySide import QtCore
-from CfdOF import CfdTools
-from CfdOF.CfdTools import addObjectProperty
 import os
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+import FreeCAD
+import FreeCADGui
 
-MESHER_DESCRIPTIONS = ['cfMesh', 'snappyHexMesh', 'gmsh (tetrahedral)', 'gmsh (polyhedral)']
-MESHERS = ['cfMesh', 'snappyHexMesh', 'gmsh', 'gmsh']
-DIMENSION = ['3D', '3D', '3D', '3D']
+from CfdOF import CfdTools
+from CfdOF.CfdTools import addObjectProperty
+
+MESHER_DESCRIPTIONS = ["cfMesh", "snappyHexMesh", "gmsh (tetrahedral)", "gmsh (polyhedral)"]
+MESHERS = ["cfMesh", "snappyHexMesh", "gmsh", "gmsh"]
+DIMENSION = ["3D", "3D", "3D", "3D"]
 DUAL_CONVERSION = [False, False, False, True]
+
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 
 
 def makeCfdMesh(name="CFDMesh"):
@@ -94,54 +95,152 @@ class CfdMesh:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, 'CaseName', "meshCase", "App::PropertyString", "",
-                          "Name of directory in which the mesh is created")
+        addObjectProperty(
+            obj,
+            "CaseName",
+            "meshCase",
+            "App::PropertyString",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Name of directory in which the mesh is created"),
+        )
 
         # Setup and utility
-        addObjectProperty(obj, 'STLRelativeLinearDeflection', 0.001, "App::PropertyFloat", "Surface triangulation",
-                          "Maximum relative linear deflection for built-in surface triangulation")
-        addObjectProperty(obj, 'STLAngularMeshDensity', 100, "App::PropertyFloat", "Surface triangulation", 
-                          "Mesh elements per 360 degrees for surface triangulation with GMSH")
+        addObjectProperty(
+            obj,
+            "STLRelativeLinearDeflection",
+            0.001,
+            "App::PropertyFloat",
+            "Surface triangulation",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Maximum relative linear deflection for built-in surface triangulation",
+            ),
+        )
+        addObjectProperty(
+            obj,
+            "STLAngularMeshDensity",
+            100,
+            "App::PropertyFloat",
+            "Surface triangulation",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Mesh elements per 360 degrees for surface triangulation with GMSH"
+            ),
+        )
 
-        addObjectProperty(obj, 'NumberOfProcesses', 1, "App::PropertyInteger", "",
-                          "Number of parallel processes (only applicable to cfMesh and snappyHexMesh)")
+        addObjectProperty(
+            obj,
+            "NumberOfProcesses",
+            1,
+            "App::PropertyInteger",
+            "",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Number of parallel processes (only applicable to cfMesh and snappyHexMesh)",
+            ),
+        )
 
-        addObjectProperty(obj, 'NumberOfThreads', 0, "App::PropertyInteger", "",
-                          "Number of parallel threads per process (only applicable to cfMesh and gmsh). "
-                          "0 means use all available (if NumberOfProcesses = 1) or use 1 (if NumberOfProcesses > 1)")
+        addObjectProperty(
+            obj,
+            "NumberOfThreads",
+            0,
+            "App::PropertyInteger",
+            "",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Number of parallel threads per process (only applicable to cfMesh and gmsh).\n"
+                "0 means use all available (if NumberOfProcesses = 1) or use 1 (if NumberOfProcesses > 1)",
+            ),
+        )
 
-        addObjectProperty(obj, "Part", None, "App::PropertyLinkGlobal", "Mesh Parameters", "Part object to mesh")
+        addObjectProperty(
+            obj,
+            "Part",
+            None,
+            "App::PropertyLinkGlobal",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP("App::Property", "Part object to mesh"),
+        )
 
-        if addObjectProperty(obj, "MeshUtility", MESHERS, "App::PropertyEnumeration",
-                             "Mesh Parameters", "Meshing utilities"):
+        if addObjectProperty(
+            obj,
+            "MeshUtility",
+            MESHERS,
+            "App::PropertyEnumeration",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP("App::Property", "Meshing utilities"),
+        ):
             obj.MeshUtility = MESHERS[0]
 
         # Refinement
-        addObjectProperty(obj, "CharacteristicLengthMax", "0 m", "App::PropertyLength", "Mesh Parameters",
-                          "Max mesh element size (0.0 = infinity)")
+        addObjectProperty(
+            obj,
+            "CharacteristicLengthMax",
+            "0 m",
+            "App::PropertyLength",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP("App::Property", "Max mesh element size (0.0 = infinity)"),
+        )
 
-        addObjectProperty(obj, 'PointInMesh', {"x": '0 m', "y": '0 m', "z": '0 m'}, "App::PropertyMap",
-                          "Mesh Parameters",
-                          "Location vector inside the region to be meshed (must not coincide with a cell face)")
+        addObjectProperty(
+            obj,
+            "PointInMesh",
+            {"x": "0 m", "y": "0 m", "z": "0 m"},
+            "App::PropertyMap",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Location vector inside the region to be meshed (must not coincide with a cell face)",
+            ),
+        )
 
-        addObjectProperty(obj, 'CellsBetweenLevels', 3, "App::PropertyInteger", "Mesh Parameters",
-                          "Number of cells between each level of refinement")
+        addObjectProperty(
+            obj,
+            "CellsBetweenLevels",
+            3,
+            "App::PropertyInteger",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP("App::Property", "Number of cells between each level of refinement"),
+        )
 
-        addObjectProperty(obj, 'EdgeRefinement', 1, "App::PropertyFloat", "Mesh Parameters",
-                          "Relative edge (feature) refinement")
+        addObjectProperty(
+            obj,
+            "EdgeRefinement",
+            1,
+            "App::PropertyFloat",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP("App::Property", "Relative edge (feature) refinement"),
+        )
 
         # PolyDualMesh
-        addObjectProperty(obj, 'ConvertToDualMesh', False, "App::PropertyBool", "Mesh Parameters",
-                          "Convert to polyhedral dual mesh")
+        addObjectProperty(
+            obj,
+            "ConvertToDualMesh",
+            False,
+            "App::PropertyBool",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP("App::Property", "Convert to polyhedral dual mesh"),
+        )
 
         # Edge detection, implicit / explicit (NB Implicit = False implies Explicit = True)
-        addObjectProperty(obj, 'ImplicitEdgeDetection', False, "App::PropertyBool", "Mesh Parameters",
-                          "Use implicit edge detection")
+        addObjectProperty(
+            obj,
+            "ImplicitEdgeDetection",
+            False,
+            "App::PropertyBool",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP("App::Property", "Use implicit edge detection"),
+        )
 
         # Mesh dimension
-        if addObjectProperty(obj, 'ElementDimension', CfdMesh.known_element_dimensions, "App::PropertyEnumeration",
-                             "Mesh Parameters", "Dimension of mesh elements (Default 3D)"):
-            obj.ElementDimension = '3D'
+        if addObjectProperty(
+            obj,
+            "ElementDimension",
+            CfdMesh.known_element_dimensions,
+            "App::PropertyEnumeration",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP("App::Property", "Dimension of mesh elements (Default 3D)"),
+        ):
+            obj.ElementDimension = "3D"
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

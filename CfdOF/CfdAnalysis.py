@@ -22,15 +22,18 @@
 # *                                                                         *
 # ***************************************************************************
 
+import os
+
 import FreeCAD
+
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
-import os
+
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
+
 
 def makeCfdAnalysis(name):
     """ Create a Cfd Analysis group object """
@@ -52,16 +55,67 @@ class CfdAnalysis:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, "OutputPath", "", "App::PropertyPath", "",
-                          "Path to which cases are written (blank to use system default; relative path is relative "
-                          "to location of current file)")
-        addObjectProperty(obj, "IsActiveAnalysis", False, "App::PropertyBool", "", "Active analysis object in document")
+        addObjectProperty(
+            obj,
+            "OutputPath",
+            "",
+            "App::PropertyPath",
+            "",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Path to which cases are written (blank to use system default; relative path is relative "
+                "to location of current file)",
+            ),
+        )
+        addObjectProperty(
+            obj,
+            "IsActiveAnalysis",
+            False,
+            "App::PropertyBool",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Active analysis object in document"),
+        )
         obj.setEditorMode("IsActiveAnalysis", 1)  # Make read-only (2 = hidden)
-        addObjectProperty(obj, 'NeedsMeshRewrite', True, "App::PropertyBool", "", "Mesh setup needs to be re-written")
-        addObjectProperty(obj, 'NeedsCaseRewrite', True, "App::PropertyBool", "", "Case setup needs to be re-written")
-        addObjectProperty(obj, 'NeedsMeshRerun', True, "App::PropertyBool", "", "Mesher needs to be re-run before running solver")
-        addObjectProperty(obj, 'UseHostfile', False, "App::PropertyBool", "", "Use a hostfile for parallel cluster runs")
-        addObjectProperty(obj, 'HostfileName', "../mpi_hostfile", "App::PropertyString", "", "Hostfile name")
+        addObjectProperty(
+            obj,
+            "NeedsMeshRewrite",
+            True,
+            "App::PropertyBool",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Mesh setup needs to be re-written"),
+        )
+        addObjectProperty(
+            obj,
+            "NeedsCaseRewrite",
+            True,
+            "App::PropertyBool",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Case setup needs to be re-written"),
+        )
+        addObjectProperty(
+            obj,
+            "NeedsMeshRerun",
+            True,
+            "App::PropertyBool",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Mesher needs to be re-run before running solver"),
+        )
+        addObjectProperty(
+            obj,
+            "UseHostfile",
+            False,
+            "App::PropertyBool",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Use a hostfile for parallel cluster runs"),
+        )
+        addObjectProperty(
+            obj,
+            "HostfileName",
+            "../mpi_hostfile",
+            "App::PropertyString",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Hostfile name"),
+        )
 
     def onDocumentRestored(self, obj):
         self.loading = False
