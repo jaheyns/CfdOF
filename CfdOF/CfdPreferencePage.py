@@ -186,8 +186,8 @@ class CfdPreferencePage:
 
         if FreeCAD.ParamGet(prefs).GetBool("UseDocker", 0):
             self.form.cb_docker_sel.setCheckState(Qt.Checked)
-        
-        # Set usedocker and enable/disable download buttons 
+
+        # Set usedocker and enable/disable download buttons
         self.dockerCheckboxClicked()
 
         self.form.le_docker_url.setText(FreeCAD.ParamGet(prefs).GetString("DockerURL", DOCKER_URL))
@@ -398,12 +398,12 @@ class CfdPreferencePage:
                     else:
                         if platform.system() == 'Darwin':
                             self.install_process = CfdTools.startFoamApplication(
-                                "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake", 
+                                "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake",
                                 "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
                                 'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                         else:
                             self.install_process = CfdTools.startFoamApplication(
-                                "export WM_NCOMPPROCS=`nproc`; ./Allwmake", 
+                                "export WM_NCOMPPROCS=`nproc`; ./Allwmake",
                                 "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
                                 'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                 else:
@@ -426,12 +426,12 @@ class CfdPreferencePage:
                     else:
                         if platform.system() == 'Darwin':
                             self.install_process = CfdTools.startFoamApplication(
-                                "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake", 
+                                "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake",
                                 "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
                                 'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                         else:
                             self.install_process = CfdTools.startFoamApplication(
-                                "export WM_NCOMPPROCS=`nproc`; ./Allwmake", 
+                                "export WM_NCOMPPROCS=`nproc`; ./Allwmake",
                                 "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
                                 'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                 else:
@@ -440,7 +440,7 @@ class CfdPreferencePage:
             CfdTools.setFoamDir(self.initial_foam_dir)
         elif self.thread.task == DOWNLOAD_DOCKER:
             if status:
-                self.consoleMessage("Download completed")            
+                self.consoleMessage("Download completed")
             else:
                 self.consoleMessage('Docker or podman installation problem. \n \
                     Refer to the <a href="https://github.com/jaheyns/CfdOF#docker-container-install">Readme</a> for details.')
@@ -484,7 +484,7 @@ class CfdPreferencePage:
         self.saveSettings()
         if self.createThread():
             self.thread.task = DOWNLOAD_DOCKER
-            self.thread.docker_url = self.form.le_docker_url.text() 
+            self.thread.docker_url = self.form.le_docker_url.text()
             self.thread.start()
 
 class CfdPreferencePageSignals(QObject):
@@ -670,8 +670,7 @@ class CfdPreferencePageThread(QThread):
                 print("Aborting docker download")
                 return
         self.signals.status.emit("Downloading Docker image, please wait until 'Download completed' message shown below")
-        if CfdTools.docker_container.container_id!=None:
-            CfdTools.docker_container.stop_container()
+        CfdTools.docker_container.clean_container()
         cmd = '{} pull {}'.format(CfdTools.docker_container.docker_cmd, self.docker_url)
         if 'docker'in CfdTools.docker_container.docker_cmd:
             cmd = cmd.replace('docker.io/','')
