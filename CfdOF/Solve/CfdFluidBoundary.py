@@ -23,57 +23,115 @@
 # ***************************************************************************
 
 import os
-from pivy import coin
-import Part
+
 import FreeCAD
-from FreeCAD import Units
+import Part
+from pivy import coin
+
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
+
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
+
     from CfdOF.Solve import TaskPanelCfdFluidBoundary
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+
+translate = FreeCAD.Qt.translate
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 
 # Constants
-BOUNDARY_NAMES = ["Wall", "Inlet", "Outlet", "Open", "Constraint", "Baffle"]
+BOUNDARY_NAMES = [
+    translate("Boundary", "Wall"),
+    translate("Boundary", "Inlet"),
+    translate("Boundary", "Outlet"),
+    translate("Boundary", "Open"),
+    translate("Boundary", "Constraint"),
+    translate("Boundary", "Baffle"),
+]
 
+# NOTE: don't translate this
 BOUNDARY_TYPES = ["wall", "inlet", "outlet", "open", "constraint", "baffle"]
 
-SUBNAMES = [["No-slip (viscous)", "Slip (inviscid)", "Partial slip", "Translating", "Rough"],
-            ["Uniform velocity", "Volumetric flow rate", "Mass flow rate", "Total pressure", "Static pressure"],
-            ["Static pressure", "Uniform velocity", "Extrapolated"],
-            ["Ambient pressure", "Far-field"],
-            ["Symmetry", "Periodic"],
-            ["Porous Baffle"]]
+SUBNAMES = [
+    [
+        translate("Subnames", "No-slip (viscous)"),
+        translate("Subnames", "Slip (inviscid)"),
+        translate("Subnames", "Partial slip"),
+        translate("Subnames", "Translating"),
+        translate("Subnames", "Rough"),
+    ],
+    [
+        translate("Subnames", "Uniform velocity"),
+        translate("Subnames", "Volumetric flow rate"),
+        translate("Subnames", "Mass flow rate"),
+        translate("Subnames", "Total pressure"),
+        translate("Subnames", "Static pressure"),
+    ],
+    [
+        translate("Subnames", "Static pressure"),
+        translate("Subnames", "Uniform velocity"),
+        translate("Subnames", "Extrapolated"),
+    ],
+    [translate("Subnames", "Ambient pressure"), translate("Subnames", "Far-field")],
+    [translate("Subnames", "Symmetry"), translate("Subnames", "Periodic")],
+    [translate("Subnames", "Porous Baffle")],
+]
 
-SUBTYPES = [["fixedWall", "slipWall", "partialSlipWall", "translatingWall", "roughWall"],
-            ["uniformVelocityInlet", "volumetricFlowRateInlet", "massFlowRateInlet", "totalPressureInlet",
-             "staticPressureInlet"],
-            ["staticPressureOutlet", "uniformVelocityOutlet", "outFlowOutlet"],
-            ["totalPressureOpening", "farField"],
-            ["symmetry", "cyclicAMI"],
-            ["porousBaffle"]]
+# NOTE: don't translate this
+SUBTYPES = [
+    ["fixedWall", "slipWall", "partialSlipWall", "translatingWall", "roughWall"],
+    [
+        "uniformVelocityInlet",
+        "volumetricFlowRateInlet",
+        "massFlowRateInlet",
+        "totalPressureInlet",
+        "staticPressureInlet",
+    ],
+    ["staticPressureOutlet", "uniformVelocityOutlet", "outFlowOutlet"],
+    ["totalPressureOpening", "farField"],
+    ["symmetry", "cyclicAMI"],
+    ["porousBaffle"],
+]
 
-SUBTYPES_HELPTEXT = [["Zero velocity relative to wall",
-                      "Frictionless wall; zero normal velocity",
-                      "Blended fixed/slip",
-                      "Fixed velocity tangential to wall; zero normal velocity",
-                      "Wall roughness function"],
-                     ["Velocity specified; normal component imposed for reverse flow",
-                      "Uniform volume flow rate specified",
-                      "Uniform mass flow rate specified",
-                      "Total pressure specified; treated as static pressure for reverse flow",
-                      "Static pressure specified"],
-                     ["Static pressure specified for outflow and total pressure for reverse flow",
-                      "Normal component imposed for outflow; velocity fixed for reverse flow",
-                      "All fields extrapolated; possibly unstable"],
-                     ["Boundary open to surroundings with total pressure specified",
-                      "Characteristic-based non-reflecting boundary"],
-                     ["Symmetry of flow quantities about boundary face",
-                      "Rotationally or translationally periodic flows between two boundary faces"],
-                     ["Permeable screen"]]
+SUBTYPES_HELPTEXT = [
+    [
+        translate("Subtypes", "Zero velocity relative to wall"),
+        translate("Subtypes", "Frictionless wall; zero normal velocity"),
+        translate("Subtypes", "Blended fixed/slip"),
+        translate("Subtypes", "Fixed velocity tangential to wall; zero normal velocity"),
+        translate("Subtypes", "Wall roughness function"),
+    ],
+    [
+        translate("Subtypes", "Velocity specified; normal component imposed for reverse flow"),
+        translate("Subtypes", "Uniform volume flow rate specified"),
+        translate("Subtypes", "Uniform mass flow rate specified"),
+        translate(
+            "Subtypes", "Total pressure specified; treated as static pressure for reverse flow"
+        ),
+        translate("Subtypes", "Static pressure specified"),
+    ],
+    [
+        translate(
+            "Subtypes", "Static pressure specified for outflow and total pressure for reverse flow"
+        ),
+        translate(
+            "Subtypes", "Normal component imposed for outflow; velocity fixed for reverse flow"
+        ),
+        translate("Subtypes", "All fields extrapolated; possibly unstable"),
+    ],
+    [
+        translate("Subtypes", "Boundary open to surroundings with total pressure specified"),
+        translate("Subtypes", "Characteristic-based non-reflecting boundary"),
+    ],
+    [
+        translate("Subtypes", "Symmetry of flow quantities about boundary face"),
+        translate(
+            "Subtypes", "Rotationally or translationally periodic flows between two boundary faces"
+        ),
+    ],
+    [translate("Subtypes", "Permeable screen")],
+]
 
 # For each sub-type, whether the basic tab is enabled, the panel numbers to show (ignored if false), whether
 # direction reversal is checked by default (only used for panel 0), whether turbulent inlet panel is shown,
