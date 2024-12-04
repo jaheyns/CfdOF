@@ -21,15 +21,17 @@
 
 from __future__ import print_function
 
+import os
+
 import FreeCAD
 import FreeCADGui
-import os
+from pivy import coin
+
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
-from pivy import coin
-from PySide import QtCore
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
+
 
 def makeCfdScalarTransportFunction(name="ScalarTransportFunction"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
@@ -74,27 +76,71 @@ class CfdScalarTransportFunction:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, 'FieldName', "S", "App::PropertyString", "Scalar transport",
-                          "Name of the scalar transport field")
+        addObjectProperty(
+            obj,
+            "FieldName",
+            "S",
+            "App::PropertyString",
+            "Scalar transport",
+            QT_TRANSLATE_NOOP("App::Property", "Name of the scalar transport field"),
+        )
 
-        addObjectProperty(obj, 'DiffusivityFixed', False, "App::PropertyBool", "Scalar transport",
-                          "Use fixed value for diffusivity rather than viscosity")
+        addObjectProperty(
+            obj,
+            "DiffusivityFixed",
+            False,
+            "App::PropertyBool",
+            "Scalar transport",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Use fixed value for diffusivity rather than viscosity"
+            ),
+        )
 
         # This is actually rho*diffusivity, but this is what OpenFOAM uses
-        addObjectProperty(obj, 'DiffusivityFixedValue', "0.001 kg/m/s", "App::PropertyQuantity", "Scalar transport",
-                          "Diffusion coefficient for fixed diffusivity")
+        addObjectProperty(
+            obj,
+            "DiffusivityFixedValue",
+            "0.001 kg/m/s",
+            "App::PropertyQuantity",
+            "Scalar transport",
+            QT_TRANSLATE_NOOP("App::Property", "Diffusion coefficient for fixed diffusivity"),
+        )
 
-        addObjectProperty(obj, 'RestrictToPhase', False, "App::PropertyBool", "Scalar transport",
-                          "Restrict transport within phase")
-        
-        addObjectProperty(obj, 'PhaseName', "water", "App::PropertyString", "Scalar transport",
-                          "Transport within phase")
+        addObjectProperty(
+            obj,
+            "RestrictToPhase",
+            False,
+            "App::PropertyBool",
+            "Scalar transport",
+            QT_TRANSLATE_NOOP("App::Property", "Restrict transport within phase"),
+        )
 
-        addObjectProperty(obj, 'InjectionRate', '1 kg/s', "App::PropertyQuantity", "Scalar transport",
-                          "Injection rate")
+        addObjectProperty(
+            obj,
+            "PhaseName",
+            "water",
+            "App::PropertyString",
+            "Scalar transport",
+            QT_TRANSLATE_NOOP("App::Property", "Transport within phase"),
+        )
 
-        addObjectProperty(obj, 'InjectionPoint', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Scalar transport",
-                          "Location of the injection point")
+        addObjectProperty(
+            obj,
+            "InjectionRate",
+            "1 kg/s",
+            "App::PropertyQuantity",
+            "Scalar transport",
+            QT_TRANSLATE_NOOP("App::Property", "Injection rate"),
+        )
+
+        addObjectProperty(
+            obj,
+            "InjectionPoint",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Scalar transport",
+            QT_TRANSLATE_NOOP("App::Property", "Location of the injection point"),
+        )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

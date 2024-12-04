@@ -24,14 +24,17 @@
 
 import os
 import os.path
+
 import FreeCAD
+
 from CfdOF import CfdTools
-from CfdOF.CfdTools import addObjectProperty
 from CfdOF.CfdTimePlot import TimePlot
+from CfdOF.CfdTools import addObjectProperty
+
 if FreeCAD.GuiUp:
     import FreeCADGui
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 
 # Constants
 START_FROM = ["startTime", "latestTime"]
@@ -82,38 +85,126 @@ class CfdSolverFoam(object):
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, "InputCaseName", "case", "App::PropertyFile", "Solver",
-                          "Name of case directory where the input files are written")
-        addObjectProperty(obj, "Parallel", True, "App::PropertyBool", "Solver",
-                          "Parallel analysis on multiple CPU cores")
-        addObjectProperty(obj, "ParallelCores", 4, "App::PropertyInteger", "Solver",
-                          "Number of cores on which to run parallel analysis")
-        addObjectProperty(obj, "PurgeWrite", 0, "App::PropertyInteger", "Solver",
-                          "Sets a limit on the number of time directories that are stored by overwriting time directories on a cyclic basis.  Set to 0 to disable")
+        addObjectProperty(
+            obj,
+            "InputCaseName",
+            "case",
+            "App::PropertyFile",
+            "Solver",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Name of case directory where the input files are written"
+            ),
+        )
+        addObjectProperty(
+            obj,
+            "Parallel",
+            True,
+            "App::PropertyBool",
+            "Solver",
+            QT_TRANSLATE_NOOP("App::Property", "Parallel analysis on multiple CPU cores"),
+        )
+        addObjectProperty(
+            obj,
+            "ParallelCores",
+            4,
+            "App::PropertyInteger",
+            "Solver",
+            QT_TRANSLATE_NOOP("App::Property", "Number of cores on which to run parallel analysis"),
+        )
+        addObjectProperty(
+            obj,
+            "PurgeWrite",
+            0,
+            "App::PropertyInteger",
+            "Solver",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Sets a limit on the number of time directories that are stored by overwriting time directories on a cyclic basis.  Set to 0 to disable",
+            ),
+        )
 
-        addObjectProperty(obj, "MaxIterations", 2000, "App::PropertyInteger", "IterationControl",
-                          "Maximum number of iterations to run steady-state analysis")
-        addObjectProperty(obj, "SteadyWriteInterval", 100, "App::PropertyInteger", "IterationControl",
-                          "Iteration output interval")
-        addObjectProperty(obj, "ConvergenceTol", 1e-3, "App::PropertyFloat", "IterationControl",
-                          "Global absolute solution convergence criterion")
+        addObjectProperty(
+            obj,
+            "MaxIterations",
+            2000,
+            "App::PropertyInteger",
+            "IterationControl",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Maximum number of iterations to run steady-state analysis"
+            ),
+        )
+        addObjectProperty(
+            obj,
+            "SteadyWriteInterval",
+            100,
+            "App::PropertyInteger",
+            "IterationControl",
+            QT_TRANSLATE_NOOP("App::Property", "Iteration output interval"),
+        )
+        addObjectProperty(
+            obj,
+            "ConvergenceTol",
+            1e-3,
+            "App::PropertyFloat",
+            "IterationControl",
+            QT_TRANSLATE_NOOP("App::Property", "Global absolute solution convergence criterion"),
+        )
 
-        if addObjectProperty(obj, "StartFrom", START_FROM,
-                             "App::PropertyEnumeration", "TimeStepControl",
-                             "Whether to restart or resume solving"):
+        if addObjectProperty(
+            obj,
+            "StartFrom",
+            START_FROM,
+            "App::PropertyEnumeration",
+            "TimeStepControl",
+            QT_TRANSLATE_NOOP("App::Property", "Whether to restart or resume solving"),
+        ):
             obj.StartFrom = START_FROM[0]
-        addObjectProperty(obj, "EndTime", "1 s", "App::PropertyQuantity", "TimeStepControl",
-                          "Total time to run transient solution")
-        addObjectProperty(obj, "TimeStep", "0.001 s", "App::PropertyQuantity", "TimeStepControl",
-                          "Time step increment")
-        addObjectProperty(obj, "MaxCFLNumber", 5, "App::PropertyFloat", "TimeStepControl",
-                          "Maximum CFL number for transient simulations")
-        addObjectProperty(obj, "MaxInterfaceCFLNumber", 5, "App::PropertyFloat", "TimeStepControl",
-                          "Maximum free-surface CFL number for transient simulations")
-        addObjectProperty(obj, "TransientWriteInterval", "0.1 s", "App::PropertyQuantity", "TimeStepControl",
-                          "Output time interval")
+        addObjectProperty(
+            obj,
+            "EndTime",
+            "1 s",
+            "App::PropertyQuantity",
+            "TimeStepControl",
+            QT_TRANSLATE_NOOP("App::Property", "Total time to run transient solution"),
+        )
+        addObjectProperty(
+            obj,
+            "TimeStep",
+            "0.001 s",
+            "App::PropertyQuantity",
+            "TimeStepControl",
+            QT_TRANSLATE_NOOP("App::Property", "Time step increment"),
+        )
+        addObjectProperty(
+            obj,
+            "MaxCFLNumber",
+            5,
+            "App::PropertyFloat",
+            "TimeStepControl",
+            QT_TRANSLATE_NOOP("App::Property", "Maximum CFL number for transient simulations"),
+        )
+        addObjectProperty(
+            obj,
+            "MaxInterfaceCFLNumber",
+            5,
+            "App::PropertyFloat",
+            "TimeStepControl",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Maximum free-surface CFL number for transient simulations"
+            ),
+        )
+        addObjectProperty(
+            obj,
+            "TransientWriteInterval",
+            "0.1 s",
+            "App::PropertyQuantity",
+            "TimeStepControl",
+            QT_TRANSLATE_NOOP("App::Property", "Output time interval"),
+        )
 
-        self.residual_plotter = TimePlot(title="Simulation residuals", y_label="Residual", is_log=True)
+        self.residual_plotter = TimePlot(
+            title="Simulation residuals", y_label="Residual", is_log=True
+        )
         self.forces_plotters = {}
         self.force_coeffs_plotters = {}
         self.probes_plotters = {}

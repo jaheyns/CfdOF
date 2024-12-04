@@ -315,92 +315,287 @@ class CfdFluidBoundary:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubListGlobal", "", "Boundary faces"):
+        if addObjectProperty(
+            obj,
+            "ShapeRefs",
+            [],
+            "App::PropertyLinkSubListGlobal",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Boundary faces"),
+        ):
             # Backward compat
-            if 'References' in obj.PropertiesList:
+            if "References" in obj.PropertiesList:
                 doc = FreeCAD.getDocument(obj.Document.Name)
                 for r in obj.References:
                     if not r[1]:
                         obj.ShapeRefs += [doc.getObject(r[0])]
                     else:
                         obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
-                obj.removeProperty('References')
-                obj.removeProperty('LinkedObjects')
+                obj.removeProperty("References")
+                obj.removeProperty("LinkedObjects")
 
-        addObjectProperty(obj, 'DefaultBoundary', False, "App::PropertyBool", "Boundary faces")
-        addObjectProperty(obj, 'BoundaryType', BOUNDARY_TYPES, "App::PropertyEnumeration", "",
-                          "Boundary condition category")
+        addObjectProperty(
+            obj,
+            "DefaultBoundary",
+            False,
+            "App::PropertyBool",
+            "Boundary faces",
+        )
+        addObjectProperty(
+            obj,
+            "BoundaryType",
+            BOUNDARY_TYPES,
+            "App::PropertyEnumeration",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Boundary condition category"),
+        )
 
         all_subtypes = []
         for s in SUBTYPES:
             all_subtypes += s
 
-        addObjectProperty(obj, 'BoundarySubType', all_subtypes, "App::PropertyEnumeration", "",
-                          "Boundary condition type")
-        addObjectProperty(obj, 'VelocityIsCartesian', True, "App::PropertyBool", "Flow",
-                          "Whether to use components of velocity")
-        addObjectProperty(obj, 'Ux', '0 m/s', "App::PropertySpeed", "Flow",
-                          "Velocity (x component)")
-        addObjectProperty(obj, 'Uy', '0 m/s', "App::PropertySpeed", "Flow",
-                          "Velocity (y component)")
-        addObjectProperty(obj, 'Uz', '0 m/s', "App::PropertySpeed", "Flow",
-                          "Velocity (z component)")
-        addObjectProperty(obj, 'VelocityMag', '0 m/s', "App::PropertySpeed", "Flow",
-                          "Velocity magnitude")
-        addObjectProperty(obj, 'DirectionFace', '', "App::PropertyString", "Flow",
-                          "Face describing direction (normal)")
-        addObjectProperty(obj, 'ReverseNormal', False, "App::PropertyBool", "Flow",
-                          "Direction is inward-pointing if true")
-        addObjectProperty(obj, 'Pressure', '100 kPa', "App::PropertyPressure", "Flow",
-                          "Static pressure")
-        addObjectProperty(obj, 'SlipRatio', '0', "App::PropertyQuantity", "Flow",
-                          "Slip ratio")
-        addObjectProperty(obj, 'VolFlowRate', '0 m^3/s', "App::PropertyQuantity", "Flow",
-                          "Volume flow rate")
-        addObjectProperty(obj, 'MassFlowRate', '0 kg/s', "App::PropertyQuantity", "Flow",
-                          "Mass flow rate")
+        addObjectProperty(
+            obj,
+            "BoundarySubType",
+            all_subtypes,
+            "App::PropertyEnumeration",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Boundary condition type"),
+        )
+        addObjectProperty(
+            obj,
+            "VelocityIsCartesian",
+            True,
+            "App::PropertyBool",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Whether to use components of velocity"),
+        )
+        addObjectProperty(
+            obj,
+            "Ux",
+            "0 m/s",
+            "App::PropertySpeed",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Velocity (x component)"),
+        )
+        addObjectProperty(
+            obj,
+            "Uy",
+            "0 m/s",
+            "App::PropertySpeed",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Velocity (y component)"),
+        )
+        addObjectProperty(
+            obj,
+            "Uz",
+            "0 m/s",
+            "App::PropertySpeed",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Velocity (z component)"),
+        )
+        addObjectProperty(
+            obj,
+            "VelocityMag",
+            "0 m/s",
+            "App::PropertySpeed",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Velocity magnitude"),
+        )
+        addObjectProperty(
+            obj,
+            "DirectionFace",
+            "",
+            "App::PropertyString",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Face describing direction (normal)"),
+        )
+        addObjectProperty(
+            obj,
+            "ReverseNormal",
+            False,
+            "App::PropertyBool",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Direction is inward-pointing if true"),
+        )
+        addObjectProperty(
+            obj,
+            "Pressure",
+            "100 kPa",
+            "App::PropertyPressure",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Static pressure"),
+        )
+        addObjectProperty(
+            obj,
+            "SlipRatio",
+            "0",
+            "App::PropertyQuantity",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Slip ratio"),
+        )
+        addObjectProperty(
+            obj,
+            "VolFlowRate",
+            "0 m^3/s",
+            "App::PropertyQuantity",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Volume flow rate"),
+        )
+        addObjectProperty(
+            obj,
+            "MassFlowRate",
+            "0 kg/s",
+            "App::PropertyQuantity",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Mass flow rate"),
+        )
 
-        addObjectProperty(obj, 'RelativeToFrame', False, "App::PropertyBool", "Flow",
-                          "Relative velocity")
+        addObjectProperty(
+            obj,
+            "RelativeToFrame",
+            False,
+            "App::PropertyBool",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Relative velocity"),
+        )
 
-        if addObjectProperty(obj, 'PorousBaffleMethod', POROUS_METHODS, "App::PropertyEnumeration",
-                             "Baffle", "Baffle"):
-            obj.PorousBaffleMethod = 'porousCoeff'
+        if addObjectProperty(
+            obj,
+            "PorousBaffleMethod",
+            POROUS_METHODS,
+            "App::PropertyEnumeration",
+            "Baffle",
+            QT_TRANSLATE_NOOP("App::Property", "Baffle"),
+        ):
+            obj.PorousBaffleMethod = "porousCoeff"
 
-        addObjectProperty(obj, 'PressureDropCoeff', '0', "App::PropertyQuantity", "Baffle",
-                          "Porous baffle pressure drop coefficient")
-        addObjectProperty(obj, 'ScreenWireDiameter', '0.2 mm', "App::PropertyLength", "Baffle",
-                          "Porous screen mesh diameter")
-        addObjectProperty(obj, 'ScreenSpacing', '2 mm', "App::PropertyLength", "Baffle",
-                          "Porous screen mesh spacing")
+        addObjectProperty(
+            obj,
+            "PressureDropCoeff",
+            "0",
+            "App::PropertyQuantity",
+            "Baffle",
+            QT_TRANSLATE_NOOP("App::Property", "Porous baffle pressure drop coefficient"),
+        )
+        addObjectProperty(
+            obj,
+            "ScreenWireDiameter",
+            "0.2 mm",
+            "App::PropertyLength",
+            "Baffle",
+            QT_TRANSLATE_NOOP("App::Property", "Porous screen mesh diameter"),
+        )
+        addObjectProperty(
+            obj,
+            "ScreenSpacing",
+            "2 mm",
+            "App::PropertyLength",
+            "Baffle",
+            QT_TRANSLATE_NOOP("App::Property", "Porous screen mesh spacing"),
+        )
 
-        addObjectProperty(obj, 'RoughnessHeight', '0 mm', "App::PropertyQuantity", "Turbulence",
-                          "Sand-grain roughness")
-        addObjectProperty(obj, 'RoughnessConstant', '0.5', "App::PropertyQuantity", "Turbulence",
-                          "Coefficient of roughness [0.5-1]")
+        addObjectProperty(
+            obj,
+            "RoughnessHeight",
+            "0 mm",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Sand-grain roughness"),
+        )
+        addObjectProperty(
+            obj,
+            "RoughnessConstant",
+            "0.5",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Coefficient of roughness [0.5-1]"),
+        )
 
-        addObjectProperty(obj, 'ThermalBoundaryType', THERMAL_BOUNDARY_TYPES, "App::PropertyEnumeration", "Thermal",
-                          "Type of thermal boundary")
-        addObjectProperty(obj, 'Temperature', '293 K', "App::PropertyQuantity", "Thermal",
-                          "Temperature")
-        addObjectProperty(obj, 'HeatFlux', '0 W/m^2', "App::PropertyQuantity", "Thermal",
-                          "Wall heat flux")
-        addObjectProperty(obj, 'HeatTransferCoeff', '0 W/m^2/K', "App::PropertyQuantity", "Thermal",
-                          "Wall heat transfer coefficient")
+        addObjectProperty(
+            obj,
+            "ThermalBoundaryType",
+            THERMAL_BOUNDARY_TYPES,
+            "App::PropertyEnumeration",
+            "Thermal",
+            QT_TRANSLATE_NOOP("App::Property", "Type of thermal boundary"),
+        )
+        addObjectProperty(
+            obj,
+            "Temperature",
+            "293 K",
+            "App::PropertyQuantity",
+            "Thermal",
+            QT_TRANSLATE_NOOP("App::Property", "Temperature"),
+        )
+        addObjectProperty(
+            obj,
+            "HeatFlux",
+            "0 W/m^2",
+            "App::PropertyQuantity",
+            "Thermal",
+            QT_TRANSLATE_NOOP("App::Property", "Wall heat flux"),
+        )
+        addObjectProperty(
+            obj,
+            "HeatTransferCoeff",
+            "0 W/m^2/K",
+            "App::PropertyQuantity",
+            "Thermal",
+            QT_TRANSLATE_NOOP("App::Property", "Wall heat transfer coefficient"),
+        )
 
         # Periodic
-        addObjectProperty(obj, 'RotationalPeriodic', False, "App::PropertyBool", "Periodic",
-                          "Rotational or translational periodicity")
-        addObjectProperty(obj, 'PeriodicCentreOfRotation', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
-                          "Periodic", "Centre of rotation for rotational periodics")
-        addObjectProperty(obj, 'PeriodicCentreOfRotationAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyVector",
-                          "Periodic", "Axis of rotational for rotational periodics")
-        addObjectProperty(obj, 'PeriodicSeparationVector', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition",
-                          "Periodic", "Separation vector for translational periodics")
-        addObjectProperty(obj, 'PeriodicPartner', '', "App::PropertyString", "Periodic",
-                          "Partner patch for the slave periodic")
-        addObjectProperty(obj, 'PeriodicMaster', True, "App::PropertyBool", "Periodic",
-                          "Whether the current patch is the master or slave patch")
+        addObjectProperty(
+            obj,
+            "RotationalPeriodic",
+            False,
+            "App::PropertyBool",
+            "Periodic",
+            QT_TRANSLATE_NOOP("App::Property", "Rotational or translational periodicity"),
+        )
+        addObjectProperty(
+            obj,
+            "PeriodicCentreOfRotation",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Periodic",
+            QT_TRANSLATE_NOOP("App::Property", "Centre of rotation for rotational periodics"),
+        )
+        addObjectProperty(
+            obj,
+            "PeriodicCentreOfRotationAxis",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyVector",
+            "Periodic",
+            QT_TRANSLATE_NOOP("App::Property", "Axis of rotational for rotational periodics"),
+        )
+        addObjectProperty(
+            obj,
+            "PeriodicSeparationVector",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Periodic",
+            QT_TRANSLATE_NOOP("App::Property", "Separation vector for translational periodics"),
+        )
+        addObjectProperty(
+            obj,
+            "PeriodicPartner",
+            "",
+            "App::PropertyString",
+            "Periodic",
+            QT_TRANSLATE_NOOP("App::Property", "Partner patch for the slave periodic"),
+        )
+        addObjectProperty(
+            obj,
+            "PeriodicMaster",
+            True,
+            "App::PropertyBool",
+            "Periodic",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Whether the current patch is the master or slave patch"
+            ),
+        )
 
         # Turbulence
         all_turb_specs = []
@@ -409,50 +604,128 @@ class CfdFluidBoundary:
 
         all_turb_specs = list(set(all_turb_specs))  # Remove duplicates
 
-        if addObjectProperty(obj, 'TurbulenceInletSpecification', all_turb_specs, "App::PropertyEnumeration",
-                             "Turbulence", "Turbulent quantities specified"):
-            obj.TurbulenceInletSpecification = 'intensityAndLengthScale'
+        if addObjectProperty(
+            obj,
+            "TurbulenceInletSpecification",
+            all_turb_specs,
+            "App::PropertyEnumeration",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent quantities specified"),
+        ):
+            obj.TurbulenceInletSpecification = "intensityAndLengthScale"
 
         # k omega SST
-        addObjectProperty(obj, 'TurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
-                          "Turbulent kinetic energy")
-        addObjectProperty(obj, 'SpecificDissipationRate', '1 1/s', "App::PropertyQuantity", "Turbulence",
-                          "Specific turbulent dissipation rate")
+        addObjectProperty(
+            obj,
+            "TurbulentKineticEnergy",
+            "0.01 m^2/s^2",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent kinetic energy"),
+        )
+        addObjectProperty(
+            obj,
+            "SpecificDissipationRate",
+            "1 1/s",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Specific turbulent dissipation rate"),
+        )
 
         # k epsilon
-        addObjectProperty(obj, 'DissipationRate', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
-                          "Turbulent dissipation rate")
+        addObjectProperty(
+            obj,
+            "DissipationRate",
+            "50 m^2/s^3",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent dissipation rate"),
+        )
 
         # Spalart Allmaras
-        addObjectProperty(obj, 'NuTilda', '55 m^2/s^1', "App::PropertyQuantity", "Turbulence",
-                          "Modified turbulent viscosity")
+        addObjectProperty(
+            obj,
+            "NuTilda",
+            "55 m^2/s^1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Modified turbulent viscosity"),
+        )
 
         # Langtry Menter 4 eqn k omega SST
-        addObjectProperty(obj, 'Intermittency', '1', "App::PropertyQuantity", "Turbulence",
-                          "Turbulent intermittency")
-        addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
-                          "Transition momentum thickness Reynolds number")
+        addObjectProperty(
+            obj,
+            "Intermittency",
+            "1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent intermittency"),
+        )
+        addObjectProperty(
+            obj,
+            "ReThetat",
+            "1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Transition momentum thickness Reynolds number"),
+        )
 
         # LES models
-        addObjectProperty(obj, 'TurbulentViscosity', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
-                          "Turbulent viscosity")
-        addObjectProperty(obj, 'kEqnTurbulentKineticEnergy', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence",
-                          "Turbulent viscosity")
-        addObjectProperty(obj, 'kEqnTurbulentViscosity', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
-                          "Turbulent viscosity")
+        addObjectProperty(
+            obj,
+            "TurbulentViscosity",
+            "50 m^2/s^1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent viscosity"),
+        )
+        addObjectProperty(
+            obj,
+            "kEqnTurbulentKineticEnergy",
+            "0.01 m^2/s^2",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent viscosity"),
+        )
+        addObjectProperty(
+            obj,
+            "kEqnTurbulentViscosity",
+            "50 m^2/s^1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent viscosity"),
+        )
 
         # General
-        addObjectProperty(obj, 'TurbulenceIntensityPercentage', '1', "App::PropertyQuantity", "Turbulence",
-                          "Turbulence intensity (percent)")
+        addObjectProperty(
+            obj,
+            "TurbulenceIntensityPercentage",
+            "1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulence intensity (percent)"),
+        )
         # Backward compat
-        if 'TurbulenceIntensity' in obj.PropertiesList:
-            obj.TurbulenceIntensityPercentage = obj.TurbulenceIntensity*100.0
-            obj.removeProperty('TurbulenceIntensity')
+        if "TurbulenceIntensity" in obj.PropertiesList:
+            obj.TurbulenceIntensityPercentage = obj.TurbulenceIntensity * 100.0
+            obj.removeProperty("TurbulenceIntensity")
 
-        addObjectProperty(obj, 'TurbulenceLengthScale', '0.1 m', "App::PropertyLength", "Turbulence",
-                          "Length scale of turbulent eddies")
-        addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume fraction",
-                          "Volume fractions")
+        addObjectProperty(
+            obj,
+            "TurbulenceLengthScale",
+            "0.1 m",
+            "App::PropertyLength",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Length scale of turbulent eddies"),
+        )
+        addObjectProperty(
+            obj,
+            "VolumeFractions",
+            {},
+            "App::PropertyMap",
+            "Volume fraction",
+            QT_TRANSLATE_NOOP("App::Property", "Volume fractions"),
+        )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

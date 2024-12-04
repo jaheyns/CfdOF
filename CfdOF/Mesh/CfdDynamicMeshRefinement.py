@@ -19,18 +19,22 @@
 # *                                                                         *
 # ***************************************************************************
 
+import os
+
 import FreeCAD
 import FreeCADGui
-from CfdOF.Mesh.CfdMesh import CfdMesh
-from PySide import QtCore
-import os
+from pivy import coin
+
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
-from pivy import coin
-from CfdOF.Mesh import TaskPanelCfdDynamicMeshInterfaceRefinement
-from CfdOF.Mesh import TaskPanelCfdDynamicMeshShockRefinement
+from CfdOF.Mesh import (
+    TaskPanelCfdDynamicMeshInterfaceRefinement,
+    TaskPanelCfdDynamicMeshShockRefinement,
+)
+from CfdOF.Mesh.CfdMesh import CfdMesh
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
+
 
 class CommandGroupDynamicMeshRefinement:
     def GetCommands(self):
@@ -189,20 +193,59 @@ class CfdDynamicMeshInterfaceRefinement:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, "Phase", "", "App::PropertyString", "DynamicMesh",
-                          "Set the target refinement interface phase")
+        addObjectProperty(
+            obj,
+            "Phase",
+            "",
+            "App::PropertyString",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP("App::Property", "Set the target refinement interface phase"),
+        )
 
-        addObjectProperty(obj, "RefinementInterval", 1, "App::PropertyInteger", "DynamicMesh",
-                          "Set the interval at which to run the dynamic mesh refinement")
+        addObjectProperty(
+            obj,
+            "RefinementInterval",
+            1,
+            "App::PropertyInteger",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Set the interval at which to run the dynamic mesh refinement",
+            ),
+        )
 
-        addObjectProperty(obj, "MaxRefinementLevel", 1, "App::PropertyInteger", "DynamicMesh",
-                          "Set the maximum dynamic mesh refinement level")
+        addObjectProperty(
+            obj,
+            "MaxRefinementLevel",
+            1,
+            "App::PropertyInteger",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP("App::Property", "Set the maximum dynamic mesh refinement level"),
+        )
 
-        addObjectProperty(obj, "BufferLayers", 1, "App::PropertyInteger", "DynamicMesh",
-                          "Set the number of buffer layers between refined and existing cells")
+        addObjectProperty(
+            obj,
+            "BufferLayers",
+            1,
+            "App::PropertyInteger",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Set the number of buffer layers between refined and existing cells",
+            ),
+        )
 
-        addObjectProperty(obj, "WriteFields", False, "App::PropertyBool", "DynamicMesh",
-                          "Whether to write the dynamic mesh refinement fields after refinement")
+        addObjectProperty(
+            obj,
+            "WriteFields",
+            False,
+            "App::PropertyBool",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Whether to write the dynamic mesh refinement fields after refinement",
+            ),
+        )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
@@ -228,23 +271,74 @@ class CfdDynamicMeshShockRefinement:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, "ReferenceVelocityDirection", FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "DynamicMesh",
-                          "Reference velocity direction (typically free-stream/input value)")
+        addObjectProperty(
+            obj,
+            "ReferenceVelocityDirection",
+            FreeCAD.Vector(1, 0, 0),
+            "App::PropertyVector",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Reference velocity direction (typically free-stream/input value)",
+            ),
+        )
 
-        addObjectProperty(obj, "RelativeElementSize", 1, "App::PropertyFloat", "DynamicMesh",
-                          "Refinement relative to the base mesh")
+        addObjectProperty(
+            obj,
+            "RelativeElementSize",
+            1,
+            "App::PropertyFloat",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP("App::Property", "Refinement relative to the base mesh"),
+        )
 
-        addObjectProperty(obj, "RefinementIntervalSteady", 50, "App::PropertyInteger", "DynamicMesh",
-                          "Interval at which to run the dynamic mesh refinement in steady analyses")
+        addObjectProperty(
+            obj,
+            "RefinementIntervalSteady",
+            50,
+            "App::PropertyInteger",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Interval at which to run the dynamic mesh refinement in steady analyses",
+            ),
+        )
 
-        addObjectProperty(obj, "RefinementIntervalTransient", 5, "App::PropertyInteger", "DynamicMesh",
-                          "Interval at which to run the dynamic mesh refinement in transient analyses")
+        addObjectProperty(
+            obj,
+            "RefinementIntervalTransient",
+            5,
+            "App::PropertyInteger",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Interval at which to run the dynamic mesh refinement in transient analyses",
+            ),
+        )
 
-        addObjectProperty(obj, "BufferLayers", 1, "App::PropertyInteger", "DynamicMesh",
-                          "Number of buffer layers between refined and existing cells")
+        addObjectProperty(
+            obj,
+            "BufferLayers",
+            1,
+            "App::PropertyInteger",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Number of buffer layers between refined and existing cells",
+            ),
+        )
 
-        addObjectProperty(obj, "WriteFields", False, "App::PropertyBool", "DynamicMesh",
-                          "Whether to write the indicator fields for shock wave detection")
+        addObjectProperty(
+            obj,
+            "WriteFields",
+            False,
+            "App::PropertyBool",
+            "DynamicMesh",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Whether to write the indicator fields for shock wave detection",
+            ),
+        )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
