@@ -222,7 +222,7 @@ class CfdReportingFunction:
             FreeCAD.Vector(0, 0, 0),
             "App::PropertyPosition",
             "Probes",
-            QT_TRANSLATE_NOOP("App::Property", "Location of the probe sample location"),
+            QT_TRANSLATE_NOOP("App::Property", "Location of the probe sample"),
         )
 
     def onDocumentRestored(self, obj):

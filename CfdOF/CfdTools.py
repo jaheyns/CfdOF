@@ -1596,20 +1596,22 @@ def getActiveAnalysis():
     return None
 
 
-def addObjectProperty(obj, prop, init_val, type, *args):
+def addObjectProperty(obj, prop: str, init_val, type: str, *args):
     """
     Call addProperty on the object if it does not yet exist
     """
     added = False
     if prop not in obj.PropertiesList:
-        added = obj.addProperty(type, prop, *args)
-    if type == 'App::PropertyQuantity':
+        added = obj.addProperty(
+            type, prop, *args
+        )  # 3rd parameter  is property group, 4th parameter is property tooltip
+    if type == "App::PropertyQuantity":
         # Set the unit so that the quantity will be accepted
         # Has to be repeated on load as unit gets lost
         setattr(obj, prop, Units.Unit(init_val))
     if added:
         setattr(obj, prop, init_val)
-    elif type == 'App::PropertyEnumeration':
+    elif type == "App::PropertyEnumeration":
         # For enumeration, re-assign the list of allowed values anyway in case some were added
         # Make sure the currently set value is unaffected by this
         curr_item = getattr(obj, prop)
