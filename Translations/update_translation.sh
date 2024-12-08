@@ -4,15 +4,15 @@
 #
 # Create, update and release translation files.
 #
-# Supported locales on FreeCAD <2024-03-13, FreeCADGui.supportedLocales(), total=43>:
+# Supported locales on FreeCAD <2024-12-08, FreeCADGui.supportedLocales(), total=44>:
 # 	{'English': 'en', 'Afrikaans': 'af', 'Arabic': 'ar', 'Basque': 'eu', 'Belarusian': 'be',
 # 	'Bulgarian': 'bg', 'Catalan': 'ca', 'Chinese Simplified': 'zh-CN',
-# 	'Chinese Traditional': 'zh-TW', 'Croatian': 'hr', 'Czech': 'cs', 'Dutch': 'nl',
-# 	'Filipino': 'fil', 'Finnish': 'fi', 'French': 'fr', 'Galician': 'gl', 'Georgian': 'ka',
-# 	'German': 'de', 'Greek': 'el', 'Hungarian': 'hu', 'Indonesian': 'id', 'Italian': 'it',
-# 	'Japanese': 'ja', 'Kabyle': 'kab', 'Korean': 'ko', 'Lithuanian': 'lt', 'Norwegian': 'no',
-# 	'Polish': 'pl', 'Portuguese': 'pt-PT', 'Portuguese, Brazilian': 'pt-BR', 'Romanian': 'ro',
-# 	'Russian': 'ru', 'Serbian': 'sr', 'Serbian, Latin': 'sr-CS', 'Slovak': 'sk',
+# 	'Chinese Traditional': 'zh-TW', 'Croatian': 'hr', 'Czech': 'cs', 'Danish': 'da',
+# 	 'Dutch': 'nl', 'Filipino': 'fil', 'Finnish': 'fi', 'French': 'fr', 'Galician': 'gl',
+# 	'Georgian': 'ka', 'German': 'de', 'Greek': 'el', 'Hungarian': 'hu', 'Indonesian': 'id',
+# 	'Italian': 'it', 'Japanese': 'ja', 'Kabyle': 'kab', 'Korean': 'ko', 'Lithuanian': 'lt',
+# 	'Norwegian': 'no', 'Polish': 'pl', 'Portuguese': 'pt-PT', 'Portuguese, Brazilian': 'pt-BR',
+# 	'Romanian': 'ro', 'Russian': 'ru', 'Serbian': 'sr', 'Serbian, Latin': 'sr-CS', 'Slovak': 'sk',
 # 	'Slovenian': 'sl', 'Spanish': 'es-ES', 'Spanish, Argentina': 'es-AR', 'Swedish': 'sv-SE',
 # 	'Turkish': 'tr', 'Ukrainian': 'uk', 'Valencian': 'val-ES', 'Vietnamese': 'vi'}
 #
@@ -23,7 +23,7 @@
 # 	Arch-based: $ sudo pacman -S qt6-tools python-pyqt6
 # - Make the script executable
 # 	$ chmod +x update_translation.sh
-# - The script has to be executed within the `freecad/freegrid/resources/translations` directory.
+# - The script has to be executed within the `Translations` directory.
 # 	Executing the script with no flags invokes the help.
 # 	$ ./update_translation.sh
 #
@@ -40,135 +40,137 @@
 # - Execute the script passing the '-U' flag
 # 	$ ./update_translation.sh -U
 # - Upload the updated file to Crowdin and wait for translators do their thing ;-)
-# - Once done, download the translated files, copy them to `freecad/freegrid/resources/translations`
+# - Once done, download the translated files, copy them to `Translations`
 # 	and release all the files to update the changes
 # 	$ ./update_translation.sh -R
-#
-# The usage of `pylupdate6` is preferred over 'pylupdate5' when extracting text strings from
-# 	Python files. Also using `lupdate` from Qt6 is possible.
 #
 # --------------------------------------------------------------------------------------------------
 
 supported_locales=(
-	"en" "af" "ar" "eu" "be" "bg" "ca" "zh-CN" "zh-TW" "hr"
-	"cs" "nl" "fil" "fi" "fr" "gl" "ka" "de" "el" "hu"
-	"id" "it" "ja" "kab" "ko" "lt" "no" "pl" "pt-PT" "pt-BR"
-	"ro" "ru" "sr" "sr-CS" "sk" "sl" "es-ES" "es-AR" "sv-SE" "tr"
-	"uk" "val-ES" "vi"
+  "en" "af" "ar" "eu" "be" "bg" "ca" "zh-CN" "zh-TW" "hr"
+  "cs" "da" "nl" "fil" "fi" "fr" "gl" "ka" "de" "el"
+  "hu" "id" "it" "ja" "kab" "ko" "lt" "no" "pl" "pt-PT"
+  "pt-BR" "ro" "ru" "sr" "sr-CS" "sk" "sl" "es-ES" "es-AR" "sv-SE"
+  "tr" "uk" "val-ES" "vi"
 )
 
 is_locale_supported() {
-	local locale="$1"
-	for supported_locale in "${supported_locales[@]}"; do
-		if [[ "$supported_locale" == "$locale" ]]; then
-			return 0
-		fi
-	done
-	return 1
-}
-
-get_strings() {
-	# Get translatable strings from Qt Designer files
-	lupdate ../Gui/*.ui -ts uifiles.ts -no-obsolete
-	# Get translatable strings from Python file(s)
-	# pylupdate5 ../../*.py -ts pyfiles.ts -verbose
-	pylupdate6 -ts pyfiles.ts ../InitGui.py \
-		../CfdOF/Cfd{Analysis,ReloadWorkbench}.py \
-		../CfdOF/Mesh/Cfd{Mesh,DynamicMeshRefinement,MeshRefinement}.py \
-		../CfdOF/CfdOpenPreferencesPage.py \
-		../CfdOF/PostProcess/CfdReportingFunction.py \
-		../CfdOF/Solve/Cfd{FluidBoundary,FluidMaterial,InitialiseFlowField}.py \
-		../CfdOF/Solve/Cfd{PhysicsSelection,ScalarTransportFunction,SolverFoam,Zone}.py
-	# Join strings from Qt Designer and Python files into a single temp file
-	lconvert -i pyfiles.ts uifiles.ts -o _${WB}.ts -sort-contexts -no-obsolete
+  local locale="$1"
+  for supported_locale in "${supported_locales[@]}"; do
+    [ "$supported_locale" == "$locale" ] && return 0
+  done
+  return 1
 }
 
 update_locale() {
-	local locale="$1"
-	local u=${locale:+_} # Conditional underscore
+  local locale="$1"
+  local u=${locale:+_} # Conditional underscore
+  FILES="../Gui/*.ui ../InitGui.py \
+		../CfdOF/Cfd{Analysis,ReloadWorkbench}.py \
+		../CfdOF/Mesh/Cfd{Mesh,DynamicMeshRefinement,MeshRefinement}.py \
+		../CfdOF/Mesh/TaskPanelCfd{Mesh,MeshRefinement}.py \
+		../CfdOF/CfdOpenPreferencesPage.py \
+		../CfdOF/CfdPreferencePage.py \
+		../CfdOF/CfdTools.py \
+		../CfdOF/PostProcess/CfdReportingFunction.py \
+		../CfdOF/Solve/Cfd{FluidBoundary,FluidMaterial,InitialiseFlowField}.py \
+		../CfdOF/Solve/Cfd{PhysicsSelection,ScalarTransportFunction,SolverFoam,Zone}.py \
+		../CfdOF/Solve/TaskPanelCfdSolverControl.py"
 
-	# NOTE: Execute the right commands depending on:
-	# - if the file already exists and
-	# - if it's a locale file or the main, agnostic one
-	if [ ! -f "${WB}${u}${locale}.ts" ]; then
-		echo -e "\033[1;34m\n\t<<< Creating '${WB}${u}${locale}.ts' file >>>\n\033[m"
-		get_strings
-		if [ "$locale" == "" ]; then
-			lconvert -i _${WB}.ts -o ${WB}.ts
-		else
-			lconvert -source-language en -target-language "${locale//-/_}" \
-				-i _${WB}.ts -o "${WB}_${locale}.ts"
-		fi
-	else
-		echo -e "\033[1;34m\n\t<<< Updating '${WB}${u}${locale}.ts' file >>>\n\033[m"
-		get_strings
-		if [ "$locale" == "" ]; then
-			lconvert -i _${WB}.ts ${WB}.ts -o ${WB}.ts
-		else
-			lconvert -source-language en -target-language "${locale//-/_}" \
-				-i _${WB}.ts "${WB}_${locale}.ts" -o "${WB}_${locale}.ts"
-		fi
-	fi
-
-	# Delete files that are no longer needed
-	rm -f pyfiles.ts uifiles.ts _${WB}.ts
+  # NOTE: Execute the right command depending on:
+  # - if it's a locale file or the main, agnostic one
+  [ ! -f "${WB}${u}${locale}.ts" ] && action="Creating" || action="Updating"
+  echo -e "\033[1;34m\n\t<<< ${action} '${WB}${u}${locale}.ts' file >>>\n\033[m"
+  if [ "$u" == "" ]; then
+    eval $LUPDATE "$FILES" -ts "${WB}.ts" # locale-agnostic file
+  else
+    eval $LUPDATE "$FILES" -source-language en_US -target-language "${locale//-/_}" \
+      -ts "${WB}_${locale}.ts"
+  fi
 }
 
-release_locale() {
-	# Release locale (creation of *.qm file from *.ts file)
-	local locale="$1"
-	lrelease "${WB}_${locale}.ts"
+normalize_crowdin_files() {
+  # Rename files which locales are different on FreeCAD and delete not supported locales
+  crowdin_fixes=(af-ZA ar-SA be-BY bg-BG ca-ES cs-CZ da-DK de-DE el-GR eu-ES fi-FI
+    fil-PH fr-FR gl-ES hr-HR hu-HU it-IT ja-JP ka-GE kab-KAB ko-KR lt-LT nl-NL
+    no-NO pl-PL ro-RO ru-RU sk-SK sl-SI sr-SP tr-TR uk-UA vi-VN)
+
+  crowdin_deletes=(az-AZ bn-BD br-FR bs-BA en en-GB en-US eo-UY es-CO es-VE et-EE fa-IR he-IL
+    hi-IN hy-AM id-ID kaa lv-LV mk-MK ms-MY sat-IN si-LK ta-IN te-IN th-TH ur-PK xav yo-NG)
+
+  for pattern in "${crowdin_fixes[@]}"; do
+    find . -type f -name "*_${pattern}\.*" | while read -r file; do
+      mv -v "$file" "${file//-*./.}"
+    done
+  done
+
+  for pattern in "${crowdin_deletes[@]}"; do
+    find . -type f -name "*_${pattern}\.*" -delete
+  done
 }
 
 help() {
-	echo -e "\nDescription:"
-	echo -e "\tCreate, update and release translation files."
-	echo -e "\nUsage:"
-	echo -e "\t./update_translation.sh [-R] [-U] [-r <locale>] [-u <locale>]"
-	echo -e "\nFlags:"
-	echo -e "  -R\n\tRelease all locales"
-	echo -e "  -U\n\tUpdate main translation file (locale agnostic)"
-	echo -e "  -r <locale>\n\tRelease the specified locale"
-	echo -e "  -u <locale>\n\tUpdate strings for the specified locale"
+  echo -e "\nDescription:"
+  echo -e "\tCreate, update and release translation files."
+  echo -e "\nUsage:"
+  echo -e "\t./update_translation.sh [-R] [-U] [-r <locale>] [-u <locale>]"
+  echo -e "\nFlags:"
+  echo -e "  -R\n\tRelease all translations (qm files)"
+  echo -e "  -U\n\tUpdate all translations (ts files)"
+  echo -e "  -r <locale>\n\tRelease the specified locale"
+  echo -e "  -u <locale>\n\tUpdate strings for the specified locale"
+  echo -e "  -N\n\tNormalize CrowdIn filenames"
 }
 
 # Main function ------------------------------------------------------------------------------------
 
+LUPDATE=/usr/lib/qt6/bin/lupdate # from Qt6
+# LUPDATE=lupdate                  # from Qt5
+LRELEASE=/usr/lib/qt6/bin/lrelease # from Qt6
+# LRELEASE=lrelease                 # from Qt5
 WB="CfdOF"
 
-if [ $# -eq 0 ]; then
-	help
-elif [ $# -eq 1 ]; then
-	if [ "$1" == "-R" ]; then
-		find . -type f -name '*_*.ts' | while IFS= read -r file; do
-			# Release all locales
-			lrelease "$file"
-			echo
-		done
-	elif [ "$1" == "-U" ]; then
-		# Update main file (agnostic)
-		update_locale
-	else
-		help
-	fi
+sed -i '3s/-/_/' ${WB}*.ts               # Enforce underscore on locales
+sed -i '3s/\"en\"/\"en_US\"/g' ${WB}*.ts # Use en_US
+
+if [ $# -eq 1 ]; then
+  if [ "$1" == "-R" ]; then
+    find . -type f -name '*_*.ts' | while IFS= read -r file; do
+      # Release all locales
+      $LRELEASE -nounfinished "$file"
+      echo
+    done
+  elif [ "$1" == "-U" ]; then
+    for locale in "${supported_locales[@]}"; do
+      update_locale "$locale"
+    done
+  elif [ "$1" == "-u" ]; then
+    update_locale # Update main file (agnostic)
+  elif [ "$1" == "-N" ]; then
+    normalize_crowdin_files
+  else
+    help
+  fi
 elif [ $# -eq 2 ]; then
-	LOCALE="$2"
-	if is_locale_supported "$LOCALE"; then
-		if [ "$1" == "-r" ]; then
-			# Release locale
-			release_locale "$LOCALE"
-		elif [ "$1" == "-u" ]; then
-			# Update main & locale files
-			update_locale
-			update_locale "$LOCALE"
-		fi
-	else
-		echo "Verify your language code. Case sensitive."
-		echo "If it's correct ask a maintainer to add support for your language on FreeCAD."
-		echo -e "Supported locales, 'FreeCADGui.supportedLocales()': \033[1;33m"
-		for locale in "${supported_locales[@]}"; do echo -n "$locale "; done
-		echo
-	fi
+  LOCALE="$2"
+  if is_locale_supported "$LOCALE"; then
+    if [ "$1" == "-r" ]; then
+      # Release locale (creation of *.qm file from *.ts file)
+      $LRELEASE -nounfinished "${WB}_${LOCALE}.ts"
+    elif [ "$1" == "-u" ]; then
+      # Update main & locale files
+      update_locale
+      update_locale "$LOCALE"
+    fi
+  else
+    echo "Verify your language code. Case sensitive."
+    echo "If it's correct, ask a maintainer to add support for your language on FreeCAD."
+    echo -e "\nSupported locales, '\033[1;34mFreeCADGui.supportedLocales()\033[m': \033[1;33m"
+    for locale in $(printf "%s\n" "${supported_locales[@]}" | sort); do
+      echo -n "$locale "
+    done
+    echo
+  fi
 else
-	help
+  help
 fi
