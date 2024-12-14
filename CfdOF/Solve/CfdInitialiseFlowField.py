@@ -25,16 +25,17 @@
 
 import os
 import os.path
+
 import FreeCAD
-from FreeCAD import Units
+
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 from CfdOF.Solve import TaskPanelCfdInitialiseInternalFlowField
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
+
 
 def makeCfdInitialFlowField(name="InitialiseFields"):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
@@ -85,42 +86,191 @@ class CfdInitialVariables:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        addObjectProperty(obj, 'PotentialFlow', True, "App::PropertyBool", "Flow",
-                          "Initialise velocity with potential flow solution")
-        addObjectProperty(obj, 'PotentialFlowP', False, "App::PropertyBool", "Flow",
-                          "Initialise pressure with potential flow solution")
-        addObjectProperty(obj, 'UseInletUValues', False, "App::PropertyBool", "Flow",
-                          "Initialise with flow values from inlet")
-        addObjectProperty(obj, 'UseOutletPValue', True, "App::PropertyBool", "Flow",
-                          "Initialise with flow values from outlet")
-        addObjectProperty(obj, 'Ux', '0 m/s', "App::PropertySpeed", "Flow", "Velocity (x component)")
-        addObjectProperty(obj, 'Uy', '0 m/s', "App::PropertySpeed", "Flow", "Velocity (y component)")
-        addObjectProperty(obj, 'Uz', '0 m/s', "App::PropertySpeed", "Flow", "Velocity (z component)")
-        addObjectProperty(obj, 'Pressure', '100 kPa', "App::PropertyPressure", "Flow", "Static pressure")
-        addObjectProperty(obj, 'UseInletTemperatureValue', False, "App::PropertyBool", "Thermal",
-                          "Initialise with temperature value from inlet")
-        addObjectProperty(obj, 'Temperature', '293 K', "App::PropertyQuantity", "Thermal", "Temperature")
-        addObjectProperty(obj, 'UseInletTurbulenceValues', False, "App::PropertyBool", "Turbulence",
-                          "Initialise turbulence with values from inlet")
-        addObjectProperty(obj, 'k', '0.01 m^2/s^2', "App::PropertyQuantity", "Turbulence", "Turbulent kinetic energy")
-        addObjectProperty(obj, 'omega', '1 1/s', "App::PropertyQuantity", "Turbulance", 
-                          "Specific turbulent dissipation rate")
-        addObjectProperty(obj, 'epsilon', '50 m^2/s^3', "App::PropertyQuantity", "Turbulence",
-                          "Turbulent dissipation rate")
-        addObjectProperty(obj, 'nuTilda', '55 m^2/s^1', "App::PropertyQuantity", "Turbulence",
-                          "Modified turbulent viscosity")
-        addObjectProperty(obj, 'gammaInt', '1', "App::PropertyQuantity", "Turbulence",
-                          "Turbulent intermittency")
-        addObjectProperty(obj, 'ReThetat', '1', "App::PropertyQuantity", "Turbulence",
-                          "Transition Momentum Thickness Reynolds Number")
-        addObjectProperty(obj, 'nut', '50 m^2/s^1', "App::PropertyQuantity", "Turbulence",
-                          "Turbulent viscosity")
+        addObjectProperty(
+            obj,
+            "PotentialFlow",
+            True,
+            "App::PropertyBool",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Initialise velocity with potential flow solution"),
+        )
+        addObjectProperty(
+            obj,
+            "PotentialFlowP",
+            False,
+            "App::PropertyBool",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Initialise pressure with potential flow solution"),
+        )
+        addObjectProperty(
+            obj,
+            "UseInletUValues",
+            False,
+            "App::PropertyBool",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Initialise with flow values from inlet"),
+        )
+        addObjectProperty(
+            obj,
+            "UseOutletPValue",
+            True,
+            "App::PropertyBool",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Initialise with flow values from outlet"),
+        )
+        addObjectProperty(
+            obj,
+            "Ux",
+            "0 m/s",
+            "App::PropertySpeed",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Velocity (x component)"),
+        )
+        addObjectProperty(
+            obj,
+            "Uy",
+            "0 m/s",
+            "App::PropertySpeed",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Velocity (y component)"),
+        )
+        addObjectProperty(
+            obj,
+            "Uz",
+            "0 m/s",
+            "App::PropertySpeed",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Velocity (z component)"),
+        )
+        addObjectProperty(
+            obj,
+            "Pressure",
+            "100 kPa",
+            "App::PropertyPressure",
+            "Flow",
+            QT_TRANSLATE_NOOP("App::Property", "Static pressure"),
+        )
+        addObjectProperty(
+            obj,
+            "UseInletTemperatureValue",
+            False,
+            "App::PropertyBool",
+            "Thermal",
+            QT_TRANSLATE_NOOP("App::Property", "Initialise with temperature value from inlet"),
+        )
+        addObjectProperty(
+            obj,
+            "Temperature",
+            "293 K",
+            "App::PropertyQuantity",
+            "Thermal",
+            QT_TRANSLATE_NOOP("App::Property", "Temperature"),
+        )
+        addObjectProperty(
+            obj,
+            "UseInletTurbulenceValues",
+            False,
+            "App::PropertyBool",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Initialise turbulence with values from inlet"),
+        )
+        addObjectProperty(
+            obj,
+            "k",
+            "0.01 m^2/s^2",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent kinetic energy"),
+        )
+        addObjectProperty(
+            obj,
+            "omega",
+            "1 1/s",
+            "App::PropertyQuantity",
+            "Turbulance",
+            QT_TRANSLATE_NOOP("App::Property", "Specific turbulent dissipation rate"),
+        )
+        addObjectProperty(
+            obj,
+            "epsilon",
+            "50 m^2/s^3",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent dissipation rate"),
+        )
+        addObjectProperty(
+            obj,
+            "nuTilda",
+            "55 m^2/s^1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Modified turbulent viscosity"),
+        )
+        addObjectProperty(
+            obj,
+            "gammaInt",
+            "1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent intermittency"),
+        )
+        addObjectProperty(
+            obj,
+            "ReThetat",
+            "1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Transition Momentum Thickness Reynolds Number"),
+        )
+        addObjectProperty(
+            obj,
+            "nut",
+            "50 m^2/s^1",
+            "App::PropertyQuantity",
+            "Turbulence",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulent viscosity"),
+        )
 
-        addObjectProperty(obj, 'VolumeFractions', {}, "App::PropertyMap", "Volume Fraction", "Volume fraction values")
-        addObjectProperty(obj, 'BoundaryU', None, "App::PropertyLinkGlobal", "", "U boundary")
-        addObjectProperty(obj, 'BoundaryP', None, "App::PropertyLinkGlobal", "", "P boundary")
-        addObjectProperty(obj, 'BoundaryT', None, "App::PropertyLinkGlobal", "", "T boundary")
-        addObjectProperty(obj, 'BoundaryTurb', None, "App::PropertyLinkGlobal", "", "Turbulence boundary")
+        addObjectProperty(
+            obj,
+            "VolumeFractions",
+            {},
+            "App::PropertyMap",
+            "Volume Fraction",
+            QT_TRANSLATE_NOOP("App::Property", "Volume fraction values"),
+        )
+        addObjectProperty(
+            obj,
+            "BoundaryU",
+            None,
+            "App::PropertyLinkGlobal",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "U boundary"),
+        )
+        addObjectProperty(
+            obj,
+            "BoundaryP",
+            None,
+            "App::PropertyLinkGlobal",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "P boundary"),
+        )
+        addObjectProperty(
+            obj,
+            "BoundaryT",
+            None,
+            "App::PropertyLinkGlobal",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "T boundary"),
+        )
+        addObjectProperty(
+            obj,
+            "BoundaryTurb",
+            None,
+            "App::PropertyLinkGlobal",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulence boundary"),
+        )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

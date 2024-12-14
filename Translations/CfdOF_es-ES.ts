@@ -1,15 +1,965 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="es_ES" sourcelanguage="en">
+<TS version="2.1" language="es_ES" sourcelanguage="en_US">
+<context>
+    <name>App::Property</name>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="93"/>
+        <source>Type of reporting function</source>
+        <translation>Tipo de función de informe</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="102"/>
+        <source>Patch on which to create the function object</source>
+        <translation>Parche en el cual crear el objeto de función</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="112"/>
+        <source>Reference density</source>
+        <translation>Densidad de referencia</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="120"/>
+        <source>Reference pressure</source>
+        <translation>Presión de referencia</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="128"/>
+        <source>Centre of rotation</source>
+        <translation>Centro de rotación</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="136"/>
+        <source>Whether to write output fields</source>
+        <translation>Si escribir campos de salida</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="146"/>
+        <source>Lift direction (x component)</source>
+        <translation>Dirección de elevación (componente X)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="155"/>
+        <source>Drag direction</source>
+        <translation>Dirección de arrastre</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="164"/>
+        <source>Freestream velocity magnitude</source>
+        <translation>Magnitud de velocidad de flujo libre</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="172"/>
+        <source>Coefficient length reference</source>
+        <translation>Coeficiente de longitud de referencia</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="180"/>
+        <source>Coefficient area reference</source>
+        <translation>Coeficiente de área de referencia</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="190"/>
+        <source>Number of bins</source>
+        <translation>Número de intervalos</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="198"/>
+        <source>Binning direction</source>
+        <translation>Dirección de agrupamiento</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="206"/>
+        <source>Cumulative</source>
+        <translation>Acumulativo</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="216"/>
+        <source>Name of the field to sample</source>
+        <translation>Nombre del campo a muestrar</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="225"/>
+        <source>Location of the probe sample</source>
+        <translation>Ubicación de la sonda de prueba</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="98"/>
+        <source>List of material shapes</source>
+        <translation>Lista de formas de material</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="108"/>
+        <source>Type of material</source>
+        <translation>Tipo de material</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdAnalysis.py" line="68"/>
+        <source>Path to which cases are written (blank to use system default; relative path is relative to location of current file)</source>
+        <translation>Ruta en la cual los casos son escritos (deje en blanco para usar valor por defecto del sistema; la ruta relativa es relativa a la ubicación del archivo actual)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdAnalysis.py" line="76"/>
+        <source>Active analysis object in document</source>
+        <translation>Objeto de análisis activo en el documento</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdAnalysis.py" line="85"/>
+        <source>Mesh setup needs to be re-written</source>
+        <translation>La configuración de la malla tiene que ser reescrito</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdAnalysis.py" line="93"/>
+        <source>Case setup needs to be re-written</source>
+        <translation>La configuración del caso tiene que ser reescrito</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdAnalysis.py" line="101"/>
+        <source>Mesher needs to be re-run before running solver</source>
+        <translation>El mallador necesita ser ejecutado de nuevo antes de ejecutar el solucionador</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdAnalysis.py" line="109"/>
+        <source>Use a hostfile for parallel cluster runs</source>
+        <translation>Usar un archivo host para ejecuciones de clúster en paralelo</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdAnalysis.py" line="117"/>
+        <source>Hostfile name</source>
+        <translation>Nombre de archivo host</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="104"/>
+        <source>Name of directory in which the mesh is created</source>
+        <translation>Normbre del directorio en el cual la malla es creada</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="117"/>
+        <source>Maximum relative linear deflection for built-in surface triangulation</source>
+        <translation>Deflexión lineal relativa máxima para triangulación de superficies integrada</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="127"/>
+        <source>Mesh elements per 360 degrees for surface triangulation with GMSH</source>
+        <translation>Elementos de malla por cada 360 grados para rtiangulación de superficies con GMSH</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="139"/>
+        <source>Number of parallel processes (only applicable to cfMesh and snappyHexMesh)</source>
+        <translation>Número de procesos en paralelo (sólo aplica a cfMesh y snappyHexMesh)</translation>
+    </message>
+    <message>
+        <source>0 means use all available (if NumberOfProcesses = 1) or use 1 (if NumberOfProcesses &gt; 1)</source>
+        <translation type="vanished">0 significa usar todo lo disponible (si NumberOfProcesses = 1) o use 1 (si NumberOfProcesses &gt; 1)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="152"/>
+        <source>Number of parallel threads per process (only applicable to cfMesh and gmsh).
+0 means use all available (if NumberOfProcesses = 1) or use 1 (if NumberOfProcesses &gt; 1)</source>
+        <translation>Número de hilos paralelos por proceso (sólo aplica a cfMesh y gmsh)
+0 significa usar todo lo disponible (si NumberOfProcesses = 1) o use 1 (si NumberOfProcesses &gt; 1)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="161"/>
+        <source>Part object to mesh</source>
+        <translation>Objeto parte a malla</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="170"/>
+        <source>Meshing utilities</source>
+        <translation>Utilidades de mallado</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="181"/>
+        <source>Max mesh element size (0.0 = infinity)</source>
+        <translation>Tamaño máximo de elemento de malla (0.0 = infinito)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="193"/>
+        <source>Location vector inside the region to be meshed (must not coincide with a cell face)</source>
+        <translation>Vector de ubicación dentro de la región a ser mallada (no debe coincidir con una cara de celda)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="202"/>
+        <source>Number of cells between each level of refinement</source>
+        <translation>Número de celdas entre cada nivel de refinado</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="211"/>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="186"/>
+        <source>Relative edge (feature) refinement</source>
+        <translation>Refinamiento (de característica) relativo de aristas</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="221"/>
+        <source>Convert to polyhedral dual mesh</source>
+        <translation>Convertir a malla poliedra dual</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="231"/>
+        <source>Use implicit edge detection</source>
+        <translation>Utilizar detección implícita de aristas</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="241"/>
+        <source>Dimension of mesh elements (Default 3D)</source>
+        <translation>Dimensión de elementos de malla (Por defecto 3D)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="202"/>
+        <source>Set the target refinement interface phase</source>
+        <translation>Establecer la fase de interfaz de refinamiento destino</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="214"/>
+        <source>Set the interval at which to run the dynamic mesh refinement</source>
+        <translation>Establecer el intervalo al cual ejecutar el refinamiento de malla dinámico</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="223"/>
+        <source>Set the maximum dynamic mesh refinement level</source>
+        <translation>Establecer el nivel máximo de refinamiento dinámico de malla</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="235"/>
+        <source>Set the number of buffer layers between refined and existing cells</source>
+        <translation>Establecer el número de capas búfer entre las celdas refinadas y existentes</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="247"/>
+        <source>Whether to write the dynamic mesh refinement fields after refinement</source>
+        <translation>Si escribir los campos de refinamiento dinámico de malla después del refinado</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="283"/>
+        <source>Reference velocity direction (typically free-stream/input value)</source>
+        <translation>Dirección de velocidad de referencia (tipicamentev valor flujo libre/entrada)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="292"/>
+        <source>Refinement relative to the base mesh</source>
+        <translation>Refinamiento relativo a la malla base</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="304"/>
+        <source>Interval at which to run the dynamic mesh refinement in steady analyses</source>
+        <translation>Intervalo al cual ejecutar el refinamiento dinámico de malla en análisis estacionarios</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="316"/>
+        <source>Interval at which to run the dynamic mesh refinement in transient analyses</source>
+        <translation>Intervalo al cual ejecutar el refinamiento dinámico de malla en análisis transitorios</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="328"/>
+        <source>Number of buffer layers between refined and existing cells</source>
+        <translation>Número de capas búfer entre las celdas refinadas y existentes</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="340"/>
+        <source>Whether to write the indicator fields for shock wave detection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="100"/>
+        <source>List of mesh refinement objects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="121"/>
+        <source>Whether the refinement region is a volume rather than surface</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="130"/>
+        <source>Defines an extrusion from a patch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="141"/>
+        <source>Set relative length of the elements for this region</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="150"/>
+        <source>Set refinement region thickness</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="159"/>
+        <source>Set number of boundary layers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="168"/>
+        <source>Set expansion ratio within boundary layers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="177"/>
+        <source>Set the maximum first layer height</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="195"/>
+        <source>Type of extrusion</source>
+        <translation>Tipo de extrusión</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="207"/>
+        <source>If true, then the extrusion extends the existing mesh rather than replacing it</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="216"/>
+        <source>Total distance of the extruded layers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="225"/>
+        <source>Total angle through which the patch is extruded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="234"/>
+        <source>Number of extrusion layers to add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="243"/>
+        <source>Expansion ratio of extrusion layers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="252"/>
+        <source>Point on axis for sector extrusion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="261"/>
+        <source>Direction of axis for sector extrusion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="324"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="121"/>
+        <source>Boundary faces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="350"/>
+        <source>Boundary condition category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="363"/>
+        <source>Boundary condition type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="371"/>
+        <source>Whether to use components of velocity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="379"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="127"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="281"/>
+        <source>Velocity (x component)</source>
+        <translation>Velocidad (componente X)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="387"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="135"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="289"/>
+        <source>Velocity (y component)</source>
+        <translation>Velocidad (componente Y)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="395"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="143"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="297"/>
+        <source>Velocity (z component)</source>
+        <translation>Velocidad (componente Z)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="403"/>
+        <source>Velocity magnitude</source>
+        <translation>Magnitud de velocidad</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="411"/>
+        <source>Face describing direction (normal)</source>
+        <translation>Cara que describe la dirección</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="419"/>
+        <source>Direction is inward-pointing if true</source>
+        <translation>La dirección apunta hacia dentro si es verdadero</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="427"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="151"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="313"/>
+        <source>Static pressure</source>
+        <translation>Presión estática</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="435"/>
+        <source>Slip ratio</source>
+        <translation>Tasa de deslizamiento</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="443"/>
+        <source>Volume flow rate</source>
+        <translation>Caudal volumétrico</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="451"/>
+        <source>Mass flow rate</source>
+        <translation>Caudal másico</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="460"/>
+        <source>Relative velocity</source>
+        <translation>Velocidad relativa</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="469"/>
+        <source>Baffle</source>
+        <translation>Obstructor</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="479"/>
+        <source>Porous baffle pressure drop coefficient</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="487"/>
+        <source>Porous screen mesh diameter</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="495"/>
+        <source>Porous screen mesh spacing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="504"/>
+        <source>Sand-grain roughness</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="512"/>
+        <source>Coefficient of roughness [0.5-1]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="521"/>
+        <source>Type of thermal boundary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="529"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="167"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="329"/>
+        <source>Temperature</source>
+        <translation type="unfinished">Temperatura</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="537"/>
+        <source>Wall heat flux</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="545"/>
+        <source>Wall heat transfer coefficient</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="555"/>
+        <source>Rotational or translational periodicity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="563"/>
+        <source>Centre of rotation for rotational periodics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="571"/>
+        <source>Axis of rotational for rotational periodics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="579"/>
+        <source>Separation vector for translational periodics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="587"/>
+        <source>Partner patch for the slave periodic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="597"/>
+        <source>Whether the current patch is the master or slave patch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="613"/>
+        <source>Turbulent quantities specified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="624"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="183"/>
+        <source>Turbulent kinetic energy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="632"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="191"/>
+        <source>Specific turbulent dissipation rate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="642"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="199"/>
+        <source>Turbulent dissipation rate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="652"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="207"/>
+        <source>Modified turbulent viscosity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="662"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="215"/>
+        <source>Turbulent intermittency</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="670"/>
+        <source>Transition momentum thickness Reynolds number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="680"/>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="688"/>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="696"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="231"/>
+        <source>Turbulent viscosity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="706"/>
+        <source>Turbulence intensity (percent)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="719"/>
+        <source>Length scale of turbulent eddies</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="727"/>
+        <source>Volume fractions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="95"/>
+        <source>Initialise velocity with potential flow solution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="103"/>
+        <source>Initialise pressure with potential flow solution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="111"/>
+        <source>Initialise with flow values from inlet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="119"/>
+        <source>Initialise with flow values from outlet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="159"/>
+        <source>Initialise with temperature value from inlet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="175"/>
+        <source>Initialise turbulence with values from inlet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="223"/>
+        <source>Transition Momentum Thickness Reynolds Number</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="240"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="345"/>
+        <source>Volume fraction values</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="248"/>
+        <source>U boundary</source>
+        <translation>Frontera U</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="256"/>
+        <source>P boundary</source>
+        <translation>Frontera P</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="264"/>
+        <source>T boundary</source>
+        <translation>Frontera T</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="272"/>
+        <source>Turbulence boundary</source>
+        <translation>Frontera de turbulencia</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="114"/>
+        <source>Resolve time dependence</source>
+        <translation>Resolver dependencia del tiempo</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="130"/>
+        <source>Flow algorithm</source>
+        <translation>Algoritmo de flujo</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="148"/>
+        <source>Type of phases present</source>
+        <translation>Tipo de fases presentes</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="158"/>
+        <source>Type of turbulence modelling</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="182"/>
+        <source>Turbulence model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="193"/>
+        <source>Gravitational acceleration vector (x component)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="201"/>
+        <source>Gravitational acceleration vector (y component)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="209"/>
+        <source>Gravitational acceleration vector (z component)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="219"/>
+        <source>Single Rotating Frame model enabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="228"/>
+        <source>Rotational speed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="237"/>
+        <source>Centre of rotation (SRF)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="246"/>
+        <source>Axis of rotation (SRF)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="85"/>
+        <source>Name of the scalar transport field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="96"/>
+        <source>Use fixed value for diffusivity rather than viscosity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="106"/>
+        <source>Diffusion coefficient for fixed diffusivity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="115"/>
+        <source>Restrict transport within phase</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="124"/>
+        <source>Transport within phase</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="133"/>
+        <source>Injection rate</source>
+        <translation>Tasa de inyección</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="142"/>
+        <source>Location of the injection point</source>
+        <translation>Ubicación del punto de inyección</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="96"/>
+        <source>Name of case directory where the input files are written</source>
+        <translation>Normbre del directorio del caso donde los archivos de entrada son escritos</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="104"/>
+        <source>Parallel analysis on multiple CPU cores</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="112"/>
+        <source>Number of cores on which to run parallel analysis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="123"/>
+        <source>Sets a limit on the number of time directories that are stored by overwriting time directories on a cyclic basis.  Set to 0 to disable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="134"/>
+        <source>Maximum number of iterations to run steady-state analysis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="142"/>
+        <source>Iteration output interval</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="150"/>
+        <source>Global absolute solution convergence criterion</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="159"/>
+        <source>Whether to restart or resume solving</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="168"/>
+        <source>Total time to run transient solution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="176"/>
+        <source>Time step increment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="184"/>
+        <source>Maximum CFL number for transient simulations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="194"/>
+        <source>Maximum free-surface CFL number for transient simulations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="202"/>
+        <source>Output time interval</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="141"/>
+        <source>Porous drag model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="150"/>
+        <source>Darcy coefficient (direction 1)</source>
+        <translation>Coeficiente de Darcy (dirección 1)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="158"/>
+        <source>Darcy coefficient (direction 2)</source>
+        <translation>Coeficiente de Darcy (dirección 2)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="166"/>
+        <source>Darcy coefficient (direction 3)</source>
+        <translation>Coeficiente de Darcy (dirección 3)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="174"/>
+        <source>Forchheimer coefficient (direction 1)</source>
+        <translation>Coeficiente de Forchheimer (dirección 1)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="182"/>
+        <source>Forchheimer coefficient (direction 2)</source>
+        <translation>Coeficiente de Forchheimer (dirección 2)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="190"/>
+        <source>Forchheimer coefficient (direction 3)</source>
+        <translation>Coeficiente de Forchheimer (dirección 3)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="198"/>
+        <source>Principal direction 1</source>
+        <translation>Dirección principal 1</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="206"/>
+        <source>Principal direction 2</source>
+        <translation>Dirección principal 2</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="214"/>
+        <source>Principal direction 3</source>
+        <translation>Dirección principal 3</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="222"/>
+        <source>Tube diameter</source>
+        <translation>Diámetro de tubo</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="230"/>
+        <source>Direction parallel to tubes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="238"/>
+        <source>Spacing between tube layers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="246"/>
+        <source>Direction normal to tube layers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="256"/>
+        <source>Tube spacing aspect ratio (layer-to-layer : tubes in layer)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="264"/>
+        <source>Approximate flow velocity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="273"/>
+        <source>Whether the zone initialises velocity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="305"/>
+        <source>Whether the zone initialises pressure</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="321"/>
+        <source>Whether the zone initialises temperature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="337"/>
+        <source>Whether the zone initialises volume fraction</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Boundary</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="45"/>
+        <source>Wall</source>
+        <translation>Pared</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="46"/>
+        <source>Inlet</source>
+        <translation>Entrada</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="47"/>
+        <source>Outlet</source>
+        <translation>Salida</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="48"/>
+        <source>Open</source>
+        <translation>Abierto</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="49"/>
+        <source>Constraint</source>
+        <translation>Restricción</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="50"/>
+        <source>Baffle</source>
+        <translation>Obstructor</translation>
+    </message>
+</context>
+<context>
+    <name>BoundaryNames</name>
+    <message>
+        <source>Wall</source>
+        <translation type="vanished">Pared</translation>
+    </message>
+    <message>
+        <source>Inlet</source>
+        <translation type="vanished">Entrada</translation>
+    </message>
+    <message>
+        <source>Outlet</source>
+        <translation type="vanished">Salida</translation>
+    </message>
+    <message>
+        <source>Open</source>
+        <translation type="vanished">Abierto</translation>
+    </message>
+    <message>
+        <source>Constraint</source>
+        <translation type="vanished">Restricción</translation>
+    </message>
+    <message>
+        <source>Baffle</source>
+        <translation type="vanished">Obstructor</translation>
+    </message>
+</context>
 <context>
     <name>CfdOF_Analysis</name>
     <message>
-        <location filename="../CfdOF/CfdAnalysis.py" line="94"/>
+        <location filename="../CfdOF/CfdAnalysis.py" line="163"/>
         <source>Analysis container</source>
         <translation>Contenedor de análisis</translation>
     </message>
     <message>
-        <location filename="../CfdOF/CfdAnalysis.py" line="96"/>
+        <location filename="../CfdOF/CfdAnalysis.py" line="167"/>
         <source>Creates an analysis container with a CFD solver</source>
         <translation>Crea un contenedor de para el análisis con un solucionador CFD</translation>
     </message>
@@ -17,12 +967,12 @@
 <context>
     <name>CfdOF_DynamicMeshInterfaceRefinement</name>
     <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="86"/>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="90"/>
         <source>Interface dynamic refinement</source>
         <translation>Refinamiento dinámico de interfaz</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="88"/>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="95"/>
         <source>Activates adaptive mesh refinement at free-surface interfaces</source>
         <translation>Activa el refinamiento de malla adaptativo en las interfaces de superficie libre</translation>
     </message>
@@ -30,12 +980,12 @@
 <context>
     <name>CfdOF_DynamicMeshShockRefinement</name>
     <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="139"/>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="143"/>
         <source>Shockwave dynamic refinement</source>
         <translation>Refinamiento dinámico de onda de choque</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="141"/>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="148"/>
         <source>Activates adaptive mesh refinement for shocks</source>
         <translation>Activa el refinamiento de malla adaptativo para choques</translation>
     </message>
@@ -43,12 +993,12 @@
 <context>
     <name>CfdOF_FluidBoundary</name>
     <message>
-        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="238"/>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="296"/>
         <source>Fluid boundary</source>
         <translation>Frontera de fluido</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="240"/>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="300"/>
         <source>Creates a CFD fluid boundary</source>
         <translation>Crea una frontera de fluido CFD</translation>
     </message>
@@ -56,8 +1006,8 @@
 <context>
     <name>CfdOF_FluidMaterial</name>
     <message>
-        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="52"/>
-        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="51"/>
+        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="54"/>
+        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="57"/>
         <source>Add fluid properties</source>
         <translation>Agregar propiedades de fluido</translation>
     </message>
@@ -65,12 +1015,12 @@
 <context>
     <name>CfdOF_GroupDynamicMeshRefinement</name>
     <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="42"/>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="46"/>
         <source>Dynamic mesh refinement</source>
         <translation>Refinamiento de malla dinámico</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="44"/>
+        <location filename="../CfdOF/Mesh/CfdDynamicMeshRefinement.py" line="50"/>
         <source>Allows adaptive refinement of the mesh</source>
         <translation>Permite un refinamiento adaptativo de la malla</translation>
     </message>
@@ -78,12 +1028,12 @@
 <context>
     <name>CfdOF_InitialisationZone</name>
     <message>
-        <location filename="../CfdOF/Solve/CfdZone.py" line="89"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="90"/>
         <source>Initialisation zone</source>
         <translation>Zona de inicialización</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Solve/CfdZone.py" line="91"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="95"/>
         <source>Select and create an initialisation zone</source>
         <translation>Selecciona y crea una zona de inicialización</translation>
     </message>
@@ -91,12 +1041,12 @@
 <context>
     <name>CfdOF_InitialiseInternal</name>
     <message>
-        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="53"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="54"/>
         <source>Initialise</source>
         <translation>Inicializar</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="55"/>
+        <location filename="../CfdOF/Solve/CfdInitialiseFlowField.py" line="60"/>
         <source>Initialise internal flow variables based on the selected physics model</source>
         <translation>Inicializa variables de flujo interno basado en el modelo de física seleccionado</translation>
     </message>
@@ -104,12 +1054,12 @@
 <context>
     <name>CfdOF_MeshFromShape</name>
     <message>
-        <location filename="../CfdOF/Mesh/CfdMesh.py" line="48"/>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="50"/>
         <source>CFD mesh</source>
         <translation>Malla CFD</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Mesh/CfdMesh.py" line="50"/>
+        <location filename="../CfdOF/Mesh/CfdMesh.py" line="54"/>
         <source>Create a mesh using cfMesh, snappyHexMesh or gmsh</source>
         <translation>Crea una malla usando cfMesh,snappyHexMesh o gmsh</translation>
     </message>
@@ -117,12 +1067,12 @@
 <context>
     <name>CfdOF_MeshRegion</name>
     <message>
-        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="61"/>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="62"/>
         <source>Mesh refinement</source>
         <translation>Refinamiento de malla</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="63"/>
+        <location filename="../CfdOF/Mesh/CfdMeshRefinement.py" line="66"/>
         <source>Creates a mesh refinement</source>
         <translation>Crea un refinamiento de malla</translation>
     </message>
@@ -130,12 +1080,12 @@
 <context>
     <name>CfdOF_OpenPreferences</name>
     <message>
-        <location filename="../CfdOF/CfdOpenPreferencesPage.py" line="32"/>
+        <location filename="../CfdOF/CfdOpenPreferencesPage.py" line="33"/>
         <source>Open preferences</source>
         <translation>Abrir preferencias</translation>
     </message>
     <message>
-        <location filename="../CfdOF/CfdOpenPreferencesPage.py" line="34"/>
+        <location filename="../CfdOF/CfdOpenPreferencesPage.py" line="36"/>
         <source>Opens the CfdOF preferences page</source>
         <translation>Abre la página de preferencias de CfdOF</translation>
     </message>
@@ -143,12 +1093,12 @@
 <context>
     <name>CfdOF_PhysicsModel</name>
     <message>
-        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="52"/>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="54"/>
         <source>Select models</source>
         <translation>Seleccionar modelos</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="54"/>
+        <location filename="../CfdOF/Solve/CfdPhysicsSelection.py" line="58"/>
         <source>Select the physics model</source>
         <translation>Selecciona el modelo físico</translation>
     </message>
@@ -156,12 +1106,12 @@
 <context>
     <name>CfdOF_PorousZone</name>
     <message>
-        <location filename="../CfdOF/Solve/CfdZone.py" line="69"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="70"/>
         <source>Porous zone</source>
         <translation>Zona porosa</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Solve/CfdZone.py" line="71"/>
+        <location filename="../CfdOF/Solve/CfdZone.py" line="74"/>
         <source>Select and create a porous zone</source>
         <translation>Selecciona y crea una zona porosa</translation>
     </message>
@@ -169,25 +1119,25 @@
 <context>
     <name>CfdOF_ReloadWorkbench</name>
     <message>
-        <location filename="../CfdOF/CfdReloadWorkbench.py" line="36"/>
+        <location filename="../CfdOF/CfdReloadWorkbench.py" line="37"/>
         <source>Reload CfdOF workbench</source>
         <translation>Recargar el entorno de trabajo CfdOF</translation>
     </message>
     <message>
-        <location filename="../CfdOF/CfdReloadWorkbench.py" line="38"/>
-        <source>Reload source files from disk</source>
-        <translation>Recarga los archivos fuente desde el disco</translation>
+        <location filename="../CfdOF/CfdReloadWorkbench.py" line="41"/>
+        <source>Attempt to reload all CfdOF source files from disk. May break open documents!</source>
+        <translation>Intenta recargar todos los archivos fuente de CfdOF desde el disco. ¡Esto podría romper los documentos abiertos!</translation>
     </message>
 </context>
 <context>
     <name>CfdOF_ReportingFunctions</name>
     <message>
-        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="57"/>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="60"/>
         <source>Reporting function</source>
         <translation>Función de informe</translation>
     </message>
     <message>
-        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="59"/>
+        <location filename="../CfdOF/PostProcess/CfdReportingFunction.py" line="64"/>
         <source>Create a reporting function for the current case</source>
         <translation>Crea una función de informe para el caso actual</translation>
     </message>
@@ -195,12 +1145,12 @@
 <context>
     <name>CfdOF_ScalarTransportFunctions</name>
     <message>
-        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="50"/>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="53"/>
         <source>Cfd scalar transport function</source>
         <translation>Función de transporte escalar CFD</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="52"/>
+        <location filename="../CfdOF/Solve/CfdScalarTransportFunction.py" line="57"/>
         <source>Create a scalar transport function</source>
         <translation>Crea una función de transporte escalar</translation>
     </message>
@@ -208,12 +1158,12 @@
 <context>
     <name>CfdOF_SolverControl</name>
     <message>
-        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="52"/>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="55"/>
         <source>Solver job control</source>
         <translation>Control del trabajo del solucionador</translation>
     </message>
     <message>
-        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="54"/>
+        <location filename="../CfdOF/Solve/CfdSolverFoam.py" line="59"/>
         <source>Edit properties and run solver</source>
         <translation>Editar propiedades y ejecutar solucionador</translation>
     </message>
@@ -346,8 +1296,8 @@
     </message>
     <message>
         <location filename="../Gui/CfdPreferencePage.ui" line="457"/>
-        <source>Install Docker Container</source>
-        <translation>Instalar contenedor Docker</translation>
+        <source>Install Docker Image</source>
+        <translation>Instalar imagen Docker</translation>
     </message>
     <message>
         <location filename="../Gui/CfdPreferencePage.ui" line="489"/>
@@ -358,11 +1308,316 @@
 <context>
     <name>Console</name>
     <message>
-        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="58"/>
+        <location filename="../CfdOF/Solve/CfdFluidMaterial.py" line="61"/>
         <source>Set fluid properties 
 </source>
         <translation>Establecer propiedades de fluido 
 </translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdTools.py" line="1019"/>
+        <source>Checking CFD workbench dependencies...
+</source>
+        <translation>Comprobando las dependencias del banco de trabajo CFD...
+</translation>
+    </message>
+</context>
+<context>
+    <name>Dialogs</name>
+    <message>
+        <location filename="../CfdOF/Mesh/TaskPanelCfdMesh.py" line="294"/>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="302"/>
+        <location filename="../CfdOF/CfdTools.py" line="364"/>
+        <source>CfdOF Workbench</source>
+        <translation>Banco de trabajo CfdOF</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/TaskPanelCfdMesh.py" line="299"/>
+        <source>The case setup for the mesher may need to be re-written based on changes you have made to the model.
+
+Write mesh case first?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="310"/>
+        <source>Before installing this software, it is advised to run FreeCAD in administrator mode (hold down  the &apos;Shift&apos; key, right-click on the FreeCAD launcher, and choose &apos;Run as administrator&apos;).
+
+If this is not possible, please make sure OpenFOAM is installed in a location to which you have full read/write access rights.
+
+You are not currently running as administrator - do you wish to continue anyway?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/TaskPanelCfdMeshRefinement.py" line="186"/>
+        <source>Mesh object not found - please re-create.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Mesh/TaskPanelCfdMeshRefinement.py" line="186"/>
+        <source>Missing mesh object</source>
+        <translation>Falta el objeto malla</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/TaskPanelCfdSolverControl.py" line="161"/>
+        <source>The case may need to be re-meshed and the case setup re-written based on changes you have made to the model.
+
+Re-mesh and re-write case setup first?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/TaskPanelCfdSolverControl.py" line="167"/>
+        <source>The case setup may need to be re-written based on changes you have made to the model.
+
+Re-write case setup first?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/TaskPanelCfdSolverControl.py" line="175"/>
+        <source>The case may need to be re-meshed based on changes you have made to the model.
+
+Re-mesh case first?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FilePicker</name>
+    <message>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="244"/>
+        <source>Choose OpenFOAM directory</source>
+        <translation>Escoger directorio de OpenFOAM</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="253"/>
+        <source>Choose ParaView executable</source>
+        <translation>Escoger ejecutable de ParaView</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="264"/>
+        <source>Choose gmsh executable</source>
+        <translation>Escoger ejecutable de gmsh</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="277"/>
+        <source>Choose output directory</source>
+        <translation>Escoger directorio de salida</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="325"/>
+        <source>Choose OpenFOAM install file</source>
+        <translation>Escoger archivo de instalación de OpenFOAM</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="338"/>
+        <source>Choose ParaView install file</source>
+        <translation>Escoger archivo de instalación de ParaView</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="361"/>
+        <source>Choose cfMesh archive</source>
+        <translation>Escoger archivo de cfMesh</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/CfdPreferencePage.py" line="384"/>
+        <source>Choose HiSA archive</source>
+        <translation>Escoger archivo de HiSA</translation>
+    </message>
+</context>
+<context>
+    <name>Subnames</name>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="58"/>
+        <source>No-slip (viscous)</source>
+        <translation>Sin deslizamiento (viscoso)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="59"/>
+        <source>Slip (inviscid)</source>
+        <translation>Deslizamiento (no viscoso)</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="60"/>
+        <source>Partial slip</source>
+        <translation>Deslizamiento parcial</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="61"/>
+        <source>Translating</source>
+        <translation>Trasladando</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="62"/>
+        <source>Rough</source>
+        <translation>Rugoso</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="65"/>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="73"/>
+        <source>Uniform velocity</source>
+        <translation>Velocidad uniforme</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="66"/>
+        <source>Volumetric flow rate</source>
+        <translation>Caudal volumétrico</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="67"/>
+        <source>Mass flow rate</source>
+        <translation>Caudal másico</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="68"/>
+        <source>Total pressure</source>
+        <translation>Presión total</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="69"/>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="72"/>
+        <source>Static pressure</source>
+        <translation>Presión estática</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="74"/>
+        <source>Extrapolated</source>
+        <translation>Extrapolado</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="76"/>
+        <source>Ambient pressure</source>
+        <translation>Presión ambiente</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="76"/>
+        <source>Far-field</source>
+        <translation>Campo lejano</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="77"/>
+        <source>Symmetry</source>
+        <translation>Simetría</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="77"/>
+        <source>Periodic</source>
+        <translation>Periódico</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="78"/>
+        <source>Porous Baffle</source>
+        <translation>Obstructor poroso</translation>
+    </message>
+</context>
+<context>
+    <name>Subtypes</name>
+    <message>
+        <source>Zero velocity relative to wall</source>
+        <comment>Help text</comment>
+        <translation type="vanished">Velocidad cero relativa a la pared</translation>
+    </message>
+    <message>
+        <source>Frictionless wall; zero normal velocity</source>
+        <comment>Help text</comment>
+        <translation type="vanished">Pared sin fricción; velocidad normal cero</translation>
+    </message>
+    <message>
+        <source>All fields extrapolated; possibly unstable</source>
+        <comment>Help text</comment>
+        <translation type="vanished">Todos los campos extrapolados; posiblemente inestable</translation>
+    </message>
+    <message>
+        <source>Permeable screen</source>
+        <comment>Help text</comment>
+        <translation type="vanished">Pantalla permeable</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="99"/>
+        <source>Zero velocity relative to wall</source>
+        <translation>Velocidad cero relativa a la pared</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="100"/>
+        <source>Frictionless wall; zero normal velocity</source>
+        <translation>Pared sin fricción; velocidad normal cero</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="101"/>
+        <source>Blended fixed/slip</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="102"/>
+        <source>Fixed velocity tangential to wall; zero normal velocity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="103"/>
+        <source>Wall roughness function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="106"/>
+        <source>Velocity specified; normal component imposed for reverse flow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="107"/>
+        <source>Uniform volume flow rate specified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="108"/>
+        <source>Uniform mass flow rate specified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="111"/>
+        <source>Total pressure specified; treated as static pressure for reverse flow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="112"/>
+        <source>Static pressure specified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="117"/>
+        <source>Static pressure specified for outflow and total pressure for reverse flow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="120"/>
+        <source>Normal component imposed for outflow; velocity fixed for reverse flow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="121"/>
+        <source>All fields extrapolated; possibly unstable</source>
+        <translation>Todos los campos extrapolados; posiblemente inestable</translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="124"/>
+        <source>Boundary open to surroundings with total pressure specified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="125"/>
+        <source>Characteristic-based non-reflecting boundary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="128"/>
+        <source>Symmetry of flow quantities about boundary face</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="131"/>
+        <source>Rotationally or translationally periodic flows between two boundary faces</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../CfdOF/Solve/CfdFluidBoundary.py" line="133"/>
+        <source>Permeable screen</source>
+        <translation>Pantalla permeable</translation>
     </message>
 </context>
 <context>
@@ -1605,26 +2860,31 @@
 <context>
     <name>Workbench</name>
     <message>
-        <location filename="../InitGui.py" line="107"/>
-        <location filename="../InitGui.py" line="102"/>
-        <location filename="../InitGui.py" line="43"/>
+        <location filename="../InitGui.py" line="44"/>
+        <location filename="../InitGui.py" line="112"/>
+        <location filename="../InitGui.py" line="120"/>
         <source>CfdOF</source>
         <translation>CfdOF</translation>
     </message>
     <message>
-        <location filename="../InitGui.py" line="44"/>
+        <location filename="../InitGui.py" line="46"/>
         <source>CfdOF workbench</source>
         <translation>Entorno de trabajo CfdOF</translation>
     </message>
     <message>
-        <location filename="../InitGui.py" line="90"/>
+        <location filename="../InitGui.py" line="96"/>
         <source>Dynamic mesh refinement</source>
         <translation>Refinamiento de malla dinámico</translation>
     </message>
     <message>
-        <location filename="../InitGui.py" line="109"/>
-        <location filename="../InitGui.py" line="106"/>
-        <location filename="../InitGui.py" line="104"/>
+        <location filename="../InitGui.py" line="105"/>
+        <source>Development</source>
+        <translation>Desarrollo</translation>
+    </message>
+    <message>
+        <location filename="../InitGui.py" line="115"/>
+        <location filename="../InitGui.py" line="117"/>
+        <location filename="../InitGui.py" line="119"/>
         <source>&amp;CfdOF</source>
         <translation>&amp;CfdOF</translation>
     </message>

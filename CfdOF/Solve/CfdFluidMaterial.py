@@ -24,15 +24,18 @@
 
 
 import os
+
 import FreeCAD
+
 if FreeCAD.GuiUp:
     import FreeCADGui
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 from CfdOF.Solve import TaskPanelCfdFluidProperties
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
 translate = FreeCAD.Qt.translate
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
+
 
 def makeCfdFluidMaterial(name):
     obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
@@ -86,11 +89,24 @@ class CfdMaterial:
 
     def initProperties(self, obj):
         # Not currently used, but required for parent class
-        addObjectProperty(obj, "References", [], "App::PropertyLinkSubListGlobal", "Material", "List of material shapes")
+        addObjectProperty(
+            obj,
+            "References",
+            [],
+            "App::PropertyLinkSubListGlobal",
+            "Material",
+            QT_TRANSLATE_NOOP("App::Property", "List of material shapes"),
+        )
 
         # Compatibility with FEM material object
         if addObjectProperty(
-                obj, "Category", ["Solid", "Fluid"], "App::PropertyEnumeration", "Material", "Type of material"):
+            obj,
+            "Category",
+            ["Solid", "Fluid"],
+            "App::PropertyEnumeration",
+            "Material",
+            QT_TRANSLATE_NOOP("App::Property", "Type of material"),
+        ):
             obj.Category = "Fluid"
 
         # 'Material' PropertyMap already present in MaterialObjectPython

@@ -22,18 +22,19 @@
 # *                                                                         *
 # ***************************************************************************
 
+import os
+
 import FreeCAD
 import FreeCADGui
-from CfdOF.Mesh.CfdMesh import CfdMesh
-from PySide import QtCore
-import os
+import Part
+from pivy import coin
+
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
-from pivy import coin
-import Part
 from CfdOF.Mesh import TaskPanelCfdMeshRefinement
+from CfdOF.Mesh.CfdMesh import CfdMesh
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 
 # Constants
 EXTRUSION_NAMES = ["2D planar mesh", "2D wedge mesh", "Patch-normal", "Rotational"]
@@ -90,65 +91,175 @@ class CfdMeshRefinement:
 
     def initProperties(self, obj):
         # Common to all
-        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubListGlobal", "", "List of mesh refinement objects"):
+        if addObjectProperty(
+            obj,
+            "ShapeRefs",
+            [],
+            "App::PropertyLinkSubListGlobal",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "List of mesh refinement objects"),
+        ):
             # Backward compat
-            if 'References' in obj.PropertiesList:
+            if "References" in obj.PropertiesList:
                 doc = FreeCAD.getDocument(obj.Document.Name)
                 for r in obj.References:
                     if not r[1]:
                         obj.ShapeRefs += [doc.getObject(r[0])]
                     else:
                         obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
-                obj.removeProperty('References')
-                obj.removeProperty('LinkedObjects')
+                obj.removeProperty("References")
+                obj.removeProperty("LinkedObjects")
 
-        addObjectProperty(obj, "Internal", False, "App::PropertyBool", "",
-                          "Whether the refinement region is a volume rather than surface")
+        addObjectProperty(
+            obj,
+            "Internal",
+            False,
+            "App::PropertyBool",
+            "",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Whether the refinement region is a volume rather than surface"
+            ),
+        )
 
-        addObjectProperty(obj, "Extrusion", False, "App::PropertyBool", "",
-                          "Defines an extrusion from a patch")
+        addObjectProperty(
+            obj,
+            "Extrusion",
+            False,
+            "App::PropertyBool",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Defines an extrusion from a patch"),
+        )
 
-        addObjectProperty(obj, "RelativeLength", 0.75, "App::PropertyFloat", "Refinement",
-                          "Set relative length of the elements for this region")
+        addObjectProperty(
+            obj,
+            "RelativeLength",
+            0.75,
+            "App::PropertyFloat",
+            "Refinement",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Set relative length of the elements for this region"
+            ),
+        )
 
-        addObjectProperty(obj, "RefinementThickness", "0 m", "App::PropertyLength", "Surface refinement",
-                          "Set refinement region thickness")
+        addObjectProperty(
+            obj,
+            "RefinementThickness",
+            "0 m",
+            "App::PropertyLength",
+            "Surface refinement",
+            QT_TRANSLATE_NOOP("App::Property", "Set refinement region thickness"),
+        )
 
-        addObjectProperty(obj, "NumberLayers", 0, "App::PropertyInteger", "Surface refinement",
-                          "Set number of boundary layers")
+        addObjectProperty(
+            obj,
+            "NumberLayers",
+            0,
+            "App::PropertyInteger",
+            "Surface refinement",
+            QT_TRANSLATE_NOOP("App::Property", "Set number of boundary layers"),
+        )
 
-        addObjectProperty(obj, "ExpansionRatio", 1.0, "App::PropertyFloat", "Surface refinement",
-                          "Set expansion ratio within boundary layers")
+        addObjectProperty(
+            obj,
+            "ExpansionRatio",
+            1.0,
+            "App::PropertyFloat",
+            "Surface refinement",
+            QT_TRANSLATE_NOOP("App::Property", "Set expansion ratio within boundary layers"),
+        )
 
-        addObjectProperty(obj, "FirstLayerHeight", "0 m", "App::PropertyLength", "Surface refinement",
-                          "Set the maximum first layer height")
+        addObjectProperty(
+            obj,
+            "FirstLayerHeight",
+            "0 m",
+            "App::PropertyLength",
+            "Surface refinement",
+            QT_TRANSLATE_NOOP("App::Property", "Set the maximum first layer height"),
+        )
 
-        addObjectProperty(obj, "RegionEdgeRefinement", 1, "App::PropertyFloat", "Surface refinement",
-                          "Relative edge (feature) refinement")
+        addObjectProperty(
+            obj,
+            "RegionEdgeRefinement",
+            1,
+            "App::PropertyFloat",
+            "Surface refinement",
+            QT_TRANSLATE_NOOP("App::Property", "Relative edge (feature) refinement"),
+        )
 
-        addObjectProperty(obj, "ExtrusionType", EXTRUSION_TYPES[0], "App::PropertyString", "Extrusion",
-                          "Type of extrusion")
+        addObjectProperty(
+            obj,
+            "ExtrusionType",
+            EXTRUSION_TYPES[0],
+            "App::PropertyString",
+            "Extrusion",
+            QT_TRANSLATE_NOOP("App::Property", "Type of extrusion"),
+        )
 
-        addObjectProperty(obj, "KeepExistingMesh", False, "App::PropertyBool", "Extrusion",
-                          "If true, then the extrusion extends the existing mesh rather than replacing it")
+        addObjectProperty(
+            obj,
+            "KeepExistingMesh",
+            False,
+            "App::PropertyBool",
+            "Extrusion",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "If true, then the extrusion extends the existing mesh rather than replacing it",
+            ),
+        )
 
-        addObjectProperty(obj, "ExtrusionThickness", "1 mm", "App::PropertyLength", "Extrusion",
-                          "Total distance of the extruded layers")
+        addObjectProperty(
+            obj,
+            "ExtrusionThickness",
+            "1 mm",
+            "App::PropertyLength",
+            "Extrusion",
+            QT_TRANSLATE_NOOP("App::Property", "Total distance of the extruded layers"),
+        )
 
-        addObjectProperty(obj, "ExtrusionAngle", 5, "App::PropertyAngle", "Extrusion",
-                          "Total angle through which the patch is extruded")
+        addObjectProperty(
+            obj,
+            "ExtrusionAngle",
+            5,
+            "App::PropertyAngle",
+            "Extrusion",
+            QT_TRANSLATE_NOOP("App::Property", "Total angle through which the patch is extruded"),
+        )
 
-        addObjectProperty(obj, "ExtrusionLayers", 1, "App::PropertyInteger", "Extrusion",
-                          "Number of extrusion layers to add")
+        addObjectProperty(
+            obj,
+            "ExtrusionLayers",
+            1,
+            "App::PropertyInteger",
+            "Extrusion",
+            QT_TRANSLATE_NOOP("App::Property", "Number of extrusion layers to add"),
+        )
 
-        addObjectProperty(obj, "ExtrusionRatio", 1.0, "App::PropertyFloat", "Extrusion",
-                          "Expansion ratio of extrusion layers")
+        addObjectProperty(
+            obj,
+            "ExtrusionRatio",
+            1.0,
+            "App::PropertyFloat",
+            "Extrusion",
+            QT_TRANSLATE_NOOP("App::Property", "Expansion ratio of extrusion layers"),
+        )
 
-        addObjectProperty(obj, "ExtrusionAxisPoint", FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Extrusion",
-                          "Point on axis for sector extrusion")
+        addObjectProperty(
+            obj,
+            "ExtrusionAxisPoint",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Extrusion",
+            QT_TRANSLATE_NOOP("App::Property", "Point on axis for sector extrusion"),
+        )
 
-        addObjectProperty(obj, "ExtrusionAxisDirection", FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Extrusion",
-                          "Direction of axis for sector extrusion")
+        addObjectProperty(
+            obj,
+            "ExtrusionAxisDirection",
+            FreeCAD.Vector(1, 0, 0),
+            "App::PropertyVector",
+            "Extrusion",
+            QT_TRANSLATE_NOOP("App::Property", "Direction of axis for sector extrusion"),
+        )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

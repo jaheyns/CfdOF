@@ -32,6 +32,7 @@ from CfdOF import CfdFaceSelectWidget
 from CfdOF.Mesh import CfdMeshRefinement
 from FreeCAD import Units
 
+translate = FreeCAD.Qt.translate
 
 class TaskPanelCfdMeshRefinement:
     """ The TaskPanel for editing References property of MeshRefinement objects """
@@ -181,8 +182,8 @@ class TaskPanelCfdMeshRefinement:
         analysis_obj = CfdTools.getActiveAnalysis()
         mesh_obj = CfdTools.getMeshObject(analysis_obj)
         if mesh_obj is None:
-            message = "Mesh object not found - please re-create."
-            QtGui.QMessageBox.critical(None, 'Missing mesh object', message)
+            message = translate("Dialogs", "Mesh object not found - please re-create.")
+            QtGui.QMessageBox.critical(None, translate("Dialogs", "Missing mesh object"), message)
             doc = FreeCADGui.getDocument(self.obj.Document)
             doc.resetEdit()
         return mesh_obj

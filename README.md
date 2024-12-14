@@ -1,6 +1,6 @@
 # CfdOF: A Computational fluid dynamics (CFD) workbench for FreeCAD
 
-This workbench aims to help users set up and run CFD analyses within the [FreeCAD](https://freecadweb.org)
+This workbench aims to help users set up and run CFD analyses within the [FreeCAD](https://freecad.org)
 modeller, and serves as a front-end (GUI) for the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
 It guides the user in selecting the relevant physics, specifying the material properties, generating a mesh, assigning
 boundary conditions and choosing the solver settings before running the simulation. Best practices are specified to
@@ -56,7 +56,7 @@ Windows 7-11; 64-bit version is required.
 #### macOS
 
 Not widely tested, but success has been reported. See
-[the following forum post](https://forum.freecadweb.org/viewtopic.php?f=37&t=63782&p=547611#p547578)
+[the following forum post](https://forum.freecad.org/viewtopic.php?f=37&t=63782&p=547611#p547578)
 for instructions.
 
 ## Getting started
@@ -66,7 +66,7 @@ for instructions.
 The CfdOF workbench depends on the following external software, some of
 which can be automatically installed (see below for instructions).
 
-- [Latest release version of FreeCAD (at least version 0.20.0 / git commit 29177)](https://www.freecadweb.org/downloads.php)
+- [Latest release version of FreeCAD (at least version 0.20.0 / git commit 29177)](https://www.freecad.org/downloads.php)
  or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
 - OpenFOAM [Foundation versions 9-11](http://openfoam.org/download/) or [ESI-OpenCFD versions 2006-2312](http://openfoam.com/download)
 - [Paraview](http://www.paraview.org/)
@@ -79,7 +79,7 @@ which can be automatically installed (see below for instructions).
 #### Windows
 
 The latest
-[release](https://www.freecadweb.org/downloads.php)
+[release](https://www.freecad.org/downloads.php)
 or [development](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
 FreeCAD build can be obtained (64 bit version) and installed
 by respectively running the installer or extracting the .7z archive to a directory
@@ -142,7 +142,7 @@ prerequisites have been successfully installed.
 
 #### Linux
 
-AppImages of the latest [release](https://www.freecadweb.org/downloads.php)
+AppImages of the latest [release](https://www.freecad.org/downloads.php)
 or [development](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
 versions of FreeCAD can be downloaded and run directly
 without installation. Note that you will
@@ -211,7 +211,7 @@ prerequisites have been successfully installed.
 #### Docker container install
 
 Docker containers offer a convenient way of providing pre-compiled program packages for both windows and linux. macOS can also be supported but
-assistance may be required to get this to work.  Please leave a message on the [forum](https://forum.freecadweb.org/viewforum.php?f=37).
+assistance may be required to get this to work.  Please leave a message on the [forum](https://forum.freecad.org/viewforum.php?f=37).
 
 ##### Docker on Windows
 
@@ -274,9 +274,9 @@ in the 'Demos' directory. Where there are several numbered files, these should b
 and aim to demonstrate step-by-step how the case is set up.
 
 Community assistance may be sought at the
-[CfdOF dedicated FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37),
+[CfdOF dedicated FreeCAD forum](https://forum.freecad.org/viewforum.php?f=37),
 and a list of various third-party documentation is available in
-[the following forum post](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359).
+[the following forum post](https://forum.freecad.org/viewtopic.php?f=37&t=33492#p280359).
 
 ### FAQ
 
@@ -291,11 +291,11 @@ Gaps smaller than the mesh spacing are also allowed.
 
 ### Reporting Bugs
 
-Please discuss issues on the [CfdOF FreeCAD forum](https://forum.freecadweb.org/viewforum.php?f=37)
+Please discuss issues on the [CfdOF FreeCAD forum](https://forum.freecad.org/viewforum.php?f=37)
 for community assistance.
 Bugs can be reported on the [Github project site](https://github.com/jaheyns/cfdof).
 
-Please first read the [guidelines for reporting bugs](https://forum.freecadweb.org/viewtopic.php?f=37&t=33492#p280359)
+Please first read the [guidelines for reporting bugs](https://forum.freecad.org/viewtopic.php?f=37&t=33492#p280359)
 in order to provide sufficient information.
 
 ## Development
