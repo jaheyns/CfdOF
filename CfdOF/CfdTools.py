@@ -55,6 +55,7 @@ if FreeCAD.GuiUp:
     from PySide.QtGui import QFormLayout, QGridLayout
 
 from PySide.QtWidgets import QApplication
+
 translate = FreeCAD.Qt.translate
 
 # Some standard install locations that are searched if an install directory is not specified
@@ -360,7 +361,7 @@ def cfdErrorBox(msg):
     """
     QtGui.QApplication.restoreOverrideCursor()
     if FreeCAD.GuiUp:
-        QtGui.QMessageBox.critical(None, "CfdOF Workbench", msg)
+        QtGui.QMessageBox.critical(None, translate("Dialogs", "CfdOF Workbench"), msg)
     else:
         FreeCAD.Console.PrintError(msg + "\n")
 
