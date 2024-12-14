@@ -1,6 +1,6 @@
 ; AirCompressible
 ;
-; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
 
 [FCMat]
 Name = Air
