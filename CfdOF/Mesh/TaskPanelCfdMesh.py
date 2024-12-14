@@ -41,7 +41,7 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt
     from PySide.QtGui import QApplication
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+translate = FreeCAD.Qt.translate
 
 class TaskPanelCfdMesh:
     """ The TaskPanel for editing References property of CfdMesh objects and creation of new CFD mesh """
@@ -291,9 +291,13 @@ class TaskPanelCfdMesh:
             if FreeCAD.GuiUp:
                 if QtGui.QMessageBox.question(
                     None,
-                    "CfdOF Workbench",
-                    "The case setup for the mesher may need to be re-written based on changes you have made to the "
-                    "model.\n\nWrite mesh case first?", defaultButton=QtGui.QMessageBox.Yes
+                    translate("Dialogs", "CfdOF Workbench"),
+                    translate(
+                        "Dialogs",
+                        "The case setup for the mesher may need to be re-written "
+                        "based on changes you have made to the model.\n\nWrite mesh case first?"
+                    ),
+                    defaultButton=QtGui.QMessageBox.Yes
                 ) == QtGui.QMessageBox.Yes:
                     self.Start = time.time()
                     self.writeMesh()
