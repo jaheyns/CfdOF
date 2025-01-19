@@ -1369,7 +1369,7 @@ def floatEqual(a, b):
     Test whether a and b are equal within an absolute and relative tolerance
     """
     reltol = 10*sys.float_info.epsilon
-    abstol = 1e-12  # Seems to be necessary on file read/write
+    abstol = 1e-11  # Seems to be necessary on file read/write
     return abs(a-b) < abstol or abs(a - b) <= reltol*max(abs(a), abs(b))
 
 
@@ -1533,12 +1533,16 @@ def matchFaces(faces1, faces2):
             j += 1
             matching = False
 
+    print(candidate_mesh_faces)
+
     # Do comprehensive matching, and reallocate to original index
     successful_candidates = []
     for k in range(len(candidate_mesh_faces)):
         i, j = candidate_mesh_faces[k]
         if isSameGeometry(faces1[i][0], faces2[j][0]):
             successful_candidates.append((faces1[i][1], faces2[j][1]))
+
+    print(successful_candidates)
 
     return successful_candidates
 
