@@ -1533,16 +1533,12 @@ def matchFaces(faces1, faces2):
             j += 1
             matching = False
 
-    print(candidate_mesh_faces)
-
     # Do comprehensive matching, and reallocate to original index
     successful_candidates = []
     for k in range(len(candidate_mesh_faces)):
         i, j = candidate_mesh_faces[k]
         if isSameGeometry(faces1[i][0], faces2[j][0]):
             successful_candidates.append((faces1[i][1], faces2[j][1]))
-
-    print(successful_candidates)
 
     return successful_candidates
 
