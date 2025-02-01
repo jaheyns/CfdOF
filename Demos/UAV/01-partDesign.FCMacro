@@ -36,20 +36,6 @@ Draft.upgrade(App.ActiveDocument.RootObjects,delete=True)
 FreeCAD.ActiveDocument.recompute()
 
 Gui.activateWorkbench("PartWorkbench")
-App.ActiveDocument.addObject("Part::Box","Box")
-App.ActiveDocument.ActiveObject.Label = "Cube"
-App.ActiveDocument.recompute()
-Gui.SendMsgToActiveView("ViewFit")
-App.ActiveDocument.getObject("Box").Length = '2500 mm'
-App.ActiveDocument.getObject("Box").Width = '4000 mm'
-App.ActiveDocument.getObject("Box").Height = '6000 mm'
-App.ActiveDocument.getObject("Box").Placement = App.Placement(App.Vector(-2500,-2000,-3500),App.Rotation(App.Vector(0,0,1),0))
-
-App.ActiveDocument.addObject("Part::Cut","Cut")
-App.ActiveDocument.Cut.Base = App.activeDocument().Compound
-App.ActiveDocument.Cut.Tool = App.activeDocument().Box
-Gui.ActiveDocument.Compound.Visibility=False
-Gui.ActiveDocument.Box.Visibility=False
 
 App.ActiveDocument.addObject("Part::Box","Box001")
 App.ActiveDocument.ActiveObject.Label = "Cube001"
@@ -61,7 +47,7 @@ App.ActiveDocument.recompute()
 Gui.SendMsgToActiveView("ViewFit")
 
 App.activeDocument().addObject("Part::Compound","Compound001")
-App.activeDocument().Compound001.Links = [App.activeDocument().Box001,App.activeDocument().Cut]
+App.activeDocument().Compound001.Links = [App.activeDocument().Box001,App.activeDocument().Compound]
 App.ActiveDocument.recompute()
 Gui.SendMsgToActiveView("ViewFit")
 

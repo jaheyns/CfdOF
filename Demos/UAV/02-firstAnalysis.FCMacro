@@ -29,14 +29,7 @@ from CfdOF.Mesh import CfdMeshRefinement
 CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound001_Mesh)
 FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = []
 referenceList = FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Cut'), (
-'Face1', 'Face2', 'Face3', 'Face4', 'Face5', 'Face6', 'Face7', 'Face8', 'Face9', 'Face10', 'Face11', 'Face12', 'Face13', 
-'Face14', 'Face15', 'Face16', 'Face17', 'Face18', 'Face19', 'Face20', 'Face21', 'Face22', 'Face23', 'Face24', 'Face25', 
-'Face26', 'Face27', 'Face28', 'Face29', 'Face30', 'Face31', 'Face32', 'Face33', 'Face34', 'Face35', 'Face36', 'Face37', 
-'Face38', 'Face39', 'Face40', 'Face41', 'Face42', 'Face43', 'Face44', 'Face45', 'Face46', 'Face47', 'Face48', 'Face49', 
-'Face50', 'Face51', 'Face52', 'Face53', 'Face54', 'Face55', 'Face56', 'Face57', 'Face58', 'Face59', 'Face60', 'Face61', 
-'Face62', 'Face63', 'Face64', 'Face65', 'Face66', 'Face67', 'Face68', 'Face69', 'Face70', 'Face71', 'Face72', 'Face73', 
-'Face74', 'Face75', 'Face76'))]
+(FreeCAD.ActiveDocument.getObject('Compound'), (''))]
 FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.25
 FreeCAD.ActiveDocument.MeshRefinement.RefinementThickness = '100 mm'
 FreeCAD.ActiveDocument.MeshRefinement.NumberLayers = 0
@@ -231,14 +224,7 @@ bc.ScreenWireDiameter = '0.1 mm'
 bc.ScreenSpacing = '0 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary004.Label = 'wall'
 FreeCAD.ActiveDocument.CfdFluidBoundary004.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Cut'), (
-'Face1', 'Face2', 'Face3', 'Face4', 'Face5', 'Face6', 'Face7', 'Face8', 'Face9', 'Face10', 'Face11', 'Face12', 'Face13',
-'Face14', 'Face15', 'Face16', 'Face17', 'Face18', 'Face19', 'Face20', 'Face21', 'Face22', 'Face23', 'Face24', 'Face25',
-'Face26', 'Face27', 'Face28', 'Face29', 'Face30', 'Face31', 'Face32', 'Face33', 'Face34', 'Face35', 'Face36', 'Face37',
-'Face38', 'Face39', 'Face40', 'Face41', 'Face42', 'Face43', 'Face44', 'Face45', 'Face46', 'Face47', 'Face48', 'Face49',
-'Face50', 'Face51', 'Face52', 'Face53', 'Face54', 'Face55', 'Face56', 'Face57', 'Face58', 'Face59', 'Face60', 'Face61',
-'Face62', 'Face63', 'Face64', 'Face65', 'Face66', 'Face67', 'Face68', 'Face69', 'Face70', 'Face71', 'Face72', 'Face73',
-'Face74', 'Face75', 'Face76'))]
+(FreeCAD.ActiveDocument.getObject('Compound'), (''))]
 FreeCAD.ActiveDocument.recompute()
 
 init = FreeCAD.ActiveDocument.InitialiseFields
