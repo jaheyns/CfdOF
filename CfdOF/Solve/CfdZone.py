@@ -277,9 +277,9 @@ class ViewProviderCfdZone:
         from CfdOF.Solve import TaskPanelCfdZone
         import importlib
         importlib.reload(TaskPanelCfdZone)
-        taskd = TaskPanelCfdZone.TaskPanelCfdZone(self.Object)
-        taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(taskd)
+        self.taskd = TaskPanelCfdZone.TaskPanelCfdZone(self.Object)
+        self.taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def doubleClicked(self, vobj):
