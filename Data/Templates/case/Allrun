@@ -183,7 +183,7 @@ then
 %:multiphaseInterFoam
     runParallel $NPROC foamRun -solver incompressibleMultiphaseVoF
 %:default
-    runCommand %(solver/SolverName%)
+    runParallel $NPROC %(solver/SolverName%)
 %}
 else
     runParallel $NPROC %(solver/SolverName%)
