@@ -23,15 +23,16 @@
 
 import os
 import os.path
+
 import FreeCAD
 import Part
+
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 
 # Constants
 POROUS_CORRELATIONS = ['DarcyForchheimer', 'Jakob']
@@ -111,7 +112,14 @@ class CfdZone:
         self.initProperties(obj)
 
     def initProperties(self, obj):
-        if addObjectProperty(obj, 'ShapeRefs', [], "App::PropertyLinkSubListGlobal", "", "Boundary faces"):
+        if addObjectProperty(
+            obj,
+            "ShapeRefs",
+            [],
+            "App::PropertyLinkSubListGlobal",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Boundary faces"),
+        ):
             # Backward compat
             if 'References' in obj.PropertiesList:
                 doc = FreeCAD.getDocument(obj.Document.Name)
@@ -120,64 +128,222 @@ class CfdZone:
                         obj.ShapeRefs += [doc.getObject(r[0])]
                     else:
                         obj.ShapeRefs += [(doc.getObject(r[0]), r[1])]
-                obj.removeProperty('References')
-                obj.removeProperty('LinkedObjects')
+                obj.removeProperty("References")
+                obj.removeProperty("LinkedObjects")
 
-        if obj.Name.startswith('PorousZone'):
-            if addObjectProperty(obj, 'PorousCorrelation', POROUS_CORRELATIONS, "App::PropertyEnumeration",
-                                 "Porous zone", "Porous drag model"):
-                obj.PorousCorrelation = 'DarcyForchheimer'
-            addObjectProperty(obj, 'D1', '0 1/m^2', "App::PropertyQuantity",
-                              "Darcy-Forchheimer", "Darcy coefficient (direction 1)")
-            addObjectProperty(obj, 'D2', '0 1/m^2', "App::PropertyQuantity",
-                              "Darcy-Forchheimer", "Darcy coefficient (direction 2)")
-            addObjectProperty(obj, 'D3', '0 1/m^2', "App::PropertyQuantity",
-                              "Darcy-Forchheimer", "Darcy coefficient (direction 3)")
-            addObjectProperty(obj, 'F1', '0 1/m', "App::PropertyQuantity",
-                              "Darcy-Forchheimer", "Forchheimer coefficient (direction 1)")
-            addObjectProperty(obj, 'F2', '0 1/m', "App::PropertyQuantity",
-                              "Darcy-Forchheimer", "Forchheimer coefficient (direction 2)")
-            addObjectProperty(obj, 'F3', '0 1/m', "App::PropertyQuantity",
-                              "Darcy-Forchheimer", "Forchheimer coefficient (direction 3)")
-            addObjectProperty(obj, 'e1', FreeCAD.Vector(1, 0, 0), "App::PropertyVector",
-                              "Darcy-Forchheimer", "Principal direction 1")
-            addObjectProperty(obj, 'e2', FreeCAD.Vector(0, 1, 0), "App::PropertyVector",
-                              "Darcy-Forchheimer", "Principal direction 2")
-            addObjectProperty(obj, 'e3', FreeCAD.Vector(0, 0, 1), "App::PropertyVector",
-                              "Darcy-Forchheimer", "Principal direction 3")
-            addObjectProperty(obj, 'OuterDiameter', '0 m', "App::PropertyLength",
-                              "Jakob", "Tube diameter")
-            addObjectProperty(obj, 'TubeAxis', FreeCAD.Vector(0, 0, 1), "App::PropertyVector",
-                              "Jakob", "Direction parallel to tubes")
-            addObjectProperty(obj, 'TubeSpacing', '0 m', "App::PropertyLength",
-                              "Jakob", "Spacing between tube layers")
-            addObjectProperty(obj, 'SpacingDirection', FreeCAD.Vector(1, 0, 0), "App::PropertyVector",
-                              "Jakob", "Direction normal to tube layers")
-            addObjectProperty(obj, 'AspectRatio', '1.73', "App::PropertyQuantity",
-                              "Jakob", "Tube spacing aspect ratio (layer-to-layer : tubes in layer)")
-            addObjectProperty(obj, 'VelocityEstimate', '0 m/s', "App::PropertySpeed",
-                              "Jakob", "Approximate flow velocity")
-        elif obj.Name.startswith('InitialisationZone'):
-            addObjectProperty(obj, "VelocitySpecified", False, "App::PropertyBool",
-                              "Initialisation zone", "Whether the zone initialises velocity")
-            addObjectProperty(obj, 'Ux', '0 m/s', "App::PropertySpeed",
-                              "Initialisation zone", "Velocity (x component)")
-            addObjectProperty(obj, 'Uy', '0 m/s', "App::PropertySpeed",
-                              "Initialisation zone", "Velocity (y component)")
-            addObjectProperty(obj, 'Uz', '0 m/s', "App::PropertySpeed",
-                              "Initialisation zone", "Velocity (z component)")
-            addObjectProperty(obj, "PressureSpecified", False, "App::PropertyBool",
-                              "Initialisation zone", "Whether the zone initialises pressure")
-            addObjectProperty(obj, 'Pressure', '0 kg/m/s^2', "App::PropertyPressure",
-                              "Initialisation zone", "Static pressure")
-            addObjectProperty(obj, "TemperatureSpecified", False, "App::PropertyBool",
-                              "Initialisation zone", "Whether the zone initialises temperature")
-            addObjectProperty(obj, 'Temperature', '293 K', "App::PropertyTemperature",
-                              "Initialisation zone", "Temperature")
-            addObjectProperty(obj, "VolumeFractionSpecified", True, "App::PropertyBool",
-                              "Initialisation zone", "Whether the zone initialises volume fraction")
-            addObjectProperty(obj, "VolumeFractions", {}, "App::PropertyMap",
-                              "Initialisation zone", "Volume fraction values")
+        if obj.Name.startswith("PorousZone"):
+            if addObjectProperty(
+                obj,
+                "PorousCorrelation",
+                POROUS_CORRELATIONS,
+                "App::PropertyEnumeration",
+                "Porous zone",
+                QT_TRANSLATE_NOOP("App::Property", "Porous drag model"),
+            ):
+                obj.PorousCorrelation = "DarcyForchheimer"
+            addObjectProperty(
+                obj,
+                "D1",
+                "0 1/m^2",
+                "App::PropertyQuantity",
+                "Darcy-Forchheimer",
+                QT_TRANSLATE_NOOP("App::Property", "Darcy coefficient (direction 1)"),
+            )
+            addObjectProperty(
+                obj,
+                "D2",
+                "0 1/m^2",
+                "App::PropertyQuantity",
+                "Darcy-Forchheimer",
+                QT_TRANSLATE_NOOP("App::Property", "Darcy coefficient (direction 2)"),
+            )
+            addObjectProperty(
+                obj,
+                "D3",
+                "0 1/m^2",
+                "App::PropertyQuantity",
+                "Darcy-Forchheimer",
+                QT_TRANSLATE_NOOP("App::Property", "Darcy coefficient (direction 3)"),
+            )
+            addObjectProperty(
+                obj,
+                "F1",
+                "0 1/m",
+                "App::PropertyQuantity",
+                "Darcy-Forchheimer",
+                QT_TRANSLATE_NOOP("App::Property", "Forchheimer coefficient (direction 1)"),
+            )
+            addObjectProperty(
+                obj,
+                "F2",
+                "0 1/m",
+                "App::PropertyQuantity",
+                "Darcy-Forchheimer",
+                QT_TRANSLATE_NOOP("App::Property", "Forchheimer coefficient (direction 2)"),
+            )
+            addObjectProperty(
+                obj,
+                "F3",
+                "0 1/m",
+                "App::PropertyQuantity",
+                "Darcy-Forchheimer",
+                QT_TRANSLATE_NOOP("App::Property", "Forchheimer coefficient (direction 3)"),
+            )
+            addObjectProperty(
+                obj,
+                "e1",
+                FreeCAD.Vector(1, 0, 0),
+                "App::PropertyVector",
+                "Darcy-Forchheimer",
+                QT_TRANSLATE_NOOP("App::Property", "Principal direction 1"),
+            )
+            addObjectProperty(
+                obj,
+                "e2",
+                FreeCAD.Vector(0, 1, 0),
+                "App::PropertyVector",
+                "Darcy-Forchheimer",
+                QT_TRANSLATE_NOOP("App::Property", "Principal direction 2"),
+            )
+            addObjectProperty(
+                obj,
+                "e3",
+                FreeCAD.Vector(0, 0, 1),
+                "App::PropertyVector",
+                "Darcy-Forchheimer",
+                QT_TRANSLATE_NOOP("App::Property", "Principal direction 3"),
+            )
+            addObjectProperty(
+                obj,
+                "OuterDiameter",
+                "0 m",
+                "App::PropertyLength",
+                "Jakob",
+                QT_TRANSLATE_NOOP("App::Property", "Tube diameter"),
+            )
+            addObjectProperty(
+                obj,
+                "TubeAxis",
+                FreeCAD.Vector(0, 0, 1),
+                "App::PropertyVector",
+                "Jakob",
+                QT_TRANSLATE_NOOP("App::Property", "Direction parallel to tubes"),
+            )
+            addObjectProperty(
+                obj,
+                "TubeSpacing",
+                "0 m",
+                "App::PropertyLength",
+                "Jakob",
+                QT_TRANSLATE_NOOP("App::Property", "Spacing between tube layers"),
+            )
+            addObjectProperty(
+                obj,
+                "SpacingDirection",
+                FreeCAD.Vector(1, 0, 0),
+                "App::PropertyVector",
+                "Jakob",
+                QT_TRANSLATE_NOOP("App::Property", "Direction normal to tube layers"),
+            )
+            addObjectProperty(
+                obj,
+                "AspectRatio",
+                "1.73",
+                "App::PropertyQuantity",
+                "Jakob",
+                QT_TRANSLATE_NOOP(
+                    "App::Property", "Tube spacing aspect ratio (layer-to-layer : tubes in layer)"
+                ),
+            )
+            addObjectProperty(
+                obj,
+                "VelocityEstimate",
+                "0 m/s",
+                "App::PropertySpeed",
+                "Jakob",
+                QT_TRANSLATE_NOOP("App::Property", "Approximate flow velocity"),
+            )
+        elif obj.Name.startswith("InitialisationZone"):
+            addObjectProperty(
+                obj,
+                "VelocitySpecified",
+                False,
+                "App::PropertyBool",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Whether the zone initialises velocity"),
+            )
+            addObjectProperty(
+                obj,
+                "Ux",
+                "0 m/s",
+                "App::PropertySpeed",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Velocity (x component)"),
+            )
+            addObjectProperty(
+                obj,
+                "Uy",
+                "0 m/s",
+                "App::PropertySpeed",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Velocity (y component)"),
+            )
+            addObjectProperty(
+                obj,
+                "Uz",
+                "0 m/s",
+                "App::PropertySpeed",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Velocity (z component)"),
+            )
+            addObjectProperty(
+                obj,
+                "PressureSpecified",
+                False,
+                "App::PropertyBool",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Whether the zone initialises pressure"),
+            )
+            addObjectProperty(
+                obj,
+                "Pressure",
+                "0 kg/m/s^2",
+                "App::PropertyPressure",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Static pressure"),
+            )
+            addObjectProperty(
+                obj,
+                "TemperatureSpecified",
+                False,
+                "App::PropertyBool",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Whether the zone initialises temperature"),
+            )
+            addObjectProperty(
+                obj,
+                "Temperature",
+                "293 K",
+                "App::PropertyTemperature",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Temperature"),
+            )
+            addObjectProperty(
+                obj,
+                "VolumeFractionSpecified",
+                True,
+                "App::PropertyBool",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Whether the zone initialises volume fraction"),
+            )
+            addObjectProperty(
+                obj,
+                "VolumeFractions",
+                {},
+                "App::PropertyMap",
+                "Initialisation zone",
+                QT_TRANSLATE_NOOP("App::Property", "Volume fraction values"),
+            )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

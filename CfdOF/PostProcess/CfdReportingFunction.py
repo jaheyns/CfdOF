@@ -21,15 +21,17 @@
 
 from __future__ import print_function
 
+import os
+
 import FreeCAD
 import FreeCADGui
 from pivy import coin
-from PySide import QtCore
+
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
-import os
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+translate = FreeCAD.Qt.translate
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 
 # Constants
 OBJECT_NAMES = ["Force", "ForceCoefficients", "Probes"]
@@ -82,51 +84,146 @@ class CfdReportingFunction:
     def initProperties(self, obj):
 
         # Setup and utility
-        addObjectProperty(obj, 'ReportingFunctionType', OBJECT_NAMES, "App::PropertyEnumeration", "",
-                          "Type of reporting function")
+        addObjectProperty(
+            obj,
+            "ReportingFunctionType",
+            OBJECT_NAMES,
+            "App::PropertyEnumeration",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Type of reporting function"),
+        )
 
-        addObjectProperty(obj, 'Patch', None, "App::PropertyLinkGlobal", "Function object",
-                          "Patch on which to create the function object")
+        addObjectProperty(
+            obj,
+            "Patch",
+            None,
+            "App::PropertyLinkGlobal",
+            "Function object",
+            QT_TRANSLATE_NOOP("App::Property", "Patch on which to create the function object"),
+        )
 
         # Forces
-        addObjectProperty(obj, 'ReferenceDensity', '1 kg/m^3', "App::PropertyQuantity", "Forces",
-                          "Reference density")
-        addObjectProperty(obj, 'ReferencePressure', '0 Pa', "App::PropertyPressure", "Forces",
-                          "Reference pressure")
-        addObjectProperty(obj, 'CentreOfRotation', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Forces",
-                          "Centre of rotation")
-        addObjectProperty(obj, 'WriteFields', False, "App::PropertyBool", "Forces",
-                          "Whether to write output fields")
+        addObjectProperty(
+            obj,
+            "ReferenceDensity",
+            "1 kg/m^3",
+            "App::PropertyQuantity",
+            "Forces",
+            QT_TRANSLATE_NOOP("App::Property", "Reference density"),
+        )
+        addObjectProperty(
+            obj,
+            "ReferencePressure",
+            "0 Pa",
+            "App::PropertyPressure",
+            "Forces",
+            QT_TRANSLATE_NOOP("App::Property", "Reference pressure"),
+        )
+        addObjectProperty(
+            obj,
+            "CentreOfRotation",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Forces",
+            QT_TRANSLATE_NOOP("App::Property", "Centre of rotation"),
+        )
+        addObjectProperty(
+            obj,
+            "WriteFields",
+            False,
+            "App::PropertyBool",
+            "Forces",
+            QT_TRANSLATE_NOOP("App::Property", "Whether to write output fields"),
+        )
 
         # Force coefficients
-        addObjectProperty(obj, 'Lift', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Force coefficients",
-                          "Lift direction (x component)")
+        addObjectProperty(
+            obj,
+            "Lift",
+            FreeCAD.Vector(1, 0, 0),
+            "App::PropertyVector",
+            "Force coefficients",
+            QT_TRANSLATE_NOOP("App::Property", "Lift direction (x component)"),
+        )
 
-        addObjectProperty(obj, 'Drag', FreeCAD.Vector(0, 1, 0), "App::PropertyVector", "Force coefficients",
-                          "Drag direction")
+        addObjectProperty(
+            obj,
+            "Drag",
+            FreeCAD.Vector(0, 1, 0),
+            "App::PropertyVector",
+            "Force coefficients",
+            QT_TRANSLATE_NOOP("App::Property", "Drag direction"),
+        )
 
-        addObjectProperty(obj, 'MagnitudeUInf', '1 m/s', "App::PropertyQuantity", "Force coefficients",
-                          "Freestream velocity magnitude")
-        addObjectProperty(obj, 'LengthRef', '1 m', "App::PropertyQuantity", "Force coefficients",
-                          "Coefficient length reference")
-        addObjectProperty(obj, 'AreaRef', '1 m^2', "App::PropertyQuantity", "Force coefficients",
-                          "Coefficient area reference")
+        addObjectProperty(
+            obj,
+            "MagnitudeUInf",
+            "1 m/s",
+            "App::PropertyQuantity",
+            "Force coefficients",
+            QT_TRANSLATE_NOOP("App::Property", "Freestream velocity magnitude"),
+        )
+        addObjectProperty(
+            obj,
+            "LengthRef",
+            "1 m",
+            "App::PropertyQuantity",
+            "Force coefficients",
+            QT_TRANSLATE_NOOP("App::Property", "Coefficient length reference"),
+        )
+        addObjectProperty(
+            obj,
+            "AreaRef",
+            "1 m^2",
+            "App::PropertyQuantity",
+            "Force coefficients",
+            QT_TRANSLATE_NOOP("App::Property", "Coefficient area reference"),
+        )
 
         # Spatial binning
-        addObjectProperty(obj, 'NBins', 0, "App::PropertyInteger", "Forces",
-                          "Number of bins")
-        addObjectProperty(obj, 'Direction', FreeCAD.Vector(1, 0, 0), "App::PropertyVector", "Forces",
-                          "Binning direction")
-        addObjectProperty(obj, 'Cumulative', True, "App::PropertyBool", "Forces",
-                          "Cumulative")
+        addObjectProperty(
+            obj,
+            "NBins",
+            0,
+            "App::PropertyInteger",
+            "Forces",
+            QT_TRANSLATE_NOOP("App::Property", "Number of bins"),
+        )
+        addObjectProperty(
+            obj,
+            "Direction",
+            FreeCAD.Vector(1, 0, 0),
+            "App::PropertyVector",
+            "Forces",
+            QT_TRANSLATE_NOOP("App::Property", "Binning direction"),
+        )
+        addObjectProperty(
+            obj,
+            "Cumulative",
+            True,
+            "App::PropertyBool",
+            "Forces",
+            QT_TRANSLATE_NOOP("App::Property", "Cumulative"),
+        )
 
         # Probes
-        addObjectProperty(obj, 'SampleFieldName', "p", "App::PropertyString", "Probes",
-                          "Name of the field to sample")
+        addObjectProperty(
+            obj,
+            "SampleFieldName",
+            "p",
+            "App::PropertyString",
+            "Probes",
+            QT_TRANSLATE_NOOP("App::Property", "Name of the field to sample"),
+        )
 
-        addObjectProperty(obj, 'ProbePosition', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Probes",
-                          "Location of the probe sample location")
-
+        addObjectProperty(
+            obj,
+            "ProbePosition",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Probes",
+            QT_TRANSLATE_NOOP("App::Property", "Location of the probe sample"),
+        )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)

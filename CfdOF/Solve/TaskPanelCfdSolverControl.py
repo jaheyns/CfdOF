@@ -35,7 +35,7 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt
     from PySide.QtGui import QApplication
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+translate = FreeCAD.Qt.translate
 
 class TaskPanelCfdSolverControl:
     def __init__(self, solver_runner_obj):
@@ -153,15 +153,24 @@ class TaskPanelCfdSolverControl:
             
             if self.analysis_object.NeedsCaseRewrite:
                 if self.analysis_object.NeedsMeshRewrite or self.analysis_object.NeedsMeshRerun:
-                    text = "The case may need to be re-meshed and the case setup re-written based on changes " + \
-                           "you have made to the model.\n\nRe-mesh and re-write case setup first?"
+                    text = translate(
+                        "Dialogs",
+                        "The case may need to be re-meshed and the case setup re-written based on changes "
+                        "you have made to the model.\n\nRe-mesh and re-write case setup first?"
+                    )
                 else:
-                    text = "The case setup may need to be re-written based on changes " + \
-                           "you have made to the model.\n\nRe-write case setup first?"
+                    text = translate(
+                        "Dialogs",
+                        "The case setup may need to be re-written based on changes " 
+                        "you have made to the model.\n\nRe-write case setup first?"
+                    )
             else:
                 if self.analysis_object.NeedsMeshRewrite or self.analysis_object.NeedsMeshRerun:
-                    text = "The case may need to be re-meshed based on changes " + \
-                           "you have made to the model.\n\nRe-mesh case first?"
+                    text = translate(
+                        "Dialogs",
+                        "The case may need to be re-meshed based on changes " 
+                        "you have made to the model.\n\nRe-mesh case first?"
+                    )
                 
             if QtGui.QMessageBox.question(
                     None, "CfdOF Workbench", text, defaultButton=QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes:

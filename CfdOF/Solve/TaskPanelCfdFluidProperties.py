@@ -185,7 +185,7 @@ class TaskPanelCfdFluidProperties:
             #makes sure saved name matches what was entered in that task panel session
             f = open(file_name[0], 'w')
             f.write('; ' + FreeCAD.ActiveDocument.FluidProperties.Label + '\n')
-            f.write('; \n; FreeCAD Material card: see https://www.freecadweb.org/wiki/Material \n')
+            f.write('; \n; FreeCAD Material card: see https://www.freecad.org/wiki/Material \n')
             f.write('\n[FCMat]\n')
             f.write('Name = ' + FreeCAD.ActiveDocument.FluidProperties.Label + '\n')
             #self.material['Name'] will always be 'Custom', which makes name unidentifiable in dropdown

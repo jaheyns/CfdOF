@@ -44,7 +44,7 @@ if FreeCAD.GuiUp:
     from PySide.QtCore import Qt, QObject, QThread
     from PySide.QtGui import QApplication
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+translate = FreeCAD.Qt.translate
 
 # Constants
 OPENFOAM_URL = \
@@ -240,21 +240,31 @@ class CfdPreferencePage:
         self.gmsh_path = text
 
     def chooseFoamDir(self):
-        d = QtGui.QFileDialog().getExistingDirectory(None, 'Choose OpenFOAM directory', self.foam_dir)
+        d = QtGui.QFileDialog().getExistingDirectory(
+            None, translate("FilePicker", "Choose OpenFOAM directory"), self.foam_dir
+        )
         if d and os.access(d, os.R_OK):
             self.foam_dir = d
         self.form.le_foam_dir.setText(self.foam_dir)
 
     def chooseParaviewPath(self):
-        p, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose ParaView executable', self.paraview_path,
-                                                        filter="*.exe"  if platform.system() == 'Windows' else None)
+        p, filter = QtGui.QFileDialog().getOpenFileName(
+            None,
+            translate("FilePicker", "Choose ParaView executable"),
+            self.paraview_path,
+            filter="*.exe" if platform.system() == "Windows" else None,
+        )
         if p and os.access(p, os.R_OK):
             self.paraview_path = p
         self.form.le_paraview_path.setText(self.paraview_path)
 
     def chooseGmshPath(self):
-        p, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose gmsh executable', self.gmsh_path,
-                                                        filter="*.exe"  if platform.system() == 'Windows' else None)
+        p, filter = QtGui.QFileDialog().getOpenFileName(
+            None,
+            translate("FilePicker", "Choose gmsh executable"),
+            self.gmsh_path,
+            filter="*.exe" if platform.system() == "Windows" else None,
+        )
         if p and os.access(p, os.R_OK):
             self.gmsh_path = p
         self.form.le_gmsh_path.setText(self.gmsh_path)
@@ -263,7 +273,9 @@ class CfdPreferencePage:
         self.output_dir = text
 
     def chooseOutputDir(self):
-        d = QtGui.QFileDialog().getExistingDirectory(None, 'Choose output directory', self.output_dir)
+        d = QtGui.QFileDialog().getExistingDirectory(
+            None, translate("FilePicker", "Choose output directory"), self.output_dir
+        )
         if d and os.access(d, os.W_OK):
             self.output_dir = os.path.abspath(d)
         self.form.le_output_dir.setText(self.output_dir)
@@ -287,12 +299,16 @@ class CfdPreferencePage:
             if not is_admin:
                 button = QtGui.QMessageBox.question(
                     None,
-                    "CfdOF Workbench",
-                    "Before installing this software, it is advised to run FreeCAD in administrator mode (hold down "
-                    " the 'Shift' key, right-click on the FreeCAD launcher, and choose 'Run as administrator').\n\n"
-                    "If this is not possible, please make sure OpenFOAM is installed in a location to which you have "
-                    "full read/write access rights.\n\n"
-                    "You are not currently running as administrator - do you wish to continue anyway?")
+                    translate("Dialogs", "CfdOF Workbench"),
+                    translate(
+                        "Dialogs",
+                        "Before installing this software, it is advised to run FreeCAD in administrator mode (hold down "
+                        " the 'Shift' key, right-click on the FreeCAD launcher, and choose 'Run as administrator').\n\n"
+                        "If this is not possible, please make sure OpenFOAM is installed in a location to which you have "
+                        "full read/write access rights.\n\n"
+                        "You are not currently running as administrator - do you wish to continue anyway?"
+                    ),
+                )
                 return button == QtGui.QMessageBox.StandardButton.Yes
         return True
 
@@ -305,7 +321,9 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickOpenFoamFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose OpenFOAM install file', filter="*.exe")
+        f, filter = QtGui.QFileDialog().getOpenFileName(
+            None, translate("FilePicker", "Choose OpenFOAM install file"), filter="*.exe"
+        )
         if f and os.access(f, os.R_OK):
             self.form.le_openfoam_url.setText(urllib.parse.urljoin('file:', urllib.request.pathname2url(f)))
 
@@ -316,7 +334,9 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickParaviewFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose ParaView install file', filter="*.exe")
+        f, filter = QtGui.QFileDialog().getOpenFileName(
+            None, translate("FilePicker", "Choose ParaView install file"), filter="*.exe"
+        )
         if f and os.access(f, os.R_OK):
             self.form.le_paraview_url.setText(urllib.parse.urljoin('file:', urllib.request.pathname2url(f)))
 
@@ -337,7 +357,9 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickCfMeshFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose cfMesh archive', filter="*.zip")
+        f, filter = QtGui.QFileDialog().getOpenFileName(
+            None, translate("FilePicker", "Choose cfMesh archive"), filter="*.zip"
+        )
         if f and os.access(f, os.R_OK):
             self.form.le_cfmesh_url.setText(urllib.parse.urljoin('file:', urllib.request.pathname2url(f)))
 
@@ -358,7 +380,9 @@ class CfdPreferencePage:
             self.thread.start()
 
     def pickHisaFile(self):
-        f, filter = QtGui.QFileDialog().getOpenFileName(None, 'Choose HiSA archive', filter="*.zip")
+        f, filter = QtGui.QFileDialog().getOpenFileName(
+            None, translate("FilePicker", "Choose HiSA archive"), filter="*.zip"
+        )
         if f and os.access(f, os.R_OK):
             self.form.le_hisa_url.setText(urllib.parse.urljoin('file:', urllib.request.pathname2url(f)))
 

@@ -25,14 +25,16 @@
 
 import os
 import os.path
+
 import FreeCAD
+
 if FreeCAD.GuiUp:
     import FreeCADGui
-    from PySide import QtCore
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
 
-from PySide.QtCore import QT_TRANSLATE_NOOP
+QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
+
 
 def makeCfdPhysicsSelection(name="PhysicsModel"):
     # DocumentObjectGroupPython, FeaturePython, GeometryPython
@@ -103,63 +105,146 @@ class CfdPhysicsModel:
         #  'Part::PropertyGeometryList', 'Part::PropertyShapeHistory', 'Part::PropertyFilletEdges',
         #  'Fem::PropertyFemMesh', 'Fem::PropertyPostDataObject']
 
-        if addObjectProperty(obj, "Time", ['Steady', 'Transient'], "App::PropertyEnumeration", "Physics modelling",
-                             "Resolve time dependence"):
-            obj.Time = 'Steady'
+        if addObjectProperty(
+            obj,
+            "Time",
+            ["Steady", "Transient"],
+            "App::PropertyEnumeration",
+            "Physics modelling",
+            QT_TRANSLATE_NOOP("App::Property", "Resolve time dependence"),
+        ):
+            obj.Time = "Steady"
 
         # Backward compat - convert old, imprecise 'Incompressible' and 'Compressible' to Isothermal/NonIsothermal
         prev_flow = None
-        if 'Flow' in obj.PropertiesList:
+        if "Flow" in obj.PropertiesList:
             prev_flow = obj.Flow
-            obj.removeProperty('Flow')
+            obj.removeProperty("Flow")
 
-        if addObjectProperty(obj, "Flow", ['Isothermal', 'NonIsothermal', 'HighMachCompressible'],
-                             "App::PropertyEnumeration", "Physics modelling", "Flow algorithm"):
-            obj.Flow = 'Isothermal'
+        if addObjectProperty(
+            obj,
+            "Flow",
+            ["Isothermal", "NonIsothermal", "HighMachCompressible"],
+            "App::PropertyEnumeration",
+            "Physics modelling",
+            QT_TRANSLATE_NOOP("App::Property", "Flow algorithm"),
+        ):
+            obj.Flow = "Isothermal"
 
         if prev_flow:
-            if prev_flow == 'Incompressible':
-                obj.Flow = 'Isothermal'
-            elif prev_flow == 'Compressible':
-                obj.Flow = 'NonIsothermal'
+            if prev_flow == "Incompressible":
+                obj.Flow = "Isothermal"
+            elif prev_flow == "Compressible":
+                obj.Flow = "NonIsothermal"
             else:
                 obj.Flow = prev_flow
 
-        if addObjectProperty(obj, "Phase", ['Single', 'FreeSurface'], "App::PropertyEnumeration", "Physics modelling",
-                             "Type of phases present"):
-            obj.Phase = 'Single'
+        if addObjectProperty(
+            obj,
+            "Phase",
+            ["Single", "FreeSurface"],
+            "App::PropertyEnumeration",
+            "Physics modelling",
+            QT_TRANSLATE_NOOP("App::Property", "Type of phases present"),
+        ):
+            obj.Phase = "Single"
 
-        if addObjectProperty(obj, "Turbulence", ['Inviscid', 'Laminar', 'DES', 'RANS', 'LES'],
-                             "App::PropertyEnumeration", "Physics modelling", "Type of turbulence modelling"):
-            obj.Turbulence = 'Laminar'
+        if addObjectProperty(
+            obj,
+            "Turbulence",
+            ["Inviscid", "Laminar", "DES", "RANS", "LES"],
+            "App::PropertyEnumeration",
+            "Physics modelling",
+            QT_TRANSLATE_NOOP("App::Property", "Type of turbulence modelling"),
+        ):
+            obj.Turbulence = "Laminar"
 
-        if addObjectProperty(obj, "TurbulenceModel", ['kOmegaSST', 'kEpsilon', 'SpalartAllmaras', 'kOmegaSSTLM',
-                                                      'kOmegaSSTDES', 'kOmegaSSTDDES', 'kOmegaSSTIDDES',
-                                                      'SpalartAllmarasDES', 'SpalartAllmarasDDES',
-                                                      'SpalartAllmarasIDDES',
-                                                      'kEqn', 'Smagorinsky', 'WALE'],
-                             "App::PropertyEnumeration", "Physics modelling", "Turbulence model"):
-            obj.TurbulenceModel = 'kOmegaSST'
+        if addObjectProperty(
+            obj,
+            "TurbulenceModel",
+            [
+                "kOmegaSST",
+                "kEpsilon",
+                "SpalartAllmaras",
+                "kOmegaSSTLM",
+                "kOmegaSSTDES",
+                "kOmegaSSTDDES",
+                "kOmegaSSTIDDES",
+                "SpalartAllmarasDES",
+                "SpalartAllmarasDDES",
+                "SpalartAllmarasIDDES",
+                "kEqn",
+                "Smagorinsky",
+                "WALE",
+            ],
+            "App::PropertyEnumeration",
+            "Physics modelling",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulence model"),
+        ):
+            obj.TurbulenceModel = "kOmegaSST"
 
         # Gravity
-        addObjectProperty(obj, "gx", '0 m/s^2', "App::PropertyAcceleration", "Physics modelling",
-                          "Gravitational acceleration vector (x component)")
-        addObjectProperty(obj, "gy", '-9.81 m/s^2', "App::PropertyAcceleration", "Physics modelling",
-                          "Gravitational acceleration vector (y component)")
-        addObjectProperty(obj, "gz", '0 m/s^2', "App::PropertyAcceleration", "Physics modelling",
-                          "Gravitational acceleration vector (z component)")
+        addObjectProperty(
+            obj,
+            "gx",
+            "0 m/s^2",
+            "App::PropertyAcceleration",
+            "Physics modelling",
+            QT_TRANSLATE_NOOP("App::Property", "Gravitational acceleration vector (x component)"),
+        )
+        addObjectProperty(
+            obj,
+            "gy",
+            "-9.81 m/s^2",
+            "App::PropertyAcceleration",
+            "Physics modelling",
+            QT_TRANSLATE_NOOP("App::Property", "Gravitational acceleration vector (y component)"),
+        )
+        addObjectProperty(
+            obj,
+            "gz",
+            "0 m/s^2",
+            "App::PropertyAcceleration",
+            "Physics modelling",
+            QT_TRANSLATE_NOOP("App::Property", "Gravitational acceleration vector (z component)"),
+        )
 
         # SRF model
-        addObjectProperty(obj, 'SRFModelEnabled', False, "App::PropertyBool", "Reference frame",
-                          "Single Rotating Frame model enabled")
+        addObjectProperty(
+            obj,
+            "SRFModelEnabled",
+            False,
+            "App::PropertyBool",
+            "Reference frame",
+            QT_TRANSLATE_NOOP("App::Property", "Single Rotating Frame model enabled"),
+        )
 
-        addObjectProperty(obj, 'SRFModelRPM', '0', "App::PropertyQuantity", "Reference frame", "Rotational speed")
+        addObjectProperty(
+            obj,
+            "SRFModelRPM",
+            "0",
+            "App::PropertyQuantity",
+            "Reference frame",
+            QT_TRANSLATE_NOOP("App::Property", "Rotational speed"),
+        )
 
-        addObjectProperty(obj, 'SRFModelCoR', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Reference frame",
-                          "Centre of rotation (SRF)")
+        addObjectProperty(
+            obj,
+            "SRFModelCoR",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Reference frame",
+            QT_TRANSLATE_NOOP("App::Property", "Centre of rotation (SRF)"),
+        )
 
-        addObjectProperty(obj, 'SRFModelAxis', FreeCAD.Vector(0, 0, 0), "App::PropertyPosition", "Reference frame",
-                          "Axis of rotation (SRF)")
+        addObjectProperty(
+            obj,
+            "SRFModelAxis",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Reference frame",
+            QT_TRANSLATE_NOOP("App::Property", "Axis of rotation (SRF)"),
+        )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
