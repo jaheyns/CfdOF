@@ -14,8 +14,12 @@ App.ActiveDocument.getObject("Box").Length = '100 mm'
 App.ActiveDocument.getObject("Box001").Width = '100 mm'
 App.ActiveDocument.getObject("Box001").Height = '100 mm'
 App.ActiveDocument.getObject("Box001").Length = '600 mm'
-App.activeDocument().addObject("Part::MultiFuse","Fusion")
-App.activeDocument().Fusion.Shapes = [App.activeDocument().Box,App.activeDocument().Box001,]
+App.activeDocument().addObject("Part::MultiFuse","Fusion0")
+App.activeDocument().Fusion0.Shapes = [App.activeDocument().Box,App.activeDocument().Box001,]
+
+App.ActiveDocument.addObject('Part::Refine','Fusion')
+App.ActiveDocument.Fusion.Source = App.ActiveDocument.getObject('Fusion0')
+App.ActiveDocument.getObject('Fusion0').Visibility = False
 
 FreeCAD.ActiveDocument.recompute()
 Gui.activeDocument().activeView().viewDimetric()

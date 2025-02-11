@@ -47,7 +47,7 @@ bc.Uz = '-5000 mm/s'
 bc.Temperature = '293 K'
 FreeCAD.ActiveDocument.CfdFluidBoundary.Label = 'inlet'
 FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face8',))]
+(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face1',))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -60,7 +60,7 @@ bc.Pressure = '0 kg/(mm*s^2)'
 bc.Temperature = '293 K'
 FreeCAD.ActiveDocument.CfdFluidBoundary001.Label = 'outlet'
 FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face12'))]
+(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face3'))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -76,7 +76,7 @@ bc.Uz = '0 mm/s'
 bc.Temperature = '293 K'
 FreeCAD.ActiveDocument.CfdFluidBoundary002.Label = 'wall'
 FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face1', 'Face2', 'Face3', 'Face4', 'Face5', 'Face6', 'Face7', 'Face9', 'Face10', 'Face11', 'Face13', 'Face14'))]
+(FreeCAD.ActiveDocument.getObject('Fusion'),  ('Face2', 'Face4', 'Face5', 'Face6', 'Face7', 'Face8'))]
 FreeCAD.ActiveDocument.recompute()
 
 init = FreeCAD.ActiveDocument.InitialiseFields
