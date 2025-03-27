@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -58,6 +58,7 @@ SUBNAMES = [
         translate("Subnames", "No-slip (viscous)"),
         translate("Subnames", "Slip (inviscid)"),
         translate("Subnames", "Partial slip"),
+        translate("Subnames", "Rotating"),
         translate("Subnames", "Translating"),
         translate("Subnames", "Rough"),
     ],
@@ -80,7 +81,7 @@ SUBNAMES = [
 
 # NOTE: don't translate this
 SUBTYPES = [
-    ["fixedWall", "slipWall", "partialSlipWall", "translatingWall", "roughWall"],
+    ["fixedWall", "slipWall", "partialSlipWall", "rotatingWall", "translatingWall", "roughWall"],
     [
         "uniformVelocityInlet",
         "volumetricFlowRateInlet",
@@ -99,6 +100,7 @@ SUBTYPES_HELPTEXT = [
         translate("Subtypes", "Zero velocity relative to wall"),
         translate("Subtypes", "Frictionless wall; zero normal velocity"),
         translate("Subtypes", "Blended fixed/slip"),
+        translate("Subtypes", "Fixed velocity corresponding to rotation about an axis"),
         translate("Subtypes", "Fixed velocity tangential to wall; zero normal velocity"),
         translate("Subtypes", "Wall roughness function"),
     ],
@@ -140,6 +142,7 @@ SUBTYPES_HELPTEXT = [
 BOUNDARY_UI = [[[False, [], False, False, False, True, None, False],  # No slip
                 [False, [], False, False, False, True, None, False],  # Slip
                 [True, [2], False, False, False, True, None, False],  # Partial slip
+                [True, [8], False, False, False, True, None, False],  # Rotating wall
                 [True, [0], False, False, False, True, None, False],  # Translating wall
                 [True, [0, 6], False, False, False, True, None, False]],  # Rough
                [[True, [0, 1], True, True, True, True, [2], False],  # Velocity
@@ -496,6 +499,31 @@ class CfdFluidBoundary:
         )
 
         addObjectProperty(
+            obj, 
+            'AngularVelocity', 
+            '0 rad/s', 
+            "App::PropertyQuantity", 
+            "Rotating",
+            QT_TRANSLATE_NOOP("App::Property", "Rotational angular velocity"),
+        )
+        addObjectProperty(
+            obj, 
+            'RotationOrigin', 
+            FreeCAD.Vector(0, 0, 0), 
+            "App::PropertyPosition", 
+            "Rotating",
+            QT_TRANSLATE_NOOP("App::Property", "Origin of rotation"),
+        )
+        addObjectProperty(
+            obj, 
+            'RotationAxis', 
+            FreeCAD.Vector(0, 0, 1), 
+            "App::PropertyVector", 
+            "Rotating",
+            QT_TRANSLATE_NOOP("App::Property", "Axis of rotation"),
+        )
+
+        addObjectProperty(
             obj,
             "RoughnessHeight",
             "0 mm",
@@ -568,7 +596,7 @@ class CfdFluidBoundary:
             FreeCAD.Vector(0, 0, 0),
             "App::PropertyVector",
             "Periodic",
-            QT_TRANSLATE_NOOP("App::Property", "Axis of rotational for rotational periodics"),
+            QT_TRANSLATE_NOOP("App::Property", "Axis of rotation for rotational periodics"),
         )
         addObjectProperty(
             obj,

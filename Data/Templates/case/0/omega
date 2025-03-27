@@ -25,7 +25,7 @@ boundaryField
 %[0/_boundary_empty%]
 %:wall
 %{%(boundaries/%(0%)/BoundarySubType%)
-%:fixedWall translatingWall partialSlipWall roughWall
+%:fixedWall translatingWall rotatingWall partialSlipWall roughWall
     %(0%)
     {
         type        omegaWallFunction;

@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022-2024 Jonathan Bergh <bergh.jonathan@gmail.com>     *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -24,7 +24,7 @@
 
 import os
 import os.path
-from FreeCAD import Units
+from FreeCAD import Units, Vector
 from CfdOF import CfdTools
 from CfdOF.TemplateBuilder import TemplateBuilder
 from CfdOF.CfdTools import cfdMessage
@@ -425,9 +425,7 @@ class CfdCaseWriterFoam:
         pass
 
     def processReferenceFrames(self):
-        if self.settings['solver']['SolverName'] == 'SRFSimpleFoam':
-            self.settings['physics']['SRFModelCoR'] = tuple(p for p in self.settings['physics']['SRFModelCoR'])
-            self.settings['physics']['SRFModelAxis'] = tuple(p for p in self.settings['physics']['SRFModelAxis'])
+        pass
 
     def processInitialConditions(self):
         """ Do any required computations before case build. Boundary conditions must be processed first. """
@@ -580,19 +578,10 @@ class CfdCaseWriterFoam:
             rf = settings['reportingFunctions'][name]
 
             rf['PatchName'] = rf['Patch'].Label
-            rf['CentreOfRotation'] = \
-                tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in rf['CentreOfRotation'])
-            rf['Direction'] = tuple(p for p in rf['Direction'])
 
             if rf['ReportingFunctionType'] == 'ForceCoefficients':
-                pitch_axis = rf['Lift'].cross(rf['Drag'])
-                rf['Lift'] = tuple(p for p in rf['Lift'])
-                rf['Drag'] = tuple(p for p in rf['Drag'])
-                rf['Pitch'] = tuple(p for p in pitch_axis)
-
-            settings['reportingFunctions'][name]['ProbePosition'] = tuple(
-                Units.Quantity(p, Units.Length).getValueAs('m') 
-                for p in settings['reportingFunctions'][name]['ProbePosition'])
+                rf['Pitch'] = Vector(rf['Lift']).cross(Vector(rf['Drag']))
+                rf['Pitch'] = tuple(p for p in rf['Pitch'])
 
     def processScalarTransportFunctions(self):
         settings = self.settings
@@ -602,8 +591,6 @@ class CfdCaseWriterFoam:
             if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam']:
                 stf['InjectionRate'] = stf['InjectionRate']/settings['fluidProperties'][0]['Density']
                 stf['DiffusivityFixedValue'] = stf['DiffusivityFixedValue']/settings['fluidProperties'][0]['Density']
-            stf['InjectionPoint'] = tuple(
-                Units.Quantity(p, Units.Length).getValueAs('m') for p in stf['InjectionPoint'])
 
     # Mesh related
     def processDynamicMeshRefinement(self):
@@ -626,8 +613,6 @@ class CfdCaseWriterFoam:
             settings['dynamicMesh']['Type'] = 'shock'
             settings['dynamicMesh']['RefinementLevel'] = CfdTools.relLenToRefinementLevel(
                 self.dynamic_mesh_refinement_obj.RelativeElementSize)
-            rvd = settings['dynamicMesh']['ReferenceVelocityDirection']
-            settings['dynamicMesh']['ReferenceVelocityDirection'] = tuple((rvd.x, rvd.y, rvd.z))
         else:
             settings['dynamicMesh']['Type'] = 'interface'
 
@@ -656,14 +641,14 @@ class CfdCaseWriterFoam:
             if po['PorousCorrelation'] == 'DarcyForchheimer':
                 pd['D'] = (po['D1'], po['D2'], po['D3'])
                 pd['F'] = (po['F1'], po['F2'], po['F3'])
-                pd['e1'] = tuple(po['e1'])
-                pd['e3'] = tuple(po['e3'])
+                pd['e1'] = po['e1']
+                pd['e3'] = po['e3']
             elif po['PorousCorrelation'] == 'Jakob':
                 # Calculate effective Darcy-Forchheimer coefficients
                 # This is for equilateral triangles arranged with the triangles pointing in BundleLayerNormal
                 # direction (direction of greater spacing - sqrt(3)*triangleEdgeLength)
-                pd['e1'] = tuple(po['SpacingDirection'])  # OpenFOAM modifies to be orthog to e3
-                pd['e3'] = tuple(po['TubeAxis'])
+                pd['e1'] = po['SpacingDirection']  # OpenFOAM modifies to be orthog to e3
+                pd['e3'] = po['TubeAxis']
                 spacing = po['TubeSpacing']
                 d0 = po['OuterDiameter']
                 u0 = po['VelocityEstimate']

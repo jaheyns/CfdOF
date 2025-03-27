@@ -49,7 +49,7 @@ boundaryField
 %[0/_boundary_empty%]
 %:wall
 %{%(boundaries/%(0%)/BoundarySubType%)
-%:fixedWall translatingWall partialSlipWall
+%:fixedWall translatingWall rotatingWall partialSlipWall
     %(0%)
     {
 %{%(physics/TurbulenceModel%)

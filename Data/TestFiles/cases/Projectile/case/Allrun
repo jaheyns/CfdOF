@@ -73,7 +73,7 @@ runParallel $NPROC renumberMesh -overwrite
 which foamRun > /dev/null 2>&1
 if [ $? == 0 ]
 then
-    runCommand hisa
+    runParallel $NPROC hisa
 else
     runParallel $NPROC hisa
 fi

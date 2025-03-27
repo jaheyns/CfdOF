@@ -13,8 +13,8 @@ FoamFile
 
 SRFModel        rpm;
 
-origin          ( %(physics/SRFModelCoR%) );
-axis            ( %(physics/SRFModelAxis%) );
+origin          (%(physics/SRFModelCoR%));
+axis            (%(physics/SRFModelAxis%));
 
 rpmCoeffs
 {

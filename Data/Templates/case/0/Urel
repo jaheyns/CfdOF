@@ -47,6 +47,15 @@ boundaryField
         U           (%(boundaries/%(0%)/Ux%) %(boundaries/%(0%)/Uy%) %(boundaries/%(0%)/Uz%));
         value       uniform (0 0 0);
     }
+%:rotatingWall
+    %(0%)
+    {
+        type        rotatingWallVelocity;
+        omega       %(boundaries/%(0%)/AngularVelocity%);
+        origin      (%(boundaries/%(0%)/RotationOrigin%));
+        axis        (%(boundaries/%(0%)/RotationAxis%));
+        value       uniform (0 0 0);
+    }
 %:partialSlipWall
     %(0%)
     {

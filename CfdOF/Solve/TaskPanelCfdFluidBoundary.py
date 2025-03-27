@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -90,7 +90,13 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputVelocityMag, self.obj.VelocityMag)
         self.form.lineDirection.setText(self.obj.DirectionFace)
         self.form.checkReverse.setChecked(self.obj.ReverseNormal)
-        setQuantity(self.form.inputPressure, self.obj.Pressure)
+        setQuantity(self.form.inputAngularVelocity, self.obj.AngularVelocity)
+        setQuantity(self.form.inputRotationOriginX, self.obj.RotationOrigin.x)
+        setQuantity(self.form.inputRotationOriginY, self.obj.RotationOrigin.y)
+        setQuantity(self.form.inputRotationOriginZ, self.obj.RotationOrigin.z)
+        setQuantity(self.form.inputRotationAxisX, self.obj.RotationAxis.x)
+        setQuantity(self.form.inputRotationAxisY, self.obj.RotationAxis.y)
+        setQuantity(self.form.inputRotationAxisZ, self.obj.RotationAxis.z)
         setQuantity(self.form.inputSlipRatio, self.obj.SlipRatio)
         setQuantity(self.form.inputVolFlowRate, self.obj.VolFlowRate)
         setQuantity(self.form.inputMassFlowRate, self.obj.MassFlowRate)
@@ -415,6 +421,17 @@ class TaskPanelCfdFluidBoundary:
         storeIfChanged(self.obj, 'ReverseNormal', self.form.checkReverse.isChecked())
         storeIfChanged(self.obj, 'MassFlowRate', getQuantity(self.form.inputMassFlowRate))
         storeIfChanged(self.obj, 'VolFlowRate', getQuantity(self.form.inputVolFlowRate))
+        storeIfChanged(self.obj, 'AngularVelocity', getQuantity(self.form.inputAngularVelocity))
+        rotation_origin = FreeCAD.Vector(
+            self.form.inputRotationOriginX.property("quantity").Value,
+            self.form.inputRotationOriginY.property("quantity").Value,
+            self.form.inputRotationOriginZ.property("quantity").Value)
+        storeIfChanged(self.obj, 'RotationOrigin', rotation_origin)
+        rotation_axis = FreeCAD.Vector(
+            self.form.inputRotationAxisX.property("quantity").Value,
+            self.form.inputRotationAxisY.property("quantity").Value,
+            self.form.inputRotationAxisZ.property("quantity").Value)
+        storeIfChanged(self.obj, 'RotationAxis', rotation_axis)
 
         storeIfChanged(self.obj, 'RelativeToFrame', self.form.cb_relative_srf.isChecked())
 

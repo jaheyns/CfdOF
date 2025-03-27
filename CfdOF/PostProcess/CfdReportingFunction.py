@@ -143,7 +143,7 @@ class CfdReportingFunction:
             FreeCAD.Vector(1, 0, 0),
             "App::PropertyVector",
             "Force coefficients",
-            QT_TRANSLATE_NOOP("App::Property", "Lift direction (x component)"),
+            QT_TRANSLATE_NOOP("App::Property", "Lift direction"),
         )
 
         addObjectProperty(

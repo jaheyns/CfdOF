@@ -82,7 +82,7 @@ runParallel $NPROC potentialFoam -initialiseUBCs -pName $PNAME
 which foamRun > /dev/null 2>&1
 if [ $? == 0 ]
 then
-    runCommand porousSimpleFoam
+    runParallel $NPROC porousSimpleFoam
 else
     runParallel $NPROC porousSimpleFoam
 fi

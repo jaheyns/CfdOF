@@ -23,7 +23,7 @@ boundaryField
 %{%(boundaries/%(0%)/BoundaryType%)
 %:wall
 %{%(boundaries/%(0%)/BoundarySubType%)
-%:fixedWall translatingWall partialSlipWall
+%:fixedWall translatingWall rotatingWall partialSlipWall
     %(0%)
     {
         type        compressible::alphatWallFunction;

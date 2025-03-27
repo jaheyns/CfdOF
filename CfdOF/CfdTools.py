@@ -1653,7 +1653,8 @@ def addMatDir(mat_dir, materials):
 
 def propsToDict(obj):
     """
-    Convert an object's properties to dictionary entries, converting any PropertyQuantity to float in SI units
+    Convert an object's properties to dictionary entries, converting any PropertyQuantity to float in SI units and
+    vectors/positions to tuples
     """
 
     d = {}
@@ -1663,6 +1664,10 @@ def propsToDict(obj):
             # q.Value is in FreeCAD internal units, which is same as SI except for mm instead of m and deg instead of
             # rad
             d[k] = q.Value/1000**q.Unit.Signature[0]/(180/math.pi)**q.Unit.Signature[7]
+        elif obj.getTypeIdOfProperty(k) == 'App::PropertyPosition':
+            d[k] = tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in getattr(obj, k))
+        elif obj.getTypeIdOfProperty(k) == 'App::PropertyVector':
+            d[k] = tuple(p for p in getattr(obj, k))
         else:
             d[k] = getattr(obj, k)
     return d
