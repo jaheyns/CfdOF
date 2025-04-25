@@ -90,6 +90,7 @@ class TaskPanelCfdFluidBoundary:
         setQuantity(self.form.inputVelocityMag, self.obj.VelocityMag)
         self.form.lineDirection.setText(self.obj.DirectionFace)
         self.form.checkReverse.setChecked(self.obj.ReverseNormal)
+        setQuantity(self.form.inputPressure, self.obj.Pressure)
         setQuantity(self.form.inputAngularVelocity, self.obj.AngularVelocity)
         setQuantity(self.form.inputRotationOriginX, self.obj.RotationOrigin.x)
         setQuantity(self.form.inputRotationOriginY, self.obj.RotationOrigin.y)
