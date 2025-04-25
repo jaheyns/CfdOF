@@ -230,8 +230,8 @@ class TaskPanelCfdPhysicsSelection:
         storeIfChanged(self.obj, 'gy', getQuantity(self.form.gy))
         storeIfChanged(self.obj, 'gz', getQuantity(self.form.gz))
 
+        storeIfChanged(self.obj, 'SRFModelEnabled', self.form.srfCheckBox.isChecked())
         if self.form.srfCheckBox.isChecked():
-            storeIfChanged(self.obj, 'SRFModelEnabled', self.form.srfCheckBox.isChecked())
             storeIfChanged(self.obj, 'SRFModelRPM', self.form.inputSRFRPM.text())
             centre_of_rotation = FreeCAD.Vector(
                 self.form.inputSRFCoRx.property("quantity").Value,
