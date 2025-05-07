@@ -2,7 +2,7 @@
 <package format="1">
     <name>CfdOF</name>
     <description>Computational Fluid Dynamics (CFD) for FreeCAD based on OpenFOAM</description>
-    <version>1.30.3</version>
+    <version>1.30.4</version>
     <maintainer email="oliveroxtoby@gmail.com">Oliver Oxtoby</maintainer>
     <license file="LICENSE">LGPL-2.0-or-later</license>
     <url type="repository" branch="master">https://github.com/jaheyns/CfdOF</url>

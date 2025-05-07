@@ -36,13 +36,7 @@ if 'PyQt5.QtCore' in sys.modules:
 else:
     reload_PyQt5 = False
 
-if int(FreeCAD.Version()[0]) == 0 and int(FreeCAD.Version()[1].split('.')[0]) < 20:
-    from CfdOF.compat import Plot  # Plot workbench
-else:
-    try:
-        from FreeCAD.Plot import Plot  # Inbuilt plot module
-    except ImportError:
-        from CfdOF.compat import Plot  # Fallback to compat (should be unnecessary once 0.20 is stable)
+from FreeCAD.Plot import Plot  # Inbuilt plot module
 
 if reload_PyQt5:
     import PyQt5.QtCore
