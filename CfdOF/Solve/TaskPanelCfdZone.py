@@ -86,10 +86,16 @@ class TaskPanelCfdZone:
             self.form.frameInitialisationZone.setVisible(True)
 
             self.form.comboFluid.currentIndexChanged.connect(self.comboFluidChanged)
-            self.form.checkAlpha.stateChanged.connect(self.updateUI)
-            self.form.checkVelocity.stateChanged.connect(self.updateUI)
-            self.form.checkPressure.stateChanged.connect(self.updateUI)
-            self.form.checkTemperature.stateChanged.connect(self.updateUI)
+            if hasattr(self.form.checkAlpha, "checkStateChanged"):
+                self.form.checkAlpha.checkStateChanged.connect(self.updateUI)
+                self.form.checkVelocity.checkStateChanged.connect(self.updateUI)
+                self.form.checkPressure.checkStateChanged.connect(self.updateUI)
+                self.form.checkTemperature.checkStateChanged.connect(self.updateUI)
+            else:
+                self.form.checkAlpha.stateChanged.connect(self.updateUI)
+                self.form.checkVelocity.stateChanged.connect(self.updateUI)
+                self.form.checkPressure.stateChanged.connect(self.updateUI)
+                self.form.checkTemperature.stateChanged.connect(self.updateUI)
             self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
 
             material_objs = CfdTools.getMaterials(CfdTools.getParentAnalysisObject(obj))
