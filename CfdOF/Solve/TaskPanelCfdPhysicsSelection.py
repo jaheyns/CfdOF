@@ -48,9 +48,14 @@ class TaskPanelCfdPhysicsSelection:
         self.form.radioButtonTransient.toggled.connect(self.updateUI)
         self.form.radioButtonSinglePhase.toggled.connect(self.updateUI)
         self.form.radioButtonFreeSurface.toggled.connect(self.updateUI)
-        self.form.checkBoxIsothermal.stateChanged.connect(self.updateUI)
-        self.form.viscousCheckBox.stateChanged.connect(self.updateUI)
-        self.form.srfCheckBox.stateChanged.connect(self.updateUI)
+        if hasattr(self.form.checkBoxIsothermal, "checkStateChanged"):
+            self.form.checkBoxIsothermal.checkStateChanged.connect(self.updateUI)
+            self.form.viscousCheckBox.checkStateChanged.connect(self.updateUI)
+            self.form.srfCheckBox.checkStateChanged.connect(self.updateUI)
+        else:
+            self.form.checkBoxIsothermal.stateChanged.connect(self.updateUI)
+            self.form.viscousCheckBox.stateChanged.connect(self.updateUI)
+            self.form.srfCheckBox.stateChanged.connect(self.updateUI)
         self.form.radioButtonLaminar.toggled.connect(self.updateUI)
         self.form.radioButtonRANS.toggled.connect(self.updateUI)
         self.form.radioButtonDES.toggled.connect(self.updateUI)

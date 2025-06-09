@@ -65,7 +65,10 @@ class TaskPanelCfdMeshRefinement:
                                                                      False,
                                                                      True)
 
-        self.form.check_boundlayer.stateChanged.connect(self.updateUI)
+        if hasattr(self.form.check_boundlayer, "checkStateChanged"):
+            self.form.check_boundlayer.checkStateChanged.connect(self.updateUI)
+        else:
+            self.form.check_boundlayer.stateChanged.connect(self.updateUI)
 
         self.form.extrusionTypeCombo.addItems(CfdMeshRefinement.EXTRUSION_NAMES)
         self.form.extrusionTypeCombo.currentIndexChanged.connect(self.updateUI)
