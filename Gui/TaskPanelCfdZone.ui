@@ -55,7 +55,7 @@
             <string>Correspond to directions in which the velocity is scaled but not rotated by the porous medium</string>
            </property>
            <property name="text">
-            <string>Principal directions</string>
+            <string>Principal directions (X,Y,Z)</string>
            </property>
            <property name="wordWrap">
             <bool>true</bool>
@@ -393,7 +393,7 @@
               </sizepolicy>
              </property>
              <property name="text">
-              <string>Viscous (d)</string>
+              <string>Viscous (d) (X,Y,Z)</string>
              </property>
              <property name="wordWrap">
               <bool>false</bool>
@@ -431,7 +431,7 @@
            <item row="0" column="1">
             <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>Inertial (f)</string>
+              <string>Inertial (f) (X,Y,Z)</string>
              </property>
              <property name="margin">
               <number>2</number>
@@ -594,7 +594,7 @@
             <string>Longitudinal axis of the tube</string>
            </property>
            <property name="text">
-            <string>Tube axis</string>
+            <string>Tube axis (X,Y,Z)</string>
            </property>
           </widget>
          </item>
@@ -720,7 +720,7 @@
             <string>Direction of spacing normal to layers</string>
            </property>
            <property name="text">
-            <string>Spacing direction</string>
+            <string>Spacing direction (X,Y,Z)</string>
            </property>
           </widget>
          </item>
@@ -896,7 +896,7 @@
       <item row="0" column="0">
        <widget class="QCheckBox" name="checkVelocity">
         <property name="text">
-         <string>Set velocity</string>
+         <string>Set velocity  (X,Y,Z)</string>
         </property>
        </widget>
       </item>
