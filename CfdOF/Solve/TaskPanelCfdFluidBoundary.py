@@ -210,7 +210,10 @@ class TaskPanelCfdFluidBoundary:
         self.form.comboFluid.currentIndexChanged.connect(self.comboFluidChanged)
         self.form.inputVolumeFraction.valueChanged.connect(self.inputVolumeFractionChanged)
         self.form.comboThermalBoundaryType.currentIndexChanged.connect(self.updateUI)
-        self.form.checkBoxDefaultBoundary.stateChanged.connect(self.updateUI)
+        if hasattr(self.form.checkBoxDefaultBoundary, "checkStateChanged"):
+            self.form.checkBoxDefaultBoundary.checkStateChanged.connect(self.updateUI)
+        else:
+            self.form.checkBoxDefaultBoundary.stateChanged.connect(self.updateUI)
         self.form.radioButtonMasterPeriodic.toggled.connect(self.updateUI)
         self.form.radioButtonSlavePeriodic.toggled.connect(self.updateUI)
         self.form.rb_rotational_periodic.toggled.connect(self.updateUI)
