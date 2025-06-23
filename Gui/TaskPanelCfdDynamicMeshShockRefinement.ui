@@ -96,7 +96,7 @@
          <string>Typically the far-field or input velocity (direction only)</string>
         </property>
         <property name="text">
-         <string>Reference velocity direction</string>
+         <string>Reference velocity direction (X,Y,Z)</string>
         </property>
        </widget>
       </item>

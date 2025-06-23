@@ -575,7 +575,7 @@
          <item row="0" column="1" colspan="3">
           <widget class="QLabel" name="label_11">
            <property name="text">
-            <string>Axis point</string>
+            <string>Axis point (X,Y,Z)</string>
            </property>
           </widget>
          </item>
@@ -602,7 +602,7 @@
          <item row="2" column="1" colspan="3">
           <widget class="QLabel" name="label_12">
            <property name="text">
-            <string>Axis direction</string>
+            <string>Axis direction (X,Y,Z)</string>
            </property>
           </widget>
          </item>
