@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>421</width>
-    <height>2216</height>
+    <height>2154</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
        <item row="0" column="0">
         <layout class="QFormLayout" name="layoutBoundaryType">
          <property name="fieldGrowthPolicy">
-          <enum>QFormLayout::FieldGrowthPolicy::AllNonFixedFieldsGrow</enum>
+          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
          </property>
          <property name="leftMargin">
           <number>8</number>
@@ -122,6 +122,7 @@
         <widget class="QLabel" name="label_10">
          <property name="font">
           <font>
+           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -166,10 +167,10 @@
        <item row="7" column="0">
         <widget class="QFrame" name="turbulenceFrame">
          <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
+          <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Shadow::Raised</enum>
+          <enum>QFrame::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <property name="leftMargin">
@@ -179,6 +180,7 @@
            <widget class="QLabel" name="labelTurbulenceSpecification">
             <property name="font">
              <font>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -246,7 +248,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>0.010000000000000</double>
@@ -281,7 +283,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>0.010000000000000</double>
@@ -316,7 +318,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>0.010000000000000</double>
@@ -342,10 +344,10 @@
             <item row="3" column="1">
              <widget class="QFrame" name="frame">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Plain</enum>
+               <enum>QFrame::Plain</enum>
               </property>
               <property name="lineWidth">
                <number>0</number>
@@ -378,7 +380,7 @@
                   <string notr="true">0</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <property name="singleStep" stdset="0">
                   <double>0.100000000000000</double>
@@ -404,6 +406,7 @@
                  </property>
                  <property name="font">
                   <font>
+                   <weight>50</weight>
                    <bold>false</bold>
                   </font>
                  </property>
@@ -411,7 +414,7 @@
                   <string notr="true">%</string>
                  </property>
                  <property name="textFormat">
-                  <enum>Qt::TextFormat::AutoText</enum>
+                  <enum>Qt::AutoText</enum>
                  </property>
                 </widget>
                </item>
@@ -437,7 +440,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>1.000000000000000</double>
@@ -472,7 +475,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>1.000000000000000</double>
@@ -507,7 +510,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>0.001000000000000</double>
@@ -542,7 +545,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>0.001000000000000</double>
@@ -577,7 +580,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>0.001000000000000</double>
@@ -601,10 +604,10 @@
        <item row="6" column="0">
         <widget class="QFrame" name="thermalFrame">
          <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
+          <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Shadow::Raised</enum>
+          <enum>QFrame::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="layoutThermalFrame">
           <property name="leftMargin">
@@ -614,6 +617,7 @@
            <widget class="QLabel" name="label_thermal">
             <property name="font">
              <font>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -639,7 +643,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>1.000000000000000</double>
@@ -713,7 +717,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>1.000000000000000</double>
@@ -745,7 +749,7 @@
                <string notr="true">0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
               <property name="singleStep" stdset="0">
                <double>1.000000000000000</double>
@@ -786,10 +790,10 @@
        <item row="4" column="0">
         <widget class="QFrame" name="basicFrame">
          <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
+          <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Shadow::Raised</enum>
+          <enum>QFrame::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="layoutBasicPanel">
           <property name="leftMargin">
@@ -803,10 +807,10 @@
             <item>
              <widget class="QFrame" name="frame1">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
+               <enum>QFrame::Raised</enum>
               </property>
               <layout class="QVBoxLayout" name="layoutVelocity">
                <property name="spacing">
@@ -855,10 +859,10 @@
                <item>
                 <widget class="QFrame" name="frameCart">
                  <property name="frameShape">
-                  <enum>QFrame::Shape::NoFrame</enum>
+                  <enum>QFrame::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Shadow::Raised</enum>
+                  <enum>QFrame::Raised</enum>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout">
                   <property name="leftMargin">
@@ -892,7 +896,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>0.100000000000000</double>
@@ -924,7 +928,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>0.100000000000000</double>
@@ -956,7 +960,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>0.100000000000000</double>
@@ -975,10 +979,10 @@
                <item>
                 <widget class="QFrame" name="frameMagNormal">
                  <property name="frameShape">
-                  <enum>QFrame::Shape::NoFrame</enum>
+                  <enum>QFrame::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Shadow::Raised</enum>
+                  <enum>QFrame::Raised</enum>
                  </property>
                  <layout class="QFormLayout" name="layoutMagNormal">
                   <property name="horizontalSpacing">
@@ -1018,7 +1022,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>2.000000000000000</double>
@@ -1102,10 +1106,10 @@
             <item>
              <widget class="QFrame" name="frame2">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
+               <enum>QFrame::Raised</enum>
               </property>
               <layout class="QHBoxLayout" name="horzLayout_2">
                <property name="leftMargin">
@@ -1139,7 +1143,7 @@
                   <string notr="true">0</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <property name="singleStep" stdset="0">
                   <double>2.000000000000000</double>
@@ -1158,10 +1162,10 @@
             <item>
              <widget class="QFrame" name="frame3">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
+               <enum>QFrame::Raised</enum>
               </property>
               <layout class="QHBoxLayout" name="horzLayout_3">
                <property name="leftMargin">
@@ -1195,7 +1199,7 @@
                   <string notr="true">0</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <property name="singleStep" stdset="0">
                   <double>0.100000000000000</double>
@@ -1220,10 +1224,10 @@
             <item>
              <widget class="QFrame" name="frame4">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
+               <enum>QFrame::Raised</enum>
               </property>
               <layout class="QHBoxLayout" name="horzLayout_4">
                <property name="leftMargin">
@@ -1257,7 +1261,7 @@
                   <string notr="true">0</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <property name="singleStep" stdset="0">
                   <double>10000.000000000000000</double>
@@ -1276,10 +1280,10 @@
             <item>
              <widget class="QFrame" name="frame5">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
+               <enum>QFrame::Raised</enum>
               </property>
               <layout class="QHBoxLayout" name="horzLayout_5">
                <property name="leftMargin">
@@ -1313,7 +1317,7 @@
                   <string notr="true">0</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <property name="singleStep" stdset="0">
                   <double>0.100000000000000</double>
@@ -1332,10 +1336,10 @@
             <item>
              <widget class="QFrame" name="frame7">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
+               <enum>QFrame::Raised</enum>
               </property>
               <layout class="QVBoxLayout" name="porousLayout">
                <property name="spacing">
@@ -1424,7 +1428,7 @@
                       <string notr="true">0</string>
                      </property>
                      <property name="alignment">
-                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                      </property>
                      <property name="singleStep" stdset="0">
                       <double>0.100000000000000</double>
@@ -1445,7 +1449,7 @@
                  <widget class="QWidget" name="pagePorousScreen">
                   <layout class="QFormLayout" name="horzLayout_5">
                    <property name="fieldGrowthPolicy">
-                    <enum>QFormLayout::FieldGrowthPolicy::AllNonFixedFieldsGrow</enum>
+                    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
                    </property>
                    <property name="leftMargin">
                     <number>0</number>
@@ -1478,7 +1482,7 @@
                       <string notr="true">0</string>
                      </property>
                      <property name="alignment">
-                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                      </property>
                      <property name="singleStep" stdset="0">
                       <double>0.100000000000000</double>
@@ -1516,7 +1520,7 @@
                       <string notr="true">0</string>
                      </property>
                      <property name="alignment">
-                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                      </property>
                      <property name="singleStep" stdset="0">
                       <double>1.000000000000000</double>
@@ -1542,10 +1546,10 @@
             <item>
              <widget class="QFrame" name="frame_2">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
+               <enum>QFrame::Raised</enum>
               </property>
               <layout class="QFormLayout" name="formLayout_2">
                <property name="leftMargin">
@@ -1573,7 +1577,7 @@
                   <string notr="true">0</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <property name="singleStep" stdset="0">
                   <double>0.100000000000000</double>
@@ -1602,7 +1606,7 @@
                   <string notr="true">0</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <property name="singleStep" stdset="0">
                   <double>0.100000000000000</double>
@@ -1627,10 +1631,10 @@
             <item>
              <widget class="QFrame" name="frame6">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
+               <enum>QFrame::Raised</enum>
               </property>
               <layout class="QHBoxLayout" name="relativeLayout">
                <property name="leftMargin">
@@ -1658,10 +1662,10 @@
             <item>
              <widget class="QFrame" name="frame8">
               <property name="frameShape">
-               <enum>QFrame::Shape::NoFrame</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Shadow::Raised</enum>
+               <enum>QFrame::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_6">
                <property name="leftMargin">
@@ -1709,7 +1713,7 @@
                   <string notr="true">0</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                  <property name="singleStep" stdset="0">
                   <double>0.010000000000000</double>
@@ -1725,10 +1729,10 @@
                <item row="2" column="0" colspan="2">
                 <widget class="QFrame" name="frameOrigin">
                  <property name="frameShape">
-                  <enum>QFrame::Shape::NoFrame</enum>
+                  <enum>QFrame::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Shadow::Raised</enum>
+                  <enum>QFrame::Raised</enum>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout">
                   <property name="leftMargin">
@@ -1755,7 +1759,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>0.100000000000000</double>
@@ -1780,7 +1784,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>0.100000000000000</double>
@@ -1805,7 +1809,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>0.100000000000000</double>
@@ -1824,10 +1828,10 @@
                <item row="4" column="0" colspan="2">
                 <widget class="QFrame" name="frameAxis">
                  <property name="frameShape">
-                  <enum>QFrame::Shape::NoFrame</enum>
+                  <enum>QFrame::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Shadow::Raised</enum>
+                  <enum>QFrame::Raised</enum>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout">
                   <property name="leftMargin">
@@ -1854,7 +1858,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>0.100000000000000</double>
@@ -1879,7 +1883,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>0.100000000000000</double>
@@ -1904,7 +1908,7 @@
                      <string notr="true">0</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="singleStep" stdset="0">
                      <double>0.100000000000000</double>
@@ -1931,10 +1935,10 @@
        <item row="8" column="0">
         <widget class="QFrame" name="periodicFrame">
          <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
+          <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Shadow::Raised</enum>
+          <enum>QFrame::Raised</enum>
          </property>
          <layout class="QVBoxLayout" name="layoutBasicPeriodicPanel">
           <property name="leftMargin">
@@ -1943,10 +1947,10 @@
           <item>
            <widget class="QFrame" name="basePeriodicFrame">
             <property name="frameShape">
-             <enum>QFrame::Shape::NoFrame</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
-             <enum>QFrame::Shadow::Raised</enum>
+             <enum>QFrame::Raised</enum>
             </property>
             <layout class="QGridLayout" name="gridLayout_5">
              <property name="leftMargin">
@@ -1985,6 +1989,7 @@
               <widget class="QLabel" name="label_periodic">
                <property name="font">
                 <font>
+                 <weight>75</weight>
                  <bold>true</bold>
                 </font>
                </property>
@@ -1999,10 +2004,10 @@
           <item>
            <widget class="QFrame" name="frameSlave">
             <property name="frameShape">
-             <enum>QFrame::Shape::NoFrame</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="frameShadow">
-             <enum>QFrame::Shadow::Raised</enum>
+             <enum>QFrame::Raised</enum>
             </property>
             <property name="lineWidth">
              <number>1</number>
@@ -2033,10 +2038,10 @@
              <item row="2" column="0">
               <widget class="QFrame" name="frame_3">
                <property name="frameShape">
-                <enum>QFrame::Shape::NoFrame</enum>
+                <enum>QFrame::NoFrame</enum>
                </property>
                <property name="frameShadow">
-                <enum>QFrame::Shadow::Raised</enum>
+                <enum>QFrame::Raised</enum>
                </property>
                <layout class="QHBoxLayout" name="horizontalLayout_3">
                 <property name="leftMargin">
@@ -2077,10 +2082,10 @@
              <item row="3" column="0">
               <widget class="QFrame" name="rotationalFrame">
                <property name="frameShape">
-                <enum>QFrame::Shape::NoFrame</enum>
+                <enum>QFrame::NoFrame</enum>
                </property>
                <property name="frameShadow">
-                <enum>QFrame::Shadow::Raised</enum>
+                <enum>QFrame::Raised</enum>
                </property>
                <layout class="QGridLayout" name="horzLayout_4">
                 <property name="leftMargin">
@@ -2121,7 +2126,7 @@
                    <string notr="true">0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="singleStep" stdset="0">
                    <double>0.100000000000000</double>
@@ -2146,7 +2151,7 @@
                    <string notr="true">0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="singleStep" stdset="0">
                    <double>0.100000000000000</double>
@@ -2171,7 +2176,7 @@
                    <string notr="true">0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="singleStep" stdset="0">
                    <double>0.100000000000000</double>
@@ -2196,7 +2201,7 @@
                    <string notr="true">0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="singleStep" stdset="0">
                    <double>0.100000000000000</double>
@@ -2221,7 +2226,7 @@
                    <string notr="true">0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="singleStep" stdset="0">
                    <double>0.100000000000000</double>
@@ -2246,7 +2251,7 @@
                    <string notr="true">0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="singleStep" stdset="0">
                    <double>0.100000000000000</double>
@@ -2265,10 +2270,10 @@
              <item row="4" column="0">
               <widget class="QFrame" name="translationalFrame">
                <property name="frameShape">
-                <enum>QFrame::Shape::NoFrame</enum>
+                <enum>QFrame::NoFrame</enum>
                </property>
                <property name="frameShadow">
-                <enum>QFrame::Shadow::Raised</enum>
+                <enum>QFrame::Raised</enum>
                </property>
                <layout class="QGridLayout" name="horzLayout_5">
                 <property name="leftMargin">
@@ -2305,7 +2310,7 @@
                    <string notr="true">0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="singleStep" stdset="0">
                    <double>0.100000000000000</double>
@@ -2330,7 +2335,7 @@
                    <string notr="true">0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="singleStep" stdset="0">
                    <double>0.100000000000000</double>
@@ -2355,7 +2360,7 @@
                    <string notr="true">0</string>
                   </property>
                   <property name="alignment">
-                   <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                   <property name="singleStep" stdset="0">
                    <double>0.100000000000000</double>
@@ -2380,10 +2385,10 @@
        <item row="5" column="0">
         <widget class="QFrame" name="volumeFractionsFrame">
          <property name="frameShape">
-          <enum>QFrame::Shape::StyledPanel</enum>
+          <enum>QFrame::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Shadow::Raised</enum>
+          <enum>QFrame::Raised</enum>
          </property>
          <layout class="QFormLayout" name="formLayout">
           <item row="1" column="0">
@@ -2432,6 +2437,7 @@
            <widget class="QLabel" name="label_8">
             <property name="font">
              <font>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -2465,7 +2471,7 @@
    <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Orientation::Vertical</enum>
+      <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -2539,8 +2545,8 @@
  <resources/>
  <connections/>
  <buttongroups>
+  <buttongroup name="buttonGroupMasterSlavePeriodic"/>
   <buttongroup name="buttonGroupPeriodic"/>
   <buttongroup name="buttonGroupPorous"/>
-  <buttongroup name="buttonGroupMasterSlavePeriodic"/>
  </buttongroups>
 </ui>
