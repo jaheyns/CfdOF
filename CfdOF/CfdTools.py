@@ -1308,6 +1308,13 @@ def getGmshExecutable():
     return gmsh_cmd
 
 
+def getMPISettings():
+    prefs = getPreferencesLocation()
+    # Get MPI settings from parameters
+    return FreeCAD.ParamGet(prefs).GetString("MPISettingsOMPI", ""), \
+        FreeCAD.ParamGet(prefs).GetString("MPISettingsMSMPI", "-affinity -affinity_layout spr:P:L")
+
+
 def startParaview(case_path, script_name, console_message_fn):
     proc = QtCore.QProcess()
     paraview_cmd = getParaviewExecutable()
