@@ -1311,8 +1311,12 @@ def getGmshExecutable():
 def getMPISettings():
     prefs = getPreferencesLocation()
     # Get MPI settings from parameters
-    return FreeCAD.ParamGet(prefs).GetString("MPISettingsOMPI", ""), \
-        FreeCAD.ParamGet(prefs).GetString("MPISettingsMSMPI", "-affinity -affinity_layout spr:P:L")
+    OMPIParams = FreeCAD.ParamGet(prefs).GetString("MPIOptionsOMPI", "")
+    MSMPIParams = FreeCAD.ParamGet(prefs).GetString("MPIOptionsMSMPI", "-affinity -affinity_layout spr:P:L")
+    # Make sure parameters are created for future editing if they don't exist
+    FreeCAD.ParamGet(prefs).SetString("MPIOptionsOMPI", OMPIParams)
+    FreeCAD.ParamGet(prefs).SetString("MPIOptionsMSMPI", MSMPIParams)
+    return OMPIParams, MSMPIParams
 
 
 def startParaview(case_path, script_name, console_message_fn):
