@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022-2024 Jonathan Bergh <bergh.jonathan@gmail.com>     *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -1010,7 +1010,7 @@ def checkCfdDependencies(msgFn):
     MIN_MINGW_VERSION = 2206
 
     MAX_FOUNDATION_VERSION = 11
-    MAX_OCFD_VERSION = 2312
+    MAX_OCFD_VERSION = 2406
     MAX_MINGW_VERSION = 2212
 
     message = ""
