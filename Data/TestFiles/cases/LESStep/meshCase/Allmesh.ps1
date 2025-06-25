@@ -12,7 +12,7 @@ function runCommand([string]$cmd)
 function runParallel([int]$NumProcs, [string]$cmd)
 {
     $sol = (Split-Path -Leaf $cmd)
-    & mpiexec -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
+    & mpiexec None -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
     $err = $LASTEXITCODE
     if( ! $LASTEXITCODE -eq 0 )
     {
@@ -23,7 +23,7 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
-$GMSH_EXE = "/usr/local/bin/gmsh"
+$GMSH_EXE = "/home/oliver/software/gmsh-4.13.1-Linux64/bin/gmsh"
 $NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Pad_Geometry.geo"
 
