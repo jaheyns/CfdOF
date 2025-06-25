@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022-2024 Jonathan Bergh <bergh.jonathan@gmail.com>     *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
@@ -1010,7 +1010,7 @@ def checkCfdDependencies(msgFn):
     MIN_MINGW_VERSION = 2206
 
     MAX_FOUNDATION_VERSION = 11
-    MAX_OCFD_VERSION = 2312
+    MAX_OCFD_VERSION = 2406
     MAX_MINGW_VERSION = 2212
 
     message = ""
@@ -1306,6 +1306,17 @@ def getGmshExecutable():
     if getFoamRuntime() == "PosixDocker":
         gmsh_cmd='gmsh'
     return gmsh_cmd
+
+
+def getMPISettings():
+    prefs = getPreferencesLocation()
+    # Get MPI settings from parameters
+    OMPIParams = FreeCAD.ParamGet(prefs).GetString("MPIOptionsOMPI", "")
+    MSMPIParams = FreeCAD.ParamGet(prefs).GetString("MPIOptionsMSMPI", "-affinity -affinity_layout spr:P:L")
+    # Make sure parameters are created for future editing if they don't exist
+    FreeCAD.ParamGet(prefs).SetString("MPIOptionsOMPI", OMPIParams)
+    FreeCAD.ParamGet(prefs).SetString("MPIOptionsMSMPI", MSMPIParams)
+    return OMPIParams, MSMPIParams
 
 
 def startParaview(case_path, script_name, console_message_fn):

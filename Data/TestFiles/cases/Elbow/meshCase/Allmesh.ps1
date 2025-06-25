@@ -12,7 +12,7 @@ function runCommand([string]$cmd)
 function runParallel([int]$NumProcs, [string]$cmd)
 {
     $sol = (Split-Path -Leaf $cmd)
-    & mpiexec -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
+    & mpiexec None -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
     $err = $LASTEXITCODE
     if( ! $LASTEXITCODE -eq 0 )
     {

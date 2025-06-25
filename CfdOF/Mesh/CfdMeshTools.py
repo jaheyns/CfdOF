@@ -702,6 +702,8 @@ class CfdMeshTools:
         self.settings['hostFileRequired'] = self.analysis.UseHostfile
         if self.settings['hostFileRequired'] == True:
             self.settings['hostFileName'] = self.analysis.HostfileName
+            CfdTools.cfdWarning("Please note: The 'Use Host File' setting is deprecated. Please edit the MPI options "
+                                "directly under 'Tools | Edit parameters | Preferences | Mod | CfdOF'")
 
         if CfdTools.getFoamRuntime() == "MinGW":
             self.settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
@@ -713,6 +715,8 @@ class CfdMeshTools:
             self.settings['ParallelMesh'] = True
             self.settings['NumberOfProcesses'] = self.mesh_obj.NumberOfProcesses
         self.settings['NumberOfThreads'] = self.mesh_obj.NumberOfThreads
+
+        self.settings['MPIOptionsOMPI'], self.settings['MPIOptionsMSMPI'] = CfdTools.getMPISettings()
 
         TemplateBuilder(self.meshCaseDir, self.template_path, self.settings)
 
