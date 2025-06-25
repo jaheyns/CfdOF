@@ -24,7 +24,10 @@ function runParallel([int]$NumProcs, [string]$cmd)
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
 $GMSH_EXE = "/home/oliver/software/gmsh-4.13.1-Linux64/bin/gmsh"
-$NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+#$NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+# Currently default to 1 thread as the current release version of gmsh 4.13.1,
+# appears to suffer from a race condition
+$NTHREADS = 1
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Box_Geometry.geo"
 
 runCommand gmshToFoam "gmsh/Box_Geometry.msh"

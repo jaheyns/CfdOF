@@ -33,7 +33,10 @@ $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 $GMSH_EXE = "%(GmshSettings/Executable%)"
 %{%(NumberOfThreads%)
 %:0
-$NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+#$NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+# Currently default to 1 thread as the current release version of gmsh 4.13.1,
+# appears to suffer from a race condition
+$NTHREADS = 1
 %:default
 $NTHREADS = %(NumberOfThreads%)
 %}
