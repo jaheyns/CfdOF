@@ -105,6 +105,10 @@ then
 else
     runCommand surfaceFeatureExtract
 fi
+if [ "${WM_PROJECT_VERSION:0:1}" != "v" ] && [ "${WM_PROJECT_VERSION#v}" -ge 10 ] && [ -f "system/snappyHexMeshDict_of10" ]
+then
+mv -f system/snappyHexMeshDict_of10 system/snappyHexMeshDict
+fi
 
 %{%(ParallelMesh%)
 %:True
