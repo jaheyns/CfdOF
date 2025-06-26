@@ -64,7 +64,7 @@ SIMPLE
 
     residualControl
     {
-        p %(solver/ConvergenceTol%);
+        "(p|p_rgh)" %(solver/ConvergenceTol%);
         U %(solver/ConvergenceTol%);
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam
