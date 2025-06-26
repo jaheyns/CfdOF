@@ -269,16 +269,17 @@ TURBULENT_INLET_SPEC = {'kOmegaSST':
 
 THERMAL_BOUNDARY_NAMES = ["Fixed temperature",
                           "Adiabatic",
-                          "Fixed conductive heat flux",
+                          "Fixed heat flux",
+                          "Fixed total power",
                           "Heat transfer coefficient"]
 
-THERMAL_BOUNDARY_TYPES = ["fixedValue", "zeroGradient", "fixedGradient", "heatTransferCoeff"]
+THERMAL_BOUNDARY_TYPES = ["fixedValue", "zeroGradient", "fixedGradient", "totalPower", "heatTransferCoeff"]
 
-THERMAL_HELPTEXT = ["Fixed Temperature", "No conductive heat transfer", "Fixed conductive heat flux",
-                    "Specified heat transfer coefficient and ambient temperature"]
+THERMAL_HELPTEXT = ["Fixed Temperature", "No heat transfer", "Specified power input per unit area", 
+                    "Specified total power input", "Specified heat transfer coefficient and ambient temperature"]
 
 # For each thermal BC, the input rows presented to the user
-BOUNDARY_THERMALTAB = [[0], [], [1], [2, 0]]
+BOUNDARY_THERMALTAB = [[0], [], [1], [2], [3, 0]]
 
 POROUS_METHODS = ['porousCoeff', 'porousScreen']
 
@@ -563,6 +564,14 @@ class CfdFluidBoundary:
             "App::PropertyQuantity",
             "Thermal",
             QT_TRANSLATE_NOOP("App::Property", "Wall heat flux"),
+        )
+        addObjectProperty(
+            obj,
+            "Power",
+            "0 W",
+            "App::PropertyQuantity",
+            "Thermal",
+            QT_TRANSLATE_NOOP("App::Property", "Total power input"),
         )
         addObjectProperty(
             obj,

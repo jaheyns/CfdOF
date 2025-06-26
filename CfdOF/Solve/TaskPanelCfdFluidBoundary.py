@@ -120,6 +120,7 @@ class TaskPanelCfdFluidBoundary:
         self.form.comboThermalBoundaryType.setCurrentIndex(thi)
         setQuantity(self.form.inputTemperature, self.obj.Temperature)
         setQuantity(self.form.inputHeatFlux, self.obj.HeatFlux)
+        setQuantity(self.form.inputPower, self.obj.Power)
         setQuantity(self.form.inputHeatTransferCoeff, self.obj.HeatTransferCoeff)
 
         # Periodics
@@ -450,6 +451,7 @@ class TaskPanelCfdFluidBoundary:
         # Thermal
         storeIfChanged(self.obj, 'Temperature', getQuantity(self.form.inputTemperature))
         storeIfChanged(self.obj, 'HeatFlux', getQuantity(self.form.inputHeatFlux))
+        storeIfChanged(self.obj, 'Power', getQuantity(self.form.inputPower))
         storeIfChanged(self.obj, 'HeatTransferCoeff', getQuantity(self.form.inputHeatTransferCoeff))
 
         # Periodic
