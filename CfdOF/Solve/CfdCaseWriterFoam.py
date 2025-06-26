@@ -580,7 +580,8 @@ class CfdCaseWriterFoam:
         for name in settings['reportingFunctions']:
             rf = settings['reportingFunctions'][name]
 
-            rf['PatchName'] = rf['Patch'].Label
+            if rf['ReportingFunctionType'] == 'Force' or rf['ReportingFunctionType'] == 'ForceCoefficients':
+                rf['PatchName'] = rf['Patch'].Label
 
             if rf['ReportingFunctionType'] == 'ForceCoefficients':
                 rf['Pitch'] = Vector(rf['Lift']).cross(Vector(rf['Drag']))
