@@ -68,6 +68,7 @@ castellatedMeshControls
     maxGlobalCells 2000000000;
     minRefinementCells 0;
     nCellsBetweenLevels %(SnappySettings/CellsBetweenLevels%);
+    maxLoadUnbalance 0.20;
 
     features
     (
