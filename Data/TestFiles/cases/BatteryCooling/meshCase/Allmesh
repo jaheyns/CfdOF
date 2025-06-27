@@ -1,0 +1,61 @@
+#!/bin/bash
+
+runCommand()
+{
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+runParallel()
+{
+    nproc="$1"
+    shift
+    exe="$(which $1)"
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    shift
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workaround for open-mpi/docker bug
+    mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+# Unset and source bashrc
+FOAMDIR="/usr/lib/openfoam/openfoam2406"
+if [ ! -z "$FOAMDIR" ]
+then
+    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+    source "$FOAMDIR/etc/bashrc"
+fi
+
+# Pick up number of parallel processes
+NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
+
+runCommand blockMesh
+
+# Extract feature edges
+which surfaceFeatures > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    runCommand surfaceFeatures
+else
+    runCommand surfaceFeatureExtract
+fi
+
+runCommand decomposePar
+runParallel $NPROC snappyHexMesh -overwrite
+if [ ! -z $FOAM_API ] || [ $WM_PROJECT_VERSION -lt 11 ] 2>/dev/null
+then    
+    runCommand reconstructParMesh -constant
+else
+    runCommand reconstructPar -constant
+fi
+
+
+# Extract surface mesh and convert to mm for visualisation in FreeCAD
+runCommand foamToSurface -scale 1000 -tri surfaceMesh.vtk

@@ -1,0 +1,87 @@
+#!/bin/bash
+
+runParallel()
+{
+    nproc="$1"
+    shift
+    exe="$(which $1)"
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    shift
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workaround for open-mpi/docker bug
+    mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+runCommand()
+{
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+# Unset and source bashrc
+FOAMDIR="/usr/lib/openfoam/openfoam2406"
+if [ ! -z "$FOAMDIR" ]
+then
+    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+    source "$FOAMDIR/etc/bashrc"
+fi
+
+# Copy mesh from mesh case dir if available
+MESHDIR="../meshCaseBatteryCooling"
+if [ -f "$MESHDIR"/constant/polyMesh/faces ]
+then
+    rm -rf constant/polyMesh
+    cp -r "$MESHDIR"/constant/polyMesh constant/polyMesh
+elif [ ! -f constant/polyMesh/faces ]
+then
+    echo "Fatal error: Unable to find mesh in directory $MESHDIR" 1>&2
+    exit 1
+fi
+
+# Detect available turbulence lib
+if [ -f "$FOAM_LIBBIN/libmomentumTransportModels.so" ] || [ -f "$FOAM_LIBBIN/libmomentumTransportModels.dll" ]
+then
+    echo \"libmomentumTransportModels.so\" > system/turbulenceLib
+else
+    echo \"libturbulenceModels.so\" > system/turbulenceLib
+fi
+
+# Update patch name and type
+runCommand createPatch -overwrite
+
+PNAME=p_rgh
+
+# Parallel decomposition
+if [ ! -d processor0 ]
+then
+    runCommand decomposePar -force
+fi
+
+# Pick up number of parallel processes
+NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
+
+# Mesh renumbering
+runParallel $NPROC renumberMesh -overwrite
+
+# Initialise flow
+runParallel $NPROC potentialFoam -initialiseUBCs -pName $PNAME
+# Remove phi with wrong units
+rm -f processor*/0/phi
+
+# Run application in parallel
+# Detect new foamRun in Foundation versions >= 11 and translate solver
+which foamRun > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    runParallel $NPROC foamRun -solver fluid
+else
+    runParallel $NPROC buoyantSimpleFoam
+fi
+
