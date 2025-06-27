@@ -123,9 +123,9 @@ relaxationFactors
     // meshes
     equations
     {
-        U               0.6;
+        U               0.7;
         UFinal          1;
-        k               0.5;
+        k               0.7;
         kFinal          1;
     }
     fields

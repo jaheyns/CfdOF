@@ -58,6 +58,7 @@ castellatedMeshControls
     maxGlobalCells 2000000000;
     minRefinementCells 0;
     nCellsBetweenLevels 3;
+    maxLoadUnbalance 0.20;
 
     features
     (
