@@ -22,9 +22,9 @@ runParallel()
     export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workaround for open-mpi/docker bug
 %{%(hostFileRequired%)
 %:False
-    mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    mpiexec %(MPIOptionsOMPI%) -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
 %:True
-    mpiexec --hostfile %(hostFileName%) -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    mpiexec %(MPIOptionsOMPI%) --hostfile %(hostFileName%) -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
 %}
     err=$?
     if [ ! $err -eq 0 ]; then exit $err; fi
