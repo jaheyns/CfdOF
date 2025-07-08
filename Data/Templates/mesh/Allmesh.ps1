@@ -93,6 +93,8 @@ runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 
 %{%(ConvertToDualMesh%)
 %:True
+# polyDualMesh doesn't seem to convert cell zones
+rm -ErrorAction SilentlyContinue constant/polyMesh/cellZones
 # Convert to polyhedra
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
 

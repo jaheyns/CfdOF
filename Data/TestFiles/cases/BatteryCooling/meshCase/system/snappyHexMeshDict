@@ -24,6 +24,7 @@ geometry
     {
         type triSurfaceMesh;
         name Cut_Geometry;
+        file "Cut_Geometry.stl";
         regions
         {
             patch_0_0
@@ -53,6 +54,7 @@ geometry
     {
         type triSurfaceMesh;
         name MeshRefinement;
+        file "MeshRefinement.stl";
     }
 
 };

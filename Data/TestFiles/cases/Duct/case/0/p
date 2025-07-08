@@ -44,6 +44,7 @@ boundaryField
         length      1.0;
         I           0.84;
         D           0;
+        jump        uniform 0;
         value       $internalField;
     }
     baffle_slave
@@ -53,6 +54,7 @@ boundaryField
         length      1.0;
         I           0.84;
         D           0;
+        jump        uniform 0;
         value       $internalField;
     }
 

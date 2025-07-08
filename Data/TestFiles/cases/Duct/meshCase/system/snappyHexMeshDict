@@ -24,6 +24,7 @@ geometry
     {
         type triSurfaceMesh;
         name Fusion_Geometry;
+        file "Fusion_Geometry.stl";
         regions
         {
             patch_1_0
@@ -48,6 +49,7 @@ geometry
     {
         type triSurfaceMesh;
         name CfdFluidBoundary003_1;
+        file "CfdFluidBoundary003_1.stl";
     }
 
 };

@@ -26,6 +26,7 @@ geometry
     {
         type triSurfaceMesh;
         name %(Name%)_Geometry;
+        file "%(Name%)_Geometry.stl";
         regions
         {
 %{%(SnappySettings/ShapePatchNames%)
@@ -45,6 +46,7 @@ geometry
     {
         type triSurfaceMesh;
         name %(0%);
+        file "%(0%).stl";
     }
 
 %}
@@ -56,6 +58,7 @@ geometry
     {
         type triSurfaceMesh;
         name %(0%);
+        file "%(0%).stl";
     }
 
 %}
