@@ -44,6 +44,10 @@ elseif( !(Test-Path -PathType Leaf constant/polyMesh/faces) )
 # Set turbulence lib
 echo "libturbulenceModels.so" > system/turbulenceLib
 
+# Set interface compression
+echo "div(phi,alpha) Gauss vanLeer;" > system/alphaDivScheme
+echo "cAlpha 1;" > system/cAlpha
+
 %{%(dynamicMeshEnabled%)
 %:True
 # Set 'internal' patch type

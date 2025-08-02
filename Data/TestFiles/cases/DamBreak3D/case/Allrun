@@ -26,7 +26,7 @@ runCommand()
 }
 
 # Unset and source bashrc
-FOAMDIR="/opt/openfoam12"
+FOAMDIR="/opt/openfoam13"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -51,6 +51,16 @@ then
     echo \"libmomentumTransportModels.so\" > system/turbulenceLib
 else
     echo \"libturbulenceModels.so\" > system/turbulenceLib
+fi
+
+# Change specification of interface compression in OF 13+
+if [ -z ${FOAM_API+x} ] && [ "$WM_PROJECT_VERSION" -ge 13 ]
+then
+    echo "div(phi,alpha) Gauss interfaceCompression vanLeer 1;" > system/alphaDivScheme
+    echo "" > system/cAlpha
+else
+    echo "div(phi,alpha) Gauss vanLeer;" > system/alphaDivScheme
+    echo "cAlpha 1;" > system/cAlpha
 fi
 
 mkdir -p 0/include

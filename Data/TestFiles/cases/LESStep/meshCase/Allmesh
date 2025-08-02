@@ -35,7 +35,7 @@ fi
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Pad_Geometry.geo"
 
 # Unset and source bashrc
-FOAMDIR="/opt/openfoam12"
+FOAMDIR="/opt/openfoam13"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -44,8 +44,9 @@ fi
 
 runCommand gmshToFoam "gmsh/Pad_Geometry.msh"
 
-# polyDualMesh doesn't seem to convert cell zones
+# polyDualMesh doesn't seem to convert cell zones or sets
 rm -f constant/polyMesh/cellZones
+rm -rf constant/polyMesh/sets
 # Convert to polyhedra
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
 

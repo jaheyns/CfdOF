@@ -37,6 +37,8 @@ import tempfile
 from contextlib import closing
 from xml.sax.saxutils import escape
 
+from CfdOF import CfdDependencyData
+
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -45,28 +47,6 @@ if FreeCAD.GuiUp:
     from PySide.QtGui import QApplication
 
 translate = FreeCAD.Qt.translate
-
-# Constants
-OPENFOAM_URL = \
-    "https://sourceforge.net/projects/openfoam/files/v2212/OpenFOAM-v2212-windows-mingw.exe/download"
-OPENFOAM_FILE_EXT = ".exe"
-PARAVIEW_URL = \
-    "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v5.10&type=binary&os=Windows&downloadFile=ParaView-5.10.1-Windows-Python3.9-msvc2017-AMD64.exe"
-PARAVIEW_FILE_EXT = ".exe"
-CFMESH_URL = \
-    "https://sourceforge.net/projects/cfmesh-cfdof/files/cfmesh-cfdof.zip/download"
-CFMESH_URL_MINGW = \
-    "https://sourceforge.net/projects/cfmesh-cfdof/files/cfmesh-cfdof-binaries-{}.zip/download"
-CFMESH_FILE_BASE = "cfmesh-cfdof"
-CFMESH_FILE_EXT = ".zip"
-HISA_URL = \
-    "https://sourceforge.net/projects/hisa/files/hisa-master.zip/download"
-HISA_URL_MINGW = \
-    "https://sourceforge.net/projects/hisa/files/hisa-master-binaries-{}.zip/download"
-HISA_FILE_BASE = "hisa-master"
-HISA_FILE_EXT = ".zip"
-DOCKER_URL = \
-    "docker.io/mmcker/cfdof-openfoam"
 
 # Tasks for the worker thread
 DOWNLOAD_OPENFOAM = 1
@@ -107,8 +87,8 @@ class CfdPreferencePage:
         self.form.pb_download_install_hisa.clicked.connect(self.downloadInstallHisa)
         self.form.tb_pick_hisa_file.clicked.connect(self.pickHisaFile)
 
-        self.form.le_openfoam_url.setText(OPENFOAM_URL)
-        self.form.le_paraview_url.setText(PARAVIEW_URL)
+        self.form.le_openfoam_url.setText(CfdDependencyData.OPENFOAM_URL)
+        self.form.le_paraview_url.setText(CfdDependencyData.PARAVIEW_URL)
 
         self.form.tb_choose_output_dir.clicked.connect(self.chooseOutputDir)
         self.form.le_output_dir.textChanged.connect(self.outputDirChanged)
@@ -190,7 +170,7 @@ class CfdPreferencePage:
         # Set usedocker and enable/disable download buttons
         self.dockerCheckboxClicked()
 
-        self.form.le_docker_url.setText(FreeCAD.ParamGet(prefs).GetString("DockerURL", DOCKER_URL))
+        self.form.le_docker_url.setText(FreeCAD.ParamGet(prefs).GetString("DockerURL", CfdDependencyData.DOCKER_URL))
 
         self.setDownloadURLs()
 
@@ -226,12 +206,12 @@ class CfdPreferencePage:
             # Temporarily apply the foam dir selection
             CfdTools.setFoamDir(self.foam_dir)
             foam_ver = os.path.split(CfdTools.getFoamDir())[-1]
-            self.form.le_cfmesh_url.setText(CFMESH_URL_MINGW.format(foam_ver))
-            self.form.le_hisa_url.setText(HISA_URL_MINGW.format(foam_ver))
+            self.form.le_cfmesh_url.setText(CfdDependencyData.CFMESH_URL_MINGW.format(foam_ver))
+            self.form.le_hisa_url.setText(CfdDependencyData.HISA_URL_MINGW.format(foam_ver))
             CfdTools.setFoamDir(self.initial_foam_dir)
         else:
-            self.form.le_cfmesh_url.setText(CFMESH_URL)
-            self.form.le_hisa_url.setText(HISA_URL)
+            self.form.le_cfmesh_url.setText(CfdDependencyData.CFMESH_URL)
+            self.form.le_hisa_url.setText(CfdDependencyData.HISA_URL)
 
     def paraviewPathChanged(self, text):
         self.paraview_path = text
@@ -345,7 +325,7 @@ class CfdPreferencePage:
             return
 
         runtime = self.testGetRuntime(False)
-        if runtime == "MinGW" and self.form.le_cfmesh_url.text() == CFMESH_URL:
+        if runtime == "MinGW" and self.form.le_cfmesh_url.text() == CfdDependencyData.CFMESH_URL:
             # Openfoam might have just been installed and the URL would not have had a chance to update
             self.setDownloadURLs()
 
@@ -368,7 +348,7 @@ class CfdPreferencePage:
             return
 
         runtime = self.testGetRuntime(False)
-        if runtime == "MinGW" and self.form.le_hisa_url.text() == HISA_URL:
+        if runtime == "MinGW" and self.form.le_hisa_url.text() == CfdDependencyData.HISA_URL:
             # Openfoam might have just been installed and the URL would not have had a chance to update
             self.setDownloadURLs()
 
@@ -412,23 +392,23 @@ class CfdPreferencePage:
                     self.consoleMessage("Download completed")
                     user_dir = self.thread.user_dir
                     self.consoleMessage("Building cfMesh. Lengthy process - please wait...")
-                    self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CFMESH_FILE_BASE))
+                    self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CfdDependencyData.CFMESH_FILE_BASE))
                     if CfdTools.getFoamRuntime() == 'WindowsDocker':
                         # There seem to be issues when using multi processors to build in docker
                         self.install_process = CfdTools.startFoamApplication(
                             "export WM_NCOMPPROCS=1; ./Allwmake",
-                            "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                            "$WM_PROJECT_USER_DIR/"+CfdDependencyData.CFMESH_FILE_BASE,
                             'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                     else:
                         if platform.system() == 'Darwin':
                             self.install_process = CfdTools.startFoamApplication(
                                 "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake",
-                                "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                                "$WM_PROJECT_USER_DIR/"+CfdDependencyData.CFMESH_FILE_BASE,
                                 'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                         else:
                             self.install_process = CfdTools.startFoamApplication(
                                 "export WM_NCOMPPROCS=`nproc`; ./Allwmake",
-                                "$WM_PROJECT_USER_DIR/"+CFMESH_FILE_BASE,
+                                "$WM_PROJECT_USER_DIR/"+CfdDependencyData.CFMESH_FILE_BASE,
                                 'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                 else:
                     self.consoleMessage("Install completed")
@@ -440,23 +420,23 @@ class CfdPreferencePage:
                     self.consoleMessage("Download completed")
                     user_dir = self.thread.user_dir
                     self.consoleMessage("Building HiSA. Please wait...")
-                    self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, HISA_FILE_BASE))
+                    self.consoleMessage("Log file: {}/{}/log.Allwmake".format(user_dir, CfdDependencyData.HISA_FILE_BASE))
                     if CfdTools.getFoamRuntime() == 'WindowsDocker':
                         # There seem to be issues when using multi processors to build in docker
                         self.install_process = CfdTools.startFoamApplication(
                             "export WM_NCOMPPROCS=1; ./Allwmake",
-                            "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                            "$WM_PROJECT_USER_DIR/"+CfdDependencyData.HISA_FILE_BASE,
                             'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                     else:
                         if platform.system() == 'Darwin':
                             self.install_process = CfdTools.startFoamApplication(
                                 "export WM_NCOMPPROCS=`sysctl -n hw.logicalcpu`; ./Allwmake",
-                                "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                                "$WM_PROJECT_USER_DIR/"+CfdDependencyData.HISA_FILE_BASE,
                                 'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                         else:
                             self.install_process = CfdTools.startFoamApplication(
                                 "export WM_NCOMPPROCS=`nproc`; ./Allwmake",
-                                "$WM_PROJECT_USER_DIR/"+HISA_FILE_BASE,
+                                "$WM_PROJECT_USER_DIR/"+CfdDependencyData.HISA_FILE_BASE,
                                 'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
                 else:
                     self.consoleMessage("Install completed")
@@ -600,7 +580,7 @@ class CfdPreferencePageThread(QThread):
         return filename
 
     def downloadOpenFoam(self):
-        filename = self.download(self.openfoam_url, OPENFOAM_FILE_EXT, "OpenFOAM")
+        filename = self.download(self.openfoam_url, CfdDependencyData.OPENFOAM_FILE_EXT, "OpenFOAM")
         if QtCore.QProcess().startDetached(filename):
             self.signals.status.emit(
                 "OpenFOAM installer launched - please complete the installation and restart FreeCAD")
@@ -608,14 +588,14 @@ class CfdPreferencePageThread(QThread):
             raise Exception("Failed to launch OpenFOAM installer")
 
     def downloadParaview(self):
-        filename = self.download(self.paraview_url, PARAVIEW_FILE_EXT, "ParaView")
+        filename = self.download(self.paraview_url, CfdDependencyData.PARAVIEW_FILE_EXT, "ParaView")
         if QtCore.QProcess().startDetached(filename):
             self.signals.status.emit("ParaView installer launched - please complete the installation")
         else:
             raise Exception("Failed to launch ParaView installer")
 
     def downloadCfMesh(self):
-        filename = self.download(self.cfmesh_url, CFMESH_FILE_EXT, "cfMesh")
+        filename = self.download(self.cfmesh_url, CfdDependencyData.CFMESH_FILE_EXT, "cfMesh")
 
         if CfdTools.getFoamRuntime() == "MinGW":
             self.user_dir = None
@@ -642,14 +622,14 @@ class CfdPreferencePageThread(QThread):
                         zip.extractall(path=tempdir)
                         CfdTools.runFoamCommand(
                             '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cp -r "{}" "$WM_PROJECT_USER_DIR/"; }}'
-                                .format(CfdTools.translatePath(os.path.join(tempdir, CFMESH_FILE_BASE))))
+                                .format(CfdTools.translatePath(os.path.join(tempdir, CfdDependencyData.CFMESH_FILE_BASE))))
             else:
                 CfdTools.runFoamCommand(
                     '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; ); }}'.
-                    format(CFMESH_FILE_BASE, CfdTools.translatePath(filename)))
+                    format(CfdDependencyData.CFMESH_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadHisa(self):
-        filename = self.download(self.hisa_url, HISA_FILE_EXT, "HiSA")
+        filename = self.download(self.hisa_url, CfdDependencyData.HISA_FILE_EXT, "HiSA")
 
         if CfdTools.getFoamRuntime() == "MinGW":
             self.user_dir = None
@@ -676,11 +656,11 @@ class CfdPreferencePageThread(QThread):
                         zip.extractall(path=tempdir)
                         CfdTools.runFoamCommand(
                             '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cp -r "{}" "$WM_PROJECT_USER_DIR/"; }}'
-                                .format(CfdTools.translatePath(os.path.join(tempdir, HISA_FILE_BASE))))
+                                .format(CfdTools.translatePath(os.path.join(tempdir, CfdDependencyData.HISA_FILE_BASE))))
             else:
                 CfdTools.runFoamCommand(
                     '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; );  }}'.
-                    format(HISA_FILE_BASE, CfdTools.translatePath(filename)))
+                    format(CfdDependencyData.HISA_FILE_BASE, CfdTools.translatePath(filename)))
 
     def downloadDocker(self):
         if "podman" in CfdTools.docker_container.docker_cmd and platform.system() != "Linux":

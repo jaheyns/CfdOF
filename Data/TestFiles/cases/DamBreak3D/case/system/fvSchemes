@@ -23,7 +23,7 @@ divSchemes
 {
     // Use second-order accurate convection
     div(rhoPhi,U)   Gauss linearUpwind grad(U);
-    div(phi,alpha)  Gauss vanLeer;
+    #include "alphaDivScheme"
     div(phirb,alpha) Gauss linear;
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
     div(phi,k)      Gauss upwind;

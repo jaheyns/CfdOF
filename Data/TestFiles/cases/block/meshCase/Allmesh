@@ -35,7 +35,7 @@ fi
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Box_Geometry.geo"
 
 # Unset and source bashrc
-FOAMDIR="/opt/openfoam12"
+FOAMDIR="/opt/openfoam13"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null

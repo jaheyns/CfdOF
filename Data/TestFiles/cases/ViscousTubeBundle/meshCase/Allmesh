@@ -26,7 +26,7 @@ runParallel()
 }
 
 # Unset and source bashrc
-FOAMDIR="/opt/openfoam12"
+FOAMDIR="/opt/openfoam13"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -45,8 +45,8 @@ runCommand changeDictionary
 rm system/changeDictionaryDict
 runCommand flattenMesh
 cp system/extrudeMeshDict.0 system/extrudeMeshDict
-# Refinement history is not processed by extrudeMesh
-rm -f constant/polyMesh/{cellLevel,pointLevel,level0Edge,refinementHistory}
+# Refinement data is not processed by extrudeMesh so should be removed
+rm -f constant/polyMesh/{cellLevel,pointLevel,level0Edge,refinementHistory,sets/meshProtectedCells}
 runCommand extrudeMesh
 mv log.extrudeMesh log.extrudeMesh.0
 rm system/extrudeMeshDict

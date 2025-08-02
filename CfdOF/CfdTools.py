@@ -49,6 +49,7 @@ from PySide import QtCore
 import CfdOF
 import time
 import atexit
+from CfdOF import CfdDependencyData
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
@@ -57,24 +58,6 @@ if FreeCAD.GuiUp:
 from PySide.QtWidgets import QApplication
 
 translate = FreeCAD.Qt.translate
-
-# Some standard install locations that are searched if an install directory is not specified
-# Supports variable expansion and Unix-style globs (in which case the last lexically-sorted match will be used)
-FOAM_DIR_DEFAULTS = {'Windows': ['C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v*',
-                                 '~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v*',
-                                 'C:\\Program Files\\blueCFD-Core-*\\OpenFOAM-*'],
-                     'Linux': ['/usr/lib/openfoam/openfoam*',  # ESI official packages
-                               '/opt/openfoam*', '/opt/openfoam-dev',  # Foundation official packages
-                               '~/openfoam/OpenFOAM-v*',
-                               '~/OpenFOAM/OpenFOAM-*.*', '~/OpenFOAM/OpenFOAM-dev'],  # Typical self-built locations
-                     "Darwin": ['~/OpenFOAM/OpenFOAM-*.*', '~/OpenFOAM/OpenFOAM-dev']
-                     }
-
-PARAVIEW_PATH_DEFAULTS = {
-                    "Windows": ["C:\\Program Files\\ParaView *\\bin\\paraview.exe"],
-                    "Linux": ["/usr/bin/paraview", "/usr/local/bin/paraview"],
-                    "Darwin": ["/Applications/ParaView-*.app/Contents/MacOS/paraview"]
-                    }
 
 QUANTITY_PROPERTIES = ['App::PropertyQuantity',
                        'App::PropertyLength',
@@ -636,7 +619,7 @@ def detectFoamDir():
             foam_dir = None
 
     if foam_dir is None:
-        foam_dir = findInDefaultPaths(FOAM_DIR_DEFAULTS)
+        foam_dir = findInDefaultPaths(CfdDependencyData.FOAM_DIR_DEFAULTS)
     return foam_dir
 
 
@@ -993,26 +976,6 @@ def runFoamApplication(cmd, case, log_name=''):
 
 
 def checkCfdDependencies(msgFn):
-    FC_MAJOR_VER_REQUIRED = 0
-    FC_MINOR_VER_REQUIRED = 20
-    FC_PATCH_VER_REQUIRED = 0
-    FC_COMMIT_REQUIRED = 29177
-
-    CF_MAJOR_VER_REQUIRED = 1
-    CF_MINOR_VER_REQUIRED = 21
-
-    HISA_MAJOR_VER_REQUIRED = 1
-    HISA_MINOR_VER_REQUIRED = 11
-    HISA_PATCH_VER_REQUIRED = 3
-
-    MIN_FOUNDATION_VERSION = 9
-    MIN_OCFD_VERSION = 2206
-    MIN_MINGW_VERSION = 2206
-
-    MAX_FOUNDATION_VERSION = 12
-    MAX_OCFD_VERSION = 2506
-    MAX_MINGW_VERSION = 2212
-
     message = ""
     FreeCAD.Console.PrintMessage(
         translate("Console", "Checking CFD workbench dependencies...\n")
@@ -1035,19 +998,19 @@ def checkCfdDependencies(msgFn):
         gitver = int(gitver)
     else:
         # If we don't have the git version, assume it's OK.
-        gitver = FC_COMMIT_REQUIRED
+        gitver = CfdDependencyData.FC_COMMIT_REQUIRED
 
     msgFn("FreeCAD version: {}.{}".format(major_ver, minor_ver))
-    if (major_ver < FC_MAJOR_VER_REQUIRED or
-        (major_ver == FC_MAJOR_VER_REQUIRED and
-         (minor_ver < FC_MINOR_VER_REQUIRED or
-          (minor_ver == FC_MINOR_VER_REQUIRED and
-           (patch_ver < FC_PATCH_VER_REQUIRED or
-            (patch_ver == FC_PATCH_VER_REQUIRED and
-             gitver < FC_COMMIT_REQUIRED)))))):
+    if (major_ver < CfdDependencyData.FC_MAJOR_VER_REQUIRED or
+        (major_ver == CfdDependencyData.FC_MAJOR_VER_REQUIRED and
+         (minor_ver < CfdDependencyData.FC_MINOR_VER_REQUIRED or
+          (minor_ver == CfdDependencyData.FC_MINOR_VER_REQUIRED and
+           (patch_ver < CfdDependencyData.FC_PATCH_VER_REQUIRED or
+            (patch_ver == CfdDependencyData.FC_PATCH_VER_REQUIRED and
+             gitver < CfdDependencyData.FC_COMMIT_REQUIRED)))))):
         msgFn("FreeCAD version (currently {}.{}.{} ({})) must be at least {}.{}.{} ({})".format(
             int(ver[0]), minor_ver, patch_ver, gitver,
-            FC_MAJOR_VER_REQUIRED, FC_MINOR_VER_REQUIRED, FC_PATCH_VER_REQUIRED, FC_COMMIT_REQUIRED))
+            CfdDependencyData.FC_MAJOR_VER_REQUIRED, CfdDependencyData.FC_MINOR_VER_REQUIRED, CfdDependencyData.FC_PATCH_VER_REQUIRED, CfdDependencyData.FC_COMMIT_REQUIRED))
 
     # check openfoam
     print("Checking for OpenFOAM:")
@@ -1084,25 +1047,25 @@ def checkCfdDependencies(msgFn):
                         foam_ver = foam_ver.lstrip('v')
                         foam_ver = int(foam_ver.split('.')[0])
                         if getFoamRuntime() == "MinGW":
-                            if foam_ver < MIN_MINGW_VERSION or foam_ver > MAX_MINGW_VERSION:
+                            if foam_ver < CfdDependencyData.MIN_MINGW_VERSION or foam_ver > CfdDependencyData.MAX_MINGW_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + \
                                       " is not currently supported with MinGW installation")
                         if foam_ver >= 1000:  # Plus version
-                            if foam_ver < MIN_OCFD_VERSION:
+                            if foam_ver < CfdDependencyData.MIN_OCFD_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                      "Minimum version " + str(MIN_OCFD_VERSION) + " or " + str(MIN_FOUNDATION_VERSION) + \
+                                      "Minimum version " + str(CfdDependencyData.MIN_OCFD_VERSION) + " or " + str(CfdDependencyData.MIN_FOUNDATION_VERSION) + \
                                       " required for full functionality")
-                            if foam_ver > MAX_OCFD_VERSION:
+                            if foam_ver > CfdDependencyData.MAX_OCFD_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                      "Last tested version is " + str(MAX_OCFD_VERSION))
+                                      "Last tested version is " + str(CfdDependencyData.MAX_OCFD_VERSION))
                         else:  # Foundation version
-                            if foam_ver < MIN_FOUNDATION_VERSION:
+                            if foam_ver < CfdDependencyData.MIN_FOUNDATION_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
-                                      "Minimum version " + str(MIN_OCFD_VERSION) + " or " + str(MIN_FOUNDATION_VERSION) + \
+                                      "Minimum version " + str(CfdDependencyData.MIN_OCFD_VERSION) + " or " + str(CfdDependencyData.MIN_FOUNDATION_VERSION) + \
                                       " required for full functionality")
-                            if foam_ver > MAX_FOUNDATION_VERSION:
+                            if foam_ver > CfdDependencyData.MAX_FOUNDATION_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is not yet supported:\n" + \
-                                      "Last tested version is " + str(MAX_FOUNDATION_VERSION))
+                                      "Last tested version is " + str(CfdDependencyData.MAX_FOUNDATION_VERSION))
                     except ValueError:
                         msgFn("Error parsing OpenFOAM version string " + foam_ver)
                 # Check for wmake
@@ -1134,11 +1097,11 @@ def checkCfdDependencies(msgFn):
                     msgFn("cfMesh-CfdOF version: " + cfmesh_ver)
                     cfmesh_ver = cfmesh_ver.split('.')
                     if (not cfmesh_ver or len(cfmesh_ver) != 2 or
-                        int(cfmesh_ver[0]) < CF_MAJOR_VER_REQUIRED or
-                        (int(cfmesh_ver[0]) == CF_MAJOR_VER_REQUIRED and
-                         int(cfmesh_ver[1]) < CF_MINOR_VER_REQUIRED)):
-                        msgFn("cfMesh-CfdOF version {}.{} required".format(CF_MAJOR_VER_REQUIRED,
-                                                                           CF_MINOR_VER_REQUIRED))
+                        int(cfmesh_ver[0]) < CfdDependencyData.CF_MAJOR_VER_REQUIRED or
+                        (int(cfmesh_ver[0]) == CfdDependencyData.CF_MAJOR_VER_REQUIRED and
+                         int(cfmesh_ver[1]) < CfdDependencyData.CF_MINOR_VER_REQUIRED)):
+                        msgFn("cfMesh-CfdOF version {}.{} required".format(CfdDependencyData.CF_MAJOR_VER_REQUIRED,
+                                                                           CfdDependencyData.CF_MINOR_VER_REQUIRED))
                 except subprocess.CalledProcessError:
                     msgFn("cfMesh (CfdOF version) not found")
 
@@ -1149,14 +1112,14 @@ def checkCfdDependencies(msgFn):
                     msgFn("HiSA version: " + hisa_ver)
                     hisa_ver = hisa_ver.split('.')
                     if (not hisa_ver or len(hisa_ver) != 3 or
-                        int(hisa_ver[0]) < HISA_MAJOR_VER_REQUIRED or
-                        (int(hisa_ver[0]) == HISA_MAJOR_VER_REQUIRED and
-                         (int(hisa_ver[1]) < HISA_MINOR_VER_REQUIRED or
-                          (int(hisa_ver[1]) == HISA_MINOR_VER_REQUIRED and
-                           int(hisa_ver[2]) < HISA_PATCH_VER_REQUIRED)))):
-                        msgFn("HiSA version {}.{}.{} required".format(HISA_MAJOR_VER_REQUIRED,
-                                                                      HISA_MINOR_VER_REQUIRED,
-                                                                      HISA_PATCH_VER_REQUIRED))
+                        int(hisa_ver[0]) < CfdDependencyData.HISA_MAJOR_VER_REQUIRED or
+                        (int(hisa_ver[0]) == CfdDependencyData.HISA_MAJOR_VER_REQUIRED and
+                         (int(hisa_ver[1]) < CfdDependencyData.HISA_MINOR_VER_REQUIRED or
+                          (int(hisa_ver[1]) == CfdDependencyData.HISA_MINOR_VER_REQUIRED and
+                           int(hisa_ver[2]) < CfdDependencyData.HISA_PATCH_VER_REQUIRED)))):
+                        msgFn("HiSA version {}.{}.{} required".format(CfdDependencyData.HISA_MAJOR_VER_REQUIRED,
+                                                                      CfdDependencyData.HISA_MINOR_VER_REQUIRED,
+                                                                      CfdDependencyData.HISA_PATCH_VER_REQUIRED))
                 except subprocess.CalledProcessError:
                     msgFn("HiSA not found")
 
@@ -1284,7 +1247,7 @@ def getParaviewExecutable():
             paraview_cmd = '{}\\..\\AddOns\\ParaView\\bin\\paraview.exe'.format(getFoamDir())
         else:
             # Check the defaults
-            paraview_cmd = findInDefaultPaths(PARAVIEW_PATH_DEFAULTS)
+            paraview_cmd = findInDefaultPaths(CfdDependencyData.PARAVIEW_PATH_DEFAULTS)
     if not paraview_cmd:
         # Otherwise, see if the command 'paraview' is in the path.
         paraview_cmd = shutil.which('paraview')

@@ -187,7 +187,7 @@ solvers
     {
         nAlphaCorr      1;
         nAlphaSubCycles 1;
-        cAlpha          1;
+        #include "cAlpha"
 
         MULESCorr       yes;
         nLimiterIter    7;
