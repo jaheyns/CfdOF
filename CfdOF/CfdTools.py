@@ -772,10 +772,21 @@ def getRunEnvironment():
     Return native environment settings necessary for running on relevant platform
     """
     if getFoamRuntime().startswith("BlueCFD"):
+        #installation_path = getFoamDir()
+        #if getFoamRuntime() == "BlueCFD2":
+        #    inst_path = "{}\\..".format(installation_path)
+        #else:
+        #    inst_path = "{}".format(installation_path)
+
+        #env = QtCore.QProcessEnvironment.systemEnvironment()
+        #path_var = env.value('PATH')
+
         return {"MSYSTEM": "MINGW64",
                 "USERNAME": "ofuser",
                 "USER": "ofuser",
-                "HOME": "/home/ofuser"}
+                "HOME": "/home/ofuser",
+                #"PATH": "{}\\msys64\\mingw64\\bin;{}".format(inst_path, path_var)
+                }
     else:
         return {}
 
@@ -874,9 +885,13 @@ def makeRunCommand(cmd, dir=None, source_env=True):
         destdir2 = None
         with os.scandir('{}'.format(inst_path)) as dirs:
             for dir in dirs:
-                if dir.is_dir() and dir.name.startswith('OpenFOAM-'):
+                if dir.is_dir() and dir.name.startswith('OpenFOAM-12'):
+                    destdir1 = os.path.join(inst_path, dir.name, 'platforms\\mingw_w64Gcc122DPInt32Opt\\bin')
+                elif dir.is_dir() and dir.name.startswith('OpenFOAM-8'):
                     destdir1 = os.path.join(inst_path, dir.name, 'platforms\\mingw_w64GccDPInt32Opt\\bin')
-                if dir.is_dir() and dir.name.startswith('ofuser-of'):
+                if dir.is_dir() and dir.name.startswith('ofuser-of12'):
+                    destdir2 = os.path.join(inst_path, dir.name, 'platforms\\mingw_w64Gcc122DPInt32Opt\\bin')
+                elif dir.is_dir() and dir.name.startswith('ofuser-of8'):
                     destdir2 = os.path.join(inst_path, dir.name, 'platforms\\mingw_w64GccDPInt32Opt\\bin')
         if not destdir1 or not destdir2:
             cfdError("Unable to find directories 'OpenFOAM-*' and 'ofuser-of*' in path {}. "
@@ -1224,14 +1239,16 @@ def checkCfdDependencies(msgFn):
                 gmshversion = proc.readAllStandardOutput() + proc.readAllStandardError()
                 gmshversion = QTextStream(gmshversion).readAll()
         gmshversion = gmshversion.rstrip()
-        msgFn("gmsh version: " + gmshversion)
         if len(gmshversion) > 1:
             # Only the last line contains gmsh version number
             gmshversion = gmshversion.split()
             gmshversion = gmshversion[-1]
+            msgFn("gmsh version: " + gmshversion)
             versionlist = gmshversion.split(".")
             if int(versionlist[0]) < 2 or (int(versionlist[0]) == 2 and int(versionlist[1]) < 13):
                 msgFn("gmsh version is older than minimum required (2.13)")
+        else:
+            msgFn("gmsh version: " + gmshversion)
 
     msgFn("Completed CFD dependency check")
 
