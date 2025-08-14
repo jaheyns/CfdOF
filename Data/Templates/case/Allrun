@@ -74,8 +74,7 @@ fi
 %{%(dynamicMeshEnabled%)
 %:True
 mkdir -p 0/include
-# Detect availability of 'internal' patch type
-if which foamInfo > /dev/null && foamInfo internalFvPatchField > /dev/null 2>&1
+if [ -z ${FOAM_API+x} ] && [ "$WM_PROJECT_VERSION" -ge 9 ]
 then
     echo "type internal;" > 0/include/helperPatchFieldType
     echo "type internal;" > system/helperPatchType
