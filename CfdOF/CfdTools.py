@@ -852,7 +852,7 @@ def makeRunCommand(cmd, dir=None, source_env=True):
             cmd = 'chmod 744 {0} && {0}'.format(cmd)  # If using windows wsl$ output directory, need to make the command executable
         if 'podman' in docker_container.docker_cmd:
             cmd = f'export OMPI_ALLOW_RUN_AS_ROOT=1 && export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 && {cmd}'
-        cmdline = [docker_container.docker_cmd, 'exec', docker_container.container_id, 'bash', '-c', source + cd + cmd]
+        cmdline = docker_container.docker_cmd.split() + ['exec', docker_container.container_id, 'bash', '-c', source + cd + cmd]
         print('Using command: ' + ' '.join(cmdline))
         return cmdline
 
@@ -1855,10 +1855,15 @@ class DockerContainer:
             else:
                 usr_str = "-u{}:{}".format(os.getuid(),os.getgid())
 
-        cmd = [self.docker_cmd, "run", "-t", "-d", usr_str, "-v" + output_path + ":/tmp", self.image_name]
+        cmd = self.docker_cmd.split() + + ["run", "-t", "-d", usr_str, "-v" + output_path + ":/tmp", self.image_name]
 
         if 'podman' in self.docker_cmd:
-            cmd.insert(2, "--security-opt=label=disable") # Allows /tmp to be mounted to the podman container
+            if 'flatpak' in self.docker_cmd:
+                insert_place = 4
+            else:
+                insert_place = 2
+            # Allows /tmp to be mounted to the podman container
+            cmd.insert(insert_place, "--security-opt=label=disable")
 
         # if 'docker' in self.docker_cmd:
         #     cmd = cmd.replace('docker.io/','')
