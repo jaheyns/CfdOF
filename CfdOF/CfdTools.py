@@ -1798,16 +1798,23 @@ class DockerContainer:
     def __init__(self):
         self.image_name = None
         import shutil
+        import subprocess
 
-        if shutil.which('podman') is not None:
-            self.docker_cmd = shutil.which('podman')
-        elif shutil.which('docker') is not None:
-            self.docker_cmd = shutil.which('docker')
+        podman_dir = shutil.which('podman')
+        docker_dir = shutil.which('docker')
+        podman_flatpak = str(subprocess.run(['flatpak-spawn', '--host', 'podman'], capture_output=True).stdout)
+        docker_flatpak = str(subprocess.run(['flatpak-spawn', '--host', 'docker'], capture_output=True).stderr)
+
+        if podman_dir is not None:
+            self.docker_cmd = podman_dir.split(os.path.sep)[-1]
+        elif docker_dir is not None:
+            self.docker_cmd = docker_dir.split(os.path.sep)[-1]
+        elif 'failed' not in podman_flatpak:
+            self.docker_cmd = 'flatpak-spawn --host podman'
+        elif 'failed' not in docker_flatpak:
+            self.docker_cmd = 'flatpak-spawn --host docker'
         else:
             self.docker_cmd = None
-
-        if self.docker_cmd is not None:
-            self.docker_cmd = self.docker_cmd.split(os.path.sep)[-1]
 
     def start_container(self):
         prefs = getPreferencesLocation()
