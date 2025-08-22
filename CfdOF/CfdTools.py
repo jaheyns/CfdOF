@@ -1802,16 +1802,22 @@ class DockerContainer:
 
         podman_dir = shutil.which('podman')
         docker_dir = shutil.which('docker')
-        podman_flatpak = str(subprocess.run(['flatpak-spawn', '--host', 'podman'], capture_output=True).stdout)
-        docker_flatpak = str(subprocess.run(['flatpak-spawn', '--host', 'docker'], capture_output=True).stderr)
+        try:
+            podman_flatpak = str(subprocess.run(['flatpak-spawn', '--host', 'podman'], capture_output=True).stdout)
+        except FileNotFoundError:
+            podman_flatpak = None
+        try:
+            docker_flatpak = str(subprocess.run(['flatpak-spawn', '--host', 'docker'], capture_output=True).stderr)
+        except FileNotFoundError:
+            docker_flatpak = None
 
         if podman_dir is not None:
             self.docker_cmd = podman_dir.split(os.path.sep)[-1]
         elif docker_dir is not None:
             self.docker_cmd = docker_dir.split(os.path.sep)[-1]
-        elif 'failed' not in podman_flatpak:
+        elif podman_flatpak is not None and 'failed' not in podman_flatpak:
             self.docker_cmd = 'flatpak-spawn --host podman'
-        elif 'failed' not in docker_flatpak:
+        elif docker_flatpak is not None and 'failed' not in docker_flatpak:
             self.docker_cmd = 'flatpak-spawn --host docker'
         else:
             self.docker_cmd = None
