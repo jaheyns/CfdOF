@@ -1,0 +1,40 @@
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+%[_header%]
+FoamFile
+{
+    format          ascii;
+    class           dictionary;
+    object          createBafflesDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+internalFacesOnly true;
+
+baffles
+{
+%{%(SnappySettings/MovingMeshRegions%)
+    %(0%)
+    {
+        type            faceZone;
+        zoneName        %(0%);
+        patches
+        {
+            owner
+            {
+                name            %(0%)_M;
+                type            patch;
+            }
+            neighbour
+            {
+                name            %(0%)_S;
+                type            patch;
+            }
+        }
+    }
+%}
+}
+
+
+// ************************************************************************* //
+%}
