@@ -82,8 +82,45 @@ else
     echo "type fixedValue;" > 0/include/helperPatchFieldType
     echo "type patch;" > system/helperPatchType
 fi
-
 %}
+
+%{%(MovingMeshRegionsPresent%)
+%:True
+mkdir -p 0/MMR
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    echo "type movingWallSlipVelocity;" > 0/MMR/U
+    echo "value \$internalField;" >> 0/MMR/U
+
+    echo "type zeroGradient;" | tee 0/MMR/{p,p_rgh,k,omega,epsilon,T,alphaT,S} >/dev/null
+
+    echo "type zeroGradient;" | tee 0/MMR/{Urel,gammaInt,nuTilda} >/dev/null
+
+	# if there is a alpha.something file
+	if [ -n "$(find 0/ -name alpha.*)" ]
+	then
+		#cp 0/alpha.* 0/MMR/
+		echo "type calculated;" | tee 0/MMR/alpha.fluid >/dev/null
+	fi
+
+    echo "type calculated;" > 0/MMR/nut
+    echo "value uniform 0;" >> 0/MMR/nut
+else
+	echo "type cyclicAMI;" | tee 0/MMR/{U,p,p_rgh,k,nut,omega,epsilon,T,alphaT,S,Urel,gammaInt,nuTilda}
+	echo "value \$internalField;" | tee -a 0/MMR/{U,p,p_rgh,k,nut,omega,epsilon,T,alphaT,S,Urel,gammaInt,nuTilda}
+
+	# if there is a alpha.something file
+	if [ -n "$(find 0/ -name alpha.*)" ]
+	then
+		#cp 0/alpha.* 0/MMR/
+		echo "type cyclicAMI;" | tee 0/MMR/alpha.fluid >/dev/null
+		echo "value \$internalField;" | tee -a 0/MMR/alpha.fluid >/dev/null
+	fi
+fi
+ls 0/MMR/
+%}
+
 %{%(scalarTransportFunctionsEnabled%)
 %:True
 # Enable fvOption source for scalar transport in OpenFOAM v10+
@@ -93,8 +130,12 @@ then
 fi
 
 %}
+
+%{%(MovingMeshRegionsPresent%)
+%:False
 # Update patch name and type
 runCommand createPatch -overwrite
+%}
 
 %{%(zonesPresent%)
 %:True
@@ -149,8 +190,11 @@ NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDic
 
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(MovingMeshRegionsPresent%)
+%:False
 # Mesh renumbering
 runParallel $NPROC renumberMesh -overwrite
+%}
 %:True
 # Mesh renumbering does not work in Foundation with dynamic mesh
 %}
@@ -200,8 +244,11 @@ fi
 %:False
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(MovingMeshRegionsPresent%)
+%:False
 # Mesh renumbering
 runCommand renumberMesh -overwrite
+%}
 %:True
 # Mesh renumbering does not currently work in Foundation with dynamic mesh
 # runCommand renumberMesh -overwrite

@@ -79,6 +79,10 @@ SIMPLE
 %:Transient
 PIMPLE
 {
+%{%(MovingMeshRegionsPresent%)
+%:True
+    correctMeshPhi  yes;
+%}
 %{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
     nOuterCorrectors 1;
@@ -154,6 +158,16 @@ solvers
         $p;
         relTol          0;
     }
+%{%(MovingMeshRegionsPresent%)
+%:True
+    MeshPhi
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-2;
+        relTol          0;
+    }
+%}
 
 %{%(solver/SolverName%)
 %:SRFSimpleFoam
