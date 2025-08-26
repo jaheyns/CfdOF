@@ -1,0 +1,51 @@
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      createPatchDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+pointSync false;
+
+// Patches to create.
+patches
+(
+%{%(SnappySettings/MovingMeshRegions%)
+    {
+        //- Master side patch
+        name            %(0%)_M;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.0001;
+            neighbourPatch  %(0%)_S;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (%(0%));
+    }
+
+    {
+        //- Slave side patch
+        name            %(0%)_S;
+        patchInfo
+        {
+            type            cyclicAMI;
+            matchTolerance  0.0001;
+            neighbourPatch  %(0%)_M;
+            transform       noOrdering;
+        }
+        constructFrom patches;
+        patches (%(0%)_slave);
+    }
+%}
+);
+%}
+
+
+// ************************************************************************* //
