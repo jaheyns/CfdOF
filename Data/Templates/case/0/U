@@ -18,6 +18,17 @@ internalField   uniform (%(initialValues/Ux%) %(initialValues/Uy%) %(initialValu
 boundaryField
 {
 
+%{%(MovingMeshRegionsPresent%)
+%:True
+%[0/_boundary_MMR%]
+%{%(MovingMeshRegions%)
+    "(%(0%).*)"
+    {
+        #include "MMR/U";
+    }
+%}
+%}
+
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
 %:empty

@@ -38,6 +38,17 @@ geometry
 %}
         }
     }
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+%{%(SnappySettings/MovingMeshRegions%)
+    "%(0%).stl"
+    {
+        type triSurfaceMesh;
+        name %(0%);
+        file "%(0%).stl";
+    }
+%}
+%}
 
 %{%(MeshRegionPresent%)
 %:True
@@ -111,6 +122,23 @@ castellatedMeshControls
             faceZone %(0%);
         }
 
+%}
+%}
+
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+%{%(SnappySettings/MovingMeshRegions%)
+        %(0%)
+        {
+            level (%(SnappySettings/MovingMeshRegions/%(0%)/RefinementLevel%) %(SnappySettings/MovingMeshRegions/%(0%)/MaxRefinementLevel%));
+            cellZone %(0%);
+            faceZone %(0%);
+            // foundation:
+            mode inside;
+            // openCFD:
+            faceType boundary;
+            cellZoneInside inside;
+        }
 %}
 %}
     }

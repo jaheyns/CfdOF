@@ -123,6 +123,15 @@ class CfdMeshRefinement:
 
         addObjectProperty(
             obj,
+            "MovingMeshRegion",
+            False,
+            "App::PropertyBool",
+            "",
+            QT_TRANSLATE_NOOP("App::Property", "Defines a moving part of the mesh"),
+        )
+
+        addObjectProperty(
+            obj,
             "Extrusion",
             False,
             "App::PropertyBool",
@@ -259,6 +268,34 @@ class CfdMeshRefinement:
             "App::PropertyVector",
             "Extrusion",
             QT_TRANSLATE_NOOP("App::Property", "Direction of axis for sector extrusion"),
+        )
+
+        # movin mesh region (MMR) model
+        addObjectProperty(
+            obj,
+            "MMRModelRPM",
+            "0",
+            "App::PropertyQuantity",
+            "Moving mesh Region",
+            QT_TRANSLATE_NOOP("App::Property", "Rotational speed"),
+        )
+
+        addObjectProperty(
+            obj,
+            "MMRModelCoR",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Moving mesh Region",
+            QT_TRANSLATE_NOOP("App::Property", "Centre of rotation (MMR)"),
+        )
+
+        addObjectProperty(
+            obj,
+            "MMRModelAxis",
+            FreeCAD.Vector(0, 0, 0),
+            "App::PropertyPosition",
+            "Moving mesh Region",
+            QT_TRANSLATE_NOOP("App::Property", "Axis of rotation (MMR)"),
         )
 
     def onDocumentRestored(self, obj):

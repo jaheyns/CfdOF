@@ -19,6 +19,17 @@ internalField   uniform %(initialValues/epsilon%);
 boundaryField
 {
 
+%{%(MovingMeshRegionsPresent%)
+%:True
+%[0/_boundary_MMR%]
+%{%(MovingMeshRegions%)
+    "(%(0%).*)"
+    {
+        #include "MMR/epsilon";
+    }
+%}
+%}
+
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
 %:empty
