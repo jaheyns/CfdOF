@@ -17,6 +17,17 @@ internalField   uniform %(initialValues/Pressure%);
 boundaryField
 {
 
+%{%(MovingMeshRegionsPresent%)
+%:True
+%[0/_boundary_MMR%]
+%{%(MovingMeshRegions%)
+    "(%(0%).*)"
+    {
+        #include "MMR/p_rgh";
+    }
+%}
+%}
+
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
 %:wall

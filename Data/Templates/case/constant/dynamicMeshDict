@@ -139,3 +139,64 @@ distributor
 
 //************************************************************************ //
 %}
+
+%{%(MovingMeshRegionsPresent%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// OpenCFD:
+
+dynamicFvMesh dynamicMultiMotionSolverFvMesh;
+dynamicMultiMotionSolverFvMeshCoeffs
+{
+%{%(MovingMeshRegions%)
+    %(0%)
+    {
+        solver solidBody;
+        cellZone %(0%);
+        solidBodyCoeffs
+        {
+    	    solidBodyMotionFunction  rotatingMotion;
+            rotatingMotionCoeffs
+            {
+                origin (%(MovingMeshRegions/%(0%)/t_MMRModelCoR%));
+                axis (%(MovingMeshRegions/%(0%)/t_MMRModelAxis%));
+                omega %(MovingMeshRegions/%(0%)/MMRModelRPS%);
+            }
+        }
+    }    	
+%}
+}
+
+// Foundation:
+
+mover
+{
+    type            motionSolver;
+    libs            ("libfvMotionSolvers.so");
+    motionSolver    motionSolverList;
+    solvers
+    {
+%{%(MovingMeshRegions%)
+        %(0%)
+        {
+            motionSolver solidBody;
+            cellZone %(0%);
+            solidBodyMotionFunction rotatingMotion;
+            origin (%(MovingMeshRegions/%(0%)/t_MMRModelCoR%));
+            axis (%(MovingMeshRegions/%(0%)/t_MMRModelAxis%));
+            omega %(MovingMeshRegions/%(0%)/MMRModelRPM%) [rpm];
+        }
+%}
+    }
+}
+//************************************************************************ //
+%}

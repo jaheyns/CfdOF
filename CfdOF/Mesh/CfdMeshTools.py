@@ -207,6 +207,7 @@ class CfdMeshTools:
         snappy_settings['MeshRegions'] = {}
         snappy_settings['BoundaryLayers'] = {}
         snappy_settings['InternalRegions'] = {}
+        snappy_settings['MovingMeshRegions'] = {}
 
         # Make list of all faces in meshed shape with original index
         mesh_face_list = list(zip(self.mesh_obj.Part.Shape.Faces, range(len(self.mesh_obj.Part.Shape.Faces))))
@@ -390,7 +391,9 @@ class CfdMeshTools:
                         }
 
         for mr_id, mr_obj in enumerate(mr_objs):
+            Extrusion = mr_obj.Extrusion
             Internal = mr_obj.Internal
+            MovingMeshRegion = mr_obj.MovingMeshRegion
             mr_rellen = mr_obj.RelativeLength
             if mr_rellen > 1.0:
                 mr_rellen = 1.0
@@ -464,7 +467,17 @@ class CfdMeshTools:
                                 }
 
                         elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                            if not Internal:
+                            # moving mesh
+                            if not Internal and MovingMeshRegion and not Extrusion:
+                                edge_level = CfdTools.relLenToRefinementLevel(mr_obj.RegionEdgeRefinement)
+                                snappy_settings['MovingMeshRegions'][mr_patch_name] = {
+                                    'RefinementLevel': refinement_level,
+                                    'EdgeRefinementLevel': edge_level,
+                                    'MaxRefinementLevel': max(refinement_level, edge_level),
+                                    'Baffle': False
+                                }
+                            # extrusion
+                            if not Internal and not MovingMeshRegion and Extrusion:
                                 edge_level = CfdTools.relLenToRefinementLevel(mr_obj.RegionEdgeRefinement)
                                 snappy_settings['MeshRegions'][mr_patch_name] = {
                                     'RefinementLevel': refinement_level,
@@ -472,7 +485,8 @@ class CfdMeshTools:
                                     'MaxRefinementLevel': max(refinement_level, edge_level),
                                     'Baffle': False
                                 }
-                            else:
+                            # internal
+                            if Internal and not MovingMeshRegion and not Extrusion:
                                 snappy_settings['InternalRegions'][mr_patch_name] = {
                                     'RefinementLevel': refinement_level
                                 }
@@ -650,6 +664,11 @@ class CfdMeshTools:
                 self.snappy_settings['InternalRefinementRegionsPresent'] = True
             else:
                 self.snappy_settings['InternalRefinementRegionsPresent'] = False
+
+            if len(self.snappy_settings["MovingMeshRegions"]) > 0:
+                self.snappy_settings['MovingMeshRegionsPresent'] = True
+            else:
+                self.snappy_settings['MovingMeshRegionsPresent'] = False
 
         # GMSH settings
         elif self.mesh_obj.MeshUtility == "gmsh":

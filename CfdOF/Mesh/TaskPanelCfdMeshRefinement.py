@@ -81,6 +81,7 @@ class TaskPanelCfdMeshRefinement:
 
         self.form.surfaceRefinementToggle.toggled.connect(self.changeInternal)
         self.form.volumeRefinementToggle.toggled.connect(self.changeInternal)
+        self.form.movingMeshRegionToggle.toggled.connect(self.changeInternal)
 
         self.form.if_refinethick.setToolTip("Distance the refinement region extends from the reference "
                                             "surface")
@@ -131,10 +132,30 @@ class TaskPanelCfdMeshRefinement:
         setQuantity(self.form.axisDirectionYEdit, self.obj.ExtrusionAxisDirection.y)
         setQuantity(self.form.axisDirectionZEdit, self.obj.ExtrusionAxisDirection.z)
 
+        # moving mesh region (MMR)
+        if self.obj.MovingMeshRegion:
+            self.form.movingMeshRegionToggle.toggle()
+        setQuantity(self.form.inputMMRCoRx, self.obj.MMRModelCoR.x)
+        setQuantity(self.form.inputMMRCoRy, self.obj.MMRModelCoR.y)
+        setQuantity(self.form.inputMMRCoRz, self.obj.MMRModelCoR.z)
+
+        setQuantity(self.form.inputMMRAxisx, self.obj.MMRModelAxis.x)
+        setQuantity(self.form.inputMMRAxisy, self.obj.MMRModelAxis.y)
+        setQuantity(self.form.inputMMRAxisz, self.obj.MMRModelAxis.z)
+
+        setQuantity(self.form.inputMMRRPM, self.obj.MMRModelRPM)
+
     def updateUI(self):
         self.form.surfaceOrInernalVolume.setVisible(True)
         self.form.boundlayer_frame.setVisible(self.form.check_boundlayer.isChecked())
         self.form.commonFrame.setVisible(True)
+        self.form.movingMeshRegionFrame.setVisible(False)
+
+        # moving mesh is only supported on snappy hex mesh
+        if not self.mesh_obj.MeshUtility == 'snappyHexMesh':
+            if self.form.movingMeshRegionToggle.isChecked():
+                self.form.surfaceRefinementToggle.toggle()
+            self.form.movingMeshRegionToggle.setEnabled(False)
 
         # Extrusion refinement
         if self.form.extrusionToggle.isChecked():
@@ -149,8 +170,18 @@ class TaskPanelCfdMeshRefinement:
             selected_rows = CfdMeshRefinement.EXTRUSION_UI[type_index]
             CfdTools.enableLayoutRows(self.form.extrusionLayout, selected_rows + [0])
 
+        # Moving mesh region
+        if self.form.movingMeshRegionToggle.isChecked():
+            self.form.extrusionFrame.setVisible(False)
+            self.form.commonFrame.setVisible(True)
+            self.form.cf_frame.setVisible(False)
+            self.form.snappy_frame.setVisible(True)
+            self.form.ReferencesFrame.setVisible(True)
+            self.form.cartesianInternalVolumeFrame.setVisible(False)
+            self.form.movingMeshRegionFrame.setVisible(True)
+
         # Volume or surface refinement
-        else:
+        if self.form.volumeRefinementToggle.isChecked() or self.form.surfaceRefinementToggle.isChecked():
             if self.mesh_obj.MeshUtility == 'gmsh':
                 self.form.cartesianInternalVolumeFrame.setVisible(False)
                 self.form.cf_frame.setVisible(False)
@@ -282,6 +313,21 @@ class TaskPanelCfdMeshRefinement:
                 "(FreeCAD.ActiveDocument.getObject('{}'), {})".format(ref[0].Name, ref[1]) for ref in self.obj.ShapeRefs)
             refstr += "]"
             FreeCADGui.doCommand(refstr)
+
+        # moving mesh region
+        storeIfChanged(self.obj, 'MovingMeshRegion', self.form.movingMeshRegionToggle.isChecked())
+        if self.form.movingMeshRegionToggle.isChecked():
+            storeIfChanged(self.obj, 'MMRModelRPM', self.form.inputMMRRPM.text())
+            centre_of_rotation = FreeCAD.Vector(
+                self.form.inputMMRCoRx.property("quantity").Value,
+                self.form.inputMMRCoRy.property("quantity").Value,
+                self.form.inputMMRCoRz.property("quantity").Value)
+            storeIfChanged(self.obj, 'MMRModelCoR', centre_of_rotation)
+            model_axis = FreeCAD.Vector(
+                self.form.inputMMRAxisx.property("quantity").Value,
+                self.form.inputMMRAxisy.property("quantity").Value,
+                self.form.inputMMRAxisz.property("quantity").Value)
+            storeIfChanged(self.obj, 'MMRModelAxis', model_axis)
 
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
         return True

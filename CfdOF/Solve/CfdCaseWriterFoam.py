@@ -65,6 +65,7 @@ class CfdCaseWriterFoam:
         self.progressCallback = None
 
         self.settings = None
+        self.SnappySettings = None
 
     def writeCase(self):
         """ writeCase() will collect case settings, and finally build a runnable case. """
@@ -111,6 +112,9 @@ class CfdCaseWriterFoam:
             'scalarTransportFunctionsEnabled': False,
             'dynamicMesh': {},
             'dynamicMeshEnabled': False,
+            'MovingMeshRegions': {},
+            'MovingMeshRegionsPresent': False,
+            'SnappySettings': self.SnappySettings,
             'bafflesPresent': self.bafflesPresent(),
             'porousZones': {},
             'porousZonesPresent': False,
@@ -125,6 +129,25 @@ class CfdCaseWriterFoam:
             'system': {},
             'runChangeDictionary': False
             }
+
+
+        mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+        for mr_id, mr_obj in enumerate(mr_objs):
+            # moving mesh
+            if self.mesh_obj.MeshUtility == 'snappyHexMesh' and not mr_obj.Internal and mr_obj.MovingMeshRegion and not mr_obj.Extrusion:
+                self.settings['MovingMeshRegions'][mr_obj.Label] = {
+                    'MMRModelCoR': mr_obj.MMRModelCoR,
+                    'MMRModelAxis': mr_obj.MMRModelAxis,
+                    't_MMRModelCoR': tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in mr_obj.MMRModelCoR),
+                    't_MMRModelAxis': tuple(d for d in mr_obj.MMRModelAxis),
+                    'MMRModelRPM': mr_obj.MMRModelRPM,# revolution per minute
+                    'MMRModelRPS': (mr_obj.MMRModelRPM/9.5) # rad/s #for the openCFD version
+                }
+
+        if len(self.settings["MovingMeshRegions"]) > 0:
+            self.settings['MovingMeshRegionsPresent'] = True
+        else:
+            self.settings['MovingMeshRegionsPresent'] = False
 
         if CfdTools.DockerContainer.usedocker:
             mesh_d = self.settings['meshDir'].split(os.sep)
