@@ -17,6 +17,17 @@ internalField   uniform %(initialValues/Temperature%);
 boundaryField
 {
 
+%{%(MovingMeshRegionsPresent%)
+%:True
+%[0/_boundary_MMR%]
+%{%(MovingMeshRegions%)
+    "(%(0%).*)"
+    {
+        #include "MMR/T";
+    }
+%}
+%}
+
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
 %:wall

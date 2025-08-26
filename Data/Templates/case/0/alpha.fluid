@@ -18,6 +18,17 @@ internalField   uniform %(initialValues/VolumeFractions/%(0%)%);
 boundaryField
 {
 
+%{%(MovingMeshRegionsPresent%)
+%:True
+%[0/_boundary_MMR%]
+%{%(MovingMeshRegions%)
+    "(%(0%).*)"
+    {
+        #include "MMR/alpha.fluid";
+    }
+%}
+%}
+
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)
 %:wall

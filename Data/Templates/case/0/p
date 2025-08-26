@@ -25,6 +25,17 @@ internalField   uniform %(initialValues/Pressure%);
 boundaryField
 {
 
+%{%(MovingMeshRegionsPresent%)
+%:True
+%[0/_boundary_MMR%]
+%{%(MovingMeshRegions%)
+    "(%(0%).*)"
+    {
+        #include "MMR/p";
+    }
+%}
+%}
+
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam buoyantPimpleFoam
 %{%(boundaries%)
