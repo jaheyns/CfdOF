@@ -1861,7 +1861,7 @@ class DockerContainer:
             else:
                 usr_str = "-u{}:{}".format(os.getuid(),os.getgid())
 
-        cmd = self.docker_cmd.split() + + ["run", "-t", "-d", usr_str, "-v" + output_path + ":/tmp", self.image_name]
+        cmd = self.docker_cmd.split() + ["run", "-t", "-d", usr_str, "-v" + output_path + ":/tmp", self.image_name]
 
         if 'podman' in self.docker_cmd:
             if 'flatpak' in self.docker_cmd:
