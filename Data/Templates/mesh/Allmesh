@@ -106,6 +106,18 @@ else
     runCommand surfaceFeatureExtract
 fi
 
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    echo "mode inside;" > system/MMR_Properties
+else
+    echo "faceType boundary;" > system/MMR_Properties
+    echo "cellZoneInside inside;" >> system/MMR_Properties
+fi
+%}
+
 %{%(ParallelMesh%)
 %:True
 runCommand decomposePar
