@@ -133,11 +133,7 @@ castellatedMeshControls
             level (%(SnappySettings/MovingMeshRegions/%(0%)/RefinementLevel%) %(SnappySettings/MovingMeshRegions/%(0%)/MaxRefinementLevel%));
             cellZone %(0%);
             faceZone %(0%);
-            // foundation:
-            mode inside;
-            // openCFD:
-            faceType boundary;
-            cellZoneInside inside;
+            #include "MMR_Properties"
         }
 %}
 %}
