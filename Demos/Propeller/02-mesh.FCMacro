@@ -1,0 +1,55 @@
+# -*- coding: utf-8 -*-
+
+from CfdOF import CfdAnalysis
+from CfdOF import CfdTools
+analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+CfdTools.setActiveAnalysis(analysis)
+from CfdOF.Solve import CfdPhysicsSelection
+analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+from CfdOF.Solve import CfdFluidMaterial
+analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+from CfdOF.Solve import CfdInitialiseFlowField
+analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+from CfdOF.Solve import CfdSolverFoam
+analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary.Label = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'uniformVelocityInlet'
+App.ActiveDocument.CfdFluidBoundary.Uz = '-1000.0 mm/s'
+App.ActiveDocument.CfdFluidBoundary.Temperature = '290.0 K'
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), ('Face3',))]
+FreeCAD.ActiveDocument.recompute()
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary001.Label = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundaryType = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundarySubType = 'staticPressureOutlet'
+App.ActiveDocument.CfdFluidBoundary001.Temperature = '290.0 K'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), ('Face2',))]
+FreeCAD.ActiveDocument.recompute()
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary002.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary002.Temperature = '290.0 K'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), ('Face1',))]
+FreeCAD.ActiveDocument.recompute()
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary003.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary003.Temperature = '290.0 K'
+App.ActiveDocument.CfdFluidBoundary003.DefaultBoundary = True
+FreeCAD.ActiveDocument.recompute()
+App.ActiveDocument.PhysicsModel.Time = 'Transient'
+App.ActiveDocument.PhysicsModel.gy = '-9800.0 mm/s^2'
+from CfdOF.Mesh import CfdMesh
+CfdMesh.makeCfdMesh('Cut_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Cut
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+App.ActiveDocument.Cut_Mesh.CharacteristicLengthMax = '2.0 mm'
+App.ActiveDocument.Cut_Mesh.MeshUtility = 'snappyHexMesh'
+App.ActiveDocument.Cut_Mesh.PointInMesh = {'x': '37.0 mm', 'y': '0.0 mm', 'z': '0.0 mm'}
+App.activeDocument().recompute(None,True,True)
+Gui.SendMsgToActiveView("ViewFit")
