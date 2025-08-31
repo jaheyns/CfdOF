@@ -1,0 +1,20 @@
+    // foundation:
+    
+    "(.*nonConformalCyclic.*)"
+    {
+        type    nonConformalCyclic;
+        value       $internalField;
+    }
+    
+    "(.*nonConformalError.*)"
+    {
+        type    nonConformalError;
+    }
+
+    // openCFD
+   
+    "(.*cyclicAMI.*)"
+    {
+        type    cyclicAMI;
+        value       $internalField;
+    }
