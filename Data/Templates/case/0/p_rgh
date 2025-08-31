@@ -23,7 +23,7 @@ boundaryField
 %{%(MovingMeshRegions%)
     "(%(0%).*)"
     {
-        #include "MMR/p_rgh";
+        #include "MMR/scalar";
     }
 %}
 %}

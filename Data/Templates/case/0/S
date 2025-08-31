@@ -24,7 +24,7 @@ boundaryField
 %{%(MovingMeshRegions%)
     "(%(0%).*)"
     {
-        #include "MMR/S";
+        #include "MMR/scalar";
     }
 %}
 %}

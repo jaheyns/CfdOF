@@ -90,35 +90,30 @@ mkdir -p 0/MMR
 which createNonConformalCouples > /dev/null 2>&1
 if [ $? == 0 ]
 then
-    echo "type movingWallSlipVelocity;" > 0/MMR/U
-    echo "value \$internalField;" >> 0/MMR/U
+    echo "type movingWallSlipVelocity;" > 0/MMR/vector
+    echo "value \$internalField;" >> 0/MMR/vector
 
-    echo "type zeroGradient;" | tee 0/MMR/{p,p_rgh,k,omega,epsilon,T,alphaT,S} >/dev/null
-
-    echo "type zeroGradient;" | tee 0/MMR/{Urel,gammaInt,nuTilda} >/dev/null
+    echo "type zeroGradient;" > 0/MMR/scalar
 
 	# if there is a alpha.something file
 	if [ -n "$(find 0/ -name alpha.*)" ]
 	then
-		#cp 0/alpha.* 0/MMR/
-		echo "type calculated;" | tee 0/MMR/alpha.fluid >/dev/null
+		echo "type calculated;" > 0/MMR/alpha.fluid
 	fi
 
-    echo "type calculated;" > 0/MMR/nut
-    echo "value uniform 0;" >> 0/MMR/nut
+    echo "type calculated;" > 0/MMR/calculated
+    echo "value uniform 0;" >> 0/MMR/calculated
 else
-	echo "type cyclicAMI;" | tee 0/MMR/{U,p,p_rgh,k,nut,omega,epsilon,T,alphaT,S,Urel,gammaInt,nuTilda}
-	echo "value \$internalField;" | tee -a 0/MMR/{U,p,p_rgh,k,nut,omega,epsilon,T,alphaT,S,Urel,gammaInt,nuTilda}
+	echo "type cyclicAMI;" | tee 0/MMR/{scalar,vector,calculated}
+	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
 
 	# if there is a alpha.something file
 	if [ -n "$(find 0/ -name alpha.*)" ]
 	then
-		#cp 0/alpha.* 0/MMR/
-		echo "type cyclicAMI;" | tee 0/MMR/alpha.fluid >/dev/null
-		echo "value \$internalField;" | tee -a 0/MMR/alpha.fluid >/dev/null
+		echo "type cyclicAMI;" > 0/MMR/alpha.fluid
+		echo "value \$internalField;" >> 0/MMR/alpha.fluid
 	fi
 fi
-ls 0/MMR/
 %}
 
 %{%(scalarTransportFunctionsEnabled%)
