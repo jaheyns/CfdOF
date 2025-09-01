@@ -26,6 +26,7 @@ geometry
     {
         type triSurfaceMesh;
         name %(Name%)_Geometry;
+        file "%(Name%)_Geometry.stl";
         regions
         {
 %{%(SnappySettings/ShapePatchNames%)
@@ -45,6 +46,7 @@ geometry
     {
         type triSurfaceMesh;
         name %(0%);
+        file "%(0%).stl";
     }
 
 %}
@@ -56,6 +58,7 @@ geometry
     {
         type triSurfaceMesh;
         name %(0%);
+        file "%(0%).stl";
     }
 
 %}
@@ -68,6 +71,7 @@ castellatedMeshControls
     maxGlobalCells 2000000000;
     minRefinementCells 0;
     nCellsBetweenLevels %(SnappySettings/CellsBetweenLevels%);
+    maxLoadUnbalance 0.20;
 
     features
     (

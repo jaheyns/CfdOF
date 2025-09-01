@@ -76,6 +76,7 @@ boundaryField
         length      1.0;
         I           %(boundaries/%(1%)/PressureDropCoeff%);
         D           0;
+        jump        uniform 0;
         value       $internalField;
     }
 %}

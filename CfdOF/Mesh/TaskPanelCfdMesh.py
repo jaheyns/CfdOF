@@ -212,6 +212,12 @@ class TaskPanelCfdMesh:
         self.consoleMessage("Preparing meshing ...")
         try:
             QApplication.setOverrideCursor(Qt.WaitCursor)
+            self.form.pb_run_mesh.setEnabled(False)
+            self.form.pb_write_mesh.setEnabled(False)
+            self.form.pb_check_mesh.setEnabled(False)
+            self.form.pb_paraview.setEnabled(False)
+            self.form.pb_load_mesh.setEnabled(False)
+
             setQuantity(self.form.if_max, str(cart_mesh.getClmax()))
             # Re-update the data in case ClMax was auto-set to avoid spurious update detection on next write
             self.store()
@@ -228,9 +234,8 @@ class TaskPanelCfdMesh:
             self.analysis_obj.NeedsMeshRerun = True
         finally:
             QApplication.restoreOverrideCursor()
-
-        # Update the UI
-        self.updateUI()
+            # Update the UI
+            self.updateUI()
 
     def progressCallback(self, message):
         self.consoleMessage(message)

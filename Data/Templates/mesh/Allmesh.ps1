@@ -14,9 +14,9 @@ function runParallel([int]$NumProcs, [string]$cmd)
     $sol = (Split-Path -Leaf $cmd)
 %{%(hostFileRequired%)
 %:False
-    & mpiexec -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
+    & mpiexec %(MPIOptionsMSMPI%) -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
 %:True
-    & mpiexec --hostfile %(hostFileName%) -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
+    & mpiexec %(MPIOptionsMSMPI%) --hostfile %(hostFileName%) -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
 %}
     $err = $LASTEXITCODE
     if( ! $LASTEXITCODE -eq 0 )
@@ -33,7 +33,10 @@ $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 $GMSH_EXE = "%(GmshSettings/Executable%)"
 %{%(NumberOfThreads%)
 %:0
-$NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+#$NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
+# Currently default to 1 thread as the current release version of gmsh 4.13.1,
+# appears to suffer from a race condition
+$NTHREADS = 1
 %:default
 $NTHREADS = %(NumberOfThreads%)
 %}
@@ -90,6 +93,8 @@ runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"
 
 %{%(ConvertToDualMesh%)
 %:True
+# polyDualMesh doesn't seem to convert cell zones
+rm -ErrorAction SilentlyContinue constant/polyMesh/cellZones
 # Convert to polyhedra
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
 

@@ -24,6 +24,7 @@ geometry
     {
         type triSurfaceMesh;
         name Compound_Geometry;
+        file "Compound_Geometry.stl";
         regions
         {
             patch_0_0
@@ -48,6 +49,7 @@ geometry
     {
         type triSurfaceMesh;
         name MeshRefinement;
+        file "MeshRefinement.stl";
     }
 
 };
@@ -58,6 +60,7 @@ castellatedMeshControls
     maxGlobalCells 2000000000;
     minRefinementCells 0;
     nCellsBetweenLevels 3;
+    maxLoadUnbalance 0.20;
 
     features
     (

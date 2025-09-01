@@ -692,7 +692,14 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
+            <item row="4" column="0">
+                <widget class="QLabel" name="labelPower">
+                 <property name="text">
+                  <string>Power</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
              <widget class="QLabel" name="labelThermalBoundaryType">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
@@ -730,6 +737,31 @@
               </property>
              </widget>
             </item>
+            <item row="4" column="1">
+             <widget class="Gui::InputField" name="inputPower">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string notr="true">0</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="unit" stdset="0">
+               <string notr="true">W</string>
+              </property>
+              <property name="format" stdset="0">
+               <string notr="true">g</string>
+              </property>
+             </widget>
+            </item>
             <item row="2" column="0">
              <widget class="QLabel" name="labelTemperature">
               <property name="text">
@@ -737,7 +769,7 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
+            <item row="5" column="1">
              <widget class="Gui::InputField" name="inputHeatTransferCoeff">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -765,7 +797,7 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
+            <item row="5" column="0">
              <widget class="QLabel" name="labelHTCeoff">
               <property name="text">
                <string>Heat transfer coefficient</string>

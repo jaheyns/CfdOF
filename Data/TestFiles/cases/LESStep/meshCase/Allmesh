@@ -20,12 +20,12 @@ runParallel()
     shift
     if [ -f log."$sol" ]; then rm log."$sol"; fi
     export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workaround for open-mpi/docker bug
-    mpiexec -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    mpiexec  -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
     err=$?
     if [ ! $err -eq 0 ]; then exit $err; fi
 }
 
-GMSH_EXE='/usr/local/bin/gmsh'
+GMSH_EXE='/home/oliver/software/gmsh-4.13.1-Linux64/bin/gmsh'
 if [[ $OSTYPE == 'darwin'* ]]
 then
     NTHREADS=$(sysctl -n hw.logicalcpu)
@@ -35,7 +35,7 @@ fi
 runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Pad_Geometry.geo"
 
 # Unset and source bashrc
-FOAMDIR="/usr/lib/openfoam/openfoam2312"
+FOAMDIR="/opt/openfoam13"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
@@ -44,6 +44,9 @@ fi
 
 runCommand gmshToFoam "gmsh/Pad_Geometry.msh"
 
+# polyDualMesh doesn't seem to convert cell zones or sets
+rm -f constant/polyMesh/cellZones
+rm -rf constant/polyMesh/sets
 # Convert to polyhedra
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
 

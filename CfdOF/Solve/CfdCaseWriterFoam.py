@@ -246,8 +246,11 @@ class CfdCaseWriterFoam:
         system_settings['hostFileRequired'] = self.analysis_obj.UseHostfile
         if system_settings['hostFileRequired'] == True:
             system_settings['hostFileName'] = self.analysis_obj.HostfileName
+            CfdTools.cfdWarning("Please note: The 'Use Host File' setting is deprecated. Please edit the MPI options "
+                                "directly under 'Tools | Edit parameters | Preferences | Mod | CfdOF'")
         if CfdTools.getFoamRuntime() == "MinGW":
             system_settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
+        system_settings['MPIOptionsOMPI'], system_settings['MPIOptionsMSMPI'] = CfdTools.getMPISettings()
 
     def setupMesh(self, updated_mesh_path, scale):
         if os.path.exists(updated_mesh_path):
@@ -577,7 +580,8 @@ class CfdCaseWriterFoam:
         for name in settings['reportingFunctions']:
             rf = settings['reportingFunctions'][name]
 
-            rf['PatchName'] = rf['Patch'].Label
+            if rf['ReportingFunctionType'] == 'Force' or rf['ReportingFunctionType'] == 'ForceCoefficients':
+                rf['PatchName'] = rf['Patch'].Label
 
             if rf['ReportingFunctionType'] == 'ForceCoefficients':
                 rf['Pitch'] = Vector(rf['Lift']).cross(Vector(rf['Drag']))

@@ -14,9 +14,9 @@ function runParallel([int]$NumProcs, [string]$cmd)
     $sol = (Split-Path -Leaf $cmd)
 %{%(system/hostFileRequired%)
 %:False
-    & mpiexec -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
+    & mpiexec %(system/MPIOptionsMSMPI%) -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
 %:True
-    & mpiexec --hostfile %(system/hostFileName%) -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
+    & mpiexec %(system/MPIOptionsMSMPI%) --hostfile %(system/hostFileName%) -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
 %}
     $err = $LASTEXITCODE
     if( ! $LASTEXITCODE -eq 0 )
@@ -43,6 +43,10 @@ elseif( !(Test-Path -PathType Leaf constant/polyMesh/faces) )
 
 # Set turbulence lib
 echo "libturbulenceModels.so" > system/turbulenceLib
+
+# Set interface compression
+echo "div(phi,alpha) Gauss vanLeer;" > system/alphaDivScheme
+echo "cAlpha 1;" > system/cAlpha
 
 %{%(dynamicMeshEnabled%)
 %:True

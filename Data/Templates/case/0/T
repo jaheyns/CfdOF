@@ -46,8 +46,20 @@ boundaryField
 %:fixedGradient
     %(0%)
     {
-        type        fixedGradient;
-        gradient    uniform %(boundaries/%(0%)/HeatFlux%);
+        type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        q               uniform %(boundaries/%(0%)/HeatFlux%);
+        kappaMethod     fluidThermo;
+        value           $internalField;
+    }
+%:totalPower
+    %(0%)
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            power;
+        Q               %(boundaries/%(0%)/Power%);
+        kappaMethod     fluidThermo;
+        value           $internalField;
     }
 %:heatTransferCoeff
     %(0%)

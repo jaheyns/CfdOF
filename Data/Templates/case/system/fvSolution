@@ -64,7 +64,7 @@ SIMPLE
 
     residualControl
     {
-        p %(solver/ConvergenceTol%);
+        "(p|p_rgh)" %(solver/ConvergenceTol%);
         U %(solver/ConvergenceTol%);
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam
@@ -187,7 +187,7 @@ solvers
     {
         nAlphaCorr      1;
         nAlphaSubCycles 1;
-        cAlpha          1;
+        #include "cAlpha"
 
         MULESCorr       yes;
         nLimiterIter    7;
@@ -315,36 +315,36 @@ relaxationFactors
     {
 %{%(solver/SolverName%)
 %:SRFSimpleFoam
-        Urel            0.6;
+        Urel            0.7;
 %:default
-        U               0.6;
+        U               0.7;
 %}
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam
-        h               0.6;
+        h               0.7;
 %}
 %{%(physics/Turbulence%)
 %:RANS DES
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES
-        k               0.5;
-        omega           0.5;
+        k               0.7;
+        omega           0.7;
 %:kEpsilon
-        k               0.5;
-        epsilon         0.5;
+        k               0.7;
+        epsilon         0.7;
 %:SpalartAllmaras SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
-        nuTilda         0.5;
+        nuTilda         0.7;
 %:kOmegaSSTLM
-        k               0.5;
-        omega           0.5;
-        gammaInt        0.5;
-        ReThetat        0.5;
+        k               0.7;
+        omega           0.7;
+        gammaInt        0.7;
+        ReThetat        0.7;
 %}
 %}
 %{%(scalarTransportFunctionsEnabled%)
 %:True
 %{%(scalarTransportFunctions%)
-        %(scalarTransportFunctions/%(0%)/FieldName%) 0.5;
+        %(scalarTransportFunctions/%(0%)/FieldName%) 0.7;
 %}
 %}
     }
@@ -361,40 +361,40 @@ relaxationFactors
 %:Transient
     equations
     {
-        U               0.6;
+        U               0.7;
         UFinal          1;
 %{%(solver/SolverName%)
 %:buoyantPimpleFoam
-        h               0.6;
+        h               0.7;
         hFinal          1;
 %}
 %{%(physics/Turbulence%)
 %:RANS DES LES
 %{%(physics/TurbulenceModel%)
 %:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES
-        k               0.5;
+        k               0.7;
         kFinal          1;
-        omega           0.5;
+        omega           0.7;
         omegaFinal      1;
 %:kEpsilon
-        k               0.5;
+        k               0.7;
         kFinal          1;
-        epsilon         0.5;
+        epsilon         0.7;
         epsilonFinal    1;
 %:SpalartAllmaras SpalartAllmarasDES SpalartAllmarasDDES SpalartAllmarasIDDES
-        nuTilda         0.5;
+        nuTilda         0.7;
         nuTildaFinal    1;
 %:kOmegaSSTLM
-        k               0.5;
+        k               0.7;
         kFinal          1;
-        omega           0.5;
+        omega           0.7;
         omegaFinal      1;
-        gammaInt               0.5;
-        gammaIntFinal          1;
-        ReThetat               0.5;
-        ReThetatFinal          1;
+        gammaInt        0.7;
+        gammaIntFinal   1;
+        ReThetat        0.7;
+        ReThetatFinal   1;
 %:kEqn
-        k               0.5;
+        k               0.7;
         kFinal          1;
 %}
 %}
@@ -405,7 +405,7 @@ relaxationFactors
 %{%(scalarTransportFunctionsEnabled%)
 %:True
 %{%(scalarTransportFunctions%)
-        %(scalarTransportFunctions/%(0%)/FieldName%) 0.5;
+        %(scalarTransportFunctions/%(0%)/FieldName%) 0.7;
         %(scalarTransportFunctions/%(0%)/FieldName%)Final 1;
 %}
 %}

@@ -22,7 +22,7 @@ SIMPLE
 
     residualControl
     {
-        p 0.001;
+        "(p|p_rgh)" 0.001;
         U 0.001;
         "(k|epsilon|omega|f|v2|nuTilda|gammaInt|ReThetat)" 0.001;
     }
@@ -97,7 +97,7 @@ relaxationFactors
     // meshes
     equations
     {
-        U               0.6;
+        U               0.7;
     }
 
     fields

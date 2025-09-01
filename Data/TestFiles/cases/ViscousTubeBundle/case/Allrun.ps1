@@ -12,7 +12,7 @@ function runCommand([string]$cmd)
 function runParallel([int]$NumProcs, [string]$cmd)
 {
     $sol = (Split-Path -Leaf $cmd)
-    & mpiexec -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
+    & mpiexec -affinity -affinity_layout spr:P:L -np $NumProcs $cmd -parallel $args 2>&1 | tee log.$sol
     $err = $LASTEXITCODE
     if( ! $LASTEXITCODE -eq 0 )
     {
@@ -38,6 +38,10 @@ elseif( !(Test-Path -PathType Leaf constant/polyMesh/faces) )
 
 # Set turbulence lib
 echo "libturbulenceModels.so" > system/turbulenceLib
+
+# Set interface compression
+echo "div(phi,alpha) Gauss vanLeer;" > system/alphaDivScheme
+echo "cAlpha 1;" > system/cAlpha
 
 # Update patch name and type
 runCommand createPatch -overwrite
