@@ -843,7 +843,7 @@
                  <item row="0" column="0">
                   <widget class="QRadioButton" name="radioButtonCart">
                    <property name="text">
-                    <string>Car&amp;tesian components</string>
+                    <string>Car&amp;tesian components (X,Y,Z)</string>
                    </property>
                   </widget>
                  </item>
@@ -878,13 +878,6 @@
                    <number>0</number>
                   </property>
                   <item>
-                   <widget class="QLabel" name="LabelCartX">
-                    <property name="text">
-                     <string>X</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
                    <widget class="Gui::InputField" name="inputCartX">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -910,13 +903,6 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="LabelCartY">
-                    <property name="text">
-                     <string>Y</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
                    <widget class="Gui::InputField" name="inputCartY">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -938,13 +924,6 @@
                     </property>
                     <property name="format" stdset="0">
                      <number>0</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QLabel" name="LabelCartZ">
-                    <property name="text">
-                     <string>Z</string>
                     </property>
                    </widget>
                   </item>
@@ -1683,14 +1662,14 @@
                <item row="3" column="0">
                 <widget class="QLabel" name="label_17">
                  <property name="text">
-                  <string>Rotation axis</string>
+                  <string>Rotation axis (X,Y,Z)</string>
                  </property>
                 </widget>
                </item>
                <item row="1" column="0">
                 <widget class="QLabel" name="label_15">
                  <property name="text">
-                  <string>Rotation origin</string>
+                  <string>Rotation origin (X,Y,Z)</string>
                  </property>
                 </widget>
                </item>
@@ -2103,14 +2082,14 @@
                 <item row="2" column="0" colspan="3">
                  <widget class="QLabel" name="label_7">
                   <property name="text">
-                   <string>Centre of rotation</string>
+                   <string>Centre of rotation (X,Y,Z)</string>
                   </property>
                  </widget>
                 </item>
                 <item row="6" column="0" colspan="3">
                  <widget class="QLabel" name="label_11">
                   <property name="text">
-                   <string>Rotational axis</string>
+                   <string>Rotational axis (X,Y,Z)</string>
                   </property>
                  </widget>
                 </item>
@@ -2294,7 +2273,7 @@
                 <item row="1" column="4" colspan="3">
                  <widget class="QLabel" name="label_12">
                   <property name="text">
-                   <string>Separation vector</string>
+                   <string>Separation vector (X,Y,Z)</string>
                   </property>
                  </widget>
                 </item>
