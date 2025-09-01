@@ -233,7 +233,7 @@
             <item row="3" column="0" colspan="3">
              <widget class="QLabel" name="labelCentreOfRotation">
               <property name="text">
-               <string>Centre of rotation</string>
+               <string>Centre of rotation (X,Y,Z)</string>
               </property>
              </widget>
             </item>
@@ -332,7 +332,7 @@
             <item row="0" column="0" colspan="3">
              <widget class="QLabel" name="labelLiftDirection">
               <property name="text">
-               <string>Lift Direction</string>
+               <string>Lift Direction (X,Y,Z)</string>
               </property>
              </widget>
             </item>
@@ -600,7 +600,7 @@
             <item row="3" column="0" colspan="3">
              <widget class="QLabel" name="labelDragDirection">
               <property name="text">
-               <string>Drag Direction</string>
+               <string>Drag Direction (X,Y,Z)</string>
               </property>
              </widget>
             </item>
@@ -828,7 +828,7 @@
             <item row="1" column="0" colspan="3">
              <widget class="QLabel" name="labelDirection">
               <property name="text">
-               <string>Binning direction</string>
+               <string>Binning direction (X,Y,Z)</string>
               </property>
              </widget>
             </item>

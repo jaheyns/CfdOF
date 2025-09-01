@@ -827,7 +827,7 @@
       <item row="5" column="0" colspan="2">
        <widget class="QRadioButton" name="radioButtonSpecifyValuesP">
         <property name="text">
-         <string>Specify value</string>
+         <string>Specify value (X,Y,Z)</string>
         </property>
        </widget>
       </item>

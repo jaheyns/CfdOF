@@ -241,7 +241,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Point in mesh</string>
+         <string>Point in mesh (X,Y,Z)</string>
         </property>
        </widget>
       </item>

@@ -167,7 +167,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Moving reference frame (SRF)</string>
+         <string>Moving reference frame (SRF) (X,Y,Z)</string>
         </property>
        </widget>
       </item>
@@ -181,7 +181,7 @@
       <item row="8" column="0" colspan="3">
        <widget class="QLabel" name="label_7">
         <property name="text">
-         <string>Rotational axis</string>
+         <string>Rotational axis (X,Y,Z)</string>
         </property>
        </widget>
       </item>
@@ -692,7 +692,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Gravity</string>
+         <string>Gravity (X,Y,Z)</string>
         </property>
        </widget>
       </item>
