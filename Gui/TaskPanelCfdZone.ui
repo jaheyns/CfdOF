@@ -55,7 +55,7 @@
             <string>Correspond to directions in which the velocity is scaled but not rotated by the porous medium</string>
            </property>
            <property name="text">
-            <string>Principal directions (Z,Y,X)</string>
+            <string>Principal directions (X,Y,Z)</string>
            </property>
            <property name="wordWrap">
             <bool>true</bool>
