@@ -56,6 +56,27 @@ echo "type fixedValue;" > 0/include/helperPatchFieldType
 echo "type patch;" > system/helperPatchType
 
 %}
+
+%{%(MovingMeshRegionsPresent%)
+%:True
+mkdir 0/MMR
+if( (Get-Command createNonConformalCouples) )
+{
+    echo "type movingWallSlipVelocity;" > 0/MMR/vector
+    echo "value \$internalField;" >> 0/MMR/vector
+
+    echo "type zeroGradient;" > 0/MMR/scalar
+
+    echo "type calculated;" > 0/MMR/calculated
+    echo "value uniform 0;" >> 0/MMR/calculated
+}
+else
+{
+	echo "type cyclicAMI;" | tee 0/MMR/{scalar,vector,calculated}
+	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
+}
+%}
+
 # Update patch name and type
 runCommand createPatch -overwrite
 
