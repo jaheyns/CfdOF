@@ -95,24 +95,11 @@ then
 
     echo "type zeroGradient;" > 0/MMR/scalar
 
-	# if there is a alpha.something file
-	if [ -n "$(find 0/ -name alpha.*)" ]
-	then
-		echo "type calculated;" > 0/MMR/alpha.fluid
-	fi
-
     echo "type calculated;" > 0/MMR/calculated
     echo "value uniform 0;" >> 0/MMR/calculated
 else
 	echo "type cyclicAMI;" | tee 0/MMR/{scalar,vector,calculated}
 	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
-
-	# if there is a alpha.something file
-	if [ -n "$(find 0/ -name alpha.*)" ]
-	then
-		echo "type cyclicAMI;" > 0/MMR/alpha.fluid
-		echo "value \$internalField;" >> 0/MMR/alpha.fluid
-	fi
 fi
 %}
 
@@ -126,11 +113,8 @@ fi
 
 %}
 
-%{%(MovingMeshRegionsPresent%)
-%:False
 # Update patch name and type
 runCommand createPatch -overwrite
-%}
 
 %{%(zonesPresent%)
 %:True
