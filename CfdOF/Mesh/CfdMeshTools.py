@@ -467,8 +467,7 @@ class CfdMeshTools:
                                 }
 
                         elif self.mesh_obj.MeshUtility == 'snappyHexMesh':
-                            # moving mesh
-                            if not Internal and MovingMeshRegion and not Extrusion:
+                            if MovingMeshRegion:
                                 edge_level = CfdTools.relLenToRefinementLevel(mr_obj.RegionEdgeRefinement)
                                 snappy_settings['MovingMeshRegions'][mr_patch_name] = {
                                     'RefinementLevel': refinement_level,
@@ -476,19 +475,18 @@ class CfdMeshTools:
                                     'MaxRefinementLevel': max(refinement_level, edge_level),
                                     'Baffle': False
                                 }
-                            # extrusion
-                            if not Internal and not MovingMeshRegion and Extrusion:
+                            elif Internal:
+                                snappy_settings['InternalRegions'][mr_patch_name] = {
+                                    'RefinementLevel': refinement_level
+                                }
+                            # surface refinement
+                            elif not Extrusion:
                                 edge_level = CfdTools.relLenToRefinementLevel(mr_obj.RegionEdgeRefinement)
                                 snappy_settings['MeshRegions'][mr_patch_name] = {
                                     'RefinementLevel': refinement_level,
                                     'EdgeRefinementLevel': edge_level,
                                     'MaxRefinementLevel': max(refinement_level, edge_level),
                                     'Baffle': False
-                                }
-                            # internal
-                            if Internal and not MovingMeshRegion and not Extrusion:
-                                snappy_settings['InternalRegions'][mr_patch_name] = {
-                                    'RefinementLevel': refinement_level
                                 }
 
             # In addition, for cfMesh and SnappyHesMesh, record matched boundary layer patches
