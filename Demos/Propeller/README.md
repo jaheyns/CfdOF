@@ -1,5 +1,6 @@
-# rotating simple propeller example
-this shows how to use AMI/NCC to simulate flow on a rotary machinery
+# Rotating simple propeller example
+
+This shows how to use AMI/NCC to simulate flow on rotary machinery
 
 ![screenshot](geom.png)
 

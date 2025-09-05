@@ -21,7 +21,6 @@ internalField   uniform 0;
 
 boundaryField
 {
-
 %[0/_boundary_MMR_calculated%]
 
 %{%(boundaries%)
