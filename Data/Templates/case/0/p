@@ -24,6 +24,7 @@ internalField   uniform %(initialValues/Pressure%);
 
 boundaryField
 {
+%[0/_boundary_MMR_scalar%]
 
 %{%(solver/SolverName%)
 %:buoyantSimpleFoam buoyantPimpleFoam

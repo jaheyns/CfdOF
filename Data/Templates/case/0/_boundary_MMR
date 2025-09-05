@@ -1,0 +1,15 @@
+    // Foundation:
+    
+%{%(0%)_M %(0%)_S
+    nonConformalCyclic_on_%(0%) 
+    {
+        type    nonConformalCyclic;
+        value   $internalField;
+    }
+
+    nonConformalError_on_%(0%)
+    {
+        type    nonConformalError;
+    }
+
+%}

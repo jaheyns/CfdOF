@@ -1,0 +1,14 @@
+# -*- coding: utf-8 -*-
+
+from CfdOF.Mesh import CfdMeshRefinement
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Cut_Mesh)
+FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cylinder001'), ('',))]
+App.ActiveDocument.MeshRefinement.MovingMeshRegion = True
+App.ActiveDocument.MeshRefinement.MMRModelRPM = '19.00 '
+App.ActiveDocument.MeshRefinement.MMRModelAxis = App.Vector (0.0, 0.0, 1.0)
+FreeCAD.ActiveDocument.recompute()
+App.ActiveDocument.InitialiseFields.Temperature = '290.0 K'
+FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary001
+App.activeDocument().recompute(None,True,True)
+Gui.SendMsgToActiveView("ViewFit")

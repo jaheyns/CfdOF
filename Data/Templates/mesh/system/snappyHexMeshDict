@@ -38,6 +38,17 @@ geometry
 %}
         }
     }
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+%{%(SnappySettings/MovingMeshRegions%)
+    "%(0%).stl"
+    {
+        type triSurfaceMesh;
+        name %(0%);
+        file "%(0%).stl";
+    }
+%}
+%}
 
 %{%(MeshRegionPresent%)
 %:True
@@ -109,6 +120,19 @@ castellatedMeshControls
             faceType baffle;
 %}
             faceZone %(0%);
+        }
+
+%}
+%}
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+%{%(SnappySettings/MovingMeshRegions%)
+        %(0%)
+        {
+            level (%(SnappySettings/MovingMeshRegions/%(0%)/RefinementLevel%) %(SnappySettings/MovingMeshRegions/%(0%)/MaxRefinementLevel%));
+            cellZone %(0%);
+            faceZone %(0%);
+            #include "MMR_Properties"
         }
 
 %}

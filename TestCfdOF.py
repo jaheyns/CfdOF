@@ -451,6 +451,21 @@ class DamBreak3DTest(unittest.TestCase, MacroTest):
         self.closeDoc()
 
 
+class PropellerTest(unittest.TestCase, MacroTest):
+    __dir_name = 'Propeller'
+    __macros = ['01-geom.FCMacro', '02-mesh.FCMacro', '03-MovingMeshRegion.FCMacro']
+
+    def __init__(self, var):
+        super().__init__(var)
+        MacroTest.child_instance = self
+
+    def test_run(self):
+        self.runTest(self.__class__.__dir_name, self.__class__.__macros)
+
+    def tearDown(self):
+        self.closeDoc()
+
+
 def compareInpFiles(file_name1, file_name2):
     file1 = open(file_name1, 'r')
     f1 = file1.readlines()

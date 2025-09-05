@@ -18,6 +18,7 @@ internalField   uniform %(initialValues/omega%);
 
 boundaryField
 {
+%[0/_boundary_MMR_scalar%]
 
 %{%(boundaries%)
 %{%(boundaries/%(0%)/BoundaryType%)

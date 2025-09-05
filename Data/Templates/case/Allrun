@@ -84,6 +84,25 @@ else
 fi
 
 %}
+%{%(MovingMeshRegionsPresent%)
+%:True
+mkdir -p 0/MMR
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    echo "type movingWallSlipVelocity;" > 0/MMR/vector
+    echo "value \$internalField;" >> 0/MMR/vector
+
+    echo "type zeroGradient;" > 0/MMR/scalar
+
+    echo "type calculated;" > 0/MMR/calculated
+    echo "value uniform 0;" >> 0/MMR/calculated
+else
+	echo "type cyclicAMI;" | tee 0/MMR/{scalar,vector,calculated}
+	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
+fi
+
+%}
 %{%(scalarTransportFunctionsEnabled%)
 %:True
 # Enable fvOption source for scalar transport in OpenFOAM v10+
@@ -149,8 +168,11 @@ NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDic
 
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(MovingMeshRegionsPresent%)
+%:False
 # Mesh renumbering
 runParallel $NPROC renumberMesh -overwrite
+%}
 %:True
 # Mesh renumbering does not work in Foundation with dynamic mesh
 %}
@@ -200,8 +222,11 @@ fi
 %:False
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(MovingMeshRegionsPresent%)
+%:False
 # Mesh renumbering
 runCommand renumberMesh -overwrite
+%}
 %:True
 # Mesh renumbering does not currently work in Foundation with dynamic mesh
 # runCommand renumberMesh -overwrite

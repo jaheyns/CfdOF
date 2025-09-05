@@ -28,7 +28,7 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 * Solution of arbitrary passive scalar transport functions
 #### Meshing
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
-* Cut-cell Cartesian meshing with baffles (snappyHexMesh)
+* Cut-cell Cartesian meshing with baffles and moving mesh regions (snappyHexMesh)
 * Tetrahedral meshing using Gmsh, including conversion to polyhedral dual mesh
 * Post-meshing check mesh
 * Support for dynamic mesh adaptation for supported solvers
@@ -41,7 +41,6 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 * Unit/regression testing
 * Case builder using an extensible template structure
 * Macro scripting
-* Support for distributed parallel (cluster) runs via mpiexec & --hostfile
 
 ### Platforms supported
 
@@ -319,7 +318,8 @@ and the [Council for Scientific and Industrial Research](https://www.csir.co.za)
 * Qingfeng Xia (2015)
 * Thomas Schrader (2017-) <info@schraderundschrader.de>
 * Michael Hindley (2016)
-* Mark Mackenzie [Forum: @markrmau]
+* Mark Mackenzie (2022-) [Forum: @markrmau]
+* @muezabdalla [Github] (2025)
 * Katy Akmal (2022) [Forum: @KAKM]
 * Adrian Insaurralde (2022)
 * Klaus Sembritzki (2017)
