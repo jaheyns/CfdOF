@@ -82,8 +82,8 @@ else
     echo "type fixedValue;" > 0/include/helperPatchFieldType
     echo "type patch;" > system/helperPatchType
 fi
-%}
 
+%}
 %{%(MovingMeshRegionsPresent%)
 %:True
 mkdir -p 0/MMR
@@ -101,8 +101,8 @@ else
 	echo "type cyclicAMI;" | tee 0/MMR/{scalar,vector,calculated}
 	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
 fi
-%}
 
+%}
 %{%(scalarTransportFunctionsEnabled%)
 %:True
 # Enable fvOption source for scalar transport in OpenFOAM v10+
@@ -112,7 +112,6 @@ then
 fi
 
 %}
-
 # Update patch name and type
 runCommand createPatch -overwrite
 

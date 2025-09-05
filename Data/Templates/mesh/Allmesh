@@ -116,8 +116,8 @@ else
     echo "faceType boundary;" > system/MMR_Properties
     echo "cellZoneInside inside;" >> system/MMR_Properties
 fi
-%}
 
+%}
 %{%(ParallelMesh%)
 %:True
 runCommand decomposePar

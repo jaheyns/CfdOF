@@ -124,7 +124,6 @@ castellatedMeshControls
 
 %}
 %}
-
 %{%(SnappySettings/MovingMeshRegionsPresent%)
 %:True
 %{%(SnappySettings/MovingMeshRegions%)
@@ -135,6 +134,7 @@ castellatedMeshControls
             faceZone %(0%);
             #include "MMR_Properties"
         }
+
 %}
 %}
     }

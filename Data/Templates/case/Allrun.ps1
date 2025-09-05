@@ -56,7 +56,6 @@ echo "type fixedValue;" > 0/include/helperPatchFieldType
 echo "type patch;" > system/helperPatchType
 
 %}
-
 %{%(MovingMeshRegionsPresent%)
 %:True
 mkdir 0/MMR
@@ -75,8 +74,8 @@ else
 	echo "type cyclicAMI;" | tee 0/MMR/{scalar,vector,calculated}
 	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
 }
-%}
 
+%}
 # Update patch name and type
 runCommand createPatch -overwrite
 

@@ -16,7 +16,6 @@ internalField   uniform (%(initialValues/Ux%) %(initialValues/Uy%) %(initialValu
 
 boundaryField
 {
-
 %[0/_boundary_MMR_vector%]
 
 %{%(boundaries%)
