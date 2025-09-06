@@ -80,6 +80,19 @@ runCommand blockMesh
 # Extract feature edges
 runCommand surfaceFeatureExtract
 
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+if( (Get-Command createNonConformalCouples) )
+{
+    echo "mode inside;" > system/MMR_Properties
+}
+else
+{
+    echo "faceType boundary;" > system/MMR_Properties
+    echo "cellZoneInside inside;" >> system/MMR_Properties
+}
+
+%}
 %{%(ParallelMesh%)
 %:True
 runCommand decomposePar
