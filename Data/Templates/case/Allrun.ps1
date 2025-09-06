@@ -71,8 +71,12 @@ if( (Get-Command createNonConformalCouples) )
 }
 else
 {
-	echo "type cyclicAMI;" | tee 0/MMR/{scalar,vector,calculated}
-	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
+	echo "type cyclicAMI;" > 0/MMR/scalar
+	echo "type cyclicAMI;" > 0/MMR/vector
+	echo "type cyclicAMI;" > 0/MMR/calculated
+	echo "value \$internalField;" >> 0/MMR/scalar
+	echo "value \$internalField;" >> 0/MMR/vector
+	echo "value \$internalField;" >> 0/MMR/calculated
 }
 
 %}
