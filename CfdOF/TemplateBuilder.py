@@ -51,7 +51,8 @@ class TemplateBuilder(object):
         for f in os.listdir(full_dir):
             rel_file = os.path.join(rel_dir, f)
             # Ignore files beginning with underscore so they can be used as includes
-            if os.path.basename(rel_file)[0] != '_':
+            # and ignore the files that start with . because they can be swap files
+            if os.path.basename(rel_file)[0] != '_' and os.path.basename(rel_file)[0] != '.':
                 if os.path.isdir(os.path.join(self.template_path, rel_dir, f)):
                     self.buildDir(rel_file)
                 else:
