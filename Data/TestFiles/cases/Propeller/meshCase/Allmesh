@@ -1,0 +1,69 @@
+#!/bin/bash
+
+runCommand()
+{
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+runParallel()
+{
+    nproc="$1"
+    shift
+    exe="$(which $1)"
+    sol=$(basename -- "$1")
+    sol="${sol%.*}"
+    shift
+    if [ -f log."$sol" ]; then rm log."$sol"; fi
+    export OMPI_MCA_btl_vader_single_copy_mechanism=none  # Workaround for open-mpi/docker bug
+    mpiexec  -np $nproc "$exe" -parallel "$@" 1> >(tee -a log."$sol") 2> >(tee -a log."$sol" >&2)
+    err=$?
+    if [ ! $err -eq 0 ]; then exit $err; fi
+}
+
+# Unset and source bashrc
+if [ ! -z "$FOAMDIR" ]
+then
+    source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
+    source "$FOAMDIR/etc/bashrc"
+fi
+
+runCommand blockMesh
+
+# Extract feature edges
+which surfaceFeatures > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    runCommand surfaceFeatures
+else
+    runCommand surfaceFeatureExtract
+fi
+
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+    echo "mode inside;" > system/MMR_Properties
+else
+    echo "faceType boundary;" > system/MMR_Properties
+    echo "cellZoneInside inside;" >> system/MMR_Properties
+fi
+
+runCommand snappyHexMesh -overwrite
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+	runCommand createBaffles -overwrite
+	runCommand splitBaffles -overwrite
+	runCommand createNonConformalCouples -overwrite MeshRefinement_M MeshRefinement_S
+	mv log.createNonConformalCouples log.createNonConformalCouplesMeshRefinement
+else
+	runCommand createPatch -overwrite || return 1
+fi
+
+
+# Extract surface mesh and convert to mm for visualisation in FreeCAD
+runCommand foamToSurface -scale 1000 -tri surfaceMesh.vtk

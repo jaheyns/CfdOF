@@ -319,7 +319,7 @@ and the [Council for Scientific and Industrial Research](https://www.csir.co.za)
 * Thomas Schrader (2017-) <info@schraderundschrader.de>
 * Michael Hindley (2016)
 * Mark Mackenzie (2022-) [Forum: @markrmau]
-* @muezabdalla [Github] (2025)
+* Muez Abdalla (2025) [Github: @muezabdalla]
 * Katy Akmal (2022) [Forum: @KAKM]
 * Adrian Insaurralde (2022)
 * Klaus Sembritzki (2017)
