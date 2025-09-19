@@ -29,7 +29,7 @@ import tempfile
 # in a single STL file
 
 # Python's open is masked by the function below
-if open.__module__ in ['__builtin__','io']:
+if open.__module__ in ['__builtin__','io','_io']:
     pythonopen = open
 
 
