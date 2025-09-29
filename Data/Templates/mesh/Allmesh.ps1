@@ -97,9 +97,41 @@ else
 %:True
 runCommand decomposePar
 runParallel $NPROC snappyHexMesh -overwrite
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+if ( (Get-Command createNonConformalCouples) )
+{
+	runParallel createBaffles -overwrite
+	runParallel splitBaffles -overwrite
+%{%(SnappySettings/MovingMeshRegions%)
+	runParallel createNonConformalCouples -overwrite %(0%)_M %(0%)_S
+	mv log.createNonConformalCouples log.createNonConformalCouples%(0%)
+%}
+}
+else
+{
+	runParallel createPatch -overwrite
+}
+%}
 runCommand reconstructParMesh -constant
 %:False
 runCommand snappyHexMesh -overwrite
+%{%(SnappySettings/MovingMeshRegionsPresent%)
+%:True
+if ( (Get-Command createNonConformalCouples) )
+{
+	runCommand createBaffles -overwrite
+	runCommand splitBaffles -overwrite
+%{%(SnappySettings/MovingMeshRegions%)
+	runCommand createNonConformalCouples -overwrite %(0%)_M %(0%)_S
+	mv log.createNonConformalCouples log.createNonConformalCouples%(0%)
+%}
+}
+else
+{
+	runCommand createPatch -overwrite
+}
+%}
 %}
 %:gmsh
 runCommand gmshToFoam "gmsh/%(Name%)_Geometry.msh"

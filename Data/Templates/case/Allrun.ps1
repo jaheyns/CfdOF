@@ -61,22 +61,22 @@ echo "type patch;" > system/helperPatchType
 mkdir 0/MMR
 if( (Get-Command createNonConformalCouples) )
 {
-    echo "type movingWallSlipVelocity;" > 0/MMR/vector
-    echo "value \$internalField;" >> 0/MMR/vector
+    echo 'type movingWallSlipVelocity;' > 0/MMR/vector
+    echo 'value $internalField;' >> 0/MMR/vector
 
-    echo "type zeroGradient;" > 0/MMR/scalar
+    echo 'type zeroGradient;' > 0/MMR/scalar
 
-    echo "type calculated;" > 0/MMR/calculated
-    echo "value uniform 0;" >> 0/MMR/calculated
+    echo 'type calculated;' > 0/MMR/calculated
+    echo 'value uniform 0;' >> 0/MMR/calculated
 }
 else
 {
-	echo "type cyclicAMI;" > 0/MMR/scalar
-	echo "type cyclicAMI;" > 0/MMR/vector
-	echo "type cyclicAMI;" > 0/MMR/calculated
-	echo "value \$internalField;" >> 0/MMR/scalar
-	echo "value \$internalField;" >> 0/MMR/vector
-	echo "value \$internalField;" >> 0/MMR/calculated
+    echo 'type cyclicAMI;' > 0/MMR/scalar
+    echo 'type cyclicAMI;' > 0/MMR/vector
+    echo 'type cyclicAMI;' > 0/MMR/calculated
+    echo 'value $internalField;' >> 0/MMR/scalar
+    echo 'value $internalField;' >> 0/MMR/vector
+    echo 'value $internalField;' >> 0/MMR/calculated
 }
 
 %}
