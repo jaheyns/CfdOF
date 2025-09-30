@@ -1,3 +1,12 @@
+# UAV simulation with meshrefinement
+
+this demo uses the mirror constrain to reduce the fluid domain
+and it makes volume refinement around the body to increase the accuracy
+
+![screenshot](geom.png)
+
+![screenshot](result.png)
+
 The CAD (UAV.IGS) was obtained from GrabCAD:
 https://grabcad.com/library/uav-40
 It was created by Shadman Sakib.
@@ -13,4 +22,4 @@ social media, including in a student presentation, or uploading to a free CAD
 library like GrabCAD."
 Note that this file cannot be used for commercial purposes without permission
 from the original creator (see above link for details).
-
+A demo simulation based on:
