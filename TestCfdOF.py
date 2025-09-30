@@ -378,7 +378,7 @@ class ViscousTubeBundleTest(unittest.TestCase, MacroTest):
 
 class UAVTest(unittest.TestCase, MacroTest):
     __dir_name = 'UAV'
-    __macros = ['01-partDesign.FCMacro', '02-firstAnalysis.FCMacro', '03-refineMesh.FCMacro']
+    __macros = ['01-partDesign.FCMacro', '02-firstAnalysis.FCMacro', '03-refineMesh.FCMacro',  '04-forces.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
