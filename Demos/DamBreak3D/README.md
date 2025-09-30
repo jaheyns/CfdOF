@@ -6,4 +6,6 @@ wave impact problems. _Journal of Computational Physics_ (2005) **206** p.p. 363
 
 ![screenshot](geom.png)
 
-[![Watch the video](result.mp4)]
+<p align="center">
+  <img src="result.gif" alt="Video">
+</p>
