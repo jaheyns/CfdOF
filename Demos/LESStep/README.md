@@ -5,3 +5,5 @@ A demo simulation based on:
   NASA Glenn Research Center, Cleveland, Ohio 44135
 
 ![screenshot](geom.png)
+
+![screenshot](result.png)
