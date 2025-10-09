@@ -1,11 +1,11 @@
-# projectile simulation
+# Projectile simulation
 
 A demo simulation that uses:
- - hisa for super sonic simulation
+ - Hisa for super sonic simulation
 
- - adaptive mesh refinement on the shock wave
+ - Adaptive mesh refinement on the shock wave
 
- - use cfmesh for meshing
+ - Use cfmesh for meshing
 
 ![screenshot](geom.png)
 
