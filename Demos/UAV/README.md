@@ -22,4 +22,3 @@ social media, including in a student presentation, or uploading to a free CAD
 library like GrabCAD."
 Note that this file cannot be used for commercial purposes without permission
 from the original creator (see above link for details).
-A demo simulation based on:
