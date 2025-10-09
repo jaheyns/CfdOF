@@ -1,0 +1,7 @@
+from CfdOF.PostProcess import CfdReportingFunction
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())
+
+FreeCAD.ActiveDocument.ReportingFunction.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary004
+App.ActiveDocument.ReportingFunction.Direction = App.Vector (0.0, 0.0, 1.0)
+FreeCAD.ActiveDocument.recompute()
