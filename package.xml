@@ -4,7 +4,7 @@
     <description>Computational Fluid Dynamics (CFD) for FreeCAD based on OpenFOAM</description>
     <version>1.32.3</version>
     <maintainer email="oliveroxtoby@gmail.com">Oliver Oxtoby</maintainer>
-    <license file="LICENSE">LGPL-2.0-or-later</license>
+    <license file="LICENSE">LGPL-3.0-or-later</license>
     <url type="repository" branch="master">https://github.com/jaheyns/CfdOF</url>
     <url type="documentation">https://github.com/jaheyns/CfdOF/README.md</url>
     <freecadmin>0.20.0</freecadmin>
