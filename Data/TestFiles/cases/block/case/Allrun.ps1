@@ -23,6 +23,9 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
+# Less verbose error reporting
+$ErrorView = 'CategoryView'
+
 # Copy mesh from mesh case dir if available
 $MESHDIR = "../meshCaseblock"
 if( Test-Path -PathType Leaf $MESHDIR/constant/polyMesh/faces )
@@ -37,7 +40,14 @@ elseif( !(Test-Path -PathType Leaf constant/polyMesh/faces) )
 }
 
 # Set turbulence lib
-echo "libturbulenceModels.so" > system/turbulenceLib
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 10 -gt $Env:WM_PROJECT_VERSION )
+{
+    echo '"libturbulenceModels"' > system/turbulenceLib
+}
+else
+{
+    echo '"libmomentumTransportModels"' > system/turbulenceLib
+}
 
 # Set interface compression
 echo "div(phi,alpha) Gauss vanLeer;" > system/alphaDivScheme
@@ -55,4 +65,12 @@ runCommand renumberMesh -overwrite
 runCommand potentialFoam -initialiseUBCs -pName $PNAME -writep
 
 # Run application
-runCommand simpleFoam
+# Detect new foamRun in Foundation versions >= 11 and translate solver
+if( (Get-Command foamRun) )
+{
+    runCommand foamRun -solver incompressibleFluid
+}
+else
+{
+    runCommand simpleFoam
+}

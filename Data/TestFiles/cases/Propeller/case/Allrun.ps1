@@ -23,6 +23,9 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
+# Less verbose error reporting
+$ErrorView = 'CategoryView'
+
 # Copy mesh from mesh case dir if available
 $MESHDIR = "../meshCasePropeller"
 if( Test-Path -PathType Leaf $MESHDIR/constant/polyMesh/faces )
@@ -37,7 +40,14 @@ elseif( !(Test-Path -PathType Leaf constant/polyMesh/faces) )
 }
 
 # Set turbulence lib
-echo "libturbulenceModels.so" > system/turbulenceLib
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 10 -gt $Env:WM_PROJECT_VERSION )
+{
+    echo '"libturbulenceModels"' > system/turbulenceLib
+}
+else
+{
+    echo '"libmomentumTransportModels"' > system/turbulenceLib
+}
 
 # Set interface compression
 echo "div(phi,alpha) Gauss vanLeer;" > system/alphaDivScheme
@@ -46,22 +56,22 @@ echo "cAlpha 1;" > system/cAlpha
 mkdir 0/MMR
 if( (Get-Command createNonConformalCouples) )
 {
-    echo "type movingWallSlipVelocity;" > 0/MMR/vector
-    echo "value \$internalField;" >> 0/MMR/vector
+    echo 'type movingWallSlipVelocity;' > 0/MMR/vector
+    echo 'value $internalField;' >> 0/MMR/vector
 
-    echo "type zeroGradient;" > 0/MMR/scalar
+    echo 'type zeroGradient;' > 0/MMR/scalar
 
-    echo "type calculated;" > 0/MMR/calculated
-    echo "value uniform 0;" >> 0/MMR/calculated
+    echo 'type calculated;' > 0/MMR/calculated
+    echo 'value uniform 0;' >> 0/MMR/calculated
 }
 else
 {
-	echo "type cyclicAMI;" > 0/MMR/scalar
-	echo "type cyclicAMI;" > 0/MMR/vector
-	echo "type cyclicAMI;" > 0/MMR/calculated
-	echo "value \$internalField;" >> 0/MMR/scalar
-	echo "value \$internalField;" >> 0/MMR/vector
-	echo "value \$internalField;" >> 0/MMR/calculated
+    echo 'type cyclicAMI;' > 0/MMR/scalar
+    echo 'type cyclicAMI;' > 0/MMR/vector
+    echo 'type cyclicAMI;' > 0/MMR/calculated
+    echo 'value $internalField;' >> 0/MMR/scalar
+    echo 'value $internalField;' >> 0/MMR/vector
+    echo 'value $internalField;' >> 0/MMR/calculated
 }
 
 # Update patch name and type
@@ -78,11 +88,17 @@ if( !(Test-Path -PathType Container processor0) )
 # Pick up number of parallel processes
 $NPROC = foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict
 
-# Mesh renumbering
-runParallel $NPROC renumberMesh -overwrite
 
 # Initialise flow
 runParallel $NPROC potentialFoam -initialiseUBCs -pName $PNAME
 
 # Run application in parallel
-runParallel $NPROC pimpleFoam
+# Detect new foamRun in Foundation versions >= 11 and translate solver
+if( (Get-Command -ErrorAction SilentlyContinue foamRun) )
+{
+    runParallel $NPROC foamRun -solver incompressibleFluid
+}
+else
+{
+    runParallel $NPROC pimpleFoam
+}

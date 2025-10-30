@@ -23,10 +23,20 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
+# Less verbose error reporting
+$ErrorView = 'ConciseView'
+
 runCommand blockMesh
 
 # Extract feature edges
-runCommand surfaceFeatureExtract
+if ( Get-Command -ErrorAction SilentlyContinue surfaceFeatures )
+{
+    runCommand surfaceFeatures
+}
+else
+{
+    runCommand surfaceFeatureExtract
+}
 
 runCommand snappyHexMesh -overwrite
 

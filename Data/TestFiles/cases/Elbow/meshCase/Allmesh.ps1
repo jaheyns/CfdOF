@@ -23,6 +23,9 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
+# Less verbose error reporting
+$ErrorView = 'ConciseView'
+
 # Extract feature edges
 runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/Pad_Geometry.stl" "Pad_Geometry.fms"
 

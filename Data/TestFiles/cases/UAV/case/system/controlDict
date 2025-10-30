@@ -45,6 +45,30 @@ libs
 
 functions
 {
+    ReportingFunction
+    {
+        type                forces;
+        libs                ("libforces.so");
+        log                 true;
+
+        patches             ( wall );
+        p                   p;
+        U                   U;
+        rho                 rhoInf;
+        rhoInf              1.2;
+        pRef                0.0;
+        porosity            false;
+        writeFields         false;
+        CofR                ( 0.0 0.0 0.0 );
+
+        binData
+        {
+            nBin            0;
+            direction       ( 0.0 0.0 1.0 );
+            cumulative      true;
+        }
+    }
+
 }
 
 // ************************************************************************* //

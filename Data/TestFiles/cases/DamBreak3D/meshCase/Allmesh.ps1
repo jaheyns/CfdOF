@@ -23,17 +23,34 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
+# Less verbose error reporting
+$ErrorView = 'ConciseView'
+
 # Pick up number of parallel processes
 $NPROC = foamDictionary -entry numberOfSubdomains -value system/decomposeParDict
 
 runCommand blockMesh
 
 # Extract feature edges
-runCommand surfaceFeatureExtract
+if ( Get-Command -ErrorAction SilentlyContinue surfaceFeatures )
+{
+    runCommand surfaceFeatures
+}
+else
+{
+    runCommand surfaceFeatureExtract
+}
 
-runCommand decomposePar
+runCommand decomposePar -force
 runParallel $NPROC snappyHexMesh -overwrite
-runCommand reconstructParMesh -constant
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 11 -gt $Env:WM_PROJECT_VERSION )
+{
+    runCommand reconstructParMesh -constant
+}
+else
+{
+    runCommand reconstructPar -constant
+}
 
 
 # Extract surface mesh and convert to mm for visualisation in FreeCAD

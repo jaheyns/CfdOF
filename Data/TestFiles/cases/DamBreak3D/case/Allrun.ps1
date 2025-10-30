@@ -23,6 +23,9 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
+# Less verbose error reporting
+$ErrorView = 'CategoryView'
+
 # Copy mesh from mesh case dir if available
 $MESHDIR = "../meshCaseDamBreak3D"
 if( Test-Path -PathType Leaf $MESHDIR/constant/polyMesh/faces )
@@ -37,7 +40,14 @@ elseif( !(Test-Path -PathType Leaf constant/polyMesh/faces) )
 }
 
 # Set turbulence lib
-echo "libturbulenceModels.so" > system/turbulenceLib
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 10 -gt $Env:WM_PROJECT_VERSION )
+{
+    echo '"libturbulenceModels"' > system/turbulenceLib
+}
+else
+{
+    echo '"libmomentumTransportModels"' > system/turbulenceLib
+}
 
 # Set interface compression
 echo "div(phi,alpha) Gauss vanLeer;" > system/alphaDivScheme
@@ -45,8 +55,16 @@ echo "cAlpha 1;" > system/cAlpha
 
 # Set 'internal' patch type
 mkdir 0/include
-echo "type fixedValue;" > 0/include/helperPatchFieldType
-echo "type patch;" > system/helperPatchType
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 9 -gt $Env:WM_PROJECT_VERSION )
+{
+    echo "type fixedValue;" > 0/include/helperPatchFieldType
+    echo "type patch;" > system/helperPatchType
+}
+else
+{
+    echo "type internal;" > 0/include/helperPatchFieldType
+    echo "type internal;" > system/helperPatchType
+}
 
 # Update patch name and type
 runCommand createPatch -overwrite
@@ -70,4 +88,12 @@ $NPROC = foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDi
 # runParallel $NPROC renumberMesh -overwrite
 
 # Run application in parallel
-runParallel $NPROC interFoam
+# Detect new foamRun in Foundation versions >= 11 and translate solver
+if( (Get-Command -ErrorAction SilentlyContinue foamRun) )
+{
+    runParallel $NPROC foamRun -solver incompressibleVoF
+}
+else
+{
+    runParallel $NPROC interFoam
+}
