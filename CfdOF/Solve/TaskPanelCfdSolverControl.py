@@ -4,7 +4,7 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
-# *   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -198,7 +198,7 @@ class TaskPanelCfdSolverControl:
                         stderr_hook=self.gotErrorLines)
 
                     cart_mesh.error = False
-                    if CfdTools.getFoamRuntime() == "MinGW":
+                    if CfdTools.getFoamRuntime() == "MinGW" or CfdTools.getFoamRuntime().startswith('BlueCFD'):
                         cmd = CfdTools.makeRunCommand('Allmesh.bat', source_env=False)
                     else:
                         cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)
@@ -234,7 +234,7 @@ class TaskPanelCfdSolverControl:
             "  solver_runner = CfdRunnableFoam.CfdRunnableFoam(analysis_object, solver_object)\n" +
             "  cmd = solver_runner.getSolverCmd(solver_directory)\n" +
             "  if cmd is not None:\n" +
-            "    env_vars = solver_runner.getRunEnvironment()\n" +
+            "    env_vars = CfdTools.getRunEnvironment()\n" +
             "    solver_process = CfdConsoleProcess.CfdConsoleProcess(stdout_hook=solver_runner.processOutput)\n" +
             "    solver_process.start(cmd, env_vars=env_vars, working_dir=solver_directory)\n" +
             "    solver_process.waitForFinished()\n")
@@ -244,7 +244,7 @@ class TaskPanelCfdSolverControl:
         cmd = self.solver_runner.getSolverCmd(solver_directory)
         if cmd is None:
             return
-        env_vars = self.solver_runner.getRunEnvironment()
+        env_vars = CfdTools.getRunEnvironment()
         self.solver_object.Proxy.solver_process = CfdConsoleProcess(finished_hook=self.solverFinished,
                                                                     stdout_hook=self.gotOutputLines,
                                                                     stderr_hook=self.gotErrorLines)

@@ -3,7 +3,7 @@
 This workbench aims to help users set up and run CFD analyses within the [FreeCAD](https://freecad.org)
 modeller, and serves as a front-end (GUI) for the popular OpenFOAM® CFD toolkit (www.openfoam.org, www.openfoam.com).
 It guides the user in selecting the relevant physics, specifying the material properties, generating a mesh, assigning
-boundary conditions and choosing the solver settings before running the simulation. Best practices are specified to
+boundary conditions and choosing the solver settings before running the simulation. Best practices are built in to
 maximise the stability of the solvers.
 
 ![screenshot](Doc/Resources/boiler.png)
@@ -24,7 +24,7 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 * High-speed compressible flow ([HiSA](https://hisa.gitlab.io))
 * Porous regions and porous baffles
 * Basic material database
-* Flow initialisation with a potential solver
+* Flow initialisation with potential flow solver
 * Solution of arbitrary passive scalar transport functions
 #### Meshing
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
@@ -67,7 +67,7 @@ which can be automatically installed (see below for instructions).
 
 - [Latest release version of FreeCAD (at least version 0.20.0 / git commit 29177)](https://www.freecad.org/downloads.php)
  or [latest development version (prerelease)](https://github.com/FreeCAD/FreeCAD-Bundle/releases/tag/weekly-builds)
-- OpenFOAM [Foundation versions 9-13](http://openfoam.org/download/) or [ESI-OpenCFD versions 2006-2506](http://openfoam.com/download)
+- OpenFOAM [Foundation versions 9-13](http://openfoam.org/download/) or [OpenCFD versions 2006-2506](http://openfoam.com/download)
 - [Paraview](http://www.paraview.org/)
 - [cfMesh (customised version updated to compile with latest OpenFOAM versions)](https://sourceforge.net/projects/cfmesh-cfdof/)
 - [HiSA (High Speed Aerodynamic Solver)](https://hisa.gitlab.io)
@@ -101,9 +101,10 @@ Dependencies can be checked and installed conveniently from the CfdOF Preference
 In the FreeCAD window, select CfdOF | Open preferences.  The dependencies can be installed as
 individual components or as part of a docker container (refer to the **Docker container install** section below).
 
-The OpenFOAM installation is via the
-[OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php), and
-the [BlueCFD Core](https://bluecfd.github.io/Core/) port of OpenFOAM is also supported.
+The OpenFOAM installation is via the [BlueCFD Core](https://bluecfd.github.io/Core/) port of OpenFOAM (version 2024-1)
+or the [OpenCFD MinGW package](https://www.openfoam.com/download/install-binary-windows-mingw.php).
+Note that only version 2212 of the latter is currently supported due to an apparent bug affecting
+the operation of the `createPatch` utility in later versions.
 
 OpenFOAM can be installed manually using the above links, or by clicking the relevant
 button in the Preferences panel described above. If you experience problems running OpenFOAM in CfdOF, please make
@@ -120,10 +121,9 @@ will also optionally be installed. If not, then it will be necessary to download
 install it manually from [here](https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi#ms-mpi-downloads).
 MPI is needed in order to run in parallel.
 
-Set the OpenFOAM install directory in the preferences
-panel to the install directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed)
-for the MinGW package, or the BlueCFD install directory.
- It will be automatically detected in the default install
+Set the OpenFOAM install directory in the preferences panel to the BlueCFD install directory,
+or the directory ending in the 'vXXXX' subfolder (where XXXX is the version number installed)
+in the case of the MinGW package. It will be automatically detected in the default install
 locations.
 
 Any version of [ParaView](https://www.paraview.org/download/) can be installed,
@@ -179,9 +179,11 @@ conveniently from the CFD Preferences panel in FreeCAD.
 In the FreeCAD window, select Edit | Preferences ... and
 choose "CfdOF".
 
-The dependencies can be installed manually, or as part of a docker container (refer to Docker container install below). Manual
-installation may be undertaken for OpenFOAM ([OpenCFD](https://openfoam.com/download) or [Foundation](https://openfoam.org/download/)
-versions), [Paraview](http://www.paraview.org/) and [Gmsh](http://gmsh.info/) (optional) by using the links above or your distribution's package
+The dependencies can be installed manually, or as part of a docker container (refer to Docker 
+container install below). Manual installation may be undertaken for OpenFOAM 
+([Foundation](https://openfoam.org/download/) or [OpenCFD](https://openfoam.com/download)
+versions), [Paraview](http://www.paraview.org/) and [Gmsh](http://gmsh.info/) 
+(optional) by using the links above or your distribution's package
 manager. Note, however, that the OpenFOAM packages bundled in
 some Linux distributions may be out of date or incomplete; for example,
 the standard Debian and Ubuntu packages do not include the build command 'wmake'
@@ -193,9 +195,9 @@ be sure that the optional components 'HiSA' and 'cfMesh' can be compiled
 with 'wmake'.
 
 Set the OpenFOAM install directory in the preferences
-panel - examples of typical install locations are /usr/lib/openfoam/openfoam2306,
-/opt/openfoam10 or /home/user/OpenFOAM/OpenFOAM-10.x (it will be automatically
-detected in common default install
+panel - examples of typical install locations are /opt/openfoam10
+/usr/lib/openfoam/openfoam2306, or /home/user/OpenFOAM/OpenFOAM-10 
+(it will be automatically detected in common default install
 locations). Note that if you have loaded the desired OpenFOAM
 environment already before starting FreeCAD, the install directory should be left blank.
 
@@ -209,8 +211,10 @@ prerequisites have been successfully installed.
 
 #### Docker container install
 
-Docker containers offer a convenient way of providing pre-compiled program packages for both windows and linux. macOS can also be supported but
-assistance may be required to get this to work.  Please leave a message on the [forum](https://forum.freecad.org/viewforum.php?f=37).
+Docker containers offer a convenient way of providing pre-compiled program packages for 
+both Windows and Linux. macOS can also be supported but
+assistance may be required to get this to work.  Please leave a message on the 
+[forum](https://forum.freecad.org/viewforum.php?f=37).
 
 ##### Docker on Windows
 

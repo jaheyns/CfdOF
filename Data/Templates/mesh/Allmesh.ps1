@@ -28,6 +28,9 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
+# Less verbose error reporting
+$ErrorView = 'ConciseView'
+
 %{%(MeshUtility%)
 %:gmsh
 $GMSH_EXE = "%(GmshSettings/Executable%)"
@@ -65,7 +68,14 @@ $Env:OMP_NUM_THREADS = %(NumberOfThreads%)
 runCommand preparePar
 $Env:MPI_BUFFER_SIZE = 200000000
 runParallel $NPROC cartesianMesh
-runCommand reconstructParMesh -constant -fullMatch
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 11 -gt $Env:WM_PROJECT_VERSION )
+{
+    runCommand reconstructParMesh -constant -fullMatch
+}
+else
+{
+    runCommand reconstructPar -constant
+}
 %:False
 %{%(NumberOfThreads%)
 %:0
@@ -78,11 +88,18 @@ runCommand cartesianMesh
 runCommand blockMesh
 
 # Extract feature edges
-runCommand surfaceFeatureExtract
+if ( Get-Command -ErrorAction SilentlyContinue surfaceFeatures )
+{
+    runCommand surfaceFeatures
+}
+else
+{
+    runCommand surfaceFeatureExtract
+}
 
 %{%(SnappySettings/MovingMeshRegionsPresent%)
 %:True
-if( (Get-Command createNonConformalCouples) )
+if( (Get-Command -ErrorAction SilentlyContinue createNonConformalCouples) )
 {
     echo "mode inside;" > system/MMR_Properties
 }
@@ -95,11 +112,11 @@ else
 %}
 %{%(ParallelMesh%)
 %:True
-runCommand decomposePar
+runCommand decomposePar -force
 runParallel $NPROC snappyHexMesh -overwrite
 %{%(SnappySettings/MovingMeshRegionsPresent%)
 %:True
-if ( (Get-Command createNonConformalCouples) )
+if ( (Get-Command -ErrorAction SilentlyContinue createNonConformalCouples) )
 {
 	runParallel createBaffles -overwrite
 	runParallel splitBaffles -overwrite
@@ -113,12 +130,19 @@ else
 	runParallel createPatch -overwrite
 }
 %}
-runCommand reconstructParMesh -constant
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 11 -gt $Env:WM_PROJECT_VERSION )
+{
+    runCommand reconstructParMesh -constant
+}
+else
+{
+    runCommand reconstructPar -constant
+}
 %:False
 runCommand snappyHexMesh -overwrite
 %{%(SnappySettings/MovingMeshRegionsPresent%)
 %:True
-if ( (Get-Command createNonConformalCouples) )
+if ( (Get-Command -ErrorAction SilentlyContinue createNonConformalCouples) )
 {
 	runCommand createBaffles -overwrite
 	runCommand splitBaffles -overwrite
@@ -144,7 +168,14 @@ rm -ErrorAction SilentlyContinue constant/polyMesh/cellZones
 runCommand polyDualMesh 10 -concaveMultiCells -overwrite
 
 %}
-runCommand transformPoints -scale "(0.001 0.001 0.001)"
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 9 -gt $Env:WM_PROJECT_VERSION )
+{
+    runCommand transformPoints -scale "(0.001 0.001 0.001)"
+}
+else
+{
+    runCommand transformPoints "scale=(0.001 0.001 0.001)"
+}
 %}
 
 %{%(ExtrusionSettings/ExtrusionsPresent%)

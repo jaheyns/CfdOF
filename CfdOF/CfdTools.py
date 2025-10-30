@@ -25,8 +25,6 @@
 
 # Utility functions like mesh exporting, shared by any CFD solver
 
-from __future__ import print_function
-
 import os
 import os.path
 import glob
@@ -490,7 +488,7 @@ def startDocker():
                 print("Aborting docker container initialization")
                 return 1
         docker_container.start_container()
-        if docker_container.container_id != None:
+        if docker_container.container_id is not None:
             print("Docker image {} started. ID = {}".format(docker_container.image_name, docker_container.container_id))
             return 0
         else:
@@ -653,30 +651,13 @@ def getGmshPath():
     return gmsh_path
 
 
-def translatePath(p):
+def translatePath(p, linux_shell=False):
     """
     Transform path to the perspective of the Linux subsystem in which OpenFOAM is run (e.g. mingw)
     """
-    if getFoamRuntime().startswith('BlueCFD'):
-        return fromWindowsPath(p)
-    else:
-        return p
-
-
-def reverseTranslatePath(p):
-    """
-    Transform path from the perspective of the OpenFOAM subsystem to the host system
-    """
-    if getFoamRuntime().startswith('BlueCFD'):
-        return toWindowsPath(p)
-    else:
-        return p
-
-
-def fromWindowsPath(p):
     drive, tail = os.path.splitdrive(p)
     pp = tail.replace('\\', '/')
-    if getFoamRuntime() == "MinGW" or getFoamRuntime() == "BlueCFD" or getFoamRuntime() == "BlueCFD2":
+    if linux_shell and (getFoamRuntime() == "MinGW" or getFoamRuntime().startswith("BlueCFD")):
         # Under mingw: c:\path -> /c/path
         if os.path.isabs(p):
             return "/" + (drive[:-1]).lower() + pp
@@ -708,9 +689,12 @@ def fromWindowsPath(p):
         return p
 
 
-def toWindowsPath(p):
+def reverseTranslatePath(p, linux_shell=False):
+    """
+    Transform path from the perspective of the OpenFOAM subsystem to the host system
+    """
     pp = p.split('/')
-    if getFoamRuntime() == "MinGW":
+    if linux_shell and getFoamRuntime() == "MinGW":
         # Under mingw: /c/path -> c:\path; /home/ofuser -> <instDir>/msys64/home/ofuser
         if p.startswith('/home/ofuser'):
             return getFoamDir() + '\\msys64\\home\\ofuser\\' + '\\'.join(pp[3:])
@@ -731,7 +715,7 @@ def toWindowsPath(p):
             return pp[2].toupper() + ':\\' + '\\'.join(pp[3:])
         else:
             return p.replace('/', '\\')
-    elif getFoamRuntime().startswith("BlueCFD"):
+    elif linux_shell and getFoamRuntime().startswith("BlueCFD"):
         # Under blueCFD (mingw): /c/path -> c:\path; /home/ofuser/blueCFD -> <blueCFDDir>
         if p.startswith('/home/ofuser/blueCFD'):
             if getFoamRuntime() == "BlueCFD2":
@@ -767,34 +751,30 @@ def getShortWindowsPath(long_name):
             output_buf_size = needed
 
 
-def getRunEnvironment():
+def getRunEnvironment(linux_shell=False):
     """
-    Return native environment settings necessary for running on relevant platform
+    Return extra native environment settings necessary for running on relevant linux subsystem
     """
-    if getFoamRuntime().startswith("BlueCFD"):
-        #installation_path = getFoamDir()
-        #if getFoamRuntime() == "BlueCFD2":
-        #    inst_path = "{}\\..".format(installation_path)
-        #else:
-        #    inst_path = "{}".format(installation_path)
-
-        #env = QtCore.QProcessEnvironment.systemEnvironment()
-        #path_var = env.value('PATH')
-
-        return {"MSYSTEM": "MINGW64",
-                "USERNAME": "ofuser",
-                "USER": "ofuser",
-                "HOME": "/home/ofuser",
-                #"PATH": "{}\\msys64\\mingw64\\bin;{}".format(inst_path, path_var)
-                }
-    else:
-        return {}
+    if linux_shell:
+        if getFoamRuntime().startswith("BlueCFD"):
+            return {"MSYSTEM": "MINGW64",
+                    "USERNAME": "ofuser",
+                    "USER": "ofuser",
+                    "HOME": "/home/ofuser",
+                    }
+        elif getFoamRuntime() == "MinGW":
+            return {"MSYSTEM": "MSYS",
+                    "USERNAME": "ofuser",
+                    "USER": "ofuser",
+                    "HOME": "/home/ofuser"}
+    return {}
 
 
-def makeRunCommand(cmd, dir=None, source_env=True):
+def makeRunCommand(cmd, dir=None, source_env=True, linux_shell=False):
     """
-    Generate native command to run the specified Linux command in the relevant environment,
-    including changing to the specified working directory if applicable
+    Generate native command to run the specified command in the relevant environment,
+    including changing to the specified working directory if applicable.
+    In Windows, linux_shell specifies running under the msys linux terminal
     """
 
     if getFoamRuntime() == "PosixDocker" and ' pull ' in cmd:
@@ -813,9 +793,28 @@ def makeRunCommand(cmd, dir=None, source_env=True):
     source = ""
     if source_env and len(installation_path):
         if getFoamRuntime() == "MinGW":
+            if linux_shell:
+                # .bashrc will exit unless shell is interactive, so we have to manually load the foam bashrc
+                foam_version = os.path.split(installation_path)[-1].lstrip('v')
+                source = 'echo Sourcing OpenFOAM environment...; ' + \
+                    'source $HOME/OpenFOAM/OpenFOAM-v{}/etc/bashrc; '.format(foam_version) + \
+                    'export PATH=$FOAM_LIBBIN/msmpi:$FOAM_LIBBIN:$WM_THIRD_PARTY_DIR/platforms/linux64MingwDPInt32/lib:$PATH; '
+            else:
+                foam_dir = getFoamDir()
+                foam_version = os.path.split(installation_path)[-1].lstrip('v')
+                source = 'call "{}\\setEnvVariables-v{}.bat" && '.format(foam_dir, foam_version)
+        elif getFoamRuntime().startswith('BlueCFD') and not linux_shell:
             foam_dir = getFoamDir()
-            foam_version = os.path.split(installation_path)[-1].lstrip('v')
-            source = 'call "{}\\setEnvVariables-v{}.bat" && '.format(foam_dir, foam_version)
+            if getFoamRuntime() == 'BlueCFD2':
+                foam_version = os.path.split(installation_path)[-1].lstrip('OpenFOAM-')
+            else:
+                # search for OpenFOAM-XX
+                with os.scandir('{}'.format(installation_path)) as dirs:
+                    for d in dirs:
+                        if d.is_dir() and d.name.startswith('OpenFOAM-'):
+                            foam_version = os.path.split(d.name)[-1].lstrip('OpenFOAM-')
+                            break
+            source = 'set OLDPATH=!PATH! && call "{}\\setvars_OF{}.bat" && set PATH=!PATH!;!OLDPATH! && '.format(foam_dir, foam_version)
         else:
             env_setup_script = "{}/etc/bashrc".format(installation_path)
             source = 'source "{}" && '.format(env_setup_script)
@@ -826,51 +825,17 @@ def makeRunCommand(cmd, dir=None, source_env=True):
 
     cd = ""
     if dir:
-        if getFoamRuntime() == "MinGW":
-            cd = 'cd /d "{}" && '.format(translatePath(dir))
+        if not linux_shell and (getFoamRuntime() == "MinGW" or getFoamRuntime().startswith("BlueCFD")):
+            cd = 'cd /d "{}" && '.format(dir)
         else:
-            cd = 'cd "{}" && '.format(translatePath(dir))
+            cd = 'cd "{}" && '.format(translatePath(dir, linux_shell=linux_shell))
 
     if getFoamRuntime() == "PosixDocker":
         prefs = getPreferencesLocation()
         if dir:
             cd = cd.replace(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""),'/tmp').replace('\\','/')
 
-    if getFoamRuntime() == "MinGW":
-        cmdline = [os.environ['COMSPEC'], '/V:ON', '/C', source + cd + cmd]
-        return cmdline
-
-    if getFoamRuntime() == "PosixDocker":
-        global docker_container
-        if docker_container.container_id is None:
-            if startDocker():
-                return("echo docker failure") # Need to return a string - shouldn't actually be used
-        if docker_container.output_path_used!=FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""):
-            print("Output path changed - restarting container")
-            docker_container.start_container()
-        if platform.system() == 'Windows' and FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")[:5]=='\\\\wsl' and cmd[:5] == './All':
-            cmd = 'chmod 744 {0} && {0}'.format(cmd)  # If using windows wsl$ output directory, need to make the command executable
-        if 'podman' in docker_container.docker_cmd:
-            cmd = f'export OMPI_ALLOW_RUN_AS_ROOT=1 && export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 && {cmd}'
-        cmdline = docker_container.docker_cmd.split() + ['exec', docker_container.container_id, 'bash', '-c', source + cd + cmd]
-        print('Using command: ' + ' '.join(cmdline))
-        return cmdline
-
-    if getFoamRuntime() == "WindowsDocker":
-        foamVersion = os.path.split(installation_path)[-1].lstrip('v')
-        cmdline = ['powershell.exe',
-                   'docker-machine.exe start default; '
-                   'docker-machine.exe env --shell powershell default | Invoke-Expression; '
-                   'docker start of_{}; '.format(foamVersion) +
-                   'docker exec --privileged of_{} '.format(foamVersion) +
-                   'bash -c "su -c \'' +  # $ -> `$: escaping for powershell
-                   (cd + cmd).replace('$', '`$').replace('"', '\\`"') + # Escape quotes for powershell and also cmdline to bash
-                   '\' -l ofuser"']
-        return cmdline
-    elif getFoamRuntime() == "BashWSL":
-        cmdline = ['bash', '-c', source + cd + cmd]
-        return cmdline
-    elif getFoamRuntime().startswith("BlueCFD"):
+    if getFoamRuntime().startswith("BlueCFD"):
         # Set-up necessary for running a command - only needs doing once, but to be safe...
         if getFoamRuntime() == "BlueCFD2":
             inst_path = "{}\\..".format(installation_path)
@@ -912,17 +877,58 @@ def makeRunCommand(cmd, dir=None, source_env=True):
                      "Try running FreeCAD again with administrator privileges, or copy the file manually."
                      .format(file, srcdir, destdir1, destdir2, str(err)))
 
-        # Note: Prefixing bash call with the *short* path can prevent errors due to spaces in paths
-        # when running linux tools - specifically when building
-        cmdline = ['{}\\msys64\\usr\\bin\\bash'.format(short_bluecfd_path), '--login', '-O', 'expand_aliases', '-c',
-                   cd + cmd]
+    if not linux_shell:
+        if getFoamRuntime() == "MinGW" or getFoamRuntime().startswith("BlueCFD"):
+            cmdline = [os.environ['COMSPEC'], '/V:ON', '/C', '"' + source + cd + cmd + '"']
+            return cmdline
+    else:
+        if getFoamRuntime() == "MinGW":
+            cmdline = ['{}\\msys64\\usr\\bin\\bash'.format(installation_path), '--login', '-O', 'expand_aliases', '-c',
+            source + cd + cmd]
+            return cmdline
+        elif getFoamRuntime().startswith("BlueCFD"):
+            # Note: Prefixing bash call with the *short* path can prevent errors due to spaces in paths
+            # when running linux tools - specifically when building
+            cmdline = ['{}\\msys64\\usr\\bin\\bash'.format(short_bluecfd_path), '--login', '-O', 'expand_aliases', '-c',
+                    cd + cmd]
+            return cmdline
+
+    if getFoamRuntime() == "PosixDocker":
+        global docker_container
+        if docker_container.container_id is None:
+            if startDocker():
+                return "echo docker failure" # Need to return a string - shouldn't actually be used
+        if docker_container.output_path_used!=FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""):
+            print("Output path changed - restarting container")
+            docker_container.start_container()
+        if platform.system() == 'Windows' and FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "")[:5]=='\\\\wsl' and cmd[:5] == './All':
+            cmd = 'chmod 744 {0} && {0}'.format(cmd)  # If using windows wsl$ output directory, need to make the command executable
+        if 'podman' in docker_container.docker_cmd:
+            cmd = f'export OMPI_ALLOW_RUN_AS_ROOT=1 && export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 && {cmd}'
+        cmdline = docker_container.docker_cmd.split() + ['exec', docker_container.container_id, 'bash', '-c', source + cd + cmd]
+        print('Using command: ' + ' '.join(cmdline))
+        return cmdline
+
+    if getFoamRuntime() == "WindowsDocker":
+        foamVersion = os.path.split(installation_path)[-1].lstrip('v')
+        cmdline = ['powershell.exe',
+                   'docker-machine.exe start default; '
+                   'docker-machine.exe env --shell powershell default | Invoke-Expression; '
+                   'docker start of_{}; '.format(foamVersion) +
+                   'docker exec --privileged of_{} '.format(foamVersion) +
+                   'bash -c "su -c \'' +  # $ -> `$: escaping for powershell
+                   (cd + cmd).replace('$', '`$').replace('"', '\\`"') + # Escape quotes for powershell and also cmdline to bash
+                   '\' -l ofuser"']
+        return cmdline
+    elif getFoamRuntime() == "BashWSL":
+        cmdline = ['bash', '-c', source + cd + cmd]
         return cmdline
     else:
         cmdline = ['bash', '-c', source + cd + cmd]
         return cmdline
 
 
-def runFoamCommand(cmdline, case=None):
+def runFoamCommand(cmdline, case=None, linux_shell=False):
     """
     Run a command in the OpenFOAM environment and wait until finished. Return output as (stdout, stderr, combined)
         Also print output as we go.
@@ -931,14 +937,15 @@ def runFoamCommand(cmdline, case=None):
         case - Case directory or path
     """
     proc = CfdSynchronousFoamProcess()
-    exit_code = proc.run(cmdline, case)
+    exit_code = proc.run(cmdline, case, linux_shell=linux_shell)
     # Reproduce behaviour of failed subprocess run
     if exit_code:
         raise subprocess.CalledProcessError(exit_code, cmdline)
     return proc.output, proc.outputErr, proc.outputAll
 
 
-def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook=None, stderr_hook=None):
+def startFoamApplication(
+    cmd, case, log_name='', finished_hook=None, stdout_hook=None, stderr_hook=None, linux_shell=False):
     """
     Run command cmd in OpenFOAM environment, sending output to log file.
         Returns a CfdConsoleProcess object after launching
@@ -975,17 +982,17 @@ def startFoamApplication(cmd, case, log_name='', finished_hook=None, stdout_hook
     else:
         print("Running ", ' '.join(cmds))
 
-    proc.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
+    proc.start(makeRunCommand(cmdline, case, linux_shell=linux_shell), env_vars=getRunEnvironment(linux_shell))
     if not proc.waitForStarted():
         raise Exception("Unable to start command " + ' '.join(cmds))
     return proc
 
 
-def runFoamApplication(cmd, case, log_name=''):
+def runFoamApplication(cmd, case, log_name='', linux_shell=False):
     """
     Same as startFoamApplication, but waits until complete. Returns exit code.
     """
-    proc = startFoamApplication(cmd, case, log_name)
+    proc = startFoamApplication(cmd, case, log_name, linux_shell=linux_shell)
     proc.waitForFinished()
     return proc.exitCode()
 
@@ -1044,7 +1051,7 @@ def checkCfdDependencies(msgFn):
                 if startDocker():
                     return
             try:
-                if getFoamRuntime() == "MinGW":
+                if getFoamRuntime() == "MinGW" or getFoamRuntime().startswith("BlueCFD"):
                     foam_ver = runFoamCommand("echo !WM_PROJECT_VERSION!")[0]
                 else:
                     foam_ver = runFoamCommand("echo $WM_PROJECT_VERSION")[0]
@@ -1065,7 +1072,7 @@ def checkCfdDependencies(msgFn):
                             if foam_ver < CfdDependencyData.MIN_MINGW_VERSION or foam_ver > CfdDependencyData.MAX_MINGW_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + \
                                       " is not currently supported with MinGW installation")
-                        if foam_ver >= 1000:  # Plus version
+                        if foam_ver >= 1000:  # OpenCFD version
                             if foam_ver < CfdDependencyData.MIN_OCFD_VERSION:
                                 msgFn("OpenFOAM version " + str(foam_ver) + " is outdated:\n" + \
                                       "Minimum version " + str(CfdDependencyData.MIN_OCFD_VERSION) + " or " + str(CfdDependencyData.MIN_FOUNDATION_VERSION) + \
@@ -1086,7 +1093,7 @@ def checkCfdDependencies(msgFn):
                 # Check for wmake
                 if getFoamRuntime() != "MinGW" and getFoamRuntime() != "PosixDocker":
                     try:
-                        runFoamCommand("wmake -help")
+                        runFoamCommand("wmake -help", linux_shell=True)
                     except subprocess.CalledProcessError:
                         msgFn("OpenFOAM installation does not include 'wmake'. " + \
                               "Installation of cfMesh and HiSA will not be possible. " + \
@@ -1094,7 +1101,7 @@ def checkCfdDependencies(msgFn):
 
                 # Check for mpiexec
                 try:
-                    if getFoamRuntime() == "MinGW":
+                    if getFoamRuntime() == "MinGW" or getFoamRuntime().startswith("BlueCFD"):
                         runFoamCommand("mpiexec -help")
                     else:
                         if platform.system() == "Windows":
@@ -1311,12 +1318,17 @@ def startParaview(case_path, script_name, console_message_fn):
             cmds = [paraview_cmd, arg]
             cmd = ' '.join(cmds)
             console_message_fn(f"Running {cmd} at {case_path}")
-            args = makeRunCommand(cmd, case_path)
+            args = makeRunCommand(cmd, case_path, linux_shell=True)
             paraview_cmd = args[0]
             args = args[1:] if len(args) > 1 else []
             proc.setProgram(paraview_cmd)
             proc.setArguments([arg])
-            proc.setProcessEnvironment(getRunEnvironment())
+            env = QtCore.QProcessEnvironment.systemEnvironment()
+            env_vars = getRunEnvironment(True)
+            for key in env_vars:
+                env.insert(key, env_vars[key])
+            removeAppimageEnvironment(env)
+            proc.setProcessEnvironment(env)
             success = proc.startDetached()
             if not success:
                 raise Exception("Unable to start command " + cmd)
@@ -1771,11 +1783,12 @@ class CfdSynchronousFoamProcess:
         self.outputErr = ""
         self.outputAll = ""
 
-    def run(self, cmdline, case=None):
+    def run(self, cmdline, case=None, linux_shell=False):
         if getFoamRuntime() == "PosixDocker" and ' pull ' not in cmdline:
             if startDocker():
                 return 1
-        self.process.start(makeRunCommand(cmdline, case), env_vars=getRunEnvironment())
+        self.process.start(
+            makeRunCommand(cmdline, case, linux_shell=linux_shell), env_vars=getRunEnvironment(linux_shell))
         if not self.process.waitForFinished():
             raise Exception("Unable to run command " + cmdline)
         return self.process.exitCode()

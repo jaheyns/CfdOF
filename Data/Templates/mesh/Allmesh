@@ -120,7 +120,7 @@ fi
 %}
 %{%(ParallelMesh%)
 %:True
-runCommand decomposePar
+runCommand decomposePar -force
 runParallel $NPROC snappyHexMesh -overwrite
 %{%(SnappySettings/MovingMeshRegionsPresent%)
 %:True

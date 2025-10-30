@@ -261,10 +261,15 @@ class CfdCaseWriterFoam:
 
     def processSystemSettings(self):
         installation_path = CfdTools.getFoamDir()
+        if CfdTools.getFoamRuntime() == 'BlueCFD2':
+            norm_inst_path = os.path.normpath(os.path.join(installation_path, '..'))
+        else:
+            norm_inst_path = installation_path
+
         system_settings = self.settings['system']
         system_settings['FoamRuntime'] = CfdTools.getFoamRuntime()
         system_settings['CasePath'] = self.case_folder
-        system_settings['FoamPath'] = installation_path
+        system_settings['FoamPath'] = norm_inst_path
         system_settings['TranslatedFoamPath'] = CfdTools.translatePath(installation_path)
         system_settings['hostFileRequired'] = self.analysis_obj.UseHostfile
         if system_settings['hostFileRequired'] == True:
@@ -273,6 +278,15 @@ class CfdCaseWriterFoam:
                                 "directly under 'Tools | Edit parameters | Preferences | Mod | CfdOF'")
         if CfdTools.getFoamRuntime() == "MinGW":
             system_settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
+        elif CfdTools.getFoamRuntime() == 'BlueCFD2':
+            system_settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('OpenFOAM-')
+        elif CfdTools.getFoamRuntime() == 'BlueCFD':
+            # search for OpenFOAM-XX
+            with os.scandir('{}'.format(installation_path)) as dirs:
+                for dir in dirs:
+                    if dir.is_dir() and dir.name.startswith('OpenFOAM-'):
+                        system_settings['FoamVersion'] = os.path.split(dir.name)[-1].lstrip('OpenFOAM-')
+                        break
         system_settings['MPIOptionsOMPI'], system_settings['MPIOptionsMSMPI'] = CfdTools.getMPISettings()
 
     def setupMesh(self, updated_mesh_path, scale):

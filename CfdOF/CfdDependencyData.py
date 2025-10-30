@@ -44,7 +44,7 @@ MAX_MINGW_VERSION = 2212
 # Default download locations
 
 OPENFOAM_URL = \
-    "https://sourceforge.net/projects/openfoam/files/v2212/OpenFOAM-v2212-windows-mingw.exe/download"
+    "https://github.com/blueCFD/Core/releases/download/blueCFD-Core-2024-1/blueCFD-Core-2024-1-win64-setup.exe"
 OPENFOAM_FILE_EXT = ".exe"
 PARAVIEW_URL = \
     "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v5.10&type=binary&os=Windows&downloadFile=ParaView-5.10.1-Windows-Python3.9-msvc2017-AMD64.exe"
@@ -67,9 +67,10 @@ DOCKER_URL = \
 
 # Some standard install locations that are searched if an install directory is not specified
 # Supports variable expansion and Unix-style globs (in which case the last lexically-sorted match will be used)
-FOAM_DIR_DEFAULTS = {'Windows': ['C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v*',
-                                 '~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v*',
-                                 'C:\\Program Files\\blueCFD-Core-*\\OpenFOAM-*'],
+FOAM_DIR_DEFAULTS = {'Windows': ['C:\\blueCFD-Core-*',
+                                 'C:\\Program Files\\blueCFD-Core-*\\OpenFOAM-*'
+                                 'C:\\Program Files\\ESI-OpenCFD\\OpenFOAM\\v*',
+                                 '~\\AppData\\Roaming\\ESI-OpenCFD\\OpenFOAM\\v*'],
                      'Linux': ['/opt/openfoam*', '/opt/openfoam-dev',  # Foundation official packages
                                '/usr/lib/openfoam/openfoam*',  # ESI official packages
                                '~/openfoam/OpenFOAM-v*',

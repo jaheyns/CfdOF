@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -409,7 +409,8 @@ class CfdPreferencePage:
                             self.install_process = CfdTools.startFoamApplication(
                                 "export WM_NCOMPPROCS=`nproc`; ./Allwmake",
                                 "$WM_PROJECT_USER_DIR/"+CfdDependencyData.CFMESH_FILE_BASE,
-                                'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
+                                'log.Allwmake', self.installFinished, 
+                                stderr_hook=self.stderrFilter, linux_shell=True)
                 else:
                     self.consoleMessage("Install completed")
             # Reset foam dir for now in case the user presses 'Cancel'
@@ -437,7 +438,8 @@ class CfdPreferencePage:
                             self.install_process = CfdTools.startFoamApplication(
                                 "export WM_NCOMPPROCS=`nproc`; ./Allwmake",
                                 "$WM_PROJECT_USER_DIR/"+CfdDependencyData.HISA_FILE_BASE,
-                                'log.Allwmake', self.installFinished, stderr_hook=self.stderrFilter)
+                                'log.Allwmake', self.installFinished, 
+                                stderr_hook=self.stderrFilter, linux_shell=True)
                 else:
                     self.consoleMessage("Install completed")
             # Reset foam dir for now in case the user presses 'Cancel'
@@ -600,19 +602,14 @@ class CfdPreferencePageThread(QThread):
         if CfdTools.getFoamRuntime() == "MinGW":
             self.user_dir = None
             self.signals.status.emit("Installing cfMesh...")
-            if CfdTools.getFoamRuntime() == "MinGW":
-                CfdTools.runFoamCommand(
-                    "PowerShell -NoProfile -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
-                        format(CfdTools.translatePath(filename)))
-            else:
-                CfdTools.runFoamCommand(
-                    '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
-                        format(CfdTools.translatePath(filename)))
+            CfdTools.runFoamCommand(
+                "PowerShell -NoProfile -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
+                    format(filename))
         else:
-            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR")[0].rstrip().split('\n')[-1]
+            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR", linux_shell=True)[0].rstrip().split('\n')[-1]
             # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
             if CfdTools.getFoamRuntime() != 'WindowsDocker':
-                self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
+                self.user_dir = CfdTools.reverseTranslatePath(self.user_dir, linux_shell=True)
 
             self.signals.status.emit("Extracting cfMesh...")
             if CfdTools.getFoamRuntime() == 'WindowsDocker':
@@ -626,7 +623,8 @@ class CfdPreferencePageThread(QThread):
             else:
                 CfdTools.runFoamCommand(
                     '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; ); }}'.
-                    format(CfdDependencyData.CFMESH_FILE_BASE, CfdTools.translatePath(filename)))
+                    format(CfdDependencyData.CFMESH_FILE_BASE, CfdTools.translatePath(filename, linux_shell=True)), 
+                    linux_shell=True)
 
     def downloadHisa(self):
         filename = self.download(self.hisa_url, CfdDependencyData.HISA_FILE_EXT, "HiSA")
@@ -634,19 +632,14 @@ class CfdPreferencePageThread(QThread):
         if CfdTools.getFoamRuntime() == "MinGW":
             self.user_dir = None
             self.signals.status.emit("Installing HiSA...")
-            if CfdTools.getFoamRuntime() == "MinGW":
-                CfdTools.runFoamCommand(
-                    "PowerShell -NoProfile -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
-                        format(CfdTools.translatePath(filename)))
-            else:
-                CfdTools.runFoamCommand(
-                    '{{ mkdir -p "$FOAM_APPBIN" && cd "$FOAM_APPBIN" && unzip -o "{}"; }}'.
-                        format(CfdTools.translatePath(filename)))
+            CfdTools.runFoamCommand(
+                "PowerShell -NoProfile -Command Expand-Archive -Force '{}' '!WM_PROJECT_DIR!\\platforms\\!TYPE!\\bin'".
+                    format(CfdTools.translatePath(filename)))
         else:
-            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR")[0].rstrip().split('\n')[-1]
+            self.user_dir = CfdTools.runFoamCommand("echo $WM_PROJECT_USER_DIR", linux_shell=True)[0].rstrip().split('\n')[-1]
             # We can't reverse-translate the path for docker since it sits inside the container. Just report it as such.
             if CfdTools.getFoamRuntime() != 'WindowsDocker':
-                self.user_dir = CfdTools.reverseTranslatePath(self.user_dir)
+                self.user_dir = CfdTools.reverseTranslatePath(self.user_dir, linux_shell=True)
 
             self.signals.status.emit("Extracting HiSA...")
             if CfdTools.getFoamRuntime() == 'WindowsDocker':
@@ -660,7 +653,8 @@ class CfdPreferencePageThread(QThread):
             else:
                 CfdTools.runFoamCommand(
                     '{{ mkdir -p "$WM_PROJECT_USER_DIR" && cd "$WM_PROJECT_USER_DIR" && ( rm -r {}; unzip -o "{}"; );  }}'.
-                    format(CfdDependencyData.HISA_FILE_BASE, CfdTools.translatePath(filename)))
+                    format(CfdDependencyData.HISA_FILE_BASE, CfdTools.translatePath(filename, linux_shell=True)),
+                    linux_shell=True)
 
     def downloadDocker(self):
         if "podman" in CfdTools.docker_container.docker_cmd and platform.system() != "Linux":

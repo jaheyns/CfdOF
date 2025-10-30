@@ -4,8 +4,8 @@
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
 # *   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          *
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
-# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
+# *   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -176,15 +176,12 @@ class CfdRunnableFoam(CfdRunnable):
         self.initMonitors()
 
         # Environment is sourced in run script, so no need to include in run command
-        if CfdTools.getFoamRuntime() == "MinGW":
+        if CfdTools.getFoamRuntime() == "MinGW" or CfdTools.getFoamRuntime().startswith('BlueCFD'):
             cmd = CfdTools.makeRunCommand('Allrun.bat', case_dir, source_env=False)
         else:
             cmd = CfdTools.makeRunCommand('./Allrun', case_dir, source_env=False)
 
         return cmd
-
-    def getRunEnvironment(self):
-        return CfdTools.getRunEnvironment()
 
     def processOutput(self, text):
         log_lines = text.split('\n')[:-1]

@@ -28,6 +28,9 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
+# Less verbose error reporting
+$ErrorView = 'CategoryView'
+
 # Copy mesh from mesh case dir if available
 $MESHDIR = "%(meshDir%)"
 if( Test-Path -PathType Leaf $MESHDIR/constant/polyMesh/faces )
@@ -42,7 +45,14 @@ elseif( !(Test-Path -PathType Leaf constant/polyMesh/faces) )
 }
 
 # Set turbulence lib
-echo "libturbulenceModels.so" > system/turbulenceLib
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 10 -gt $Env:WM_PROJECT_VERSION )
+{
+    echo '"libturbulenceModels"' > system/turbulenceLib
+}
+else
+{
+    echo '"libmomentumTransportModels"' > system/turbulenceLib
+}
 
 # Set interface compression
 echo "div(phi,alpha) Gauss vanLeer;" > system/alphaDivScheme
@@ -52,8 +62,16 @@ echo "cAlpha 1;" > system/cAlpha
 %:True
 # Set 'internal' patch type
 mkdir 0/include
-echo "type fixedValue;" > 0/include/helperPatchFieldType
-echo "type patch;" > system/helperPatchType
+if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 9 -gt $Env:WM_PROJECT_VERSION )
+{
+    echo "type fixedValue;" > 0/include/helperPatchFieldType
+    echo "type patch;" > system/helperPatchType
+}
+else
+{
+    echo "type internal;" > 0/include/helperPatchFieldType
+    echo "type internal;" > system/helperPatchType
+}
 
 %}
 %{%(MovingMeshRegionsPresent%)
@@ -136,8 +154,11 @@ $NPROC = foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDi
 
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(MovingMeshRegionsPresent%)
+%:False
 # Mesh renumbering
 runParallel $NPROC renumberMesh -overwrite
+%}
 %:True
 # Mesh renumbering does not work in Foundation with dynamic mesh
 # runParallel $NPROC renumberMesh -overwrite
@@ -166,7 +187,26 @@ rm -ErrorAction SilentlyContinue processor*/0/phi
 
 %}
 # Run application in parallel
-runParallel $NPROC %(solver/SolverName%)
+# Detect new foamRun in Foundation versions >= 11 and translate solver
+if( (Get-Command -ErrorAction SilentlyContinue foamRun) )
+{
+%{%(solver/SolverName%)
+%:simpleFoam pimpleFoam
+    runParallel $NPROC foamRun -solver incompressibleFluid
+%:buoyantSimpleFoam buoyantPimpleFoam
+    runParallel $NPROC foamRun -solver fluid
+%:interFoam
+    runParallel $NPROC foamRun -solver incompressibleVoF
+%:multiphaseInterFoam
+    runParallel $NPROC foamRun -solver incompressibleMultiphaseVoF
+%:default
+    runParallel $NPROC %(solver/SolverName%)
+%}
+}
+else
+{
+    runParallel $NPROC %(solver/SolverName%)
+}
 %:False
 %{%(dynamicMeshEnabled%)
 %:False
@@ -200,5 +240,24 @@ rm -ErrorAction SilentlyContinue 0/phi
 
 %}
 # Run application
-runCommand %(solver/SolverName%)
+# Detect new foamRun in Foundation versions >= 11 and translate solver
+if( (Get-Command foamRun) )
+{
+%{%(solver/SolverName%)
+%:simpleFoam pimpleFoam
+    runCommand foamRun -solver incompressibleFluid
+%:buoyantSimpleFoam buoyantPimpleFoam
+    runCommand foamRun -solver fluid
+%:interFoam
+    runCommand foamRun -solver incompressibleVoF
+%:multiphaseInterFoam
+    runCommand foamRun -solver incompressibleMultiphaseVoF
+%:default
+    runCommand %(solver/SolverName%)
+%}
+}
+else
+{
+    runCommand %(solver/SolverName%)
+}
 %}

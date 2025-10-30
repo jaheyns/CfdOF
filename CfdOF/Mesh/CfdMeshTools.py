@@ -3,7 +3,7 @@
 # *   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>             *
 # *   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>     *
 # *   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        *
-# *   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
+# *   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
 # *                                                                         *
 # *   This program is free software: you can redistribute it and/or modify  *
 # *   it under the terms of the GNU Lesser General Public License as        *
@@ -516,7 +516,7 @@ class CfdMeshTools:
         # the meshing algorithm might fail if the point accidentally falls in a sliver between the mesh and the geometry
         # As a safety measure, the check distance is chosen to be approximately the size of the background mesh.
         shape = self.part_obj.Shape
-        step_size = self.clmax*2.5
+        step_size = self.clmax/10
 
         bound_box = self.part_obj.Shape.BoundBox
         error_safety_factor = 2.0
@@ -701,12 +701,17 @@ class CfdMeshTools:
             mesh_region_present = True
 
         installation_path = CfdTools.getFoamDir()
+        if CfdTools.getFoamRuntime() == 'BlueCFD2':
+            norm_inst_path = os.path.normpath(os.path.join(installation_path, '..'))
+        else:
+            norm_inst_path = installation_path
 
         self.settings = {
             'Name': self.part_obj.Name,
             'MeshPath': self.meshCaseDir,
             'FoamRuntime': CfdTools.getFoamRuntime(),
-            'TranslatedFoamPath': CfdTools.translatePath(installation_path),
+            'FoamPath': norm_inst_path,
+            'TranslatedFoamPath': CfdTools.translatePath(norm_inst_path),
             'MeshUtility': self.mesh_obj.MeshUtility,
             'MeshRegionPresent': mesh_region_present,
             'CfSettings': self.cf_settings,
@@ -724,6 +729,15 @@ class CfdMeshTools:
 
         if CfdTools.getFoamRuntime() == "MinGW":
             self.settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('v')
+        elif CfdTools.getFoamRuntime() == 'BlueCFD2':
+            self.settings['FoamVersion'] = os.path.split(installation_path)[-1].lstrip('OpenFOAM-')
+        elif CfdTools.getFoamRuntime() == 'BlueCFD':
+            # search for OpenFOAM-XX
+            with os.scandir('{}'.format(installation_path)) as dirs:
+                for dir in dirs:
+                    if dir.is_dir() and dir.name.startswith('OpenFOAM-'):
+                        self.settings['FoamVersion'] = os.path.split(dir.name)[-1].lstrip('OpenFOAM-')
+                        break
 
         if self.mesh_obj.NumberOfProcesses <= 1:
             self.settings['ParallelMesh'] = False
