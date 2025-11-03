@@ -804,7 +804,10 @@ def makeRunCommand(cmd, dir=None, source_env=True, linux_shell=False):
                 foam_version = os.path.split(installation_path)[-1].lstrip('v')
                 source = 'call "{}\\setEnvVariables-v{}.bat" && '.format(foam_dir, foam_version)
         elif getFoamRuntime().startswith('BlueCFD') and not linux_shell:
-            foam_dir = getFoamDir()
+            if getFoamRuntime() == 'BlueCFD2':
+                norm_inst_path = os.path.normpath(os.path.join(installation_path, '..'))
+            else:
+                norm_inst_path = installation_path
             if getFoamRuntime() == 'BlueCFD2':
                 foam_version = os.path.split(installation_path)[-1].lstrip('OpenFOAM-')
             else:
@@ -814,7 +817,7 @@ def makeRunCommand(cmd, dir=None, source_env=True, linux_shell=False):
                         if d.is_dir() and d.name.startswith('OpenFOAM-'):
                             foam_version = os.path.split(d.name)[-1].lstrip('OpenFOAM-')
                             break
-            source = 'set OLDPATH=!PATH! && call "{}\\setvars_OF{}.bat" && set PATH=!PATH!;!OLDPATH! && '.format(foam_dir, foam_version)
+            source = 'set OLDPATH=!PATH! && call "{}\\setvars_OF{}.bat" && set PATH=!PATH!;!OLDPATH! && '.format(norm_inst_path, foam_version)
         else:
             env_setup_script = "{}/etc/bashrc".format(installation_path)
             source = 'source "{}" && '.format(env_setup_script)
