@@ -6,32 +6,32 @@ import Part
 
 App.newDocument()
 App.ActiveDocument.addObject("Part::Cylinder","Cylinder")
-App.ActiveDocument.ActiveObject.Label = "Cylinder"
+App.ActiveDocument.Cylinder.Label = "Cylinder"
 App.ActiveDocument.recompute()
-FreeCAD.getDocument('Unnamed').getObject('Cylinder').Radius = '10 mm'
-FreeCAD.getDocument('Unnamed').getObject('Cylinder').Height = '20 mm'
+App.ActiveDocument.getObject('Cylinder').Radius = '10 mm'
+App.ActiveDocument.getObject('Cylinder').Height = '20 mm'
 
 App.ActiveDocument.addObject("Part::Box","Box")
-App.ActiveDocument.ActiveObject.Label = "Cube"
+App.ActiveDocument.Box.Label = "Cube"
 App.ActiveDocument.recompute()
-FreeCAD.getDocument('Unnamed').getObject('Box').Length = '30 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box').Width = '2 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box').Height = '15 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box').Placement = App.Placement(App.Vector(0,0,2.5),App.Rotation(App.Vector(0,0,1),0))
+App.ActiveDocument.getObject('Box').Length = '30 mm'
+App.ActiveDocument.getObject('Box').Width = '2 mm'
+App.ActiveDocument.getObject('Box').Height = '15 mm'
+App.ActiveDocument.getObject('Box').Placement = App.Placement(App.Vector(0,0,2.5),App.Rotation(App.Vector(0,0,1),0))
 
 App.ActiveDocument.addObject("Part::Box","Box")
-App.ActiveDocument.ActiveObject.Label = "Cube"
+App.ActiveDocument.Box001.Label = "Cube"
 App.ActiveDocument.recompute()
-FreeCAD.getDocument('Unnamed').getObject('Box001').Length = '2 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box001').Width = '30 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box001').Height = '15 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box001').Placement = App.Placement(App.Vector(0,0,2.5),App.Rotation(App.Vector(0,0,1),0))
+App.ActiveDocument.getObject('Box001').Length = '2 mm'
+App.ActiveDocument.getObject('Box001').Width = '30 mm'
+App.ActiveDocument.getObject('Box001').Height = '15 mm'
+App.ActiveDocument.getObject('Box001').Placement = App.Placement(App.Vector(0,0,2.5),App.Rotation(App.Vector(0,0,1),0))
 
 from BOPTools import BOPFeatures
 bp = BOPFeatures.BOPFeatures(App.activeDocument())
 bp.make_multi_fuse(["Box", "Box001", ])
 App.ActiveDocument.recompute()
-__doc__=FreeCAD.getDocument("Unnamed")
+__doc__=App.ActiveDocument
 __doc__.addObject("Part::Mirroring")
 __doc__.ActiveObject.Source=__doc__.getObject("Fusion")
 __doc__.ActiveObject.Label=u"Fusion (Mirror #1)"
@@ -42,7 +42,7 @@ del __doc__
 bp = BOPFeatures.BOPFeatures(App.activeDocument())
 bp.make_multi_fuse(["Part__Mirroring", "Fusion", ])
 App.ActiveDocument.recompute()
-__doc__=FreeCAD.getDocument("Unnamed")
+__doc__=App.ActiveDocument
 __doc__.addObject("Part::Mirroring")
 __doc__.ActiveObject.Source=__doc__.getObject("Fusion001")
 __doc__.ActiveObject.Label=u"Fusion001 (Mirror #2)"
@@ -54,18 +54,18 @@ bp = BOPFeatures.BOPFeatures(App.activeDocument())
 bp.make_multi_fuse(["Part__Mirroring001", "Fusion001", "Cylinder", ])
 App.ActiveDocument.recompute()
 App.ActiveDocument.addObject("Part::Cylinder","Cylinder")
-App.ActiveDocument.ActiveObject.Label = "Cylinder"
+App.ActiveDocument.Cylinder001.Label = "Cylinder"
 App.ActiveDocument.recompute()
-FreeCAD.getDocument('Unnamed').getObject('Cylinder001').Radius = '35 mm'
-FreeCAD.getDocument('Unnamed').getObject('Cylinder001').Height = '30 mm'
-FreeCAD.getDocument('Unnamed').getObject('Cylinder001').Placement = App.Placement(App.Vector(0,0,-5),App.Rotation(App.Vector(0,0,1),0))
+App.ActiveDocument.getObject('Cylinder001').Radius = '35 mm'
+App.ActiveDocument.getObject('Cylinder001').Height = '30 mm'
+App.ActiveDocument.getObject('Cylinder001').Placement = App.Placement(App.Vector(0,0,-5),App.Rotation(App.Vector(0,0,1),0))
 
 App.ActiveDocument.addObject("Part::Cylinder","Cylinder")
-App.ActiveDocument.ActiveObject.Label = "Cylinder"
+App.ActiveDocument.Cylinder002.Label = "Cylinder"
 App.ActiveDocument.recompute()
-FreeCAD.getDocument('Unnamed').getObject('Cylinder002').Radius = '40 mm'
-FreeCAD.getDocument('Unnamed').getObject('Cylinder002').Height = '40 mm'
-FreeCAD.getDocument('Unnamed').getObject('Cylinder002').Placement = App.Placement(App.Vector(0,0,-10),App.Rotation(App.Vector(0,0,1),0))
+App.ActiveDocument.getObject('Cylinder002').Radius = '40 mm'
+App.ActiveDocument.getObject('Cylinder002').Height = '40 mm'
+App.ActiveDocument.getObject('Cylinder002').Placement = App.Placement(App.Vector(0,0,-10),App.Rotation(App.Vector(0,0,1),0))
 
 bp = BOPFeatures.BOPFeatures(App.activeDocument())
 bp.make_cut(["Cylinder002", "Fusion002", ])
