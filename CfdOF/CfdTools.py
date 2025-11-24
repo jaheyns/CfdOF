@@ -1331,6 +1331,10 @@ def startParaview(case_path, script_name, console_message_fn):
             for key in env_vars:
                 env.insert(key, env_vars[key])
             removeAppimageEnvironment(env)
+            # FreeCAD sets PYTHONHOME/PYTHONPATH to its own Python; strip them so ParaView's bundled Python is used.
+            for py_var in ("PYTHONHOME", "PYTHONPATH"):
+                if env.contains(py_var):
+                    env.remove(py_var)
             proc.setProcessEnvironment(env)
             success = proc.startDetached()
             if not success:
@@ -1345,6 +1349,9 @@ def startParaview(case_path, script_name, console_message_fn):
         proc.setWorkingDirectory(case_path)
         env = QtCore.QProcessEnvironment.systemEnvironment()
         removeAppimageEnvironment(env)
+        for py_var in ("PYTHONHOME", "PYTHONPATH"):
+            if env.contains(py_var):
+                env.remove(py_var)
         proc.setProcessEnvironment(env)
         success = proc.startDetached()
         if success:
