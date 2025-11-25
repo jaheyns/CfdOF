@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+
 # ***************************************************************************
 # *   (c) bernd hahnebach (bernd@bimstatik.org) 2014                        *
 # *   (c) qingfeng xia @ iesensor.com 2016                                  *
