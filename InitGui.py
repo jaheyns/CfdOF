@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+# SPDX-FileNotice: Part of the CfdOF addon.
 
 # ***************************************************************************
 # *   (c) bernd hahnebach (bernd@bimstatik.org) 2014                        *
