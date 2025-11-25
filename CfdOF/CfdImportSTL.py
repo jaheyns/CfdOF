@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: LGPL-3.0-or-later
+
 # ***************************************************************************
 # *                                                                         *
 # *   Copyright (c) 2020 Oliver Oxtoby <oliveroxtoby@gmail.com>             *
