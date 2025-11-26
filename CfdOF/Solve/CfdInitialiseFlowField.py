@@ -3,11 +3,11 @@
 
 ################################################################################
 #                                                                              #
-#   Copyright (c) 2013-2015 - Juergen Riegel <FreeCAD@juergen-riegel.net>      #
-#   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>             #
-#   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>               #
-#   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>                  #
-#   Copyright (c) 2019-2023 Oliver Oxtoby <oliveroxtoby@gmail.com>             #
+#   Copyright (c) 2013 Juergen Riegel <FreeCAD@juergen-riegel.net>             #
+#   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        #
+#   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          #
+#   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>             #
+#   Copyright (c) 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>                  #
 #   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>               #
 #                                                                              #
 #   This program is free software; you can redistribute it and/or              #
