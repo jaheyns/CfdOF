@@ -1,13 +1,12 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2014 Bernd Hahnebach <bernd@bimstatik.org>
+# SPDX-FileCopyrightText: 2016 Qingfeng Xia <iesensor.com>
+# SPDX-FileCopyrightText: 2017 Andrew Gill (CSIR) <agill@csir.co.za>
+# SPDX-FileCopyrightText: 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>
+# SPDX-FileCopyrightText: 2022 Jonathan Bergh <bergh.jonathan@gmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################
-#                                                                              #
-#   (c) bernd hahnebach (bernd@bimstatik.org) 2014                        *
-#   (c) qingfeng xia @ iesensor.com 2016                                  *
-#   Copyright (c) 2017 Andrew Gill (CSIR) <agill@csir.co.za>              *
-#   Copyright (c) 2019-2024 Oliver Oxtoby <oliveroxtoby@gmail.com>        *
-#   Copyright (c) 2022 Jonathan Bergh <bergh.jonathan@gmail.com>          *
 #                                                                              #
 #   This program is free software; you can redistribute it and/or              #
 #   modify it under the terms of the GNU Lesser General Public                 #

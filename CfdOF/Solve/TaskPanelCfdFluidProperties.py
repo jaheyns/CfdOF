@@ -1,12 +1,11 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>
+# SPDX-FileCopyrightText: 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>
+# SPDX-FileCopyrightText: 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>
+# SPDX-FileCopyrightText: 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################
-#                                                                              #
-#   Copyright (c) 2017-2018 Johan Heyns (CSIR) <jheyns@csir.co.za>             #
-#   Copyright (c) 2017-2018 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>          #
-#   Copyright (c) 2017-2018 Alfred Bogaers (CSIR) <abogaers@csir.co.za>        #
-#   Copyright (c) 2019-2022 Oliver Oxtoby <oliveroxtoby@gmail.com>             #
 #                                                                              #
 #   This program is free software; you can redistribute it and/or              #
 #   modify it under the terms of the GNU Lesser General Public                 #

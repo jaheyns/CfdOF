@@ -1,9 +1,6 @@
 This is the FreeCAD fluid material library. It's intended to gather
 the most common fluid properties.
 
-(c) 2016 CSIR, South Africa
-(c) 2021 Oliver Oxtoby
-
 Please verify the fluid material properties before use. It aims to
 serve as a convenience and does not aim to be a comprehensive
 reference.
