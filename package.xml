@@ -1,19 +1,87 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<package format="1">
-    <name>CfdOF</name>
-    <description>Computational Fluid Dynamics (CFD) for FreeCAD based on OpenFOAM</description>
-    <version>1.33.3</version>
-    <maintainer email="oliveroxtoby@gmail.com">Oliver Oxtoby</maintainer>
-    <license file="LICENSE">LGPL-3.0-or-later</license>
-    <url type="repository" branch="master">https://github.com/jaheyns/CfdOF</url>
-    <url type="documentation">https://github.com/jaheyns/CfdOF/README.md</url>
+<?xml
+    version = '1.0'
+    encoding = 'UTF-8'
+    standalone = 'no'
+?>
+<package
+    format = '1'
+    xmlns = 'https://wiki.freecad.org/Package_Metadata'
+>
+
+    <!--[ Versions ]―――――――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
     <freecadmin>0.20.0</freecadmin>
+    <version>1.33.3</version>
+    <date>2025-11-24</date>
+
+    <!--[ Dependencies ]―――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
+    <depend>matplotlib</depend>
+
+    <!--[ Info ]―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
+    <description>Computational Fluid Dynamics (CFD) based on OpenFOAM.</description>
+    <name>CfdOF</name>
+
+    <!--[ Tags ]―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
+    <tag>Fluid Dynamics</tag>
+    <tag>OpenForm</tag>
+    <tag>CFD</tag>
+
+    <tag>Boundary</tag>
+    <tag>Material</tag>
+    <tag>Solver</tag>
+    <tag>Mesh</tag>
+
+    <!--[ Maintainers ]――――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
+    <maintainer
+        email = 'oliveroxtoby@gmail.com'
+    >Oliver Oxtoby</maintainer>
+
+    <!--[ Authors ]――――――――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
+    <author
+        email = 'oliveroxtoby@gmail.com'
+    >Oliver Oxtoby</author>
+
+    <!--[ Licenses ]―――――――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
+    <license
+        file = 'LICENSE'
+    >LGPL-3.0-or-later</license>
+
+    <!--[ Icon ]―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
+    <icon>Gui/Icons/cfd.svg</icon>
+
+    <!--[ Urls ]―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
+    <url
+        branch = 'master'
+        type = 'repository'
+    >https://github.com/jaheyns/CfdOF</url>
+
+    <url 
+        type = 'documentation'
+    >https://github.com/jaheyns/CfdOF/README.md</url>
+
+    <url
+        type = 'bugtracker'
+    >https://github.com/jaheyns/CfdOF/issues</url>
+  
+    <url
+        type = 'readme'
+    >https://github.com/jaheyns/CfdOF/blob/master/README.md</url>
+
+    <!--[ Content ]――――――――――――――――――――――――――――――――――――――――――――――――――――――――――-->
+
     <content>
         <workbench>
             <classname>CfdOFWorkbench</classname>
-            <subdirectory>./</subdirectory>
-            <icon>Gui/Icons/cfd.svg</icon>
-            <depend>matplotlib</depend>
+            <subdirectory>.</subdirectory>
         </workbench>
     </content>
+
 </package>
