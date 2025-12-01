@@ -1179,7 +1179,7 @@ def checkCfdDependencies(msgFn):
             if proc.waitForFinished():
                 pvversion = proc.readAllStandardOutput()
                 pvversion = QTextStream(pvversion).readAll().split()
-                # The --version flag doesn't seem to work on Winodws, so quietly ignore if nothing returned
+                # The --version flag doesn't seem to work on Windows, so quietly ignore if nothing returned
                 if len(pvversion):
                     pvversion = pvversion[-1].rstrip()
                     msgFn("Paraview version: " + pvversion)
@@ -1475,7 +1475,7 @@ def matchFaces(faces1, faces2):
     :param faces1: List of tuples - first item is face object, second is any user data
     :param faces2: List of tuples - first item is face object, second is any user data
     :return:  A list of (data1, data2) containing the user data for any/all matching faces
-    Note that faces1 and faces2 are sorted in place and can be re-used for faster subsequent searches
+    Note that faces1 and faces2 are sorted in place and can be reused for faster subsequent searches
     """
 
     def compKeyFn(key):
