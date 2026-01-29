@@ -82,13 +82,13 @@ class CommandCfdSolverFoam:
 class CfdSolverFoam(object):
     """ Solver-specific properties """
     def __init__(self, obj):
-        self.Type = "CfdSolverFoam"
         self.Object = obj  # keep a ref to the DocObj for nonGui usage
-        obj.Proxy = self  # link between App::DocumentObject to  this object
-
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        self.Type = 'CfdSolverFoam'
+        obj.Proxy = self  # link between App::DocumentObject to  this object
+
         addObjectProperty(
             obj,
             "InputCaseName",

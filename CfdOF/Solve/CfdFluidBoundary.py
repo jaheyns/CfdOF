@@ -318,11 +318,12 @@ class CommandCfdFluidBoundary:
 
 class CfdFluidBoundary:
     def __init__(self, obj):
-        obj.Proxy = self
-        self.Type = "CfdFluidBoundary"
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        obj.Proxy = self
+        self.Type = 'CfdFluidBoundary'
+
         if addObjectProperty(
             obj,
             "ShapeRefs",

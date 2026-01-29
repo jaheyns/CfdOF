@@ -84,11 +84,12 @@ class CommandCfdPhysicsSelection:
 class CfdPhysicsModel:
     """ The CFD Physics Model """
     def __init__(self, obj):
-        obj.Proxy = self
-        self.Type = "PhysicsModel"
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        obj.Proxy = self
+        self.Type = 'CfdPhysicsModel'
+
         # obj.supportedProperties()
         # ['App::PropertyBool', 'App::PropertyBoolList', 'App::PropertyFloat', 'App::PropertyFloatList',
         #  'App::PropertyFloatConstraint', 'App::PropertyPrecision', 'App::PropertyQuantity',

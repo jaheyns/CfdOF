@@ -192,11 +192,12 @@ class CommandDynamicMeshShockRefinement:
 class CfdDynamicMeshInterfaceRefinement:
 
     def __init__(self, obj):
-        obj.Proxy = self
-        self.Type = "DynamicMeshInterfaceRefinement"
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        obj.Proxy = self
+        self.Type = 'CfdDynamicMeshInterfaceRefinement'
+
         addObjectProperty(
             obj,
             "Phase",
@@ -270,11 +271,12 @@ class _CfdDynamicMeshRefinement:
 class CfdDynamicMeshShockRefinement:
 
     def __init__(self, obj):
-        obj.Proxy = self
-        self.Type = "DynamicMeshShockRefinement"
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        obj.Proxy = self
+        self.Type = 'CfdDynamicMeshShockRefinement'
+
         addObjectProperty(
             obj,
             "ReferenceVelocityDirection",

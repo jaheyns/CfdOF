@@ -89,11 +89,12 @@ class CommandMeshRegion:
 class CfdMeshRefinement:
 
     def __init__(self, obj):
-        obj.Proxy = self
-        self.Type = "CfdMeshRefinement"
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        obj.Proxy = self
+        self.Type = 'CfdMeshRefinement'
+
         # Common to all
         if addObjectProperty(
             obj,

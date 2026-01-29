@@ -87,11 +87,12 @@ class CommandCfdFluidMaterial:
 class CfdMaterial:
     """ CFD material properties object. Compatible with FreeCAD material object. """
     def __init__(self, obj):
-        obj.Proxy = self
-        self.Type = "CfdMaterial"
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        obj.Proxy = self
+        self.Type = 'CfdMaterial'
+
         # Not currently used, but required for parent class
         addObjectProperty(
             obj,

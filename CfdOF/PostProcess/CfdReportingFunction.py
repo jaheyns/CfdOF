@@ -80,12 +80,12 @@ class CfdReportingFunction:
     """ CFD Function objects properties """
 
     def __init__(self, obj):
-        self.Type = "ReportingFunction"
-        self.Object = obj
         obj.Proxy = self
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        self.Type = 'CfdReportingFunction'
+        self.Object = obj
 
         # Setup and utility
         addObjectProperty(

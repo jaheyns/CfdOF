@@ -54,11 +54,12 @@ class CfdAnalysis:
     def __init__(self, obj):
         self.loading = False
         self.ignore_next_grouptouched = False
-        obj.Proxy = self
-        self.Type = "CfdAnalysis"
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        obj.Proxy = self
+        self.Type = "CfdAnalysis"
+
         addObjectProperty(
             obj,
             "OutputPath",

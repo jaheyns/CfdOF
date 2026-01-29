@@ -53,7 +53,7 @@ ASPECT_RATIO_TIPS = ["", "Equilateral triangles pointing perpendicular to spacin
 
 def makeCfdPorousZone(name='PorousZone'):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    CfdZone(obj)
+    CfdZone(obj, 'CfdPorousZone')
     if FreeCAD.GuiUp:
         ViewProviderCfdZone(obj.ViewObject)
     return obj
@@ -61,7 +61,7 @@ def makeCfdPorousZone(name='PorousZone'):
 
 def makeCfdInitialisationZone(name='InitialisationZone'):
     obj = FreeCAD.ActiveDocument.addObject("Part::FeaturePython", name)
-    CfdZone(obj)
+    CfdZone(obj, 'CfdInitialisationZone')
     if FreeCAD.GuiUp:
         ViewProviderCfdZone(obj.ViewObject)
     return obj
@@ -110,12 +110,13 @@ class CommandCfdInitialisationZone:
 
 
 class CfdZone:
-    def __init__(self, obj):
-        obj.Proxy = self
-        self.Type = 'Zone'
-        self.initProperties(obj)
+    def __init__(self, obj, Type):
+        self.initProperties(obj, Type)
 
-    def initProperties(self, obj):
+    def initProperties(self, obj, Type):
+        obj.Proxy = self
+        self.Type = Type
+
         if addObjectProperty(
             obj,
             "ShapeRefs",
@@ -135,7 +136,7 @@ class CfdZone:
                 obj.removeProperty("References")
                 obj.removeProperty("LinkedObjects")
 
-        if obj.Name.startswith("PorousZone"):
+        if self.Type == 'CfdPorousZone':
             if addObjectProperty(
                 obj,
                 "PorousCorrelation",
@@ -267,7 +268,7 @@ class CfdZone:
                 "Jakob",
                 QT_TRANSLATE_NOOP("App::Property", "Approximate flow velocity"),
             )
-        elif obj.Name.startswith("InitialisationZone"):
+        elif self.Type == 'CfdInitialisationZone':
             addObjectProperty(
                 obj,
                 "VelocitySpecified",
@@ -350,7 +351,8 @@ class CfdZone:
             )
 
     def onDocumentRestored(self, obj):
-        self.initProperties(obj)
+        # This is a bit of a hack. Could we store Type in the obj instead of the proxy, so that it persists?
+        self.initProperties(obj, 'CfdInitialisationZone' if obj.Name.startswith('InitialisationZone') else 'CfdPorousZone')
 
     def execute(self, fp):
         list_of_shapes = []
@@ -382,7 +384,7 @@ class CfdZone:
 class _CfdZone:
     """ Backward compatibility for old class name when loading from file """
     def onDocumentRestored(self, obj):
-        CfdZone(obj)
+        CfdZone(obj, obj.Type)
 
     def __getstate__(self):
         return None

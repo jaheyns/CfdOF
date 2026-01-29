@@ -2,13 +2,14 @@
 
 REM Source runtime environment
 
-set FOAMDIR="/opt/openfoam13"
+set FOAMDIR="C:\blueCFD-Core-2024"
 set CWD=%CD%
+set FOAMVER=12
 
-if None GEQ 1000 goto OPENCFD
+if %FOAMVER% GEQ 1000 goto OPENCFD
 :FOUNDATION
 set OLDPATH=%PATH%
-call %FOAMDIR%\setvars_OFNone.bat
+call %FOAMDIR%\setvars_OF%FOAMVER%.bat
 set PATH=%PATH%;%OLDPATH%
 
 REM Fix for error in FOAM_MPI in setvars-OF.bat
@@ -19,7 +20,7 @@ set PATH=%FOAM_LIBBIN%\%FOAM_MPI%;%PATH%
 goto CONTINUE
 
 :OPENCFD
-call %FOAMDIR%\setEnvVariables-vNone.bat
+call %FOAMDIR%\setEnvVariables-v%FOAMVER%.bat
 
 :CONTINUE
 

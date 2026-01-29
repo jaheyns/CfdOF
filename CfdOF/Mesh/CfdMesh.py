@@ -93,12 +93,13 @@ class CfdMesh:
     known_element_dimensions = ['2D', '3D']
 
     def __init__(self, obj):
-        self.Type = "CfdMesh"
         self.Object = obj
-        obj.Proxy = self
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        self.Type = 'CfdMesh'
+        obj.Proxy = self
+
         addObjectProperty(
             obj,
             "CaseName",

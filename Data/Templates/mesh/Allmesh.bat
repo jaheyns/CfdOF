@@ -4,12 +4,13 @@ REM Source runtime environment
 
 set FOAMDIR="%(FoamPath%)"
 set CWD=%CD%
+set FOAMVER=%(FoamVersion%)
 
-if %(FoamVersion%) GEQ 1000 goto OPENCFD
+if %FOAMVER% GEQ 1000 goto OPENCFD
 
 :FOUNDATION
 set OLDPATH=%PATH%
-call %FOAMDIR%\setvars_OF%(FoamVersion%).bat
+call %FOAMDIR%\setvars_OF%FOAMVER%.bat
 set PATH=%PATH%;%OLDPATH%
 
 REM Fix for error in FOAM_MPI in setvars-OF.bat
@@ -20,7 +21,7 @@ set PATH=%FOAM_LIBBIN%\%FOAM_MPI%;%PATH%
 goto CONTINUE
 
 :OPENCFD
-call %FOAMDIR%\setEnvVariables-v%(FoamVersion%).bat
+call %FOAMDIR%\setEnvVariables-v%FOAMVER%.bat
 
 :CONTINUE
 

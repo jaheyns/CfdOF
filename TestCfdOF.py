@@ -475,13 +475,13 @@ def compareInpFiles(file_name1, file_name2):
     f1 = file1.readlines()
     file1.close()
     lf1 = [l for l in f1 if not l.startswith("FOAMDIR=") and not l.startswith("GMSH_EXE=")
-           and not l.startswith("set FOAMDIR") and not l.startswith("call %FOAMDIR%") and not l.startswith("$GMSH_EXE")]
+           and not l.startswith("set FOAMDIR") and not l.startswith("set FOAMVER") and not l.startswith("$GMSH_EXE")]
     lf1 = forceUnixLineEnds(lf1)
     file2 = open(file_name2, 'r')
     f2 = file2.readlines()
     file2.close()
     lf2 = [l for l in f2 if not l.startswith("FOAMDIR=") and not l.startswith("GMSH_EXE=")
-           and not l.startswith("set FOAMDIR") and not l.startswith("call %FOAMDIR%") and not l.startswith("$GMSH_EXE")]
+           and not l.startswith("set FOAMDIR") and not l.startswith("set FOAMVER") and not l.startswith("$GMSH_EXE")]
     lf2 = forceUnixLineEnds(lf2)
     import difflib
     diff = difflib.unified_diff(lf1, lf2, n=0)

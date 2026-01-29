@@ -7,7 +7,7 @@
 #   Copyright (c) 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>                  #
 #   Copyright (c) 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>               #
 #   Copyright (c) 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>             #
-#   Copyright (c) 2019-2025 Oliver Oxtoby <oliveroxtoby@gmail.com>             #
+#   Copyright (c) 2019-2026 Oliver Oxtoby <oliveroxtoby@gmail.com>             #
 #   Copyright (c) 2022-2024 Jonathan Bergh <bergh.jonathan@gmail.com>          #
 #                                                                              #
 #   This program is free software; you can redistribute it and/or              #
@@ -130,63 +130,48 @@ def getParentAnalysisObject(obj):
         return getParentAnalysisObject(parent)
 
 
+def getModelsOfType(parent, model_type):
+    return [i for i in parent.Group if hasattr(i, 'Proxy') and hasattr(i.Proxy, 'Type') and i.Proxy.Type == model_type]
+
+
+def getModelOfType(parent, model_type):
+    for i in parent.Group:
+        if hasattr(i, 'Proxy') and hasattr(i.Proxy, 'Type') and i.Proxy.Type == model_type:
+            return i
+    return None
+
+
 def getPhysicsModel(analysis_object):
-    is_present = False
-    for i in analysis_object.Group:
-        if "PhysicsModel" in i.Name:
-            physics_model = i
-            is_present = True
-    if not is_present:
-        physics_model = None
-    return physics_model
+    return getModelOfType(analysis_object, 'CfdPhysicsModel')
 
 
 def getDynamicMeshAdaptation(mesh_object):
-    dynamic_mesh_adaption_model = None
-    for i in mesh_object.Group:
-        if i.Name.startswith("DynamicMeshInterfaceRefinement") or i.Name.startswith("DynamicMeshShockRefinement"):
-            dynamic_mesh_adaption_model = i
-    return dynamic_mesh_adaption_model
+    return getModelOfType(mesh_object, 'CfdDynamicMeshInterfaceRefinement') or \
+        getModelOfType(mesh_object, 'CfdDynamicMeshShockRefinement')
 
 
 def getMeshObject(analysis_object):
-    is_present = False
-    mesh_obj = []
-    if analysis_object:
-        members = analysis_object.Group
-    else:
-        members = FreeCAD.activeDocument().Objects
-    from CfdOF.Mesh.CfdMesh import CfdMesh
-    for i in members:
-        if hasattr(i, "Proxy") and isinstance(i.Proxy, CfdMesh):
-            if is_present:
-                FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
-            else:
-                mesh_obj.append(i)
-                is_present = True
-    if not is_present:
-        mesh_obj = [None]
-    return mesh_obj[0]
+    models = getModelsOfType(analysis_object if analysis_object else FreeCAD.activeDocument().Objects, 'CfdMesh')
+    if len(models) > 1:
+        FreeCAD.Console.PrintError("Analysis contains more than one mesh object.")
+    return models[0] if len(models) else None
 
 
 def getPorousZoneObjects(analysis_object):
-    return [i for i in analysis_object.Group if i.Name.startswith('PorousZone')]
+    return getModelsOfType(analysis_object, 'CfdPorousZone')
 
 
 def getInitialisationZoneObjects(analysis_object):
-    return [i for i in analysis_object.Group if i.Name.startswith('InitialisationZone')]
+    return getModelsOfType(analysis_object, 'CfdInitialisationZone')
 
 
 def getZoneObjects(analysis_object):
-    return [i for i in analysis_object.Group if 'Zone' in i.Name]
+    from CfdOF.Solve.CfdZone import CfdZone
+    return [i for i in analysis_object.Group if isinstance(i.Proxy, CfdZone)]
 
 
 def getInitialConditions(analysis_object):
-    from CfdOF.Solve.CfdInitialiseFlowField import CfdInitialVariables
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, CfdInitialVariables):
-            return i
-    return None
+    return getModelOfType(analysis_object, 'CfdInitialVariables')
 
 
 def getMaterials(analysis_object):
@@ -194,10 +179,7 @@ def getMaterials(analysis_object):
 
 
 def getSolver(analysis_object):
-    from CfdOF.Solve.CfdSolverFoam import CfdSolverFoam
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, CfdSolverFoam):
-            return i
+    return getModelOfType(analysis_object, 'CfdSolverFoam')
 
 
 def getSolverSettings(solver):
@@ -212,12 +194,7 @@ def getSolverSettings(solver):
 
 
 def getCfdBoundaryGroup(analysis_object):
-    group = []
-    from CfdOF.Solve.CfdFluidBoundary import CfdFluidBoundary
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, CfdFluidBoundary):
-            group.append(i)
-    return group
+    return getModelsOfType(analysis_object, 'CfdFluidBoundary')
 
 
 def isPlanar(shape):
@@ -236,11 +213,7 @@ def isPlanar(shape):
 
 
 def getMesh(analysis_object):
-    from CfdOF.Mesh.CfdMesh import CfdMesh
-    for i in analysis_object.Group:
-        if hasattr(i, "Proxy") and isinstance(i.Proxy, CfdMesh):
-            return i
-    return None
+    return getModelOfType(analysis_object, 'CfdMesh')
 
 
 def getResult(analysis_object):
@@ -262,31 +235,16 @@ def getModulePath():
 
 # Function objects
 def getReportingFunctionsGroup(analysis_object):
-    group = []
-    from CfdOF.PostProcess.CfdReportingFunction import CfdReportingFunction
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, CfdReportingFunction):
-            group.append(i)
-    return group
+    return getModelsOfType(analysis_object, 'CfdReportingFunction')
 
 
 def getScalarTransportFunctionsGroup(analysis_object):
-    group = []
-    from CfdOF.Solve.CfdScalarTransportFunction import CfdScalarTransportFunction
-    for i in analysis_object.Group:
-        if isinstance(i.Proxy, CfdScalarTransportFunction):
-            group.append(i)
-    return group
+    return getModelsOfType(analysis_object, 'CfdScalarTransportFunction')
 
 
 # Mesh
 def getMeshRefinementObjs(mesh_obj):
-    from CfdOF.Mesh.CfdMeshRefinement import CfdMeshRefinement
-    ref_objs = []
-    for obj in mesh_obj.Group:
-        if hasattr(obj, "Proxy") and isinstance(obj.Proxy, CfdMeshRefinement):
-            ref_objs = ref_objs + [obj]
-    return ref_objs
+    return getModelsOfType(mesh_obj, 'CfdMeshRefinement')
 
 
 # Set functions

@@ -26,7 +26,7 @@ $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 # Less verbose error reporting
 $ErrorView = 'ConciseView'
 
-$GMSH_EXE = "/home/oliver/software/gmsh-4.13.1-Linux64/bin/gmsh"
+$GMSH_EXE = "C:\Program Files\FreeCAD 1.0\bin\gmsh.exe"
 #$NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
 # Currently default to 1 thread as the current release version of gmsh 4.13.1,
 # appears to suffer from a race condition

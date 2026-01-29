@@ -85,11 +85,12 @@ class CommandCfdInitialiseInternalFlowField:
 class CfdInitialVariables:
     """ The field initialisation object """
     def __init__(self, obj):
-        obj.Proxy = self
-        self.Type = "InitialVariables"
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        obj.Proxy = self
+        self.Type = 'CfdInitialVariables'
+        
         addObjectProperty(
             obj,
             "PotentialFlow",

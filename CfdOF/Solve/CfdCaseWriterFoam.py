@@ -104,7 +104,7 @@ class CfdCaseWriterFoam:
             for j in range(i+1, len(bc_labels)):
                 if bc_labels[j] == l:
                     raise ValueError("Boundary condition label '" + bc_labels[i] + "' is duplicated")
-
+        
         self.settings = {
             'physics': phys_settings,
             'fluidProperties': [],  # Order is important, so use a list

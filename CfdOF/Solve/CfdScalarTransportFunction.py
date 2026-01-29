@@ -74,12 +74,13 @@ class CommandCfdScalarTransportFunction:
 class CfdScalarTransportFunction:
 
     def __init__(self, obj):
-        self.Type = "ScalarTransportFunction"
         self.Object = obj
-        obj.Proxy = self
         self.initProperties(obj)
 
     def initProperties(self, obj):
+        obj.Proxy = self
+        self.Type = 'CfdScalarTransportFunction'
+
         addObjectProperty(
             obj,
             "FieldName",
