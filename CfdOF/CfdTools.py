@@ -1789,11 +1789,11 @@ class DockerContainer:
         docker_dir = shutil.which('docker')
         try:
             podman_flatpak = str(subprocess.run(['flatpak-spawn', '--host', 'podman'], capture_output=True).stdout)
-        except FileNotFoundError:
+        except (FileNotFoundError, PermissionError):
             podman_flatpak = None
         try:
             docker_flatpak = str(subprocess.run(['flatpak-spawn', '--host', 'docker'], capture_output=True).stderr)
-        except FileNotFoundError:
+        except (FileNotFoundError, PermissionError):
             docker_flatpak = None
 
         if podman_dir is not None:
