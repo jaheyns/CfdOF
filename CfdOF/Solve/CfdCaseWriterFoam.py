@@ -497,6 +497,14 @@ class CfdCaseWriterFoam:
         if initial_values['PotentialFlow']:
             if settings['solver']['SolverName'] in ['SRFSimpleFoam']:
                 raise RuntimeError("Selected solver does not support potential flow velocity initialisation.")
+            
+        if initial_values['PotentialFlow'] or initial_values['PotentialFlowP']:
+            if settings['solver']['SolverName'] in ['buoyantSimpleFoam', 'buoyantPimpleFoam', 'hisa']:
+                for bc in settings['boundaries']:
+                    if settings['boundaries'][bc]['BoundarySubType'] == 'massFlowRateInlet':
+                        raise RuntimeError("Selected solver does not support potential flow initialisation with "
+                                           "a mass flow inlet boundary.")
+
         if initial_values['PotentialFlowP']:
             if settings['solver']['SolverName'] not in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'hisa']:
                 raise RuntimeError("Selected solver does not support potential flow pressure initialisation.")
