@@ -823,9 +823,13 @@ class CfdCaseWriterFoam:
                         'PeriodicMaster': bc_obj.PeriodicMaster,
                         'PeriodicPartner': slave_bc_obj.Label if bc_obj.PeriodicMaster else slave_bc_obj.PeriodicPartner,
                         'RotationalPeriodic': slave_bc_obj.RotationalPeriodic,
-                        'PeriodicCentreOfRotation': tuple(p for p in slave_bc_obj.PeriodicCentreOfRotation),
+                        'PeriodicCentreOfRotation': tuple(
+                            Units.Quantity(p, Units.Length).getValueAs('m').Value
+                            for p in slave_bc_obj.PeriodicCentreOfRotation),
                         'PeriodicCentreOfRotationAxis': tuple(p for p in slave_bc_obj.PeriodicCentreOfRotationAxis),
-                        'PeriodicSeparationVector': tuple(p for p in slave_bc_obj.PeriodicSeparationVector),
+                        'PeriodicSeparationVector': tuple(
+                            Units.Quantity(p, Units.Length).getValueAs('m').Value
+                            for p in slave_bc_obj.PeriodicSeparationVector),
                         'PatchNamesList': '"patch_'+str(bc_id+1)+'_.*"',
                         'PatchNamesListSlave': '"patch_'+str(slave_bc_id+1)+'_.*"'}
 
