@@ -320,7 +320,7 @@ class MacroTest:
         self.child_instance.assertTrue(self.writer, "CfdTest of writer failed")
 
         mesh_ref_dir = os.path.join(test_file_dir, "cases", dir_name, "meshCase")
-        mesh_case_dir = self.meshwriter.meshCaseDir
+        mesh_case_dir = self.meshwriter.mesh_case_dir
         comparePaths(mesh_ref_dir, mesh_case_dir, self.child_instance)
 
         ref_dir = os.path.join(test_file_dir, "cases", dir_name, "case")

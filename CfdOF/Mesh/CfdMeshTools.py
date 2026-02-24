@@ -86,7 +86,7 @@ class CfdMeshTools:
             self.progressCallback("Exporting the part surfaces ...")
         self.writePartFile()
         self.writeMeshCase()
-        CfdTools.cfdMessage("Wrote mesh case to {}\n".format(self.meshCaseDir))
+        CfdTools.cfdMessage("Wrote mesh case to {}\n".format(self.mesh_case_dir))
         if self.progressCallback:
             self.progressCallback("Mesh case written successfully")
 
@@ -179,12 +179,12 @@ class CfdMeshTools:
         if not hasattr(self.mesh_obj, 'CaseName'):  # Backward compat
             self.mesh_obj.CaseName = 'meshCase'
         self.case_name = self.mesh_obj.CaseName
-        self.meshCaseDir = os.path.join(output_dir, self.case_name)
-        self.constantDir = os.path.join(self.meshCaseDir, 'constant')
+        self.mesh_case_dir = os.path.join(output_dir, self.case_name)
+        self.constantDir = os.path.join(self.mesh_case_dir, 'constant')
         self.polyMeshDir = os.path.join(self.constantDir, 'polyMesh')
         self.triSurfaceDir = os.path.join(self.constantDir, 'triSurface')
-        self.gmshDir = os.path.join(self.meshCaseDir, 'gmsh')
-        self.systemDir = os.path.join(self.meshCaseDir, 'system')
+        self.gmshDir = os.path.join(self.mesh_case_dir, 'gmsh')
+        self.systemDir = os.path.join(self.mesh_case_dir, 'system')
 
         if self.mesh_obj.MeshUtility == "gmsh":
             self.temp_file_shape = os.path.join(self.gmshDir, self.part_obj.Name +"_Geometry.brep")
@@ -195,7 +195,7 @@ class CfdMeshTools:
 
     def setupMeshCaseDir(self):
         """ Create temporary mesh case directory """
-        CfdTools.clearCase(self.meshCaseDir)
+        CfdTools.clearCase(self.mesh_case_dir)
         os.makedirs(self.triSurfaceDir)
         os.makedirs(self.gmshDir)
 
@@ -580,7 +580,7 @@ class CfdMeshTools:
     def loadSurfMesh(self):
         if not self.error:
             import Fem
-            vtk = os.path.join(self.meshCaseDir, 'surfaceMesh.vtk')
+            vtk = os.path.join(self.mesh_case_dir, 'surfaceMesh.vtk')
             fem_mesh = Fem.read(vtk)
             fem_mesh_obj = FreeCAD.ActiveDocument.addObject("Fem::FemMeshObject", self.mesh_obj.Name+"SurfaceMesh")
             fem_mesh_obj.FemMesh = fem_mesh
@@ -591,7 +591,7 @@ class CfdMeshTools:
 
     def writeMeshCase(self):
         """ Collect case settings, and finally build a runnable case. """
-        CfdTools.cfdMessage("Populating mesh dictionaries in folder {}\n".format(self.meshCaseDir))
+        CfdTools.cfdMessage("Populating mesh dictionaries in folder {}\n".format(self.mesh_case_dir))
 
         # cfMesh settings
         if self.mesh_obj.MeshUtility == "cfMesh":
@@ -712,7 +712,7 @@ class CfdMeshTools:
 
         self.settings = {
             'Name': self.part_obj.Name,
-            'MeshPath': self.meshCaseDir,
+            'MeshPath': self.mesh_case_dir,
             'FoamRuntime': CfdTools.getFoamRuntime(),
             'FoamPath': norm_inst_path,
             'TranslatedFoamPath': CfdTools.translatePath(norm_inst_path),
@@ -753,16 +753,16 @@ class CfdMeshTools:
 
         self.settings['MPIOptionsOMPI'], self.settings['MPIOptionsMSMPI'] = CfdTools.getMPISettings()
 
-        TemplateBuilder(self.meshCaseDir, self.template_path, self.settings)
+        TemplateBuilder(self.mesh_case_dir, self.template_path, self.settings)
 
         # Update Allmesh permission - will fail silently on Windows
-        fname = os.path.join(self.meshCaseDir, "Allmesh")
+        fname = os.path.join(self.mesh_case_dir, "Allmesh")
         import stat
         s = os.stat(fname)
         os.chmod(fname, s.st_mode | stat.S_IEXEC)
 
         self.analysis.NeedsMeshRewrite = False
-        CfdTools.cfdMessage("Successfully wrote meshCase to folder {}\n".format(self.meshCaseDir))
+        CfdTools.cfdMessage("Successfully wrote meshCase to folder {}\n".format(self.mesh_case_dir))
 
 def writeSurfaceMeshFromShape(shape, path, name, mesh_obj):
     prefs = CfdTools.getPreferencesLocation()

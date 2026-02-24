@@ -137,7 +137,7 @@ class TaskPanelCfdMesh:
         self.form.cb_utility.setCurrentIndex(index_utility)
 
     def updateUI(self):
-        case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
+        case_path = self.mesh_obj.Proxy.cart_mesh.mesh_case_dir
         self.form.pb_write_mesh.setEnabled(True)
         self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
         self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
@@ -257,7 +257,7 @@ class TaskPanelCfdMesh:
             FreeCADGui.doCommand("proxy = FreeCAD.ActiveDocument." + self.mesh_obj.Name + ".Proxy")
             FreeCADGui.doCommand("proxy.cart_mesh = cart_mesh")
             FreeCADGui.doCommand("cart_mesh.error = False")
-            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh -meshQuality', cart_mesh.meshCaseDir)")
+            FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('checkMesh -meshQuality', cart_mesh.mesh_case_dir)")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             self.check_mesh_error = False
             FreeCADGui.doCommand("proxy.running_from_macro = True")
@@ -266,10 +266,10 @@ class TaskPanelCfdMesh:
                 stdout_hook=self.gotOutputLines, stderr_hook=self.gotErrorLines)
             FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
                                  "  proxy.check_mesh_process = CfdConsoleProcess()\n" +
-                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.meshCaseDir)\n" +
+                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.mesh_case_dir)\n" +
                                  "  proxy.check_mesh_process.waitForFinished()\n" +
                                  "else:\n" +
-                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.meshCaseDir)")
+                                 "  proxy.check_mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.mesh_case_dir)")
             if self.mesh_obj.Proxy.check_mesh_process.waitForStarted():
                 self.consoleMessage("Mesh check started ...")
             else:
@@ -288,7 +288,7 @@ class TaskPanelCfdMesh:
             QApplication.restoreOverrideCursor()
 
     def editMesh(self):
-        case_path = self.mesh_obj.Proxy.cart_mesh.meshCaseDir
+        case_path = self.mesh_obj.Proxy.cart_mesh.mesh_case_dir
         self.consoleMessage("Please edit the case input files externally at: {}\n".format(case_path))
         CfdTools.openFileManager(case_path)
 
@@ -328,16 +328,16 @@ class TaskPanelCfdMesh:
             if CfdTools.getFoamRuntime() == "MinGW" or CfdTools.getFoamRuntime().startswith('BlueCFD'):
                 FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('Allmesh.bat', source_env=False)")
             else:
-                FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.meshCaseDir, source_env=False)")
+                FreeCADGui.doCommand("cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.mesh_case_dir, source_env=False)")
             FreeCADGui.doCommand("env_vars = CfdTools.getRunEnvironment()")
             FreeCADGui.doCommand("proxy.running_from_macro = True")
             self.mesh_obj.Proxy.running_from_macro = False
             FreeCADGui.doCommand("if proxy.running_from_macro:\n" +
                                  "  mesh_process = CfdConsoleProcess.CfdConsoleProcess()\n" +
-                                 "  mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.meshCaseDir)\n" +
+                                 "  mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.mesh_case_dir)\n" +
                                  "  mesh_process.waitForFinished()\n" +
                                  "else:\n" +
-                                 "  proxy.mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.meshCaseDir)")
+                                 "  proxy.mesh_process.start(cmd, env_vars=env_vars, working_dir=cart_mesh.mesh_case_dir)")
             if self.mesh_obj.Proxy.mesh_process.waitForStarted():
                 self.form.pb_run_mesh.setEnabled(False)  # Prevent user running a second instance
                 self.form.pb_stop_mesh.setEnabled(True)
@@ -404,7 +404,7 @@ class TaskPanelCfdMesh:
 
     def openParaview(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        case_path = os.path.abspath(self.mesh_obj.Proxy.cart_mesh.meshCaseDir)
+        case_path = os.path.abspath(self.mesh_obj.Proxy.cart_mesh.mesh_case_dir)
         script_name = "pvScriptMesh.py"
         try:
             CfdTools.startParaview(case_path, script_name, self.consoleMessage)
