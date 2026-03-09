@@ -154,10 +154,10 @@ class CfdCaseWriterFoam:
             self.settings['MovingMeshRegionsPresent'] = False
 
         if CfdTools.DockerContainer.usedocker:
-            mesh_d = self.settings['meshDir'].split(os.sep)
-            self.settings['meshDir'] = '/tmp/{}'.format(mesh_d[-1])
-        else:
-            self.settings['meshDir'] = self.settings['meshDir'].replace('\\', '/')
+            mesh_d = os.path.relpath(os.path.join(self.working_dir,self.mesh_obj.CaseName),CfdTools.getDefaultOutputPath())
+            self.settings['meshDir'] = '/tmp/{}'.format(mesh_d)
+
+        self.settings['meshDir'] = self.settings['meshDir'].replace('\\', '/')
 
         self.processSystemSettings()
         self.processSolverSettings()
