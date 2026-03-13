@@ -158,6 +158,8 @@ this.
 can be problematic as it does not allow access to system
 directories, and therefore OpenFOAM has to be installed in the user's home directory
 to be runnable from FreeCAD.
+* The 'Flatpak' version of FreeCAD requires the *default output deirectory* to be in the user's
+home directory. For example: `/home/<USER>/cfdof`.
 
 For the reasons above we recommend the AppImage as the most robust installation
 option on Linux.
