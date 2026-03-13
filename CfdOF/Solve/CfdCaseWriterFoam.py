@@ -60,6 +60,7 @@ class CfdCaseWriterFoam:
             raise RuntimeError("No initial conditions object was found in analysis " + analysis_obj.Label)
         self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
         self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
+        self.mean_velocity_force_obj = CfdTools.getMeanVelocityForceObject(analysis_obj)
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
@@ -114,6 +115,9 @@ class CfdCaseWriterFoam:
             'reportingFunctionsEnabled': False,
             'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
             'scalarTransportFunctionsEnabled': False,
+            'meanVelocityForce': CfdTools.propsToDict(self.mean_velocity_force_obj) if self.mean_velocity_force_obj else {},
+            'meanVelocityForceEnabled': self.mean_velocity_force_obj is not None,
+            'fvOptionsPresent': (self.mean_velocity_force_obj is not None),
             'dynamicMesh': {},
             'dynamicMeshEnabled': False,
             'MovingMeshRegions': {},
