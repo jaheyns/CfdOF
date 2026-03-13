@@ -108,7 +108,7 @@ fi
 # Enable fvOption source for scalar transport in OpenFOAM v10+
 if [ -z ${FOAM_API+x} ] && [ "$WM_PROJECT_VERSION" -ge 10 ]
 then
-    cp system/fvOptions_OF10 system/fvOptions
+    cp system/fvOptionsScalarTransport_OF10 system/fvOptionsScalarTransport
 fi
 
 %}
