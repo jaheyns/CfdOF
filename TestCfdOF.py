@@ -470,6 +470,54 @@ class PropellerTest(unittest.TestCase, MacroTest):
         self.closeDoc()
 
 
+class PeriodicBoundaryAndMeanVelocityForceTest(unittest.TestCase, MacroTest):
+    __dir_name = 'Periodic_boundary_meanvelocityforce'
+    __case_name = 'PeriodicBoundaryAndMeanVelocityForce'
+    __macros = ['periodicBoundaryAndMeanVelocityForce.FCMacro']
+
+    def __init__(self, var):
+        super().__init__(var)
+        MacroTest.child_instance = self
+
+    def test_run(self):
+        prefs = CfdTools.getPreferencesLocation()
+        original_append_setting = FreeCAD.ParamGet(prefs).GetBool("AppendDocNameToOutputPath", 0)
+        FreeCAD.ParamGet(prefs).SetBool("AppendDocNameToOutputPath", 0)
+
+        fccPrint('--------------- Start of CFD tests ---------------')
+        dir_name = self.__class__.__dir_name
+        case_name = self.__class__.__case_name
+        for m in self.__class__.__macros:
+            macro_name = os.path.join(home_path, "Demos", dir_name, m)
+            fccPrint('Running {} macro {} ...'.format(dir_name, macro_name))
+            CfdTools.executeMacro(macro_name)
+
+        fccPrint('Writing {} case files ...'.format(dir_name))
+        analysis = CfdTools.getActiveAnalysis()
+        if analysis is None:
+            # Proxy may not be fully restored when running without GUI; find by property
+            for obj in FreeCAD.ActiveDocument.Objects:
+                if hasattr(obj, 'IsActiveAnalysis') and hasattr(obj, 'OutputPath'):
+                    analysis = obj
+                    break
+        analysis.OutputPath = temp_dir
+        CfdTools.getSolver(analysis).InputCaseName = "case" + case_name
+        self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam(analysis)
+        self.writer.writeCase()
+        self.assertTrue(self.writer, "CfdTest of writer failed")
+
+        ref_dir = os.path.join(test_file_dir, "cases", case_name, "case")
+        case_dir = self.writer.case_folder
+        comparePaths(ref_dir, case_dir, self)
+
+        fccPrint('--------------- End of CFD tests ---------------')
+
+        FreeCAD.ParamGet(prefs).SetBool("AppendDocNameToOutputPath", original_append_setting)
+
+    def tearDown(self):
+        self.closeDoc()
+
+
 def compareInpFiles(file_name1, file_name2):
     file1 = open(file_name1, 'r')
     f1 = file1.readlines()
