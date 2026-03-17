@@ -101,7 +101,7 @@ else
 %{%(scalarTransportFunctionsEnabled%)
 %:True
 # Enable fvOption source for scalar transport in OpenFOAM v10+
-if ( $Env:WM_PROJECT_VERSION[0] -neq "v" -and 10 -le $Env:WM_PROJECT_VERSION )
+if ( $Env:WM_PROJECT_VERSION[0] -ne "v" -and 10 -le $Env:WM_PROJECT_VERSION )
 {
     cp system/fvOptionsScalarTransport_OF10 system/fvOptionsScalarTransport
 }
