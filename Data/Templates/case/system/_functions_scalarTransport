@@ -10,9 +10,11 @@
 %{%(scalarTransportFunctions/%(0%)/DiffusivityFixed%)
 %:True
         diffusion       constant;
+        diffusivity     constant;
         D               %(scalarTransportFunctions/%(0%)/DiffusivityFixedValue%);
 %:False
         diffusion       viscosity;
+        diffusivity     viscosity;
         alphal          1;
         alphat          1;
 %}

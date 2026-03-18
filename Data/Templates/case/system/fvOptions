@@ -1,8 +1,5 @@
-%{%(porousZonesPresent%)
+%{%(fvOptionsPresent%)
 %:True
-%{%(solver/SolverName%)
-%:porousSimpleFoam
-%:default
 %[_header%]
 FoamFile
 {
@@ -13,6 +10,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+%{%(porousZonesPresent%)
+%:True
+%{%(solver/SolverName%)
+%:porousSimpleFoam
+%:default
 %{%(porousZones%)
 %{%(porousZones/%(0%)/PartNameList%)
 %(0%)
@@ -49,7 +51,28 @@ FoamFile
 
 %}
 %}
-
-//************************************************************************ //
 %}
+%}
+
+#includeIfPresent "fvOptionsScalarTransport"
+
+%{%(meanVelocityForceEnabled%)
+%:True
+momentumSource
+{
+    type            meanVelocityForce;
+    selectionMode   all;
+    active          yes;
+    meanVelocityForceCoeffs
+    {
+        selectionMode   all;
+        fields          (U);
+        direction       (%(meanVelocityForce/Direction%));
+        Ubar            (%(meanVelocityForce/Ubar%));
+        relaxation      %(meanVelocityForce/Relaxation%);
+    }
+}
+
+%}
+//************************************************************************ //
 %}

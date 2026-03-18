@@ -242,6 +242,10 @@ def getScalarTransportFunctionsGroup(analysis_object):
     return getModelsOfType(analysis_object, 'CfdScalarTransportFunction')
 
 
+def getMeanVelocityForceObject(analysis_object):
+    return getModelOfType(analysis_object, 'CfdMeanVelocityForce')
+
+
 # Mesh
 def getMeshRefinementObjs(mesh_obj):
     return getModelsOfType(mesh_obj, 'CfdMeshRefinement')
@@ -328,17 +332,7 @@ def setQuantity(inputField, quantity):
     """
     Set the quantity (quantity object or unlocalised string) into the inputField correctly
     """
-    # Must set in the correctly localised value as the user would enter it.
-    # A bit painful because the python locale settings seem to be based on language,
-    # not input settings as the FreeCAD settings are. So can't use that; hence
-    # this rather roundabout way involving the UserString of Quantity
-    q = Units.Quantity(quantity)
-    # Avoid any truncation
-    if isinstance(q.Format, tuple):  # Backward compat
-        q.Format = (12, 'e')
-    else:
-        q.Format = {'Precision': 12, 'NumberFormat': 'e', 'Denominator': q.Format['Denominator']}
-    inputField.setProperty("quantityString", q.UserString)
+    inputField.setProperty("quantity", quantity)
 
 
 def getQuantity(inputField):
