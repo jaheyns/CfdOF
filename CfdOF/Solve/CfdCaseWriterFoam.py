@@ -60,7 +60,11 @@ class CfdCaseWriterFoam:
             raise RuntimeError("No initial conditions object was found in analysis " + analysis_obj.Label)
         self.reporting_functions = CfdTools.getReportingFunctionsGroup(analysis_obj)
         self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
-        self.mean_velocity_force_obj = CfdTools.getMeanVelocityForceObject(analysis_obj)
+        _all_mvf_objs = CfdTools.getMeanVelocityForceObjects(analysis_obj)
+        _all_mode_objs = [o for o in _all_mvf_objs if o.SelectionMode == 'all']
+        self.mean_velocity_force_obj = _all_mode_objs[0] if _all_mode_objs else None
+        self.mean_velocity_force_cellzone_objs = [
+            o for o in _all_mvf_objs if o.SelectionMode == 'cellZone']
         self.porous_zone_objs = CfdTools.getPorousZoneObjects(analysis_obj)
         self.initialisation_zone_objs = CfdTools.getInitialisationZoneObjects(analysis_obj)
         self.zone_objs = CfdTools.getZoneObjects(analysis_obj)
@@ -117,7 +121,10 @@ class CfdCaseWriterFoam:
             'scalarTransportFunctionsEnabled': False,
             'meanVelocityForce': CfdTools.propsToDict(self.mean_velocity_force_obj) if self.mean_velocity_force_obj else {},
             'meanVelocityForceEnabled': self.mean_velocity_force_obj is not None,
-            'fvOptionsPresent': (self.mean_velocity_force_obj is not None),
+            'meanVelocityForceCellZones': {},
+            'meanVelocityForceCellZonesPresent': False,
+            'fvOptionsPresent': (self.mean_velocity_force_obj is not None or
+                                 len(self.mean_velocity_force_cellzone_objs) > 0),
             'dynamicMesh': {},
             'dynamicMeshEnabled': False,
             'MovingMeshRegions': {},
@@ -175,6 +182,11 @@ class CfdCaseWriterFoam:
         if self.porous_zone_objs:
             self.processPorousZoneProperties()
         self.processInitialisationZoneProperties()
+
+        if self.mean_velocity_force_cellzone_objs:
+            cfdMessage('Mean velocity force cell zone(s) present\n')
+            self.exportMeanVelocityForceCellZoneStlSurfaces()
+            self.processMeanVelocityForceCellZoneProperties()
 
         if self.reporting_functions:
             cfdMessage('Reporting functions present\n')
@@ -729,6 +741,37 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("Unrecognised method for porous baffle resistance")
             porousZoneSettings[po['Label']] = pd
+
+    # Mean velocity force cell zones
+    def exportMeanVelocityForceCellZoneStlSurfaces(self):
+        for o in self.mean_velocity_force_cellzone_objs:
+            for r in o.ShapeRefs:
+                path = os.path.join(self.working_dir,
+                                    self.solver_obj.InputCaseName,
+                                    "constant",
+                                    "triSurface")
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                shape = r[0].Shape
+                CfdMeshTools.writeSurfaceMeshFromShape(shape, path, r[0].Name, self.mesh_obj)
+                print("Successfully wrote stl surface for mean velocity force cell zone\n")
+
+    def processMeanVelocityForceCellZoneProperties(self):
+        settings = self.settings
+        settings['meanVelocityForceCellZonesPresent'] = True
+        settings['fvOptionsPresent'] = True
+        for o in self.mean_velocity_force_cellzone_objs:
+            od = CfdTools.propsToDict(o)
+            part_name_list = tuple(r[0].Name for r in o.ShapeRefs)
+            settings['meanVelocityForceCellZones'][o.Label] = {
+                'PartNameList': part_name_list,
+                'Direction': od['Direction'],
+                'Ubar': od['Ubar'],
+                'Relaxation': od['Relaxation'],
+            }
+            # Register the zone for topoSetZonesDict so the cellZoneSet is created
+            settings['zones'][o.Label] = {'PartNameList': part_name_list}
+        settings['zonesPresent'] = True
 
     def processInitialisationZoneProperties(self):
         settings = self.settings

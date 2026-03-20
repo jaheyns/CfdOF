@@ -5,6 +5,7 @@ import os
 
 import FreeCAD
 import FreeCADGui
+import Part
 from pivy import coin
 
 from CfdOF import CfdTools
@@ -55,6 +56,25 @@ class CfdMeanVelocityForce:
         obj.Proxy = self
         self.Type = 'CfdMeanVelocityForce'
 
+        if addObjectProperty(
+            obj,
+            "SelectionMode",
+            ["all", "cellZone"],
+            "App::PropertyEnumeration",
+            "Mean velocity force",
+            QT_TRANSLATE_NOOP("App::Property", "Selection mode: apply to entire domain (all) or a specific cell zone (cellZone)"),
+        ):
+            obj.SelectionMode = "all"
+
+        addObjectProperty(
+            obj,
+            "ShapeRefs",
+            [],
+            "App::PropertyLinkSubListGlobal",
+            "Mean velocity force",
+            QT_TRANSLATE_NOOP("App::Property", "Solid reference(s) defining the cell zone (used when SelectionMode is cellZone)"),
+        )
+
         addObjectProperty(
             obj,
             "Direction",
@@ -84,7 +104,19 @@ class CfdMeanVelocityForce:
         self.initProperties(obj)
 
     def execute(self, obj):
-        pass
+        if obj.SelectionMode == 'cellZone' and obj.ShapeRefs:
+            list_of_shapes = []
+            for r in obj.ShapeRefs:
+                try:
+                    list_of_shapes.append(r[0].Shape)
+                except Part.OCCError:
+                    pass
+            if list_of_shapes:
+                obj.Shape = Part.makeCompound(list_of_shapes)
+            else:
+                obj.Shape = Part.Shape()
+        else:
+            obj.Shape = Part.Shape()
 
     def __getstate__(self):
         return None
@@ -102,6 +134,7 @@ class CfdMeanVelocityForce:
 class ViewProviderCfdMeanVelocityForce:
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.taskd = None
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "meanvelocityforce.svg")
@@ -112,6 +145,8 @@ class ViewProviderCfdMeanVelocityForce:
         self.Object = vobj.Object
         self.standard = coin.SoGroup()
         vobj.addDisplayMode(self.standard, "Standard")
+        vobj.ShapeColor = (0.0, 0.5, 1.0)
+        vobj.Transparency = 70
         return
 
     def updateData(self, obj, prop):
@@ -140,12 +175,15 @@ class ViewProviderCfdMeanVelocityForce:
         from CfdOF.Solve import TaskPanelCfdMeanVelocityForce
         import importlib
         importlib.reload(TaskPanelCfdMeanVelocityForce)
-        taskd = TaskPanelCfdMeanVelocityForce.TaskPanelCfdMeanVelocityForce(self.Object)
-        taskd.obj = vobj.Object
-        FreeCADGui.Control.showDialog(taskd)
+        self.taskd = TaskPanelCfdMeanVelocityForce.TaskPanelCfdMeanVelocityForce(self.Object)
+        self.taskd.obj = vobj.Object
+        FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def unsetEdit(self, vobj, mode):
+        if self.taskd:
+            self.taskd.closing()
+            self.taskd = None
         FreeCADGui.Control.closeDialog()
         return
 
