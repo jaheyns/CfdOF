@@ -74,5 +74,29 @@ momentumSource
 }
 
 %}
+%{%(meanVelocityForceCellZonesPresent%)
+%:True
+%{%(meanVelocityForceCellZones%)
+%{%(meanVelocityForceCellZones/%(0%)/PartNameList%)
+%(0%)MomentumSource
+{
+    type            meanVelocityForce;
+    selectionMode   cellZone;
+    cellZone        %(0%);
+    active          yes;
+    meanVelocityForceCoeffs
+    {
+        selectionMode   cellZone;
+        cellZone        %(0%);
+        fields          (U);
+        direction       (%(meanVelocityForceCellZones/%(1%)/Direction%));
+        Ubar            (%(meanVelocityForceCellZones/%(1%)/Ubar%));
+        relaxation      %(meanVelocityForceCellZones/%(1%)/Relaxation%);
+    }
+}
+
+%}
+%}
+%}
 //************************************************************************ //
 %}
