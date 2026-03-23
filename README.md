@@ -6,7 +6,7 @@ It guides the user in selecting the relevant physics, specifying the material pr
 boundary conditions and choosing the solver settings before running the simulation. Best practices are built in to
 maximise the stability of the solvers.
 
-![screenshot](Doc/Resources/boiler.png)
+![screenshot](Doc/Resources/duct.png)
 
 Disclaimer:
 This offering is not approved or endorsed by OpenCFD Limited, producer and distributor of the OpenFOAM software via
