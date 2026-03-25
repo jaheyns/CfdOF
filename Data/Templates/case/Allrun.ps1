@@ -28,9 +28,6 @@ function runParallel([int]$NumProcs, [string]$cmd)
 # Set piping to file to ascii
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
-# Less verbose error reporting
-$ErrorView = 'CategoryView'
-
 # Copy mesh from mesh case dir if available
 $MESHDIR = "%(meshDir%)"
 if( Test-Path -PathType Leaf $MESHDIR/constant/polyMesh/faces )
@@ -40,8 +37,7 @@ if( Test-Path -PathType Leaf $MESHDIR/constant/polyMesh/faces )
 }
 elseif( !(Test-Path -PathType Leaf constant/polyMesh/faces) )
 {
-    Write-Error "Fatal error: Unable to find mesh in directory $MESHDIR"
-    exit 1
+    throw "Fatal error: Unable to find mesh in directory $MESHDIR"
 }
 
 # Set turbulence lib
