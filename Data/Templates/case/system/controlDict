@@ -67,7 +67,7 @@ libs
 %{%(solver/SolverName%)
 %:hisa
     // Needed for availability of boundary conditions in potentialFoam
-    "libhisaFiniteVolume.so"
+    "libhisaFiniteVolume"
 %}
 );
 

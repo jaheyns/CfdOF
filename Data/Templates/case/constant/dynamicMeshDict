@@ -13,7 +13,7 @@ FoamFile
 // OpenCFD:
 
 dynamicFvMesh    dynamicRefineFvMesh;
-dynamicFvMeshLibs ("libhisaMeshRebalancing.so");
+dynamicFvMeshLibs ("libhisaMeshRebalancing");
 
 dynamicRefineFvMeshCoeffs
 {
@@ -76,7 +76,7 @@ dynamicRefineFvMeshCoeffs
 topoChanger
 {
     type refiner;
-    libs            ("libfvMeshTopoChangers.so" "libhisaMeshRebalancing.so");
+    libs            ("libfvMeshTopoChangers" "libhisaMeshRebalancing");
 
 %{%(dynamicMesh/Type%)
 %:interface
