@@ -410,6 +410,11 @@ class CfdCaseWriterFoam:
                 beta = (1-wireDiam/spacing)**2
                 bc['PressureDropCoeff'] = CD*(1-beta)
 
+            if bc['BoundaryType'] == 'wall' and bc['BoundarySubType'] == 'rotatingWall':
+                ax = bc['RotationAxis']
+                if ax[0]**2 + ax[1]**2 + ax[2]**2 == 0:
+                    raise RuntimeError(str("The rotation axis in boundary '" + bc_name + "' cannot be zero."))
+
             if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
                 # Make sure the first n-1 alpha values exist, and write the n-th one
                 # consistently for multiphaseInterFoam

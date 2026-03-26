@@ -607,7 +607,7 @@ class CfdFluidBoundary:
         addObjectProperty(
             obj,
             "PeriodicCentreOfRotationAxis",
-            FreeCAD.Vector(0, 0, 0),
+            FreeCAD.Vector(0, 0, 1),
             "App::PropertyVector",
             "Periodic",
             QT_TRANSLATE_NOOP("App::Property", "Axis of rotation for rotational periodics"),
