@@ -1252,6 +1252,8 @@ def getGmshExecutable():
     if not gmsh_cmd:
         # Otherwise, see if the command 'gmsh' is in the path.
         gmsh_cmd = shutil.which("gmsh")
+    if not gmsh_cmd:
+        raise IOError("gmsh executable path not set and not detected")
     gmsh_cmd = os.path.normpath(gmsh_cmd)
     if getFoamRuntime() == "PosixDocker":
         gmsh_cmd='gmsh'
