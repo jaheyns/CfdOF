@@ -4,7 +4,7 @@
 ;
 ; FreeCAD Material card: see https://www.freecad.org/wiki/Material
 
-[FCdMat]
+[FCMat]
 Name = Water
 Type = Incompressible
 Description = Temperature-dependent properties for pure water
