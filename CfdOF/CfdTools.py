@@ -1187,8 +1187,9 @@ def checkCfdDependencies(msgFn):
     print("Checking for gmsh:")
     # check that gmsh version 2.13 or greater is installed
     gmshversion = ""
-    gmsh_exe = getGmshExecutable()
-    if gmsh_exe is None:
+    try:
+        gmsh_exe = getGmshExecutable()
+    except IOError as e:
         msgFn("gmsh not found (optional)")
     else:
         msgFn("gmsh executable: " + gmsh_exe)
@@ -1242,6 +1243,9 @@ def getParaviewExecutable():
 
 
 def getGmshExecutable():
+    if getFoamRuntime() == "PosixDocker":
+        return 'gmsh'
+
     # If path of gmsh executable specified, use that
     gmsh_cmd = getGmshPath()
     if not gmsh_cmd:
@@ -1255,8 +1259,6 @@ def getGmshExecutable():
     if not gmsh_cmd:
         raise IOError("gmsh executable path not set and not detected")
     gmsh_cmd = os.path.normpath(gmsh_cmd)
-    if getFoamRuntime() == "PosixDocker":
-        gmsh_cmd='gmsh'
     return gmsh_cmd
 
 
