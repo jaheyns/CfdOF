@@ -42,7 +42,7 @@ libs
     // Needed for availability of porous baffle boundary in potentialFoam
     #include "turbulenceLib"
     // Needed for availability of boundary conditions in potentialFoam
-    "libhisaFiniteVolume.so"
+    "libhisaFiniteVolume"
 );
 
 functions
