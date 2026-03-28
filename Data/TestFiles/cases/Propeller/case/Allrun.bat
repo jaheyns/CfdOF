@@ -2,9 +2,9 @@
 
 REM Source runtime environment
 
-set FOAMDIR="C:\blueCFD-Core-2024"
+set FOAMDIR="/usr/lib/openfoam/openfoam2512"
 set CWD=%CD%
-set FOAMVER=12
+set FOAMVER=None
 
 if %FOAMVER% GEQ 1000 goto OPENCFD
 :FOUNDATION

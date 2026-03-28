@@ -26,6 +26,7 @@ runParallel()
 }
 
 # Unset and source bashrc
+FOAMDIR="/usr/lib/openfoam/openfoam2512"
 if [ ! -z "$FOAMDIR" ]
 then
     source "$FOAMDIR/etc/config.sh/unset" 2> /dev/null
