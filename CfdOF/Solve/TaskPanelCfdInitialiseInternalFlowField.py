@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-# SPDX-FileCopyrightText: 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>
-# SPDX-FileCopyrightText: 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>
-# SPDX-FileCopyrightText: 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>
-# SPDX-FileCopyrightText: 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>
-# SPDX-FileCopyrightText: 2022 Jonathan Bergh <bergh.jonathan@gmail.com>
+# SPDX-FileCopyrightText: © 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>
+# SPDX-FileCopyrightText: © 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>
+# SPDX-FileCopyrightText: © 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>
+# SPDX-FileCopyrightText: © 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>
+# SPDX-FileCopyrightText: © 2022 Jonathan Bergh <bergh.jonathan@gmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################

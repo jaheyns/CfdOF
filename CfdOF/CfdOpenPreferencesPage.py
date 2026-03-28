@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-# SPDX-FileCopyrightText: 2024 hasecilu <hasecilu@tuta.io>
+# SPDX-FileCopyrightText: © 2024 hasecilu <hasecilu@tuta.io>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################

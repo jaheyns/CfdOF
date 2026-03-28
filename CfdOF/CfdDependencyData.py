@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: LGPL-3.0-or-later
-# SPDX-FileCopyrightText: 2025 Oliver Oxtoby <oliveroxtoby@gmail.com>
+# SPDX-FileCopyrightText: © 2025 Oliver Oxtoby <oliveroxtoby@gmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################
