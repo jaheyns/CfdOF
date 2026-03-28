@@ -26,6 +26,8 @@ www.openfoam.com, and owner of the OPENFOAM® and OpenCFD® trade marks
 * Basic material database
 * Flow initialisation with potential flow solver
 * Solution of arbitrary passive scalar transport functions
+* AMI/NCC support for rotating mesh regions
+* support for mean velocity force calculation
 #### Meshing
 * Cut-cell Cartesian meshing with boundary layers (cfMesh)
 * Cut-cell Cartesian meshing with baffles and moving mesh regions (snappyHexMesh)
