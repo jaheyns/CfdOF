@@ -335,6 +335,8 @@ def setQuantity(inputField, quantity):
     """
     Set the quantity (quantity object or unlocalised string) into the inputField correctly
     """
+    if isinstance(quantity, str):
+        quantity = Units.Quantity(quantity)
     inputField.setProperty("quantity", quantity)
 
 
