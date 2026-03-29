@@ -2180,6 +2180,34 @@ Re-mesh case first?</source>
     </message>
 </context>
 <context>
+    <name>TaskPanelCfdMeanVelocityForce</name>
+    <message>
+        <location filename="../Gui/TaskPanelCfdMeanVelocityForce.ui" line="20"/>
+        <source>All (entire domain)</source>
+		<translation>الكل (كل المجال)</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdMeanVelocityForce.ui" line="25"/>
+        <source>Cell zone</source>
+		<translation>منطقة خلوية</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdMeanVelocityForce.ui" line="33"/>
+        <source>Direction (X,Y,Z)</source>
+		<translation>الاتجاه (س, ص, ع)</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdMeanVelocityForce.ui" line="61"/>
+        <source>Mean velocity (X,Y,Z)</source>
+		<translation>السرعة المتوسطة (س, ص, ع)</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdMeanVelocityForce.ui" line="68"/>
+        <source>Relaxation</source>
+		<translation>الاسترخاء</translation>
+    </message>
+</context>
+<context>
     <name>TaskPanelCfdMesh</name>
     <message>
         <location filename="../Gui/TaskPanelCfdMesh.ui" line="14"/>
@@ -2302,6 +2330,11 @@ Re-mesh case first?</source>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdMeshRefinement.ui" line="42"/>
+        <source>Moving mesh region</source>
+		<translation>منطقة ميش متحركة</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdMeshRefinement.ui" line="49"/>
         <source>Surface refinement</source>
 		<translation>التصغير السطحي</translation>
     </message>
