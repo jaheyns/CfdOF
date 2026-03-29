@@ -182,7 +182,7 @@ class TaskPanelCfdFluidProperties:
         d = QtGui.QFileDialog(
             None, "Save Custom Material", system_mat_dir, "FCMat (*.FCMat)")
         d.setDefaultSuffix("FCMat")
-        d.setAcceptMode(d.AcceptSave)
+        d.setAcceptMode(QtGui.QFileDialog.AcceptMode.AcceptSave)
         d.exec()
         file_name = d.selectedFiles()
         if file_name:
