@@ -327,7 +327,8 @@ and the [Council for Scientific and Industrial Research](https://www.csir.co.za)
 * Thomas Schrader (2017-) <info@schraderundschrader.de>
 * Michael Hindley (2016)
 * Mark Mackenzie (2022-) [Forum: @markrmau]
-* Muez Abdalla (2025) [Github: @muezabdalla]
+* Muez Abdalla (2025-) [Github: @muezabdalla]
+* Kavin Teenakul (2026-) <andythe_great@protonmail.com>
 * Katy Akmal (2022) [Forum: @KAKM]
 * Adrian Insaurralde (2022)
 * Klaus Sembritzki (2017)
