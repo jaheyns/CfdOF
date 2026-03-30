@@ -27,7 +27,7 @@ FreeCAD.ActiveDocument.Pad_Mesh.MeshUtility = 'cfMesh'
 FreeCAD.ActiveDocument.Pad_Mesh.ElementDimension = '2D'
 FreeCAD.ActiveDocument.Pad_Mesh.CellsBetweenLevels = 3
 FreeCAD.ActiveDocument.Pad_Mesh.EdgeRefinement = 1.0
-FreeCAD.ActiveDocument.Pad_Mesh.PointInMesh = {'x': '0 mm', 'y': '0 mm', 'z': '0 mm'}
+FreeCAD.ActiveDocument.Pad_Mesh.PointInMesh = {'x': '100 mm', 'y': '0 mm', 'z': '0 mm'}
 
 from CfdOF.Mesh import CfdMeshRefinement
 CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Pad_Mesh)
