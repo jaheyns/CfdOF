@@ -21,6 +21,7 @@
 # 	Debian-based (e.g., Ubuntu): $ sudo apt-get install qttools5-dev-tools pyqt6-dev-tools
 # 	Fedora-based: $ sudo dnf install qt6-linguist qt6-devel
 # 	Arch-based: $ sudo pacman -S qt6-tools python-pyqt6
+#   Void-linux: $ sudo xbps-install -S qt6-tools python3-pyqt6
 # - Make the script executable
 # 	$ chmod +x update_translation.sh
 # - The script has to be executed within the `Translations` directory.
