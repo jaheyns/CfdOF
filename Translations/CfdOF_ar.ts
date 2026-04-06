@@ -2545,7 +2545,7 @@ Re-mesh case first?</source>
     <message>
         <location filename="../Gui/TaskPanelCfdReportingFunctions.ui" line="997"/>
         <source>Probe location (x, y, z)</source>
-        <translation>موقع المجس (x, y, z)</translation>
+        <translation>موقع المجس (س, ص, ع)</translation>
     </message>
 </context>
 <context>
@@ -2593,7 +2593,7 @@ Re-mesh case first?</source>
     <message>
         <location filename="../Gui/TaskPanelCfdScalarTransportFunctions.ui" line="269"/>
         <source>Injection point (x, y, z)</source>
-        <translation>نقطة الحقن (x, y, z)</translation>
+        <translation>نقطة الحقن (س, ص, ع)</translation>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdScalarTransportFunctions.ui" line="282"/>
