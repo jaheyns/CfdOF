@@ -1,0 +1,28 @@
+# Gui.Selection.clearSelection()
+### Begin command Std_Workbench
+# Gui.activateWorkbench("CfdOFWorkbench")
+### End command Std_Workbench
+### Begin command CfdOF_Analysis
+from CfdOF import CfdAnalysis
+from CfdOF import CfdTools
+analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+CfdTools.setActiveAnalysis(analysis)
+from CfdOF.Solve import CfdPhysicsSelection
+analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+from CfdOF.Solve import CfdFluidMaterial
+analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+from CfdOF.Solve import CfdInitialiseFlowField
+analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+from CfdOF.Solve import CfdSolverFoam
+analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+### End command CfdOF_Analysis
+# Gui.Selection.addSelection('Unnamed','PhysicsModel')
+# App.getDocument('Unnamed').getObject('PhysicsModel').ViewObject.doubleClicked()
+App.ActiveDocument.PhysicsModel.Time = 'Transient'
+App.ActiveDocument.PhysicsModel.Turbulence = 'DES'
+App.ActiveDocument.PhysicsModel.TurbulenceModel = 'kOmegaSSTIDDES'
+# Gui.Selection.addSelection('Unnamed','InitialiseFields')
+# App.getDocument('Unnamed').getObject('InitialiseFields').ViewObject.doubleClicked()
+App.ActiveDocument.InitialiseFields.PotentialFlow = False
+App.ActiveDocument.InitialiseFields.UseOutletPValue = False
+FreeCAD.ActiveDocument.recompute()
