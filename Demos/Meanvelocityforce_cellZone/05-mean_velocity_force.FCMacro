@@ -1,0 +1,32 @@
+### Begin command CfdOF_MeanVelocityForce
+
+from CfdOF.Solve import CfdMeanVelocityForce
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdMeanVelocityForce.makeCfdMeanVelocityForce())
+### End command CfdOF_MeanVelocityForce
+App.ActiveDocument.MeanVelocityForce.SelectionMode = 'cellZone'
+App.ActiveDocument.MeanVelocityForce.Direction = App.Vector (1.0, 0.0, 0.0)
+App.ActiveDocument.MeanVelocityForce.Ubar = App.Vector (0.04, 0.0, 0.0)
+# Gui.Selection.addSelection('Unnamed','MeanVelocityForce')
+# Gui.Selection.clearSelection()
+### Begin command CfdOF_MeanVelocityForce
+
+from CfdOF.Solve import CfdMeanVelocityForce
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdMeanVelocityForce.makeCfdMeanVelocityForce())
+### End command CfdOF_MeanVelocityForce
+App.ActiveDocument.MeanVelocityForce001.SelectionMode = 'cellZone'
+App.ActiveDocument.MeanVelocityForce001.Direction = App.Vector (0.0, 1.0, 0.0)
+App.ActiveDocument.MeanVelocityForce001.Ubar = App.Vector (0.0, 0.06, 0.0)
+# Gui.Selection.addSelection('Unnamed','MeanVelocityForce001')
+### Begin command CfdOF_MeanVelocityForce
+
+from CfdOF.Solve import CfdMeanVelocityForce
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdMeanVelocityForce.makeCfdMeanVelocityForce())
+### End command CfdOF_MeanVelocityForce
+# Gui.Selection.clearSelection()
+App.ActiveDocument.MeanVelocityForce002.SelectionMode = 'cellZone'
+App.ActiveDocument.MeanVelocityForce002.Direction = App.Vector (0.0, 0.0, 1.0)
+App.ActiveDocument.MeanVelocityForce002.Ubar = App.Vector (0.0, 0.0, 0.08)
+FreeCAD.ActiveDocument.recompute()

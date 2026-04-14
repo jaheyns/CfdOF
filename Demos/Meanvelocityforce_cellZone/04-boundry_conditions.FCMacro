@@ -1,0 +1,18 @@
+# Gui.Selection.addSelection('Unnamed','Box','Face3',71.3061,0,75.3373)
+# Gui.Selection.addSelection('Unnamed','Box','Face2',100,46.7449,55.4546)
+# Gui.Selection.addSelection('Unnamed','Box','Face6',54.7496,43.1953,100)
+# Gui.Selection.addSelection('Unnamed','Box','Face1',3.55271e-15,70.1613,42.8807)
+# Gui.Selection.addSelection('Unnamed','Box','Face5',18.1456,69.2525,1.77636e-15)
+# Gui.Selection.addSelection('Unnamed','Box','Face4',52.1356,100,42.6571)
+### Begin command CfdOF_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command CfdOF_FluidBoundary
+# Gui.Selection.clearSelection()
+App.ActiveDocument.CfdFluidBoundary.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Box'), ('Face3', 'Face2', 'Face6', 'Face1', 'Face5', 'Face4'))]
+FreeCAD.ActiveDocument.recompute()

@@ -1,0 +1,12 @@
+# Gui.Selection.addSelection('Unnamed','Box')
+### Begin command CfdOF_MeshFromShape
+from CfdOF.Mesh import CfdMesh
+CfdMesh.makeCfdMesh('Box_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Box
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+### End command CfdOF_MeshFromShape
+# Gui.Selection.clearSelection()
+App.ActiveDocument.Box_Mesh.CharacteristicLengthMax = '2.0 mm'
+App.ActiveDocument.Box_Mesh.MeshUtility = 'gmsh'
+FreeCAD.ActiveDocument.recompute()

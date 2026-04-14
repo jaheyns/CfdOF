@@ -1,0 +1,71 @@
+import FreeCAD
+import PartDesignGui
+import Part
+
+# Gui.runCommand('Std_DlgMacroRecord',0)
+### Begin command Std_New
+App.newDocument()
+# App.setActiveDocument("Unnamed")
+# App.ActiveDocument=App.getDocument("Unnamed")
+# Gui.ActiveDocument=Gui.getDocument("Unnamed")
+# Gui.activeDocument().activeView().viewDefaultOrientation()
+### End command Std_New
+# Gui.runCommand('Std_OrthographicCamera',1)
+### Begin command Std_Workbench
+# Gui.activateWorkbench("PartWorkbench")
+### End command Std_Workbench
+### Begin command Part_Box
+App.ActiveDocument.addObject("Part::Box","Box")
+App.ActiveDocument.ActiveObject.Label = "Cube"
+# Object created at document root.
+# Gui.SendMsgToActiveView("ViewFit")
+### End command Part_Box
+# Gui.Selection.addSelection('Unnamed','Box')
+FreeCAD.getDocument('Unnamed').getObject('Box').Length = '100 mm'
+
+FreeCAD.getDocument('Unnamed').getObject('Box').Width = '100 mm'
+
+FreeCAD.getDocument('Unnamed').getObject('Box').Height = '100 mm'
+
+# Gui.Selection.clearSelection()
+### Begin command Part_Cylinder
+App.ActiveDocument.addObject("Part::Cylinder","Cylinder")
+App.ActiveDocument.ActiveObject.Label = "Cylinder"
+# Object created at document root.
+# Gui.SendMsgToActiveView("ViewFit")
+### End command Part_Cylinder
+# Gui.Selection.addSelection('Unnamed','Cylinder')
+FreeCAD.getDocument('Unnamed').getObject('Cylinder').Placement = App.Placement(App.Vector(75,75,47),App.Rotation(App.Vector(0,1,0),90))
+
+FreeCAD.getDocument('Unnamed').getObject('Cylinder').Radius = '10 mm'
+
+FreeCAD.getDocument('Unnamed').getObject('Cylinder').Height = '4 mm'
+
+# Gui.Selection.clearSelection()
+### Begin command Part_Cylinder
+App.ActiveDocument.addObject("Part::Cylinder","Cylinder")
+App.ActiveDocument.ActiveObject.Label = "Cylinder"
+# Object created at document root.
+# Gui.SendMsgToActiveView("ViewFit")
+### End command Part_Cylinder
+# Gui.Selection.addSelection('Unnamed','Cylinder001')
+FreeCAD.getDocument('Unnamed').getObject('Cylinder001').Placement = App.Placement(App.Vector(21,51,71),App.Rotation(App.Vector(1,0,0),270))
+
+FreeCAD.getDocument('Unnamed').getObject('Cylinder001').Radius = '10 mm'
+
+FreeCAD.getDocument('Unnamed').getObject('Cylinder001').Height = '4 mm'
+
+# Gui.Selection.clearSelection()
+### Begin command Part_Cylinder
+App.ActiveDocument.addObject("Part::Cylinder","Cylinder")
+App.ActiveDocument.ActiveObject.Label = "Cylinder"
+# Object created at document root.
+# Gui.SendMsgToActiveView("ViewFit")
+### End command Part_Cylinder
+# Gui.Selection.addSelection('Unnamed','Cylinder002')
+FreeCAD.getDocument('Unnamed').getObject('Cylinder002').Placement = App.Placement(App.Vector(45,24,47),App.Rotation(App.Vector(0,0,1),0))
+
+FreeCAD.getDocument('Unnamed').getObject('Cylinder002').Radius = '10 mm'
+
+FreeCAD.getDocument('Unnamed').getObject('Cylinder002').Height = '4 mm'
+App.ActiveDocument.recompute()
