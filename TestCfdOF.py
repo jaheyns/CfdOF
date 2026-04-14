@@ -520,7 +520,7 @@ class PeriodicBoundaryAndMeanVelocityForceTest(unittest.TestCase, MacroTest):
 class MeanVelocityForceCellZoneTest(unittest.TestCase, MacroTest):
     __dir_name = 'Meanvelocityforce_cellZone'
     __case_name = 'MeanVelocityForceCellZone'
-    __macros = ['mean_velocity_force_cellzone.FCMacro']
+    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-mesh.FCMacro', '04-boundary_conditions.FCMacro',  '05-mean_velocity_force.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
