@@ -939,6 +939,9 @@
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
+              <property name="singleStep" stdset="0">
+               <double>1.000000000000000</double>
+              </property>
               <property name="unit" stdset="0">
                <string notr="true">mm</string>
               </property>
@@ -961,6 +964,9 @@
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
+              <property name="singleStep" stdset="0">
+               <double>1.000000000000000</double>
+              </property>
               <property name="unit" stdset="0">
                <string notr="true">mm</string>
               </property>
@@ -982,6 +988,9 @@
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="singleStep" stdset="0">
+               <double>1.000000000000000</double>
               </property>
               <property name="unit" stdset="0">
                <string notr="true">mm</string>
