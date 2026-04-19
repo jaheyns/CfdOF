@@ -153,6 +153,47 @@ class CfdSolverFoam(object):
             QT_TRANSLATE_NOOP("App::Property", "Global absolute solution convergence criterion"),
         )
 
+        addObjectProperty(
+            obj,
+            "RelaxationU",
+            0.7,
+            "App::PropertyFloat",
+            "Relaxation",
+            QT_TRANSLATE_NOOP("App::Property", "Velocity equation relaxation factor (steady-state)"),
+        )
+        addObjectProperty(
+            obj,
+            "RelaxationP",
+            0.3,
+            "App::PropertyFloat",
+            "Relaxation",
+            QT_TRANSLATE_NOOP("App::Property", "Pressure field relaxation factor (steady-state)"),
+        )
+        addObjectProperty(
+            obj,
+            "RelaxationH",
+            0.7,
+            "App::PropertyFloat",
+            "Relaxation",
+            QT_TRANSLATE_NOOP("App::Property", "Enthalpy equation relaxation factor (steady-state)"),
+        )
+        addObjectProperty(
+            obj,
+            "RelaxationTurbulence",
+            0.7,
+            "App::PropertyFloat",
+            "Relaxation",
+            QT_TRANSLATE_NOOP("App::Property", "Turbulence equations relaxation factor (steady-state)"),
+        )
+        addObjectProperty(
+            obj,
+            "RelaxationRho",
+            0.5,
+            "App::PropertyFloat",
+            "Relaxation",
+            QT_TRANSLATE_NOOP("App::Property", "Density field relaxation factor (steady-state)"),
+        )
+
         if addObjectProperty(
             obj,
             "StartFrom",
