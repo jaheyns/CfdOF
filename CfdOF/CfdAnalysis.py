@@ -277,3 +277,6 @@ class _ViewProviderCfdAnalysis:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_Analysis', CommandCfdAnalysis())

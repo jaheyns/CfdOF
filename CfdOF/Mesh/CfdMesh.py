@@ -404,3 +404,6 @@ class _ViewProviderCfdMesh:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_MeshFromShape', CommandCfdMeshFromShape())

@@ -54,46 +54,23 @@ class CfdOFWorkbench(Workbench):
     def Initialize(self):
         from PySide.QtCore import QT_TRANSLATE_NOOP
 
-        from CfdOF.CfdAnalysis import CommandCfdAnalysis
-        from CfdOF.Mesh.CfdMesh import CommandCfdMeshFromShape
-        from CfdOF.Mesh.CfdMeshRefinement import CommandMeshRegion
-        from CfdOF.Solve.CfdPhysicsSelection import CommandCfdPhysicsSelection
-        from CfdOF.Solve.CfdFluidMaterial import CommandCfdFluidMaterial
-        from CfdOF.Solve.CfdSolverFoam import CommandCfdSolverFoam
-        from CfdOF.Solve.CfdInitialiseFlowField import CommandCfdInitialiseInternalFlowField
-        from CfdOF.Solve.CfdFluidBoundary import CommandCfdFluidBoundary
-        from CfdOF.Solve.CfdZone import CommandCfdPorousZone
-        from CfdOF.Solve.CfdZone import CommandCfdInitialisationZone
-        from CfdOF.Mesh.CfdDynamicMeshRefinement import CommandGroupDynamicMeshRefinement, \
-            CommandDynamicMeshInterfaceRefinement, CommandDynamicMeshShockRefinement
-        from CfdOF.PostProcess.CfdReportingFunction import CommandCfdReportingFunction
-        from CfdOF.Solve.CfdScalarTransportFunction import CommandCfdScalarTransportFunction
-        from CfdOF.Solve.CfdMeanVelocityForce import CommandCfdMeanVelocityForce
-        from CfdOF.CfdOpenPreferencesPage import CommandCfdOpenPreferencesPage
-        from CfdOF.CfdReloadWorkbench import CommandCfdReloadWorkbench
-        from CfdOF.CfdTestCommands import CommandCfdRunTests, CommandCfdUpdateTestData, CommandCfdCleanTests
-
-        FreeCADGui.addCommand('CfdOF_Analysis', CommandCfdAnalysis())
-        FreeCADGui.addCommand('CfdOF_MeshFromShape', CommandCfdMeshFromShape())
-        FreeCADGui.addCommand('CfdOF_MeshRegion', CommandMeshRegion())
-        FreeCADGui.addCommand('CfdOF_DynamicMeshInterfaceRefinement', CommandDynamicMeshInterfaceRefinement())
-        FreeCADGui.addCommand('CfdOF_DynamicMeshShockRefinement', CommandDynamicMeshShockRefinement())
-        FreeCADGui.addCommand('CfdOF_GroupDynamicMeshRefinement', CommandGroupDynamicMeshRefinement())
-        FreeCADGui.addCommand('CfdOF_PhysicsModel', CommandCfdPhysicsSelection())
-        FreeCADGui.addCommand('CfdOF_FluidMaterial', CommandCfdFluidMaterial())
-        FreeCADGui.addCommand('CfdOF_FluidBoundary', CommandCfdFluidBoundary())
-        FreeCADGui.addCommand('CfdOF_InitialiseInternal', CommandCfdInitialiseInternalFlowField())
-        FreeCADGui.addCommand('CfdOF_PorousZone', CommandCfdPorousZone())
-        FreeCADGui.addCommand('CfdOF_InitialisationZone', CommandCfdInitialisationZone())
-        FreeCADGui.addCommand('CfdOF_SolverControl', CommandCfdSolverFoam())
-        FreeCADGui.addCommand('CfdOF_ReportingFunctions', CommandCfdReportingFunction())
-        FreeCADGui.addCommand('CfdOF_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
-        FreeCADGui.addCommand('CfdOF_MeanVelocityForce', CommandCfdMeanVelocityForce())
-        FreeCADGui.addCommand('CfdOF_OpenPreferences', CommandCfdOpenPreferencesPage())
-        FreeCADGui.addCommand('CfdOF_ReloadWorkbench', CommandCfdReloadWorkbench())
-        FreeCADGui.addCommand('CfdOF_RunTests', CommandCfdRunTests())
-        FreeCADGui.addCommand('CfdOF_UpdateTestData', CommandCfdUpdateTestData())
-        FreeCADGui.addCommand('CfdOF_CleanTests', CommandCfdCleanTests())
+        # Register the commands
+        import CfdOF.CfdAnalysis
+        import CfdOF.Mesh.CfdMesh
+        import CfdOF.Mesh.CfdMeshRefinement
+        import CfdOF.Solve.CfdPhysicsSelection
+        import CfdOF.Solve.CfdFluidMaterial
+        import CfdOF.Solve.CfdSolverFoam
+        import CfdOF.Solve.CfdInitialiseFlowField
+        import CfdOF.Solve.CfdFluidBoundary
+        import CfdOF.Solve.CfdZone
+        import CfdOF.Mesh.CfdDynamicMeshRefinement
+        import CfdOF.PostProcess.CfdReportingFunction
+        import CfdOF.Solve.CfdScalarTransportFunction
+        import CfdOF.Solve.CfdMeanVelocityForce
+        import CfdOF.CfdOpenPreferencesPage
+        import CfdOF.CfdReloadWorkbench
+        import CfdOF.CfdTestCommands
 
         # Commands for both menu and toolbar, or one or the other if a tuple
         # starting with 'M' or 'T'

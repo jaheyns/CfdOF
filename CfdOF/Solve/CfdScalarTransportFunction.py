@@ -22,8 +22,6 @@
 #                                                                              #
 ################################################################################
 
-from __future__ import print_function
-
 import os
 
 import FreeCAD
@@ -249,3 +247,6 @@ class _ViewProviderCfdScalarTransportFunction:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_ScalarTransportFunctions', CommandCfdScalarTransportFunction())

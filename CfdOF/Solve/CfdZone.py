@@ -503,3 +503,7 @@ class _ViewProviderCfdZone:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_PorousZone', CommandCfdPorousZone())
+FreeCADGui.addCommand('CfdOF_InitialisationZone', CommandCfdInitialisationZone())

@@ -47,3 +47,4 @@ class CommandCfdReloadWorkbench:
     def Activated(self):
         CfdTools.reloadWorkbench()
 
+FreeCADGui.addCommand('CfdOF_ReloadWorkbench', CommandCfdReloadWorkbench())

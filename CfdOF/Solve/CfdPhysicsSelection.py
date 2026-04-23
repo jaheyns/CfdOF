@@ -354,3 +354,6 @@ class _ViewProviderPhysicsSelection:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_PhysicsModel', CommandCfdPhysicsSelection())

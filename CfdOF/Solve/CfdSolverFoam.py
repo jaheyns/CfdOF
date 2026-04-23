@@ -359,3 +359,6 @@ class _ViewProviderCfdSolverFoam:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_SolverControl', CommandCfdSolverFoam())

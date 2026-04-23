@@ -220,3 +220,6 @@ class _ViewProviderCfdFluidMaterial:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_FluidMaterial', CommandCfdFluidMaterial())

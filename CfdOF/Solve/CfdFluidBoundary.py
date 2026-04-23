@@ -941,3 +941,6 @@ class _ViewProviderCfdFluidBoundary:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_FluidBoundary', CommandCfdFluidBoundary())

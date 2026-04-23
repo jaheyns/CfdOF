@@ -416,3 +416,6 @@ class _ViewProviderCfdMeshRefinement:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_MeshRegion', CommandMeshRegion())

@@ -22,8 +22,6 @@
 #                                                                              #
 ################################################################################
 
-from __future__ import print_function
-
 import os
 
 import FreeCAD
@@ -366,3 +364,6 @@ class _ViewProviderCfdReportingFunctions:
 
     def loads(self, state):
         return None
+
+
+FreeCADGui.addCommand('CfdOF_ReportingFunctions', CommandCfdReportingFunction())

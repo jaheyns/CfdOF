@@ -41,3 +41,6 @@ class CommandCfdOpenPreferencesPage:
 
     def Activated(self):
         FreeCADGui.showPreferences("CfdOF")
+
+
+FreeCADGui.addCommand('CfdOF_OpenPreferences', CommandCfdOpenPreferencesPage())
