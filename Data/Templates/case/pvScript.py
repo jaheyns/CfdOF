@@ -14,6 +14,9 @@ pfoam.CaseType = 'Reconstructed Case'
 if hasattr(pfoam, 'Decomposepolyhedra'):
     pfoam.Decomposepolyhedra = 0
 
+if hasattr(pfoam, 'Createcelltopointfiltereddata'):
+    pfoam.Createcelltopointfiltereddata = 1
+
 # get active view
 renderView1 = GetActiveViewOrCreate('RenderView')
 
