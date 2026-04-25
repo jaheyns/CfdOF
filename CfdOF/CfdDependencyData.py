@@ -50,8 +50,8 @@ OPENFOAM_URL = \
     "https://github.com/blueCFD/Core/releases/download/blueCFD-Core-2024-1/blueCFD-Core-2024-1-win64-setup.exe"
 OPENFOAM_FILE_EXT = ".exe"
 PARAVIEW_URL = \
-    "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v5.10&type=binary&os=Windows&downloadFile=ParaView-5.10.1-Windows-Python3.9-msvc2017-AMD64.exe"
-PARAVIEW_FILE_EXT = ".exe"
+    "https://www.paraview.org/paraview-downloads/download.php?submit=Download&version=v6.1&type=binary&os=Windows&downloadFile=ParaView-6.1.0-Windows-Python3.12-msvc2017-AMD64.msi"
+PARAVIEW_FILE_EXT = ".msi"
 CFMESH_URL = \
     "https://sourceforge.net/projects/cfmesh-cfdof/files/cfmesh-cfdof.zip/download"
 CFMESH_URL_MINGW = \

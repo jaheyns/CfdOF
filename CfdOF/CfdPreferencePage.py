@@ -318,7 +318,7 @@ class CfdPreferencePage:
 
     def pickParaviewFile(self):
         f, filter = QtGui.QFileDialog().getOpenFileName(
-            None, translate("FilePicker", "Choose ParaView install file"), filter="*.exe"
+            None, translate("FilePicker", "Choose ParaView install file"), filter="*.msi"
         )
         if f and os.access(f, os.R_OK):
             self.form.le_paraview_url.setText(urllib.parse.urljoin('file:', urllib.request.pathname2url(f)))
@@ -594,7 +594,7 @@ class CfdPreferencePageThread(QThread):
 
     def downloadParaview(self):
         filename = self.download(self.paraview_url, CfdDependencyData.PARAVIEW_FILE_EXT, "ParaView")
-        if QtCore.QProcess().startDetached(filename):
+        if QtCore.QProcess().startDetached("explorer", [filename]):
             self.signals.status.emit("ParaView installer launched - please complete the installation")
         else:
             raise Exception("Failed to launch ParaView installer")
