@@ -1,0 +1,45 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%{%(multiRegionSolidNames%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0/%(multiRegionSolidNames/%(0%)%)";
+    object      p;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform %(initialValues/Pressure%);
+
+boundaryField
+{
+%{%(multiRegionSolidBoundaries%)
+%{%(multiRegionSolidBoundaries/%(0%)/BoundaryType%)
+%:constraint
+%[0/_boundary_constraint%]
+%:default
+    %(0%)
+    {
+        type        calculated;
+        value       $internalField;
+    }
+%}
+
+%}
+
+    // Derived from p_rgh at fluid-solid interface
+    defaultFaces
+    {
+        type        calculated;
+        value       $internalField;
+    }
+}
+
+// ************************************************************************* //
+%} 0/%(multiRegionSolidNames/%(0%)%)/p
+%}

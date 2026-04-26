@@ -35,6 +35,51 @@ from CfdOF.TemplateBuilder import TemplateBuilder
 import Part
 
 
+
+def _get_interior_point(solid):
+    """Return a point guaranteed to be inside the solid material.
+
+    CenterOfMass can lie outside the material for non-convex solids (e.g. an air
+    shell surrounding an object, or a heatsink whose centroid falls between fins).
+    Falls back to face centroids (always on the surface, which passes isInside
+    with allowFace=True), then to a 3-D bounding-box grid.
+    """
+    tol = 1e-3
+    centroid = solid.CenterOfMass
+    if solid.isInside(centroid, tol, True):
+        return centroid
+    # Face centroids are guaranteed to lie on the solid surface and always pass
+    # isInside(allowFace=True).  This handles thin-feature solids (e.g. heatsink
+    # fins) where the centroid and a coarse grid both land outside the material.
+    for face in solid.Faces:
+        pt = face.CenterOfMass
+        if solid.isInside(pt, tol, True):
+            return pt
+    bb = solid.BoundBox
+    for xi in (0.1, 0.3, 0.5, 0.7, 0.9):
+        for yi in (0.1, 0.3, 0.5, 0.7, 0.9):
+            for zi in (0.1, 0.3, 0.5, 0.7, 0.9):
+                pt = FreeCAD.Vector(
+                    bb.XMin + xi * bb.XLength,
+                    bb.YMin + yi * bb.YLength,
+                    bb.ZMin + zi * bb.ZLength,
+                )
+                if solid.isInside(pt, tol, True):
+                    return pt
+    return centroid
+
+
+def _getCompoundLinks(part_obj):
+    """Return the list of child body objects from a compound or BooleanFragments shape object."""
+    if hasattr(part_obj, 'Links'):      # Part::Compound
+        return list(part_obj.Links)
+    if hasattr(part_obj, 'Shapes'):     # Part::BooleanFragments (older FreeCAD)
+        return list(part_obj.Shapes)
+    if hasattr(part_obj, 'Objects'):    # Part::BooleanFragments (FreeCAD 1.x)
+        return list(part_obj.Objects)
+    return [part_obj]
+
+
 class CfdMeshTools:
     def __init__(self, cart_mesh_obj):
         self.mesh_obj = cart_mesh_obj
@@ -687,6 +732,57 @@ class CfdMeshTools:
             self.gmsh_settings['ClMin'] = self.clmin
             sols = (''.join((str(n+1) + ', ') for n in range(len(self.mesh_obj.Part.Shape.Solids)))).rstrip(', ')
             self.gmsh_settings['Solids'] = sols
+
+            # Build per-region volume map for CHT (chtMultiRegionSimpleFoam/chtMultiRegionFoam)
+            solid_material_objs = CfdTools.getSolidMaterials(self.analysis)
+            if solid_material_objs:
+                region_volume_map = {}
+                mesh_part = self.mesh_obj.Part
+                links = _getCompoundLinks(mesh_part)
+                result_solids = mesh_part.Shape.Solids
+                solid_vol_indices_all = set()
+                # For each CfdSolidMaterial, find the result solid volumes that belong
+                # to it by centroid containment in its referenced shapes. Each material
+                # is handled independently so that multiple solid regions receive
+                # distinct volume index sets rather than the same combined set.
+                for solid_obj in solid_material_objs:
+                    rname = getattr(solid_obj, 'RegionName', '') or solid_obj.Label
+                    body_names = set()
+                    body_shapes = {}
+                    for ref in solid_obj.ShapeRefs:
+                        body_names.add(ref[0].Name)
+                        body_shapes[ref[0].Name] = ref[0].Shape
+                    for lnk in links:
+                        if lnk.Name in body_names and lnk.Name not in body_shapes:
+                            body_shapes[lnk.Name] = lnk.Shape
+                    shapes = list(body_shapes.values())
+                    # Flatten to individual solids — Compound.isInside() is unreliable
+                    flat_solids = []
+                    for sh in shapes:
+                        flat_solids.extend(sh.Solids if sh.Solids else [sh])
+                    vol_indices = [i for i, s in enumerate(result_solids, start=1)
+                                   if any(sol.isInside(_get_interior_point(s), 1e-3, True)
+                                          for sol in flat_solids)]
+                    solid_vol_indices_all.update(vol_indices)
+                    if vol_indices:
+                        region_volume_map[rname] = ', '.join(str(v) for v in vol_indices)
+                # Fluid volumes are those not claimed by any solid material
+                fluid_vol_indices = [i for i in range(1, len(result_solids) + 1)
+                                     if i not in solid_vol_indices_all]
+                mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+                internal_zones = [o for o in mr_objs if o.Internal]
+                if internal_zones:
+                    fluid_rname = internal_zones[0].Label
+                else:
+                    fluid_mats = CfdTools.getMaterials(self.analysis)
+                    fluid_rname = fluid_mats[0].Label if fluid_mats else 'fluid'
+                if fluid_vol_indices:
+                    region_volume_map[fluid_rname] = ', '.join(str(v) for v in fluid_vol_indices)
+                self.gmsh_settings['IsMultiRegion'] = True
+                self.gmsh_settings['RegionVolumeMap'] = region_volume_map
+            else:
+                self.gmsh_settings['IsMultiRegion'] = False
+
             self.gmsh_settings['BoundaryFaceMap'] = {}
             for k in range(len(self.patch_faces)):
                 for l in range(len(self.patch_faces[k])):

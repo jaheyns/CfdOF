@@ -51,6 +51,7 @@ class TaskPanelCfdPhysicsSelection:
         self.form.radioButtonTransient.toggled.connect(self.updateUI)
         self.form.radioButtonSinglePhase.toggled.connect(self.updateUI)
         self.form.radioButtonFreeSurface.toggled.connect(self.updateUI)
+        self.form.radioButtonMultiRegion.toggled.connect(self.updateUI)
         if hasattr(self.form.checkBoxIsothermal, "checkStateChanged"):
             self.form.checkBoxIsothermal.checkStateChanged.connect(self.updateUI)
             self.form.viscousCheckBox.checkStateChanged.connect(self.updateUI)
@@ -79,6 +80,8 @@ class TaskPanelCfdPhysicsSelection:
             self.form.radioButtonSinglePhase.toggle()
         elif self.obj.Phase == 'FreeSurface':
             self.form.radioButtonFreeSurface.toggle()
+        elif self.obj.Phase == 'MultiRegion':
+            self.form.radioButtonMultiRegion.toggle()
 
         # Flow
         self.form.checkBoxIsothermal.setChecked(self.obj.Flow == 'Isothermal')
@@ -126,9 +129,12 @@ class TaskPanelCfdPhysicsSelection:
         self.form.FlowFrame.setVisible(True)
         self.form.turbulenceFrame.setVisible(True)
 
+        multi_region = self.form.radioButtonMultiRegion.isChecked()
+
         # Steady / transient
         if self.form.radioButtonSteady.isChecked():
-            self.form.radioButtonFreeSurface.setEnabled(False)
+            free_surface_allowed = not multi_region
+            self.form.radioButtonFreeSurface.setEnabled(free_surface_allowed)
             if self.form.radioButtonDES.isChecked() or self.form.radioButtonLES.isChecked():
                 self.form.radioButtonRANS.toggle()
             self.form.radioButtonDES.setEnabled(False)
@@ -136,36 +142,48 @@ class TaskPanelCfdPhysicsSelection:
             if self.form.radioButtonFreeSurface.isChecked():
                 self.form.radioButtonSinglePhase.toggle()
         else:
-            self.form.radioButtonFreeSurface.setEnabled(True)
+            self.form.radioButtonFreeSurface.setEnabled(not multi_region)
             self.form.radioButtonDES.setEnabled(True)
             self.form.radioButtonLES.setEnabled(True)
 
+        # Multi-region forces NonIsothermal flow and disables flow override controls
+        if multi_region:
+            self.form.checkBoxIsothermal.setChecked(False)
+            self.form.checkBoxIsothermal.setEnabled(False)
+            self.form.checkBoxHighMach.setChecked(False)
+            self.form.checkBoxHighMach.setEnabled(False)
+        else:
+            self.form.checkBoxHighMach.setEnabled(not self.form.checkBoxIsothermal.isChecked())
+
         # Gravity
         self.form.gravityFrame.setEnabled(
-            self.form.radioButtonFreeSurface.isChecked() or
+            self.form.radioButtonFreeSurface.isChecked() or multi_region or
             (not self.form.checkBoxIsothermal.isChecked() and not self.form.checkBoxHighMach.isChecked()))
 
         # SRF model
-        srf_capable = (self.form.radioButtonSteady.isChecked() and self.form.checkBoxIsothermal.isChecked())
-        srf_should_be_unchecked = ((not self.form.checkBoxIsothermal.isChecked()) 
+        srf_capable = (self.form.radioButtonSteady.isChecked() and self.form.checkBoxIsothermal.isChecked()
+                       and not multi_region)
+        srf_should_be_unchecked = ((not self.form.checkBoxIsothermal.isChecked())
                                    or self.form.radioButtonTransient.isChecked()
-                                   or self.form.radioButtonFreeSurface.isChecked())
+                                   or self.form.radioButtonFreeSurface.isChecked()
+                                   or multi_region)
         self.form.srfCheckBox.setEnabled(srf_capable)
         if srf_should_be_unchecked:
             self.form.srfCheckBox.setChecked(False)
         self.form.srfFrame.setEnabled(self.form.srfCheckBox.isChecked())
 
-        # Free surface
+        # Free surface forces isothermal (only when not multi-region)
         if self.form.radioButtonFreeSurface.isChecked():
             self.form.checkBoxIsothermal.setChecked(True)
             self.form.checkBoxIsothermal.setEnabled(False)
-        else:
+        elif not multi_region:
             self.form.checkBoxIsothermal.setEnabled(True)
 
-        # High Mach capability
-        self.form.checkBoxHighMach.setEnabled(not self.form.checkBoxIsothermal.isChecked())
-        if self.form.checkBoxIsothermal.isChecked():
-            self.form.checkBoxHighMach.setChecked(False)
+        # High Mach capability (only when not multi-region)
+        if not multi_region:
+            self.form.checkBoxHighMach.setEnabled(not self.form.checkBoxIsothermal.isChecked())
+            if self.form.checkBoxIsothermal.isChecked():
+                self.form.checkBoxHighMach.setChecked(False)
 
         # Viscous 
         if self.form.viscousCheckBox.isChecked():
@@ -211,6 +229,8 @@ class TaskPanelCfdPhysicsSelection:
             storeIfChanged(self.obj, 'Phase', 'Single')
         elif self.form.radioButtonFreeSurface.isChecked():
             storeIfChanged(self.obj, 'Phase', 'FreeSurface')
+        elif self.form.radioButtonMultiRegion.isChecked():
+            storeIfChanged(self.obj, 'Phase', 'MultiRegion')
 
         if self.form.checkBoxIsothermal.isChecked():
             storeIfChanged(self.obj, 'Flow', 'Isothermal')

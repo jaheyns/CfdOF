@@ -1,0 +1,57 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/%(multiRegionFluidNames/0%)";
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(physics/Turbulence%)
+%:RANS
+simulationType RAS;
+
+RAS
+{
+    RASModel        %(physics/TurbulenceModel%);
+    turbulence      on;
+    printCoeffs     on;
+}
+%:DES
+simulationType  LES;
+
+LES
+{
+    LESModel        %(physics/TurbulenceModel%);
+    turbulence      on;
+    printCoeffs     on;
+    delta           cubeRootVol;
+    cubeRootVolCoeffs
+    {
+        deltaCoeff  1;
+    }
+}
+%:LES
+simulationType  LES;
+
+LES
+{
+    LESModel        %(physics/TurbulenceModel%);
+    turbulence      on;
+    printCoeffs     on;
+    delta           cubeRootVol;
+    cubeRootVolCoeffs
+    {
+        deltaCoeff  1;
+    }
+}
+%:default
+simulationType  laminar;
+%}
+
+// ************************************************************************* //
+%}

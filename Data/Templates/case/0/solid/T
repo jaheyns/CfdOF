@@ -1,0 +1,88 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%{%(multiRegionSolidNames%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0/%(multiRegionSolidNames/%(0%)%)";
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform %(initialValues/Temperature%);
+
+boundaryField
+{
+%{%(multiRegionSolidBoundaries%)
+%{%(multiRegionSolidBoundaries/%(0%)/BoundaryType%)
+%:wall
+%{%(multiRegionSolidBoundaries/%(0%)/ThermalBoundaryType%)
+%:fixedValue
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(multiRegionSolidBoundaries/%(0%)/Temperature%);
+    }
+%:zeroGradient
+    %(0%)
+    {
+        type        zeroGradient;
+        value       $internalField;
+    }
+%:fixedGradient
+    %(0%)
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        q               uniform %(multiRegionSolidBoundaries/%(0%)/HeatFlux%);
+        kappaMethod     solidThermo;
+        value           $internalField;
+    }
+%:totalPower
+    %(0%)
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            power;
+        Q               %(multiRegionSolidBoundaries/%(0%)/Power%);
+        kappaMethod     solidThermo;
+        value           $internalField;
+    }
+%:heatTransferCoeff
+    %(0%)
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        Ta              constant %(multiRegionSolidBoundaries/%(0%)/Temperature%);
+        h               uniform %(multiRegionSolidBoundaries/%(0%)/HeatTransferCoeff%);
+        kappaMethod     solidThermo;
+        value           $internalField;
+    }
+%}
+%:constraint
+%[0/_boundary_constraint%]
+%}
+
+%}
+
+    %(multiRegionSolidNames/%(0%)%)_to_%(multiRegionFluidNames/0%)
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        value           $internalField;
+        Tnbr            T;
+        kappaMethod     solidThermo;
+    }
+
+    defaultFaces
+    {
+        type            zeroGradient;
+    }
+}
+
+// ************************************************************************* //
+%} 0/%(multiRegionSolidNames/%(0%)%)/T
+%}

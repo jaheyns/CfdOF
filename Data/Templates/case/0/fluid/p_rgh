@@ -1,0 +1,94 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0/%(multiRegionFluidNames/0%)";
+    object      p_rgh;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [1 -1 -2 0 0 0 0];
+
+internalField   uniform %(initialValues/Pressure%);
+
+boundaryField
+{
+%{%(multiRegionFluidBoundaries%)
+%{%(multiRegionFluidBoundaries/%(0%)/BoundaryType%)
+%:wall
+    %(0%)
+    {
+        type        fixedFluxPressure;
+        value       $internalField;
+    }
+%:inlet
+%{%(multiRegionFluidBoundaries/%(0%)/BoundarySubType%)
+%:totalPressureInlet
+    %(0%)
+    {
+        type        totalPressure;
+        p0          uniform %(multiRegionFluidBoundaries/%(0%)/Pressure%);
+        value       $internalField;
+    }
+%:staticPressureInlet
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(multiRegionFluidBoundaries/%(0%)/Pressure%);
+    }
+%:default
+    %(0%)
+    {
+        type        fixedFluxPressure;
+        value       $internalField;
+    }
+%}
+%:outlet
+%{%(multiRegionFluidBoundaries/%(0%)/BoundarySubType%)
+%:staticPressureOutlet
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(multiRegionFluidBoundaries/%(0%)/Pressure%);
+    }
+%:default
+    %(0%)
+    {
+        type        fixedFluxPressure;
+        value       $internalField;
+    }
+%}
+%:open
+    %(0%)
+    {
+        type        totalPressure;
+        p0          uniform %(multiRegionFluidBoundaries/%(0%)/Pressure%);
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%}
+
+%}
+
+%{%(multiRegionSolidNames%)
+    %(multiRegionFluidNames/0%)_to_%(multiRegionSolidNames/%(0%)%)
+    {
+        type        fixedFluxPressure;
+        value       $internalField;
+    }
+
+%}
+    defaultFaces
+    {
+        type        fixedFluxPressure;
+        value       $internalField;
+    }
+}
+
+// ************************************************************************* //
+%}

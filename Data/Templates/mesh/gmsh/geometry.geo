@@ -37,7 +37,14 @@ Mesh.Algorithm = 2;
 Mesh.Algorithm3D = 10;
 
 // Internal mesh
+%{%(GmshSettings/IsMultiRegion%)
+%:True
+%{%(GmshSettings/RegionVolumeMap%)
+Physical Volume ("%(0%)") = {%(GmshSettings/RegionVolumeMap/%(0%)%)};
+%}
+%:default
 Physical Volume ("Internal") = {%(GmshSettings/Solids%)};
+%}
 
 // Boundaries
 %{%(GmshSettings/BoundaryFaceMap%)

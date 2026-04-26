@@ -60,6 +60,7 @@ class CfdOFWorkbench(Workbench):
         import CfdOF.Mesh.CfdMeshRefinement
         import CfdOF.Solve.CfdPhysicsSelection
         import CfdOF.Solve.CfdFluidMaterial
+        import CfdOF.Solve.CfdSolidMaterial
         import CfdOF.Solve.CfdSolverFoam
         import CfdOF.Solve.CfdInitialiseFlowField
         import CfdOF.Solve.CfdFluidBoundary
@@ -79,7 +80,7 @@ class CfdOFWorkbench(Workbench):
                   ('M', QT_TRANSLATE_NOOP("Workbench", "Dynamic mesh refinement"),
                    ['CfdOF_DynamicMeshInterfaceRefinement','CfdOF_DynamicMeshShockRefinement',]),
                   ('T', 'CfdOF_GroupDynamicMeshRefinement',),
-                  'CfdOF_PhysicsModel', 'CfdOF_FluidMaterial',
+                  'CfdOF_PhysicsModel', 'CfdOF_FluidMaterial', 'CfdOF_SolidMaterial',
                   'CfdOF_FluidBoundary', 'CfdOF_InitialiseInternal',
                   'CfdOF_InitialisationZone', 'CfdOF_PorousZone', 'CfdOF_MeanVelocityForce',
                   'CfdOF_ReportingFunctions', 'CfdOF_ScalarTransportFunctions',

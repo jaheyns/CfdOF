@@ -174,7 +174,16 @@ def getInitialConditions(analysis_object):
 
 
 def getMaterials(analysis_object):
-    return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
+    from CfdOF.Solve.CfdSolidMaterial import CfdSolidMaterial
+    return [i for i in analysis_object.Group
+            if i.isDerivedFrom('App::MaterialObjectPython')
+            and not isinstance(getattr(i, 'Proxy', None), CfdSolidMaterial)]
+
+
+def getSolidMaterials(analysis_object):
+    from CfdOF.Solve.CfdSolidMaterial import CfdSolidMaterial
+    return [i for i in analysis_object.Group
+            if isinstance(getattr(i, 'Proxy', None), CfdSolidMaterial)]
 
 
 def getSolver(analysis_object):
