@@ -204,6 +204,14 @@ class CfdSolverFoam(object):
             "TimeStepControl",
             QT_TRANSLATE_NOOP("App::Property", "Output time interval"),
         )
+        addObjectProperty(
+            obj,
+            "useCleanToGridFillter",
+            True,
+            "App::PropertyBool",
+            "postProcessing",
+            QT_TRANSLATE_NOOP("App::Property", "wheather to use cleanToGrid fillter in paraview"),
+        )
 
         self.residual_plotter = TimePlot(
             title="Simulation residuals", y_label="Residual", is_log=True
