@@ -1,0 +1,109 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0/%(multiRegionFluidNames/0%)";
+    object      T;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 0 1 0 0 0];
+
+internalField   uniform %(initialValues/Temperature%);
+
+boundaryField
+{
+%{%(multiRegionFluidBoundaries%)
+%{%(multiRegionFluidBoundaries/%(0%)/BoundaryType%)
+%:wall
+%{%(multiRegionFluidBoundaries/%(0%)/ThermalBoundaryType%)
+%:fixedValue
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform %(multiRegionFluidBoundaries/%(0%)/Temperature%);
+    }
+%:zeroGradient
+    %(0%)
+    {
+        type        zeroGradient;
+        value       $internalField;
+    }
+%:fixedGradient
+    %(0%)
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        q               uniform %(multiRegionFluidBoundaries/%(0%)/HeatFlux%);
+        kappaMethod     fluidThermo;
+        value           $internalField;
+    }
+%:totalPower
+    %(0%)
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            power;
+        Q               %(multiRegionFluidBoundaries/%(0%)/Power%);
+        kappaMethod     fluidThermo;
+        value           $internalField;
+    }
+%:heatTransferCoeff
+    %(0%)
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        Ta              constant %(multiRegionFluidBoundaries/%(0%)/Temperature%);
+        h               uniform %(multiRegionFluidBoundaries/%(0%)/HeatTransferCoeff%);
+        kappaMethod     fluidThermo;
+        value           $internalField;
+    }
+%}
+%:inlet
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(multiRegionFluidBoundaries/%(0%)/Temperature%);
+        value       uniform %(multiRegionFluidBoundaries/%(0%)/Temperature%);
+    }
+%:outlet
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(multiRegionFluidBoundaries/%(0%)/Temperature%);
+        value       $internalField;
+    }
+%:open
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(multiRegionFluidBoundaries/%(0%)/Temperature%);
+        value       $internalField;
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%}
+
+%}
+
+%{%(multiRegionSolidNames%)
+    %(multiRegionFluidNames/0%)_to_%(multiRegionSolidNames/%(0%)%)
+    {
+        type            compressible::turbulentTemperatureCoupledBaffleMixed;
+        value           $internalField;
+        Tnbr            T;
+        kappaMethod     fluidThermo;
+    }
+
+%}
+    defaultFaces
+    {
+        type            zeroGradient;
+    }
+}
+
+// ************************************************************************* //
+%}

@@ -1,15 +1,19 @@
 %{%(solver/SolverName%)
 %:chtMultiRegionSimpleFoam chtMultiRegionFoam
-%:default
 %[_header%]
 FoamFile
 {
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      momentumTransport;
+    location    "system/%(multiRegionFluidNames/0%)";
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "turbulenceProperties"
+numberOfSubdomains  %(solver/ParallelCores%);
+
+method              scotch;
+
+// ************************************************************************* //
 %}

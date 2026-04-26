@@ -33,6 +33,20 @@ from CfdOF.TemplateBuilder import TemplateBuilder
 from CfdOF.CfdTools import cfdMessage
 from CfdOF.Mesh import CfdMeshTools
 from CfdOF.Mesh import CfdDynamicMeshRefinement
+from CfdOF.Solve.CfdSolidMaterial import CfdSolidMaterial
+
+
+
+def _getCompoundLinks(part_obj):
+    """Return the list of child body objects from a compound or BooleanFragments shape object."""
+    if hasattr(part_obj, 'Links'):      # Part::Compound
+        return list(part_obj.Links)
+    if hasattr(part_obj, 'Shapes'):     # Part::BooleanFragments (older FreeCAD)
+        return list(part_obj.Shapes)
+    if hasattr(part_obj, 'Objects'):    # Part::BooleanFragments (FreeCAD 1.x)
+        return list(part_obj.Objects)
+    return [part_obj]
+
 
 class CfdCaseWriterFoam:
     def __init__(self, analysis_obj):
@@ -51,7 +65,8 @@ class CfdCaseWriterFoam:
         if not self.mesh_obj:
             raise RuntimeError("No mesh object was found in analysis " + analysis_obj.Label)
         self.material_objs = CfdTools.getMaterials(analysis_obj)
-        if not self.material_objs:
+        self.solid_material_objs = CfdTools.getSolidMaterials(analysis_obj)
+        if not self.material_objs and not self.solid_material_objs:
             raise RuntimeError("No material properties were found in analysis " + analysis_obj.Label)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
@@ -112,6 +127,14 @@ class CfdCaseWriterFoam:
         self.settings = {
             'physics': phys_settings,
             'fluidProperties': [],  # Order is important, so use a list
+            'solidProperties': [],  # Solid material properties for multi-region CHT
+            'multiRegionEnabled': False,
+            'multiRegionFluidNames': [],
+            'multiRegionSolidNames': [],
+            'multiRegionFluidNamesDict': {},
+            'multiRegionSolidNamesDict': {},
+            'multiRegionFluidBoundaries': {},
+            'multiRegionSolidBoundaries': {},
             'initialValues': CfdTools.propsToDict(self.initial_conditions),
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
@@ -182,6 +205,12 @@ class CfdCaseWriterFoam:
             self.processPorousZoneProperties()
         self.processInitialisationZoneProperties()
 
+        if self.settings['multiRegionEnabled']:
+            cfdMessage('Multi-region CHT case detected\n')
+            self._checkChtGeometryConformality()
+            self.exportChtRegionStlSurfaces()
+            self.processMultiRegionBoundaries()
+
         if self.mean_velocity_force_cellzone_objs:
             cfdMessage('Mean velocity force cell zone(s) present\n')
             self.exportMeanVelocityForceCellZoneStlSurfaces()
@@ -208,6 +237,10 @@ class CfdCaseWriterFoam:
 
         TemplateBuilder(self.case_folder, self.template_path, self.settings)
 
+        # For CHT: rename template fluid/solid subdirs to actual region names so the
+        # solver finds thermophysicalProperties, fvSchemes, etc. in the right places.
+        self._renameChtRegionDirs()
+
         # Update Allrun permission - will fail silently on Windows
         file_name = os.path.join(self.case_folder, "Allrun")
         import stat
@@ -219,6 +252,28 @@ class CfdCaseWriterFoam:
             self.progressCallback("Case written successfully")
 
         return True
+
+    def _renameChtRegionDirs(self):
+        """Rename constant/fluid, 0/fluid, system/fluid template subdirs to actual fluid region name.
+
+        Solid region files are written directly to per-region paths by the template's
+        filename-loop mechanism, so no renaming is needed for solids.
+        """
+        import shutil
+        fluid_names = self.settings.get('multiRegionFluidNames', [])
+        if not fluid_names:
+            return
+        for top in ('constant', '0', 'system'):
+            src = os.path.join(self.case_folder, top, 'fluid')
+            dst = os.path.join(self.case_folder, top, fluid_names[0])
+            if src == dst or not os.path.isdir(src):
+                continue
+            if os.path.isdir(dst):
+                for fname in os.listdir(src):
+                    shutil.copy2(os.path.join(src, fname), os.path.join(dst, fname))
+                shutil.rmtree(src)
+            else:
+                os.rename(src, dst)
 
     def getSolverName(self):
         """
@@ -262,6 +317,14 @@ class CfdCaseWriterFoam:
                     raise RuntimeError("Only isothermal analysis is currently supported for free surface flow simulation.")
             else:
                 raise RuntimeError("Only transient analysis is supported for free surface flow simulation.")
+        elif self.physics_model.Phase == 'MultiRegion':
+            if self.physics_model.Flow == 'NonIsothermal':
+                if self.physics_model.Time == 'Steady':
+                    solver = 'chtMultiRegionSimpleFoam'
+                else:
+                    solver = 'chtMultiRegionFoam'
+            else:
+                raise RuntimeError("Only NonIsothermal flow is supported for MultiRegion (CHT) simulation.")
         else:
             raise RuntimeError(self.physics_model.Phase + " phase model currently not supported.")
 
@@ -316,9 +379,66 @@ class CfdCaseWriterFoam:
         # self.material_obj currently stores everything as a string
         # Convert to (mostly) SI numbers for OpenFOAM
         settings = self.settings
+        solver_name = settings['solver']['SolverName']
+        is_multiregion = solver_name in ['chtMultiRegionSimpleFoam', 'chtMultiRegionFoam']
+
+        # Process dedicated CfdSolidMaterial objects (new path)
+        for solid_obj in self.solid_material_objs:
+            mp = solid_obj.Material.copy()
+            mp['Name'] = solid_obj.Label
+            region_name = getattr(solid_obj, 'RegionName', '') or solid_obj.Label
+            if 'ThermalConductivity' in mp:
+                mp['ThermalConductivity'] = Units.Quantity(mp['ThermalConductivity']).getValueAs("W/m/K").Value
+            if 'Density' in mp:
+                mp['Density'] = Units.Quantity(mp['Density']).getValueAs("kg/m^3").Value
+            if 'SpecificHeat' in mp:
+                mp['Cp'] = Units.Quantity(mp['SpecificHeat']).getValueAs("J/kg/K").Value
+            if hasattr(solid_obj, 'HeatGeneration'):
+                heat_gen = solid_obj.HeatGeneration.getValueAs("W/m^3").Value
+            else:
+                heat_gen = 0.0
+            mp['HeatGeneration'] = heat_gen
+            mp['HeatGenerationActive'] = 'true' if heat_gen > 0 else 'false'
+            settings['solidProperties'].append(mp)
+            settings['multiRegionSolidNames'].append(region_name)
+
         for material_obj in self.material_objs:
-            mp = material_obj.Material
+            mp = material_obj.Material.copy()
             mp['Name'] = material_obj.Label
+            # Legacy: CfdFluidMaterial with Category='Solid' (backward compatibility)
+            is_solid = (getattr(material_obj, 'Category', 'Fluid') == 'Solid')
+            explicit_region = getattr(material_obj, 'RegionName', '')
+            if explicit_region:
+                region_name = explicit_region
+            elif is_multiregion and not is_solid:
+                # Derive fluid region name from the Internal mesh refinement zone label so the
+                # user does not have to set RegionName manually. Falls back to material Label.
+                mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+                internal_zones = [o.Label for o in mr_objs if o.Internal]
+                region_name = internal_zones[0] if internal_zones else material_obj.Label
+            else:
+                region_name = material_obj.Label
+
+            if is_solid and is_multiregion:
+                if 'ThermalConductivity' in mp:
+                    mp['ThermalConductivity'] = Units.Quantity(mp['ThermalConductivity']).getValueAs("W/m/K").Value
+                if 'Density' in mp:
+                    mp['Density'] = Units.Quantity(mp['Density']).getValueAs("kg/m^3").Value
+                if 'SpecificHeat' in mp:
+                    mp['Cp'] = Units.Quantity(mp['SpecificHeat']).getValueAs("J/kg/K").Value
+                if hasattr(material_obj, 'HeatGeneration'):
+                    heat_gen = material_obj.HeatGeneration.getValueAs("W/m^3").Value
+                else:
+                    heat_gen = 0.0
+                mp['HeatGeneration'] = heat_gen
+                mp['HeatGenerationActive'] = 'true' if heat_gen > 0 else 'false'
+                settings['solidProperties'].append(mp)
+                settings['multiRegionSolidNames'].append(region_name)
+                continue
+
+            if is_multiregion:
+                settings['multiRegionFluidNames'].append(region_name)
+
             # Add type if absent
             mat_type = mp.get('Type', 'Isothermal')
             mp['Type'] = mat_type
@@ -361,6 +481,11 @@ class CfdCaseWriterFoam:
                     mp[k] = ' '.join(str(v) for v in poly8)
 
             settings['fluidProperties'].append(mp)
+
+        if is_multiregion:
+            settings['multiRegionEnabled'] = True
+            settings['multiRegionFluidNamesDict'] = {n: {} for n in settings['multiRegionFluidNames']}
+            settings['multiRegionSolidNamesDict'] = {n: {} for n in settings['multiRegionSolidNames']}
 
     def processBoundaryConditions(self):
         """ Compute any quantities required before case build """
@@ -688,6 +813,235 @@ class CfdCaseWriterFoam:
                 self.dynamic_mesh_refinement_obj.RelativeElementSize)
         else:
             settings['dynamicMesh']['Type'] = 'interface'
+
+    # Multi-region CHT
+    def exportChtRegionStlSurfaces(self):
+        """Export STL surfaces for CHT regions.
+
+        Fluid regions: sourced from Internal CfdMeshRefinement zones matching multiRegionFluidNames.
+        Solid regions: sourced from CfdSolidMaterial.ShapeRefs (new path) or legacy Internal zones.
+        """
+        settings = self.settings
+        path = os.path.join(self.working_dir, self.solver_obj.InputCaseName, "constant", "triSurface")
+
+        # Fluid regions: use Internal mesh refinement zones
+        mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+        fluid_zones_written = set()
+        for mr_obj in mr_objs:
+            if mr_obj.Internal and mr_obj.Label in settings['multiRegionFluidNames']:
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                for r in mr_obj.ShapeRefs:
+                    CfdMeshTools.writeSurfaceMeshFromShape(r[0].Shape, path, mr_obj.Label, self.mesh_obj)
+                    cfdMessage("Wrote STL for fluid region '{}'\n".format(mr_obj.Label))
+                settings['zones'][mr_obj.Label] = {'PartNameList': (mr_obj.Label,)}
+                fluid_zones_written.add(mr_obj.Label)
+
+        # Fallback: if no Internal zone was found for a fluid region, derive the fluid body
+        # from the compound mesh part by excluding known solid bodies.
+        solid_obj_names = set()
+        for solid_obj in self.solid_material_objs:
+            for r in solid_obj.ShapeRefs:
+                solid_obj_names.add(r[0].Name)
+        for region_name in settings['multiRegionFluidNames']:
+            if region_name not in fluid_zones_written:
+                mesh_part = self.mesh_obj.Part
+                compound_links = _getCompoundLinks(mesh_part)
+                fluid_bodies = [lnk for lnk in compound_links if lnk.Name not in solid_obj_names]
+                if fluid_bodies:
+                    if not os.path.exists(path):
+                        os.makedirs(path)
+                    for body in fluid_bodies:
+                        CfdMeshTools.writeSurfaceMeshFromShape(body.Shape, path, region_name, self.mesh_obj)
+                    cfdMessage("Wrote STL for fluid region '{}' (auto-derived from compound)\n".format(region_name))
+                    settings['zones'][region_name] = {'PartNameList': (region_name,)}
+                else:
+                    cfdMessage("Warning: no geometry found for fluid region '{}' - "
+                               "add an Internal mesh refinement zone\n".format(region_name))
+
+        # Solid regions: use CfdSolidMaterial.ShapeRefs directly
+        for solid_obj in self.solid_material_objs:
+            region_name = getattr(solid_obj, 'RegionName', '') or solid_obj.Label
+            if not os.path.exists(path):
+                os.makedirs(path)
+            for r in solid_obj.ShapeRefs:
+                CfdMeshTools.writeSurfaceMeshFromShape(r[0].Shape, path, region_name, self.mesh_obj)
+                cfdMessage("Wrote STL for solid region '{}'\n".format(region_name))
+            settings['zones'][region_name] = {'PartNameList': (region_name,)}
+
+        # Legacy: solid regions from Internal mesh refinement zones (CfdFluidMaterial Category='Solid')
+        for mr_obj in mr_objs:
+            if mr_obj.Internal and mr_obj.Label in settings['multiRegionSolidNames']:
+                if mr_obj.Label not in settings['zones']:  # skip if already handled above
+                    if not os.path.exists(path):
+                        os.makedirs(path)
+                    for r in mr_obj.ShapeRefs:
+                        CfdMeshTools.writeSurfaceMeshFromShape(r[0].Shape, path, mr_obj.Label, self.mesh_obj)
+                        cfdMessage("Wrote STL for solid region '{}'\n".format(mr_obj.Label))
+                    settings['zones'][mr_obj.Label] = {'PartNameList': (mr_obj.Label,)}
+
+        # For gmsh CHT cases, cell zones come directly from per-region Physical Volumes
+        # in the .geo file (written by CfdMeshTools). topoSet zone creation is not needed.
+        if (settings['multiRegionFluidNames'] or settings['multiRegionSolidNames']) and \
+                self.mesh_obj.MeshUtility != 'gmsh':
+            settings['zonesPresent'] = True
+
+    def _checkChtGeometryConformality(self):
+        """Warn if solid bodies are enclosed inside fluid bodies without shared faces (non-conformal topology).
+
+        A simple Part::Compound of an enclosed heatsink produces non-conformal mesh —
+        splitMeshRegions won't create an interface patch in the fluid region.
+        BooleanFragments is required to create shared surfaces.
+        """
+        if self.mesh_obj.MeshUtility != 'gmsh':
+            return
+        if not self.solid_material_objs:
+            return
+        mesh_part = self.mesh_obj.Part
+        links = _getCompoundLinks(mesh_part)
+        if len(links) < 2:
+            return
+        solid_names = set()
+        for solid_obj in self.solid_material_objs:
+            for r in solid_obj.ShapeRefs:
+                solid_names.add(r[0].Name)
+        fluid_links = [lnk for lnk in links if lnk.Name not in solid_names]
+        solid_links = [lnk for lnk in links if lnk.Name in solid_names]
+        if not fluid_links or not solid_links:
+            return
+        # Check whether any solid body shares a face with the fluid compound shape.
+        # If the compound has no shared/fused topology (i.e. it was created with
+        # Part::Compound rather than BooleanFragments), the sub-shapes are independent
+        # and share no faces. We detect this by checking if the compound compound object
+        # has a Links attribute (Part::Compound) and its Placement is default — a proxy
+        # for "not Boolean-fused". A more robust check: count faces in compound vs sum of faces.
+        compound_shape = mesh_part.Shape
+        sub_face_count = sum(len(lnk.Shape.Faces) for lnk in links)
+        compound_face_count = len(compound_shape.Faces)
+        if compound_face_count >= sub_face_count:
+            # No face reduction means no shared faces — BooleanFragments reduces face count
+            # by merging coincident faces into one shared face.
+            # Only warn if at least one solid body is spatially enclosed in a fluid body
+            # (bounding box of solid is inside bounding box of a fluid link).
+            for s_lnk in solid_links:
+                s_bb = s_lnk.Shape.BoundBox
+                for f_lnk in fluid_links:
+                    f_bb = f_lnk.Shape.BoundBox
+                    if (f_bb.XMin <= s_bb.XMin and f_bb.XMax >= s_bb.XMax and
+                            f_bb.YMin <= s_bb.YMin and f_bb.YMax >= s_bb.YMax and
+                            f_bb.ZMin <= s_bb.ZMin and f_bb.ZMax >= s_bb.ZMax):
+                        cfdMessage(
+                            "WARNING: Solid body '{}' appears to be enclosed inside fluid body '{}', "
+                            "but the compound was not created with BooleanFragments. "
+                            "This will produce a non-conformal mesh — splitMeshRegions will NOT create "
+                            "a defaultFaces interface patch in the fluid region and the CHT solver will "
+                            "fail. Use Part → Boolean → BooleanFragments instead of Part → Create a "
+                            "compound.\n".format(s_lnk.Label, f_lnk.Label))
+
+    def processMultiRegionBoundaries(self):
+        """Categorize boundary conditions by region (fluid vs solid) for CHT cases."""
+        settings = self.settings
+        fluid_region_shapes = set()
+        solid_region_shapes = set()
+
+        # Fluid region shapes from Internal mesh refinement zones
+        mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+        for mr_obj in mr_objs:
+            if mr_obj.Internal:
+                for r in mr_obj.ShapeRefs:
+                    if mr_obj.Label in settings['multiRegionFluidNames']:
+                        fluid_region_shapes.add(r[0].Name)
+
+        # Solid region shapes from CfdSolidMaterial.ShapeRefs (new path)
+        solid_shapes_geom = []  # actual FreeCAD shapes for geometry-based fallback
+        for solid_obj in self.solid_material_objs:
+            for r in solid_obj.ShapeRefs:
+                solid_region_shapes.add(r[0].Name)
+                # Also add names of all child features (e.g. PartDesign Pad inside Body)
+                for child in getattr(r[0], 'OutList', []):
+                    if hasattr(child, 'Shape'):
+                        solid_region_shapes.add(child.Name)
+                # Collect actual shape for geometry fallback
+                try:
+                    solid_shapes_geom.append(r[0].Shape)
+                except Exception:
+                    pass
+
+        # Legacy: solid region shapes from Internal mesh refinement zones
+        for mr_obj in mr_objs:
+            if mr_obj.Internal and mr_obj.Label in settings['multiRegionSolidNames']:
+                for r in mr_obj.ShapeRefs:
+                    solid_region_shapes.add(r[0].Name)
+
+        # Auto-detect fluid shapes: compound children that are not solid bodies
+        fluid_shapes_geom = []  # actual FreeCAD shapes for geometry-based fallback
+        if not fluid_region_shapes and settings.get('multiRegionFluidNames'):
+            mesh_part = self.mesh_obj.Part
+            links = _getCompoundLinks(mesh_part)
+            for lnk in links:
+                if lnk.Name not in solid_region_shapes:
+                    fluid_region_shapes.add(lnk.Name)
+                    try:
+                        fluid_shapes_geom.append(lnk.Shape)
+                    except Exception:
+                        pass
+
+        fluid_bcs = {}
+        solid_bcs = {}
+        for bc_obj in self.bc_group:
+            matched = False
+            for ref in bc_obj.ShapeRefs:
+                if ref[0].Name in fluid_region_shapes:
+                    fluid_bcs[bc_obj.Label] = settings['boundaries'][bc_obj.Label]
+                    matched = True
+                    break
+                elif ref[0].Name in solid_region_shapes:
+                    solid_bcs[bc_obj.Label] = settings['boundaries'][bc_obj.Label]
+                    matched = True
+                    break
+            if not matched and solid_shapes_geom:
+                # Geometry fallback: classify by whether face centroid is inside the fluid
+                # region. Faces outside the fluid region are solid BCs; faces inside (or on
+                # the boundary of) the fluid region are fluid BCs. This handles cases where
+                # BCs reference the BooleanFragments compound directly, whose face centroids
+                # may lie geometrically inside the original solid shape even when the face
+                # belongs to the fluid domain boundary (e.g. interface faces at z=0).
+                is_solid = False
+                for ref in bc_obj.ShapeRefs:
+                    try:
+                        shape_obj = ref[0]
+                        sub_list = ref[1] if ref[1] else []
+                        faces = [shape_obj.Shape.getElement(s) for s in sub_list] if sub_list \
+                            else [shape_obj.Shape]
+                        for face in faces:
+                            if face is None:
+                                continue
+                            centroid = face.CenterOfMass
+                            if fluid_shapes_geom:
+                                # Solid BC only if centroid is outside every fluid shape
+                                in_fluid = any(fs.isInside(centroid, 1e-3, True)
+                                               for fs in fluid_shapes_geom)
+                                if not in_fluid:
+                                    is_solid = True
+                                    break
+                            else:
+                                for solid_shape in solid_shapes_geom:
+                                    if solid_shape.isInside(centroid, 1e-3, True):
+                                        is_solid = True
+                                        break
+                            if is_solid:
+                                break
+                    except Exception:
+                        pass
+                    if is_solid:
+                        break
+                if is_solid:
+                    solid_bcs[bc_obj.Label] = settings['boundaries'][bc_obj.Label]
+                else:
+                    fluid_bcs[bc_obj.Label] = settings['boundaries'][bc_obj.Label]
+
+        settings['multiRegionFluidBoundaries'] = fluid_bcs
+        settings['multiRegionSolidBoundaries'] = solid_bcs
 
     # Zones
     def exportZoneStlSurfaces(self):

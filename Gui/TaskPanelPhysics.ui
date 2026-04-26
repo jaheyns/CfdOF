@@ -418,6 +418,19 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QRadioButton" name="radioButtonMultiRegion">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Multi-region (conjugate heat transfer)</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>

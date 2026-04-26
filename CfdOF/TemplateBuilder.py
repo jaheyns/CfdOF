@@ -83,7 +83,7 @@ class TemplateBuilder(object):
     def buildFile(self, rel_file, params):
         """ Open the specified template file, make replacements, and return as a string """
         try:
-            fid = open(os.path.join(self.template_path, rel_file))
+            fid = open(os.path.join(self.template_path, rel_file), encoding='utf-8')
         except IOError:
             # Special cases:
             # 1. Don't worry if files that end with "None" do not exist
@@ -92,7 +92,7 @@ class TemplateBuilder(object):
             # 2. If a file is not found, try the same file with 'default' after the last underscore
             rel_file_default = rel_file.rsplit("_", 1)[0] + "_default"
             try:
-                fid = open(os.path.join(self.template_path, rel_file_default))
+                fid = open(os.path.join(self.template_path, rel_file_default), encoding='utf-8')
             except IOError:
                 raise IOError("Error reading file {} in template path {}".format(rel_file, self.template_path))
             finally:
@@ -218,9 +218,11 @@ class TemplateBuilder(object):
             filename_param = None
             if trailing_nl is not None:
                 filename_param = contents[end+2:trailing_nl].strip()
-            # Loop the content passing values
+            # Loop the content passing values (skip empty strings from empty dict/list substitution)
             replacement = ""
             for v in keys:
+                if not v:
+                    continue
                 filename = None
                 if filename_param:
                     # Process filename with parameter
