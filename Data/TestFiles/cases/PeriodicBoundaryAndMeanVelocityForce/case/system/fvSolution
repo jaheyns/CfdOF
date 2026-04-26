@@ -109,8 +109,6 @@ solvers
 
 relaxationFactors
 {
-    // Conservative settings to solve reliably on bad
-    // meshes
     equations
     {
         U               0.7;
