@@ -23,6 +23,19 @@ renderView1 = GetActiveViewOrCreate('RenderView')
 # reset view to fit data
 renderView1.ResetCamera()
 
+# get animation scene
+animationScene1 = GetAnimationScene()
+
+# update animation scene based on data timesteps
+animationScene1.UpdateAnimationUsingDataTimeSteps()
+
+# go to the final timestep of the simulation
+timesteps = pfoam.TimestepValues
+finalTime =  timesteps[-1]
+animationScene1.AnimationTime = finalTime
+
+%{%(solver/useCleanToGridFillter%)
+%:True
 # create a new 'Clean to Grid'
 cleantoGrid1 = CleantoGrid(Input=pfoam)
 
@@ -41,19 +54,13 @@ cleantoGrid1Display.LookupTable = ULUT
 cleantoGrid1Display.EdgeColor = [0.0, 0.0, 0.5]
 cleantoGrid1Display.ScalarOpacityUnitDistance = 0.05
 
-# get animation scene
-animationScene1 = GetAnimationScene()
-
-# update animation scene based on data timesteps
-animationScene1.UpdateAnimationUsingDataTimeSteps()
-
-# go to the final timestep of the simulation
-timesteps = pfoam.TimestepValues
-finalTime =  timesteps[-1]
-animationScene1.AnimationTime = finalTime
-
 # rescale color and/or opacity maps used to exactly fit the current data range
 cleantoGrid1Display.RescaleTransferFunctionToDataRange(False, True)
+%:False
+pfoamDisplay = Show(pfoam, renderView1)
+pfoamDisplay.ColorArrayName = ['POINTS', 'U']
+pfoamDisplay.RescaleTransferFunctionToDataRange(False, True)
+%}
 
 # update the view to ensure updated data information
 renderView1.Update()
