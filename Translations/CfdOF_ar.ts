@@ -2182,6 +2182,11 @@ Re-mesh case first?</source>
 <context>
     <name>TaskPanelCfdMeanVelocityForce</name>
     <message>
+        <location filename="../Gui/TaskPanelCfdMeanVelocityForce.ui" line="12"/>
+        <source>Selection mode</source>
+		<translation>نمط الاختيار</translation>
+    </message>
+    <message>
         <location filename="../Gui/TaskPanelCfdMeanVelocityForce.ui" line="20"/>
         <source>All (entire domain)</source>
 		<translation>الكل (كل المجال)</translation>
@@ -2399,6 +2404,11 @@ Re-mesh case first?</source>
 		<translation>الزاوية</translation>
     </message>
     <message>
+        <location filename="../Gui/TaskPanelCfdMeshRefinement.ui" line="453"/>
+        <source>Centre of rotation</source>
+		<translation>مركز الدوران</translation>
+    </message>
+    <message>
         <location filename="../Gui/TaskPanelCfdMeshRefinement.ui" line="471"/>
         <source>Number of layers</source>
 		<translation>عدد الطبقات</translation>
@@ -2407,6 +2417,11 @@ Re-mesh case first?</source>
         <location filename="../Gui/TaskPanelCfdMeshRefinement.ui" line="488"/>
         <source>Expansion ratio</source>
 		<translation>نسبة التمدد</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdMeshRefinement.ui" line="526"/>
+        <source>Rotational axis</source>
+		<translation>محور الدوران</translation>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdMeshRefinement.ui" line="578"/>
