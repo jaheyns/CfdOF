@@ -13,6 +13,11 @@ from CfdOF.CfdTools import setQuantity, getQuantity, storeIfChanged
 translate = FreeCAD.Qt.translate
 
 SOLID_FIELDS = ['ThermalConductivity', 'Density', 'SpecificHeat']
+SOLID_FIELD_UNITS = {
+    'ThermalConductivity': 'W/m/K',
+    'Density': 'kg/m^3',
+    'SpecificHeat': 'J/kg/K',
+}
 HEAT_GENERATION_UNIT = 'W/m^3'
 
 
@@ -41,7 +46,7 @@ class TaskPanelCfdSolidProperties:
             widget.setObjectName(name)
             widget.setProperty("format", "g")
             val = self.material.get(name, '0')
-            widget.setProperty("unit", val)
+            widget.setProperty("unit", SOLID_FIELD_UNITS.get(name, ''))
             widget.setProperty("minimum", 0)
             widget.setProperty("singleStep", 0.1)
             layout.addRow(name + ":", widget)
@@ -71,8 +76,12 @@ class TaskPanelCfdSolidProperties:
         # Restore the user's saved values: populateMaterialsList and selectPredefined
         # both fire signals that overwrite self.material and the widget values.
         self.material = dict(self.obj.Material)
-        for name in SOLID_FIELDS:
-            setQuantity(self.text_boxes[name], self.material.get(name, '0'))
+        self.selecting_predefined = True
+        try:
+            for name in SOLID_FIELDS:
+                setQuantity(self.text_boxes[name], self.material.get(name, '0'))
+        finally:
+            self.selecting_predefined = False
         self.form.solidDescriptor.setText(self.material.get("Description", ""))
         self.form.material_name.setText(self.obj.Label)
 
