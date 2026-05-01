@@ -36,6 +36,7 @@ from CfdOF import CfdTools
 from CfdOF.CfdTools import setQuantity, getQuantity, storeIfChanged
 from CfdOF.Mesh import CfdMeshTools
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
+from FreeCAD import Units
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -43,11 +44,16 @@ if FreeCAD.GuiUp:
     from PySide import QtGui
     from PySide.QtCore import Qt
     from PySide.QtGui import QApplication
+    from CfdOF.PreviewShapes import initPrevPoint
+    from pivy import coin
 
 translate = FreeCAD.Qt.translate
 
 class TaskPanelCfdMesh:
     """ The TaskPanel for editing References property of CfdMesh objects and creation of new CFD mesh """
+    if FreeCAD.GuiUp:
+        prev_point_move_node = coin.SoTranslation()
+        prev_point_node = coin.SoSeparator()
     def __init__(self, obj):
         self.mesh_obj = obj
         self.analysis_obj = CfdTools.getParentAnalysisObject(self.mesh_obj)
@@ -75,6 +81,9 @@ class TaskPanelCfdMesh:
         self.form.pb_load_mesh.clicked.connect(self.pbLoadMeshClicked)
         self.form.pb_clear_mesh.clicked.connect(self.pbClearMeshClicked)
         self.form.pb_searchPointInMesh.clicked.connect(self.searchPointInMesh)
+        self.form.if_pointInMeshX.valueChanged.connect(self.pointInMesh_changed)
+        self.form.if_pointInMeshY.valueChanged.connect(self.pointInMesh_changed)
+        self.form.if_pointInMeshZ.valueChanged.connect(self.pointInMesh_changed)
         self.form.pb_check_mesh.clicked.connect(self.checkMeshClicked)
 
         self.radioGroup = QtGui.QButtonGroup()
@@ -111,6 +120,9 @@ class TaskPanelCfdMesh:
 
     def closed(self):
         # We call this from unsetEdit to ensure cleanup
+        utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
+        if utility == "snappyHexMesh" and FreeCAD.GuiUp:
+            FreeCADGui.ActiveDocument.ActiveView.getSceneGraph().removeChild(self.prev_point_node)
         self.store()
         self.mesh_obj.Proxy.mesh_process.terminate()
         self.mesh_obj.Proxy.mesh_process.waitForFinished()
@@ -134,6 +146,17 @@ class TaskPanelCfdMesh:
                 CfdMesh.MESHERS, CfdMesh.DIMENSION, CfdMesh.DUAL_CONVERSION)), 
                 (self.mesh_obj.MeshUtility, self.mesh_obj.ElementDimension, self.mesh_obj.ConvertToDualMesh), 0)
         self.form.cb_utility.setCurrentIndex(index_utility)
+
+        if FreeCAD.GuiUp:
+            # create the point every time the taskpanel is loaded
+            initPrevPoint(self.prev_point_node, self.prev_point_move_node, self.get_prev_point_size(self.mesh_obj.Part.Shape), 0, 1, 0,
+                         self.if_2_float(self.form.if_pointInMeshX),
+                         self.if_2_float(self.form.if_pointInMeshY),
+                         self.if_2_float(self.form.if_pointInMeshZ))
+            # then if not using snappyHexMesh remove the point
+            utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
+            if utility != "snappyHexMesh":
+                FreeCADGui.ActiveDocument.ActiveView.getSceneGraph().removeChild(self.prev_point_node)
 
     def updateUI(self):
         case_path = self.mesh_obj.Proxy.cart_mesh.mesh_case_dir
@@ -193,8 +216,19 @@ class TaskPanelCfdMesh:
         utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
+            if FreeCAD.GuiUp:
+                FreeCADGui.ActiveDocument.ActiveView.getSceneGraph().addChild(self.prev_point_node)
         else:
             self.form.snappySpecificProperties.setVisible(False)
+            if FreeCAD.GuiUp:
+                FreeCADGui.ActiveDocument.ActiveView.getSceneGraph().removeChild(self.prev_point_node)
+
+    def pointInMesh_changed(self):
+        if FreeCAD.GuiUp:
+            self.prev_point_move_node.translation.setValue(
+                             self.if_2_float(self.form.if_pointInMeshX),
+                             self.if_2_float(self.form.if_pointInMeshY),
+                             self.if_2_float(self.form.if_pointInMeshZ))
 
     def writeMesh(self):
         import importlib
@@ -438,3 +472,13 @@ class TaskPanelCfdMesh:
             setQuantity(self.form.if_pointInMeshX, str(iMPx) + "mm")
             setQuantity(self.form.if_pointInMeshY, str(iMPy) + "mm")
             setQuantity(self.form.if_pointInMeshZ, str(iMPz) + "mm")
+
+    def if_2_float(self, if_obj):
+        """ converts the qt input field in the gui to float """
+        value_obj = Units.Quantity(if_obj.text())
+        return value_obj.getValueAs(Units.Length).Value
+
+    def get_prev_point_size(self, shape):
+        """ return the estimated size of the preview point based on the mesh object"""
+        size = 0.2 * min(min(shape.BoundBox.XLength, shape.BoundBox.YLength), shape.BoundBox.ZLength)
+        return size
