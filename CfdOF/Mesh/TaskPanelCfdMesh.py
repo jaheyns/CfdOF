@@ -480,5 +480,5 @@ class TaskPanelCfdMesh:
 
     def get_prev_point_size(self, shape):
         """ return the estimated size of the preview point based on the mesh object"""
-        size = 0.2 * min(min(shape.BoundBox.XLength, shape.BoundBox.YLength), shape.BoundBox.ZLength)
+        size = 0.1 * min(min(shape.BoundBox.XLength, shape.BoundBox.YLength), shape.BoundBox.ZLength)
         return size
