@@ -1,3 +1,6 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%:default
 %{%(physics/Turbulence%)
 %:RANS DES LES
 %[_header%]
@@ -90,4 +93,6 @@ boundaryField
 }
 
 // ************************************************************************* //
+%}
+
 %}

@@ -1,0 +1,63 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%{%(physics/Turbulence%)
+%:RANS DES
+%{%(physics/TurbulenceModel%)
+%:kOmegaSST kOmegaSSTDES kOmegaSSTDDES kOmegaSSTIDDES kOmegaSSTLM
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0/%(multiRegionFluidNames/0%)";
+    object      omega;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 0 -1 0 0 0 0];
+
+internalField   uniform %(initialValues/omega%);
+
+boundaryField
+{
+%{%(multiRegionFluidBoundaries%)
+%{%(multiRegionFluidBoundaries/%(0%)/BoundaryType%)
+%:wall
+    %(0%)
+    {
+        type        omegaWallFunction;
+        value       $internalField;
+    }
+%:inlet outlet open
+    %(0%)
+    {
+        type        inletOutlet;
+        inletValue  uniform %(initialValues/omega%);
+        value       uniform %(initialValues/omega%);
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%}
+
+%}
+
+%{%(multiRegionSolidNames%)
+    %(multiRegionFluidNames/0%)_to_%(multiRegionSolidNames/%(0%)%)
+    {
+        type        omegaWallFunction;
+        value       $internalField;
+    }
+
+%}
+    defaultFaces
+    {
+        type        omegaWallFunction;
+        value       $internalField;
+    }
+}
+
+// ************************************************************************* //
+%}
+%}
+%}

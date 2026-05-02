@@ -1,3 +1,24 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes      {}
+gradSchemes     {}
+divSchemes      {}
+laplacianSchemes {}
+interpolationSchemes {}
+snGradSchemes   {}
+
+// ************************************************************************* //
+%:default
 %[_header%]
 FoamFile
 {
@@ -258,3 +279,5 @@ wallDist
 
 
 // ************************************************************************* //
+
+%}

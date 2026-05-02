@@ -1,3 +1,19 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// (intentionally empty - solver settings are in system/<region>/fvSolution)
+
+// ************************************************************************* //
+%:default
 %[_header%]
 FoamFile
 {
@@ -438,3 +454,4 @@ cache
 }
 
 // ************************************************************************* //
+%}

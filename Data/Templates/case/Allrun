@@ -121,6 +121,156 @@ runCommand createPatch -overwrite
 runCommand topoSet -dict system/topoSetZonesDict
 
 %}
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+# Split combined mesh into fluid and solid regions
+runCommand splitMeshRegions -cellZones -overwrite
+
+# Upgrade sampleMode on all mappedWall interface patches to nearestPatchFaceAMI (parallel-safe)
+# and add missing patch entries to 0/ field files for any interface patches splitMeshRegions created.
+# splitMeshRegions already creates correct <fluid>_to_<solid> / <solid>_to_<fluid> mappedWall pairs;
+# we only need to upgrade their sampleMode and populate the 0/ field files.
+env -u PYTHONPATH -u PYTHONHOME python3 << 'PYEOF'
+import re, os, glob
+
+FLUID_REGIONS = []
+SOLID_REGIONS = []
+try:
+    with open('constant/regionProperties') as f:
+        txt = f.read()
+    fm = re.search(r'fluid\s*\(\s*([^)]*?)\s*\)', txt)
+    sm = re.search(r'solid\s*\(\s*([^)]*?)\s*\)', txt)
+    if fm:
+        FLUID_REGIONS = fm.group(1).split()
+    if sm:
+        SOLID_REGIONS = sm.group(1).split()
+except FileNotFoundError:
+    pass
+
+def fix_samplemode_to_ami(bfile):
+    """Upgrade sampleMode nearestPatchFace → nearestPatchFaceAMI for parallel CHT."""
+    with open(bfile) as f:
+        txt = f.read()
+    txt = txt.replace('sampleMode      nearestPatchFace;\n',
+                      'sampleMode      nearestPatchFaceAMI;\n')
+    with open(bfile, 'w') as f:
+        f.write(txt)
+
+def get_mapped_patches(bfile):
+    """Return names of all mappedWall patches in boundary file."""
+    with open(bfile) as f:
+        txt = f.read()
+    return re.findall(r'\n\s+(\w+)\s*\n\s*\{[^}]*type\s+mappedWall', txt)
+
+def get_nonmapped_patches(bfile):
+    """Return names of all non-mappedWall patches in boundary file."""
+    with open(bfile) as f:
+        txt = f.read()
+    all_patches = re.findall(r'\n    (\w+)\n    \{', txt)
+    mapped = set(re.findall(r'\n\s+(\w+)\s*\n\s*\{[^}]*type\s+mappedWall', txt))
+    return [p for p in all_patches if p not in mapped]
+
+def patch_present(field_txt, patch_name):
+    return bool(re.search(r'\n\s+' + re.escape(patch_name) + r'\s*\n\s*\{', field_txt))
+
+def add_patch_entry(field_file, patch_name, bc_lines):
+    with open(field_file) as f:
+        txt = f.read()
+    if patch_present(txt, patch_name):
+        return
+    entry = '\n    ' + patch_name + '\n    {\n'
+    for line in bc_lines:
+        entry += '        ' + line + '\n'
+    entry += '    }\n'
+    # Insert before the LAST closing brace (end of boundaryField, not FoamFile header)
+    matches = list(re.finditer(r'\n}', txt))
+    if matches:
+        pos = matches[-1].start() + 1
+        txt = txt[:pos] + entry + txt[pos:]
+    with open(field_file, 'w') as f:
+        f.write(txt)
+
+def add_missing_patches_to_fields(region, patches, is_fluid):
+    field_dir = os.path.join('0', region)
+    if not os.path.isdir(field_dir):
+        return
+    for patch in patches:
+        for field_file in glob.glob(os.path.join(field_dir, '*')):
+            fname = os.path.basename(field_file)
+            if fname == 'T':
+                kappa = 'fluidThermo' if is_fluid else 'solidThermo'
+                add_patch_entry(field_file, patch, [
+                    'type            compressible::turbulentTemperatureCoupledBaffleMixed;',
+                    'value           $internalField;',
+                    'Tnbr            T;',
+                    'kappaMethod     ' + kappa + ';',
+                ])
+            elif fname == 'U' and is_fluid:
+                add_patch_entry(field_file, patch, ['type            noSlip;'])
+            elif fname == 'p_rgh' and is_fluid:
+                add_patch_entry(field_file, patch, [
+                    'type            fixedFluxPressure;',
+                    'value           $internalField;',
+                ])
+            elif fname == 'p':
+                add_patch_entry(field_file, patch, [
+                    'type        calculated;',
+                    'value       $internalField;',
+                ])
+            elif fname == 'nut' and is_fluid:
+                add_patch_entry(field_file, patch, [
+                    'type            nutkWallFunction;',
+                    'value           $internalField;',
+                ])
+            elif fname in ('k', 'epsilon', 'omega', 'nuTilda', 'alphat') and is_fluid:
+                add_patch_entry(field_file, patch, ['type            zeroGradient;'])
+
+for r in FLUID_REGIONS:
+    bfile = 'constant/' + r + '/polyMesh/boundary'
+    if not os.path.exists(bfile):
+        continue
+    fix_samplemode_to_ami(bfile)
+for r in SOLID_REGIONS:
+    bfile = 'constant/' + r + '/polyMesh/boundary'
+    if not os.path.exists(bfile):
+        continue
+    fix_samplemode_to_ami(bfile)
+
+# Add 0/ field entries for all mappedWall interface patches splitMeshRegions created
+for r in FLUID_REGIONS:
+    bfile = 'constant/' + r + '/polyMesh/boundary'
+    if not os.path.exists(bfile):
+        continue
+    mapped = [p for p in get_mapped_patches(bfile) if p != 'defaultFaces']
+    add_missing_patches_to_fields(r, mapped, is_fluid=True)
+for r in SOLID_REGIONS:
+    bfile = 'constant/' + r + '/polyMesh/boundary'
+    if not os.path.exists(bfile):
+        continue
+    mapped = [p for p in get_mapped_patches(bfile) if p != 'defaultFaces']
+    add_missing_patches_to_fields(r, mapped, is_fluid=False)
+
+# Add default BC entries for non-mapped patches in solid regions that aren't yet in
+# the field files (e.g. inlet/outlet/wall faces that fall inside a solid volume after
+# splitMeshRegions). OpenFOAM requires an explicit entry for every patch in boundaryField.
+for r in SOLID_REGIONS:
+    bfile = 'constant/' + r + '/polyMesh/boundary'
+    if not os.path.exists(bfile):
+        continue
+    nonmapped = get_nonmapped_patches(bfile)
+    for patch in nonmapped:
+        for field_file in glob.glob(os.path.join('0', r, '*')):
+            fname = os.path.basename(field_file)
+            if fname == 'T':
+                add_patch_entry(field_file, patch, ['type            zeroGradient;'])
+            elif fname == 'p':
+                add_patch_entry(field_file, patch, [
+                    'type        calculated;',
+                    'value       $internalField;',
+                ])
+PYEOF
+
+%}
 %{%(initialisationZonesPresent%)
 %:True
 # Set internal fields according to setFieldsDict
@@ -160,7 +310,17 @@ PNAME=p
 # Parallel decomposition
 if [ ! -d processor0 ]
 then
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+    # Copy decomposeParDict to each region's system directory
+    for region in $(ls -d constant/*/polyMesh 2>/dev/null | cut -d/ -f2); do
+        mkdir -p system/$region
+        cp system/decomposeParDict system/$region/decomposeParDict
+    done
+    runCommand decomposePar -allRegions -force
+%:default
     runCommand decomposePar -force
+%}
 fi
 
 # Pick up number of parallel processes
@@ -170,8 +330,12 @@ NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDic
 %:False
 %{%(MovingMeshRegionsPresent%)
 %:False
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%:default
 # Mesh renumbering
 runParallel $NPROC renumberMesh -overwrite
+%}
 %}
 %:True
 # Mesh renumbering does not work in Foundation with dynamic mesh
@@ -179,6 +343,10 @@ runParallel $NPROC renumberMesh -overwrite
 
 %{%(initialValues/PotentialFlow%)
 %:True
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+# potentialFoam not applicable to multi-region CHT (no single-region polyMesh after splitMeshRegions)
+%:default
 # Initialise flow
 %{%(bafflesPresent%)
 %:True
@@ -196,6 +364,7 @@ runParallel $NPROC potentialFoam -initialiseUBCs -pName $PNAME
 %:buoyantSimpleFoam buoyantPimpleFoam interFoam multiphaseInterFoam
 # Remove phi with wrong units
 rm -f processor*/0/phi
+%}
 %}
 
 %}
@@ -224,8 +393,12 @@ fi
 %:False
 %{%(MovingMeshRegionsPresent%)
 %:False
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%:default
 # Mesh renumbering
 runCommand renumberMesh -overwrite
+%}
 %}
 %:True
 # Mesh renumbering does not currently work in Foundation with dynamic mesh
