@@ -1,0 +1,27 @@
+# Gui.runCommand('Std_OrthographicCamera',1)
+### Begin command Std_Workbench
+# Gui.activateWorkbench("CfdOFWorkbench")
+### End command Std_Workbench
+### Begin command CfdOF_Analysis
+from CfdOF import CfdAnalysis
+from CfdOF import CfdTools
+analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+CfdTools.setActiveAnalysis(analysis)
+from CfdOF.Solve import CfdPhysicsSelection
+analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+from CfdOF.Solve import CfdFluidMaterial
+analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+from CfdOF.Solve import CfdInitialiseFlowField
+analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+from CfdOF.Solve import CfdSolverFoam
+analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+### End command CfdOF_Analysis
+# Gui.Selection.addSelection('PeriodicBoundaryMeanvelocityforce','PhysicsModel')
+# App.getDocument('PeriodicBoundaryMeanvelocityforce').getObject('PhysicsModel').ViewObject.doubleClicked()
+App.ActiveDocument.PhysicsModel.Turbulence = 'RANS'
+# Gui.Selection.addSelection('PeriodicBoundaryMeanvelocityforce','InitialiseFields')
+# App.getDocument('PeriodicBoundaryMeanvelocityforce').getObject('InitialiseFields').ViewObject.doubleClicked()
+App.ActiveDocument.InitialiseFields.PotentialFlow = False
+App.ActiveDocument.InitialiseFields.Ux = '5.0 mm/s'
+App.ActiveDocument.InitialiseFields.UseOutletPValue = False
+App.ActiveDocument.recompute()
