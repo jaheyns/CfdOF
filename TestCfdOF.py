@@ -470,9 +470,9 @@ class PropellerTest(unittest.TestCase, MacroTest):
 
 
 class PeriodicBoundaryAndMeanVelocityForceTest(unittest.TestCase, MacroTest):
-    __dir_name = 'Periodic_boundary_meanvelocityforce'
+    __dir_name = 'PeriodicBoundaryMeanVelocityForce'
     __case_name = 'PeriodicBoundaryAndMeanVelocityForce'
-    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-mesh.FCMacro', '04-boundary_conditions.FCMacro', '05-mean_velocity_force.FCMacro']
+    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-mesh.FCMacro', '04-boundaryConditions.FCMacro', '05-meanVelocityForce.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
