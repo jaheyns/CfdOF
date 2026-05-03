@@ -1,8 +1,0 @@
-### Begin command CfdOF_MeanVelocityForce
-from CfdOF.Solve import CfdMeanVelocityForce
-from CfdOF import CfdTools
-CfdTools.getActiveAnalysis().addObject(CfdMeanVelocityForce.makeCfdMeanVelocityForce())
-### End command CfdOF_MeanVelocityForce
-App.ActiveDocument.MeanVelocityForce.Direction = App.Vector (1.0, 0.0, 0.0)
-App.ActiveDocument.MeanVelocityForce.Ubar = App.Vector (0.005, 0.0, 0.0)
-App.ActiveDocument.recompute()
