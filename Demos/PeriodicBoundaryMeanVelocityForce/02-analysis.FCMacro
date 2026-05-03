@@ -16,11 +16,11 @@ analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
 from CfdOF.Solve import CfdSolverFoam
 analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
 ### End command CfdOF_Analysis
-# Gui.Selection.addSelection('PeriodicBoundaryMeanvelocityforce','PhysicsModel')
-# App.getDocument('PeriodicBoundaryMeanvelocityforce').getObject('PhysicsModel').ViewObject.doubleClicked()
+# Gui.Selection.addSelection('PeriodicBoundaryMeanVelocityForce','PhysicsModel')
+# App.getDocument('PeriodicBoundaryMeanVelocityForce').getObject('PhysicsModel').ViewObject.doubleClicked()
 App.ActiveDocument.PhysicsModel.Turbulence = 'RANS'
-# Gui.Selection.addSelection('PeriodicBoundaryMeanvelocityforce','InitialiseFields')
-# App.getDocument('PeriodicBoundaryMeanvelocityforce').getObject('InitialiseFields').ViewObject.doubleClicked()
+# Gui.Selection.addSelection('PeriodicBoundaryMeanVelocityForce','InitialiseFields')
+# App.getDocument('PeriodicBoundaryMeanVelocityForce').getObject('InitialiseFields').ViewObject.doubleClicked()
 App.ActiveDocument.InitialiseFields.PotentialFlow = False
 App.ActiveDocument.InitialiseFields.Ux = '5.0 mm/s'
 App.ActiveDocument.InitialiseFields.UseOutletPValue = False
