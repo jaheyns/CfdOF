@@ -1,0 +1,12 @@
+import FreeCAD
+import PartDesignGui
+import os
+
+# Gui.runCommand('Std_DlgMacroRecord',0)
+### Begin command Std_Open
+FreeCAD.openDocument(os.path.join(os.path.dirname(__file__), "PeriodicBoundaryMeanvelocityforce.FCStd"))
+# App.setActiveDocument("PeriodicBoundaryMeanvelocityforce")
+# App.ActiveDocument=App.getDocument("PeriodicBoundaryMeanvelocityforce")
+# Gui.ActiveDocument=Gui.getDocument("PeriodicBoundaryMeanvelocityforce")
+### End command Std_Open
+App.ActiveDocument.recompute()

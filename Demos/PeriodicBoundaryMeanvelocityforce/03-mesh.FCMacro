@@ -1,0 +1,12 @@
+# Gui.Selection.addSelection('PeriodicBoundaryMeanvelocityforce','Body')
+### Begin command CfdOF_MeshFromShape
+from CfdOF.Mesh import CfdMesh
+CfdMesh.makeCfdMesh('Body_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Body
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+### End command CfdOF_MeshFromShape
+# Gui.Selection.clearSelection()
+App.ActiveDocument.Body_Mesh.CharacteristicLengthMax = '0.42 mm'
+App.ActiveDocument.Body_Mesh.MeshUtility = 'gmsh'
+App.ActiveDocument.recompute()

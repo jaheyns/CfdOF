@@ -1,0 +1,64 @@
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face8',6.42233,8.88178e-16,4.75139)
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face10',4.00969,6.24028,10)
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face2',-5.43361,1.33227e-15,5.09017)
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face9',1.4059,8.14386,-4.44089e-16)
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face5',0.017243,12.1244,2.37087)
+### Begin command CfdOF_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command CfdOF_FluidBoundary
+# Gui.Selection.clearSelection()
+App.ActiveDocument.CfdFluidBoundary.Label = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'symmetry'
+App.ActiveDocument.CfdFluidBoundary.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'), ('Face8', 'Face10', 'Face2', 'Face9', 'Face5'))]
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face3',-7,4.52047,4.26428)
+### Begin command CfdOF_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command CfdOF_FluidBoundary
+# Gui.Selection.clearSelection()
+App.ActiveDocument.CfdFluidBoundary001.Label = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundaryType = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundarySubType = 'cyclicAMI'
+App.ActiveDocument.CfdFluidBoundary001.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary001.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'), ('Face3',))]
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face7',7,5.07521,4.42995)
+### Begin command CfdOF_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command CfdOF_FluidBoundary
+# Gui.Selection.clearSelection()
+App.ActiveDocument.CfdFluidBoundary002.Label = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundaryType = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundarySubType = 'cyclicAMI'
+App.ActiveDocument.CfdFluidBoundary002.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary002.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary002.PeriodicPartner = 'constraint001'
+App.ActiveDocument.CfdFluidBoundary002.PeriodicMaster = False
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'), ('Face7',))]
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face1',3.2496,3.78693,5.06392)
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face4',-3.16257,8.93306,5.60885)
+# Gui.Selection.addSelection('periodic_boundary_meanvelocityforce','Body','Pad.Face6',4.73636,7.67767,4.48719)
+### Begin command CfdOF_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command CfdOF_FluidBoundary
+# Gui.Selection.clearSelection()
+App.ActiveDocument.CfdFluidBoundary003.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary003.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary003.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary003.PeriodicPartner = 'constraint001'
+FreeCAD.ActiveDocument.CfdFluidBoundary003.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Pad'), ('Face1', 'Face4', 'Face6'))]
+App.ActiveDocument.recompute()
