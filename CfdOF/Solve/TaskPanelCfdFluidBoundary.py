@@ -28,6 +28,7 @@
 import os
 import os.path
 import FreeCAD
+from FreeCAD import Units
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui, QtCore
@@ -95,9 +96,9 @@ class TaskPanelCfdFluidBoundary:
         self.form.checkReverse.setChecked(self.obj.ReverseNormal)
         setQuantity(self.form.inputPressure, self.obj.Pressure)
         setQuantity(self.form.inputAngularVelocity, self.obj.AngularVelocity)
-        setQuantity(self.form.inputRotationOriginX, self.obj.RotationOrigin.x)
-        setQuantity(self.form.inputRotationOriginY, self.obj.RotationOrigin.y)
-        setQuantity(self.form.inputRotationOriginZ, self.obj.RotationOrigin.z)
+        setQuantity(self.form.inputRotationOriginX, Units.Quantity(self.obj.RotationOrigin.x, Units.Length))
+        setQuantity(self.form.inputRotationOriginY, Units.Quantity(self.obj.RotationOrigin.y, Units.Length))
+        setQuantity(self.form.inputRotationOriginZ, Units.Quantity(self.obj.RotationOrigin.z, Units.Length))
         setQuantity(self.form.inputRotationAxisX, self.obj.RotationAxis.x)
         setQuantity(self.form.inputRotationAxisY, self.obj.RotationAxis.y)
         setQuantity(self.form.inputRotationAxisZ, self.obj.RotationAxis.z)
@@ -148,15 +149,16 @@ class TaskPanelCfdFluidBoundary:
         self.form.radioButtonSlavePeriodic.setChecked(not self.obj.PeriodicMaster)
         self.form.rb_rotational_periodic.setChecked(self.obj.RotationalPeriodic)
         self.form.rb_translational_periodic.setChecked(not self.obj.RotationalPeriodic)
-        setQuantity(self.form.input_corx, self.obj.PeriodicCentreOfRotation.x)
-        setQuantity(self.form.input_cory, self.obj.PeriodicCentreOfRotation.y)
-        setQuantity(self.form.input_corz, self.obj.PeriodicCentreOfRotation.z)
+        setQuantity(self.form.input_corx, Units.Quantity(self.obj.PeriodicCentreOfRotation.x, Units.Length))
+        setQuantity(self.form.input_cory, Units.Quantity(self.obj.PeriodicCentreOfRotation.y, Units.Length))
+        setQuantity(self.form.input_corz, Units.Quantity(self.obj.PeriodicCentreOfRotation.z, Units.Length))
         setQuantity(self.form.input_axisx, self.obj.PeriodicCentreOfRotationAxis.x)
         setQuantity(self.form.input_axisy, self.obj.PeriodicCentreOfRotationAxis.y)
         setQuantity(self.form.input_axisz, self.obj.PeriodicCentreOfRotationAxis.z)
-        setQuantity(self.form.input_sepx, self.obj.PeriodicSeparationVector.x)
-        setQuantity(self.form.input_sepy, self.obj.PeriodicSeparationVector.y)
-        setQuantity(self.form.input_sepz, self.obj.PeriodicSeparationVector.z)
+        print(self.obj.PeriodicSeparationVector.x)
+        setQuantity(self.form.input_sepx, Units.Quantity(self.obj.PeriodicSeparationVector.x, Units.Length))
+        setQuantity(self.form.input_sepy, Units.Quantity(self.obj.PeriodicSeparationVector.y, Units.Length))
+        setQuantity(self.form.input_sepz, Units.Quantity(self.obj.PeriodicSeparationVector.z, Units.Length))
 
         # Turbulence
         if self.turb_model is not None:

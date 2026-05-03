@@ -22,9 +22,10 @@
 #                                                                              #
 ################################################################################
 
-import FreeCAD
 import os
 import os.path
+import FreeCAD
+from FreeCAD import Units
 from CfdOF import CfdTools
 from CfdOF.CfdTools import getQuantity, setQuantity, storeIfChanged, indexOrDefault
 if FreeCAD.GuiUp:
@@ -67,9 +68,9 @@ class TaskPanelCfdScalarTransportFunctions:
 
         self.form.comboPhase.setCurrentIndex(indexOrDefault(mat_names, self.obj.PhaseName, 0))
 
-        setQuantity(self.form.inputInjectionPointx, self.obj.InjectionPoint.x)
-        setQuantity(self.form.inputInjectionPointy, self.obj.InjectionPoint.y)
-        setQuantity(self.form.inputInjectionPointz, self.obj.InjectionPoint.z)
+        setQuantity(self.form.inputInjectionPointx, Units.Quantity(self.obj.InjectionPoint.x, Units.Length))
+        setQuantity(self.form.inputInjectionPointy, Units.Quantity(self.obj.InjectionPoint.y, Units.Length))
+        setQuantity(self.form.inputInjectionPointz, Units.Quantity(self.obj.InjectionPoint.z, Units.Length))
 
         setQuantity(self.form.inputInjectionRate, self.obj.InjectionRate)
 

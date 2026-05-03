@@ -28,6 +28,7 @@
 import os
 import os.path
 import FreeCAD
+from FreeCAD import Units
 if FreeCAD.GuiUp:
     import FreeCADGui
 from CfdOF import CfdTools
@@ -109,9 +110,9 @@ class TaskPanelCfdPhysicsSelection:
         # SRF model
         self.form.srfCheckBox.setChecked(self.obj.SRFModelEnabled)
 
-        setQuantity(self.form.inputSRFCoRx, self.obj.SRFModelCoR.x)
-        setQuantity(self.form.inputSRFCoRy, self.obj.SRFModelCoR.y)
-        setQuantity(self.form.inputSRFCoRz, self.obj.SRFModelCoR.z)
+        setQuantity(self.form.inputSRFCoRx, Units.Quantity(self.obj.SRFModelCoR.x, Units.Length))
+        setQuantity(self.form.inputSRFCoRy, Units.Quantity(self.obj.SRFModelCoR.y, Units.Length))
+        setQuantity(self.form.inputSRFCoRz, Units.Quantity(self.obj.SRFModelCoR.z, Units.Length))
 
         setQuantity(self.form.inputSRFAxisx, self.obj.SRFModelAxis.x)
         setQuantity(self.form.inputSRFAxisy, self.obj.SRFModelAxis.y)
