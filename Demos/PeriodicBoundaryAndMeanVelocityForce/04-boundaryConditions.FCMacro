@@ -40,6 +40,7 @@ CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
 App.ActiveDocument.CfdFluidBoundary002.Label = 'constraint'
 FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundaryType = 'constraint'
 FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundarySubType = 'cyclicAMI'
+App.ActiveDocument.CfdFluidBoundary002.PeriodicSeparationVector = App.Vector (14.0, 0.0, 0.0)
 App.ActiveDocument.CfdFluidBoundary002.RotationAxis = App.Vector (0.0, 0.0, 0.0)
 App.ActiveDocument.CfdFluidBoundary002.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
 App.ActiveDocument.CfdFluidBoundary002.PeriodicPartner = 'constraint001'
