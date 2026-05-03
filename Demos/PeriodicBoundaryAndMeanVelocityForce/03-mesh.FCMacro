@@ -1,4 +1,4 @@
-# Gui.Selection.addSelection('PeriodicBoundaryMeanVelocityForce','Body')
+# Gui.Selection.addSelection('PeriodicBoundaryAndMeanVelocityForce','Body')
 ### Begin command CfdOF_MeshFromShape
 from CfdOF.Mesh import CfdMesh
 CfdMesh.makeCfdMesh('Body_Mesh')

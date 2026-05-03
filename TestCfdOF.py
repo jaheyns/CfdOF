@@ -470,7 +470,7 @@ class PropellerTest(unittest.TestCase, MacroTest):
 
 
 class PeriodicBoundaryAndMeanVelocityForceTest(unittest.TestCase, MacroTest):
-    __dir_name = 'PeriodicBoundaryMeanVelocityForce'
+    __dir_name = 'PeriodicBoundaryAndMeanVelocityForce'
     __case_name = 'PeriodicBoundaryAndMeanVelocityForce'
     __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-mesh.FCMacro', '04-boundaryConditions.FCMacro', '05-meanVelocityForce.FCMacro']
 
