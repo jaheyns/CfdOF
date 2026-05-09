@@ -1,0 +1,6 @@
+import FreeCAD
+import PartDesignGui
+import os
+
+FreeCAD.openDocument(os.path.join(os.path.dirname(__file__), "Ayyash-250.FCStd"))
+App.ActiveDocument.recompute()

@@ -1,0 +1,35 @@
+
+# Gui.Selection.addSelection('Ayyash-250','Body001')
+### Begin command CfdOF_MeshFromShape
+from CfdOF.Mesh import CfdMesh
+CfdMesh.makeCfdMesh('Body001_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Body001
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+### End command CfdOF_MeshFromShape
+# Gui.Selection.clearSelection()
+App.ActiveDocument.Body001_Mesh.CharacteristicLengthMax = '280.0 mm'
+# Gui.Selection.addSelection('Ayyash-250','Body001_Mesh')
+### Begin command CfdOF_MeshRegion
+
+from CfdOF.Mesh import CfdMeshRefinement
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Body001_Mesh)
+### End command CfdOF_MeshRegion
+# Gui.Selection.clearSelection()
+App.ActiveDocument.MeshRefinement.RelativeLength = 0.5
+App.ActiveDocument.MeshRefinement.Internal = True
+FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body002'), ('Solid1',))]
+FreeCAD.ActiveDocument.recompute()
+# Gui.Selection.addSelection('Ayyash-250','Body001_Mesh')
+### Begin command CfdOF_MeshRegion
+
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Body001_Mesh)
+### End command CfdOF_MeshRegion
+# Gui.Selection.clearSelection()
+App.ActiveDocument.MeshRefinement001.RelativeLength = 0.1
+App.ActiveDocument.MeshRefinement001.NumberLayers = 5
+App.ActiveDocument.MeshRefinement001.ExpansionRatio = 1.2
+FreeCAD.ActiveDocument.MeshRefinement001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body'), ('',))]
+FreeCAD.ActiveDocument.recompute()

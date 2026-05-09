@@ -1,0 +1,31 @@
+### Begin command CfdOF_ReportingFunctions
+from CfdOF.PostProcess import CfdReportingFunction
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())
+### End command CfdOF_ReportingFunctions
+# Gui.Selection.addSelection('Ayyash-250','VarSet')
+FreeCAD.ActiveDocument.ReportingFunction.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary
+App.ActiveDocument.ReportingFunction.ReferencePressure = '10.0 kg/(mm*s^2)'
+App.ActiveDocument.ReportingFunction.WriteFields = True
+App.ActiveDocument.ReportingFunction.CentreOfRotation = App.Vector (0.0, 0.0, 2950.0)
+App.ActiveDocument.ReportingFunction.Lift = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.ReportingFunction.Drag = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.ReportingFunction.NBins = 1
+App.ActiveDocument.ReportingFunction.Direction = App.Vector (0.0, 0.0, 1.0)
+FreeCAD.ActiveDocument.recompute()
+### Begin command CfdOF_ReportingFunctions
+CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())
+### End command CfdOF_ReportingFunctions
+App.ActiveDocument.ReportingFunction001.ReportingFunctionType = 'ForceCoefficients'
+FreeCAD.ActiveDocument.ReportingFunction001.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary
+App.ActiveDocument.ReportingFunction001.ReferencePressure = '10.0 kg/(mm*s^2)'
+App.ActiveDocument.ReportingFunction001.WriteFields = True
+App.ActiveDocument.ReportingFunction001.CentreOfRotation = App.Vector (0.0, 0.0, 2950.0)
+App.ActiveDocument.ReportingFunction001.Lift = App.Vector (1.0, 0.0, 0.0)
+App.ActiveDocument.ReportingFunction001.Drag = App.Vector (0.0, 0.0, 1.0)
+App.ActiveDocument.ReportingFunction001.MagnitudeUInf = '80000.0 mm/s'
+App.ActiveDocument.ReportingFunction001.LengthRef = '5900.0 mm'
+App.ActiveDocument.ReportingFunction001.AreaRef = '323060.0 mm^2'
+App.ActiveDocument.ReportingFunction001.NBins = 1
+App.ActiveDocument.ReportingFunction001.Direction = App.Vector (0.0, 0.0, 1.0)
+FreeCAD.ActiveDocument.recompute()

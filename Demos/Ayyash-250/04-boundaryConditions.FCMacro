@@ -1,0 +1,64 @@
+
+### Begin command CfdOF_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command CfdOF_FluidBoundary
+App.ActiveDocument.CfdFluidBoundary.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body'), ('',))]
+FreeCAD.ActiveDocument.recompute()
+# Gui.Selection.addSelection('Ayyash-250','Body001','Boolean.Face3',1526.34,-1131.87,10620)
+### Begin command CfdOF_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command CfdOF_FluidBoundary
+# Gui.Selection.clearSelection()
+App.ActiveDocument.CfdFluidBoundary001.Label = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundaryType = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundarySubType = 'uniformVelocityInlet'
+App.ActiveDocument.CfdFluidBoundary001.Uz = '-80000.0 mm/s'
+App.ActiveDocument.CfdFluidBoundary001.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary001.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face3',))]
+FreeCAD.ActiveDocument.recompute()
+# Gui.Selection.addSelection('Ayyash-250','Body001','Boolean.Face1',287.904,1358.49,-5000)
+### Begin command CfdOF_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command CfdOF_FluidBoundary
+# Gui.Selection.clearSelection()
+App.ActiveDocument.CfdFluidBoundary002.Label = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundaryType = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundarySubType = 'staticPressureOutlet'
+App.ActiveDocument.CfdFluidBoundary002.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary002.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face1',))]
+FreeCAD.ActiveDocument.recompute()
+# Gui.Selection.addSelection('Ayyash-250','Body001','Boolean.Face2',-1813.68,-2366.8,3655.38)
+### Begin command CfdOF_FluidBoundary
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+### End command CfdOF_FluidBoundary
+# Gui.Selection.clearSelection()
+App.ActiveDocument.CfdFluidBoundary003.Label = 'wall'
+FreeCAD.ActiveDocument.CfdFluidBoundary003.BoundarySubType = 'slipWall'
+App.ActiveDocument.CfdFluidBoundary003.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary003.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+FreeCAD.ActiveDocument.CfdFluidBoundary003.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face2',))]
+FreeCAD.ActiveDocument.recompute()
+# Gui.Selection.addSelection('Ayyash-250','InitialiseFields')
+# App.getDocument('Ayyash-250').getObject('InitialiseFields').ViewObject.doubleClicked()
+FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary002
+# Gui.Selection.addSelection('Ayyash-250','CfdSolver')
+# Gui.Selection.clearSelection()
+App.activeDocument().recompute(None,True,True)
+Gui.SendMsgToActiveView("ViewFit")
