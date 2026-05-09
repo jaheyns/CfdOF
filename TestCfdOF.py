@@ -334,6 +334,21 @@ class MacroTest:
         FreeCAD.closeDocument(FreeCAD.ActiveDocument.Name)
 
 
+class Ayyash_250Test(unittest.TestCase, MacroTest):
+    __dir_name = 'Ayyash_250'
+    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-mesh.FCMacro', '04-boundaryConditions.FCMacro', '05-reportFunction.FCMacro']
+
+    def __init__(self, var):
+        super().__init__(var)
+        MacroTest.child_instance = self
+
+    def test_run(self):
+        self.runTest(self.__class__.__dir_name, self.__class__.__macros)
+
+    def tearDown(self):
+        self.closeDoc()
+
+
 class ElbowTest(unittest.TestCase, MacroTest):
     __dir_name = 'Elbow'
     __macros = ['elbow.FCMacro']
