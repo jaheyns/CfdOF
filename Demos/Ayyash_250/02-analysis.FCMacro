@@ -16,6 +16,6 @@ analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
 from CfdOF.Solve import CfdSolverFoam
 analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
 ### End command CfdOF_Analysis
-# Gui.Selection.addSelection('Ayyash-250','PhysicsModel')
-# App.getDocument('Ayyash-250').getObject('PhysicsModel').ViewObject.doubleClicked()
+# Gui.Selection.addSelection('Ayyash_250','PhysicsModel')
+# App.getDocument('Ayyash_250').getObject('PhysicsModel').ViewObject.doubleClicked()
 App.ActiveDocument.PhysicsModel.Turbulence = 'RANS'

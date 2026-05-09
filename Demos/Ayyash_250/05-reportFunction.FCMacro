@@ -3,7 +3,7 @@ from CfdOF.PostProcess import CfdReportingFunction
 from CfdOF import CfdTools
 CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())
 ### End command CfdOF_ReportingFunctions
-# Gui.Selection.addSelection('Ayyash-250','VarSet')
+# Gui.Selection.addSelection('Ayyash_250','VarSet')
 FreeCAD.ActiveDocument.ReportingFunction.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary
 App.ActiveDocument.ReportingFunction.ReferencePressure = '10.0 kg/(mm*s^2)'
 App.ActiveDocument.ReportingFunction.WriteFields = True
