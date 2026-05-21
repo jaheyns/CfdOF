@@ -1,0 +1,27 @@
+%{%(zonesPresent%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetZonesDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(zones%)
+%{%(zones/%(0%)/PartNameList%)
+%(0%)
+{
+    type        insideSurface;
+    zoneType    cell;
+
+    surface     triSurface;
+    file        "%(0%).stl";
+}
+%}
+%}
+
+// ************************************************************************* //
+%}
