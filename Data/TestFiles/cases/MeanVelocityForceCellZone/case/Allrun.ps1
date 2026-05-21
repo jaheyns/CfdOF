@@ -53,7 +53,14 @@ echo "cAlpha 1;" > system/cAlpha
 runCommand createPatch -overwrite
 
 # Set cell zones contained inside the .stl surfaces
-runCommand topoSet -dict system/topoSetZonesDict
+if( (Get-Command createNonConformalCouples) )
+{
+	runCommand createZones -dict system/createZonesDict
+}
+else
+{
+	runCommand topoSet -dict system/topoSetZonesDict
+}
 
 # Parallel decomposition
 if( !(Test-Path -PathType Container processor0) )
