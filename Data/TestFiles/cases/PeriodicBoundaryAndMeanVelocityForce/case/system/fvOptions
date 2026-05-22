@@ -24,6 +24,7 @@ momentumSource
     meanVelocityForceCoeffs
     {
         selectionMode   all;
+        cellZone		all;
         fields          (U);
         direction       (1.0 0.0 0.0);
         Ubar            (0.005 0.0 0.0);
