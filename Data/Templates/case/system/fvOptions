@@ -66,6 +66,7 @@ momentumSource
     meanVelocityForceCoeffs
     {
         selectionMode   all;
+        cellZone        all; // for the foundation version
         fields          (U);
         direction       (%(meanVelocityForce/Direction%));
         Ubar            (%(meanVelocityForce/Ubar%));
