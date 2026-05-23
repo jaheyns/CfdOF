@@ -18,10 +18,6 @@ for the user. Generally improve the logging and messages that are printed there.
 
 Add a task panel and allow editing case path
 
-## Meshing
-
-* Expose parallel option in GUI
-
 ## Solver
 
 * Add a mechanism to specify surface tension coefficients between each pair of fluids
