@@ -103,6 +103,9 @@ class TaskPanelCfdMesh:
         self.form.radio_explicit_edge_detection.setToolTip("Find surface edges using explicit (eMesh) detection")
         self.form.radio_implicit_edge_detection.setToolTip("Find surface edges using implicit detection")
 
+        self.form.if_NumberOfProcesses.setToolTip("Number of parallel processes")
+        self.form.if_NumberOfThreads.setToolTip("Number of parallel threads per process")
+
         self.load()
         self.updateUI()
 
@@ -140,6 +143,8 @@ class TaskPanelCfdMesh:
         self.form.if_edgerefine.setValue(self.mesh_obj.EdgeRefinement)
         self.form.radio_implicit_edge_detection.setChecked(self.mesh_obj.ImplicitEdgeDetection)
         self.form.radio_explicit_edge_detection.setChecked(not self.mesh_obj.ImplicitEdgeDetection)
+        self.form.if_NumberOfProcesses.setValue(self.mesh_obj.NumberOfProcesses)
+        self.form.if_NumberOfThreads.setValue(self.mesh_obj.NumberOfThreads)
 
         index_utility = CfdTools.indexOrDefault(list(zip(
                 CfdMesh.MESHERS, CfdMesh.DIMENSION, CfdMesh.DUAL_CONVERSION)), 
@@ -169,8 +174,15 @@ class TaskPanelCfdMesh:
         utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
+            self.form.NumberOfThreads_frame.setVisible(False)
         else:
             self.form.snappySpecificProperties.setVisible(False)
+            self.form.NumberOfThreads_frame.setVisible(True)
+
+        if utility == "snappyHexMesh" or utility == "cfMesh":
+            self.form.NumberOfProcesses_frame.setVisible(True)
+        else:
+            self.form.NumberOfProcesses_frame.setVisible(False)
 
     def store(self):
         mesher_idx = self.form.cb_utility.currentIndex()
@@ -181,6 +193,8 @@ class TaskPanelCfdMesh:
         storeIfChanged(self.mesh_obj, 'EdgeRefinement', self.form.if_edgerefine.value())
         storeIfChanged(self.mesh_obj, 'ConvertToDualMesh', CfdMesh.DUAL_CONVERSION[mesher_idx])
         storeIfChanged(self.mesh_obj, 'ImplicitEdgeDetection', self.form.radio_implicit_edge_detection.isChecked())
+        storeIfChanged(self.mesh_obj, 'NumberOfProcesses', self.form.if_NumberOfProcesses.value())
+        storeIfChanged(self.mesh_obj, 'NumberOfThreads', self.form.if_NumberOfThreads.value())
 
         point_in_mesh = {'x': getQuantity(self.form.if_pointInMeshX),
                          'y': getQuantity(self.form.if_pointInMeshY),
@@ -215,12 +229,18 @@ class TaskPanelCfdMesh:
         utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
+            self.form.NumberOfThreads_frame.setVisible(False)
             if FreeCAD.GuiUp:
                 FreeCADGui.ActiveDocument.ActiveView.getSceneGraph().addChild(self.prev_point_node)
         else:
             self.form.snappySpecificProperties.setVisible(False)
+            self.form.NumberOfThreads_frame.setVisible(True)
             if FreeCAD.GuiUp:
                 FreeCADGui.ActiveDocument.ActiveView.getSceneGraph().removeChild(self.prev_point_node)
+        if utility == "snappyHexMesh" or utility == "cfMesh":
+            self.form.NumberOfProcesses_frame.setVisible(True)
+        else:
+            self.form.NumberOfProcesses_frame.setVisible(False)
 
     def pointInMeshChanged(self):
         if FreeCAD.GuiUp:
