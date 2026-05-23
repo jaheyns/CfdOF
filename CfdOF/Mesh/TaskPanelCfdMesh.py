@@ -104,7 +104,7 @@ class TaskPanelCfdMesh:
         self.form.radio_implicit_edge_detection.setToolTip("Find surface edges using implicit detection")
 
         self.form.if_NumberOfProcesses.setToolTip("Number of parallel processes")
-        self.form.if_NumberOfThreads.setToolTip("Number of parallel threads per process")
+        self.form.if_NumberOfThreads.setToolTip("Number of parallel threads per process.\n0 means use all available (if NumberOfProcesses = 1) or use 1 (if NumberOfProcesses > 1)")
 
         self.load()
         self.updateUI()
