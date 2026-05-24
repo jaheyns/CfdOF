@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
+import FreeCAD
 
 import os
+FreeCAD.openDocument(os.path.join(os.path.dirname(__file__), 'BatteryCooling.FCStd'))
 
-FreeCAD.open(os.path.join(os.path.dirname(__file__), "tesla-4680-battery-cooling.FCStd"))
-Gui.SendMsgToActiveView("ViewFit")
-
-# Create CfdOF Analysis
+# analysis
 from CfdOF import CfdAnalysis
 from CfdOF import CfdTools
 analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
@@ -18,89 +16,95 @@ from CfdOF.Solve import CfdInitialiseFlowField
 analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
 from CfdOF.Solve import CfdSolverFoam
 analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+App.ActiveDocument.PhysicsModel.Flow = 'NonIsothermal'
+App.ActiveDocument.PhysicsModel.Turbulence = 'RANS'
+App.ActiveDocument.PhysicsModel.TurbulenceModel = 'kEpsilon'
+App.ActiveDocument.FluidProperties.Material = {'CardName': 'AirCompressible', 'AuthorAndLicense': '', 'Author': 'SPDX-FileCopyrightText: 2021 Oliver Oxtoby', 'License': '', 'Name': 'Air', 'Description': 'Compressible air properties', 'ReferenceSource': '', 'SourceURL': '', 'Cp': '1004.703 J/kg/K', 'MolarMass': '0.0289643897748887 kg/mol', 'SutherlandRefTemperature': '273.15 K', 'SutherlandRefViscosity': '1.716e-5 kg/m/s', 'SutherlandTemperature': '110.4 K', 'Type': 'Compressible'}
 
-# Create background mesh
+# boundary conditions
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+# inlet
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary.Label = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'volumetricFlowRateInlet'
+App.ActiveDocument.CfdFluidBoundary.VolFlowRate = '27700000.0 mm^3/s'
+App.ActiveDocument.CfdFluidBoundary.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary.TurbulenceIntensityPercentage = '3.0'
+App.ActiveDocument.CfdFluidBoundary.TurbulenceLengthScale = '20.25 mm'
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face30',))]
+FreeCAD.ActiveDocument.recompute()
+# outlet
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary001.Label = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundaryType = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundarySubType = 'staticPressureOutlet'
+App.ActiveDocument.CfdFluidBoundary001.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary001.Pressure = '110.0 kg/(mm*s^2)'
+App.ActiveDocument.CfdFluidBoundary001.Temperature = '300.0 K'
+App.ActiveDocument.CfdFluidBoundary001.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face44',))]
+FreeCAD.ActiveDocument.recompute()
+# battery wall
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary002.Label = 'battery_wall'
+App.ActiveDocument.CfdFluidBoundary002.ThermalBoundaryType = 'totalPower'
+App.ActiveDocument.CfdFluidBoundary002.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary002.Power = '2000000000.0 mm^2*kg/s^3'
+App.ActiveDocument.CfdFluidBoundary002.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Binder001'), ('',))]
+FreeCAD.ActiveDocument.recompute()
+# side walls
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary003.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary003.ThermalBoundaryType = 'zeroGradient'
+App.ActiveDocument.CfdFluidBoundary003.RotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary003.PeriodicCentreOfRotationAxis = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.CfdFluidBoundary003.DefaultBoundary = True
+FreeCAD.ActiveDocument.recompute()
+
+# meshing
 from CfdOF.Mesh import CfdMesh
-CfdMesh.makeCfdMesh('Cut_Mesh')
-App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Cut
+CfdMesh.makeCfdMesh('Body001_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Body001
 from CfdOF import CfdTools
 CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
-App.ActiveDocument.Cut_Mesh.CharacteristicLengthMax = '3.0 mm'
-App.ActiveDocument.Cut_Mesh.MeshUtility = 'snappyHexMesh'
-App.ActiveDocument.Cut_Mesh.PointInMesh = {'x': '0.0 mm', 'y': '0.0 mm', 'z': '-5.0 mm'}
-
-# Create mesh surface refinement and layers
+App.ActiveDocument.Body001_Mesh.CharacteristicLengthMax = '3.0 mm'
+App.ActiveDocument.Body001_Mesh.MeshUtility = 'snappyHexMesh'
+App.ActiveDocument.Body001_Mesh.PointInMesh = {'x': '0.0 mm', 'y': '0.0 mm', 'z': '-5.0 mm'}
+App.ActiveDocument.Body001_Mesh.NumberOfProcesses = 4
 from CfdOF.Mesh import CfdMeshRefinement
-CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Cut_Mesh)
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Body001_Mesh)
 App.ActiveDocument.MeshRefinement.RelativeLength = 0.25
 App.ActiveDocument.MeshRefinement.NumberLayers = 2
 App.ActiveDocument.MeshRefinement.ExpansionRatio = 1.4
 FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Fusion'), ('',))]
+(FreeCAD.ActiveDocument.getObject('Binder001'), ('',))]
 FreeCAD.ActiveDocument.recompute()
 
-# Set physics modelling
-App.ActiveDocument.PhysicsModel.Flow = 'NonIsothermal'
-App.ActiveDocument.PhysicsModel.Turbulence = 'RANS'
-App.ActiveDocument.PhysicsModel.TurbulenceModel = 'kEpsilon'
-App.ActiveDocument.FluidProperties.Material = {'CardName': 'AirCompressible', 'AuthorAndLicense': '', 'Author': '', 'License': '', 'Name': 'Air', 'Description': 'Compressible air properties', 'ReferenceSource': '', 'SourceURL': '', 'Cp': '1004.703 J/kg/K', 'MolarMass': '0.0289643897748887 kg/mol', 'SutherlandRefTemperature': '273.15 K', 'SutherlandRefViscosity': '1.716e-5 kg/m/s', 'SutherlandTemperature': '110.4 K', 'Type': 'Compressible'}
-App.ActiveDocument.FluidProperties.Label = 'air'
-
-# Create battery fixed heat flux boundary condition
-from CfdOF.Solve import CfdFluidBoundary
-from CfdOF import CfdTools
-CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
-App.ActiveDocument.CfdFluidBoundary.Label = 'battery'
-App.ActiveDocument.CfdFluidBoundary.ThermalBoundaryType = 'totalPower'
-App.ActiveDocument.CfdFluidBoundary.Power = '2000 W';
-FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Fusion'), ('',))]
-FreeCAD.ActiveDocument.recompute()
-
-# Create inlet boundary condition
-CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
-App.ActiveDocument.CfdFluidBoundary001.Label = 'inlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundaryType = 'inlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundarySubType = 'volumetricFlowRateInlet'
-App.ActiveDocument.CfdFluidBoundary001.VolFlowRate = '27.7 l/s'
-App.ActiveDocument.CfdFluidBoundary001.TurbulenceIntensityPercentage = '3.0'
-App.ActiveDocument.CfdFluidBoundary001.TurbulenceLengthScale = '20.25 mm'
-FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Cut'), ('Face30',))]
-FreeCAD.ActiveDocument.recompute()
-
-# Create outlet boundary condition
-CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
-App.ActiveDocument.CfdFluidBoundary002.Label = 'outlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundaryType = 'outlet'
-FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundarySubType = 'staticPressureOutlet'
-App.ActiveDocument.CfdFluidBoundary002.Pressure = '110.0 kPa'
-App.ActiveDocument.CfdFluidBoundary002.Temperature = '300.0 K'
-FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Cut'), ('Face44',))]
-FreeCAD.ActiveDocument.recompute()
-
-# Create wall boundary condition
-CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
-App.ActiveDocument.CfdFluidBoundary003.Label = 'wall'
-App.ActiveDocument.CfdFluidBoundary003.ThermalBoundaryType = 'zeroGradient'
-App.ActiveDocument.CfdFluidBoundary003.DefaultBoundary = True
-FreeCAD.ActiveDocument.recompute()
-
-# Flow initialisation
+# initial values
 App.ActiveDocument.InitialiseFields.UseInletTemperatureValue = True
-App.ActiveDocument.InitialiseFields.UseInletTurbulenceValues = False
-FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary002
-FreeCAD.ActiveDocument.InitialiseFields.BoundaryT = FreeCAD.ActiveDocument.CfdFluidBoundary001
-FreeCAD.ActiveDocument.InitialiseFields.BoundaryTurb = None
-App.ActiveDocument.InitialiseFields.k = '1 m^2/s^2'
-App.ActiveDocument.InitialiseFields.epsilon = '200 m^2/s^3'
+App.ActiveDocument.InitialiseFields.k = '1000000.0 mm^2/s^2'
+App.ActiveDocument.InitialiseFields.epsilon = '200000000.0 mm^2/s^3'
+FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary001
+FreeCAD.ActiveDocument.InitialiseFields.BoundaryT = FreeCAD.ActiveDocument.CfdFluidBoundary
 
+# report functions
 from CfdOF.PostProcess import CfdReportingFunction
+from CfdOF import CfdTools
 CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())
-FreeCAD.ActiveDocument.ReportingFunction.ReportingFunctionType = 'Probes'
-FreeCAD.ActiveDocument.ReportingFunction.SampleFieldName = 'T'
-FreeCAD.ActiveDocument.ReportingFunction.ProbePosition = App.Vector (275.0, -66.0, 40.0)
-
-# Set meshing to parallel
-FreeCAD.ActiveDocument.getObject('Cut_Mesh').NumberOfProcesses = 4
+App.ActiveDocument.ReportingFunction.ReportingFunctionType = 'Probes'
+FreeCAD.ActiveDocument.ReportingFunction.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary
+App.ActiveDocument.ReportingFunction.Lift = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.ReportingFunction.Drag = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.ReportingFunction.Direction = App.Vector (0.0, 0.0, 0.0)
+App.ActiveDocument.ReportingFunction.SampleFieldName = 'T'
+App.ActiveDocument.ReportingFunction.ProbePosition = App.Vector (275.0, -66.0, 40.0)
+FreeCAD.ActiveDocument.recompute()
+Gui.SendMsgToActiveView("ViewFit")
+Gui.activeDocument().activeView().viewIsometric()
