@@ -20,11 +20,11 @@ addLayers       true;
 
 geometry
 {
-    "Cut_Geometry.stl"
+    "Body001_Geometry.stl"
     {
         type triSurfaceMesh;
-        name Cut_Geometry;
-        file "Cut_Geometry.stl";
+        name Body001_Geometry;
+        file "Body001_Geometry.stl";
         regions
         {
             patch_0_0
@@ -32,9 +32,9 @@ geometry
                 name patch_0_0;
             }
 
-            patch_1_1
+            patch_1_0
             {
-                name patch_1_1;
+                name patch_1_0;
             }
 
             patch_2_0
@@ -42,9 +42,9 @@ geometry
                 name patch_2_0;
             }
 
-            patch_3_0
+            patch_3_1
             {
-                name patch_3_0;
+                name patch_3_1;
             }
 
         }
@@ -70,7 +70,7 @@ castellatedMeshControls
     features
     (
         {
-            file "Cut_Geometry.eMesh";
+            file "Body001_Geometry.eMesh";
             level 0;
         }
         {
@@ -82,7 +82,7 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        Cut_Geometry
+        Body001_Geometry
         {
             level (0 0);
         }
@@ -99,6 +99,12 @@ castellatedMeshControls
 
     refinementRegions
     {
+        MeshRefinement
+        {
+            mode distance;
+            levels ((0.0 2));
+        }
+
     }
 
     locationInMesh (0.0 0.0 -0.005);
@@ -115,6 +121,7 @@ snapControls
 
     implicitFeatureSnap false;
     explicitFeatureSnap true;
+    multiRegionFeatureSnap true;
 }
 
 addLayersControls
@@ -122,7 +129,7 @@ addLayersControls
     relativeSizes true;
     layers
     {
-        "patch_1_1"
+        "patch_3_1"
         {
             nSurfaceLayers 2;
             expansionRatio 1.4;
