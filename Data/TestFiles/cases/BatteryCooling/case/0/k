@@ -20,12 +20,6 @@ internalField   uniform 1.0;
 boundaryField
 {
 
-    battery
-    {
-        type        kqRWallFunction;
-        value       $internalField;
-    }
-
     inlet
     {
         type        turbulentIntensityKineticEnergyInlet;
@@ -37,6 +31,12 @@ boundaryField
     {
         type        inletOutlet;
         inletValue  $internalField;
+        value       $internalField;
+    }
+
+    battery_wall
+    {
+        type        kqRWallFunction;
         value       $internalField;
     }
 

@@ -20,15 +20,6 @@ internalField   uniform 293.0;
 boundaryField
 {
 
-    battery
-    {
-        type            externalWallHeatFluxTemperature;
-        mode            power;
-        Q               2000.0;
-        kappaMethod     fluidThermo;
-        value           $internalField;
-    }
-
     inlet
     {
         type        inletOutlet;
@@ -41,6 +32,15 @@ boundaryField
         type        inletOutlet;
         inletValue  uniform 300.0;
         value       uniform 300.0;
+    }
+
+    battery_wall
+    {
+        type            externalWallHeatFluxTemperature;
+        mode            power;
+        Q               2000.0;
+        kappaMethod     fluidThermo;
+        value           $internalField;
     }
 
     wall

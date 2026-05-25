@@ -20,12 +20,6 @@ internalField   uniform 0;
 boundaryField
 {
 
-    battery
-    {
-        type        compressible::alphatWallFunction;
-        value       uniform 0;
-    }
-
     inlet
     {
         type        calculated;
@@ -36,6 +30,12 @@ boundaryField
     {
         type        calculated;
         value       $internalField;
+    }
+
+    battery_wall
+    {
+        type        compressible::alphatWallFunction;
+        value       uniform 0;
     }
 
     wall

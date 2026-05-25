@@ -19,16 +19,16 @@ pointSync false;
 patches
 (
     {
-        name battery;
+        name inlet;
         patchInfo
         {
-            type wall;
+            type patch;
         }
         constructFrom patches;
         patches ( "patch_1_.*" );
     }
     {
-        name inlet;
+        name outlet;
         patchInfo
         {
             type patch;
@@ -37,10 +37,10 @@ patches
         patches ( "patch_2_.*" );
     }
     {
-        name outlet;
+        name battery_wall;
         patchInfo
         {
-            type patch;
+            type wall;
         }
         constructFrom patches;
         patches ( "patch_3_.*" );

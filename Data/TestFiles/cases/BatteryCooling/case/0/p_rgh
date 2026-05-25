@@ -20,12 +20,6 @@ internalField   uniform 110000.0;
 boundaryField
 {
 
-    battery
-    {
-        type        fixedFluxPressure;
-        value       $internalField;
-    }
-
     inlet
     {
         type        fixedFluxPressure;
@@ -35,6 +29,12 @@ boundaryField
     outlet
     {
         type        fixedValue;
+        value       $internalField;
+    }
+
+    battery_wall
+    {
+        type        fixedFluxPressure;
         value       $internalField;
     }
 

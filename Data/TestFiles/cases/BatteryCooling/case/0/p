@@ -20,12 +20,6 @@ internalField   uniform 110000.0;
 boundaryField
 {
 
-    battery
-    {
-        type        calculated;
-        value       $internalField;
-    }
-
     inlet
     {
         type        calculated;
@@ -33,6 +27,12 @@ boundaryField
     }
 
     outlet
+    {
+        type        calculated;
+        value       $internalField;
+    }
+
+    battery_wall
     {
         type        calculated;
         value       $internalField;

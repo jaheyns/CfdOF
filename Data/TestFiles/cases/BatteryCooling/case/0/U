@@ -20,13 +20,6 @@ internalField   uniform (0.0 0.0 0.0);
 boundaryField
 {
 
-    battery
-    {
-        // movingWallVelocity reduces to fixedValue if the mesh is not moving
-        type        movingWallVelocity;
-        value       uniform (0 0 0);
-    }
-
     inlet
     {
         type                flowRateInletVelocity;
@@ -38,6 +31,13 @@ boundaryField
     {
         type        pressureInletOutletVelocity;
         value       $internalField;
+    }
+
+    battery_wall
+    {
+        // movingWallVelocity reduces to fixedValue if the mesh is not moving
+        type        movingWallVelocity;
+        value       uniform (0 0 0);
     }
 
     wall

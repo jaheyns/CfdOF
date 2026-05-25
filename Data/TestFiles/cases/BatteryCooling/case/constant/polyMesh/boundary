@@ -14,11 +14,6 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 (
-    battery
-    {
-        type        wall;
-    }
-
     inlet
     {
         type        patch;
@@ -27,6 +22,11 @@ FoamFile
     outlet
     {
         type        patch;
+    }
+
+    battery_wall
+    {
+        type        wall;
     }
 
     wall
