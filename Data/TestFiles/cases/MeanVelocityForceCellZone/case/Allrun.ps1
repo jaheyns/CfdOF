@@ -53,7 +53,7 @@ echo "cAlpha 1;" > system/cAlpha
 runCommand createPatch -overwrite
 
 # Set cell zones contained inside the .stl surfaces
-if( (Get-Command createNonConformalCouples) )
+if( (Get-Command createZones) )
 {
 	runCommand createZones -dict system/createZonesDict
 }
