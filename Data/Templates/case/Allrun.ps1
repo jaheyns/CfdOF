@@ -124,7 +124,7 @@ runCommand createPatch -overwrite
 %{%(zonesPresent%)
 %:True
 # Set cell zones contained inside the .stl surfaces
-if( (Get-Command createNonConformalCouples) )
+if( (Get-Command createZones) )
 {
 	runCommand createZones -dict system/createZonesDict
 }
