@@ -1,0 +1,12 @@
+from os import path
+from CfdOF.CfdTools import executeMacro
+dir = path.dirname(__file__)
+executeMacro(path.join(dir, '01-geom.FCMacro'))
+executeMacro(path.join(dir, '02-analysis.FCMacro'))
+executeMacro(path.join(dir, '03-mesh.FCMacro'))
+executeMacro(path.join(dir, '04-adaptiveMesh.FCMacro'))
+executeMacro(path.join(dir, '05-boundaries.FCMacro'))
+executeMacro(path.join(dir, '06-waterZone.FCMacro'))
+executeMacro(path.join(dir, '07-probes.FCMacro'))
+Gui.activeDocument().activeView().viewIsometric()
+Gui.SendMsgToActiveView("ViewFit")
