@@ -441,7 +441,7 @@ class LESStepTest(unittest.TestCase, MacroTest):
 
 class DamBreak3DTest(unittest.TestCase, MacroTest):
     __dir_name = 'DamBreak3D'
-    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-probes.FCMacro','04-adaptiveMesh.FCMacro']
+    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-mesh.FCMacro', '04-adaptiveMesh.FCMacro', '05-boundaries.FCMacro', '06-waterZone.FCMacro', '07-probes.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)
