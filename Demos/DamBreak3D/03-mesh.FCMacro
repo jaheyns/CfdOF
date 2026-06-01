@@ -7,6 +7,7 @@ CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
 App.ActiveDocument.Cut_Mesh.CharacteristicLengthMax = '30.0 mm'
 App.ActiveDocument.Cut_Mesh.MeshUtility = 'snappyHexMesh'
 App.ActiveDocument.Cut_Mesh.PointInMesh = {'x': '500.0 mm', 'y': '500.0 mm', 'z': '500.0 mm'}
+App.ActiveDocument.Cut_Mesh.NumberOfProcesses = 4
 
 # make the mesh refinement near the obstacle
 from CfdOF.Mesh import CfdMeshRefinement
