@@ -1,0 +1,8 @@
+# make the water zone
+from CfdOF.Solve import CfdZone
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdZone.makeCfdInitialisationZone())
+App.ActiveDocument.InitialisationZone.VolumeFractions = {'Water': '1.0'}
+FreeCAD.ActiveDocument.InitialisationZone.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Box002'), ('Solid1',))]
+App.activeDocument().recompute(None,True,True)

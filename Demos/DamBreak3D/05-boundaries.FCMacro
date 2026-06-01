@@ -1,0 +1,16 @@
+# make the open boundary condition
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary.Label = 'open'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'open'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'totalPressureOpening'
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Cut'), ('Face3',))]
+FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary
+
+# set the defualt boundary to wall
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary001.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary001.DefaultBoundary = True
+FreeCAD.ActiveDocument.recompute()

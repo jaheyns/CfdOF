@@ -1,0 +1,18 @@
+# make the main mesh
+from CfdOF.Mesh import CfdMesh
+CfdMesh.makeCfdMesh('Cut_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Cut
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+App.ActiveDocument.Cut_Mesh.CharacteristicLengthMax = '30.0 mm'
+App.ActiveDocument.Cut_Mesh.MeshUtility = 'snappyHexMesh'
+App.ActiveDocument.Cut_Mesh.PointInMesh = {'x': '500.0 mm', 'y': '500.0 mm', 'z': '500.0 mm'}
+
+# make the mesh refinement near the obstacle
+from CfdOF.Mesh import CfdMeshRefinement
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Cut_Mesh)
+App.ActiveDocument.MeshRefinement.RelativeLength = 0.5
+App.ActiveDocument.MeshRefinement.RefinementThickness = '20.0 mm'
+FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Box001'), ('',))]
+FreeCAD.ActiveDocument.recompute()
