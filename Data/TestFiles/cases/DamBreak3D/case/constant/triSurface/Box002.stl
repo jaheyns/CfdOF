@@ -1,0 +1,86 @@
+solid Box002
+ facet normal -1.0 0.0 0.0
+  outer loop
+   vertex 2.0 0.0 0.0
+   vertex 2.0 0.0 0.55
+   vertex 2.0 1.0 0.0
+  endloop
+ endfacet
+ facet normal -1.0 0.0 0.0
+  outer loop
+   vertex 2.0 1.0 0.0
+   vertex 2.0 0.0 0.55
+   vertex 2.0 1.0 0.55
+  endloop
+ endfacet
+ facet normal 1.0 0.0 0.0
+  outer loop
+   vertex 3.22 0.0 0.55
+   vertex 3.22 0.0 0.0
+   vertex 3.22 1.0 0.0
+  endloop
+ endfacet
+ facet normal 1.0 -0.0 0.0
+  outer loop
+   vertex 3.22 0.0 0.55
+   vertex 3.22 1.0 0.0
+   vertex 3.22 1.0 0.55
+  endloop
+ endfacet
+ facet normal 0.0 -1.0 0.0
+  outer loop
+   vertex 3.22 0.0 0.0
+   vertex 3.22 0.0 0.55
+   vertex 2.0 0.0 0.0
+  endloop
+ endfacet
+ facet normal 0.0 -1.0 0.0
+  outer loop
+   vertex 2.0 0.0 0.0
+   vertex 3.22 0.0 0.55
+   vertex 2.0 0.0 0.55
+  endloop
+ endfacet
+ facet normal 0.0 1.0 0.0
+  outer loop
+   vertex 3.22 1.0 0.55
+   vertex 3.22 1.0 0.0
+   vertex 2.0 1.0 0.0
+  endloop
+ endfacet
+ facet normal 0.0 1.0 0.0
+  outer loop
+   vertex 3.22 1.0 0.55
+   vertex 2.0 1.0 0.0
+   vertex 2.0 1.0 0.55
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 2.0 1.0 0.0
+   vertex 3.22 0.0 0.0
+   vertex 2.0 0.0 0.0
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 2.0 1.0 0.0
+   vertex 3.22 1.0 0.0
+   vertex 3.22 0.0 0.0
+  endloop
+ endfacet
+ facet normal 0.0 0.0 1.0
+  outer loop
+   vertex 3.22 0.0 0.55
+   vertex 2.0 1.0 0.55
+   vertex 2.0 0.0 0.55
+  endloop
+ endfacet
+ facet normal 0.0 0.0 1.0
+  outer loop
+   vertex 3.22 1.0 0.55
+   vertex 2.0 1.0 0.55
+   vertex 3.22 0.0 0.55
+  endloop
+ endfacet
+endsolid Box002
