@@ -19,9 +19,9 @@ App.ActiveDocument.PhysicsModel.gy = '0.0 mm/s^2'
 App.ActiveDocument.PhysicsModel.gz = '-9810.0 mm/s^2'
 App.ActiveDocument.CfdSolver.EndTime = '10 s'
 
-# change the material to Water
+# change the material to water
 App.ActiveDocument.FluidProperties.Material = {'CardName': 'WaterIsothermal', 'AuthorAndLicense': '', 'Author': 'SPDX-FileCopyrightText: 2021 Oliver Oxtoby', 'License': '', 'Name': 'Water', 'Description': 'Standard distilled water properties at 20 Degrees Celsius and 1 atm', 'ReferenceSource': '', 'SourceURL': '', 'Density': '998 kg/m^3', 'DynamicViscosity': '1.003e-3 kg/m/s ', 'Type': 'Isothermal'}
-App.ActiveDocument.FluidProperties.Label = 'Water'
+App.ActiveDocument.FluidProperties.Label = 'water'
 App.activeDocument().recompute(None,True,True)
 
 App.ActiveDocument.InitialiseFields.PotentialFlow = False
