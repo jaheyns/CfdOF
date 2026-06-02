@@ -4,9 +4,11 @@ CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunc
 App.ActiveDocument.ReportingFunction.ReportingFunctionType = 'Probes'
 FreeCAD.ActiveDocument.ReportingFunction.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary
 App.ActiveDocument.ReportingFunction.ProbePosition = App.Vector (830.0, 474.0, 99.0)
+App.ActiveDocument.ReportingFunction.Label = 'P3'
 
 CfdTools.getActiveAnalysis().addObject(CfdReportingFunction.makeCfdReportingFunction())
 App.ActiveDocument.ReportingFunction001.ReportingFunctionType = 'Probes'
 FreeCAD.ActiveDocument.ReportingFunction001.Patch = FreeCAD.ActiveDocument.CfdFluidBoundary
 App.ActiveDocument.ReportingFunction001.ProbePosition = App.Vector (733.0, 526.0, 160.0)
+App.ActiveDocument.ReportingFunction001.Label = 'P7'
 FreeCAD.ActiveDocument.recompute()
