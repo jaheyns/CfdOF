@@ -1,0 +1,202 @@
+solid patch_0_0
+ facet normal -1.0 0.0 0.0
+  outer loop
+   vertex 0.0 0.0 0.0
+   vertex 0.0 0.0 1.0
+   vertex 0.0 1.0 0.0
+  endloop
+ endfacet
+ facet normal -1.0 0.0 0.0
+  outer loop
+   vertex 0.0 1.0 0.0
+   vertex 0.0 0.0 1.0
+   vertex 0.0 1.0 1.0
+  endloop
+ endfacet
+ facet normal 0.0 -1.0 0.0
+  outer loop
+   vertex 0.0 0.0 0.0
+   vertex 3.22 0.0 0.0
+   vertex 0.0 0.0 1.0
+  endloop
+ endfacet
+ facet normal 0.0 -1.0 0.0
+  outer loop
+   vertex 3.22 0.0 0.0
+   vertex 3.22 0.0 1.0
+   vertex 0.0 0.0 1.0
+  endloop
+ endfacet
+ facet normal 0.0 1.0 0.0
+  outer loop
+   vertex 3.22 1.0 0.0
+   vertex 0.0 1.0 0.0
+   vertex 0.0 1.0 1.0
+  endloop
+ endfacet
+ facet normal 0.0 1.0 0.0
+  outer loop
+   vertex 3.22 1.0 1.0
+   vertex 3.22 1.0 0.0
+   vertex 0.0 1.0 1.0
+  endloop
+ endfacet
+ facet normal 0.0 -0.0 -1.0
+  outer loop
+   vertex 0.67 0.3 0.0
+   vertex 0.8300000000000001 0.3 0.0
+   vertex 0.0 0.0 0.0
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.0 1.0 0.0
+   vertex 0.67 0.7000000000000001 0.0
+   vertex 0.0 0.0 0.0
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.0 0.0 0.0
+   vertex 0.67 0.7000000000000001 0.0
+   vertex 0.67 0.3 0.0
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.0 1.0 0.0
+   vertex 0.8300000000000001 0.7000000000000001 0.0
+   vertex 0.67 0.7000000000000001 0.0
+  endloop
+ endfacet
+ facet normal 0.0 -0.0 -1.0
+  outer loop
+   vertex 0.8300000000000001 0.3 0.0
+   vertex 3.22 0.0 0.0
+   vertex 0.0 0.0 0.0
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.8300000000000001 0.7000000000000001 0.0
+   vertex 3.22 1.0 0.0
+   vertex 0.8300000000000001 0.3 0.0
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.8300000000000001 0.3 0.0
+   vertex 3.22 1.0 0.0
+   vertex 3.22 0.0 0.0
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.0 1.0 0.0
+   vertex 3.22 1.0 0.0
+   vertex 0.8300000000000001 0.7000000000000001 0.0
+  endloop
+ endfacet
+ facet normal 1.0 0.0 0.0
+  outer loop
+   vertex 3.22 0.0 1.0
+   vertex 3.22 0.0 0.0
+   vertex 3.22 1.0 0.0
+  endloop
+ endfacet
+ facet normal 1.0 -0.0 0.0
+  outer loop
+   vertex 3.22 0.0 1.0
+   vertex 3.22 1.0 0.0
+   vertex 3.22 1.0 1.0
+  endloop
+ endfacet
+ facet normal 0.0 1.0 0.0
+  outer loop
+   vertex 0.8300000000000001 0.3 0.16
+   vertex 0.8300000000000001 0.3 0.0
+   vertex 0.67 0.3 0.0
+  endloop
+ endfacet
+ facet normal 0.0 1.0 0.0
+  outer loop
+   vertex 0.8300000000000001 0.3 0.16
+   vertex 0.67 0.3 0.0
+   vertex 0.67 0.3 0.16
+  endloop
+ endfacet
+ facet normal -1.0 0.0 0.0
+  outer loop
+   vertex 0.8300000000000001 0.3 0.0
+   vertex 0.8300000000000001 0.3 0.16
+   vertex 0.8300000000000001 0.7000000000000001 0.0
+  endloop
+ endfacet
+ facet normal -1.0 0.0 0.0
+  outer loop
+   vertex 0.8300000000000001 0.7000000000000001 0.0
+   vertex 0.8300000000000001 0.3 0.16
+   vertex 0.8300000000000001 0.7000000000000001 0.16
+  endloop
+ endfacet
+ facet normal 0.0 -1.0 0.0
+  outer loop
+   vertex 0.8300000000000001 0.7000000000000001 0.0
+   vertex 0.8300000000000001 0.7000000000000001 0.16
+   vertex 0.67 0.7000000000000001 0.0
+  endloop
+ endfacet
+ facet normal 0.0 -1.0 0.0
+  outer loop
+   vertex 0.67 0.7000000000000001 0.0
+   vertex 0.8300000000000001 0.7000000000000001 0.16
+   vertex 0.67 0.7000000000000001 0.16
+  endloop
+ endfacet
+ facet normal 1.0 0.0 0.0
+  outer loop
+   vertex 0.67 0.3 0.16
+   vertex 0.67 0.3 0.0
+   vertex 0.67 0.7000000000000001 0.0
+  endloop
+ endfacet
+ facet normal 1.0 -0.0 0.0
+  outer loop
+   vertex 0.67 0.3 0.16
+   vertex 0.67 0.7000000000000001 0.0
+   vertex 0.67 0.7000000000000001 0.16
+  endloop
+ endfacet
+endsolid patch_0_0
+solid patch_0_1
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.67 0.7000000000000001 0.16
+   vertex 0.8300000000000001 0.7000000000000001 0.16
+   vertex 0.67 0.3 0.16
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.67 0.3 0.16
+   vertex 0.8300000000000001 0.7000000000000001 0.16
+   vertex 0.8300000000000001 0.3 0.16
+  endloop
+ endfacet
+endsolid patch_0_1
+solid patch_1_0
+ facet normal 0.0 0.0 1.0
+  outer loop
+   vertex 3.22 0.0 1.0
+   vertex 0.0 1.0 1.0
+   vertex 0.0 0.0 1.0
+  endloop
+ endfacet
+ facet normal 0.0 0.0 1.0
+  outer loop
+   vertex 3.22 1.0 1.0
+   vertex 0.0 1.0 1.0
+   vertex 3.22 0.0 1.0
+  endloop
+ endfacet
+endsolid patch_1_0
