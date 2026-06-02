@@ -1,6 +1,6 @@
 from CfdOF.Mesh import CfdDynamicMeshRefinement
 CfdDynamicMeshRefinement.makeCfdDynamicMeshInterfaceRefinement(App.ActiveDocument.Cut_Mesh)
-App.ActiveDocument.DynamicMeshInterfaceRefinement.Phase = 'Water'
+App.ActiveDocument.DynamicMeshInterfaceRefinement.Phase = 'water'
 App.ActiveDocument.DynamicMeshInterfaceRefinement.RefinementInterval = 5
 App.ActiveDocument.DynamicMeshInterfaceRefinement.BufferLayers = 3
 FreeCAD.ActiveDocument.recompute()
