@@ -16,7 +16,7 @@ FoamFile
 
 surfaces
 (
-    "Compound_Geometry.stl"
+    "Cut_Geometry.stl"
     "MeshRefinement.stl"
 );
 

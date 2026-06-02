@@ -20,11 +20,11 @@ addLayers       false;
 
 geometry
 {
-    "Compound_Geometry.stl"
+    "Cut_Geometry.stl"
     {
         type triSurfaceMesh;
-        name Compound_Geometry;
-        file "Compound_Geometry.stl";
+        name Cut_Geometry;
+        file "Cut_Geometry.stl";
         regions
         {
             patch_0_0
@@ -65,7 +65,7 @@ castellatedMeshControls
     features
     (
         {
-            file "Compound_Geometry.eMesh";
+            file "Cut_Geometry.eMesh";
             level 0;
         }
         {
@@ -77,7 +77,7 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        Compound_Geometry
+        Cut_Geometry
         {
             level (0 0);
         }
@@ -94,6 +94,12 @@ castellatedMeshControls
 
     refinementRegions
     {
+        MeshRefinement
+        {
+            mode distance;
+            levels ((0.02 1));
+        }
+
     }
 
     locationInMesh (0.5 0.5 0.5);
@@ -110,6 +116,7 @@ snapControls
 
     implicitFeatureSnap false;
     explicitFeatureSnap true;
+    multiRegionFeatureSnap true;
 }
 
 addLayersControls

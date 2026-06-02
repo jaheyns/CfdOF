@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Compound_Geometry.stl
+Cut_Geometry.stl
 {
     extractionMethod    extractFromSurface;
     extractFromSurfaceCoeffs
