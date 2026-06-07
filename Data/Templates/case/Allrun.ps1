@@ -296,8 +296,11 @@ else
 %:False
 %{%(createPatchesForPeriodics%)
 %:False
+%{%(MovingMeshRegionsPresent%)
+%:False
 # Mesh renumbering
 runCommand renumberMesh -overwrite
+%}
 %}
 %:True
 # Mesh renumbering does not currently work in Foundation with dynamic mesh
