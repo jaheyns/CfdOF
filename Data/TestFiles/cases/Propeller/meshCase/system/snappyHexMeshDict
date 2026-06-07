@@ -111,6 +111,7 @@ snapControls
 
     implicitFeatureSnap false;
     explicitFeatureSnap true;
+    multiRegionFeatureSnap true;
 }
 
 addLayersControls
