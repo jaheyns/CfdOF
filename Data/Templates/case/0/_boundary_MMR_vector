@@ -12,3 +12,20 @@
 
 %}
 %}
+%{%(createPatchesForPeriodics%)
+%:True
+%{%(createPeriodics%)
+%{%(createPeriodics/%(0%)/PeriodicMaster%)
+%:True
+%[0/_boundary_MMR_cyclic%]
+
+%{%(0%)_master %(0%)_slave
+    %(0%) 
+    {
+        #include "MMR/vector";
+    }
+
+%}
+%}
+%}
+%}
