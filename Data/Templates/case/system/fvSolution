@@ -82,6 +82,11 @@ PIMPLE
 %{%(MovingMeshRegionsPresent%)
 %:True
     correctMeshPhi  yes;
+%:False
+%{%(createPatchesForPeriodics%)
+%:True
+    correctMeshPhi  yes;
+%}
 %}
 %{%(solver/SolverName%)
 %:interFoam multiphaseInterFoam
@@ -167,6 +172,17 @@ solvers
         tolerance       1e-2;
         relTol          0;
     }
+%:False
+%{%(createPatchesForPeriodics%)
+%:True
+    MeshPhi
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-2;
+        relTol          0;
+    }
+%}
 %}
 
 %{%(solver/SolverName%)
