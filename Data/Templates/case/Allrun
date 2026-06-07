@@ -165,7 +165,6 @@ then
 fi
 
 %}
-
 %{%(zonesPresent%)
 %:True
 # Set cell zones contained inside the .stl surfaces
