@@ -70,6 +70,33 @@ else
 }
 
 %}
+%{%(createPatchesForPeriodics%)
+%:True
+mkdir 0/MMR
+if( (Get-Command createNonConformalCouples) )
+{
+	echo 'type wall;' > system/periodic_type
+
+    echo 'type movingWallSlipVelocity;' > 0/MMR/vector
+    echo 'value $internalField;' >> 0/MMR/vector
+
+    echo 'type zeroGradient;' > 0/MMR/scalar
+
+    echo 'type calculated;' > 0/MMR/calculated
+    echo 'value uniform 0;' >> 0/MMR/calculated
+}
+else
+{
+    echo 'type cyclicAMI;' > 0/MMR/scalar
+    echo 'type cyclicAMI;' > 0/MMR/vector
+    echo 'type cyclicAMI;' > 0/MMR/calculated
+    echo 'type cyclicAMI;' > system/periodic_type
+    echo 'value $internalField;' >> 0/MMR/scalar
+    echo 'value $internalField;' >> 0/MMR/vector
+    echo 'value $internalField;' >> 0/MMR/calculated
+}
+
+%:False
 %{%(MovingMeshRegionsPresent%)
 %:True
 mkdir 0/MMR
@@ -93,6 +120,7 @@ else
     echo 'value $internalField;' >> 0/MMR/calculated
 }
 
+%}
 %}
 %{%(scalarTransportFunctionsEnabled%)
 %:True
@@ -121,6 +149,19 @@ else
 # Update patch name and type
 runCommand createPatch -overwrite
 
+%{%(createPatchesForPeriodics%)
+%:True
+if( (Get-Command createNonConformalCouples) )
+{
+%{%(createPeriodics%)
+%{%(createPeriodics/%(0%)/PeriodicMaster%)
+%:True
+	runCommand createNonConformalCouples -overwrite %(0%)_master %(0%)_slave
+%}
+%}
+}
+
+%}
 %{%(zonesPresent%)
 %:True
 # Set cell zones contained inside the .stl surfaces
@@ -181,16 +222,32 @@ $NPROC = foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDi
 
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(createPatchesForPeriodics%)
+%:False
 %{%(MovingMeshRegionsPresent%)
 %:False
 # Mesh renumbering
 runParallel $NPROC renumberMesh -overwrite
+%}
 %}
 %:True
 # Mesh renumbering does not work in Foundation with dynamic mesh
 # runParallel $NPROC renumberMesh -overwrite
 %}
 
+%{%(createPatchesForPeriodics%)
+%:True
+if( (Get-Command createNonConformalCouples) )
+{
+%{%(createPeriodics%)
+%{%(createPeriodics/%(0%)/PeriodicMaster%)
+%:True
+	runParallel $NPROC createNonConformalCouples -overwrite %(0%)_master %(0%)_slave
+%}
+%}
+}
+
+%}
 %{%(initialValues/PotentialFlow%)
 %:True
 # Initialise flow
@@ -237,8 +294,11 @@ else
 %:False
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(createPatchesForPeriodics%)
+%:False
 # Mesh renumbering
 runCommand renumberMesh -overwrite
+%}
 %:True
 # Mesh renumbering does not currently work in Foundation with dynamic mesh
 # runCommand renumberMesh -overwrite
