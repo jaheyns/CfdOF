@@ -85,6 +85,27 @@ else
 fi
 
 %}
+%{%(createPatchesForPeriodics%)
+%:True
+mkdir -p 0/MMR
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+	echo "type wall;" > system/periodic_type
+
+    echo "type movingWallSlipVelocity;" > 0/MMR/vector
+    echo "value \$internalField;" >> 0/MMR/vector
+
+    echo "type zeroGradient;" > 0/MMR/scalar
+
+    echo "type calculated;" > 0/MMR/calculated
+    echo "value uniform 0;" >> 0/MMR/calculated
+else
+	echo "type cyclicAMI;" | tee 0/MMR/{scalar,vector,calculated} system/periodic_type
+	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
+fi
+
+%:False
 %{%(MovingMeshRegionsPresent%)
 %:True
 mkdir -p 0/MMR
@@ -103,6 +124,7 @@ else
 	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
 fi
 
+%}
 %}
 %{%(scalarTransportFunctionsEnabled%)
 %:True
@@ -128,6 +150,21 @@ fi
 %}
 # Update patch name and type
 runCommand createPatch -overwrite
+
+%{%(createPatchesForPeriodics%)
+%:True
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+%{%(createPeriodics%)
+%{%(createPeriodics/%(0%)/PeriodicMaster%)
+%:True
+	runCommand createNonConformalCouples -overwrite %(0%)_master %(0%)_slave
+%}
+%}
+fi
+
+%}
 
 %{%(zonesPresent%)
 %:True
@@ -188,15 +225,32 @@ NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDic
 
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(createPatchesForPeriodics%)
+%:False
 %{%(MovingMeshRegionsPresent%)
 %:False
 # Mesh renumbering
 runParallel $NPROC renumberMesh -overwrite
 %}
+%}
 %:True
 # Mesh renumbering does not work in Foundation with dynamic mesh
 %}
 
+%{%(createPatchesForPeriodics%)
+%:True
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+%{%(createPeriodics%)
+%{%(createPeriodics/%(0%)/PeriodicMaster%)
+%:True
+	runParallel $NPROC createNonConformalCouples -overwrite %(0%)_master %(0%)_slave
+%}
+%}
+fi
+
+%}
 %{%(initialValues/PotentialFlow%)
 %:True
 # Initialise flow
@@ -242,10 +296,13 @@ fi
 %:False
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(createPatchesForPeriodics%)
+%:False
 %{%(MovingMeshRegionsPresent%)
 %:False
 # Mesh renumbering
 runCommand renumberMesh -overwrite
+%}
 %}
 %:True
 # Mesh renumbering does not currently work in Foundation with dynamic mesh
