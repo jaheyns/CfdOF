@@ -4,7 +4,7 @@
         name %(0%)_master;
         patchInfo
         {
-            type cyclicAMI;
+            #include "periodic_type";
             neighbourPatch %(0%)_slave;
 
 %{%(createPeriodics/%(0%)/RotationalPeriodic%)
@@ -25,7 +25,7 @@
         name %(0%)_slave;
         patchInfo
         {
-            type cyclicAMI;
+            #include "periodic_type";
             neighbourPatch %(0%)_master;
 
 %{%(createPeriodics/%(0%)/RotationalPeriodic%)
