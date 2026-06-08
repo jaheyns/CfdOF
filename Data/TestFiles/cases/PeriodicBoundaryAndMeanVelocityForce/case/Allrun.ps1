@@ -49,8 +49,38 @@ else
 echo "div(phi,alpha) Gauss vanLeer;" > system/alphaDivScheme
 echo "cAlpha 1;" > system/cAlpha
 
+mkdir 0/MMR
+if( (Get-Command createNonConformalCouples) )
+{
+	echo 'type wall;' > system/periodic_type
+
+    echo 'type movingWallSlipVelocity;' > 0/MMR/vector
+    echo 'value $internalField;' >> 0/MMR/vector
+
+    echo 'type zeroGradient;' > 0/MMR/scalar
+
+    echo 'type calculated;' > 0/MMR/calculated
+    echo 'value uniform 0;' >> 0/MMR/calculated
+}
+else
+{
+    echo 'type cyclicAMI;' > 0/MMR/scalar
+    echo 'type cyclicAMI;' > 0/MMR/vector
+    echo 'type cyclicAMI;' > 0/MMR/calculated
+    echo 'type cyclicAMI;' > system/periodic_type
+    echo 'value $internalField;' >> 0/MMR/scalar
+    echo 'value $internalField;' >> 0/MMR/vector
+    echo 'value $internalField;' >> 0/MMR/calculated
+}
+
 # Update patch name and type
 runCommand createPatch -overwrite
+
+if( (Get-Command createNonConformalCouples) )
+{
+	runCommand createNonConformalCouples -overwrite constraint001_master constraint001_slave
+	Rename-Item log.createNonConformalCouples log.createNonConformalCouples.constraint001
+}
 
 # Parallel decomposition
 if( !(Test-Path -PathType Container processor0) )
@@ -61,8 +91,12 @@ if( !(Test-Path -PathType Container processor0) )
 # Pick up number of parallel processes
 $NPROC = foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict
 
-# Mesh renumbering
-runParallel $NPROC renumberMesh -overwrite
+
+if( (Get-Command createNonConformalCouples) )
+{
+	runParallel $NPROC createNonConformalCouples -overwrite constraint001_master constraint001_slave
+	Rename-Item log.createNonConformalCouples log.createNonConformalCouples.constraint001
+}
 
 # Run application in parallel
 # Detect new foamRun in Foundation versions >= 11 and translate solver
