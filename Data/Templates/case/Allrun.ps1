@@ -157,6 +157,7 @@ if( (Get-Command createNonConformalCouples) )
 %{%(createPeriodics/%(0%)/PeriodicMaster%)
 %:True
 	runCommand createNonConformalCouples -overwrite %(0%)_master %(0%)_slave
+	Rename-Item log.createNonConformalCouples log.createNonConformalCouples.%(0%)
 %}
 %}
 }
@@ -243,6 +244,7 @@ if( (Get-Command createNonConformalCouples) )
 %{%(createPeriodics/%(0%)/PeriodicMaster%)
 %:True
 	runParallel $NPROC createNonConformalCouples -overwrite %(0%)_master %(0%)_slave
+	Rename-Item log.createNonConformalCouples log.createNonConformalCouples.%(0%)
 %}
 %}
 }

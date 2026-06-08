@@ -160,6 +160,7 @@ then
 %{%(createPeriodics/%(0%)/PeriodicMaster%)
 %:True
 	runCommand createNonConformalCouples -overwrite %(0%)_master %(0%)_slave
+	mv log.createNonConformalCouples log.createNonConformalCouples.%(0%)
 %}
 %}
 fi
@@ -245,6 +246,7 @@ then
 %{%(createPeriodics/%(0%)/PeriodicMaster%)
 %:True
 	runParallel $NPROC createNonConformalCouples -overwrite %(0%)_master %(0%)_slave
+	mv log.createNonConformalCouples log.createNonConformalCouples.%(0%)
 %}
 %}
 fi
