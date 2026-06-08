@@ -34,7 +34,7 @@ then
 fi
 
 # Copy mesh from mesh case dir if available
-MESHDIR="../meshCase"
+MESHDIR="../meshCasePeriodicBoundaryAndMeanVelocityForce"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
     rm -rf constant/polyMesh
@@ -63,8 +63,32 @@ else
     echo "cAlpha 1;" > system/cAlpha
 fi
 
+mkdir -p 0/MMR
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+	echo "type wall;" > system/periodic_type
+
+    echo "type movingWallSlipVelocity;" > 0/MMR/vector
+    echo "value \$internalField;" >> 0/MMR/vector
+
+    echo "type zeroGradient;" > 0/MMR/scalar
+
+    echo "type calculated;" > 0/MMR/calculated
+    echo "value uniform 0;" >> 0/MMR/calculated
+else
+	echo "type cyclicAMI;" | tee 0/MMR/{scalar,vector,calculated} system/periodic_type
+	echo "value \$internalField;" | tee -a 0/MMR/{scalar,vector,calculated}
+fi
+
 # Update patch name and type
 runCommand createPatch -overwrite
+
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+	runCommand createNonConformalCouples -overwrite constraint001_master constraint001_slave
+fi
 
 # Parallel decomposition
 if [ ! -d processor0 ]
@@ -75,8 +99,12 @@ fi
 # Pick up number of parallel processes
 NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
 
-# Mesh renumbering
-runParallel $NPROC renumberMesh -overwrite
+
+which createNonConformalCouples > /dev/null 2>&1
+if [ $? == 0 ]
+then
+	runParallel $NPROC createNonConformalCouples -overwrite constraint001_master constraint001_slave
+fi
 
 # Run application in parallel
 # Detect new foamRun in Foundation versions >= 11 and translate solver

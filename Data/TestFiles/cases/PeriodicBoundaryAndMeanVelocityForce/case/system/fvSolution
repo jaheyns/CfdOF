@@ -60,6 +60,13 @@ solvers
         $p;
         relTol          0;
     }
+    MeshPhi
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-2;
+        relTol          0;
+    }
 
     U
     {

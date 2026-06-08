@@ -19,21 +19,46 @@ internalField   uniform 0;
 
 boundaryField
 {
+    // Foundation:
+    
+    nonConformalCyclic_on_constraint001_master 
+    {
+        type    nonConformalCyclic;
+        value   $internalField;
+    }
+
+    nonConformalError_on_constraint001_master
+    {
+        type    nonConformalError;
+    }
+
+    nonConformalCyclic_on_constraint001_slave 
+    {
+        type    nonConformalCyclic;
+        value   $internalField;
+    }
+
+    nonConformalError_on_constraint001_slave
+    {
+        type    nonConformalError;
+    }
+
+
+    constraint001_master
+    {
+        #include "MMR/calculated";
+    }
+
+    constraint001_slave
+    {
+        #include "MMR/calculated";
+    }
+
 
     constraint
     {
         type        symmetry;
         value       $internalField;
-    }
-
-    constraint001_master
-    {
-        type        cyclicAMI;
-    }
-
-    constraint001_slave
-    {
-        type        cyclicAMI;
     }
 
 

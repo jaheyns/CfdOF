@@ -50,7 +50,7 @@ patches
         name constraint001_master;
         patchInfo
         {
-            type cyclicAMI;
+            #include "periodic_type";
             neighbourPatch constraint001_slave;
 
             transform translational;
@@ -64,7 +64,7 @@ patches
         name constraint001_slave;
         patchInfo
         {
-            type cyclicAMI;
+            #include "periodic_type";
             neighbourPatch constraint001_master;
 
             transform translational;
