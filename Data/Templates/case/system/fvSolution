@@ -165,23 +165,11 @@ solvers
     }
 %{%(MovingMeshRegionsPresent%)
 %:True
-    MeshPhi
-    {
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       1e-2;
-        relTol          0;
-    }
+%[system/_fvSolution_MeshPhi%]
 %:False
 %{%(createPatchesForPeriodics%)
 %:True
-    MeshPhi
-    {
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       1e-2;
-        relTol          0;
-    }
+%[system/_fvSolution_MeshPhi%]
 %}
 %}
 
