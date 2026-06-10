@@ -25,11 +25,10 @@ App.ActiveDocument.FluidProperties.Label = 'water'
 App.activeDocument().recompute(None,True,True)
 
 App.ActiveDocument.InitialiseFields.PotentialFlow = False
-App.ActiveDocument.InitialiseFields.VolumeFractions = {'': '0.0'}
 App.activeDocument().recompute(None,True,True)
 
 # make the second material (air)
 CfdTools.getActiveAnalysis().addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
-App.ActiveDocument.InitialiseFields.VolumeFractions = {'': '0.0', 'Water': '0.0'}
+App.ActiveDocument.InitialiseFields.VolumeFractions = {'water': '0.0'}
 App.ActiveDocument.FluidProperties001.Label = 'air'
 
