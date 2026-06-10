@@ -27,7 +27,7 @@ bp.make_cut(["Box", "Box001", ])
 App.ActiveDocument.getObject('Cut').Label = "fluid_domain"
 App.ActiveDocument.recompute()
 
-# make the initiale water volume
+# make the initial water volume
 App.ActiveDocument.addObject("Part::Box","Box")
 App.ActiveDocument.ActiveObject.Label = "initWater"
 App.ActiveDocument.getObject('Box002').Length = '1220 mm'
