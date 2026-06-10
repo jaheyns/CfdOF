@@ -7,31 +7,31 @@ App.newDocument()
 App.ActiveDocument.addObject("Part::Box","Box")
 App.ActiveDocument.ActiveObject.Label = "tank"
 App.ActiveDocument.recompute()
-FreeCAD.getDocument('Unnamed').getObject('Box').Length = '3220 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box').Width = '1000 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box').Height = '1000 mm'
+App.ActiveDocument.getObject('Box').Length = '3220 mm'
+App.ActiveDocument.getObject('Box').Width = '1000 mm'
+App.ActiveDocument.getObject('Box').Height = '1000 mm'
 
 # make the tank box
 App.ActiveDocument.addObject("Part::Box","Box")
 App.ActiveDocument.ActiveObject.Label = "obstacle"
 App.ActiveDocument.recompute()
-FreeCAD.getDocument('Unnamed').getObject('Box001').Length = '160 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box001').Width = '400 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box001').Height = '160 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box001').Placement = App.Placement(App.Vector(670,300,0),App.Rotation(App.Vector(0,0,1),0))
+App.ActiveDocument.getObject('Box001').Length = '160 mm'
+App.ActiveDocument.getObject('Box001').Width = '400 mm'
+App.ActiveDocument.getObject('Box001').Height = '160 mm'
+App.ActiveDocument.getObject('Box001').Placement = App.Placement(App.Vector(670,300,0),App.Rotation(App.Vector(0,0,1),0))
 
 # make the fluid domain
 from BOPTools import BOPFeatures
 bp = BOPFeatures.BOPFeatures(App.activeDocument())
 bp.make_cut(["Box", "Box001", ])
-FreeCAD.getDocument('Unnamed').getObject('Cut').Label = "fluid_domain"
+App.ActiveDocument.getObject('Cut').Label = "fluid_domain"
 App.ActiveDocument.recompute()
 
 # make the initiale water volume
 App.ActiveDocument.addObject("Part::Box","Box")
 App.ActiveDocument.ActiveObject.Label = "initWater"
-FreeCAD.getDocument('Unnamed').getObject('Box002').Length = '1220 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box002').Width = '1000 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box002').Height = '550 mm'
-FreeCAD.getDocument('Unnamed').getObject('Box002').Placement = App.Placement(App.Vector(2000,0,0),App.Rotation(App.Vector(0,0,1),0))
+App.ActiveDocument.getObject('Box002').Length = '1220 mm'
+App.ActiveDocument.getObject('Box002').Width = '1000 mm'
+App.ActiveDocument.getObject('Box002').Height = '550 mm'
+App.ActiveDocument.getObject('Box002').Placement = App.Placement(App.Vector(2000,0,0),App.Rotation(App.Vector(0,0,1),0))
 App.ActiveDocument.recompute()
