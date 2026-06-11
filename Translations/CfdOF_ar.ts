@@ -2271,6 +2271,16 @@ Re-mesh case first?</source>
 		<translation>تصغير الحواف النسبية</translation>
     </message>
     <message>
+        <location filename="../Gui/TaskPanelCfdMesh.ui" line="384"/>
+        <source>Number of Processes</source>
+		<translation>عدد العمليات</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdMesh.ui" line="418"/>
+        <source>Number of Threads</source>
+		<translation>عدد المسارات</translation>
+    </message>
+    <message>
         <location filename="../Gui/TaskPanelCfdMesh.ui" line="359"/>
         <source>Stop</source>
 		<translation>توقف</translation>
