@@ -2634,6 +2634,21 @@ Re-mesh case first?</source>
 		<translation>التحكم في التحليل</translation>
     </message>
     <message>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="46"/>
+        <source>Solver Parameters</source>
+        <translation>اعدادات المحلل</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="59"/>
+        <source>Solve in Parallel</source>
+        <translation>تحليل على التوازي</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="87"/>
+        <source>Number of Parallel Cores</source>
+        <translation>عدد الانوية على التوازي</translation>
+    </message>
+    <message>
         <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="40"/>
         <source>Write</source>
 		<translation>اكتب</translation>
