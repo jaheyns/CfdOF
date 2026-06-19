@@ -53,16 +53,19 @@ class TaskPanelCfdScalarTransportFunctions:
         self.form.inputInjectionPointx.valueChanged.connect(self.inputInjectionPointChanged)
         self.form.inputInjectionPointy.valueChanged.connect(self.inputInjectionPointChanged)
         self.form.inputInjectionPointz.valueChanged.connect(self.inputInjectionPointChanged)
+
+        if hasattr(self.form.checkBoxDiffusivityFixed, "checkStateChanged"):
+            self.form.checkBoxDiffusivityFixed.checkStateChanged.connect(self.diffusivityCheckBoxChanged)
+        else:
+            self.form.checkBoxDiffusivityFixed.stateChanged.connect(self.diffusivityCheckBoxChanged)
         
         self.load()
         self.updateUI()
 
     def load(self):
         self.form.inputScalarFieldName.setText(self.obj.FieldName)
-        if self.obj.DiffusivityFixed:
-            self.form.radioUniformDiffusivity.toggle()
-        else:
-            self.form.radioViscousDiffusivity.toggle()
+        self.form.checkBoxDiffusivityFixed.setChecked(self.obj.DiffusivityFixed)
+        self.diffusivityCheckBoxChanged()
         setQuantity(self.form.inputDiffusivity, self.obj.DiffusivityFixedValue)
 
         self.form.checkRestrictToPhase.setChecked(self.obj.RestrictToPhase)
@@ -101,6 +104,14 @@ class TaskPanelCfdScalarTransportFunctions:
         self.form.checkRestrictToPhase.setVisible(mp)
         self.form.comboPhase.setVisible(mp)
 
+    def diffusivityCheckBoxChanged(self):
+        if self.form.checkBoxDiffusivityFixed.isChecked():
+            self.form.inputDiffusivity.setVisible(True)
+            self.form.specifiedCoefficientLabel.setVisible(True)
+        else:
+            self.form.inputDiffusivity.setVisible(False)
+            self.form.specifiedCoefficientLabel.setVisible(False)
+
     def inputInjectionPointChanged(self):
         if FreeCAD.GuiUp:
             self.prev_point_move_node.translation.setValue(
@@ -117,7 +128,7 @@ class TaskPanelCfdScalarTransportFunctions:
 
         # Type
         storeIfChanged(self.obj, 'FieldName', self.form.inputScalarFieldName.text())
-        storeIfChanged(self.obj, 'DiffusivityFixed', self.form.radioUniformDiffusivity.isChecked())
+        storeIfChanged(self.obj, 'DiffusivityFixed', self.form.checkBoxDiffusivityFixed.isChecked())
         storeIfChanged(self.obj, 'DiffusivityFixedValue', getQuantity(self.form.inputDiffusivity))
         storeIfChanged(self.obj, 'RestrictToPhase', self.form.checkRestrictToPhase.isChecked())
         storeIfChanged(self.obj, 'PhaseName', self.form.comboPhase.currentText())

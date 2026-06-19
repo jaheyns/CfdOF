@@ -64,13 +64,6 @@
        <property name="bottomMargin">
         <number>8</number>
        </property>
-       <item row="3" column="0" colspan="2">
-        <widget class="QRadioButton" name="radioViscousDiffusivity">
-         <property name="text">
-          <string>Viscous/turbulent</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="0">
         <widget class="QLabel" name="labelPressure">
          <property name="text">
@@ -78,8 +71,15 @@
          </property>
         </widget>
        </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QCheckBox" name="checkBoxDiffusivityFixed">
+         <property name="text">
+          <string>Fixed diffusivity</string>
+         </property>
+        </widget>
+       </item>
        <item row="4" column="0">
-        <widget class="QRadioButton" name="radioUniformDiffusivity">
+        <widget class="QLabel" name="specifiedCoefficientLabel">
          <property name="text">
           <string>Specified coefficient</string>
          </property>
@@ -311,8 +311,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>inputScalarFieldName</tabstop>
-  <tabstop>radioViscousDiffusivity</tabstop>
-  <tabstop>radioUniformDiffusivity</tabstop>
+  <tabstop>checkBoxDiffusivityFixed</tabstop>
   <tabstop>inputDiffusivity</tabstop>
   <tabstop>inputInjectionRate</tabstop>
   <tabstop>inputInjectionPointx</tabstop>
