@@ -155,8 +155,39 @@ class CfdCaseWriterFoam:
                     't_MMRModelCoR': tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in mr_obj.MMRModelCoR),
                     't_MMRModelAxis': tuple(d for d in mr_obj.MMRModelAxis),
                     'MMRModelRPM': mr_obj.MMRModelRPM,# revolution per minute
-                    'MMRModelRPS': (mr_obj.MMRModelRPM/9.5) # rad/s #for the openCFD version
+                    'MMRModelRPS': (mr_obj.MMRModelRPM/9.5), # rad/s #for the openCFD version
+                    'SpeedType': mr_obj.SpeedType,
+                    'VariableSpeedRPM': "",
+                    'VariableSpeedRPS': ""
                 }
+
+                longer = max(len(mr_obj.TimeList), len(mr_obj.SpeedList))
+                for i in range(longer):
+                    self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPM'] += "\t\t\t\t\t("
+                    self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPS'] += "\t\t\t\t\t\t("
+                    for j in range(2): # iterate over the 2 lists to copy the values to the buff
+                        try:
+                            entery = [mr_obj.TimeList, mr_obj.SpeedList][j][i]
+                        except:
+                            entery = 0 # make the value 0 when the lists are not the same length
+                        self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPM'] += str(entery)
+                        if j == 0:
+                            self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPS'] += str(entery) + " "
+                            self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPM'] += " "
+                        else:
+                            self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPS'] += str(entery/9.5)
+                    self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPM'] += ")\n"
+                    self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPS'] += ")\n"
+                # if the first time in the list is not 0 then add a 0 with a speed eqaul the first speed
+                # to avoid getting an error in the OpenCFD version
+                if mr_obj.TimeList[0] > 0:
+                    self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPS'] = "\t\t\t\t\t\t(0 "+str(mr_obj.SpeedList[0]/9.5)+")\n" + self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPS']
+                # if the last time in the list is less than the EndTime then add a new pair with time = EndTime and with a speed eqaul the last speed
+                # to avoid getting an error in the OpenCFD version
+                if mr_obj.TimeList[len(mr_obj.TimeList)-1] < self.settings['solver']['EndTime']:
+                    self.settings['MovingMeshRegions'][mr_obj.Label]['VariableSpeedRPS'] += "\t\t\t\t\t\t("+str(self.settings['solver']['EndTime'])+" "+str(mr_obj.SpeedList[len(mr_obj.SpeedList)-1]/9.5)+")\n"
+
+
 
         if len(self.settings["MovingMeshRegions"]) > 0:
             self.settings['MovingMeshRegionsPresent'] = True

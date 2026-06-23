@@ -43,6 +43,8 @@ QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 EXTRUSION_NAMES = ["2D planar mesh", "2D wedge mesh", "Patch-normal", "Rotational"]
 EXTRUSION_TYPES = ["2DPlanar", "2DWedge", "PatchNormal", "Rotational"]
 EXTRUSION_UI = [[2], [6], [1, 2, 4, 5], [1, 3, 4, 5, 6]]
+SPEED_NAMES = ["constant speed", "variable speed"]
+SPEED_TYPES = ["ConstantSpeed", "VariableSpeed"]
 
 
 def makeCfdMeshRefinement(base_mesh, name="MeshRefinement"):
@@ -300,6 +302,34 @@ class CfdMeshRefinement:
             "App::PropertyPosition",
             "Moving mesh Region",
             QT_TRANSLATE_NOOP("App::Property", "Axis of rotation (MMR)"),
+        )
+
+        if addObjectProperty(
+            obj,
+            "SpeedType",
+            SPEED_TYPES,
+            "App::PropertyEnumeration",
+            "Moving mesh Region",
+            QT_TRANSLATE_NOOP("App::Property", "set the type of speed"),
+        ):
+            SPEED_TYPES[0]
+
+        addObjectProperty(
+            obj,
+            "SpeedList",
+            [0.0],
+            "App::PropertyFloatList",
+            "Moving mesh Region",
+            QT_TRANSLATE_NOOP("App::Property", "speed point for defining variable speed"),
+        )
+
+        addObjectProperty(
+            obj,
+            "TimeList",
+            [0.0],
+            "App::PropertyFloatList",
+            "Moving mesh Region",
+            QT_TRANSLATE_NOOP("App::Property", "time point for defining variable speed"),
         )
 
     def onDocumentRestored(self, obj):

@@ -168,7 +168,19 @@ dynamicMultiMotionSolverFvMeshCoeffs
             {
                 origin (%(MovingMeshRegions/%(0%)/t_MMRModelCoR%));
                 axis (%(MovingMeshRegions/%(0%)/t_MMRModelAxis%));
+%{%(MovingMeshRegions/%(0%)/SpeedType%)
+%:ConstantSpeed
                 omega %(MovingMeshRegions/%(0%)/MMRModelRPS%);
+%:VariableSpeed
+                omega
+                {
+                    type    table;
+                    values
+                    (
+%(MovingMeshRegions/%(0%)/VariableSpeedRPS%)
+                    );
+                }
+%}
             }
         }
     }    	
@@ -192,7 +204,20 @@ mover
             solidBodyMotionFunction rotatingMotion;
             origin (%(MovingMeshRegions/%(0%)/t_MMRModelCoR%));
             axis (%(MovingMeshRegions/%(0%)/t_MMRModelAxis%));
+%{%(MovingMeshRegions/%(0%)/SpeedType%)
+%:ConstantSpeed
             omega %(MovingMeshRegions/%(0%)/MMRModelRPM%) [rpm];
+%:VariableSpeed
+            omega
+            {
+                type    table;
+                units   ([s] [rpm]);
+                values
+                (
+%(MovingMeshRegions/%(0%)/VariableSpeedRPM%)
+                );
+            }
+%}
         }
 %}
     }

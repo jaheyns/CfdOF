@@ -34,8 +34,23 @@ from CfdOF.CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChan
 from CfdOF import CfdFaceSelectWidget
 from CfdOF.Mesh import CfdMeshRefinement
 from FreeCAD import Units
+from PySide6.QtWidgets import QTableWidgetItem
 
 translate = FreeCAD.Qt.translate
+
+def getCellValue(row, colum, table):
+        cell = table.item(row, colum)
+        return(float(cell.text()))
+
+class floatDelegate(QtGui.QItemDelegate):
+
+    def createEditor(self, parent, option, index):
+        editor = super().createEditor(parent, option, index)
+        if isinstance(editor, QtGui.QLineEdit):
+            # Allow only floats
+            editor.setValidator(QtGui.QDoubleValidator(editor))
+        return editor
+
 
 class TaskPanelCfdMeshRefinement:
     """ The TaskPanel for editing References property of MeshRefinement objects """
@@ -76,6 +91,7 @@ class TaskPanelCfdMeshRefinement:
         self.form.extrusionTypeCombo.addItems(CfdMeshRefinement.EXTRUSION_NAMES)
         self.form.extrusionTypeCombo.currentIndexChanged.connect(self.updateUI)
         self.form.pickAxisButton.clicked.connect(self.pickFromSelection)
+        self.form.comboBoxSpeedType.addItems(CfdMeshRefinement.SPEED_NAMES)
 
         self.form.if_rellen.setToolTip("Cell size relative to base cell size")
         self.form.label_rellen.setToolTip("Cell size relative to base cell size")
@@ -85,6 +101,12 @@ class TaskPanelCfdMeshRefinement:
         self.form.surfaceRefinementToggle.toggled.connect(self.changeInternal)
         self.form.volumeRefinementToggle.toggled.connect(self.changeInternal)
         self.form.movingMeshRegionToggle.toggled.connect(self.changeInternal)
+        self.form.comboBoxSpeedType.currentIndexChanged.connect(self.comboBoxSpeedTypeChanged)
+        delegate = floatDelegate()
+        self.form.tableTimeVsSpeed.setItemDelegate(delegate)
+
+        self.form.pushButtonAddRow.clicked.connect(self.add)
+        self.form.pushButtonDeleteRow.clicked.connect(self.remove)
 
         self.form.if_refinethick.setToolTip("Distance the refinement region extends from the reference "
                                             "surface")
@@ -147,6 +169,22 @@ class TaskPanelCfdMeshRefinement:
         setQuantity(self.form.inputMMRAxisz, self.obj.MMRModelAxis.z)
 
         setQuantity(self.form.inputMMRRPM, self.obj.MMRModelRPM)
+        self.form.comboBoxSpeedType.setCurrentIndex(
+            indexOrDefault(CfdMeshRefinement.SPEED_TYPES, self.obj.SpeedType, 0))
+        self.comboBoxSpeedTypeChanged()
+
+        # load the table with values from SpeedList and TimeList arrays
+        # set nrows to be the larger length between the 2 arrays
+        nrows = max(len(self.obj.TimeList), len(self.obj.SpeedList))
+        self.form.tableTimeVsSpeed.setRowCount(nrows)
+        for i in range(2):
+            for j in range(nrows):
+                try:
+                    entery = [self.obj.TimeList, self.obj.SpeedList][i][j]
+                except:
+                    entery = 0
+                cell = QTableWidgetItem(str(entery))
+                self.form.tableTimeVsSpeed.setItem(j, i, cell)
 
     def updateUI(self):
         self.form.surfaceOrInernalVolume.setVisible(True)
@@ -214,6 +252,43 @@ class TaskPanelCfdMeshRefinement:
 
             self.form.extrusionFrame.setVisible(False)
         self.updateSelectionButtonUI()
+
+    def comboBoxSpeedTypeChanged(self):
+        if self.form.comboBoxSpeedType.currentIndex() == 1:
+            self.form.frameVariableSpeed.setVisible(True)
+            self.form.labelRPM.setVisible(False)
+            self.form.inputMMRRPM.setVisible(False)
+        else:
+            self.form.frameVariableSpeed.setVisible(False)
+            self.form.labelRPM.setVisible(True)
+            self.form.inputMMRRPM.setVisible(True)
+
+    def add(self):
+        """Adds a new row below the last one"""
+        cur_row = self.form.tableTimeVsSpeed.currentRow()
+        self.form.tableTimeVsSpeed.insertRow(cur_row + 1)
+        time_cell = QTableWidgetItem("0")
+        speed_cell =  QTableWidgetItem("0")
+
+        if cur_row == 0: # the 2nd row give the data of the first
+            time_cell.setText(str(getCellValue(cur_row, 0, self.form.tableTimeVsSpeed)))
+            speed_cell.setText(str(getCellValue(cur_row, 1, self.form.tableTimeVsSpeed)))
+        elif cur_row > 0: # else 3rd = 2nd + (2nd-1st)
+            prev_time_cell = getCellValue(cur_row, 0, self.form.tableTimeVsSpeed)
+            prev_time_cell2 = getCellValue(cur_row-1, 0, self.form.tableTimeVsSpeed)
+            time_cell.setText(str(round(prev_time_cell + (prev_time_cell- prev_time_cell2), 7)))
+            prev_speed_cell = getCellValue(cur_row, 1, self.form.tableTimeVsSpeed)
+            prev_speed_cell2 = getCellValue(cur_row-1, 1, self.form.tableTimeVsSpeed)
+            speed_cell.setText(str(round(prev_speed_cell + (prev_speed_cell- prev_speed_cell2), 7)))
+
+        self.form.tableTimeVsSpeed.setItem(cur_row+1, 0, time_cell)
+        self.form.tableTimeVsSpeed.setItem(cur_row+1, 1, speed_cell)
+
+    def remove(self):
+        """Removes the current row"""
+        indices = self.form.tableTimeVsSpeed.selectionModel().selectedRows()
+        for index in sorted(indices, reverse=True):
+            self.form.tableTimeVsSpeed.removeRow(index.row())
 
     def getMeshObject(self):
         analysis_obj = CfdTools.getActiveAnalysis()
@@ -331,6 +406,18 @@ class TaskPanelCfdMeshRefinement:
                 self.form.inputMMRAxisy.property("quantity").Value,
                 self.form.inputMMRAxisz.property("quantity").Value)
             storeIfChanged(self.obj, 'MMRModelAxis', model_axis)
+            storeIfChanged(self.obj, 'SpeedType',
+                CfdMeshRefinement.SPEED_TYPES[self.form.comboBoxSpeedType.currentIndex()])
+
+            # convert the table data to 2 arrays (time and speed)
+            temp_speed_list = []
+            temp_time_list = []
+            for i in range(self.form.tableTimeVsSpeed.rowCount()):
+                temp_time_list.append(getCellValue(i, 0, self.form.tableTimeVsSpeed))
+                temp_speed_list.append(getCellValue(i, 1, self.form.tableTimeVsSpeed))
+
+            storeIfChanged(self.obj, 'TimeList', temp_time_list)
+            storeIfChanged(self.obj, 'SpeedList', temp_speed_list)
 
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
         return True
