@@ -1,0 +1,25 @@
+# make the analysis
+from CfdOF import CfdAnalysis
+from CfdOF import CfdTools
+analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+CfdTools.setActiveAnalysis(analysis)
+from CfdOF.Solve import CfdPhysicsSelection
+analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+from CfdOF.Solve import CfdFluidMaterial
+analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+from CfdOF.Solve import CfdInitialiseFlowField
+analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+from CfdOF.Solve import CfdSolverFoam
+analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+App.ActiveDocument.PhysicsModel.Time = 'Transient'
+App.ActiveDocument.PhysicsModel.Phase = 'FreeSurface'
+App.ActiveDocument.PhysicsModel.gy = '0.0 mm/s^2'
+App.ActiveDocument.PhysicsModel.gz = '-9810.0 mm/s^2'
+App.ActiveDocument.CfdSolver.EndTime = '2.5 s'
+App.ActiveDocument.CfdSolver.TransientWriteInterval = '0.02 s'
+App.ActiveDocument.FluidProperties.Material = {'CardName': 'WaterIsothermal', 'AuthorAndLicense': '', 'Author': 'SPDX-FileCopyrightText: 2021 Oliver Oxtoby', 'License': '', 'Name': 'Water', 'Description': 'Standard distilled water properties at 20 Degrees Celsius and 1 atm', 'ReferenceSource': '', 'SourceURL': '', 'Density': '998 kg/m^3', 'DynamicViscosity': '1.003e-3 kg/m/s ', 'Type': 'Isothermal'}
+App.ActiveDocument.FluidProperties.Label = 'Water'
+
+# make the second material (air)
+CfdTools.getActiveAnalysis().addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+App.ActiveDocument.FluidProperties001.Label = 'Air'

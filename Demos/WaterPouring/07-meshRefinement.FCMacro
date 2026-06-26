@@ -1,0 +1,14 @@
+# make a volume mesh refinement
+from CfdOF.Mesh import CfdMeshRefinement
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Body004_Mesh)
+App.ActiveDocument.MeshRefinement001.Internal = True
+FreeCAD.ActiveDocument.MeshRefinement001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body005'), ('Solid1',))]
+FreeCAD.ActiveDocument.recompute()
+
+# make a mesh refinement on the cup and bottle
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Body004_Mesh)
+FreeCAD.ActiveDocument.MeshRefinement002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body'), ('',)),
+(FreeCAD.ActiveDocument.getObject('Body001'), ('',))]
+FreeCAD.ActiveDocument.recompute()

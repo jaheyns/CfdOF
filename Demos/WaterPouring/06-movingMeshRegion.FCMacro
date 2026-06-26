@@ -1,0 +1,13 @@
+# make the MMR region
+from CfdOF.Mesh import CfdMeshRefinement
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Body004_Mesh)
+FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body002'), ('',))]
+App.ActiveDocument.MeshRefinement.MovingMeshRegion = True
+App.ActiveDocument.MeshRefinement.RelativeLength = 1
+App.ActiveDocument.MeshRefinement.MMRModelRPM = '0.0000'
+App.ActiveDocument.MeshRefinement.MMRModelAxis = App.Vector (0.0, 1.0, 0.0)
+App.ActiveDocument.MeshRefinement.SpeedType = 'VariableSpeed'
+App.ActiveDocument.MeshRefinement.TimeList = [0.0, 0.5, 0.501, 2.0, 2.001, 2.5]
+App.ActiveDocument.MeshRefinement.SpeedList = [30.0, 30.0, 0.0, 0.0, -30.0, -30.0]
+FreeCAD.ActiveDocument.recompute()

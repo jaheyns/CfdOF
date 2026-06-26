@@ -1,0 +1,9 @@
+# make the main mesh
+from CfdOF.Mesh import CfdMesh
+CfdMesh.makeCfdMesh('Body004_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Body004
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+App.ActiveDocument.Body004_Mesh.CharacteristicLengthMax = '3 mm'
+App.ActiveDocument.Body004_Mesh.MeshUtility = 'snappyHexMesh'
+App.ActiveDocument.Body004_Mesh.PointInMesh = {'x': '0.0 mm', 'y': '0.0 mm', 'z': '0.0 mm'}

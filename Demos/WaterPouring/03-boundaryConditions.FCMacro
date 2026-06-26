@@ -1,0 +1,36 @@
+# make the open boundary
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdFluidBoundary
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary.Label = 'open'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'open'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'totalPressureOpening'
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face3',))]
+FreeCAD.ActiveDocument.recompute()
+
+# make the bottle wall boundary
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary001.Label = 'bottle_wall'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body'), ('',))]
+FreeCAD.ActiveDocument.recompute()
+
+# make the cup wall boundary
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary002.Label = 'cup_wall'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body001'), ('',))]
+FreeCAD.ActiveDocument.recompute()
+
+# make the side wall boundary
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary003.Label = 'side_wall'
+FreeCAD.ActiveDocument.CfdFluidBoundary003.BoundarySubType = 'slipWall'
+App.ActiveDocument.CfdFluidBoundary003.DefaultBoundary = True
+FreeCAD.ActiveDocument.recompute()
+
+# make the initial conditions ( should be after making the second material and the open boundary
+App.ActiveDocument.InitialiseFields.VolumeFractions = {'Water': '0.0'}
+FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary
+App.activeDocument().recompute(None,True,True)

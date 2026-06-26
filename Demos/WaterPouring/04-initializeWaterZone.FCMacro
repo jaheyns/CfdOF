@@ -1,0 +1,7 @@
+# make a new cfd zone to initialize the water volume
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdZone
+CfdTools.getActiveAnalysis().addObject(CfdZone.makeCfdInitialisationZone())
+FreeCAD.ActiveDocument.InitialisationZone.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body003'), ('Solid1',))]
+App.ActiveDocument.InitialisationZone.VolumeFractions = {'Water': '1.0'}

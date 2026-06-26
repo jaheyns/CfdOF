@@ -1,0 +1,4 @@
+import FreeCAD
+import os
+
+FreeCAD.openDocument(os.path.join(os.path.dirname(__file__), "WaterPouring.FCStd"))
