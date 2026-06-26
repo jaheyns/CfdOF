@@ -532,6 +532,20 @@ class MeanVelocityForceCellZoneTest(unittest.TestCase, MacroTest):
     def tearDown(self):
         self.closeDoc()
 
+class WaterPouringTest(unittest.TestCase, MacroTest):
+    __dir_name = 'WaterPouring'
+    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-boundaryConditions.FCMacro', '04-initializeWaterZone.FCMacro', '05-mesh.FCMacro', '06-movingMeshRegion.FCMacro', '07-meshRefinement.FCMacro']
+
+    def __init__(self, var):
+        super().__init__(var)
+        MacroTest.child_instance = self
+
+    def test_run(self):
+        self.runTest(self.__class__.__dir_name, self.__class__.__macros)
+
+    def tearDown(self):
+        self.closeDoc()
+
 
 def compareInpFiles(file_name1, file_name2):
     file1 = open(file_name1, 'r')
