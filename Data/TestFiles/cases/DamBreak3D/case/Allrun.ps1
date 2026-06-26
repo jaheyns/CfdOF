@@ -66,7 +66,14 @@ else
 runCommand createPatch -overwrite
 
 # Set cell zones contained inside the .stl surfaces
-runCommand topoSet -dict system/topoSetZonesDict
+if( (Get-Command createZones) )
+{
+	runCommand createZones -dict system/createZonesDict
+}
+else
+{
+	runCommand topoSet -dict system/topoSetZonesDict
+}
 
 # Set internal fields according to setFieldsDict
 runCommand setFields
