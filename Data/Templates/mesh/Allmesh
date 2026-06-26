@@ -129,14 +129,14 @@ runParallel $NPROC snappyHexMesh -overwrite
 which createNonConformalCouples > /dev/null 2>&1
 if [ $? == 0 ]
 then
-	runParallel createBaffles -overwrite
-	runParallel splitBaffles -overwrite
+	runParallel $NPROC createBaffles -overwrite
+	runParallel $NPROC splitBaffles -overwrite
 %{%(SnappySettings/MovingMeshRegions%)
-	runParallel createNonConformalCouples -overwrite %(0%)_M %(0%)_S
+	runParallel $NPROC createNonConformalCouples -overwrite %(0%)_M %(0%)_S
 	mv log.createNonConformalCouples log.createNonConformalCouples%(0%)
 %}
 else
-	runParallel createPatch -overwrite || return 1
+	runParallel $NPROC createPatch -overwrite || return 1
 fi
 %}
 if [ ! -z $FOAM_API ] || [ $WM_PROJECT_VERSION -lt 11 ] 2>/dev/null

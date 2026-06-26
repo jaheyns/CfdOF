@@ -115,16 +115,16 @@ runParallel $NPROC snappyHexMesh -overwrite
 %:True
 if ( (Get-Command -ErrorAction SilentlyContinue createNonConformalCouples) )
 {
-	runParallel createBaffles -overwrite
-	runParallel splitBaffles -overwrite
+	runParallel $NPROC createBaffles -overwrite
+	runParallel $NPROC splitBaffles -overwrite
 %{%(SnappySettings/MovingMeshRegions%)
-	runParallel createNonConformalCouples -overwrite %(0%)_M %(0%)_S
+	runParallel $NPROC createNonConformalCouples -overwrite %(0%)_M %(0%)_S
 	mv log.createNonConformalCouples log.createNonConformalCouples%(0%)
 %}
 }
 else
 {
-	runParallel createPatch -overwrite
+	runParallel $NPROC createPatch -overwrite
 }
 %}
 if ( $Env:WM_PROJECT_VERSION[0] -eq "v" -or 11 -gt $Env:WM_PROJECT_VERSION )
