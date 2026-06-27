@@ -76,7 +76,7 @@ dynamicRefineFvMeshCoeffs
 topoChanger
 {
     type refiner;
-    libs            ("libfvMeshTopoChangers" "libhisaMeshRebalancing");
+    libs            ("libfvMeshTopoChangers.so" "libhisaMeshRebalancing.so");
 
 %{%(dynamicMesh/Type%)
 %:interface
