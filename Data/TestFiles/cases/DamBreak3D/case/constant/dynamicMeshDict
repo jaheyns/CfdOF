@@ -53,7 +53,7 @@ dynamicRefineFvMeshCoeffs
 topoChanger
 {
     type refiner;
-    libs            ("libfvMeshTopoChangers" "libhisaMeshRebalancing");
+    libs            ("libfvMeshTopoChangers.so" "libhisaMeshRebalancing.so");
 
     refineInterval  5;
     field           alpha.water;
