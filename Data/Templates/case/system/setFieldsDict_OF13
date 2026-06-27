@@ -1,0 +1,106 @@
+%{%(initialisationZonesPresent%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defaultValues
+{
+}
+
+zones
+{
+
+%{%(initialisationZones%)
+%{%(zones/%(0%)/PartNameList%)
+    %(0%)
+    {
+		type insideSurface;
+		zoneType cell;
+        surface triSurface;
+        file "%(0%).stl";
+        values
+        {
+%{%(initialisationZones/%(1%)%)
+%{%(0%)
+%:Ux
+            U ( %(initialisationZones/%(2%)/Ux%) %(initialisationZones/%(2%)/Uy%) %(initialisationZones/%(2%)/Uz%) );
+%:Uy
+%:Uz
+%:Pressure
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+            p_rgh %(initialisationZones/%(2%)/Pressure%);
+%:simpleFoam porousSimpleFoam pimpleFoam SRFSimpleFoam
+            p %(initialisationZones/%(2%)/KinematicPressure%);
+%:default
+            p %(initialisationZones/%(2%)/Pressure%);
+%}
+%:Temperature
+%{%(physics/Flow%)
+%:Isothermal
+%:default
+            T %(initialisationZones/%(2%)/Temperature%);
+%}
+%:VolumeFractions
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+%{%(initialisationZones/%(2%)/VolumeFractions%)
+            alpha.%(0%) %(initialisationZones/%(3%)/VolumeFractions/%(0%)%);
+%}
+%}
+%}
+%}
+        }
+    }
+
+    cellToFace
+    {
+		type insideSurface;
+		zoneType face;
+        surface triSurface;
+        file "%(0%).stl";
+        values
+        {
+%{%(initialisationZones/%(1%)%)
+%{%(0%)
+%:Ux
+            U ( %(initialisationZones/%(2%)/Ux%) %(initialisationZones/%(2%)/Uy%) %(initialisationZones/%(2%)/Uz%) );
+%:Uy
+%:Uz
+%:Pressure
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+            p_rgh %(initialisationZones/%(2%)/Pressure%);
+%:simpleFoam porousSimpleFoam pimpleFoam
+            p %(initialisationZones/%(2%)/KinematicPressure%);
+%:default
+            p %(initialisationZones/%(2%)/Pressure%);
+%}
+%:Temperature
+            T %(initialisationZones/%(2%)/Temperature%);
+%:VolumeFractions
+%{%(solver/SolverName%)
+%:interFoam multiphaseInterFoam
+%{%(initialisationZones/%(2%)/VolumeFractions%)
+            alpha.%(0%) %(initialisationZones/%(3%)/VolumeFractions/%(0%)%);
+%}
+%}
+%}
+%}
+        }
+    }
+%}
+%}
+}
+
+// ************************************************************************* //
+
+%}
