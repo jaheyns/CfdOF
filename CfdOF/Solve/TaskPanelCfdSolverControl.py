@@ -31,6 +31,8 @@ import os
 import os.path
 import time
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
+from CfdOF.Solve import CfdSolverFoam
+from CfdOF.CfdTools import setQuantity, indexOrDefault, storeIfChanged
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -46,6 +48,7 @@ class TaskPanelCfdSolverControl:
         self.form = FreeCADGui.PySideUic.loadUi(ui_path)
 
         self.analysis_object = CfdTools.getActiveAnalysis()
+        self.physics_object = CfdTools.getPhysicsModel(self.analysis_object)
 
         self.solver_runner = solver_runner_obj
         self.solver_object = solver_runner_obj.solver
@@ -56,6 +59,16 @@ class TaskPanelCfdSolverControl:
         self.solver_object.Proxy.solver_process = CfdConsoleProcess(finished_hook=self.solverFinished,
                                                                     stdout_hook=self.gotOutputLines,
                                                                     stderr_hook=self.gotErrorLines)
+        self.form.comboBoxStartFrom.addItems(CfdSolverFoam.START_FROM_NAMES)
+        if self.physics_object.Time == "Steady":
+            self.form.inputFieldEndTime.setVisible(False)
+            self.form.inputFieldWriteInterval.setVisible(False)
+            self.form.inputFieldTimeStep.setVisible(False)
+            self.form.labelTimeStep.setVisible(False)
+        else:
+            self.form.spinBoxEndTime.setVisible(False)
+            self.form.spinBoxWriteInterval.setVisible(False)
+
         self.Timer = QtCore.QTimer()
         self.Timer.setInterval(1000)
         self.Timer.timeout.connect(self.updateText)
@@ -82,10 +95,28 @@ class TaskPanelCfdSolverControl:
         self.Timer.start()
 
     def load(self):
+        self.form.comboBoxStartFrom.setCurrentIndex(
+            indexOrDefault(CfdSolverFoam.START_FROM, self.solver_object.StartFrom, 0))
+        if self.physics_object.Time == "Steady":
+            self.form.spinBoxEndTime.setValue(self.solver_object.MaxIterations)
+            self.form.spinBoxWriteInterval.setValue(self.solver_object.SteadyWriteInterval)
+        else:
+            setQuantity(self.form.inputFieldEndTime, self.solver_object.EndTime)
+            setQuantity(self.form.inputFieldWriteInterval, self.solver_object.TransientWriteInterval)
+            setQuantity(self.form.inputFieldTimeStep, self.solver_object.TimeStep)
         self.form.inputParallel.setChecked(self.solver_object.Parallel)
         self.form.inputParallelCores.setValue(self.solver_object.ParallelCores)
 
     def store(self):
+        storeIfChanged(self.solver_object, 'StartFrom',
+            CfdSolverFoam.START_FROM[self.form.comboBoxStartFrom.currentIndex()])
+        if self.physics_object.Time == "Steady":
+            CfdTools.storeIfChanged(self.solver_object, 'MaxIterations', self.form.spinBoxEndTime.value())
+            CfdTools.storeIfChanged(self.solver_object, 'SteadyWriteInterval', self.form.spinBoxWriteInterval.value())
+        else:
+            CfdTools.storeIfChanged(self.solver_object, 'EndTime', self.form.inputFieldEndTime.property("quantity").Value)
+            CfdTools.storeIfChanged(self.solver_object, 'TransientWriteInterval', self.form.inputFieldWriteInterval.property("quantity").Value)
+            CfdTools.storeIfChanged(self.solver_object, 'TimeStep', self.form.inputFieldTimeStep.property("quantity").Value)
         CfdTools.storeIfChanged(self.solver_object, 'Parallel', self.form.inputParallel.isChecked())
         CfdTools.storeIfChanged(self.solver_object, 'ParallelCores', self.form.inputParallelCores.value())
 

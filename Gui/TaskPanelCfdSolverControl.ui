@@ -35,6 +35,137 @@
       <number>8</number>
      </property>
      <item row="0" column="0">
+      <widget class="QLabel" name="labelTimeParameters">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>time Parameters</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QLabel" name="labelStartFrom">
+       <property name="text">
+        <string>start from</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2" colspan="2">
+      <widget class="QComboBox" name="comboBoxStartFrom">
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="2">
+      <widget class="QLabel" name="labelEndTime">
+       <property name="text">
+        <string>end time</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="Gui::InputField" name="inputFieldEndTime">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string notr="true">0</string>
+       </property>
+       <property name="singleStep" stdset="0">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="unit" stdset="0">
+        <string notr="true">s</string>
+       </property>
+       <property name="format" stdset="0">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QSpinBox" name="spinBoxEndTime">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100000000</number>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0" colspan="2">
+      <widget class="QLabel" name="labelWriteInterval">
+       <property name="text">
+        <string>write interval</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="Gui::InputField" name="inputFieldWriteInterval">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string notr="true">0</string>
+       </property>
+       <property name="singleStep" stdset="0">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="unit" stdset="0">
+        <string notr="true">s</string>
+       </property>
+       <property name="format" stdset="0">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QSpinBox" name="spinBoxWriteInterval">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100000000</number>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="2">
+      <widget class="QLabel" name="labelTimeStep">
+       <property name="text">
+        <string>time step</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="2">
+      <widget class="Gui::InputField" name="inputFieldTimeStep">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string notr="true">0</string>
+       </property>
+       <property name="singleStep" stdset="0">
+        <double>1.000000000000000</double>
+       </property>
+       <property name="unit" stdset="0">
+        <string notr="true">s</string>
+       </property>
+       <property name="format" stdset="0">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0">
       <widget class="QLabel" name="label">
        <property name="font">
         <font>
@@ -47,7 +178,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0" colspan="3">
+     <item row="6" column="0" colspan="3">
       <widget class="QCheckBox" name="inputParallel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -60,7 +191,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="2">
+     <item row="7" column="0" colspan="2">
       <widget class="QFrame" name="ParallelCoresFrame">
        <property name="frameShape">
         <enum>QFrame::NoFrame</enum>
