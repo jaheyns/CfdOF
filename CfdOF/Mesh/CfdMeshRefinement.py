@@ -43,7 +43,7 @@ QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 EXTRUSION_NAMES = ["2D planar mesh", "2D wedge mesh", "Patch-normal", "Rotational"]
 EXTRUSION_TYPES = ["2DPlanar", "2DWedge", "PatchNormal", "Rotational"]
 EXTRUSION_UI = [[2], [6], [1, 2, 4, 5], [1, 3, 4, 5, 6]]
-SPEED_NAMES = ["constant speed", "variable speed"]
+SPEED_NAMES = ["Constant", "Variable"]
 SPEED_TYPES = ["ConstantSpeed", "VariableSpeed"]
 
 
