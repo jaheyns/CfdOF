@@ -2635,16 +2635,41 @@ Re-mesh case first?</source>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="46"/>
+        <source>time Parameters</source>
+        <translation>اعدادات الزمن</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="53"/>
+        <source>start from</source>
+        <translation>ابدأ من</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="64"/>
+        <source>end time</source>
+        <translation>زمن النهاية</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="103"/>
+        <source>write interval</source>
+        <translation>فترة الكتابة</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="142"/>
+        <source>time step</source>
+        <translation>القفزة الزمنية</translation>
+    </message>
+    <message>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="177"/>
         <source>Solver Parameters</source>
         <translation>اعدادات المحلل</translation>
     </message>
     <message>
-        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="59"/>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="190"/>
         <source>Solve in Parallel</source>
         <translation>تحليل على التوازي</translation>
     </message>
     <message>
-        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="87"/>
+        <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="218"/>
         <source>Number of Parallel Cores</source>
         <translation>عدد الانوية على التوازي</translation>
     </message>
