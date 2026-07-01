@@ -92,7 +92,13 @@ else
 fi
 
 # Set internal fields according to setFieldsDict
-runCommand setFields
+# use the OF13 dict for setFields if using openfoam 13 and later
+if [ "$WM_PROJECT_VERSION" -ge 13 ] && [ "${WM_PROJECT_VERSION:0:1}" != "v" ]
+then
+	runCommand setFields -dict system/setFieldsDict_OF13
+else
+	runCommand setFields
+fi
 
 PNAME=p_rgh
 

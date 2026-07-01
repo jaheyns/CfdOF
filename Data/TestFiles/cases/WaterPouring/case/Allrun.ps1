@@ -84,7 +84,15 @@ else
 }
 
 # Set internal fields according to setFieldsDict
-runCommand setFields
+# use the OF13 dict for setFields if using openfoam 13 and later
+if ( $Env:WM_PROJECT_VERSION[0] -ne "v" -and 13 -le $Env:WM_PROJECT_VERSION )
+{
+	runCommand setFields -dict system/setFieldsDict_OF13
+}
+else
+{
+	runCommand setFields
+}
 
 $PNAME = "p_rgh"
 
