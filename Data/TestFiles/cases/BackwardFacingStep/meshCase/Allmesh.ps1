@@ -28,9 +28,9 @@ $ErrorView = 'ConciseView'
 
 $GMSH_EXE = "/home/oliver/software/gmsh-4.13.1-Linux64/bin/gmsh"
 $NTHREADS = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
-runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Pad_Geometry.geo"
+runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Fusion_Geometry.geo"
 
-runCommand gmshToFoam "gmsh/Pad_Geometry.msh"
+runCommand gmshToFoam "gmsh/Fusion_Geometry.msh"
 
 # polyDualMesh doesn't seem to convert cell zones
 rm -ErrorAction SilentlyContinue constant/polyMesh/cellZones

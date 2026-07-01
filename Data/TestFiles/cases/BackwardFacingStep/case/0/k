@@ -8,42 +8,54 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       polyBoundaryMesh;
-    object      boundary;
+    class       volScalarField;
+    object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-(
-    constraint
-    {
-        type        symmetry;
-    }
+dimensions      [0 2 -2 0 0 0 0];
 
-    wall
-    {
-        type        symmetry;
-    }
+internalField   uniform 0.0;
 
-    wall001
-    {
-        type        wall;
-    }
+boundaryField
+{
 
     inlet
     {
-        type        patch;
+        type        fixedValue;
+        value       uniform 0.15;
     }
 
     outlet
     {
-        type        patch;
+        type        inletOutlet;
+        inletValue  $internalField;
+        value       $internalField;
+    }
+
+    constraint
+    {
+        type        symmetry;
+        value       $internalField;
+    }
+
+    constraint001
+    {
+        type        symmetry;
+        value       $internalField;
+    }
+
+    wall
+    {
+        type        kqRWallFunction;
+        value       $internalField;
     }
 
     defaultFaces
     {
-        type        wall;
+        type        zeroGradient;
     }
 
-)
+}
 
 // ************************************************************************* //

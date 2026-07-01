@@ -19,46 +19,46 @@ pointSync false;
 patches
 (
     {
-        name constraint;
-        patchInfo
-        {
-            type symmetry;
-        }
-        constructFrom patches;
-        patches ( "patch_1_.*" );
-    }
-    {
-        name wall;
-        patchInfo
-        {
-            type symmetry;
-        }
-        constructFrom patches;
-        patches ( "patch_2_.*" );
-    }
-    {
-        name wall001;
-        patchInfo
-        {
-            type wall;
-        }
-        constructFrom patches;
-        patches ( "patch_3_.*" );
-    }
-    {
         name inlet;
         patchInfo
         {
             type patch;
         }
         constructFrom patches;
-        patches ( "patch_4_.*" );
+        patches ( "patch_1_.*" );
     }
     {
         name outlet;
         patchInfo
         {
             type patch;
+        }
+        constructFrom patches;
+        patches ( "patch_2_.*" );
+    }
+    {
+        name constraint;
+        patchInfo
+        {
+            type symmetry;
+        }
+        constructFrom patches;
+        patches ( "patch_3_.*" );
+    }
+    {
+        name constraint001;
+        patchInfo
+        {
+            type symmetry;
+        }
+        constructFrom patches;
+        patches ( "patch_4_.*" );
+    }
+    {
+        name wall;
+        patchInfo
+        {
+            type wall;
         }
         constructFrom patches;
         patches ( "patch_5_.*" );

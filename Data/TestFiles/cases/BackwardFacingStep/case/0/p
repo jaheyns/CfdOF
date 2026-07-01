@@ -15,27 +15,10 @@ FoamFile
 
 dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform 0.0;
+internalField   uniform 83333.33333333334;
 
 boundaryField
 {
-
-    constraint
-    {
-        type        symmetry;
-        value       $internalField;
-    }
-
-    wall
-    {
-        type        symmetry;
-        value       $internalField;
-    }
-
-    wall001
-    {
-        type        zeroGradient;
-    }
 
     inlet
     {
@@ -47,6 +30,23 @@ boundaryField
         type        totalPressure;
         p0          uniform 0.0;
         value       $internalField;
+    }
+
+    constraint
+    {
+        type        symmetry;
+        value       $internalField;
+    }
+
+    constraint001
+    {
+        type        symmetry;
+        value       $internalField;
+    }
+
+    wall
+    {
+        type        zeroGradient;
     }
 
     defaultFaces

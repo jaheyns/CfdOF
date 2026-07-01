@@ -20,25 +20,6 @@ internalField   uniform (0.0 0.0 0.0);
 boundaryField
 {
 
-    constraint
-    {
-        type        symmetry;
-        value       $internalField;
-    }
-
-    wall
-    {
-        type        symmetry;
-        value       $internalField;
-    }
-
-    wall001
-    {
-        // movingWallVelocity reduces to fixedValue if the mesh is not moving
-        type        movingWallVelocity;
-        value       uniform (0 0 0);
-    }
-
     inlet
     {
         // Fix all three components of velocity on inflow and only the normal component on outflow,
@@ -57,6 +38,25 @@ boundaryField
     {
         type        pressureInletOutletVelocity;
         value       $internalField;
+    }
+
+    constraint
+    {
+        type        symmetry;
+        value       $internalField;
+    }
+
+    constraint001
+    {
+        type        symmetry;
+        value       $internalField;
+    }
+
+    wall
+    {
+        // movingWallVelocity reduces to fixedValue if the mesh is not moving
+        type        movingWallVelocity;
+        value       uniform (0 0 0);
     }
 
     defaultFaces

@@ -32,7 +32,7 @@ then
 else
     NTHREADS=$(nproc)
 fi
-runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Pad_Geometry.geo"
+runCommand "$GMSH_EXE" -nt $NTHREADS - "gmsh/Fusion_Geometry.geo"
 
 # Unset and source bashrc
 FOAMDIR="/usr/lib/openfoam/openfoam2512"
@@ -42,7 +42,7 @@ then
     source "$FOAMDIR/etc/bashrc"
 fi
 
-runCommand gmshToFoam "gmsh/Pad_Geometry.msh"
+runCommand gmshToFoam "gmsh/Fusion_Geometry.msh"
 
 # polyDualMesh doesn't seem to convert cell zones or sets
 rm -f constant/polyMesh/cellZones

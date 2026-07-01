@@ -1,7 +1,7 @@
 // geo file created by FreeCAD for meshing with GMSH meshing software
 
 // Open brep geometry
-Merge "Pad_Geometry.brep";
+Merge "Fusion_Geometry.brep";
 
 // Characteristic Length
 
@@ -30,11 +30,11 @@ Mesh.Algorithm3D = 10;
 Physical Volume ("Internal") = {1};
 
 // Boundaries
-Physical Surface ("patch_1_0") = {7, 8};
-Physical Surface ("patch_2_0") = {6};
-Physical Surface ("patch_3_0") = {2, 3, 4};
-Physical Surface ("patch_4_0") = {1};
-Physical Surface ("patch_5_0") = {5};
+Physical Surface ("patch_1_0") = {5};
+Physical Surface ("patch_2_0") = {4};
+Physical Surface ("patch_3_0") = {6, 7};
+Physical Surface ("patch_4_0") = {8};
+Physical Surface ("patch_5_0") = {1, 2, 3};
 
 // Meshing
 Mesh 3;
@@ -47,4 +47,4 @@ Mesh.MshFileVersion = 2.2;
 Mesh.SaveAll = 0;
 
 // Save in msh for OpenFOAM as its unv converter is outdated
-Save "Pad_Geometry.msh";
+Save "Fusion_Geometry.msh";

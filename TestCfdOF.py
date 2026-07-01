@@ -334,6 +334,21 @@ class MacroTest:
         FreeCAD.closeDocument(FreeCAD.ActiveDocument.Name)
 
 
+class BackwardFacingStepTest(unittest.TestCase, MacroTest):
+    __dir_name = 'BackwardFacingStep'
+    __macros = ['01-geometry.FCMacro', '02-analysis.FCMacro', '03-mesh.FCMacro', '04-boundaryConditions.FCMacro']
+
+    def __init__(self, var):
+        super().__init__(var)
+        MacroTest.child_instance = self
+
+    def test_run(self):
+        self.runTest(self.__class__.__dir_name, self.__class__.__macros)
+
+    def tearDown(self):
+        self.closeDoc()
+
+
 class ElbowTest(unittest.TestCase, MacroTest):
     __dir_name = 'Elbow'
     __macros = ['elbow.FCMacro']
@@ -412,21 +427,6 @@ class BatteryCoolingTest(unittest.TestCase, MacroTest):
 class ProjectileTest(unittest.TestCase, MacroTest):
     __dir_name = 'Projectile'
     __macros = ['01-geometry.FCMacro', '02-mesh.FCMacro', '03-boundaries.FCMacro', '04-forceCoeffs.FCMacro']
-
-    def __init__(self, var):
-        super().__init__(var)
-        MacroTest.child_instance = self
-
-    def test_run(self):
-        self.runTest(self.__class__.__dir_name, self.__class__.__macros)
-
-    def tearDown(self):
-        self.closeDoc()
-
-
-class LESStepTest(unittest.TestCase, MacroTest):
-    __dir_name = 'LESStep'
-    __macros = ['backwardStep.FCMacro']
 
     def __init__(self, var):
         super().__init__(var)

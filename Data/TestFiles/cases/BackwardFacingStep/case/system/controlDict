@@ -8,54 +8,47 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      k;
+    class       dictionary;
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+application     pimpleFoam;
 
-internalField   uniform 0.0;
+startFrom       startTime;
 
-boundaryField
+startTime       0;
+
+stopAt          endTime;
+
+deltaT          0.001;
+
+endTime         1.0;
+
+writeControl    adjustableRunTime;
+
+writeInterval   0.1;
+
+purgeWrite      0;
+
+adjustTimeStep  yes;
+
+maxCo           5.0;
+
+writeFormat     ascii;
+
+writePrecision  15;
+
+runTimeModifiable true;
+
+libs
+(
+    // Needed for availability of porous baffle boundary in potentialFoam
+    #include "turbulenceLib"
+);
+
+functions
 {
-
-    constraint
-    {
-        type        symmetry;
-        value       $internalField;
-    }
-
-    wall
-    {
-        type        symmetry;
-        value       $internalField;
-    }
-
-    wall001
-    {
-        type        kqRWallFunction;
-        value       $internalField;
-    }
-
-    inlet
-    {
-        type        fixedValue;
-        value       uniform 0.15;
-    }
-
-    outlet
-    {
-        type        inletOutlet;
-        inletValue  $internalField;
-        value       $internalField;
-    }
-
-    defaultFaces
-    {
-        type        zeroGradient;
-    }
-
 }
 
 // ************************************************************************* //
