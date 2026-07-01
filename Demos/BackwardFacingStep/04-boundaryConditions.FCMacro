@@ -1,0 +1,51 @@
+# create the inlet
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary.Label = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'uniformVelocityInlet'
+App.ActiveDocument.CfdFluidBoundary.Ux = '10.0 mm/s'
+App.ActiveDocument.CfdFluidBoundary.Pressure = '0.0 kg/(mm*s^2)'
+App.ActiveDocument.CfdFluidBoundary.TurbulenceInletSpecification = 'TurbulentViscosityAndK'
+App.ActiveDocument.CfdFluidBoundary.TurbulentKineticEnergy = '150000.0 mm^2/s^2'
+App.ActiveDocument.CfdFluidBoundary.kEqnTurbulentKineticEnergy = '150000.0 mm^2/s^2'
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face5',))]
+
+# create the outlet
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary001.Label = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundaryType = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundarySubType = 'staticPressureOutlet'
+App.ActiveDocument.CfdFluidBoundary001.Pressure = '0.0 kg/(mm*s^2)'
+App.ActiveDocument.CfdFluidBoundary001.TurbulenceInletSpecification = 'TurbulentViscosityAndK'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face4',))]
+App.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary001
+
+# make the sides use symmetry constraint
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary002.Label = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundaryType = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundarySubType = 'symmetry'
+App.ActiveDocument.CfdFluidBoundary002.TurbulenceInletSpecification = 'TurbulentViscosityAndK'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face6', 'Face7'))]
+
+# make the top use symmetry constraint
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary003.Label = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary003.BoundaryType = 'constraint'
+FreeCAD.ActiveDocument.CfdFluidBoundary003.BoundarySubType = 'symmetry'
+App.ActiveDocument.CfdFluidBoundary003.TurbulenceInletSpecification = 'TurbulentViscosityAndK'
+FreeCAD.ActiveDocument.CfdFluidBoundary003.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face8',))]
+
+# make the buttom wall
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary004.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary004.TurbulenceInletSpecification = 'TurbulentViscosityAndK'
+FreeCAD.ActiveDocument.CfdFluidBoundary004.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Fusion'), ('Face2', 'Face1', 'Face3'))]
+FreeCAD.ActiveDocument.recompute()

@@ -1,0 +1,27 @@
+import FreeCAD
+import Part
+
+# making the first box
+App.newDocument()
+App.ActiveDocument.addObject("Part::Box","Box")
+App.ActiveDocument.ActiveObject.Label = "Cube"
+App.ActiveDocument.recompute()
+App.ActiveDocument.Box.Placement = App.Placement(App.Vector(0,0,-15),App.Rotation(App.Vector(0,0,1),0))
+App.ActiveDocument.Box.Length = '75 mm'
+App.ActiveDocument.Box.Width = '20 mm'
+App.ActiveDocument.Box.Height = '25 mm'
+
+# making the second box
+App.ActiveDocument.addObject("Part::Box","Box")
+App.ActiveDocument.ActiveObject.Label = "Cube"
+App.ActiveDocument.recompute()
+App.ActiveDocument.Box001.Placement = App.Placement(App.Vector(-40,0,0),App.Rotation(App.Vector(0,0,1),0))
+App.ActiveDocument.Box001.Length = '45 mm'
+App.ActiveDocument.Box001.Width = '20 mm'
+
+# make the fluid domain by megring the 2 boxes
+from BOPTools import BOPFeatures
+bp = BOPFeatures.BOPFeatures(App.activeDocument())
+bp.make_multi_fuse(["Box", "Box001"])
+bp.Label = "fluid_domain"
+App.ActiveDocument.recompute()

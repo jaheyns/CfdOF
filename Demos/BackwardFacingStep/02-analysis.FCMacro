@@ -1,0 +1,20 @@
+# create the analysis
+from CfdOF import CfdAnalysis
+from CfdOF import CfdTools
+analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+CfdTools.setActiveAnalysis(analysis)
+from CfdOF.Solve import CfdPhysicsSelection
+analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+from CfdOF.Solve import CfdFluidMaterial
+analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+from CfdOF.Solve import CfdInitialiseFlowField
+analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+from CfdOF.Solve import CfdSolverFoam
+analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+App.ActiveDocument.PhysicsModel.Time = 'Transient'
+App.ActiveDocument.PhysicsModel.Turbulence = 'LES'
+App.ActiveDocument.PhysicsModel.TurbulenceModel = 'kEqn'
+App.ActiveDocument.InitialiseFields.PotentialFlow = False
+App.ActiveDocument.InitialiseFields.k = '0.0 mm^2/s^2'
+App.ActiveDocument.InitialiseFields.nut = '0.0 mm^2/s'
+App.activeDocument().recompute(None,True,True)

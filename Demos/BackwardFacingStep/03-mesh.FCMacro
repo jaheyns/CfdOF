@@ -1,0 +1,9 @@
+# create the mesh
+from CfdOF.Mesh import CfdMesh
+CfdMesh.makeCfdMesh('Fusion_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Fusion
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+App.ActiveDocument.Fusion_Mesh.CharacteristicLengthMax = '0.7 mm'
+App.ActiveDocument.Fusion_Mesh.MeshUtility = 'gmsh'
+App.ActiveDocument.Fusion_Mesh.ConvertToDualMesh = True
