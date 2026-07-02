@@ -6,7 +6,7 @@ App.ActiveDocument.CfdFluidBoundary.Label = 'open'
 FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'open'
 FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'totalPressureOpening'
 FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Cut'), ('Face3',))]
+(FreeCAD.ActiveDocument.Cut, ('Face3',))]
 FreeCAD.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary
 
 # set the defualt boundary to wall

@@ -15,5 +15,5 @@ CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Cut_Mesh)
 App.ActiveDocument.MeshRefinement.RelativeLength = 0.5
 App.ActiveDocument.MeshRefinement.RefinementThickness = '20.0 mm'
 FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Box001'), ('',))]
+(FreeCAD.ActiveDocument.Box001, ('',))]
 FreeCAD.ActiveDocument.recompute()
