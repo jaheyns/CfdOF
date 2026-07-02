@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
 # Gui.runCommand('Std_DlgMacroRecord',0)
-# Gui.Selection.addSelection('modifiedFinner','Compound_Mesh')
+# Gui.Selection.addSelection('modifiedFinner','Boolean')
 ### Begin command CfdOF_GroupDynamicMeshRefinement
 
 from CfdOF.Mesh import CfdDynamicMeshRefinement
 from CfdOF import CfdTools
-CfdDynamicMeshRefinement.makeCfdDynamicMeshShockRefinement(App.ActiveDocument.Compound_Mesh)
+CfdDynamicMeshRefinement.makeCfdDynamicMeshShockRefinement(App.ActiveDocument.mesh)
 ### End command CfdOF_GroupDynamicMeshRefinement
 # Gui.Selection.clearSelection()
 App.ActiveDocument.DynamicMeshShockRefinement.ReferenceVelocityDirection = App.Vector (-1.0, 0.0, 0.0)
 App.ActiveDocument.DynamicMeshShockRefinement.RelativeElementSize = 0.007
 FreeCAD.ActiveDocument.recompute()
-# Gui.Selection.addSelection('modifiedFinner','Compound_Mesh')
+# Gui.Selection.addSelection('modifiedFinner','Boolean')

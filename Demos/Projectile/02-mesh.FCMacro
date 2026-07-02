@@ -29,17 +29,17 @@ FreeCAD.ActiveDocument.FluidProperties.Material = {'CardName': 'AirCompressible'
 
 FreeCAD.ActiveDocument.getObject('CfdSolver').MaxIterations = 1000
 
-CfdMesh.makeCfdMesh('Compound_Mesh')
-App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Compound001
+CfdMesh.makeCfdMesh('mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Boolean
 CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
-FreeCAD.ActiveDocument.Compound_Mesh.CharacteristicLengthMax = '225.0 mm'
-FreeCAD.ActiveDocument.Compound_Mesh.MeshUtility = 'cfMesh'
-FreeCAD.ActiveDocument.Compound_Mesh.ElementDimension = '3D'
-FreeCAD.ActiveDocument.Compound_Mesh.CellsBetweenLevels = 3
-FreeCAD.ActiveDocument.Compound_Mesh.EdgeRefinement = 1.0
-FreeCAD.ActiveDocument.Compound_Mesh.PointInMesh = {'x': '0.0 mm', 'y': '0.0 mm', 'z': '0.0 mm'}
+FreeCAD.ActiveDocument.mesh.CharacteristicLengthMax = '225.0 mm'
+FreeCAD.ActiveDocument.mesh.MeshUtility = 'cfMesh'
+FreeCAD.ActiveDocument.mesh.ElementDimension = '3D'
+FreeCAD.ActiveDocument.mesh.CellsBetweenLevels = 3
+FreeCAD.ActiveDocument.mesh.EdgeRefinement = 1.0
+FreeCAD.ActiveDocument.mesh.PointInMesh = {'x': '0.0 mm', 'y': '0.0 mm', 'z': '0.0 mm'}
 
-CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound_Mesh)
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.mesh)
 FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.015
 FreeCAD.ActiveDocument.MeshRefinement.RefinementThickness = '5 mm'
 FreeCAD.ActiveDocument.MeshRefinement.NumberLayers = 10
@@ -48,11 +48,11 @@ FreeCAD.ActiveDocument.MeshRefinement.FirstLayerHeight = '0.0 mm'
 FreeCAD.ActiveDocument.MeshRefinement.RegionEdgeRefinement = 1.0
 FreeCAD.ActiveDocument.MeshRefinement.Internal = False
 FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('body002'), ('',))]
+(FreeCAD.ActiveDocument.getObject('Body'), ('Face8', 'Face9', 'Face10'))]
 FreeCAD.ActiveDocument.recompute()
 
 from CfdOF.Mesh import CfdMeshRefinement
-CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound_Mesh)
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.mesh)
 FreeCAD.ActiveDocument.MeshRefinement001.RelativeLength = 0.007
 FreeCAD.ActiveDocument.MeshRefinement001.RefinementThickness = '5 mm'
 FreeCAD.ActiveDocument.MeshRefinement001.NumberLayers = 10
@@ -61,10 +61,7 @@ FreeCAD.ActiveDocument.MeshRefinement001.FirstLayerHeight = '0.0 mm'
 FreeCAD.ActiveDocument.MeshRefinement001.RegionEdgeRefinement = 1.0
 FreeCAD.ActiveDocument.MeshRefinement001.Internal = False
 FreeCAD.ActiveDocument.MeshRefinement001.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('fin2002'), ('',)),
-(FreeCAD.ActiveDocument.getObject('fin1002'), ('',)),
-(FreeCAD.ActiveDocument.getObject('fin3002'), ('',)),
-(FreeCAD.ActiveDocument.getObject('fin4002'), ('',))]
+(FreeCAD.ActiveDocument.getObject('PolarPattern'), ('',))]
 FreeCAD.ActiveDocument.recompute()
 
 App.ActiveDocument.addObject("Part::Cylinder","Cylinder")
@@ -73,9 +70,9 @@ App.ActiveDocument.recompute()
 
 App.ActiveDocument.getObject('Cylinder').Radius = '50 mm'
 App.ActiveDocument.getObject('Cylinder').Height = '480 mm'
-App.ActiveDocument.getObject('Cylinder').Placement = App.Placement(App.Vector(-450,0,0),App.Rotation(App.Vector(0,1,0),90))
+App.ActiveDocument.getObject('Cylinder').Placement = App.Placement(App.Vector(-150,0,0),App.Rotation(App.Vector(0,1,0),90))
 
-CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound_Mesh)
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.mesh)
 FreeCAD.ActiveDocument.MeshRefinement002.RelativeLength = 0.03
 FreeCAD.ActiveDocument.MeshRefinement002.Internal = True
 FreeCAD.ActiveDocument.MeshRefinement002.ShapeRefs = [
@@ -87,11 +84,11 @@ App.ActiveDocument.addObject("Part::Cylinder","Cylinder")
 App.ActiveDocument.ActiveObject.Label = "Cylinder"
 App.ActiveDocument.recompute()
 
-FreeCAD.getDocument('modifiedFinner').getObject('Cylinder001').Radius = '100 mm'
-FreeCAD.getDocument('modifiedFinner').getObject('Cylinder001').Height = '650 mm'
-FreeCAD.getDocument('modifiedFinner').getObject('Cylinder001').Placement = App.Placement(App.Vector(-600,0,0),App.Rotation(App.Vector(0,1,0),90))
+FreeCAD.ActiveDocument.getObject('Cylinder001').Radius = '100 mm'
+FreeCAD.ActiveDocument.getObject('Cylinder001').Height = '650 mm'
+FreeCAD.ActiveDocument.getObject('Cylinder001').Placement = App.Placement(App.Vector(-300,0,0),App.Rotation(App.Vector(0,1,0),90))
 
-CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound_Mesh)
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.mesh)
 FreeCAD.ActiveDocument.MeshRefinement003.RelativeLength = 0.06
 FreeCAD.ActiveDocument.MeshRefinement003.Internal = True
 FreeCAD.ActiveDocument.MeshRefinement003.ShapeRefs = [
@@ -105,9 +102,9 @@ App.ActiveDocument.recompute()
 
 App.ActiveDocument.getObject('Cylinder002').Radius = '200 mm'
 App.ActiveDocument.getObject('Cylinder002').Height = '900 mm'
-App.ActiveDocument.getObject('Cylinder002').Placement = App.Placement(App.Vector(-800,0,0),App.Rotation(App.Vector(0,1,0),90))
+App.ActiveDocument.getObject('Cylinder002').Placement = App.Placement(App.Vector(-500,0,0),App.Rotation(App.Vector(0,1,0),90))
 
-CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound_Mesh)
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.mesh)
 FreeCAD.ActiveDocument.MeshRefinement004.RelativeLength = 0.12
 FreeCAD.ActiveDocument.MeshRefinement004.Internal = True
 FreeCAD.ActiveDocument.MeshRefinement004.ShapeRefs = [
@@ -121,9 +118,9 @@ App.ActiveDocument.recompute()
 
 App.ActiveDocument.getObject('Cylinder003').Radius = '400 mm'
 App.ActiveDocument.getObject('Cylinder003').Height = '1200 mm'
-App.ActiveDocument.getObject('Cylinder003').Placement = App.Placement(App.Vector(-1000,0,0),App.Rotation(App.Vector(0,1,0),90))
+App.ActiveDocument.getObject('Cylinder003').Placement = App.Placement(App.Vector(-700,0,0),App.Rotation(App.Vector(0,1,0),90))
 
-CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Compound_Mesh)
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.mesh)
 FreeCAD.ActiveDocument.MeshRefinement005.RelativeLength = 0.12
 FreeCAD.ActiveDocument.MeshRefinement005.Internal = True
 FreeCAD.ActiveDocument.MeshRefinement005.ShapeRefs = [

@@ -14,7 +14,7 @@ bc.Uy = '0.0 mm/s'
 bc.Uz = '0.0 mm/s'
 FreeCAD.ActiveDocument.CfdFluidBoundary.Label = 'wall'
 FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Compound'), ('',))]
+(FreeCAD.ActiveDocument.getObject('Body'), ('',))]
 FreeCAD.ActiveDocument.recompute()
 
 CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
@@ -32,7 +32,7 @@ bc.TurbulenceIntensityPercentage = '2 '
 bc.TurbulenceLengthScale = '0.1 mm'
 FreeCAD.ActiveDocument.CfdFluidBoundary001.Label = 'open'
 FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
-(FreeCAD.ActiveDocument.getObject('Box'), ('',))]
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face1', 'Face2', 'Face3', 'Face4', 'Face5', 'Face6'))]
 FreeCAD.ActiveDocument.recompute()
 
 init = FreeCAD.ActiveDocument.InitialiseFields
