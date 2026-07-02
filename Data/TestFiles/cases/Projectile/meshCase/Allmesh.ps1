@@ -27,7 +27,7 @@ $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 $ErrorView = 'ConciseView'
 
 # Extract feature edges
-runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/Compound001_Geometry.stl" "Compound001_Geometry.fms"
+runCommand surfaceFeatureEdges -angle 60 "constant/triSurface/Boolean_Geometry.stl" "Boolean_Geometry.fms"
 
 runCommand cartesianMesh
 

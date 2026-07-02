@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-surfaceFile       "Compound001_Geometry.fms";
+surfaceFile       "Boolean_Geometry.fms";
 
 maxCellSize       0.225;
 boundaryCellSize  0.225;
