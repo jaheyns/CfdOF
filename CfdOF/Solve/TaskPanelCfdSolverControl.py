@@ -79,11 +79,11 @@ class TaskPanelCfdSolverControl:
         self.working_dir = CfdTools.getOutputPath(self.analysis_object)
 
         self.form.comboBoxStartFrom.setToolTip("Whether to start from 0 or from the latest time step")
-        self.form.inputFieldEndTime.setToolTip("the end time for the simulation")
-        self.form.spinBoxEndTime.setToolTip("the number of iterations for the simulation")
-        self.form.inputFieldWriteInterval.setToolTip("the time period between each write of the time step")
-        self.form.spinBoxWriteInterval.setToolTip("the iterations between each write of the time step")
-        self.form.inputFieldTimeStep.setToolTip("the maximum time step for the simulation (might decrease to maintaine the limits for CFnumber and maxCo ..etc)")
+        self.form.inputFieldEndTime.setToolTip("The end time for the simulation")
+        self.form.spinBoxEndTime.setToolTip("The number of iterations for the simulation")
+        self.form.inputFieldWriteInterval.setToolTip("The time period between each write of the time step")
+        self.form.spinBoxWriteInterval.setToolTip("The iterations between each write of the time step")
+        self.form.inputFieldTimeStep.setToolTip("The maximum time step for the simulation (might decrease to maintaine the limits for CFnumber and maxCo ..etc)")
         self.form.inputParallel.setToolTip("Whether to Solve the Case in Parallel")
         self.form.inputParallelCores.setToolTip("Number of Parallel Cores to Use")
 

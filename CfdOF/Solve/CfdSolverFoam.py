@@ -41,7 +41,7 @@ QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 
 # Constants
 START_FROM = ["startTime", "latestTime"]
-START_FROM_NAMES = ["start time", "latest time"]
+START_FROM_NAMES = ["Start time", "Latest time"]
 
 
 def makeCfdSolverFoam(name="CfdSolver"):

@@ -43,14 +43,14 @@
         </font>
        </property>
        <property name="text">
-        <string>time Parameters</string>
+        <string>Time Parameters</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0" colspan="2">
       <widget class="QLabel" name="labelStartFrom">
        <property name="text">
-        <string>start from</string>
+        <string>Start from</string>
        </property>
       </widget>
      </item>
@@ -61,7 +61,7 @@
      <item row="2" column="0" colspan="2">
       <widget class="QLabel" name="labelEndTime">
        <property name="text">
-        <string>end time</string>
+        <string>End time</string>
        </property>
       </widget>
      </item>
@@ -100,7 +100,7 @@
      <item row="3" column="0" colspan="2">
       <widget class="QLabel" name="labelWriteInterval">
        <property name="text">
-        <string>write interval</string>
+        <string>Write interval</string>
        </property>
       </widget>
      </item>
@@ -139,7 +139,7 @@
      <item row="4" column="0" colspan="2">
       <widget class="QLabel" name="labelTimeStep">
        <property name="text">
-        <string>time step</string>
+        <string>Time step</string>
        </property>
       </widget>
      </item>

@@ -2635,32 +2635,32 @@ Re-mesh case first?</source>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="46"/>
-        <source>time Parameters</source>
+        <source>Time Parameters</source>
         <translation>اعدادات الزمن</translation>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="53"/>
-        <source>start from</source>
+        <source>Start from</source>
         <translation>ابدأ من</translation>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="64"/>
-        <source>end time</source>
+        <source>End time</source>
         <translation>زمن النهاية</translation>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="103"/>
-        <source>write interval</source>
+        <source>Write interval</source>
         <translation>فترة الكتابة</translation>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="142"/>
-        <source>time step</source>
+        <source>Time step</source>
         <translation>القفزة الزمنية</translation>
     </message>
     <message>
         <location filename="../Gui/TaskPanelCfdSolverControl.ui" line="177"/>
-        <source>Solver Parameters</source>
+        <source>solver Parameters</source>
         <translation>اعدادات المحلل</translation>
     </message>
     <message>
