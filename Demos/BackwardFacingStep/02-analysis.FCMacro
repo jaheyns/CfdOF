@@ -15,10 +15,10 @@ App.ActiveDocument.PhysicsModel.Time = 'Transient'
 App.ActiveDocument.PhysicsModel.Turbulence = 'LES'
 App.ActiveDocument.PhysicsModel.TurbulenceModel = 'kEqn'
 App.ActiveDocument.InitialiseFields.PotentialFlow = False
+App.ActiveDocument.InitialiseFields.UseOutletPValue = True
 App.ActiveDocument.InitialiseFields.Ux = '0.0 mm/s'
 App.ActiveDocument.InitialiseFields.Uy = '0.0 mm/s'
 App.ActiveDocument.InitialiseFields.Uz = '0.0 mm/s'
-APP.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary001
 App.ActiveDocument.InitialiseFields.k = '0.0 mm^2/s^2'
 App.ActiveDocument.InitialiseFields.nut = '0.0 mm^2/s'
 App.activeDocument().recompute(None,True,True)
