@@ -6,10 +6,12 @@ import os
 import FreeCAD
 from FreeCAD import Units
 from CfdOF import CfdTools, CfdFaceSelectWidget
-from CfdOF.CfdTools import setQuantity, getQuantity, storeIfChanged
+from CfdOF.CfdTools import setQuantity, getMeshObject, getQuantity, if2Float, makeShapeFromReferences, storeIfChanged
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui
+    from CfdOF.PreviewShapes import directionVectorToAxisAngle, getPrevPointSize, initPrevArrow
+    from pivy import coin
 
 SELECTION_MODE_LABELS = ["all", "cellZone"]
 
@@ -18,6 +20,11 @@ class TaskPanelCfdMeanVelocityForce:
     """
     Task panel for adding/editing mean velocity force fvOption objects
     """
+    if FreeCAD.GuiUp:
+        prev_arrow_node = coin.SoSeparator()
+        prev_arrow_move_node = coin.SoTransform()
+        prev_arrow_move_node.scaleFactor.setValue([5, 5, 5]) # the default size for the arrow
+        prev_arrow_move_node.translation.setValue(0, 0, 0) # the defualt position for the arrow
     def __init__(self, obj):
         self.obj = obj
         self.analysis_obj = CfdTools.getParentAnalysisObject(obj)
@@ -33,6 +40,11 @@ class TaskPanelCfdMeanVelocityForce:
             self.form.faceSelectWidget, self.obj, False, False, True)
 
         self.form.comboSelectionMode.currentIndexChanged.connect(self.updateUI)
+        if FreeCAD.GuiUp:
+            self.mesh_obj = getMeshObject(self.analysis_obj)
+            self.form.inputDirectionX.valueChanged.connect(self.updateArrowDirection)
+            self.form.inputDirectionY.valueChanged.connect(self.updateArrowDirection)
+            self.form.inputDirectionZ.valueChanged.connect(self.updateArrowDirection)
 
         self.load()
         self.updateUI()
@@ -48,6 +60,10 @@ class TaskPanelCfdMeanVelocityForce:
         setQuantity(self.form.inputDirectionX, Units.Quantity(float(self.obj.Direction.x)))
         setQuantity(self.form.inputDirectionY, Units.Quantity(float(self.obj.Direction.y)))
         setQuantity(self.form.inputDirectionZ, Units.Quantity(float(self.obj.Direction.z)))
+        if FreeCAD.GuiUp:
+            self.updateArrowDirection()
+            self.updateArrowData()
+            initPrevArrow(self.prev_arrow_node, self.prev_arrow_move_node, 0,1,0)
 
         setQuantity(self.form.inputUbarX, Units.Quantity("{} mm/s".format(float(self.obj.Ubar.x) * 1000.0)))
         setQuantity(self.form.inputUbarY, Units.Quantity("{} mm/s".format(float(self.obj.Ubar.y) * 1000.0)))
@@ -58,6 +74,31 @@ class TaskPanelCfdMeanVelocityForce:
     def updateUI(self):
         is_cell_zone = self.form.comboSelectionMode.currentIndex() == 1
         self.form.faceSelectWidget.setVisible(is_cell_zone)
+        if FreeCAD.GuiUp:
+            self.updateArrowData()
+
+    def updateArrowData(self):
+        mode = SELECTION_MODE_LABELS[self.form.comboSelectionMode.currentIndex()]
+        if mode == 'cellZone' and self.obj.ShapeRefs:
+            combined_shapes = makeShapeFromReferences(self.obj.ShapeRefs)
+            size = getPrevPointSize(combined_shapes) * 5
+            self.prev_arrow_move_node.scaleFactor.setValue([size, size, size])
+            self.prev_arrow_move_node.translation.setValue(combined_shapes.CenterOfGravity)
+        elif mode == 'all' and self.mesh_obj: # if modes is all and mesh_obj is not none
+            size = getPrevPointSize(self.mesh_obj.Part.Shape) * 5
+            self.prev_arrow_move_node.scaleFactor.setValue([size, size, size])
+            self.prev_arrow_move_node.translation.setValue(self.mesh_obj.Part.Shape.CenterOfMass)
+        else: # return to the defualt when could not fine niether mesh_obj nor ShapeRefs in the seclected shapes
+            self.prev_arrow_move_node.scaleFactor.setValue([5, 5, 5])
+            self.prev_arrow_move_node.translation.setValue(0, 0, 0)
+
+    def updateArrowDirection(self):
+        axis, angle = directionVectorToAxisAngle(FreeCAD.Vector(0, 1, 0), FreeCAD.Vector(
+            if2Float(self.form.inputDirectionX),
+            if2Float(self.form.inputDirectionY),
+            if2Float(self.form.inputDirectionZ))
+            )
+        self.prev_arrow_move_node.rotation.setValue(axis, angle)
 
     def _toMS(self, widget, field_name):
         try:
@@ -104,3 +145,5 @@ class TaskPanelCfdMeanVelocityForce:
 
     def closing(self):
         FreeCADGui.Selection.removeObserver(self.faceSelector)
+        if FreeCAD.GuiUp:
+            FreeCADGui.ActiveDocument.ActiveView.getSceneGraph().removeChild(self.prev_arrow_node)
