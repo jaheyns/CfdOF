@@ -1,0 +1,73 @@
+import FreeCAD as App
+
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF.Solve import CfdRegionCoupledInterface
+
+
+def add_boundary(label, boundary_type, subtype, thermal_type, refs,
+                 temperature="293 K", velocity=(0, 0, 0)):
+    boundary = CfdFluidBoundary.makeCfdFluidBoundary()
+    CfdTools.getActiveAnalysis().addObject(boundary)
+    boundary.Label = label
+    boundary.BoundaryType = boundary_type
+    boundary.BoundarySubType = subtype
+    boundary.ThermalBoundaryType = thermal_type
+    boundary.Temperature = temperature
+    boundary.Ux = "{} mm/s".format(velocity[0])
+    boundary.Uy = "{} mm/s".format(velocity[1])
+    boundary.Uz = "{} mm/s".format(velocity[2])
+    boundary.TurbulenceIntensityPercentage = 1.0
+    boundary.TurbulenceLengthScale = "10 mm"
+    boundary.ShapeRefs = refs
+    return boundary
+
+
+fluid = App.ActiveDocument.FluidRegion
+solid = App.ActiveDocument.SolidRegion
+
+add_boundary(
+    "inlet",
+    "inlet",
+    "uniformVelocityInlet",
+    "fixedValue",
+    [(fluid, ("Face1",))],
+    velocity=(100, 0, 0),
+)
+add_boundary(
+    "outlet",
+    "outlet",
+    "staticPressureOutlet",
+    "fixedValue",
+    [(fluid, ("Face2",))],
+)
+add_boundary(
+    "fluid_wall",
+    "wall",
+    "fixedWall",
+    "zeroGradient",
+    [(fluid, ("Face3", "Face4", "Face5"))],
+)
+interface = CfdRegionCoupledInterface.makeCfdRegionCoupledInterface("fluid_aluminium_interface")
+CfdTools.getActiveAnalysis().addObject(interface)
+interface.RegionObjects = CfdTools.getMeshObjects(CfdTools.getActiveAnalysis())
+interface.RegionNames = [CfdRegionCoupledInterface.getRegionName(obj) for obj in interface.RegionObjects]
+interface.ThermalBoundaryType = "zeroGradient"
+interface.ShapeRefs = [CfdRegionCoupledInterface.generateTouchingFaceRefs(interface.RegionObjects)]
+add_boundary(
+    "heatsource",
+    "wall",
+    "fixedWall",
+    "fixedValue",
+    [(solid, ("Face6",))],
+    temperature="393 K",
+)
+add_boundary(
+    "solid_wall",
+    "wall",
+    "fixedWall",
+    "zeroGradient",
+    [(solid, ("Face1", "Face2", "Face3", "Face4"))],
+)
+
+App.ActiveDocument.recompute()

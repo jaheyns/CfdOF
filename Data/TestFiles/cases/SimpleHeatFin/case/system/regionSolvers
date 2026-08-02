@@ -1,0 +1,5 @@
+regionSolvers
+{
+    FluidProperties fluid;
+    heatsink solid;
+}

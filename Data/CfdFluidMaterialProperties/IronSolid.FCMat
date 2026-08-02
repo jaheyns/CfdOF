@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; IronSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Iron_solid
+Type = Solid
+Description = Iron solid thermal properties
+Density = 7870 kg/m^3
+ThermalConductivity = 76.2 W/m/K
+SpecificHeat = 440 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=654ca9c358264b5392d43315d8535b7d

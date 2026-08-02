@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; BrassSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Brass_solid
+Type = Solid
+Description = Brass solid thermal properties
+Density = 8510 kg/m^3
+ThermalConductivity = 85.1 W/m/K
+SpecificHeat = 379 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=d3bd4617903543ada92f4c101c2a20e5

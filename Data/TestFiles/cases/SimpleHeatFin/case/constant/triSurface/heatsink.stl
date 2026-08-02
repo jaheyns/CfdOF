@@ -1,0 +1,86 @@
+solid heatsink
+ facet normal -1.0 0.0 0.0
+  outer loop
+   vertex 0.0 0.015 0.013000000000000001
+   vertex 0.0 0.015 0.023
+   vertex 0.0 0.016 0.013000000000000001
+  endloop
+ endfacet
+ facet normal -1.0 0.0 0.0
+  outer loop
+   vertex 0.0 0.016 0.013000000000000001
+   vertex 0.0 0.015 0.023
+   vertex 0.0 0.016 0.023
+  endloop
+ endfacet
+ facet normal 1.0 0.0 0.0
+  outer loop
+   vertex 0.06 0.015 0.023
+   vertex 0.06 0.015 0.013000000000000001
+   vertex 0.06 0.016 0.013000000000000001
+  endloop
+ endfacet
+ facet normal 1.0 -0.0 0.0
+  outer loop
+   vertex 0.06 0.015 0.023
+   vertex 0.06 0.016 0.013000000000000001
+   vertex 0.06 0.016 0.023
+  endloop
+ endfacet
+ facet normal 0.0 -1.0 0.0
+  outer loop
+   vertex 0.06 0.015 0.013000000000000001
+   vertex 0.06 0.015 0.023
+   vertex 0.0 0.015 0.013000000000000001
+  endloop
+ endfacet
+ facet normal 0.0 -1.0 0.0
+  outer loop
+   vertex 0.0 0.015 0.013000000000000001
+   vertex 0.06 0.015 0.023
+   vertex 0.0 0.015 0.023
+  endloop
+ endfacet
+ facet normal 0.0 1.0 0.0
+  outer loop
+   vertex 0.06 0.016 0.023
+   vertex 0.06 0.016 0.013000000000000001
+   vertex 0.0 0.016 0.013000000000000001
+  endloop
+ endfacet
+ facet normal 0.0 1.0 0.0
+  outer loop
+   vertex 0.06 0.016 0.023
+   vertex 0.0 0.016 0.013000000000000001
+   vertex 0.0 0.016 0.023
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.0 0.016 0.013000000000000001
+   vertex 0.06 0.016 0.013000000000000001
+   vertex 0.0 0.015 0.013000000000000001
+  endloop
+ endfacet
+ facet normal 0.0 0.0 -1.0
+  outer loop
+   vertex 0.0 0.015 0.013000000000000001
+   vertex 0.06 0.016 0.013000000000000001
+   vertex 0.06 0.015 0.013000000000000001
+  endloop
+ endfacet
+ facet normal 0.0 0.0 1.0
+  outer loop
+   vertex 0.06 0.016 0.023
+   vertex 0.0 0.016 0.023
+   vertex 0.0 0.015 0.023
+  endloop
+ endfacet
+ facet normal 0.0 0.0 1.0
+  outer loop
+   vertex 0.06 0.016 0.023
+   vertex 0.0 0.015 0.023
+   vertex 0.06 0.015 0.023
+  endloop
+ endfacet
+endsolid heatsink

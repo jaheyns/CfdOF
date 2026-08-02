@@ -1,0 +1,13 @@
+from os import path
+import FreeCAD as App
+if App.GuiUp:
+    import FreeCADGui as Gui
+from CfdOF.CfdTools import executeMacro
+
+macro_dir = path.dirname(__file__)
+executeMacro(path.join(macro_dir, "01-geometry.FCMacro"))
+executeMacro(path.join(macro_dir, "02-analysis.FCMacro"))
+executeMacro(path.join(macro_dir, "03-meshes.FCMacro"))
+executeMacro(path.join(macro_dir, "04-boundaries.FCMacro"))
+executeMacro(path.join(macro_dir, "05-solidMaterials.FCMacro"))
+executeMacro(path.join(macro_dir, "06-meanVelocityForce.FCMacro"))

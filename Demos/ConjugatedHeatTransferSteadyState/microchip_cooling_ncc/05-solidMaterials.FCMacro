@@ -1,0 +1,66 @@
+import FreeCAD as App
+
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdSolidMaterial
+from CfdOF.Solve import CfdRegionCoupledInterface
+
+
+def generated_region_for_source(source_name):
+    source = App.ActiveDocument.getObject(source_name)
+    obj = CfdRegionCoupledInterface.getInterfaceRegionForSource(source)
+    if obj is not None:
+        return obj
+    raise RuntimeError("No generated interface region for source '{}'".format(source_name))
+
+
+def add_solid(name, label, region_obj, material, heat_generation="0 W/m^3"):
+    solid = CfdSolidMaterial.makeCfdSolidMaterial(name)
+    CfdTools.getActiveAnalysis().addObject(solid)
+    solid.Label = label
+    solid.Material = material
+    solid.HeatGeneration = heat_generation
+    solid.ShapeRefs = [(region_obj, ("Solid1",))]
+    return solid
+
+
+aluminium = {
+    "Author": "AluminiumSolid", "AuthorAndLicense": "",
+    "CardName": "AluminiumSolid", "Density": "2699 kg/m^3",
+    "Description": "Aluminium solid thermal properties for CHT simulation",
+    "License": "", "Name": "Aluminium_solid",
+    "ReferenceSource": "https://www.matweb.com/search/DataSheet.aspx?MatGUID=0cd1edf33ac145ee93a0aa6fc666c0e0",
+    "SourceURL": "", "SpecificHeat": "897 J/kg/K",
+    "ThermalConductivity": "237 W/m/K", "Type": "Solid",
+}
+
+add_solid("SolidProperties", "SolidProperties",
+          generated_region_for_source("Fusion"), aluminium)
+add_solid("SolidProperties", "Acrylic_solid", generated_region_for_source("Box001"), {
+    "Author": "AcrylicSolid", "AuthorAndLicense": "",
+    "CardName": "AcrylicSolid", "Density": "1180 kg/m^3",
+    "Description": "Acrylic PMMA solid thermal properties", "License": "",
+    "Name": "Acrylic_solid",
+    "ReferenceSource": "https://www.matweb.com/search/DataSheet.aspx?MatGUID=a5e93a1f1fff43bcbac5b6ca51b8981f",
+    "SourceURL": "", "SpecificHeat": "1500 J/kg/K",
+    "ThermalConductivity": "0.189 W/m/K", "Type": "Solid",
+})
+add_solid("SolidProperties", "Polypropylene_solid", generated_region_for_source("Body"), {
+    "Author": "PolypropyleneSolid", "AuthorAndLicense": "",
+    "CardName": "PolypropyleneSolid", "Density": "918 kg/m^3",
+    "Description": "Polypropylene solid thermal properties", "License": "",
+    "Name": "Polypropylene_solid",
+    "ReferenceSource": "https://www.matweb.com/search/DataSheet.aspx?MatGUID=a882a1c603374e278d062f106dfda95b",
+    "SourceURL": "", "SpecificHeat": "1920 J/kg/K",
+    "ThermalConductivity": "0.249 W/m/K", "Type": "Solid",
+})
+add_solid("SolidProperties", "Brass_solid", generated_region_for_source("Box002"), {
+    "Author": "BrassSolid", "AuthorAndLicense": "",
+    "CardName": "BrassSolid", "Density": "8510 kg/m^3",
+    "Description": "Brass solid thermal properties", "License": "",
+    "Name": "Brass_solid",
+    "ReferenceSource": "https://www.matweb.com/search/DataSheet.aspx?MatGUID=d3bd4617903543ada92f4c101c2a20e5",
+    "SourceURL": "", "SpecificHeat": "379 J/kg/K",
+    "ThermalConductivity": "85.1 W/m/K", "Type": "Solid",
+}, "300000 kg/(mm*s^3)")
+
+App.ActiveDocument.recompute()

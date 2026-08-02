@@ -193,6 +193,36 @@ class CfdSolverFoam(object):
             "Relaxation",
             QT_TRANSLATE_NOOP("App::Property", "Density field relaxation factor (steady-state)"),
         )
+        addObjectProperty(
+            obj,
+            "FluidNonOrthogonalCorrectors",
+            3,
+            "App::PropertyInteger",
+            "Relaxation",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Number of fluid-region non-orthogonal correctors"
+            ),
+        )
+        addObjectProperty(
+            obj,
+            "SolidEnergyRelaxation",
+            0.9,
+            "App::PropertyFloat",
+            "Relaxation",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Solid energy equation relaxation factor (steady-state)"
+            ),
+        )
+        addObjectProperty(
+            obj,
+            "SolidNonOrthogonalCorrectors",
+            5,
+            "App::PropertyInteger",
+            "Relaxation",
+            QT_TRANSLATE_NOOP(
+                "App::Property", "Number of solid-region non-orthogonal correctors"
+            ),
+        )
 
         if addObjectProperty(
             obj,

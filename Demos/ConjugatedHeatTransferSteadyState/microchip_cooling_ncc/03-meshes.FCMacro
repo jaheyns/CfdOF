@@ -1,0 +1,89 @@
+import FreeCAD as App
+
+from CfdOF import CfdTools
+from CfdOF.Mesh import CfdMesh
+from CfdOF.Solve import CfdInterfaceNccRegions
+from CfdOF.Solve import CfdRegionCoupledInterface
+
+
+def generated_regions_by_source_name():
+    return {
+        source.Name: CfdRegionCoupledInterface.getInterfaceRegionForSource(source)
+        for source in source_objects
+    }
+
+
+def add_mesh(name, region_obj, region_type, case_name):
+    mesh = CfdMesh.makeCfdMesh(name)
+    mesh.Label = name
+    mesh.Part = region_obj
+    mesh.PartSubShape = ""
+    mesh.RegionType = region_type
+    mesh.CaseName = case_name
+    CfdTools.getActiveAnalysis().addObject(mesh)
+    mesh.CharacteristicLengthMax = "3.94 mm"
+    mesh.MeshUtility = "gmsh"
+    mesh.ElementDimension = "3D"
+    mesh.CellsBetweenLevels = 3
+    mesh.EdgeRefinement = 1.0
+    mesh.PointInMesh = {"x": "0 m", "y": "0 m", "z": "0 m"}
+    mesh.NumberOfProcesses = 1
+    mesh.NumberOfThreads = 0
+    mesh.ImplicitEdgeDetection = False
+    mesh.ConvertToDualMesh = False
+    mesh.STLAngularMeshDensity = 100.0
+    mesh.STLRelativeLinearDeflection = 0.001
+    return mesh
+
+
+source_objects = [
+    App.ActiveDocument.Box,
+    App.ActiveDocument.Box001,
+    App.ActiveDocument.Box002,
+    App.ActiveDocument.Body,
+    App.ActiveDocument.Fusion,
+]
+_group, _regions, interface = CfdInterfaceNccRegions.createInterfaceNccRegions(source_objects)
+
+regions = generated_regions_by_source_name()
+region_names = {
+    "Box": "FluidProperties001",
+    "Box001": "PCB",
+    "Box002": "microchip",
+    "Body": "fan case",
+    "Fusion": "heat_sink",
+}
+for source_name, region_name in region_names.items():
+    regions[source_name].Label = "{}_interface".format(region_name)
+
+interface.Label = "RegionCoupledInterface001"
+interface.RegionObjects = [
+    regions["Box001"],
+    regions["Box002"],
+    regions["Body"],
+    regions["Fusion"],
+]
+interface.RegionNames = [
+    CfdRegionCoupledInterface.getRegionName(regions["Box001"]),
+    CfdRegionCoupledInterface.getRegionName(regions["Box002"]),
+    CfdRegionCoupledInterface.getRegionName(regions["Body"]),
+    CfdRegionCoupledInterface.getRegionName(regions["Fusion"]),
+]
+interface.ThermalBoundaryType = "zeroGradient"
+interface.Temperature = "293 K"
+interface.ShapeRefs, interface.InterfacePairs = CfdRegionCoupledInterface.generatePairedTouchingFaceData(
+    interface.RegionObjects
+)
+
+add_mesh("Fluid_Mesh", regions["Box"], "fluid",
+         "meshCaseMicrochipCoolingNccFluid")
+add_mesh("PCB_Mesh", regions["Box001"], "solid",
+         "meshCaseMicrochipCoolingNccPCB")
+add_mesh("Microchip_Mesh", regions["Box002"], "solid",
+         "meshCaseMicrochipCoolingNccMicrochip")
+add_mesh("FanCase_Mesh", regions["Body"], "solid",
+         "meshCaseMicrochipCoolingNccFanCase")
+add_mesh("HeatSink_Mesh", regions["Fusion"], "solid",
+         "meshCaseMicrochipCoolingNccHeatSink")
+
+App.ActiveDocument.recompute()

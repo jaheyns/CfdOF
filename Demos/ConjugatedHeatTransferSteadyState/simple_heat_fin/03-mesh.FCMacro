@@ -1,0 +1,15 @@
+from CfdOF import CfdTools
+from CfdOF.Mesh import CfdMesh
+
+CfdMesh.makeCfdMesh("BooleanFragments_Mesh")
+mesh = App.ActiveDocument.ActiveObject
+mesh.Part = App.ActiveDocument.BooleanFragments
+CfdTools.getActiveAnalysis().addObject(mesh)
+mesh.CharacteristicLengthMax = "3 mm"
+mesh.MeshUtility = "gmsh"
+mesh.ElementDimension = "3D"
+mesh.CellsBetweenLevels = 3
+mesh.EdgeRefinement = 1.0
+mesh.PointInMesh = {"x": "0 m", "y": "0 m", "z": "0 m"}
+mesh.NumberOfProcesses = 1
+App.ActiveDocument.recompute()

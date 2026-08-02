@@ -1,0 +1,35 @@
+import FreeCAD as App
+import BOPTools.SplitFeatures as SplitFeatures
+if App.GuiUp:
+    import FreeCADGui as Gui
+
+document_name = "simple_heat_fin"
+
+if document_name in App.listDocuments():
+    doc = App.getDocument(document_name)
+    App.closeDocument(doc.Name)
+    doc = App.newDocument(document_name)
+else:
+    doc = App.newDocument(document_name)
+App.setActiveDocument(doc.Name)
+
+fluid_domain = doc.addObject("Part::Box", "Box")
+fluid_domain.Label = "fluid_domain"
+fluid_domain.Length = "70 mm"
+fluid_domain.Width = "30 mm"
+fluid_domain.Height = "50 mm"
+
+heatsink = doc.addObject("Part::Box", "Box001")
+heatsink.Label = "heatsink"
+heatsink.Length = "60 mm"
+heatsink.Width = "1 mm"
+heatsink.Height = "10 mm"
+heatsink.Placement.Base = App.Vector(0, 15, 13)
+
+doc.recompute()
+
+BooleanFragments = SplitFeatures.makeBooleanFragments(name="BooleanFragments")
+BooleanFragments.Label = "BooleanFragments"
+BooleanFragments.Objects = [fluid_domain, heatsink]
+BooleanFragments.Mode = "Standard"
+doc.recompute()

@@ -1,0 +1,39 @@
+import FreeCAD as App
+
+from CfdOF import CfdTools
+from CfdOF.Mesh import CfdMesh
+
+
+def add_mesh(name, part, region_type, case_name, length):
+    CfdMesh.makeCfdMesh(name)
+    mesh = App.ActiveDocument.ActiveObject
+    CfdTools.getActiveAnalysis().addObject(mesh)
+    mesh.Part = part
+    mesh.RegionType = region_type
+    mesh.CaseName = case_name
+    mesh.CharacteristicLengthMax = length
+    mesh.MeshUtility = "gmsh"
+    mesh.ElementDimension = "3D"
+    mesh.CellsBetweenLevels = 3
+    mesh.EdgeRefinement = 1.0
+    mesh.PointInMesh = {"x": "0 m", "y": "0 m", "z": "0 m"}
+    mesh.NumberOfProcesses = 1
+    return mesh
+
+
+add_mesh(
+    "Fluid_Mesh",
+    App.ActiveDocument.FluidRegion,
+    "fluid",
+    "meshCaseSimpleHeatFinNccFluid",
+    "5 mm",
+)
+add_mesh(
+    "Solid_Mesh",
+    App.ActiveDocument.SolidRegion,
+    "solid",
+    "meshCaseSimpleHeatFinNccSolid",
+    "3 mm",
+)
+
+App.ActiveDocument.recompute()
