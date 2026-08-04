@@ -238,13 +238,18 @@ class ViewProviderCfdAnalysis:
         doc = FreeCAD.getDocument(docName)
         for obj in doc.Objects:
             if obj.isDerivedFrom("Part::Feature") and not ("CfdFluidBoundary" in obj.Name):
-                vobj2 = FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject
-                if hasattr(vobj2, 'Transparency'):
-                    vobj2.Transparency = 70
-                if obj.isDerivedFrom("PartDesign::Feature"):
-                    doc.getObject(obj.Name).ViewObject.LineWidth = 1
-                    doc.getObject(obj.Name).ViewObject.LineColor = (0.5, 0.5, 0.5)
-                    doc.getObject(obj.Name).ViewObject.PointColor = (0.5, 0.5, 0.5)
+                try:
+                    vobj2 = FreeCAD.getDocument(docName).getObject(obj.Name).ViewObject
+                    if hasattr(vobj2, 'Transparency'):
+                        vobj2.Transparency = 70
+                    if obj.isDerivedFrom("PartDesign::Feature"):
+                        vobj2.LineWidth = 1
+                        vobj2.LineColor = (0.5, 0.5, 0.5)
+                        vobj2.PointColor = (0.5, 0.5, 0.5)
+                except Exception:
+                    # Some FreeCAD 1.1 view providers can lack optional GUI extensions.
+                    # Transparency is cosmetic, so avoid interrupting macro generation.
+                    pass
 
     def __getstate__(self):
         return None
