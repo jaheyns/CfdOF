@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; AcrylicSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Acrylic_solid
+Type = Solid
+Description = Acrylic PMMA solid thermal properties
+Density = 1180 kg/m^3
+ThermalConductivity = 0.189 W/m/K
+SpecificHeat = 1500 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=a5e93a1f1fff43bcbac5b6ca51b8981f

@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; StyrofoamSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Styrofoam_solid
+Type = Solid
+Description = Rigid polystyrene foam solid thermal properties
+Density = 32 kg/m^3
+ThermalConductivity = 0.029 W/m/K
+SpecificHeat = 1210 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=c98422e64d1f4bfa98e9d82dc89eaee6

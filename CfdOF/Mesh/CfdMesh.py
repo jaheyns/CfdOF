@@ -22,6 +22,7 @@
 ################################################################################
 
 import os
+import re
 
 import FreeCAD
 import FreeCADGui
@@ -35,11 +36,36 @@ DIMENSION = ["3D", "3D", "3D", "3D"]
 DUAL_CONVERSION = [False, False, False, True]
 
 QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
+DEFAULT_MESH_CASE_PREFIX = "meshCase"
+
+
+def cleanMeshCaseName(case_name):
+    clean = re.sub(r"[^A-Za-z0-9_.-]+", "_", str(case_name or "").strip())
+    clean = clean.strip("._-")
+    return clean or "{}1".format(DEFAULT_MESH_CASE_PREFIX)
+
+
+def nextMeshCaseName(doc=None, exclude_obj=None):
+    if doc is None:
+        doc = FreeCAD.ActiveDocument
+    used = set()
+    if doc is not None:
+        for obj in doc.Objects:
+            if obj is exclude_obj:
+                continue
+            case_name = getattr(obj, "CaseName", "")
+            if case_name:
+                used.add(cleanMeshCaseName(case_name))
+    index = 1
+    while "{}{}".format(DEFAULT_MESH_CASE_PREFIX, index) in used:
+        index += 1
+    return "{}{}".format(DEFAULT_MESH_CASE_PREFIX, index)
 
 
 def makeCfdMesh(name="CFDMesh"):
     obj = FreeCAD.ActiveDocument.addObject("App::DocumentObjectGroupPython", name)
     CfdMesh(obj)
+    obj.CaseName = nextMeshCaseName(obj.Document, exclude_obj=obj)
     if FreeCAD.GuiUp:
         ViewProviderCfdMesh(obj.ViewObject)
     return obj
@@ -66,21 +92,19 @@ class CommandCfdMeshFromShape:
         FreeCAD.ActiveDocument.openTransaction("Create CFD mesh")
         analysis_obj = CfdTools.getActiveAnalysis()
         if analysis_obj:
+            sel = FreeCADGui.Selection.getSelection()
             mesh_obj = CfdTools.getMesh(analysis_obj)
-            if not mesh_obj:
-                sel = FreeCADGui.Selection.getSelection()
-                if len(sel) == 1:
-                    if sel[0].isDerivedFrom("Part::Feature"):
-                        mesh_obj_name = sel[0].Name + "_Mesh"
-                        FreeCADGui.doCommand("from CfdOF.Mesh import CfdMesh")
-                        FreeCADGui.doCommand("CfdMesh.makeCfdMesh('" + mesh_obj_name + "')")
-                        FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
-                        if CfdTools.getActiveAnalysis():
-                            FreeCADGui.doCommand("from CfdOF import CfdTools")
-                            FreeCADGui.doCommand(
-                                "CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
-                        FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
-            else:
+            if len(sel) == 1 and sel[0].isDerivedFrom("Part::Feature"):
+                mesh_obj_name = sel[0].Name + "_Mesh"
+                FreeCADGui.doCommand("from CfdOF.Mesh import CfdMesh")
+                FreeCADGui.doCommand("CfdMesh.makeCfdMesh('" + mesh_obj_name + "')")
+                FreeCADGui.doCommand("App.ActiveDocument.ActiveObject.Part = App.ActiveDocument." + sel[0].Name)
+                if CfdTools.getActiveAnalysis():
+                    FreeCADGui.doCommand("from CfdOF import CfdTools")
+                    FreeCADGui.doCommand(
+                        "CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)")
+                FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
+            elif mesh_obj:
                 FreeCADGui.activeDocument().setEdit(mesh_obj.Name)
         FreeCADGui.Selection.clearSelection()
 
@@ -102,7 +126,7 @@ class CfdMesh:
         addObjectProperty(
             obj,
             "CaseName",
-            "meshCase",
+            nextMeshCaseName(obj.Document, exclude_obj=obj),
             "App::PropertyString",
             "",
             QT_TRANSLATE_NOOP("App::Property", "Name of directory in which the mesh is created"),
@@ -164,6 +188,27 @@ class CfdMesh:
             "Mesh Parameters",
             QT_TRANSLATE_NOOP("App::Property", "Part object to mesh"),
         )
+        addObjectProperty(
+            obj,
+            "PartSubShape",
+            "",
+            "App::PropertyString",
+            "Mesh Parameters",
+            QT_TRANSLATE_NOOP(
+                "App::Property",
+                "Optional sub-shape name of the Part object to mesh, for example Solid1",
+            ),
+        )
+
+        if addObjectProperty(
+            obj,
+            "RegionType",
+            ["fluid", "solid"],
+            "App::PropertyEnumeration",
+            "Multi-region",
+            QT_TRANSLATE_NOOP("App::Property", "Region type for multi-region cases"),
+        ):
+            obj.RegionType = "fluid"
 
         if addObjectProperty(
             obj,
@@ -406,4 +451,5 @@ class _ViewProviderCfdMesh:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_MeshFromShape', CommandCfdMeshFromShape())
+if FreeCAD.GuiUp and hasattr(FreeCADGui, 'addCommand'):
+    FreeCADGui.addCommand('CfdOF_MeshFromShape', CommandCfdMeshFromShape())

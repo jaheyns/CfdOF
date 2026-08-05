@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; FiberglassSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Fiberglass_solid
+Type = Solid
+Description = E-glass fiber solid thermal properties
+Density = 2570 kg/m^3
+ThermalConductivity = 1.30 W/m/K
+SpecificHeat = 810 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=d9c18047c49147a2a7c0b0bb1743e812
