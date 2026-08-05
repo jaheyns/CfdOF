@@ -28,6 +28,7 @@
 
 import FreeCAD
 import FreeCADGui
+import Part
 
 from CfdOF import CfdAnalysis as CfdAnalysis
 from CfdOF.Solve import CfdSolverFoam
@@ -545,6 +546,32 @@ class WaterPouringTest(unittest.TestCase, MacroTest):
 
     def tearDown(self):
         self.closeDoc()
+
+
+class InterfaceNccGeometryTest(unittest.TestCase):
+    def test_containing_fluid_is_cut_around_solid(self):
+        from CfdOF.Solve import CfdInterfaceNccRegions
+
+        doc = FreeCAD.newDocument("InterfaceNccGeometryTest")
+        analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+        fluid = doc.addObject("Part::Feature", "Fluid")
+        fluid.Shape = Part.makeBox(10, 10, 10)
+        solid = doc.addObject("Part::Feature", "Solid")
+        solid.Shape = Part.makeBox(4, 4, 4, FreeCAD.Vector(3, 3, 3))
+        doc.recompute()
+
+        _group, regions, interface = CfdInterfaceNccRegions.createInterfaceNccRegions(
+            [fluid, solid], analysis
+        )
+
+        self.assertIsNone(interface)
+        self.assertEqual([region.RegionRole for region in regions], ["Fluid", "Solid"])
+        self.assertAlmostEqual(regions[0].Shape.Volume, 936.0, places=5)
+        self.assertAlmostEqual(regions[1].Shape.Volume, 64.0, places=5)
+
+    def tearDown(self):
+        if FreeCAD.ActiveDocument is not None:
+            FreeCAD.closeDocument(FreeCAD.ActiveDocument.Name)
 
 
 def compareInpFiles(file_name1, file_name2):

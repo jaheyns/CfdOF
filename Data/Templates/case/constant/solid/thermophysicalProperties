@@ -1,0 +1,50 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%{%(multiRegionSolidNames%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/%(multiRegionSolidNames/%(0%)%)";
+    object      thermophysicalProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+thermoType
+{
+    type            heSolidThermo;
+    mixture         pureMixture;
+    transport       constIso;
+    thermo          hConst;
+    equationOfState rhoConst;
+    specie          specie;
+    energy          sensibleEnthalpy;
+}
+
+mixture
+{
+    specie
+    {
+        nMoles          1;
+        molWeight       1;
+    }
+    transport
+    {
+        kappa           %(solidProperties/%(0%)/ThermalConductivity%);
+    }
+    thermodynamics
+    {
+        Cp              %(solidProperties/%(0%)/Cp%);
+        Hf              0;
+    }
+    equationOfState
+    {
+        rho             %(solidProperties/%(0%)/Density%);
+    }
+}
+
+// ************************************************************************* //
+%} constant/%(multiRegionSolidNames/%(0%)%)/thermophysicalProperties
+%}
