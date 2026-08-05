@@ -28,6 +28,7 @@
 
 import FreeCAD
 import FreeCADGui
+import Part
 
 from CfdOF import CfdAnalysis as CfdAnalysis
 from CfdOF.Solve import CfdSolverFoam
@@ -84,6 +85,10 @@ class BlockTest(unittest.TestCase):
         CfdTools.setActiveAnalysis(self.analysis)
         self.active_doc.recompute()
 
+    def test_fluid_boundary_has_no_region_override(self):
+        boundary = CfdFluidBoundary.makeCfdFluidBoundary('boundary')
+        self.assertNotIn('RegionName', boundary.PropertiesList)
+
     def createNewSolver(self):
         self.solver_object = CfdSolverFoam.makeCfdSolverFoam()
         self.analysis.addObject(self.solver_object)
@@ -134,6 +139,7 @@ class BlockTest(unittest.TestCase):
         self.inlet_boundary = CfdFluidBoundary.makeCfdFluidBoundary('inlet')
         self.analysis.addObject(self.inlet_boundary)
         bc_set = self.inlet_boundary
+        self.assertNotIn('RegionName', bc_set.PropertiesList)
         bc_set.BoundaryType = 'inlet'
         bc_set.BoundarySubType = 'uniformVelocityInlet'
         bc_set.Ux = 1
@@ -545,6 +551,41 @@ class WaterPouringTest(unittest.TestCase, MacroTest):
 
     def tearDown(self):
         self.closeDoc()
+
+
+class InterfaceNccGeometryTest(unittest.TestCase):
+    def test_containing_fluid_is_cut_around_solid(self):
+        from CfdOF.Solve import CfdInterfaceNccRegions
+
+        doc = FreeCAD.newDocument("InterfaceNccGeometryTest")
+        analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+        fluid = doc.addObject("Part::Feature", "Fluid")
+        fluid.Shape = Part.makeBox(10, 10, 10)
+        solid = doc.addObject("Part::Feature", "Solid")
+        solid.Shape = Part.makeBox(4, 4, 4, FreeCAD.Vector(3, 3, 3))
+        doc.recompute()
+
+        _group, regions, interface = CfdInterfaceNccRegions.createInterfaceNccRegions(
+            [fluid, solid], analysis
+        )
+
+        self.assertIsNotNone(interface)
+        self.assertEqual([region.RegionRole for region in regions], ["Fluid", "Solid"])
+        self.assertAlmostEqual(regions[0].Shape.Volume, 936.0, places=5)
+        self.assertAlmostEqual(regions[1].Shape.Volume, 64.0, places=5)
+        self.assertTrue(interface.InterfacePairs)
+        boundaries = interface.Proxy.makeBoundaryObjects(interface)
+        self.assertTrue(boundaries)
+        referenced_regions = {
+            reference[0].Name
+            for boundary in boundaries
+            for reference in boundary.ShapeRefs
+        }
+        self.assertEqual(referenced_regions, {region.Name for region in regions})
+
+    def tearDown(self):
+        if FreeCAD.ActiveDocument is not None:
+            FreeCAD.closeDocument(FreeCAD.ActiveDocument.Name)
 
 
 def compareInpFiles(file_name1, file_name2):
