@@ -35,12 +35,94 @@ from CfdOF.TemplateBuilder import TemplateBuilder
 import Part
 
 
+def _getCompoundLinks(part_obj):
+    """Return the list of child body objects from a compound or BooleanFragments shape object."""
+    if hasattr(part_obj, 'Links'):      # Part::Compound
+        return list(part_obj.Links)
+    if hasattr(part_obj, 'Objects'):    # Part::BooleanFragments
+        return list(part_obj.Objects)
+    return [part_obj]
+
+
+def _get_shape_ref_solids(shape_ref):
+    """Return solid shapes from a FreeCAD LinkSub reference.
+
+    Solid materials can reference selected sub-solids in a compound/body.  Use
+    those sub-elements when present instead of broadening the selection to the
+    whole source object, otherwise unrelated volumes can be assigned to the
+    solid region after BooleanFragments.
+    """
+    obj = shape_ref[0]
+    sub_names = shape_ref[1] if len(shape_ref) > 1 else []
+    solids = []
+    for sub_name in sub_names:
+        try:
+            sub_shape = obj.Shape.getElement(sub_name)
+        except (Part.OCCError, ValueError, IndexError, AttributeError):
+            continue
+        solids.extend(sub_shape.Solids if sub_shape.Solids else [sub_shape])
+    if solids:
+        return solids
+    return list(obj.Shape.Solids if obj.Shape.Solids else [obj.Shape])
+
+
+class _MeshPartSubShape:
+    def __init__(self, part_obj, sub_shape_name):
+        self.Source = part_obj
+        self.SubShapeName = sub_shape_name
+        self.Name = "{}_{}".format(part_obj.Name, sub_shape_name)
+        self.Label = "{} {}".format(part_obj.Label, sub_shape_name)
+        self.Shape = part_obj.Shape.getElement(sub_shape_name)
+
+
+def _get_mesh_part_object(mesh_obj):
+    sub_shape_name = getattr(mesh_obj, 'PartSubShape', '')
+    if sub_shape_name:
+        return _MeshPartSubShape(mesh_obj.Part, sub_shape_name)
+    return mesh_obj.Part
+
+
+def _get_mesh_part_source_object(part_obj):
+    return getattr(part_obj, 'Source', part_obj)
+
+
+def _reference_targets_mesh_part(shape_ref, part_obj):
+    ref_obj = shape_ref[0]
+    source_obj = _get_mesh_part_source_object(part_obj)
+    return ref_obj is source_obj or getattr(ref_obj, 'Name', None) == getattr(source_obj, 'Name', None)
+
+
+def _boundary_targets_mesh_part(boundary_obj, part_obj):
+    refs = getattr(boundary_obj, 'ShapeRefs', [])
+    return not refs or any(_reference_targets_mesh_part(ref, part_obj) for ref in refs)
+
+
+def _solid_belongs_to_reference(result_solid, reference_solids):
+    """Return True if a BooleanFragments result solid belongs to a source solid.
+
+    A center of mass is not necessarily inside a non-convex solid. Use the OCC
+    boolean intersection instead and classify a fragment when most of its volume
+    belongs to the referenced source solid.
+    """
+    result_volume = abs(result_solid.Volume)
+    if result_volume <= 0:
+        return False
+    for ref_solid in reference_solids:
+        try:
+            common_volume = abs(result_solid.common(ref_solid).Volume)
+        except Part.OCCError:
+            continue
+        if common_volume / result_volume > 0.5:
+            return True
+    return False
+
+
 class CfdMeshTools:
     def __init__(self, cart_mesh_obj):
         self.mesh_obj = cart_mesh_obj
         self.analysis = CfdTools.getParentAnalysisObject(self.mesh_obj)
 
-        self.part_obj = self.mesh_obj.Part  # Part to mesh
+        self.part_obj = _get_mesh_part_object(self.mesh_obj)  # Part or sub-shape to mesh
         self.scale = 0.001  # Scale mm to m
 
         # Default to 2 % of bounding box characteristic length
@@ -176,8 +258,11 @@ class CfdMeshTools:
 
     def getFilePaths(self, output_dir):
         if not hasattr(self.mesh_obj, 'CaseName'):  # Backward compat
-            self.mesh_obj.CaseName = 'meshCase'
-        self.case_name = self.mesh_obj.CaseName
+            self.mesh_obj.CaseName = 'meshCase1'
+        from CfdOF.Mesh import CfdMesh
+        self.case_name = CfdMesh.cleanMeshCaseName(self.mesh_obj.CaseName)
+        if self.case_name != self.mesh_obj.CaseName:
+            self.mesh_obj.CaseName = self.case_name
         self.mesh_case_dir = os.path.join(output_dir, self.case_name)
         self.constantDir = os.path.join(self.mesh_case_dir, 'constant')
         self.polyMeshDir = os.path.join(self.constantDir, 'polyMesh')
@@ -213,7 +298,7 @@ class CfdMeshTools:
         snappy_settings['MovingMeshRegions'] = {}
 
         # Make list of all faces in meshed shape with original index
-        mesh_face_list = list(zip(self.mesh_obj.Part.Shape.Faces, range(len(self.mesh_obj.Part.Shape.Faces))))
+        mesh_face_list = list(zip(self.part_obj.Shape.Faces, range(len(self.part_obj.Shape.Faces))))
 
         # Make list of all boundary references
         CfdTools.cfdMessage("Matching boundary patches\n")
@@ -223,14 +308,36 @@ class CfdMeshTools:
         if not analysis_obj:
             analysis_obj = CfdTools.getActiveAnalysis()
         if analysis_obj:
-            bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
+            bc_group = CfdTools.getCfdBoundaryGroupWithRegionInterfaces(analysis_obj)
+        multi_mesh_analysis = bool(analysis_obj and len(CfdTools.getMeshObjects(analysis_obj)) > 1)
+        boundary_applies = []
+        seen_region_interface_refs = set()
+        skipped_region_interface_bc_ids = set()
         for bc_id, bc_obj in enumerate(bc_group):
+            applies = not multi_mesh_analysis or _boundary_targets_mesh_part(bc_obj, self.part_obj)
+            boundary_applies.append(applies)
+            if not applies:
+                continue
             for ri, ref in enumerate(bc_obj.ShapeRefs):
                 try:
                     bf = CfdTools.resolveReference(ref)
                 except RuntimeError as re:
                     raise RuntimeError("Error processing boundary condition {}: {}".format(bc_obj.Label, str(re)))
                 for si, s in enumerate(bf):
+                    if (not multi_mesh_analysis and
+                            hasattr(bc_obj, 'InterfaceObject') and
+                            ri < len(bc_obj.ShapeRefs) and
+                            si < len(bc_obj.ShapeRefs[ri][1])):
+                        source_ref = bc_obj.ShapeRefs[ri]
+                        interface_ref_key = (
+                            id(bc_obj.InterfaceObject),
+                            source_ref[0].Name,
+                            source_ref[1][si],
+                        )
+                        if interface_ref_key in seen_region_interface_refs:
+                            skipped_region_interface_bc_ids.add(bc_id)
+                            continue
+                        seen_region_interface_refs.add(interface_ref_key)
                     boundary_face_list += [(sf, (bc_id, ri, si)) for sf in s[0].Faces]
 
         # Match them up to faces in the main geometry
@@ -239,6 +346,8 @@ class CfdMeshTools:
         # Check for and filter duplicates
         bc_match_per_shape_face = [-1] * len(mesh_face_list)
         bc_matched = [False] * len(bc_group)
+        for bc_id in skipped_region_interface_bc_ids:
+            bc_matched[bc_id] = True
         for k in range(len(bc_matched_faces)):
             match = bc_matched_faces[k][1]
             prev_k = bc_match_per_shape_face[match]
@@ -318,7 +427,7 @@ class CfdMeshTools:
         if self.mesh_obj.MeshUtility == 'gmsh':
             # Make list of all vertices in meshed shape with original index
             mesh_vertices_list = list(
-                zip(self.mesh_obj.Part.Shape.Vertexes, range(len(self.mesh_obj.Part.Shape.Vertexes))))
+                zip(self.part_obj.Shape.Vertexes, range(len(self.part_obj.Shape.Vertexes))))
 
             CfdTools.cfdMessage("Matching mesh refinements\n")
             mr_vertices_list = []
@@ -348,12 +457,14 @@ class CfdMeshTools:
                 bc_matched[nb] = True
 
         for bc_id, matched in enumerate(bc_matched):
-            if not matched and not bc_group[bc_id].DefaultBoundary:
+            if boundary_applies[bc_id] and not matched and not bc_group[bc_id].DefaultBoundary:
                 CfdTools.cfdWarning(
-                    "No part of the boundary '{}' matched any part of the geometry '{}' being meshed\n".format(
-                        bc_group[bc_id].Label, self.mesh_obj.Part.Label))
+                "No part of the boundary '{}' matched any part of the geometry '{}' being meshed\n".format(
+                        bc_group[bc_id].Label, self.part_obj.Label))
         # Handle baffles
         for bc_id, bc_obj in enumerate(bc_group):
+            if not boundary_applies[bc_id]:
+                continue
             if bc_obj.BoundaryType == 'baffle':
                 baffle_matches = [m for m in bc_mr_matched_faces if m[0][0] == bc_id]
                 mr_match_per_baffle_ref = []
@@ -568,7 +679,7 @@ class CfdMeshTools:
                         patch_name = self.patch_names[k][l]
                         if len(patch_faces):
                             # Put together the faces making up this patch; mesh them and output to file
-                            faces = self.mesh_obj.Part.Shape.Faces
+                            faces = self.part_obj.Shape.Faces
                             patch_shape = Part.makeCompound([faces[f] for f in patch_faces])
                             CfdTools.cfdMessage(
                                 "Triangulating part {}, patch {}\n".format(self.part_obj.Label, patch_name))
@@ -687,8 +798,54 @@ class CfdMeshTools:
                     self.gmsh_settings['NodeMap'][e] = ele_nodes
             self.gmsh_settings['ClMax'] = self.clmax
             self.gmsh_settings['ClMin'] = self.clmin
-            sols = (''.join((str(n+1) + ', ') for n in range(len(self.mesh_obj.Part.Shape.Solids)))).rstrip(', ')
+            sols = (''.join((str(n+1) + ', ') for n in range(len(self.part_obj.Shape.Solids)))).rstrip(', ')
             self.gmsh_settings['Solids'] = sols
+
+            # Build per-region volume map for CHT (chtMultiRegionSimpleFoam/chtMultiRegionFoam)
+            solid_material_objs = CfdTools.getSolidMaterials(self.analysis)
+            if solid_material_objs:
+                region_volume_map = {}
+                mesh_part = self.part_obj
+                links = _getCompoundLinks(mesh_part)
+                result_solids = mesh_part.Shape.Solids
+                solid_vol_indices_all = set()
+                # For each CfdSolidMaterial, find the result solid volumes that belong
+                # to it by geometric containment/overlap in its referenced shapes. Each
+                # material is handled independently so that multiple solid regions
+                # receive distinct volume index sets rather than the same combined set.
+                for solid_obj in solid_material_objs:
+                    rname = CfdTools.getRegionName(solid_obj)
+                    body_names = set()
+                    body_solids = {}
+                    for ref in solid_obj.ShapeRefs:
+                        body_names.add(ref[0].Name)
+                        body_solids.setdefault(ref[0].Name, []).extend(_get_shape_ref_solids(ref))
+                    for lnk in links:
+                        if lnk.Name in body_names and lnk.Name not in body_solids:
+                            body_solids[lnk.Name] = list(lnk.Shape.Solids if lnk.Shape.Solids else [lnk.Shape])
+                    flat_solids = [solid for solids in body_solids.values() for solid in solids]
+                    vol_indices = [i for i, s in enumerate(result_solids, start=1)
+                                   if _solid_belongs_to_reference(s, flat_solids)]
+                    solid_vol_indices_all.update(vol_indices)
+                    if vol_indices:
+                        region_volume_map[rname] = ', '.join(str(v) for v in vol_indices)
+                # Fluid volumes are those not claimed by any solid material
+                fluid_vol_indices = [i for i in range(1, len(result_solids) + 1)
+                                     if i not in solid_vol_indices_all]
+                mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+                internal_zones = [o for o in mr_objs if o.Internal]
+                if internal_zones:
+                    fluid_rname = internal_zones[0].Label
+                else:
+                    fluid_mats = CfdTools.getMaterials(self.analysis)
+                    fluid_rname = fluid_mats[0].Label if fluid_mats else 'fluid'
+                if fluid_vol_indices:
+                    region_volume_map[fluid_rname] = ', '.join(str(v) for v in fluid_vol_indices)
+                self.gmsh_settings['IsMultiRegion'] = True
+                self.gmsh_settings['RegionVolumeMap'] = region_volume_map
+            else:
+                self.gmsh_settings['IsMultiRegion'] = False
+
             self.gmsh_settings['BoundaryFaceMap'] = {}
             for k in range(len(self.patch_faces)):
                 for l in range(len(self.patch_faces[k])):

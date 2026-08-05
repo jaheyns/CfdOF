@@ -106,6 +106,8 @@ class TaskPanelCfdMesh:
         self.form.if_NumberOfProcesses.setToolTip("Number of parallel processes")
         self.form.if_NumberOfThreads.setToolTip("Number of parallel threads per process.\n0 means use all available (if NumberOfProcesses = 1) or use 1 (if NumberOfProcesses > 1)")
 
+        self.initMeshCaseControls()
+        self.initRegionControls()
         self.load()
         self.updateUI()
 
@@ -120,6 +122,28 @@ class TaskPanelCfdMesh:
         FreeCADGui.ActiveDocument.resetEdit()
         return True
 
+    def initRegionControls(self):
+        self.regionFrame = QtGui.QGroupBox("Multi-region")
+        regionLayout = QtGui.QFormLayout(self.regionFrame)
+
+        self.comboRegionType = QtGui.QComboBox()
+        self.comboRegionType.addItems(["fluid", "solid"])
+        regionLayout.addRow("Region type:", self.comboRegionType)
+
+        self.form.layout().insertWidget(2, self.regionFrame)
+
+    def initMeshCaseControls(self):
+        self.meshCaseFrame = QtGui.QGroupBox("Mesh case")
+        meshCaseLayout = QtGui.QFormLayout(self.meshCaseFrame)
+
+        self.editMeshCaseName = QtGui.QLineEdit()
+        self.editMeshCaseName.setToolTip(
+            "Name of the mesh case folder under the analysis output path. "
+            "Only letters, numbers, underscores, hyphens and dots are kept.")
+        meshCaseLayout.addRow("Mesh case folder:", self.editMeshCaseName)
+
+        self.form.layout().insertWidget(1, self.meshCaseFrame)
+
     def closed(self):
         # We call this from unsetEdit to ensure cleanup
         utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
@@ -133,6 +157,7 @@ class TaskPanelCfdMesh:
 
     def load(self):
         """ Fills the widgets """
+        self.editMeshCaseName.setText(CfdMesh.cleanMeshCaseName(getattr(self.mesh_obj, 'CaseName', '')))
         setQuantity(self.form.if_max, self.mesh_obj.CharacteristicLengthMax)
         point_in_mesh = self.mesh_obj.PointInMesh.copy()
         setQuantity(self.form.if_pointInMeshX, point_in_mesh.get('x'))
@@ -145,6 +170,8 @@ class TaskPanelCfdMesh:
         self.form.radio_explicit_edge_detection.setChecked(not self.mesh_obj.ImplicitEdgeDetection)
         self.form.if_NumberOfProcesses.setValue(self.mesh_obj.NumberOfProcesses)
         self.form.if_NumberOfThreads.setValue(self.mesh_obj.NumberOfThreads)
+        self.comboRegionType.setCurrentIndex(
+            self.comboRegionType.findText(getattr(self.mesh_obj, 'RegionType', 'fluid')))
 
         index_utility = CfdTools.indexOrDefault(list(zip(
                 CfdMesh.MESHERS, CfdMesh.DIMENSION, CfdMesh.DUAL_CONVERSION)), 
@@ -170,7 +197,7 @@ class TaskPanelCfdMesh:
         self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(case_path, "pv.foam")))
         self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "surfaceMesh.vtk")))
         self.form.pb_check_mesh.setEnabled(os.path.exists(os.path.join(case_path, "surfaceMesh.vtk")))
-        
+
         utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
@@ -186,6 +213,10 @@ class TaskPanelCfdMesh:
 
     def store(self):
         mesher_idx = self.form.cb_utility.currentIndex()
+        case_name = CfdMesh.cleanMeshCaseName(self.editMeshCaseName.text())
+        if case_name != self.editMeshCaseName.text():
+            self.editMeshCaseName.setText(case_name)
+        storeIfChanged(self.mesh_obj, 'CaseName', case_name)
         storeIfChanged(self.mesh_obj, 'CharacteristicLengthMax', getQuantity(self.form.if_max))
         storeIfChanged(self.mesh_obj, 'MeshUtility', CfdMesh.MESHERS[mesher_idx])
         storeIfChanged(self.mesh_obj, 'ElementDimension', CfdMesh.DIMENSION[mesher_idx])
@@ -195,6 +226,7 @@ class TaskPanelCfdMesh:
         storeIfChanged(self.mesh_obj, 'ImplicitEdgeDetection', self.form.radio_implicit_edge_detection.isChecked())
         storeIfChanged(self.mesh_obj, 'NumberOfProcesses', self.form.if_NumberOfProcesses.value())
         storeIfChanged(self.mesh_obj, 'NumberOfThreads', self.form.if_NumberOfThreads.value())
+        storeIfChanged(self.mesh_obj, 'RegionType', self.comboRegionType.currentText())
 
         point_in_mesh = {'x': getQuantity(self.form.if_pointInMeshX),
                          'y': getQuantity(self.form.if_pointInMeshY),

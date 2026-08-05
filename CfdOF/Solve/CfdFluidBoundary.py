@@ -833,6 +833,8 @@ class _CfdFluidBoundary:
 class ViewProviderCfdFluidBoundary:
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.ViewObject = vobj
+        self.Object = vobj.Object
         self.taskd = None
 
     def getIcon(self):
@@ -876,7 +878,9 @@ class ViewProviderCfdFluidBoundary:
         return
 
     def setEdit(self, vobj, mode):
-        analysis_object = CfdTools.getParentAnalysisObject(self.Object)
+        self.ViewObject = vobj
+        self.Object = vobj.Object
+        analysis_object = CfdTools.getParentAnalysisObject(vobj.Object)
         if analysis_object is None:
             CfdTools.cfdErrorBox("Boundary must have a parent analysis object")
             return False
@@ -888,16 +892,18 @@ class ViewProviderCfdFluidBoundary:
 
         import importlib
         importlib.reload(TaskPanelCfdFluidBoundary)
-        self.taskd = TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(self.Object, physics_model, material_objs)
-        self.Object.ViewObject.show()
+        self.taskd = TaskPanelCfdFluidBoundary.TaskPanelCfdFluidBoundary(vobj.Object, physics_model, material_objs)
+        vobj.Object.ViewObject.show()
         self.taskd.obj = vobj.Object
         FreeCADGui.Control.showDialog(self.taskd)
         return True
 
     def doubleClicked(self, vobj):
-        doc = FreeCADGui.getDocument(vobj.Object.Document)
-        if not doc.getInEdit():
-            doc.setEdit(vobj.Object.Name)
+        if FreeCADGui.activeWorkbench().name() != 'CfdOFWorkbench':
+            FreeCADGui.activateWorkbench("CfdOFWorkbench")
+        gui_doc = FreeCADGui.getDocument(vobj.Object.Document)
+        if not gui_doc.getInEdit():
+            gui_doc.setEdit(vobj.Object.Name)
         else:
             FreeCAD.Console.PrintError('Task dialog already active\n')
             FreeCADGui.Control.showTaskView()
@@ -943,4 +949,5 @@ class _ViewProviderCfdFluidBoundary:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_FluidBoundary', CommandCfdFluidBoundary())
+if FreeCAD.GuiUp and hasattr(FreeCADGui, 'addCommand'):
+    FreeCADGui.addCommand('CfdOF_FluidBoundary', CommandCfdFluidBoundary())
