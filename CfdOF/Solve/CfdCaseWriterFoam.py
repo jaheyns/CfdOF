@@ -526,9 +526,10 @@ class CfdCaseWriterFoam:
         """ Do any required computations before case build. Boundary conditions must be processed first. """
         settings = self.settings
         initial_values = settings['initialValues']
-        if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
-            mat_prop = settings['fluidProperties'][0]
-            initial_values['KinematicPressure'] = initial_values['Pressure'] / mat_prop['Density']
+        # NOTE: KinematicPressure is derived from initial_values['Pressure'] at the
+        # end of this function, after the 'Copy pressure' block below has had a
+        # chance to replace Pressure with the value taken from the outlet boundary.
+        # Deriving it here instead would ignore UseOutletPValue entirely.
         if settings['solver']['SolverName'] in ['interFoam', 'multiphaseInterFoam']:
             # Make sure the first n-1 alpha values exist, and write the n-th one
             # consistently for multiphaseInterFoam
@@ -670,6 +671,13 @@ class CfdCaseWriterFoam:
                 else:
                     raise RuntimeError("No boundary selected to copy initial turbulence values from.")
             #TODO: Check that the required values have actually been set for each turbulent model
+
+        # Incompressible solvers work in kinematic pressure. This must be derived
+        # after the 'Copy pressure' block above, so that an outlet-derived
+        # Pressure (UseOutletPValue) is reflected in the initial field.
+        if settings['solver']['SolverName'] in ['simpleFoam', 'porousSimpleFoam', 'pimpleFoam', 'SRFSimpleFoam']:
+            mat_prop = settings['fluidProperties'][0]
+            initial_values['KinematicPressure'] = initial_values['Pressure'] / mat_prop['Density']
 
     # Function objects (reporting functions, probes)
     def processReportingFunctions(self):
