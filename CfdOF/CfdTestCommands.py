@@ -87,6 +87,7 @@ class CommandCfdCleanTests:
         cleanCfdUnitTests()
 
 
-FreeCADGui.addCommand('CfdOF_RunTests', CommandCfdRunTests())
-FreeCADGui.addCommand('CfdOF_UpdateTestData', CommandCfdUpdateTestData())
-FreeCADGui.addCommand('CfdOF_CleanTests', CommandCfdCleanTests())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_RunTests', CommandCfdRunTests())
+    FreeCADGui.addCommand('CfdOF_UpdateTestData', CommandCfdUpdateTestData())
+    FreeCADGui.addCommand('CfdOF_CleanTests', CommandCfdCleanTests())

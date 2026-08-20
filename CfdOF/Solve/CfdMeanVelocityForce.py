@@ -237,4 +237,5 @@ class _ViewProviderCfdMeanVelocityForce:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_MeanVelocityForce', CommandCfdMeanVelocityForce())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_MeanVelocityForce', CommandCfdMeanVelocityForce())

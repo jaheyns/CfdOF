@@ -505,5 +505,6 @@ class _ViewProviderCfdZone:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_PorousZone', CommandCfdPorousZone())
-FreeCADGui.addCommand('CfdOF_InitialisationZone', CommandCfdInitialisationZone())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_PorousZone', CommandCfdPorousZone())
+    FreeCADGui.addCommand('CfdOF_InitialisationZone', CommandCfdInitialisationZone())

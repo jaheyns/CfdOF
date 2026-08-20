@@ -366,4 +366,5 @@ class _ViewProviderCfdReportingFunctions:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_ReportingFunctions', CommandCfdReportingFunction())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_ReportingFunctions', CommandCfdReportingFunction())

@@ -222,4 +222,5 @@ class _ViewProviderCfdFluidMaterial:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_FluidMaterial', CommandCfdFluidMaterial())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_FluidMaterial', CommandCfdFluidMaterial())

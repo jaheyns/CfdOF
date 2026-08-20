@@ -403,4 +403,5 @@ class _ViewProviderCfdSolverFoam:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_SolverControl', CommandCfdSolverFoam())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_SolverControl', CommandCfdSolverFoam())

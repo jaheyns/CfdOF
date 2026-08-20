@@ -448,4 +448,5 @@ class _ViewProviderCfdMeshRefinement:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_MeshRegion', CommandMeshRegion())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_MeshRegion', CommandMeshRegion())

@@ -356,4 +356,5 @@ class _ViewProviderPhysicsSelection:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_PhysicsModel', CommandCfdPhysicsSelection())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_PhysicsModel', CommandCfdPhysicsSelection())

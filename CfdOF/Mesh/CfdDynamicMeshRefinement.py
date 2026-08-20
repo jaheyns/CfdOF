@@ -545,6 +545,7 @@ class ViewProviderCfdDynamicMeshShockRefinement:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_DynamicMeshInterfaceRefinement', CommandDynamicMeshInterfaceRefinement())
-FreeCADGui.addCommand('CfdOF_DynamicMeshShockRefinement', CommandDynamicMeshShockRefinement())
-FreeCADGui.addCommand('CfdOF_GroupDynamicMeshRefinement', CommandGroupDynamicMeshRefinement())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_DynamicMeshInterfaceRefinement', CommandDynamicMeshInterfaceRefinement())
+    FreeCADGui.addCommand('CfdOF_DynamicMeshShockRefinement', CommandDynamicMeshShockRefinement())
+    FreeCADGui.addCommand('CfdOF_GroupDynamicMeshRefinement', CommandGroupDynamicMeshRefinement())

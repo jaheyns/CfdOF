@@ -249,4 +249,5 @@ class _ViewProviderCfdScalarTransportFunction:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_ScalarTransportFunctions', CommandCfdScalarTransportFunction())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_ScalarTransportFunctions', CommandCfdScalarTransportFunction())

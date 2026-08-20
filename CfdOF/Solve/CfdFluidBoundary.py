@@ -943,4 +943,5 @@ class _ViewProviderCfdFluidBoundary:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_FluidBoundary', CommandCfdFluidBoundary())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_FluidBoundary', CommandCfdFluidBoundary())

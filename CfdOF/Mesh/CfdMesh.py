@@ -406,4 +406,5 @@ class _ViewProviderCfdMesh:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_MeshFromShape', CommandCfdMeshFromShape())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_MeshFromShape', CommandCfdMeshFromShape())

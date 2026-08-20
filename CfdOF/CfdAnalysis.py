@@ -280,4 +280,5 @@ class _ViewProviderCfdAnalysis:
         return None
 
 
-FreeCADGui.addCommand('CfdOF_Analysis', CommandCfdAnalysis())
+if FreeCAD.GuiUp:
+    FreeCADGui.addCommand('CfdOF_Analysis', CommandCfdAnalysis())
