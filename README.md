@@ -56,9 +56,12 @@ Windows 7-11; 64-bit version is required.
 
 #### macOS
 
-Not widely tested, but success has been reported. See
-[the following forum post](https://forum.freecad.org/viewtopic.php?f=37&t=63782&p=547611#p547578)
-for instructions.
+Verified working on Apple Silicon (arm64) with FreeCAD's official release and
+a native-arm64 OpenFOAM build; see the setup instructions below. Less
+thoroughly tested on Intel Macs, though there is no known reason CfdOF itself
+would behave differently there. See also
+[this forum post](https://forum.freecad.org/viewtopic.php?f=37&t=63782&p=547611#p547578)
+for an earlier account of getting CfdOF running on macOS.
 
 ## Getting started
 
@@ -211,6 +214,58 @@ cfMesh and HiSA can be installed using the Preferences panel described above,
 and can be downloaded and built from their source
 code inside your OpenFOAM installation if you have
 not already done so yourself. Note that this is a lengthy process.
+
+Choosing the "Check dependencies" option will verify that all
+prerequisites have been successfully installed.
+
+#### macOS
+
+Download the official FreeCAD build (.dmg) from
+[freecad.org/downloads](https://www.freecad.org/downloads.php) and drag it
+into `/Applications`. **Installing FreeCAD via a third-party package manager
+(e.g. Conda/conda-forge) is not currently recommended**: at the time of
+writing, conda-forge's `freecad` package for macOS (tested across two
+different FreeCAD versions) was found to be missing a Qt/shiboken type
+converter required to read values back from CfdOF's numeric input fields,
+causing most CfdOF panels to fail with `RuntimeError: Can't find converter
+for 'Base::Quantity'` as soon as a value is saved. This reproduces on a bare
+`Gui::InputField` widget with no CfdOF code involved, so it is a property of
+that particular build rather than anything CfdOF can work around. The
+official installer was not observed to have this problem.
+
+If more than one FreeCAD installation is ever present on the same Mac (for
+example, while comparing the official build against a package-manager build),
+give each one its own profile rather than letting them share
+`~/Library/Application Support/FreeCAD/vX-Y` and
+`~/Library/Preferences/FreeCAD/vX-Y` (that directory is scoped by FreeCAD's
+major.minor version only, not by which build wrote it). Two different FreeCAD
+builds sharing one profile has been observed to cause native crashes
+unrelated to CfdOF or to either build individually — set `FREECAD_USER_HOME`
+to a separate directory per installation if you need more than one.
+
+CfdOF itself is installed the same way as on other platforms, via the Addon
+Manager:
+
+* Run FreeCAD
+* Select Tools | Addon manager ...
+* Select CfdOF in the list of workbenches, and click "Install/update"
+* Restart FreeCAD
+* For installation of dependencies, see below
+
+##### Dependency installation
+
+Unlike Windows and Linux, there is no single official pre-built OpenFOAM
+package for macOS. The most reliable route is to build OpenFOAM from source
+following the instructions on the project websites linked in
+[Prerequisites](#prerequisites) above, or to use the Docker container option
+described below. Once a working OpenFOAM installation exists, CfdOF detects
+and uses it exactly as it does on Linux: in the Preferences panel (Edit |
+Preferences ... | CfdOF), set the OpenFOAM install directory to the folder
+containing `etc/bashrc`. As on Linux, if the desired OpenFOAM environment is
+already sourced before FreeCAD is started, this can be left blank.
+
+ParaView, cfMesh and HiSA can be installed the same way as described in the
+Linux section above.
 
 Choosing the "Check dependencies" option will verify that all
 prerequisites have been successfully installed.
