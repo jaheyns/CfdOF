@@ -35,6 +35,57 @@ from CfdOF.TemplateBuilder import TemplateBuilder
 import Part
 
 
+def _getCompoundLinks(part_obj):
+    """Return the list of child body objects from a compound or BooleanFragments shape object."""
+    if hasattr(part_obj, 'Links'):      # Part::Compound
+        return list(part_obj.Links)
+    if hasattr(part_obj, 'Objects'):    # Part::BooleanFragments
+        return list(part_obj.Objects)
+    return [part_obj]
+
+
+def _get_shape_ref_solids(shape_ref):
+    """Return solid shapes from a FreeCAD LinkSub reference.
+
+    Solid materials can reference selected sub-solids in a compound/body.  Use
+    those sub-elements when present instead of broadening the selection to the
+    whole source object, otherwise unrelated volumes can be assigned to the
+    solid region after BooleanFragments.
+    """
+    obj = shape_ref[0]
+    sub_names = shape_ref[1] if len(shape_ref) > 1 else []
+    solids = []
+    for sub_name in sub_names:
+        try:
+            sub_shape = obj.Shape.getElement(sub_name)
+        except (Part.OCCError, ValueError, IndexError, AttributeError):
+            continue
+        solids.extend(sub_shape.Solids if sub_shape.Solids else [sub_shape])
+    if solids:
+        return solids
+    return list(obj.Shape.Solids if obj.Shape.Solids else [obj.Shape])
+
+
+def _solid_belongs_to_reference(result_solid, reference_solids):
+    """Return True if a BooleanFragments result solid belongs to a source solid.
+
+    A center of mass is not necessarily inside a non-convex solid. Use the OCC
+    boolean intersection instead and classify a fragment when most of its volume
+    belongs to the referenced source solid.
+    """
+    result_volume = abs(result_solid.Volume)
+    if result_volume <= 0:
+        return False
+    for ref_solid in reference_solids:
+        try:
+            common_volume = abs(result_solid.common(ref_solid).Volume)
+        except Part.OCCError:
+            continue
+        if common_volume / result_volume > 0.5:
+            return True
+    return False
+
+
 class CfdMeshTools:
     def __init__(self, cart_mesh_obj):
         self.mesh_obj = cart_mesh_obj
@@ -689,6 +740,52 @@ class CfdMeshTools:
             self.gmsh_settings['ClMin'] = self.clmin
             sols = (''.join((str(n+1) + ', ') for n in range(len(self.mesh_obj.Part.Shape.Solids)))).rstrip(', ')
             self.gmsh_settings['Solids'] = sols
+
+            # Build per-region volume map for CHT (chtMultiRegionSimpleFoam/chtMultiRegionFoam)
+            solid_material_objs = CfdTools.getSolidMaterials(self.analysis)
+            if solid_material_objs:
+                region_volume_map = {}
+                mesh_part = self.mesh_obj.Part
+                links = _getCompoundLinks(mesh_part)
+                result_solids = mesh_part.Shape.Solids
+                solid_vol_indices_all = set()
+                # For each CfdSolidMaterial, find the result solid volumes that belong
+                # to it by geometric containment/overlap in its referenced shapes. Each
+                # material is handled independently so that multiple solid regions
+                # receive distinct volume index sets rather than the same combined set.
+                for solid_obj in solid_material_objs:
+                    rname = CfdTools.getRegionName(solid_obj)
+                    body_names = set()
+                    body_solids = {}
+                    for ref in solid_obj.ShapeRefs:
+                        body_names.add(ref[0].Name)
+                        body_solids.setdefault(ref[0].Name, []).extend(_get_shape_ref_solids(ref))
+                    for lnk in links:
+                        if lnk.Name in body_names and lnk.Name not in body_solids:
+                            body_solids[lnk.Name] = list(lnk.Shape.Solids if lnk.Shape.Solids else [lnk.Shape])
+                    flat_solids = [solid for solids in body_solids.values() for solid in solids]
+                    vol_indices = [i for i, s in enumerate(result_solids, start=1)
+                                   if _solid_belongs_to_reference(s, flat_solids)]
+                    solid_vol_indices_all.update(vol_indices)
+                    if vol_indices:
+                        region_volume_map[rname] = ', '.join(str(v) for v in vol_indices)
+                # Fluid volumes are those not claimed by any solid material
+                fluid_vol_indices = [i for i in range(1, len(result_solids) + 1)
+                                     if i not in solid_vol_indices_all]
+                mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+                internal_zones = [o for o in mr_objs if o.Internal]
+                if internal_zones:
+                    fluid_rname = internal_zones[0].Label
+                else:
+                    fluid_mats = CfdTools.getMaterials(self.analysis)
+                    fluid_rname = fluid_mats[0].Label if fluid_mats else 'fluid'
+                if fluid_vol_indices:
+                    region_volume_map[fluid_rname] = ', '.join(str(v) for v in fluid_vol_indices)
+                self.gmsh_settings['IsMultiRegion'] = True
+                self.gmsh_settings['RegionVolumeMap'] = region_volume_map
+            else:
+                self.gmsh_settings['IsMultiRegion'] = False
+
             self.gmsh_settings['BoundaryFaceMap'] = {}
             for k in range(len(self.patch_faces)):
                 for l in range(len(self.patch_faces[k])):

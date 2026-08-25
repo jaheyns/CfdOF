@@ -139,7 +139,12 @@ class _CfdMaterial:
 class ViewProviderCfdFluidMaterial:
     def __init__(self, vobj):
         vobj.Proxy = self
+        self.ViewObject = vobj
+        self.Object = vobj.Object
         self.taskd = None
+        # FreeCAD 1.1 builds may not provide this optional GUI extension and
+        # print ExtensionContainer warnings before raising. Suppressible view
+        # behaviour is cosmetic, so skip it for compatibility.
 
     def getIcon(self):
         icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "material.svg")
@@ -156,6 +161,9 @@ class ViewProviderCfdFluidMaterial:
 
     def onChanged(self, vobj, prop):
         return
+
+    def isShow(self):
+        return self.ViewObject.Visibility
 
     def setEdit(self, vobj, mode):
         analysis_object = CfdTools.getParentAnalysisObject(self.Object)

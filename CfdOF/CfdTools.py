@@ -30,6 +30,7 @@
 
 import os
 import os.path
+import re
 import glob
 import shutil
 import tempfile
@@ -156,6 +157,28 @@ def getMeshObject(analysis_object):
     return models[0] if len(models) else None
 
 
+def getRegionName(obj):
+    """Derive an OpenFOAM-safe region name from an object's selected geometry."""
+    source_obj = getattr(obj, 'SourceObject', None)
+    if source_obj is not None:
+        return getRegionName(source_obj)
+    part_obj = getattr(obj, 'Part', None)
+    if part_obj is not None:
+        sub_shape = getattr(obj, 'PartSubShape', '')
+        if sub_shape:
+            return _safeRegionName("{}_{}".format(part_obj.Label, sub_shape))
+        return getRegionName(part_obj)
+    shape_refs = getattr(obj, 'ShapeRefs', [])
+    if shape_refs:
+        return getRegionName(shape_refs[0][0])
+    return _safeRegionName(getattr(obj, 'Label', getattr(obj, 'Name', 'region')))
+
+
+def _safeRegionName(label):
+    name = re.sub(r'[^A-Za-z0-9_]+', '_', str(label)).strip('_') or 'region'
+    return 'region_' + name if name[0].isdigit() else name
+
+
 def getPorousZoneObjects(analysis_object):
     return getModelsOfType(analysis_object, 'CfdPorousZone')
 
@@ -166,7 +189,7 @@ def getInitialisationZoneObjects(analysis_object):
 
 def getZoneObjects(analysis_object):
     from CfdOF.Solve.CfdZone import CfdZone
-    return [i for i in analysis_object.Group if isinstance(i.Proxy, CfdZone)]
+    return [i for i in analysis_object.Group if isinstance(getattr(i, 'Proxy', None), CfdZone)]
 
 
 def getInitialConditions(analysis_object):
@@ -174,7 +197,16 @@ def getInitialConditions(analysis_object):
 
 
 def getMaterials(analysis_object):
-    return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
+    from CfdOF.Solve.CfdSolidMaterial import CfdSolidMaterial
+    return [i for i in analysis_object.Group
+            if i.isDerivedFrom('App::MaterialObjectPython')
+            and not isinstance(getattr(i, 'Proxy', None), CfdSolidMaterial)]
+
+
+def getSolidMaterials(analysis_object):
+    from CfdOF.Solve.CfdSolidMaterial import CfdSolidMaterial
+    return [i for i in analysis_object.Group
+            if isinstance(getattr(i, 'Proxy', None), CfdSolidMaterial)]
 
 
 def getSolver(analysis_object):
