@@ -32,7 +32,7 @@ import os.path
 import time
 from CfdOF.CfdConsoleProcess import CfdConsoleProcess
 from CfdOF.Solve import CfdSolverFoam
-from CfdOF.CfdTools import setQuantity, indexOrDefault, storeIfChanged
+from CfdOF.CfdTools import setQuantity, getQuantity, indexOrDefault, storeIfChanged
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtCore
@@ -121,9 +121,9 @@ class TaskPanelCfdSolverControl:
             CfdTools.storeIfChanged(self.solver_object, 'MaxIterations', self.form.spinBoxEndTime.value())
             CfdTools.storeIfChanged(self.solver_object, 'SteadyWriteInterval', self.form.spinBoxWriteInterval.value())
         else:
-            CfdTools.storeIfChanged(self.solver_object, 'EndTime', self.form.inputFieldEndTime.property("quantity").Value)
-            CfdTools.storeIfChanged(self.solver_object, 'TransientWriteInterval', self.form.inputFieldWriteInterval.property("quantity").Value)
-            CfdTools.storeIfChanged(self.solver_object, 'TimeStep', self.form.inputFieldTimeStep.property("quantity").Value)
+            CfdTools.storeIfChanged(self.solver_object, 'EndTime', getQuantity(self.form.inputFieldEndTime))
+            CfdTools.storeIfChanged(self.solver_object, 'TransientWriteInterval', getQuantity(self.form.inputFieldWriteInterval))
+            CfdTools.storeIfChanged(self.solver_object, 'TimeStep', getQuantity(self.form.inputFieldTimeStep))
         CfdTools.storeIfChanged(self.solver_object, 'Parallel', self.form.inputParallel.isChecked())
         CfdTools.storeIfChanged(self.solver_object, 'ParallelCores', self.form.inputParallelCores.value())
 
