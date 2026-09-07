@@ -87,7 +87,7 @@ class TaskPanelCfdMeanVelocityForce:
         elif mode == 'all' and self.mesh_obj: # if modes is all and mesh_obj is not none
             size = getPrevPointSize(self.mesh_obj.Part.Shape) * 5
             self.prev_arrow_move_node.scaleFactor.setValue([size, size, size])
-            self.prev_arrow_move_node.translation.setValue(self.mesh_obj.Part.Shape.CenterOfMass)
+            self.prev_arrow_move_node.translation.setValue(self.mesh_obj.Part.Shape.CenterOfGravity)
         else: # return to the defualt when could not fine niether mesh_obj nor ShapeRefs in the seclected shapes
             self.prev_arrow_move_node.scaleFactor.setValue([5, 5, 5])
             self.prev_arrow_move_node.translation.setValue(0, 0, 0)
