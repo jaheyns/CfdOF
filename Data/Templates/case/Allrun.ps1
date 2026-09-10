@@ -280,6 +280,34 @@ rm -ErrorAction SilentlyContinue processor*/0/phi
 %}
 
 %}
+%{%(boundaryInMRFRegionPresent%)
+%:True
+# set the wall inside the MRF region(s) to MRFnoSlip or MRFslip if using of11+
+if ( $Env:WM_PROJECT_VERSION[0] -ne "v" -and 11 -le $Env:WM_PROJECT_VERSION )
+{
+	Get-ChildItem "." -Filter processor* |
+	Foreach-Object {
+%{%(boundaries%)
+%{%(boundaries/%(0%)/InsideMRFRegion%)
+%:True
+%{%(solver/SolverName%)
+%:default
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall
+		foamDictionary -entry boundaryField/%(0%)/type -set MRFnoSlip $_/0/U
+%:slipWall
+		foamDictionary -entry boundaryField/%(0%)/type -set MRFslip $_/0/U
+%}
+%}
+%}
+%}
+%}
+	}
+}
+
+%}
 # Run application in parallel
 # Detect new foamRun in Foundation versions >= 11 and translate solver
 if( (Get-Command -ErrorAction SilentlyContinue foamRun) )
@@ -337,6 +365,31 @@ runCommand potentialFoam -initialiseUBCs -pName $PNAME
 # Remove phi with wrong units
 rm -ErrorAction SilentlyContinue 0/phi
 %}
+
+%}
+%{%(boundaryInMRFRegionPresent%)
+%:True
+# set the wall inside the MRF region(s) to MRFnoSlip or MRFslip if using of11+
+if ( $Env:WM_PROJECT_VERSION[0] -ne "v" -and 11 -le $Env:WM_PROJECT_VERSION )
+{
+%{%(boundaries%)
+%{%(boundaries/%(0%)/InsideMRFRegion%)
+%:True
+%{%(solver/SolverName%)
+%:default
+%{%(boundaries/%(0%)/BoundaryType%)
+%:wall
+%{%(boundaries/%(0%)/BoundarySubType%)
+%:fixedWall
+	foamDictionary -entry boundaryField/%(0%)/type -set MRFnoSlip 0/U
+%:slipWall
+	foamDictionary -entry boundaryField/%(0%)/type -set MRFslip 0/U
+%}
+%}
+%}
+%}
+%}
+}
 
 %}
 # Run application

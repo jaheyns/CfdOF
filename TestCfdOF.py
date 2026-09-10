@@ -424,6 +424,21 @@ class BatteryCoolingTest(unittest.TestCase, MacroTest):
         self.closeDoc()
 
 
+class FanTest(unittest.TestCase, MacroTest):
+    __dir_name = 'Fan'
+    __macros = ['01-geom.FCMacro', '02-analysis.FCMacro', '03-boundaries.FCMacro', '04-MRF.FCMacro', '05-mesh.FCMacro', '06-meshRefinement.FCMacro']
+
+    def __init__(self, var):
+        super().__init__(var)
+        MacroTest.child_instance = self
+
+    def test_run(self):
+        self.runTest(self.__class__.__dir_name, self.__class__.__macros)
+
+    def tearDown(self):
+        self.closeDoc()
+
+
 class ProjectileTest(unittest.TestCase, MacroTest):
     __dir_name = 'Projectile'
     __macros = ['01-geometry.FCMacro', '02-mesh.FCMacro', '03-boundaries.FCMacro', '04-forceCoeffs.FCMacro']

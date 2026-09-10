@@ -61,6 +61,7 @@ class CfdCaseWriterFoam:
         self.scalar_transport_objs = CfdTools.getScalarTransportFunctionsGroup(analysis_obj)
         _all_mvf_objs = CfdTools.getMeanVelocityForceObjects(analysis_obj)
         _all_mode_objs = [o for o in _all_mvf_objs if o.SelectionMode == 'all']
+        self.MRF_objs = CfdTools.getMRFGroup(self.analysis_obj)
         self.mean_velocity_force_obj = _all_mode_objs[0] if _all_mode_objs else None
         self.mean_velocity_force_cellzone_objs = [
             o for o in _all_mvf_objs if o.SelectionMode == 'cellZone']
@@ -114,6 +115,9 @@ class CfdCaseWriterFoam:
             'fluidProperties': [],  # Order is important, so use a list
             'initialValues': CfdTools.propsToDict(self.initial_conditions),
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
+            'boundaryInMRFRegionPresent': False,
+            'MRF': {},
+            'MRFPresent': False,
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
             'reportingFunctionsEnabled': False,
             'scalarTransportFunctions': dict((st.Label, CfdTools.propsToDict(st)) for st in self.scalar_transport_objs),
@@ -212,6 +216,11 @@ class CfdCaseWriterFoam:
         if self.porous_zone_objs:
             self.processPorousZoneProperties()
         self.processInitialisationZoneProperties()
+
+        if self.MRF_objs:
+            cfdMessage('Multi-reference Frame zone(s) present\n')
+            self.exportMRFStlSurfaces()
+            self.processMRFProperties()
 
         if self.mean_velocity_force_cellzone_objs:
             cfdMessage('Mean velocity force cell zone(s) present\n')
@@ -491,6 +500,7 @@ class CfdCaseWriterFoam:
             settings['boundaries']['defaultFaces'] = {
                 'BoundaryType': 'wall',
                 'BoundarySubType': 'slipWall',
+                'InsideMRFRegion': False,
                 'ThermalBoundaryType': 'zeroGradient'
             }
 
@@ -500,21 +510,41 @@ class CfdCaseWriterFoam:
             if mr_obj.Extrusion and mr_obj.ExtrusionType == "2DPlanar":
                 settings['boundaries'][mr_obj.Label] = {
                     'BoundaryType': 'constraint',
+                    'InsideMRFRegion': False,
                     'BoundarySubType': 'empty'
                 }
                 settings['boundaries'][mr_obj.Label+"BackFace"] = {
                     'BoundaryType': 'constraint',
+                    'InsideMRFRegion': False,
                     'BoundarySubType': 'empty'
                 }
             if mr_obj.Extrusion and mr_obj.ExtrusionType == "2DWedge":
                 settings['boundaries'][mr_obj.Label] = {
                     'BoundaryType': 'constraint',
+                    'InsideMRFRegion': False,
                     'BoundarySubType': 'symmetry'
                 }
                 settings['boundaries'][mr_obj.Label+"BackFace"] = {
                     'BoundaryType': 'constraint',
+                    'InsideMRFRegion': False,
                     'BoundarySubType': 'symmetry'
                 }
+
+        # make sure that the InsideMRFRegion is true only for slipWall and fixedWall types and when the case is transient
+        for bc_name in settings['boundaries']:
+            if settings['boundaries'][bc_name]['InsideMRFRegion'] and\
+               (settings['boundaries'][bc_name]['BoundaryType'] != 'wall' or\
+               not self.MRF_objs or\
+               settings['physics']['Time'] != 'Transient' or\
+               (settings['boundaries'][bc_name]['BoundaryType'] == 'wall' and\
+               (settings['boundaries'][bc_name]['BoundarySubType'] != 'slipWall' and\
+               settings['boundaries'][bc_name]['BoundarySubType'] != 'fixedWall'))):
+                settings['boundaries'][bc_name]['InsideMRFRegion'] = False
+        # check if there is a boundary inside an MRF region after the above conditions
+        for bc_name in settings['boundaries']:
+            if settings['boundaries'][bc_name]['InsideMRFRegion']:
+                settings['boundaryInMRFRegionPresent'] = True
+                break
 
     def parseFaces(self, shape_refs):
         pass
@@ -784,6 +814,35 @@ class CfdCaseWriterFoam:
             else:
                 raise RuntimeError("Unrecognised method for porous baffle resistance")
             porousZoneSettings[po['Label']] = pd
+
+    # MRF region(s)
+    def exportMRFStlSurfaces(self):
+        for o in self.MRF_objs:
+            for r in o.ShapeRefs:
+                path = os.path.join(self.working_dir,
+                                    self.solver_obj.InputCaseName,
+                                    "constant",
+                                    "triSurface")
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                shape = r[0].Shape
+                CfdMeshTools.writeSurfaceMeshFromShape(shape, path, r[0].Name, self.mesh_obj)
+                print("Successfully wrote stl surface for multi-reference frame zone\n")
+
+    def processMRFProperties(self):
+        for MRF_id, MRF_obj in enumerate(self.MRF_objs):
+            part_name_list = tuple(r[0].Name for r in MRF_obj.ShapeRefs)
+            self.settings['MRF'][MRF_obj.Label] = {
+                'PartNameList': part_name_list,
+                'CoR': tuple(Units.Quantity(p, Units.Length).getValueAs('m') for p in MRF_obj.CenterOfRotation),
+                'Axis': tuple(d for d in MRF_obj.Axis),
+                'SpeedRPM': MRF_obj.Speed, # revolution per minute
+                'SpeedRPS': (MRF_obj.Speed/9.54928945328726331688), # rad/s # for the openCFD version
+            }
+            # Register the zone for topoSetZonesDict so the cellZoneSet is created
+            self.settings['zones'][MRF_obj.Label] = {'PartNameList': part_name_list}
+        self.settings['MRFPresent'] = True
+        self.settings['zonesPresent'] = True
 
     # Mean velocity force cell zones
     def exportMeanVelocityForceCellZoneStlSurfaces(self):

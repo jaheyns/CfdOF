@@ -1,0 +1,30 @@
+%{%(MRFPresent%)
+%:True
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      MRFProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+%{%(MRF%)
+%{%(MRF/%(0%)/PartNameList%)
+%(0%)
+{
+    cellZone    %(0%);
+    active      yes;
+
+    nonRotatingPatches ();
+
+    origin    (%(MRF/%(1%)/CoR%));
+    axis      (%(MRF/%(1%)/Axis%));
+    omega     %(MRF/%(1%)/SpeedRPS%);
+}
+%}
+%}
+
+// ************************************************************************* //
+%}

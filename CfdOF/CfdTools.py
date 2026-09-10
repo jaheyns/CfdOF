@@ -233,6 +233,10 @@ def getModulePath():
 
 
 # Function objects
+def getMRFGroup(analysis_object):
+    return getModelsOfType(analysis_object, 'CfdMRF')
+
+
 def getReportingFunctionsGroup(analysis_object):
     return getModelsOfType(analysis_object, 'CfdReportingFunction')
 
