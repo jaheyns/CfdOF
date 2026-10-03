@@ -34,6 +34,21 @@ from CfdOF.CfdTools import cfdMessage
 from CfdOF.Mesh import CfdMeshTools
 from CfdOF.Mesh import CfdDynamicMeshRefinement
 
+
+def reThetatFromIntensity(tu_percent):
+    """ Langtry & Menter (2009) transition-onset momentum-thickness Reynolds
+    number at zero pressure gradient (F(lambda) = 1). The correlation is
+    defined with the turbulence intensity in PERCENT -- OpenFOAM's
+    kOmegaSSTLM evaluates it the same way (100*sqrt(2k/3)/U) -- with the
+    same clips: Tu >= 0.027 %, Re_theta_t >= 20. """
+    tu = max(tu_percent, 0.027)
+    if tu <= 1.3:
+        re_thetat = 1173.51 - 589.428*tu + 0.2196/tu**2
+    else:
+        re_thetat = 331.5*(tu - 0.5658)**-0.671
+    return max(re_thetat, 20.0)
+
+
 class CfdCaseWriterFoam:
     def __init__(self, analysis_obj):
         self.case_folder = None
@@ -464,9 +479,14 @@ class CfdCaseWriterFoam:
             # Copy turbulence settings
             bc['TurbulenceIntensity'] = bc['TurbulenceIntensityPercentage']/100.0
             physics = settings['physics']
-            if physics['Turbulence'] == 'RANS' and physics['TurbulenceModel'] == 'SpalartAllmaras':
-                if (bc['BoundaryType'] == 'inlet' or bc['BoundaryType'] == 'open') and \
-                        bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale':
+            is_turb_inlet = (bc['BoundaryType'] == 'inlet' or bc['BoundaryType'] == 'open') and \
+                bc['TurbulenceInletSpecification'] == 'intensityAndLengthScale'
+            # All Spalart-Allmaras variants (RANS, and the DES/DDES/IDDES hybrids, which are
+            # Turbulence == 'DES') transport nuTilda. Restricting this to RANS left the hybrids
+            # with the uncomputed NuTilda property default (55 m^2/s), which diverges.
+            if physics['Turbulence'] in ('RANS', 'DES') and \
+                    physics['TurbulenceModel'].startswith('SpalartAllmaras'):
+                if is_turb_inlet:
                     if bc['BoundarySubType'] == 'uniformVelocityInlet' or bc['BoundarySubType'] == 'farField':
                         Uin = (bc['Ux']**2 + bc['Uy']**2 + bc['Uz']**2)**0.5
 
@@ -481,6 +501,13 @@ class CfdCaseWriterFoam:
                         raise RuntimeError(
                             "Inlet type currently unsupported for calculating turbulence inlet conditions from "
                             "intensity and length scale.")
+
+            # Langtry-Menter transition model: the inlet ReThetat must come from the inlet
+            # turbulence intensity too, otherwise the 0/ReThetat template writes the
+            # uncomputed ReThetat property default (1).
+            if physics['Turbulence'] == 'RANS' and physics['TurbulenceModel'] == 'kOmegaSSTLM' and \
+                    is_turb_inlet:
+                bc['ReThetat'] = reThetatFromIntensity(bc['TurbulenceIntensityPercentage'])
 
             if bc['DefaultBoundary']:
                 if settings['boundaries'].get('defaultFaces'):
@@ -647,12 +674,10 @@ class CfdCaseWriterFoam:
                             # Spalart Allmaras
                             nuTilda = inlet_bc['NuTilda']
 
-                            # k omega (transition)
+                            # k omega (transition). The correlation takes Tu in percent, not the
+                            # fraction I above (passing I gave values 6-1700x too high).
                             gammaInt = 1
-                            if I <= 1.3:
-                                ReThetat = 1173.51 - (589.428 * I) + (0.2196 / (I**2))
-                            else:
-                                ReThetat = 331.5 / ((I - 0.5658)**0.671)
+                            ReThetat = reThetatFromIntensity(inlet_bc['TurbulenceIntensityPercentage'])
 
                             # Set the values
                             initial_values['k'] = k
