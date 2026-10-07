@@ -1,0 +1,29 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%{%(multiRegionSolidNames%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/%(multiRegionSolidNames/%(0%)%)";
+    object      fvOptions;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+heatSource
+{
+    type            scalarSemiImplicitSource;
+    active          %(solidProperties/%(0%)/HeatGenerationActive%);
+    selectionMode   all;
+    volumeMode      specific;
+    injectionRateSuSp
+    {
+        h    (%(solidProperties/%(0%)/HeatGeneration%) 0);
+    }
+}
+
+// ************************************************************************* //
+%} constant/%(multiRegionSolidNames/%(0%)%)/fvOptions
+%}

@@ -13,6 +13,99 @@ FoamFile
 actions
 (
 
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+    // Remove any pre-existing cell zones created by the mesh converter (e.g. gmshToFoam)
+    // before creating the CHT region cell zones
+    {
+        name    Internal;
+        type    cellZoneSet;
+        action  clear;
+    }
+
+    // --- Solid region cellSets (created first so they can be subtracted from fluid) ---
+%{%(multiRegionSolidNamesDict%)
+    {
+        name    %(0%)SelectedSurface;
+        type    cellSet;
+        action  new;
+        source  surfaceToCell;
+        sourceInfo
+        {
+            file            "constant/triSurface/%(0%).stl";
+            useSurfaceOrientation true;
+            outsidePoints   ();
+            includeCut      false;
+            includeInside   true;
+            includeOutside  false;
+            nearDistance    -1;
+            curvature       -100;
+        }
+    }
+
+%}
+    // --- Fluid region cellSets (solid cells subtracted to handle solid-inside-fluid) ---
+%{%(multiRegionFluidNamesDict%)
+    {
+        name    %(0%)SelectedSurface;
+        type    cellSet;
+        action  new;
+        source  surfaceToCell;
+        sourceInfo
+        {
+            file            "constant/triSurface/%(0%).stl";
+            useSurfaceOrientation true;
+            outsidePoints   ();
+            includeCut      false;
+            includeInside   true;
+            includeOutside  false;
+            nearDistance    -1;
+            curvature       -100;
+        }
+    }
+
+%{%(multiRegionSolidNamesDict%)
+    {
+        name    %(1%)SelectedSurface;
+        type    cellSet;
+        action  subtract;
+        source  cellToCell;
+        sourceInfo
+        {
+            set %(0%)SelectedSurface;
+        }
+    }
+
+%}
+%}
+    // --- Create cellZones from cellSets ---
+%{%(multiRegionSolidNamesDict%)
+    {
+        name    %(0%);
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set %(0%)SelectedSurface;
+        }
+    }
+
+%}
+%{%(multiRegionFluidNamesDict%)
+    {
+        name    %(0%);
+        type    cellZoneSet;
+        action  new;
+        source  setToCellZone;
+        sourceInfo
+        {
+            set %(0%)SelectedSurface;
+        }
+    }
+
+%}
+%:default
 %{%(zones%)
 %{%(zones/%(0%)/PartNameList%)
     {
@@ -44,6 +137,7 @@ actions
         }
     }
 
+%}
 %}
 %}
 );

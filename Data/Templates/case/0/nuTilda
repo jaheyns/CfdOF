@@ -1,3 +1,6 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%:default
 %{%(physics/Turbulence%)
 %:RANS DES
 %{%(physics/TurbulenceModel%)
@@ -65,5 +68,6 @@ boundaryField
 }
 
 // ************************************************************************* //
+%}
 %}
 %}

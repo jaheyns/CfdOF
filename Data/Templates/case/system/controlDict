@@ -10,6 +10,11 @@ FoamFile
 
 application     %(solver/SolverName%);
 
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+#includeIfPresent "regionSolvers"
+
+%}
 startFrom       %(solver/StartFrom%);
 
 startTime       0;
