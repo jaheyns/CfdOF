@@ -68,6 +68,7 @@ class CfdOFWorkbench(Workbench):
         import CfdOF.PostProcess.CfdReportingFunction
         import CfdOF.Solve.CfdScalarTransportFunction
         import CfdOF.Solve.CfdMeanVelocityForce
+        import CfdOF.Solve.CfdMRF
         import CfdOF.CfdOpenPreferencesPage
         import CfdOF.CfdReloadWorkbench
         import CfdOF.CfdTestCommands
@@ -109,7 +110,7 @@ class CfdOFWorkbench(Workbench):
                   ('T', 'CfdOF_GroupDynamicMeshRefinement',),
                   'CfdOF_PhysicsModel', 'CfdOF_FluidMaterial',
                   'CfdOF_FluidBoundary', 'CfdOF_InitialiseInternal',
-                  'CfdOF_InitialisationZone', 'CfdOF_PorousZone', 'CfdOF_MeanVelocityForce',
+                  'CfdOF_InitialisationZone', 'CfdOF_PorousZone', 'CfdOF_MeanVelocityForce', 'CfdOF_MRF',
                   'CfdOF_ReportingFunctions', 'CfdOF_ScalarTransportFunctions',
                   'CfdOF_SolverControl',
                   ('M', 'CfdOF_OpenPreferences',),

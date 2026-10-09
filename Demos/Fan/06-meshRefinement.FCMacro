@@ -1,0 +1,6 @@
+from CfdOF.Mesh import CfdMeshRefinement
+CfdMeshRefinement.makeCfdMeshRefinement(App.ActiveDocument.Body002_Mesh)
+FreeCAD.ActiveDocument.MeshRefinement.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body001'), ('',))]
+FreeCAD.ActiveDocument.MeshRefinement.RelativeLength = 0.75
+FreeCAD.ActiveDocument.recompute()

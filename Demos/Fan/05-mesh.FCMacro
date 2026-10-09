@@ -1,0 +1,7 @@
+from CfdOF.Mesh import CfdMesh
+CfdMesh.makeCfdMesh('Body002_Mesh')
+App.ActiveDocument.ActiveObject.Part = App.ActiveDocument.Body002
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(App.ActiveDocument.ActiveObject)
+App.ActiveDocument.Body002_Mesh.CharacteristicLengthMax = '4.0 mm'
+FreeCAD.ActiveDocument.recompute()

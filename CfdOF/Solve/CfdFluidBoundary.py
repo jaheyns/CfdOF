@@ -767,6 +767,17 @@ class CfdFluidBoundary:
             "Volume fraction",
             QT_TRANSLATE_NOOP("App::Property", "Volume fractions"),
         )
+        # add a variable that indicate if a bc is inside an MRF region
+        # this is needed for OF11+ to set the bc type to MRFnoSlip or MRFslip
+        # but only for wall types and when the case is transient
+        addObjectProperty(
+            obj,
+            "InsideMRFRegion",
+            False,
+            "App::PropertyBool",
+            "MRF",
+            QT_TRANSLATE_NOOP("App::Property", "Whether the boundary condition is inside an MRF region"),
+        )
 
     def onDocumentRestored(self, obj):
         self.initProperties(obj)
