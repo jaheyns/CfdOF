@@ -32,7 +32,6 @@ from FreeCAD import Units
 if FreeCAD.GuiUp:
     import FreeCADGui
     from PySide import QtGui, QtCore
-    from PySide.QtGui import QFormLayout
 from CfdOF import CfdTools
 from CfdOF.CfdTools import getQuantity, setQuantity, indexOrDefault, storeIfChanged
 from CfdOF import CfdFaceSelectWidget
