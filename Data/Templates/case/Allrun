@@ -44,6 +44,8 @@ then
 fi
 
 # Copy mesh from mesh case dir if available
+%{%(multiRegionUseSplitMeshRegions%)
+%:True
 MESHDIR="%(meshDir%)"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
@@ -54,6 +56,7 @@ then
     echo "Fatal error: Unable to find mesh in directory $MESHDIR" 1>&2
     exit 1
 fi
+%}
 
 # Detect available turbulence lib
 if [ -f "$FOAM_LIBBIN/libmomentumTransportModels.so" ] || [ -f "$FOAM_LIBBIN/libmomentumTransportModels.dll" ]
@@ -149,7 +152,10 @@ fi
 
 %}
 # Update patch name and type
+%{%(multiRegionUseSplitMeshRegions%)
+%:True
 runCommand createPatch -overwrite
+%}
 
 %{%(createPatchesForPeriodics%)
 %:True
@@ -180,8 +186,16 @@ fi
 %}
 %{%(multiRegionEnabled%)
 %:True
+%{%(multiRegionUseSplitMeshRegions%)
+%:True
 # Split the combined mesh into its fluid and solid regions
 runCommand splitMeshRegions -cellZonesOnly -overwrite
+%:False
+# Copy and configure the independently generated region meshes
+env -u PYTHONPATH -u PYTHONHOME python3 prepareMultiRegion.py meshes
+status=$?
+if [ ! $status -eq 0 ]; then exit $status; fi
+%}
 
 %{%(meanVelocityForceCellZonesPresent%)
 %:True
@@ -189,7 +203,7 @@ runCommand splitMeshRegions -cellZonesOnly -overwrite
 runCommand topoSet -region %(multiRegionFluidNames/0%) -dict "$PWD/system/%(multiRegionFluidNames/0%)/topoSetMeanVelocityForceZonesDict"
 
 %}
-# Complete the interface patch and field setup created by splitMeshRegions
+# Complete the region interface patch and field setup
 env -u PYTHONPATH -u PYTHONHOME python3 prepareMultiRegion.py
 status=$?
 if [ ! $status -eq 0 ]; then exit $status; fi

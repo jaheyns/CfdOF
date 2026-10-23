@@ -760,6 +760,128 @@ class BoundaryFaceAssignmentTest(unittest.TestCase):
             FreeCAD.closeDocument(doc.Name)
 
 
+class TransientChtTemplateTest(unittest.TestCase):
+    def setUp(self):
+        from CfdOF.TemplateBuilder import TemplateBuilder
+
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.builder = TemplateBuilder.__new__(TemplateBuilder)
+        self.builder.case_path = self.temp_dir.name
+        self.builder.template_path = os.path.join(home_path, 'Data', 'Templates', 'case')
+        self.builder.settings = {
+            'multiRegionFluidNames': ['fluid'],
+            'multiRegionSolidNames': ['solid'],
+            'physics': {
+                'Time': 'Transient',
+                'Turbulence': 'Laminar',
+                'TurbulenceModel': 'None',
+            },
+            'solver': {
+                'SolverName': 'chtMultiRegionFoam',
+                'ConvergenceTol': 1e-5,
+                'FluidNonOrthogonalCorrectors': 1,
+                'SolidNonOrthogonalCorrectors': 0,
+                'URelaxation': 0.7,
+                'energyRelaxation': 0.7,
+                'pRelaxation': 0.3,
+                'rhoRelaxation': 0.3,
+                'SolidEnergyRelaxation': 0.7,
+            },
+        }
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def test_transient_cht_algorithm_and_time_schemes(self):
+        top_solution = self.builder.buildFile('system/fvSolution', [])
+        fluid_solution = self.builder.buildFile('system/fluid/fvSolution', [])
+        fluid_schemes = self.builder.buildFile('system/fluid/fvSchemes', [])
+
+        self.assertRegex(top_solution, r'PIMPLE\s*\{\s*nOuterCorrectors\s+1;')
+        self.assertRegex(fluid_solution, r'PIMPLE\s*\{')
+        self.assertIn('"(rho|rhoFinal)"', fluid_solution)
+        self.assertNotRegex(fluid_solution, r'\bSIMPLE\s*\{')
+        self.assertRegex(fluid_schemes, r'ddtSchemes\s*\{\s*default\s+Euler;')
+        self.assertNotIn('default         steadyState;', fluid_schemes)
+
+        self.builder.buildFile('system/solid/fvSolution', [])
+        self.builder.buildFile('system/solid/fvSchemes', [])
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSolution')) as stream:
+            solid_solution = stream.read()
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSchemes')) as stream:
+            solid_schemes = stream.read()
+        self.assertRegex(solid_solution, r'PIMPLE\s*\{')
+        self.assertNotRegex(solid_solution, r'\bSIMPLE\s*\{')
+        self.assertRegex(solid_schemes, r'ddtSchemes\s*\{\s*default\s+Euler;')
+        self.assertNotIn('default         steadyState;', solid_schemes)
+
+    def test_steady_cht_output_is_unchanged(self):
+        self.builder.settings['physics']['Time'] = 'Steady'
+        self.builder.settings['solver']['SolverName'] = 'chtMultiRegionSimpleFoam'
+
+        top_solution = self.builder.buildFile('system/fvSolution', [])
+        fluid_solution = self.builder.buildFile('system/fluid/fvSolution', [])
+        fluid_schemes = self.builder.buildFile('system/fluid/fvSchemes', [])
+
+        self.assertNotRegex(top_solution, r'\bPIMPLE\s*\{')
+        self.assertRegex(fluid_solution, r'SIMPLE\s*\{')
+        self.assertNotRegex(fluid_solution, r'\bPIMPLE\s*\{')
+        self.assertNotIn('"(rho|rhoFinal)"', fluid_solution)
+        self.assertRegex(fluid_schemes, r'ddtSchemes\s*\{\s*default\s+steadyState;')
+        self.assertNotIn('default         Euler;', fluid_schemes)
+
+        self.builder.buildFile('system/solid/fvSolution', [])
+        self.builder.buildFile('system/solid/fvSchemes', [])
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSolution')) as stream:
+            solid_solution = stream.read()
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSchemes')) as stream:
+            solid_schemes = stream.read()
+        self.assertRegex(solid_solution, r'SIMPLE\s*\{')
+        self.assertNotRegex(solid_solution, r'\bPIMPLE\s*\{')
+        self.assertRegex(solid_schemes, r'ddtSchemes\s*\{\s*default\s+steadyState;')
+        self.assertNotIn('default         Euler;', solid_schemes)
+
+
+@unittest.skipUnless(FreeCAD.GuiUp, "Solver remeshing requires the GUI")
+class MultiRegionRemeshTest(unittest.TestCase):
+    def test_solver_remeshes_all_regions_before_solving(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock, patch
+        from CfdOF.Solve import TaskPanelCfdSolverControl
+
+        panel = TaskPanelCfdSolverControl.TaskPanelCfdSolverControl.__new__(
+            TaskPanelCfdSolverControl.TaskPanelCfdSolverControl)
+        panel.analysis_object = SimpleNamespace(
+            NeedsMeshRewrite=True, NeedsMeshRerun=True, NeedsCaseRewrite=True)
+        panel.form = Mock()
+        panel.store = Mock()
+        panel.consoleMessage = Mock()
+        panel.write_input_file_handler = Mock()
+        meshes = [Mock(), Mock()]
+        mesh_tools = [Mock(), Mock()]
+        started = []
+        panel.startNextMesh = lambda: started.append(panel.pending_meshes.pop(0))
+
+        with patch.object(CfdTools, 'getMeshObjects', return_value=meshes), \
+                patch.object(CfdMeshTools, 'CfdMeshTools', side_effect=mesh_tools), \
+                patch.object(TaskPanelCfdSolverControl.QtGui.QMessageBox, 'question',
+                             return_value=TaskPanelCfdSolverControl.QtGui.QMessageBox.Yes):
+            panel.runSolverProcess()
+
+        for tools in mesh_tools:
+            tools.writeMesh.assert_called_once()
+        self.assertEqual(started, mesh_tools[:1])
+        self.assertTrue(panel.analysis_object.NeedsMeshRerun)
+        panel.runSolverProcess = Mock()
+        panel.mesherFinished(0)
+        self.assertEqual(started, mesh_tools)
+        panel.runSolverProcess.assert_not_called()
+        self.assertTrue(panel.analysis_object.NeedsMeshRerun)
+        panel.mesherFinished(0)
+        self.assertFalse(panel.analysis_object.NeedsMeshRerun)
+        panel.runSolverProcess.assert_called_once()
+
+
 def compareInpFiles(file_name1, file_name2):
     file1 = open(file_name1, 'r')
     f1 = file1.readlines()

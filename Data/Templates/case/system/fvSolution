@@ -1,5 +1,5 @@
 %{%(solver/SolverName%)
-%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%:chtMultiRegionSimpleFoam
 %[_header%]
 FoamFile
 {
@@ -10,7 +10,32 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+%{%(system/FoundationChtModels%)
+%:True
+PIMPLE
+{
+    nOuterCorrectors 1;
+}
+%:False
 // (intentionally empty - solver settings are in system/<region>/fvSolution)
+%}
+
+// ************************************************************************* //
+%:chtMultiRegionFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+PIMPLE
+{
+    nOuterCorrectors 1;
+}
 
 // ************************************************************************* //
 %:default

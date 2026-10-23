@@ -13,7 +13,12 @@ FoamFile
 
 ddtSchemes
 {
+%{%(physics/Time%)
+%:Steady
     default         steadyState;
+%:Transient
+    default         Euler;
+%}
 }
 
 gradSchemes

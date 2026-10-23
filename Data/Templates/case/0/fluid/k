@@ -42,7 +42,8 @@ boundaryField
 
 %}
 
-%{%(multiRegionSplitMeshBoundaryEntries%)
+%{%(multiRegionUseSplitMeshRegions%)
+%:True
 %{%(multiRegionSolidNames%)
     %(multiRegionFluidNames/0%)_to_%(multiRegionSolidNames/%(0%)%)
     {

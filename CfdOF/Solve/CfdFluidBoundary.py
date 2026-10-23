@@ -315,6 +315,39 @@ class CommandCfdFluidBoundary:
         FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
 
 
+def makeCfdSolidBoundary(name="CfdSolidBoundary"):
+    obj = makeCfdFluidBoundary(name)
+    addObjectProperty(obj, "SolidBoundary", True, "App::PropertyBool", "",
+                      QT_TRANSLATE_NOOP("App::Property", "External solid thermal boundary"))
+    obj.setEditorMode("SolidBoundary", 1)
+    obj.BoundaryType = "wall"
+    obj.BoundarySubType = "fixedWall"
+    obj.ThermalBoundaryType = "zeroGradient"
+    return obj
+
+
+class CommandCfdSolidBoundary(CommandCfdFluidBoundary):
+    def GetResources(self):
+        return {
+            'Pixmap': os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "solid_boundary.svg"),
+            'MenuText': QT_TRANSLATE_NOOP("CfdOF_SolidBoundary", "Solid boundary"),
+            'ToolTip': QT_TRANSLATE_NOOP("CfdOF_SolidBoundary", "Assign a thermal condition to external solid faces")}
+
+    def Activated(self):
+        selection = [(entry.Object, tuple(entry.SubElementNames))
+                     for entry in FreeCADGui.Selection.getSelectionEx()]
+        FreeCAD.ActiveDocument.openTransaction("Create solid thermal boundary")
+        FreeCADGui.doCommand("from CfdOF.Solve import CfdFluidBoundary")
+        FreeCADGui.doCommand("from CfdOF import CfdTools")
+        FreeCADGui.doCommand("CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdSolidBoundary())")
+        boundary = FreeCAD.ActiveDocument.ActiveObject
+        FreeCADGui.ActiveDocument.setEdit(boundary.Name)
+        selector = boundary.ViewObject.Proxy.taskd.faceSelector
+        for obj, subnames in selection:
+            for subname in subnames or (None,):
+                selector.addSelection(obj.Document.Name, obj.Name, subname)
+
+
 class CfdFluidBoundary:
     def __init__(self, obj):
         self.initProperties(obj)
@@ -838,7 +871,8 @@ class ViewProviderCfdFluidBoundary:
         self.taskd = None
 
     def getIcon(self):
-        icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", "boundary.svg")
+        icon = "solid_boundary.svg" if getattr(self.Object, 'SolidBoundary', False) else "boundary.svg"
+        icon_path = os.path.join(CfdTools.getModulePath(), "Gui", "Icons", icon)
         return icon_path
 
     def attach(self, vobj):
@@ -949,5 +983,6 @@ class _ViewProviderCfdFluidBoundary:
         return None
 
 
-if FreeCAD.GuiUp:
+if FreeCAD.GuiUp and hasattr(FreeCADGui, 'addCommand'):
     FreeCADGui.addCommand('CfdOF_FluidBoundary', CommandCfdFluidBoundary())
+    FreeCADGui.addCommand('CfdOF_SolidBoundary', CommandCfdSolidBoundary())
