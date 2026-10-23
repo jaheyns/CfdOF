@@ -235,6 +235,50 @@ def getCfdBoundaryGroup(analysis_object):
     return getModelsOfType(analysis_object, 'CfdFluidBoundary')
 
 
+def getRegionCoupledInterfaceGroup(analysis_object):
+    return getModelsOfType(analysis_object, 'CfdRegionCoupledInterface')
+
+
+def getCfdBoundaryGroupWithRegionInterfaces(analysis_object):
+    boundaries = list(getCfdBoundaryGroup(analysis_object))
+    for interface_obj in getRegionCoupledInterfaceGroup(analysis_object):
+        if hasattr(interface_obj.Proxy, 'makeBoundaryObjects'):
+            boundaries.extend(interface_obj.Proxy.makeBoundaryObjects(interface_obj))
+    return boundaries
+
+
+def validateBoundaryFaceAssignments(boundaries):
+    """Reject competing boundary objects on the same referenced geometry face."""
+    owners = {}
+    for boundary in boundaries:
+        for obj, subnames in boundary.ShapeRefs:
+            for subname in subnames or ('',):
+                shape = obj.Shape.getElement(subname) if subname else obj.Shape
+                for face in shape.Faces:
+                    face_index = next(index for index, candidate in enumerate(obj.Shape.Faces, 1)
+                                      if candidate.isSame(face))
+                    key = (obj.Document.Name, obj.Name, face_index)
+                    previous = owners.get(key)
+                    if previous is not None and previous is not boundary:
+                        raise ValueError("Duplicate boundary assignment: '{}:Face{}' is assigned to both '{}' "
+                                         "and '{}'. Remove the conflicting face assignment.".format(
+                                             obj.Label, face_index, previous.Label, boundary.Label))
+                    owners[key] = boundary
+
+
+def getBoundaryPatchPrefix(boundary, index):
+    """Keep generated interface patch names independent of boundary list order."""
+    if hasattr(boundary, 'InterfaceObject'):
+        return 'patch_' + _safeRegionName(boundary.Label)
+    return 'patch_' + str(index + 1)
+
+
+def boundaryToDict(obj):
+    if hasattr(obj, 'toDict'):
+        return obj.toDict()
+    return propsToDict(obj)
+
+
 def isPlanar(shape):
     """
     Return whether the shape is a planar face
