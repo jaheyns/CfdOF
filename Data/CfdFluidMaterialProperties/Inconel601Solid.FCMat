@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; Inconel601Solid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Inconel601_solid
+Type = Solid
+Description = INCONEL alloy 601 solid thermal properties
+Density = 8110 kg/m^3
+ThermalConductivity = 11.2 W/m/K
+SpecificHeat = 448 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=f3fb3ae6ebe54d98ad8fa01c74b6a3e8

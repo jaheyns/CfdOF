@@ -1,0 +1,12 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+regionSolvers
+{
+%{%(multiRegionFluidNames%)
+    %(multiRegionFluidNames/%(0%)%) fluid;
+%}
+%{%(multiRegionSolidNames%)
+    %(multiRegionSolidNames/%(0%)%) solid;
+%}
+}
+%}

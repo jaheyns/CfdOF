@@ -36,6 +36,7 @@ from CfdOF.Solve import CfdInitialiseFlowField
 from CfdOF.Solve import CfdFluidMaterial
 from CfdOF.Mesh import CfdMesh
 from CfdOF.Solve import CfdFluidBoundary
+from CfdOF.Solve import CfdRegionCoupledInterface
 from CfdOF import CfdTools
 from CfdOF.Solve import CfdCaseWriterFoam
 from CfdOF.Mesh import CfdMeshTools
@@ -83,6 +84,10 @@ class BlockTest(unittest.TestCase):
         self.analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
         CfdTools.setActiveAnalysis(self.analysis)
         self.active_doc.recompute()
+
+    def test_fluid_boundary_has_no_region_override(self):
+        boundary = CfdFluidBoundary.makeCfdFluidBoundary('boundary')
+        self.assertNotIn('RegionName', boundary.PropertiesList)
 
     def createNewSolver(self):
         self.solver_object = CfdSolverFoam.makeCfdSolverFoam()
@@ -134,6 +139,7 @@ class BlockTest(unittest.TestCase):
         self.inlet_boundary = CfdFluidBoundary.makeCfdFluidBoundary('inlet')
         self.analysis.addObject(self.inlet_boundary)
         bc_set = self.inlet_boundary
+        self.assertNotIn('RegionName', bc_set.PropertiesList)
         bc_set.BoundaryType = 'inlet'
         bc_set.BoundarySubType = 'uniformVelocityInlet'
         bc_set.Ux = 1
@@ -545,6 +551,422 @@ class WaterPouringTest(unittest.TestCase, MacroTest):
 
     def tearDown(self):
         self.closeDoc()
+
+
+@unittest.skipUnless(FreeCAD.GuiUp, "Mesh shape selection requires the GUI")
+class MeshShapeSelectionTest(unittest.TestCase):
+    def test_missing_mesh_case_name_gets_unique_default(self):
+        doc = FreeCAD.newDocument('LegacyMeshCaseNameTest')
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+            CfdTools.setActiveAnalysis(analysis)
+            shape = doc.addObject('Part::Box', 'Shape')
+            doc.recompute()
+            meshes = []
+            for _ in range(3):
+                mesh = CfdMesh.makeCfdMesh()
+                analysis.addObject(mesh)
+                mesh.Part = shape
+                meshes.append(mesh)
+            meshes[1].removeProperty('CaseName')
+            meshes[2].removeProperty('CaseName')
+            for index, mesh in enumerate(meshes, 1):
+                tools = CfdMeshTools.CfdMeshTools(mesh)
+                self.assertEqual(mesh.CaseName, 'meshCase{}'.format(index))
+                self.assertEqual(tools.case_name, mesh.CaseName)
+            meshes[2].CaseName = 'custom mesh.name-'
+            CfdMeshTools.CfdMeshTools(meshes[2])
+            self.assertEqual(meshes[2].CaseName, 'custom mesh.name-')
+            meshes[2].removeProperty('CaseName')
+            meshes[2].Proxy.onDocumentRestored(meshes[2])
+            self.assertEqual(meshes[2].CaseName, 'meshCase3')
+        finally:
+            FreeCAD.closeDocument(doc.Name)
+
+    def test_mesh_case_name_is_preserved(self):
+        from CfdOF.Mesh import TaskPanelCfdMesh
+
+        doc = FreeCAD.newDocument('MeshCaseNameTest')
+        panel = None
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+            CfdTools.setActiveAnalysis(analysis)
+            shape = doc.addObject('Part::Box', 'Shape')
+            doc.recompute()
+            first = CfdMesh.makeCfdMesh()
+            analysis.addObject(first)
+            first.Part = shape
+            second = CfdMesh.makeCfdMesh()
+            analysis.addObject(second)
+            self.assertEqual(first.CaseName, 'meshCase1')
+            self.assertEqual(second.CaseName, 'meshCase2')
+            self.assertEqual(CfdMesh.nextMeshCaseName(doc), 'meshCase3')
+            FreeCADGui.Selection.clearSelection()
+            first.CaseName = 'custom mesh.name-'
+            panel = TaskPanelCfdMesh.TaskPanelCfdMesh(first)
+            self.assertEqual(panel.editMeshCaseName.text(), first.CaseName)
+            for name in ('meshCase1', ' heat sink mesh.- ', ''):
+                panel.editMeshCaseName.setText(name)
+                panel.store()
+                self.assertEqual(first.CaseName, name)
+                self.assertEqual(panel.editMeshCaseName.text(), name)
+                tools = CfdMeshTools.CfdMeshTools(first)
+                tools.getFilePaths('/tmp/mesh-name-test')
+                self.assertEqual(tools.case_name, name)
+                self.assertEqual(tools.mesh_case_dir, os.path.join('/tmp/mesh-name-test', name))
+                self.assertEqual(first.CaseName, name)
+        finally:
+            if panel is not None:
+                panel.Timer.stop()
+                panel.form.close()
+            FreeCADGui.Selection.clearSelection()
+            FreeCAD.closeDocument(doc.Name)
+
+    def test_mesh_without_selected_shape(self):
+        doc = FreeCAD.newDocument("MeshWithoutShapeTest")
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+            CfdTools.setActiveAnalysis(analysis)
+            FreeCADGui.Selection.clearSelection()
+            command = CfdMesh.CommandCfdMeshFromShape()
+            self.assertTrue(command.IsActive())
+            command.Activated()
+            mesh = CfdTools.getMesh(analysis)
+            self.assertIsNone(mesh.Part)
+            self.assertNotIn('RegionType', mesh.PropertiesList)
+            panel = mesh.ViewObject.Proxy.taskd
+            self.assertFalse(hasattr(panel, 'regionFrame'))
+            self.assertEqual(panel.form.cb_shape.currentData(), "")
+            self.assertTrue(panel.form.pb_write_mesh.isEnabled())
+            self.assertTrue(panel.form.pb_run_mesh.isEnabled())
+            for button in (panel.form.pb_write_mesh, panel.form.pb_run_mesh):
+                panel.console_message_cart = ''
+                button.click()
+                self.assertIn("Select a shape before meshing.", panel.form.te_output.toPlainText())
+            FreeCADGui.ActiveDocument.resetEdit()
+
+            shape = doc.addObject("Part::Box", "ChosenShape")
+            doc.recompute()
+            FreeCADGui.Selection.addSelection(mesh)
+            command.Activated()
+            panel = mesh.ViewObject.Proxy.taskd
+            panel.form.cb_shape.setCurrentIndex(panel.form.cb_shape.findData(shape.Name))
+            self.assertIs(mesh.Part, shape)
+            panel.form.cb_shape.setCurrentIndex(0)
+            self.assertIsNone(mesh.Part)
+            self.assertIsNone(mesh.Proxy.cart_mesh)
+        finally:
+            if FreeCADGui.ActiveDocument.getInEdit():
+                FreeCADGui.ActiveDocument.resetEdit()
+            FreeCADGui.Selection.clearSelection()
+            FreeCAD.closeDocument(doc.Name)
+
+    def test_mesh_shape_selection(self):
+        from CfdOF.Mesh import TaskPanelCfdMesh
+
+        doc = FreeCAD.newDocument("MeshShapeSelectionTest")
+        panels = []
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+            first = doc.addObject("Part::Box", "First")
+            second = doc.addObject("Part::Cylinder", "Second")
+            first.Label = second.Label = "Duplicate label"
+            doc.addObject("Part::Feature", "Empty")
+            doc.recompute()
+            mesh = CfdMesh.makeCfdMesh()
+            analysis.addObject(mesh)
+            mesh.Part = first
+            mesh.PartSubShape = "Solid1"
+
+            FreeCADGui.Selection.clearSelection()
+            panel = TaskPanelCfdMesh.TaskPanelCfdMesh(mesh)
+            panels.append(panel)
+            combo = panel.form.cb_shape
+            self.assertEqual(combo.count(), 3)
+            self.assertEqual(combo.currentData(), first.Name)
+            self.assertEqual(mesh.PartSubShape, "Solid1")
+            combo.setCurrentIndex(combo.findData(second.Name))
+            self.assertIs(mesh.Part, second)
+            self.assertEqual(mesh.PartSubShape, "")
+            self.assertIs(mesh.Proxy.cart_mesh.part_obj, second)
+            panel.Timer.stop()
+            panel.form.close()
+
+            FreeCADGui.Selection.addSelection(first, "Face1")
+            panel = TaskPanelCfdMesh.TaskPanelCfdMesh(mesh)
+            panels.append(panel)
+            self.assertEqual(panel.form.cb_shape.currentData(), first.Name)
+            self.assertIs(mesh.Part, first)
+            panel.Timer.stop()
+            panel.form.close()
+
+            FreeCADGui.Selection.clearSelection()
+            FreeCADGui.Selection.addSelection(mesh)
+            panel = TaskPanelCfdMesh.TaskPanelCfdMesh(mesh)
+            panels.append(panel)
+            self.assertEqual(panel.form.cb_shape.currentData(), first.Name)
+            self.assertIs(mesh.Part, first)
+        finally:
+            for panel in panels:
+                panel.Timer.stop()
+                panel.form.close()
+            FreeCADGui.Selection.clearSelection()
+            FreeCAD.closeDocument(doc.Name)
+
+
+class NccGeometryBackendTest(unittest.TestCase):
+    def test_touching_regions_preserve_source_geometry(self):
+        from CfdOF.Solve import CfdInterfaceNccRegions
+
+        doc = FreeCAD.newDocument('NccGeometryBackendTest')
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+            CfdTools.setActiveAnalysis(analysis)
+            first = doc.addObject('Part::Box', 'FirstRegion')
+            second = doc.addObject('Part::Box', 'SecondRegion')
+            second.Placement.Base.x = 10
+            doc.recompute()
+            original_volumes = [obj.Shape.Volume for obj in (first, second)]
+            self.assertEqual(CfdInterfaceNccRegions.findTouchingShapePairs([first, second]),
+                             [(first, second)])
+            _group, regions, _interface = CfdInterfaceNccRegions.createInterfaceNccRegions([first, second])
+            self.assertEqual([region.SourceObject for region in regions], [first, second])
+            self.assertTrue(all(region in analysis.Group for region in regions))
+            self.assertTrue(all(region.Shape.isValid() for region in regions))
+            self.assertEqual([obj.Shape.Volume for obj in (first, second)], original_volumes)
+        finally:
+            FreeCAD.closeDocument(doc.Name)
+
+
+class BoundaryFaceAssignmentTest(unittest.TestCase):
+    def test_duplicate_face_assignments_are_errors(self):
+        from types import SimpleNamespace
+        doc = FreeCAD.newDocument('DuplicateBoundaryTest')
+        try:
+            shape = doc.addObject('Part::Box', 'Box')
+            doc.recompute()
+            first = SimpleNamespace(Label='FirstBoundary', ShapeRefs=[(shape, ('Face1',))])
+            second = SimpleNamespace(Label='SecondBoundary', ShapeRefs=[(shape, ('Face1',))])
+            with self.assertRaisesRegex(ValueError, "Duplicate boundary assignment.*FirstBoundary.*SecondBoundary"):
+                CfdTools.validateBoundaryFaceAssignments([first, second])
+            second.ShapeRefs = [(shape, ('',))]
+            with self.assertRaisesRegex(ValueError, 'Duplicate boundary assignment'):
+                CfdTools.validateBoundaryFaceAssignments([first, second])
+            second.ShapeRefs = [(shape, ('Face2',))]
+            CfdTools.validateBoundaryFaceAssignments([first, second])
+            first.ShapeRefs.append((shape, ('Face1',)))
+            CfdTools.validateBoundaryFaceAssignments([first, second])
+        finally:
+            FreeCAD.closeDocument(doc.Name)
+
+
+class TransientChtTemplateTest(unittest.TestCase):
+    def setUp(self):
+        from CfdOF.TemplateBuilder import TemplateBuilder
+
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.builder = TemplateBuilder.__new__(TemplateBuilder)
+        self.builder.case_path = self.temp_dir.name
+        self.builder.template_path = os.path.join(home_path, 'Data', 'Templates', 'case')
+        self.builder.settings = {
+            'multiRegionFluidNames': ['fluid'],
+            'multiRegionSolidNames': ['solid'],
+            'physics': {
+                'Time': 'Transient',
+                'Turbulence': 'Laminar',
+                'TurbulenceModel': 'None',
+            },
+            'solver': {
+                'SolverName': 'chtMultiRegionFoam',
+                'ConvergenceTol': 1e-5,
+                'FluidNonOrthogonalCorrectors': 1,
+                'SolidNonOrthogonalCorrectors': 0,
+                'URelaxation': 0.7,
+                'energyRelaxation': 0.7,
+                'pRelaxation': 0.3,
+                'rhoRelaxation': 0.3,
+                'SolidEnergyRelaxation': 0.7,
+            },
+        }
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def test_transient_cht_algorithm_and_time_schemes(self):
+        top_solution = self.builder.buildFile('system/fvSolution', [])
+        fluid_solution = self.builder.buildFile('system/fluid/fvSolution', [])
+        fluid_schemes = self.builder.buildFile('system/fluid/fvSchemes', [])
+
+        self.assertRegex(top_solution, r'PIMPLE\s*\{\s*nOuterCorrectors\s+1;')
+        self.assertRegex(fluid_solution, r'PIMPLE\s*\{')
+        self.assertIn('"(rho|rhoFinal)"', fluid_solution)
+        self.assertNotRegex(fluid_solution, r'\bSIMPLE\s*\{')
+        self.assertRegex(fluid_schemes, r'ddtSchemes\s*\{\s*default\s+Euler;')
+        self.assertNotIn('default         steadyState;', fluid_schemes)
+
+        self.builder.buildFile('system/solid/fvSolution', [])
+        self.builder.buildFile('system/solid/fvSchemes', [])
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSolution')) as stream:
+            solid_solution = stream.read()
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSchemes')) as stream:
+            solid_schemes = stream.read()
+        self.assertRegex(solid_solution, r'PIMPLE\s*\{')
+        self.assertNotRegex(solid_solution, r'\bSIMPLE\s*\{')
+        self.assertRegex(solid_schemes, r'ddtSchemes\s*\{\s*default\s+Euler;')
+        self.assertNotIn('default         steadyState;', solid_schemes)
+
+    def test_steady_cht_output_is_unchanged(self):
+        self.builder.settings['physics']['Time'] = 'Steady'
+        self.builder.settings['solver']['SolverName'] = 'chtMultiRegionSimpleFoam'
+
+        top_solution = self.builder.buildFile('system/fvSolution', [])
+        fluid_solution = self.builder.buildFile('system/fluid/fvSolution', [])
+        fluid_schemes = self.builder.buildFile('system/fluid/fvSchemes', [])
+
+        self.assertNotRegex(top_solution, r'\bPIMPLE\s*\{')
+        self.assertRegex(fluid_solution, r'SIMPLE\s*\{')
+        self.assertNotRegex(fluid_solution, r'\bPIMPLE\s*\{')
+        self.assertNotIn('"(rho|rhoFinal)"', fluid_solution)
+        self.assertRegex(fluid_schemes, r'ddtSchemes\s*\{\s*default\s+steadyState;')
+        self.assertNotIn('default         Euler;', fluid_schemes)
+
+        self.builder.buildFile('system/solid/fvSolution', [])
+        self.builder.buildFile('system/solid/fvSchemes', [])
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSolution')) as stream:
+            solid_solution = stream.read()
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSchemes')) as stream:
+            solid_schemes = stream.read()
+        self.assertRegex(solid_solution, r'SIMPLE\s*\{')
+        self.assertNotRegex(solid_solution, r'\bPIMPLE\s*\{')
+        self.assertRegex(solid_schemes, r'ddtSchemes\s*\{\s*default\s+steadyState;')
+        self.assertNotIn('default         Euler;', solid_schemes)
+
+
+@unittest.skipUnless(FreeCAD.GuiUp, "Solver remeshing requires the GUI")
+class MultiRegionRemeshTest(unittest.TestCase):
+    def test_solver_remeshes_all_regions_before_solving(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock, patch
+        from CfdOF.Solve import TaskPanelCfdSolverControl
+
+        panel = TaskPanelCfdSolverControl.TaskPanelCfdSolverControl.__new__(
+            TaskPanelCfdSolverControl.TaskPanelCfdSolverControl)
+        panel.analysis_object = SimpleNamespace(
+            NeedsMeshRewrite=True, NeedsMeshRerun=True, NeedsCaseRewrite=True)
+        panel.form = Mock()
+        panel.store = Mock()
+        panel.consoleMessage = Mock()
+        panel.write_input_file_handler = Mock()
+        meshes = [Mock(), Mock()]
+        mesh_tools = [Mock(), Mock()]
+        started = []
+        panel.startNextMesh = lambda: started.append(panel.pending_meshes.pop(0))
+
+        with patch.object(CfdTools, 'getMeshObjects', return_value=meshes), \
+                patch.object(CfdMeshTools, 'CfdMeshTools', side_effect=mesh_tools), \
+                patch.object(TaskPanelCfdSolverControl.QtGui.QMessageBox, 'question',
+                             return_value=TaskPanelCfdSolverControl.QtGui.QMessageBox.Yes):
+            panel.runSolverProcess()
+
+        for tools in mesh_tools:
+            tools.writeMesh.assert_called_once()
+        self.assertEqual(started, mesh_tools[:1])
+        self.assertTrue(panel.analysis_object.NeedsMeshRerun)
+        panel.runSolverProcess = Mock()
+        panel.mesherFinished(0)
+        self.assertEqual(started, mesh_tools)
+        panel.runSolverProcess.assert_not_called()
+        self.assertTrue(panel.analysis_object.NeedsMeshRerun)
+        panel.mesherFinished(0)
+        self.assertFalse(panel.analysis_object.NeedsMeshRerun)
+        panel.runSolverProcess.assert_called_once()
+
+
+class SolidMaterialCardsTest(unittest.TestCase):
+    @unittest.skipUnless(FreeCAD.GuiUp, "Solid material selection requires the GUI")
+    def test_selected_shape_populates_solid_material(self):
+        from CfdOF.Solve import CfdSolidMaterial
+
+        doc = FreeCAD.newDocument("SelectedSolidMaterialTest")
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+            CfdTools.setActiveAnalysis(analysis)
+            box = doc.addObject("Part::Box", "SelectedSolid")
+            compound = doc.addObject("Part::Compound", "SelectedCompound")
+            second = doc.addObject("Part::Box", "SecondSolid")
+            second.Placement.Base.x = 20
+            compound.Links = [box, second]
+            doc.recompute()
+            for shape, subname, expected in (
+                    (box, None, ('Solid1',)),
+                    (compound, None, ('Solid1', 'Solid2')),
+                    (box, 'Face1', ('Solid1',)),
+                    (None, None, ())):
+                FreeCADGui.Selection.clearSelection()
+                if shape is not None:
+                    if subname:
+                        FreeCADGui.Selection.addSelection(shape, subname)
+                    else:
+                        FreeCADGui.Selection.addSelection(shape)
+                CfdSolidMaterial.CommandCfdSolidMaterial().Activated()
+                material = CfdTools.getSolidMaterials(analysis)[-1]
+                refs = material.ViewObject.Proxy.taskd.solidSelector.ShapeRefs
+                self.assertEqual({(obj.Name, sub) for obj, subs in refs for sub in subs},
+                                 {(shape.Name, sub) for sub in expected})
+                FreeCADGui.ActiveDocument.resetEdit()
+        finally:
+            if FreeCADGui.ActiveDocument.getInEdit():
+                FreeCADGui.ActiveDocument.resetEdit()
+            FreeCADGui.Selection.clearSelection()
+            FreeCAD.closeDocument(doc.Name)
+
+    @unittest.skipUnless(FreeCAD.GuiUp, "Solid material panel requires the GUI")
+    def test_default_solid_material_name(self):
+        from CfdOF.Solve import CfdSolidMaterial, TaskPanelCfdSolidProperties
+
+        doc = FreeCAD.newDocument("SolidMaterialNameTest")
+        panels = []
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+            CfdTools.setActiveAnalysis(analysis)
+            material = CfdSolidMaterial.makeCfdSolidMaterial("SolidProperties")
+            analysis.addObject(material)
+            self.assertEqual(material.Material['Name'], 'Aluminium_solid')
+            self.assertEqual(material.Label, 'Aluminium_solid')
+            panel = TaskPanelCfdSolidProperties.TaskPanelCfdSolidProperties(material)
+            panels.append(panel)
+            self.assertEqual(panel.form.material_name.text(), 'Aluminium_solid')
+            panel.solidSelector.closing()
+            panel.form.close()
+
+            material.Label = "Heat sink material"
+            material.Proxy.initProperties(material)
+            panel = TaskPanelCfdSolidProperties.TaskPanelCfdSolidProperties(material)
+            panels.append(panel)
+            self.assertEqual(material.Label, "Heat sink material")
+            self.assertEqual(panel.form.material_name.text(), "Heat sink material")
+        finally:
+            for panel in panels:
+                panel.solidSelector.closing()
+                panel.form.close()
+            FreeCAD.closeDocument(doc.Name)
+
+    def test_solid_material_cards_are_complete(self):
+        expected_names = {
+            "AcrylicSolid", "AluminiumSolid", "BrassSolid", "BrickSolid",
+            "CopperSolid", "FiberglassSolid", "GlassSolid", "Inconel601Solid",
+            "IronSolid", "PolypropyleneSolid", "SandSolid", "SilverSolid",
+            "StainlessSteel316Solid", "StyrofoamSolid", "TitaniumSolid",
+        }
+        materials, name_path_list = CfdTools.importMaterials()
+        paths_by_name = {name: path for name, path in name_path_list}
+
+        self.assertTrue(expected_names.issubset(paths_by_name))
+        for name in expected_names:
+            material = materials[paths_by_name[name]]
+            self.assertEqual(material.get("Type"), "Solid")
+            for property_name in ("Density", "ThermalConductivity", "SpecificHeat"):
+                self.assertTrue(material.get(property_name), "{} lacks {}".format(name, property_name))
 
 
 def compareInpFiles(file_name1, file_name2):

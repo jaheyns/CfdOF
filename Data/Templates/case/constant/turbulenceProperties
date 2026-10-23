@@ -1,3 +1,6 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%:default
 %[_header%]
 FoamFile
 {
@@ -49,4 +52,5 @@ LES
 }
 %:default
 simulationType laminar;
+%}
 %}

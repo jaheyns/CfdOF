@@ -60,7 +60,8 @@ class TaskPanelCfdMesh:
 
         self.console_message_cart = ''
         self.error_message = ''
-        self.mesh_obj.Proxy.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
+        self.mesh_obj.Proxy.cart_mesh = (
+            CfdMeshTools.CfdMeshTools(self.mesh_obj) if self.mesh_obj.Part is not None else None)
         self.paraviewScriptName = ""
 
         self.mesh_obj.Proxy.mesh_process = CfdConsoleProcess(finished_hook=self.meshFinished,
@@ -106,7 +107,9 @@ class TaskPanelCfdMesh:
         self.form.if_NumberOfProcesses.setToolTip("Number of parallel processes")
         self.form.if_NumberOfThreads.setToolTip("Number of parallel threads per process.\n0 means use all available (if NumberOfProcesses = 1) or use 1 (if NumberOfProcesses > 1)")
 
+        self.initMeshCaseControls()
         self.load()
+        self.initShapeControls()
         self.updateUI()
 
         self.Start = time.time()
@@ -119,6 +122,47 @@ class TaskPanelCfdMesh:
     def reject(self):
         FreeCADGui.ActiveDocument.resetEdit()
         return True
+
+    def initShapeControls(self):
+        selected_shapes = [obj for obj in FreeCADGui.Selection.getSelection()
+                           if obj.Document is self.mesh_obj.Document
+                           and obj.isDerivedFrom("Part::Feature") and not obj.Shape.isNull()]
+        shape = selected_shapes[0] if selected_shapes else self.mesh_obj.Part
+        self.form.cb_shape.addItem(translate("TaskPanelCfdMesh", "None"), "")
+        for obj in self.mesh_obj.Document.Objects:
+            if obj.isDerivedFrom("Part::Feature") and not obj.Shape.isNull():
+                self.form.cb_shape.addItem(obj.Label, obj.Name)
+        self.form.cb_shape.setCurrentIndex(self.form.cb_shape.findData(shape.Name if shape else ""))
+        self.form.cb_shape.currentIndexChanged.connect(self.chooseShape)
+        if shape is not self.mesh_obj.Part:
+            self.chooseShape(self.form.cb_shape.currentIndex())
+
+    def chooseShape(self, index):
+        if index < 0:
+            return
+        shape_name = self.form.cb_shape.itemData(index)
+        shape = self.mesh_obj.Document.getObject(shape_name) if shape_name else None
+        if shape is not self.mesh_obj.Part:
+            storeIfChanged(self.mesh_obj, 'PartSubShape', '')
+            shape_reference = "App.getDocument({!r}).getObject({!r})".format(
+                shape.Document.Name, shape.Name) if shape is not None else "None"
+            FreeCADGui.doCommand(
+                "App.getDocument({!r}).getObject({!r}).Part = {}".format(
+                    self.mesh_obj.Document.Name, self.mesh_obj.Name, shape_reference))
+            self.store()
+            self.updateUI()
+
+    def initMeshCaseControls(self):
+        self.meshCaseFrame = QtGui.QGroupBox("Mesh case")
+        meshCaseLayout = QtGui.QFormLayout(self.meshCaseFrame)
+
+        self.editMeshCaseName = QtGui.QLineEdit()
+        self.editMeshCaseName.setToolTip(
+            "Name of the mesh case folder under the analysis output path. "
+            "Only letters, numbers, underscores, hyphens and dots are kept.")
+        meshCaseLayout.addRow("Mesh case folder:", self.editMeshCaseName)
+
+        self.form.layout().insertWidget(1, self.meshCaseFrame)
 
     def closed(self):
         # We call this from unsetEdit to ensure cleanup
@@ -133,6 +177,7 @@ class TaskPanelCfdMesh:
 
     def load(self):
         """ Fills the widgets """
+        self.editMeshCaseName.setText(self.mesh_obj.CaseName)
         setQuantity(self.form.if_max, self.mesh_obj.CharacteristicLengthMax)
         point_in_mesh = self.mesh_obj.PointInMesh.copy()
         setQuantity(self.form.if_pointInMeshX, point_in_mesh.get('x'))
@@ -145,7 +190,6 @@ class TaskPanelCfdMesh:
         self.form.radio_explicit_edge_detection.setChecked(not self.mesh_obj.ImplicitEdgeDetection)
         self.form.if_NumberOfProcesses.setValue(self.mesh_obj.NumberOfProcesses)
         self.form.if_NumberOfThreads.setValue(self.mesh_obj.NumberOfThreads)
-
         index_utility = CfdTools.indexOrDefault(list(zip(
                 CfdMesh.MESHERS, CfdMesh.DIMENSION, CfdMesh.DUAL_CONVERSION)), 
                 (self.mesh_obj.MeshUtility, self.mesh_obj.ElementDimension, self.mesh_obj.ConvertToDualMesh), 0)
@@ -153,7 +197,8 @@ class TaskPanelCfdMesh:
 
         if FreeCAD.GuiUp:
             # create the point every time the taskpanel is loaded
-            initPrevPoint(self.prev_point_node, self.prev_point_move_node, getPrevPointSize(self.mesh_obj.Part.Shape), 0, 1, 0,
+            point_size = getPrevPointSize(self.mesh_obj.Part.Shape) if self.mesh_obj.Part is not None else 1.0
+            initPrevPoint(self.prev_point_node, self.prev_point_move_node, point_size, 0, 1, 0,
                          if2Float(self.form.if_pointInMeshX),
                          if2Float(self.form.if_pointInMeshY),
                          if2Float(self.form.if_pointInMeshZ))
@@ -163,14 +208,15 @@ class TaskPanelCfdMesh:
                 FreeCADGui.ActiveDocument.ActiveView.getSceneGraph().removeChild(self.prev_point_node)
 
     def updateUI(self):
-        case_path = self.mesh_obj.Proxy.cart_mesh.mesh_case_dir
+        cart_mesh = self.mesh_obj.Proxy.cart_mesh
+        case_path = cart_mesh.mesh_case_dir if cart_mesh is not None else ''
         self.form.pb_write_mesh.setEnabled(True)
         self.form.pb_edit_mesh.setEnabled(os.path.exists(case_path))
-        self.form.pb_run_mesh.setEnabled(os.path.exists(os.path.join(case_path, "Allmesh")))
-        self.form.pb_paraview.setEnabled(os.path.exists(os.path.join(case_path, "pv.foam")))
-        self.form.pb_load_mesh.setEnabled(os.path.exists(os.path.join(case_path, "surfaceMesh.vtk")))
-        self.form.pb_check_mesh.setEnabled(os.path.exists(os.path.join(case_path, "surfaceMesh.vtk")))
-        
+        self.form.pb_run_mesh.setEnabled(cart_mesh is None or os.path.exists(os.path.join(case_path, "Allmesh")))
+        self.form.pb_paraview.setEnabled(bool(case_path) and os.path.exists(os.path.join(case_path, "pv.foam")))
+        self.form.pb_load_mesh.setEnabled(bool(case_path) and os.path.exists(os.path.join(case_path, "surfaceMesh.vtk")))
+        self.form.pb_check_mesh.setEnabled(bool(case_path) and os.path.exists(os.path.join(case_path, "surfaceMesh.vtk")))
+
         utility = CfdMesh.MESHERS[self.form.cb_utility.currentIndex()]
         if utility == "snappyHexMesh":
             self.form.snappySpecificProperties.setVisible(True)
@@ -186,6 +232,7 @@ class TaskPanelCfdMesh:
 
     def store(self):
         mesher_idx = self.form.cb_utility.currentIndex()
+        storeIfChanged(self.mesh_obj, 'CaseName', self.editMeshCaseName.text())
         storeIfChanged(self.mesh_obj, 'CharacteristicLengthMax', getQuantity(self.form.if_max))
         storeIfChanged(self.mesh_obj, 'MeshUtility', CfdMesh.MESHERS[mesher_idx])
         storeIfChanged(self.mesh_obj, 'ElementDimension', CfdMesh.DIMENSION[mesher_idx])
@@ -203,7 +250,14 @@ class TaskPanelCfdMesh:
         if self.mesh_obj.MeshUtility == 'snappyHexMesh':
             storeIfChanged(self.mesh_obj, 'PointInMesh', point_in_mesh)
 
-        self.mesh_obj.Proxy.cart_mesh = CfdMeshTools.CfdMeshTools(self.mesh_obj)
+        self.mesh_obj.Proxy.cart_mesh = (
+            CfdMeshTools.CfdMeshTools(self.mesh_obj) if self.mesh_obj.Part is not None else None)
+
+    def validateShape(self):
+        if self.mesh_obj.Part is None or self.mesh_obj.Part.Shape.isNull():
+            self.consoleMessage(translate("TaskPanelCfdMesh", "Select a shape before meshing."), 'Error')
+            return False
+        return True
 
     def consoleMessage(self, message="", colour_type=None, timed=True):
         if timed:
@@ -250,6 +304,8 @@ class TaskPanelCfdMesh:
                              if2Float(self.form.if_pointInMeshZ))
 
     def writeMesh(self):
+        if not self.validateShape():
+            return
         import importlib
         importlib.reload(CfdMeshTools)
         self.console_message_cart = ''
@@ -345,6 +401,8 @@ class TaskPanelCfdMesh:
         CfdTools.openFileManager(case_path)
 
     def runMesh(self):
+        if not self.validateShape():
+            return
         self.Start = time.time()
 
         # Check for changes that require mesh re-write
@@ -482,6 +540,8 @@ class TaskPanelCfdMesh:
         FreeCAD.ActiveDocument.recompute()
 
     def searchPointInMesh(self):
+        if not self.validateShape():
+            return
         print ("Searching for an internal vector point ...")
         # Apply latest mesh size
         self.store()
