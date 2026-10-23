@@ -882,6 +882,93 @@ class MultiRegionRemeshTest(unittest.TestCase):
         panel.runSolverProcess.assert_called_once()
 
 
+class SolidMaterialCardsTest(unittest.TestCase):
+    @unittest.skipUnless(FreeCAD.GuiUp, "Solid material selection requires the GUI")
+    def test_selected_shape_populates_solid_material(self):
+        from CfdOF.Solve import CfdSolidMaterial
+
+        doc = FreeCAD.newDocument("SelectedSolidMaterialTest")
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+            CfdTools.setActiveAnalysis(analysis)
+            box = doc.addObject("Part::Box", "SelectedSolid")
+            compound = doc.addObject("Part::Compound", "SelectedCompound")
+            second = doc.addObject("Part::Box", "SecondSolid")
+            second.Placement.Base.x = 20
+            compound.Links = [box, second]
+            doc.recompute()
+            for shape, subname, expected in (
+                    (box, None, ('Solid1',)),
+                    (compound, None, ('Solid1', 'Solid2')),
+                    (box, 'Face1', ('Solid1',)),
+                    (None, None, ())):
+                FreeCADGui.Selection.clearSelection()
+                if shape is not None:
+                    if subname:
+                        FreeCADGui.Selection.addSelection(shape, subname)
+                    else:
+                        FreeCADGui.Selection.addSelection(shape)
+                CfdSolidMaterial.CommandCfdSolidMaterial().Activated()
+                material = CfdTools.getSolidMaterials(analysis)[-1]
+                refs = material.ViewObject.Proxy.taskd.solidSelector.ShapeRefs
+                self.assertEqual({(obj.Name, sub) for obj, subs in refs for sub in subs},
+                                 {(shape.Name, sub) for sub in expected})
+                FreeCADGui.ActiveDocument.resetEdit()
+        finally:
+            if FreeCADGui.ActiveDocument.getInEdit():
+                FreeCADGui.ActiveDocument.resetEdit()
+            FreeCADGui.Selection.clearSelection()
+            FreeCAD.closeDocument(doc.Name)
+
+    @unittest.skipUnless(FreeCAD.GuiUp, "Solid material panel requires the GUI")
+    def test_default_solid_material_name(self):
+        from CfdOF.Solve import CfdSolidMaterial, TaskPanelCfdSolidProperties
+
+        doc = FreeCAD.newDocument("SolidMaterialNameTest")
+        panels = []
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+            CfdTools.setActiveAnalysis(analysis)
+            material = CfdSolidMaterial.makeCfdSolidMaterial("SolidProperties")
+            analysis.addObject(material)
+            self.assertEqual(material.Material['Name'], 'Aluminium_solid')
+            self.assertEqual(material.Label, 'Aluminium_solid')
+            panel = TaskPanelCfdSolidProperties.TaskPanelCfdSolidProperties(material)
+            panels.append(panel)
+            self.assertEqual(panel.form.material_name.text(), 'Aluminium_solid')
+            panel.solidSelector.closing()
+            panel.form.close()
+
+            material.Label = "Heat sink material"
+            material.Proxy.initProperties(material)
+            panel = TaskPanelCfdSolidProperties.TaskPanelCfdSolidProperties(material)
+            panels.append(panel)
+            self.assertEqual(material.Label, "Heat sink material")
+            self.assertEqual(panel.form.material_name.text(), "Heat sink material")
+        finally:
+            for panel in panels:
+                panel.solidSelector.closing()
+                panel.form.close()
+            FreeCAD.closeDocument(doc.Name)
+
+    def test_solid_material_cards_are_complete(self):
+        expected_names = {
+            "AcrylicSolid", "AluminiumSolid", "BrassSolid", "BrickSolid",
+            "CopperSolid", "FiberglassSolid", "GlassSolid", "Inconel601Solid",
+            "IronSolid", "PolypropyleneSolid", "SandSolid", "SilverSolid",
+            "StainlessSteel316Solid", "StyrofoamSolid", "TitaniumSolid",
+        }
+        materials, name_path_list = CfdTools.importMaterials()
+        paths_by_name = {name: path for name, path in name_path_list}
+
+        self.assertTrue(expected_names.issubset(paths_by_name))
+        for name in expected_names:
+            material = materials[paths_by_name[name]]
+            self.assertEqual(material.get("Type"), "Solid")
+            for property_name in ("Density", "ThermalConductivity", "SpecificHeat"):
+                self.assertTrue(material.get(property_name), "{} lacks {}".format(name, property_name))
+
+
 def compareInpFiles(file_name1, file_name2):
     file1 = open(file_name1, 'r')
     f1 = file1.readlines()

@@ -17,6 +17,7 @@ QT_TRANSLATE_NOOP = FreeCAD.Qt.QT_TRANSLATE_NOOP
 def makeCfdSolidMaterial(name):
     obj = FreeCAD.ActiveDocument.addObject("App::MaterialObjectPython", name)
     CfdSolidMaterial(obj)
+    obj.Label = obj.Material['Name']
     if FreeCAD.GuiUp:
         ViewProviderCfdSolidMaterial(obj.ViewObject)
     return obj
@@ -35,13 +36,20 @@ class CommandCfdSolidMaterial:
         return CfdTools.getActiveAnalysis() is not None
 
     def Activated(self):
+        selection = [(selected.Object, tuple(selected.SubElementNames))
+                     for selected in FreeCADGui.Selection.getSelectionEx()]
         FreeCAD.Console.PrintMessage(translate("Console", "Set solid properties\n"))
         FreeCAD.ActiveDocument.openTransaction("Set CfdSolidMaterial")
         FreeCADGui.doCommand("from CfdOF import CfdTools")
         FreeCADGui.doCommand("from CfdOF.Solve import CfdSolidMaterial")
         FreeCADGui.doCommand(
             "CfdTools.getActiveAnalysis().addObject(CfdSolidMaterial.makeCfdSolidMaterial('SolidProperties'))")
-        FreeCADGui.ActiveDocument.setEdit(FreeCAD.ActiveDocument.ActiveObject.Name)
+        material = FreeCAD.ActiveDocument.ActiveObject
+        FreeCADGui.ActiveDocument.setEdit(material.Name)
+        selector = material.ViewObject.Proxy.taskd.solidSelector
+        for obj, subnames in selection:
+            for subname in subnames or (None,):
+                selector.addSelection(obj.Document.Name, obj.Name, subname)
 
 
 class CfdSolidMaterial:

@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; TitaniumSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Titanium_solid
+Type = Solid
+Description = Titanium solid thermal properties
+Density = 4500 kg/m^3
+ThermalConductivity = 17.0 W/m/K
+SpecificHeat = 528 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=66a15d609a3f4c829cb6ad08f0dafc01
