@@ -1,0 +1,136 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    location    "0/%(multiRegionFluidNames/0%)";
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (%(initialValues/Ux%) %(initialValues/Uy%) %(initialValues/Uz%));
+
+boundaryField
+{
+%{%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)%)
+%{%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/BoundaryType%)
+%:wall
+%{%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/BoundarySubType%)
+%:fixedWall roughWall
+    %(0%)
+    {
+        type        noSlip;
+    }
+%:slipWall
+    %(0%)
+    {
+        type        slip;
+    }
+%:partialSlipWall
+    %(0%)
+    {
+        type        partialSlip;
+        valueFraction %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/SlipRatio%);
+        value       uniform (0 0 0);
+    }
+%:translatingWall
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform (%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/Ux%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/Uy%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/Uz%));
+    }
+%:rotatingWall
+    %(0%)
+    {
+        type        rotatingWallVelocity;
+        origin      (%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/CentreOfRotationx%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/CentreOfRotationy%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/CentreOfRotationz%));
+        axis        (%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/RotationAxisx%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/RotationAxisy%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/RotationAxisz%));
+        omega       %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/AngularVelocity%);
+    }
+%}
+%:inlet
+%{%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/BoundarySubType%)
+%:uniformVelocityInlet
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform (%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/Ux%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/Uy%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/Uz%));
+    }
+%:volumetricFlowRateInlet
+    %(0%)
+    {
+        type        flowRateInletVelocity;
+        volumetricFlowRate %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/VolumetricFlowRate%);
+        value       uniform (0 0 0);
+    }
+%:massFlowRateInlet
+    %(0%)
+    {
+        type        flowRateInletVelocity;
+        massFlowRate %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/MassFlowRate%);
+        rho         rho;
+        value       uniform (0 0 0);
+    }
+%:totalPressureInlet staticPressureInlet
+    %(0%)
+    {
+        type        pressureInletOutletVelocity;
+        value       uniform (0 0 0);
+    }
+%}
+%:outlet
+%{%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/BoundarySubType%)
+%:staticPressureOutlet
+    %(0%)
+    {
+        type        pressureInletOutletVelocity;
+        value       uniform (0 0 0);
+    }
+%:uniformVelocityOutlet
+    %(0%)
+    {
+        type        fixedValue;
+        value       uniform (%(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/Ux%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/Uy%) %(multiRegionFluidBoundariesByRegion/%(multiRegionFluidNames/0%)/%(0%)/Uz%));
+    }
+%:outFlowOutlet
+    %(0%)
+    {
+        type        outletInlet;
+        outletValue uniform (0 0 0);
+        value       uniform (0 0 0);
+    }
+%}
+%:open
+    %(0%)
+    {
+        type        pressureInletOutletVelocity;
+        value       uniform (0 0 0);
+    }
+%:constraint
+%[0/_boundary_constraint%]
+%}
+
+%}
+
+%{%(multiRegionSplitMeshBoundaryEntries%)
+%{%(multiRegionSolidNames%)
+    %(multiRegionFluidNames/0%)_to_%(multiRegionSolidNames/%(0%)%)
+    {
+        type        noSlip;
+    }
+
+%}
+%}
+    defaultFaces
+    {
+        type        noSlip;
+    }
+}
+
+// ************************************************************************* //
+%}
