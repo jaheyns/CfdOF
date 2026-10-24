@@ -1,5 +1,7 @@
 %{%(solver/SolverName%)
 %:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%{%(system/FoundationChtModels%)
+%:False
 %{%(multiRegionFluidNames/0%)
 %[_header%]
 FoamFile
@@ -67,4 +69,5 @@ momentumSource
 %}
 // ************************************************************************* //
 %} constant/%(0%)/fvOptions
+%}
 %}

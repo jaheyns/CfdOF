@@ -12,6 +12,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+%{%(physics/Time%)
+%:Steady
 SIMPLE
 {
     nNonOrthogonalCorrectors %(solver/FluidNonOrthogonalCorrectors%);
@@ -28,9 +30,43 @@ SIMPLE
     pRefValue   0;
     pRefCell    0;
 }
+%:Transient
+PIMPLE
+{
+    nOuterCorrectors 1;
+    nCorrectors 2;
+    nNonOrthogonalCorrectors %(solver/FluidNonOrthogonalCorrectors%);
+
+    pRefValue   0;
+    pRefCell    0;
+}
+%}
+
+%{%(system/FoundationChtModels%)
+%:True
+%{%(physics/Time%)
+%:Steady
+PIMPLE
+{
+    nOuterCorrectors 1;
+    nCorrectors 2;
+    nNonOrthogonalCorrectors %(solver/FluidNonOrthogonalCorrectors%);
+    pRefValue 0;
+    pRefCell 0;
+}
+%}
+%}
 
 solvers
 {
+%{%(physics/Time%)
+%:Transient
+    "(rho|rhoFinal)"
+    {
+        solver          diagonal;
+    }
+
+%}
     "(p_rgh|pcorr)"
     {
         solver           GAMG;
@@ -116,6 +152,8 @@ solvers
     }
 }
 
+%{%(physics/Time%)
+%:Steady
 relaxationFactors
 {
     equations
@@ -142,6 +180,15 @@ relaxationFactors
         rho             %(solver/rhoRelaxation%);
     }
 }
+%:Transient
+relaxationFactors
+{
+    equations
+    {
+        ".*"            1;
+    }
+}
+%}
 
 // ************************************************************************* //
 %} system/%(0%)/fvSolution

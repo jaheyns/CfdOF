@@ -12,19 +12,38 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+%{%(physics/Time%)
+%:Steady
 SIMPLE
 {
     nNonOrthogonalCorrectors %(solver/SolidNonOrthogonalCorrectors%);
 
     residualControl
     {
-        h               %(solver/ConvergenceTol%);
+        %(system/SolidEnergyField%)               %(solver/ConvergenceTol%);
     }
 }
+%:Transient
+PIMPLE
+{
+    nNonOrthogonalCorrectors %(solver/SolidNonOrthogonalCorrectors%);
+}
+%}
+
+%{%(system/FoundationChtModels%)
+%:True
+%{%(physics/Time%)
+%:Steady
+PIMPLE
+{
+    nNonOrthogonalCorrectors %(solver/SolidNonOrthogonalCorrectors%);
+}
+%}
+%}
 
 solvers
 {
-    h
+    %(system/SolidEnergyField%)
     {
         solver           GAMG;
         tolerance        1e-8;
@@ -38,20 +57,31 @@ solvers
         mergeLevels      1;
     }
 
-    hFinal
+    %(system/SolidEnergyField%)Final
     {
-        $h;
+        $%(system/SolidEnergyField%);
         relTol          0;
     }
 }
 
+%{%(physics/Time%)
+%:Steady
 relaxationFactors
 {
     equations
     {
-        h               %(solver/SolidEnergyRelaxation%);
+        %(system/SolidEnergyField%)               %(solver/SolidEnergyRelaxation%);
     }
 }
+%:Transient
+relaxationFactors
+{
+    equations
+    {
+        ".*"            1;
+    }
+}
+%}
 
 // ************************************************************************* //
 %} system/%(multiRegionSolidNames/%(0%)%)/fvSolution
