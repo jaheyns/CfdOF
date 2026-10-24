@@ -36,6 +36,7 @@ from CfdOF.Solve import CfdInitialiseFlowField
 from CfdOF.Solve import CfdFluidMaterial
 from CfdOF.Mesh import CfdMesh
 from CfdOF.Solve import CfdFluidBoundary
+from CfdOF.Solve import CfdRegionCoupledInterface
 from CfdOF import CfdTools
 from CfdOF.Solve import CfdCaseWriterFoam
 from CfdOF.Mesh import CfdMeshTools
@@ -83,6 +84,10 @@ class BlockTest(unittest.TestCase):
         self.analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
         CfdTools.setActiveAnalysis(self.analysis)
         self.active_doc.recompute()
+
+    def test_fluid_boundary_has_no_region_override(self):
+        boundary = CfdFluidBoundary.makeCfdFluidBoundary('boundary')
+        self.assertNotIn('RegionName', boundary.PropertiesList)
 
     def createNewSolver(self):
         self.solver_object = CfdSolverFoam.makeCfdSolverFoam()
@@ -134,6 +139,7 @@ class BlockTest(unittest.TestCase):
         self.inlet_boundary = CfdFluidBoundary.makeCfdFluidBoundary('inlet')
         self.analysis.addObject(self.inlet_boundary)
         bc_set = self.inlet_boundary
+        self.assertNotIn('RegionName', bc_set.PropertiesList)
         bc_set.BoundaryType = 'inlet'
         bc_set.BoundarySubType = 'uniformVelocityInlet'
         bc_set.Ux = 1
@@ -775,6 +781,28 @@ class NccGeometryBackendTest(unittest.TestCase):
             self.assertTrue(all(region in analysis.Group for region in regions))
             self.assertTrue(all(region.Shape.isValid() for region in regions))
             self.assertEqual([obj.Shape.Volume for obj in (first, second)], original_volumes)
+        finally:
+            FreeCAD.closeDocument(doc.Name)
+
+
+class BoundaryFaceAssignmentTest(unittest.TestCase):
+    def test_duplicate_face_assignments_are_errors(self):
+        from types import SimpleNamespace
+        doc = FreeCAD.newDocument('DuplicateBoundaryTest')
+        try:
+            shape = doc.addObject('Part::Box', 'Box')
+            doc.recompute()
+            first = SimpleNamespace(Label='FirstBoundary', ShapeRefs=[(shape, ('Face1',))])
+            second = SimpleNamespace(Label='SecondBoundary', ShapeRefs=[(shape, ('Face1',))])
+            with self.assertRaisesRegex(ValueError, "Duplicate boundary assignment.*FirstBoundary.*SecondBoundary"):
+                CfdTools.validateBoundaryFaceAssignments([first, second])
+            second.ShapeRefs = [(shape, ('',))]
+            with self.assertRaisesRegex(ValueError, 'Duplicate boundary assignment'):
+                CfdTools.validateBoundaryFaceAssignments([first, second])
+            second.ShapeRefs = [(shape, ('Face2',))]
+            CfdTools.validateBoundaryFaceAssignments([first, second])
+            first.ShapeRefs.append((shape, ('Face1',)))
+            CfdTools.validateBoundaryFaceAssignments([first, second])
         finally:
             FreeCAD.closeDocument(doc.Name)
 

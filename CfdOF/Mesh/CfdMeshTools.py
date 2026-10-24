@@ -35,6 +35,8 @@ from CfdOF.TemplateBuilder import TemplateBuilder
 import Part
 
 
+
+
 class _MeshPartSubShape:
     def __init__(self, part_obj, sub_shape_name):
         self.Source = part_obj
@@ -64,6 +66,8 @@ def _reference_targets_mesh_part(shape_ref, part_obj):
 def _boundary_targets_mesh_part(boundary_obj, part_obj):
     refs = getattr(boundary_obj, 'ShapeRefs', [])
     return not refs or any(_reference_targets_mesh_part(ref, part_obj) for ref in refs)
+
+
 
 
 class CfdMeshTools:
@@ -259,9 +263,12 @@ class CfdMeshTools:
         if not analysis_obj:
             analysis_obj = CfdTools.getActiveAnalysis()
         if analysis_obj:
-            bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
+            bc_group = CfdTools.getCfdBoundaryGroupWithRegionInterfaces(analysis_obj)
+        CfdTools.validateBoundaryFaceAssignments(bc_group)
         multi_mesh_analysis = bool(analysis_obj and len(CfdTools.getMeshObjects(analysis_obj)) > 1)
         boundary_applies = []
+        seen_region_interface_refs = set()
+        skipped_region_interface_bc_ids = set()
         for bc_id, bc_obj in enumerate(bc_group):
             applies = not multi_mesh_analysis or _boundary_targets_mesh_part(bc_obj, self.part_obj)
             boundary_applies.append(applies)
@@ -273,14 +280,30 @@ class CfdMeshTools:
                 except RuntimeError as re:
                     raise RuntimeError("Error processing boundary condition {}: {}".format(bc_obj.Label, str(re)))
                 for si, s in enumerate(bf):
+                    if (not multi_mesh_analysis and
+                            hasattr(bc_obj, 'InterfaceObject') and
+                            ri < len(bc_obj.ShapeRefs) and
+                            si < len(bc_obj.ShapeRefs[ri][1])):
+                        source_ref = bc_obj.ShapeRefs[ri]
+                        interface_ref_key = (
+                            id(bc_obj.InterfaceObject),
+                            source_ref[0].Name,
+                            source_ref[1][si],
+                        )
+                        if interface_ref_key in seen_region_interface_refs:
+                            skipped_region_interface_bc_ids.add(bc_id)
+                            continue
+                        seen_region_interface_refs.add(interface_ref_key)
                     boundary_face_list += [(sf, (bc_id, ri, si)) for sf in s[0].Faces]
 
         # Match them up to faces in the main geometry
         bc_matched_faces = CfdTools.matchFaces(boundary_face_list, mesh_face_list)
 
-        # Check for and filter duplicates
+        # Reject competing boundaries; do not silently discard an assignment.
         bc_match_per_shape_face = [-1] * len(mesh_face_list)
         bc_matched = [False] * len(bc_group)
+        for bc_id in skipped_region_interface_bc_ids:
+            bc_matched[bc_id] = True
         for k in range(len(bc_matched_faces)):
             match = bc_matched_faces[k][1]
             prev_k = bc_match_per_shape_face[match]
@@ -288,13 +311,15 @@ class CfdMeshTools:
             bc_matched[nb] = True
             if prev_k >= 0:
                 nb2, ri2, si2 = bc_matched_faces[prev_k][0]
+                if nb == nb2:
+                    continue
                 bc = bc_group[nb]
                 bc2 = bc_group[nb2]
-                CfdTools.cfdWarning(
+                raise ValueError(
                     "Boundary '{}' reference {}:{} also assigned as "
-                    "boundary '{}' reference {}:{} - ignoring duplicate\n".format(
+                    "boundary '{}' reference {}:{}. Remove the conflicting face assignment.".format(
                         bc.Label, bc.ShapeRefs[ri][0].Name, bc.ShapeRefs[ri][1][si],
-                        bc2.Label, bc.ShapeRefs[ri][0].Name, bc.ShapeRefs[ri][1][si]))
+                        bc2.Label, bc2.ShapeRefs[ri2][0].Name, bc2.ShapeRefs[ri2][1][si2]))
             else:
                 bc_match_per_shape_face[match] = k
 
@@ -341,9 +366,10 @@ class CfdMeshTools:
         for k in range(len(bc_group)+1):
             self.patch_faces.append([])
             self.patch_names.append([])
+            patch_prefix = CfdTools.getBoundaryPatchPrefix(bc_group[k - 1], k - 1) if k else 'patch_0'
             for l in range(len(mr_objs)+1):
                 self.patch_faces[k].append([])
-                self.patch_names[k].append("patch_"+str(k)+"_"+str(l))
+                self.patch_names[k].append(patch_prefix + '_' + str(l))
         for i in range(len(mesh_face_list)):
             k = bc_match_per_shape_face[i]
             l = mr_match_per_shape_face[i]
@@ -354,6 +380,7 @@ class CfdMeshTools:
             if l >= 0:
                 nr, rri, ssi = mr_matched_faces[l][0]
             self.patch_faces[nb+1][nr+1].append(i)
+
 
         # For gmsh, match mesh refinement with vertices in original mesh
         mr_matched_vertices = []
