@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; SilverSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Silver_solid
+Type = Solid
+Description = Silver solid thermal properties
+Density = 10491 kg/m^3
+ThermalConductivity = 419 W/m/K
+SpecificHeat = 234 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=63cbd043a31f4f739ddb7632c1443d33

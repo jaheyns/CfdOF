@@ -254,6 +254,10 @@ class CfdFaceSelectWidget:
         selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
         if not hasattr(selected_object, 'Shape') or selected_object.Shape.isNull():
             return
+        if self.selection_mode_solid and not self.allow_obj_sel and not sub and not as_is:
+            for index in range(len(selected_object.Shape.Solids)):
+                self.addSelection(doc_name, obj_name, 'Solid{}'.format(index + 1), selected_point)
+            return
 
         # On double click of a shape, sub is None and obj is the shape
         print('Selection: ' + selected_object.Shape.ShapeType + '  ' + selected_object.Name + ':' +
