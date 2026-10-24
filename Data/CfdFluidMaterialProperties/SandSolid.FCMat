@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; SandSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Sand_solid
+Type = Solid
+Description = Dry sand solid thermal properties
+Density = 1650 kg/m^3
+ThermalConductivity = 0.305 W/m/K
+SpecificHeat = 776 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=18a1e365613b478f880e5506d6fb2ec1
