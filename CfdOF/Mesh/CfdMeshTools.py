@@ -35,12 +35,43 @@ from CfdOF.TemplateBuilder import TemplateBuilder
 import Part
 
 
+class _MeshPartSubShape:
+    def __init__(self, part_obj, sub_shape_name):
+        self.Source = part_obj
+        self.SubShapeName = sub_shape_name
+        self.Name = "{}_{}".format(part_obj.Name, sub_shape_name)
+        self.Label = "{} {}".format(part_obj.Label, sub_shape_name)
+        self.Shape = part_obj.Shape.getElement(sub_shape_name)
+
+
+def _get_mesh_part_object(mesh_obj):
+    sub_shape_name = getattr(mesh_obj, 'PartSubShape', '')
+    if sub_shape_name:
+        return _MeshPartSubShape(mesh_obj.Part, sub_shape_name)
+    return mesh_obj.Part
+
+
+def _get_mesh_part_source_object(part_obj):
+    return getattr(part_obj, 'Source', part_obj)
+
+
+def _reference_targets_mesh_part(shape_ref, part_obj):
+    ref_obj = shape_ref[0]
+    source_obj = _get_mesh_part_source_object(part_obj)
+    return ref_obj is source_obj or getattr(ref_obj, 'Name', None) == getattr(source_obj, 'Name', None)
+
+
+def _boundary_targets_mesh_part(boundary_obj, part_obj):
+    refs = getattr(boundary_obj, 'ShapeRefs', [])
+    return not refs or any(_reference_targets_mesh_part(ref, part_obj) for ref in refs)
+
+
 class CfdMeshTools:
     def __init__(self, cart_mesh_obj):
         self.mesh_obj = cart_mesh_obj
         self.analysis = CfdTools.getParentAnalysisObject(self.mesh_obj)
 
-        self.part_obj = self.mesh_obj.Part  # Part to mesh
+        self.part_obj = _get_mesh_part_object(self.mesh_obj)  # Part or sub-shape to mesh
         self.scale = 0.001  # Scale mm to m
 
         # Default to 2 % of bounding box characteristic length
@@ -175,8 +206,13 @@ class CfdMeshTools:
         return Units.Quantity(self.clmax, Units.Length)
 
     def getFilePaths(self, output_dir):
-        if not hasattr(self.mesh_obj, 'CaseName'):  # Backward compat
-            self.mesh_obj.CaseName = 'meshCase'
+        if not hasattr(self.mesh_obj, 'CaseName'):
+            from CfdOF.Mesh.CfdMesh import nextMeshCaseName
+            CfdTools.addObjectProperty(
+                self.mesh_obj, 'CaseName',
+                nextMeshCaseName(self.mesh_obj.Document, exclude_obj=self.mesh_obj),
+                'App::PropertyString', '',
+                FreeCAD.Qt.QT_TRANSLATE_NOOP('App::Property', 'Name of directory in which the mesh is created'))
         self.case_name = self.mesh_obj.CaseName
         self.mesh_case_dir = os.path.join(output_dir, self.case_name)
         self.constantDir = os.path.join(self.mesh_case_dir, 'constant')
@@ -213,7 +249,7 @@ class CfdMeshTools:
         snappy_settings['MovingMeshRegions'] = {}
 
         # Make list of all faces in meshed shape with original index
-        mesh_face_list = list(zip(self.mesh_obj.Part.Shape.Faces, range(len(self.mesh_obj.Part.Shape.Faces))))
+        mesh_face_list = list(zip(self.part_obj.Shape.Faces, range(len(self.part_obj.Shape.Faces))))
 
         # Make list of all boundary references
         CfdTools.cfdMessage("Matching boundary patches\n")
@@ -224,7 +260,13 @@ class CfdMeshTools:
             analysis_obj = CfdTools.getActiveAnalysis()
         if analysis_obj:
             bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
+        multi_mesh_analysis = bool(analysis_obj and len(CfdTools.getMeshObjects(analysis_obj)) > 1)
+        boundary_applies = []
         for bc_id, bc_obj in enumerate(bc_group):
+            applies = not multi_mesh_analysis or _boundary_targets_mesh_part(bc_obj, self.part_obj)
+            boundary_applies.append(applies)
+            if not applies:
+                continue
             for ri, ref in enumerate(bc_obj.ShapeRefs):
                 try:
                     bf = CfdTools.resolveReference(ref)
@@ -318,7 +360,7 @@ class CfdMeshTools:
         if self.mesh_obj.MeshUtility == 'gmsh':
             # Make list of all vertices in meshed shape with original index
             mesh_vertices_list = list(
-                zip(self.mesh_obj.Part.Shape.Vertexes, range(len(self.mesh_obj.Part.Shape.Vertexes))))
+                zip(self.part_obj.Shape.Vertexes, range(len(self.part_obj.Shape.Vertexes))))
 
             CfdTools.cfdMessage("Matching mesh refinements\n")
             mr_vertices_list = []
@@ -348,12 +390,14 @@ class CfdMeshTools:
                 bc_matched[nb] = True
 
         for bc_id, matched in enumerate(bc_matched):
-            if not matched and not bc_group[bc_id].DefaultBoundary:
+            if boundary_applies[bc_id] and not matched and not bc_group[bc_id].DefaultBoundary:
                 CfdTools.cfdWarning(
-                    "No part of the boundary '{}' matched any part of the geometry '{}' being meshed\n".format(
-                        bc_group[bc_id].Label, self.mesh_obj.Part.Label))
+                "No part of the boundary '{}' matched any part of the geometry '{}' being meshed\n".format(
+                        bc_group[bc_id].Label, self.part_obj.Label))
         # Handle baffles
         for bc_id, bc_obj in enumerate(bc_group):
+            if not boundary_applies[bc_id]:
+                continue
             if bc_obj.BoundaryType == 'baffle':
                 baffle_matches = [m for m in bc_mr_matched_faces if m[0][0] == bc_id]
                 mr_match_per_baffle_ref = []
@@ -568,7 +612,7 @@ class CfdMeshTools:
                         patch_name = self.patch_names[k][l]
                         if len(patch_faces):
                             # Put together the faces making up this patch; mesh them and output to file
-                            faces = self.mesh_obj.Part.Shape.Faces
+                            faces = self.part_obj.Shape.Faces
                             patch_shape = Part.makeCompound([faces[f] for f in patch_faces])
                             CfdTools.cfdMessage(
                                 "Triangulating part {}, patch {}\n".format(self.part_obj.Label, patch_name))
@@ -687,8 +731,16 @@ class CfdMeshTools:
                     self.gmsh_settings['NodeMap'][e] = ele_nodes
             self.gmsh_settings['ClMax'] = self.clmax
             self.gmsh_settings['ClMin'] = self.clmin
-            sols = (''.join((str(n+1) + ', ') for n in range(len(self.mesh_obj.Part.Shape.Solids)))).rstrip(', ')
+            sols = (''.join((str(n+1) + ', ') for n in range(len(self.part_obj.Shape.Solids)))).rstrip(', ')
             self.gmsh_settings['Solids'] = sols
+
+            # Each CHT mesh owns the volumes in its selected region geometry.
+            physics = CfdTools.getPhysicsModel(self.analysis)
+            is_cht = getattr(physics, 'Phase', None) == 'MultiRegion'
+            self.gmsh_settings['IsMultiRegion'] = is_cht
+            self.gmsh_settings['RegionVolumeMap'] = (
+                {CfdTools.getRegionName(self.mesh_obj): sols} if is_cht else {})
+
             self.gmsh_settings['BoundaryFaceMap'] = {}
             for k in range(len(self.patch_faces)):
                 for l in range(len(self.patch_faces[k])):
