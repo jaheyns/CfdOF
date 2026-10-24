@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; StainlessSteel316Solid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = StainlessSteel316_solid
+Type = Solid
+Description = AISI 316 stainless steel solid thermal properties
+Density = 8000 kg/m^3
+ThermalConductivity = 14.6 W/m/K
+SpecificHeat = 500 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=1336be6d0c594b55afb5ca8bf1f3e042

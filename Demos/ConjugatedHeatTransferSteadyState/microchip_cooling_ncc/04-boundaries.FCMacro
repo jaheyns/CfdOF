@@ -1,0 +1,81 @@
+import FreeCAD as App
+
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF.Solve import CfdRegionCoupledInterface
+
+
+def generated_region_for_source(source_name):
+    source = App.ActiveDocument.getObject(source_name)
+    obj = CfdRegionCoupledInterface.getInterfaceRegionForSource(source)
+    if obj is not None:
+        return obj
+    raise RuntimeError("No generated interface region for source '{}'".format(source_name))
+
+
+def faces_on_plane(shape_obj, axis, value, tol=1e-6):
+    faces = []
+    for index, face in enumerate(shape_obj.Shape.Faces, 1):
+        bb = face.BoundBox
+        if axis == "x" and abs(bb.XMin - value) <= tol and abs(bb.XMax - value) <= tol:
+            faces.append("Face{}".format(index))
+        elif axis == "y" and abs(bb.YMin - value) <= tol and abs(bb.YMax - value) <= tol:
+            faces.append("Face{}".format(index))
+        elif axis == "z" and abs(bb.ZMin - value) <= tol and abs(bb.ZMax - value) <= tol:
+            faces.append("Face{}".format(index))
+    if not faces:
+        raise RuntimeError("No faces found on {}={}".format(axis, value))
+    return tuple(faces)
+
+
+def add_boundary(label, boundary_type, subtype, thermal_type, refs, velocity=(0, 0, 0)):
+    boundary = CfdFluidBoundary.makeCfdFluidBoundary()
+    CfdTools.getActiveAnalysis().addObject(boundary)
+    boundary.Label = label
+    boundary.BoundaryType = boundary_type
+    boundary.BoundarySubType = subtype
+    boundary.ThermalBoundaryType = thermal_type
+    boundary.Temperature = "293 K"
+    boundary.Pressure = "100 kPa"
+    boundary.Ux = "{} mm/s".format(velocity[0])
+    boundary.Uy = "{} mm/s".format(velocity[1])
+    boundary.Uz = "{} mm/s".format(velocity[2])
+    boundary.TurbulenceIntensityPercentage = 1.0
+    boundary.TurbulenceLengthScale = "100 mm"
+    boundary.ShapeRefs = refs
+    return boundary
+
+
+fluid = generated_region_for_source("Box")
+bb = fluid.Shape.BoundBox
+side_faces = (
+    faces_on_plane(fluid, "y", bb.YMin) +
+    faces_on_plane(fluid, "y", bb.YMax) +
+    faces_on_plane(fluid, "z", bb.ZMin) +
+    faces_on_plane(fluid, "z", bb.ZMax)
+)
+
+add_boundary(
+    "wall",
+    "wall",
+    "fixedWall",
+    "fixedValue",
+    [(fluid, side_faces)],
+)
+add_boundary(
+    "outlet",
+    "outlet",
+    "staticPressureOutlet",
+    "fixedValue",
+    [(fluid, faces_on_plane(fluid, "x", bb.XMax))],
+)
+add_boundary(
+    "inlet",
+    "inlet",
+    "uniformVelocityInlet",
+    "fixedValue",
+    [(fluid, faces_on_plane(fluid, "x", bb.XMin))],
+    velocity=(50, 0, 0),
+)
+
+App.ActiveDocument.recompute()

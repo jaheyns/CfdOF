@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; CopperSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Copper_solid
+Type = Solid
+Description = Copper solid thermal properties
+Density = 8930 kg/m^3
+ThermalConductivity = 385 W/m/K
+SpecificHeat = 385 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=9aebe83845c04c1db5126fada6f76f7e

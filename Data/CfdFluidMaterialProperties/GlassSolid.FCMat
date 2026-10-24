@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; GlassSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Glass_solid
+Type = Solid
+Description = Borosilicate glass solid thermal properties
+Density = 2230 kg/m^3
+ThermalConductivity = 1.12 W/m/K
+SpecificHeat = 830 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=7546f96147b847a5ab00091f3c36b8ce

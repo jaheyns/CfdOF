@@ -1,0 +1,49 @@
+import FreeCAD as App
+import BOPTools.SplitFeatures as SplitFeatures
+
+document_name = "simple_heat_fin_ncc"
+
+if document_name in App.listDocuments():
+    App.closeDocument(document_name)
+doc = App.newDocument(document_name)
+App.setActiveDocument(doc.Name)
+
+fluid = doc.addObject("Part::Box", "FluidSource")
+fluid.Label = "fluid_channel"
+fluid.Length = "60 mm"
+fluid.Width = "20 mm"
+fluid.Height = "20 mm"
+
+solid = doc.addObject("Part::Box", "SolidSource")
+solid.Label = "heat_fin"
+solid.Length = "60 mm"
+solid.Width = "20 mm"
+solid.Height = "5 mm"
+solid.Placement.Base = App.Vector(0, 0, 20)
+
+doc.recompute()
+
+BooleanFragments = SplitFeatures.makeBooleanFragments(name="BooleanFragments")
+BooleanFragments.Label = "BooleanFragments"
+BooleanFragments.Objects = [fluid, solid]
+BooleanFragments.Mode = "Standard"
+doc.recompute()
+
+
+def extract_region(name, predicate):
+    matches = [solid_shape for solid_shape in BooleanFragments.Shape.Solids if predicate(solid_shape.BoundBox)]
+    if len(matches) != 1:
+        raise RuntimeError("Expected one solid for {}, found {}".format(name, len(matches)))
+    obj = doc.addObject("Part::Feature", name)
+    obj.Shape = matches[0]
+    return obj
+
+
+FluidRegion = extract_region("FluidRegion", lambda bb: bb.ZMax <= 20.000001)
+SolidRegion = extract_region("SolidRegion", lambda bb: bb.ZMin >= 19.999999)
+
+for obj in [fluid, solid, BooleanFragments]:
+    if getattr(obj, "ViewObject", None):
+        obj.ViewObject.Visibility = False
+
+doc.recompute()

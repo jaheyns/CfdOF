@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; BrickSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Brick_solid
+Type = Solid
+Description = Common brick solid thermal properties
+Density = 1920 kg/m^3
+ThermalConductivity = 0.72 W/m/K
+SpecificHeat = 840 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=4288c4f80e77437893b26c4a56a98171

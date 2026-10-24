@@ -1,0 +1,13 @@
+; SPDX-FileCopyrightText: 2026 CfdOF contributors
+; PolypropyleneSolid
+;
+; FreeCAD Material card: see https://www.freecad.org/wiki/Material
+
+[FCMat]
+Name = Polypropylene_solid
+Type = Solid
+Description = Polypropylene solid thermal properties
+Density = 918 kg/m^3
+ThermalConductivity = 0.249 W/m/K
+SpecificHeat = 1920 J/kg/K
+ReferenceSource = https://www.matweb.com/search/DataSheet.aspx?MatGUID=a882a1c603374e278d062f106dfda95b

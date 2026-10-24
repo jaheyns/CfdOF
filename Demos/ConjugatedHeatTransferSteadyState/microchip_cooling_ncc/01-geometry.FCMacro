@@ -1,0 +1,102 @@
+import FreeCAD as App
+import Part
+import BOPTools.SplitFeatures as SplitFeatures
+
+
+document_name = "microchip_cooling_ncc"
+
+if document_name in App.listDocuments():
+    App.closeDocument(document_name)
+doc = App.newDocument(document_name)
+App.setActiveDocument(doc.Name)
+
+
+def make_box(name, label, length, width, height, placement):
+    obj = doc.addObject("Part::Box", name)
+    obj.Label = label
+    obj.Length = "{} mm".format(length)
+    obj.Width = "{} mm".format(width)
+    obj.Height = "{} mm".format(height)
+    obj.Placement.Base = App.Vector(*placement)
+    return obj
+
+
+Box = make_box("Box", "room", 120, 120, 100, (89, 90, 0))
+Box001 = make_box("Box001", "PCB", 100, 100, 1, (100, 100, 10))
+Box002 = make_box("Box002", "microchip", 30, 30, 1, (135, 135, 11))
+
+# Heat sink: 30 x 30 x 3 mm base plus seven 1 mm thick fins, then placed on
+# top of the microchip. Keep object names aligned with the original demo.
+Box003 = make_box("Box003", "Cube", 30, 30, 3, (0, 0, 0))
+fin_pitch = 29.0 / 6.0
+Fins = [
+    make_box("Box{:03d}".format(4 + i), "Cube{:03d}".format(i + 1), 30, 1, 12, (0, fin_pitch * i, 0))
+    for i in range(7)
+]
+
+Fusion = doc.addObject("Part::MultiFuse", "Fusion")
+Fusion.Label = "heat_sink"
+Fusion.Shapes = [Box003] + Fins
+Fusion.Placement.Base = App.Vector(135, 135, 12)
+
+# Fan case: square 30 x 30 x 10 mm duct with a 28 mm diameter cylindrical hole.
+outer = Part.makeBox(30, 30, 10, App.Vector(-15, -15, 0))
+inner = Part.makeCylinder(14, 10, App.Vector(0, 0, 0))
+Body = doc.addObject("Part::Feature", "Body")
+Body.Label = "fan case"
+Body.Shape = outer.cut(inner)
+Body.Placement.Base = App.Vector(150, 150, 24)
+
+doc.recompute()
+
+BooleanFragments = SplitFeatures.makeBooleanFragments(name="BooleanFragments")
+BooleanFragments.Label = "BooleanFragments"
+BooleanFragments.Objects = [Fusion, Box002, Box001, Box, Body]
+BooleanFragments.Mode = "Standard"
+doc.recompute()
+
+
+def close_to(value, target, tol=1e-6):
+    return abs(value - target) <= tol
+
+
+def check_solid(predicate, description):
+    matches = [solid for solid in BooleanFragments.Shape.Solids if predicate(solid.BoundBox)]
+    if len(matches) != 1:
+        raise RuntimeError("Expected one {} solid, found {}".format(description, len(matches)))
+    return matches[0]
+
+
+check_solid(
+    lambda bb: close_to(bb.XMin, 100) and close_to(bb.XMax, 200)
+    and close_to(bb.YMin, 100) and close_to(bb.YMax, 200)
+    and close_to(bb.ZMin, 10) and close_to(bb.ZMax, 11),
+    "PCB",
+)
+check_solid(
+    lambda bb: close_to(bb.XMin, 135) and close_to(bb.XMax, 165)
+    and close_to(bb.YMin, 135) and close_to(bb.YMax, 165)
+    and close_to(bb.ZMin, 11) and close_to(bb.ZMax, 12),
+    "microchip",
+)
+check_solid(
+    lambda bb: close_to(bb.XMin, 135) and close_to(bb.XMax, 165)
+    and close_to(bb.YMin, 135) and close_to(bb.YMax, 165)
+    and close_to(bb.ZMin, 12) and close_to(bb.ZMax, 24),
+    "heat sink",
+)
+check_solid(
+    lambda bb: close_to(bb.XMin, 135) and close_to(bb.XMax, 165)
+    and close_to(bb.YMin, 135) and close_to(bb.YMax, 165)
+    and close_to(bb.ZMin, 24) and close_to(bb.ZMax, 34),
+    "fan case",
+)
+
+for obj in [Fusion, Body] + Fins + [Box003, Box002, Box001, Box]:
+    if getattr(obj, "ViewObject", None):
+        obj.ViewObject.Visibility = False
+
+if getattr(BooleanFragments, "ViewObject", None):
+    BooleanFragments.ViewObject.Visibility = True
+
+doc.recompute()

@@ -1,0 +1,21 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam chtMultiRegionFoam
+%{%(multiRegionFluidNames/0%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/%(multiRegionFluidNames/0%)";
+    object      decomposeParDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+numberOfSubdomains  %(solver/ParallelCores%);
+
+method              scotch;
+
+// ************************************************************************* //
+%} system/%(0%)/decomposeParDict
+%}
