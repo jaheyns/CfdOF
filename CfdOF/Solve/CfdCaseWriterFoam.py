@@ -33,6 +33,31 @@ from CfdOF.TemplateBuilder import TemplateBuilder
 from CfdOF.CfdTools import cfdMessage
 from CfdOF.Mesh import CfdMeshTools
 from CfdOF.Mesh import CfdDynamicMeshRefinement
+from CfdOF.Solve.CfdSolidMaterial import CfdSolidMaterial
+
+
+
+def _faces_from_shape_refs(shape_refs):
+    faces = []
+    for ref in shape_refs:
+        shape_obj = ref[0]
+        if shape_obj is None or not hasattr(shape_obj, 'Shape'):
+            raise ValueError("Boundary reference points to a missing geometry object.")
+        sub_list = ref[1] if ref[1] else []
+        if sub_list:
+            for sub_name in sub_list:
+                try:
+                    face = shape_obj.Shape.getElement(sub_name)
+                except Exception as exc:
+                    raise ValueError("Invalid boundary face reference '{}:{}'.".format(
+                        shape_obj.Name, sub_name)) from exc
+                if getattr(face, 'ShapeType', '') != 'Face':
+                    raise ValueError("Boundary reference '{}:{}' is not a face.".format(
+                        shape_obj.Name, sub_name))
+                faces.append(face)
+        else:
+            faces.extend(shape_obj.Shape.Faces)
+    return faces
 
 
 class CfdCaseWriterFoam:
@@ -52,7 +77,8 @@ class CfdCaseWriterFoam:
         if not self.mesh_obj:
             raise RuntimeError("No mesh object was found in analysis " + analysis_obj.Label)
         self.material_objs = CfdTools.getMaterials(analysis_obj)
-        if not self.material_objs:
+        self.solid_material_objs = CfdTools.getSolidMaterials(analysis_obj)
+        if not self.material_objs and not self.solid_material_objs:
             raise RuntimeError("No material properties were found in analysis " + analysis_obj.Label)
         self.bc_group = CfdTools.getCfdBoundaryGroup(analysis_obj)
         self.initial_conditions = CfdTools.getInitialConditions(analysis_obj)
@@ -125,6 +151,17 @@ class CfdCaseWriterFoam:
         self.settings = {
             'physics': phys_settings,
             'fluidProperties': [],  # Order is important, so use a list
+            'solidProperties': [],  # Solid material properties for multi-region CHT
+            'multiRegionEnabled': False,
+            'multiRegionFluidNames': [],
+            'multiRegionSolidNames': [],
+            'multiRegionFluidNamesDict': {},
+            'multiRegionSolidNamesDict': {},
+            'multiRegionFluidBoundaries': {},
+            'multiRegionSolidBoundaries': {},
+            'multiRegionFluidBoundariesByRegion': {},
+            'multiRegionSolidBoundariesByRegion': {},
+            'multiRegionSplitMeshBoundaryEntries': ['enabled'],
             'initialValues': CfdTools.propsToDict(self.initial_conditions),
             'boundaries': dict((b.Label, CfdTools.propsToDict(b)) for b in self.bc_group),
             'reportingFunctions': dict((fo.Label, CfdTools.propsToDict(fo)) for fo in self.reporting_functions),
@@ -226,6 +263,10 @@ class CfdCaseWriterFoam:
             self.processPorousZoneProperties()
         self.processInitialisationZoneProperties()
 
+        if self.settings['multiRegionEnabled']:
+            cfdMessage('Multi-region CHT case detected\n')
+            self.processMultiRegionBoundaries()
+
         if self.mean_velocity_force_cellzone_objs:
             cfdMessage('Mean velocity force cell zone(s) present\n')
             self.exportMeanVelocityForceCellZoneStlSurfaces()
@@ -306,6 +347,14 @@ class CfdCaseWriterFoam:
                     raise RuntimeError("Only isothermal analysis is currently supported for free surface flow simulation.")
             else:
                 raise RuntimeError("Only transient analysis is supported for free surface flow simulation.")
+        elif self.physics_model.Phase == 'MultiRegion':
+            if self.physics_model.Time == 'Steady':
+                if self.physics_model.Flow == 'NonIsothermal':
+                    solver = 'chtMultiRegionSimpleFoam'
+                else:
+                    raise RuntimeError("Only NonIsothermal flow is supported for MultiRegion (CHT) simulation.")
+            else:
+                raise RuntimeError("Only steady analysis is supported for MultiRegion (CHT) simulation.")
         else:
             raise RuntimeError(self.physics_model.Phase + " phase model currently not supported.")
 
@@ -360,9 +409,44 @@ class CfdCaseWriterFoam:
         # self.material_obj currently stores everything as a string
         # Convert to (mostly) SI numbers for OpenFOAM
         settings = self.settings
+        solver_name = settings['solver']['SolverName']
+        is_multiregion = solver_name == 'chtMultiRegionSimpleFoam'
+
+        # Read solid material properties and convert to OpenFOAM units.
+        for solid_obj in self.solid_material_objs:
+            mp = solid_obj.Material.copy()
+            mp['Name'] = solid_obj.Label
+            region_name = CfdTools.getRegionName(solid_obj)
+            if 'ThermalConductivity' in mp:
+                mp['ThermalConductivity'] = Units.Quantity(mp['ThermalConductivity']).getValueAs("W/m/K").Value
+            if 'Density' in mp:
+                mp['Density'] = Units.Quantity(mp['Density']).getValueAs("kg/m^3").Value
+            if 'SpecificHeat' in mp:
+                mp['Cp'] = Units.Quantity(mp['SpecificHeat']).getValueAs("J/kg/K").Value
+            if hasattr(solid_obj, 'HeatGeneration'):
+                heat_gen = solid_obj.HeatGeneration.getValueAs("W/m^3").Value
+            else:
+                heat_gen = 0.0
+            mp['HeatGeneration'] = heat_gen
+            mp['HeatGenerationActive'] = 'true' if heat_gen != 0 else 'false'
+            settings['solidProperties'].append(mp)
+            settings['multiRegionSolidNames'].append(region_name)
+
         for material_obj in self.material_objs:
-            mp = material_obj.Material
+            mp = material_obj.Material.copy()
             mp['Name'] = material_obj.Label
+            if is_multiregion:
+                # Derive fluid region name from the Internal mesh refinement zone label so the
+                # region identity follows selected geometry rather than material metadata.
+                mr_objs = CfdTools.getMeshRefinementObjs(self.mesh_obj)
+                internal_zones = [o.Label for o in mr_objs if o.Internal]
+                region_name = internal_zones[0] if internal_zones else material_obj.Label
+            else:
+                region_name = material_obj.Label
+
+            if is_multiregion:
+                settings['multiRegionFluidNames'].append(region_name)
+
             # Add type if absent
             mat_type = mp.get('Type', 'Isothermal')
             mp['Type'] = mat_type
@@ -405,6 +489,17 @@ class CfdCaseWriterFoam:
                     mp[k] = ' '.join(str(v) for v in poly8)
 
             settings['fluidProperties'].append(mp)
+
+        if is_multiregion:
+            if not settings['multiRegionSolidNames']:
+                raise ValueError("{} requires at least one solid material region. "
+                                 "Add a Solid Properties object for the solid body, or use a "
+                                 "single-region buoyant solver with a fixed-temperature wall "
+                                 "if the body is only meant to be a boundary."
+                                 .format(solver_name))
+            settings['multiRegionEnabled'] = True
+            settings['multiRegionFluidNamesDict'] = {n: {} for n in settings['multiRegionFluidNames']}
+            settings['multiRegionSolidNamesDict'] = {n: {} for n in settings['multiRegionSolidNames']}
 
     def processBoundaryConditions(self):
         """ Compute any quantities required before case build """
@@ -742,6 +837,43 @@ class CfdCaseWriterFoam:
                 self.dynamic_mesh_refinement_obj.RelativeElementSize)
         else:
             settings['dynamicMesh']['Type'] = 'interface'
+
+    def processMultiRegionBoundaries(self):
+        """Assign boundaries to explicitly referenced material and refinement regions."""
+        settings = self.settings
+        regions_by_object = {}
+        for refinement in CfdTools.getMeshRefinementObjs(self.mesh_obj):
+            if refinement.Internal and refinement.Label in settings['multiRegionFluidNames']:
+                for obj, _ in refinement.ShapeRefs:
+                    regions_by_object.setdefault(obj.Name, set()).add(('fluid', refinement.Label))
+        for material in self.solid_material_objs:
+            name = CfdTools.getRegionName(material)
+            for obj, _ in material.ShapeRefs:
+                regions_by_object.setdefault(obj.Name, set()).add(('solid', name))
+        maps = {
+            'fluid': {name: {} for name in settings['multiRegionFluidNames']},
+            'solid': {name: {} for name in settings['multiRegionSolidNames']},
+        }
+        for boundary in self.bc_group:
+            if getattr(boundary, 'DefaultBoundary', False):
+                owners = {('fluid', name) for name in maps['fluid']}
+            else:
+                if not _faces_from_shape_refs(boundary.ShapeRefs):
+                    raise ValueError("Boundary '{}' has no selected faces.".format(boundary.Label))
+                owners = set()
+                for obj, _ in boundary.ShapeRefs:
+                    assigned = regions_by_object.get(obj.Name, set())
+                    if len(assigned) != 1:
+                        raise ValueError("Boundary '{}' must reference geometry assigned to exactly one region: '{}'.".format(
+                            boundary.Label, obj.Label))
+                    owners.update(assigned)
+            for kind, name in owners:
+                maps[kind][name][boundary.Label] = settings['boundaries'][boundary.Label]
+        for kind in ('fluid', 'solid'):
+            prefix = 'multiRegion' + kind.capitalize()
+            settings[prefix + 'BoundariesByRegion'] = maps[kind]
+            settings[prefix + 'Boundaries'] = {
+                label: value for region in maps[kind].values() for label, value in region.items()}
 
     # Zones
     def exportZoneStlSurfaces(self):
