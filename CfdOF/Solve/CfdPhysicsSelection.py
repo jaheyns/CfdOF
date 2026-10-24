@@ -146,7 +146,7 @@ class CfdPhysicsModel:
         if addObjectProperty(
             obj,
             "Phase",
-            ["Single", "FreeSurface"],
+            ["Single", "FreeSurface", "MultiRegion"],
             "App::PropertyEnumeration",
             "Physics modelling",
             QT_TRANSLATE_NOOP("App::Property", "Type of phases present"),
