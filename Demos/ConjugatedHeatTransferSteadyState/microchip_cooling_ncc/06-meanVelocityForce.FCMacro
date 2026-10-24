@@ -1,0 +1,6 @@
+import FreeCAD as App
+
+# The source document /home/kevin/Desktop/microchip_cooling_ncc.FCStd does not
+# contain a mean-velocity-force object. This file is kept as a no-op so older
+# demo runners that expect step 06 continue to work.
+App.ActiveDocument.recompute()

@@ -1,0 +1,26 @@
+import FreeCAD as App
+
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdSolidMaterial
+
+solid = CfdSolidMaterial.makeCfdSolidMaterial("SolidProperties")
+CfdTools.getActiveAnalysis().addObject(solid)
+solid.Label = "aluminium"
+solid.Material = {
+    "Author": "AluminiumSolid",
+    "AuthorAndLicense": "",
+    "CardName": "AluminiumSolid",
+    "Density": "2699 kg/m^3",
+    "Description": "Aluminium solid thermal properties for CHT simulation",
+    "License": "",
+    "Name": "Aluminium_solid",
+    "ReferenceSource": "",
+    "SourceURL": "",
+    "SpecificHeat": "897 J/kg/K",
+    "ThermalConductivity": "237 W/m/K",
+    "Type": "Solid",
+}
+solid.HeatGeneration = "0 W/m^3"
+solid.ShapeRefs = [(App.ActiveDocument.SolidRegion, ("Solid1",))]
+
+App.ActiveDocument.recompute()

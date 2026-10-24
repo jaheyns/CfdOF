@@ -1,0 +1,80 @@
+import FreeCAD as App
+
+from CfdOF import CfdAnalysis, CfdTools
+from CfdOF.Solve import CfdPhysicsSelection
+from CfdOF.Solve import CfdFluidMaterial
+from CfdOF.Solve import CfdInitialiseFlowField
+from CfdOF.Solve import CfdSolverFoam
+
+analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+analysis.Label = "CfdAnalysis001"
+CfdTools.setActiveAnalysis(analysis)
+analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial("FluidProperties"))
+analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+
+physics = App.ActiveDocument.PhysicsModel
+physics.Label = "PhysicsModel001"
+physics.Time = "Transient"
+physics.Flow = "NonIsothermal"
+physics.Phase = "MultiRegion"
+physics.Turbulence = "Laminar"
+physics.TurbulenceModel = "kOmegaSST"
+physics.gx = "0 mm/s^2"
+physics.gy = "0 mm/s^2"
+physics.gz = "-9810 mm/s^2"
+
+fluid = App.ActiveDocument.FluidProperties
+fluid.Label = "FluidProperties001"
+fluid.Material = {
+    "Author": "SPDX-FileCopyrightText: 2021 Oliver Oxtoby",
+    "AuthorAndLicense": "",
+    "CardName": "AirCompressible",
+    "Cp": "1004.703 J/kg/K",
+    "Description": "Compressible air properties",
+    "License": "",
+    "MolarMass": "0.0289643897748887 kg/mol",
+    "Name": "Air",
+    "ReferenceSource": "",
+    "SourceURL": "",
+    "SutherlandRefTemperature": "273.15 K",
+    "SutherlandRefViscosity": "1.716e-5 kg/m/s",
+    "SutherlandTemperature": "110.4 K",
+    "Type": "Compressible",
+}
+
+initial = App.ActiveDocument.InitialiseFields
+initial.Label = "InitialiseFields001"
+initial.PotentialFlow = False
+initial.PotentialFlowP = False
+initial.Pressure = "100 kPa"
+initial.Temperature = "293 K"
+initial.UseInletTemperatureValue = False
+initial.UseInletTurbulenceValues = False
+initial.UseInletUValues = False
+initial.UseOutletPValue = False
+initial.Ux = initial.Uy = "0 mm/s"
+initial.Uz = "0 mm/s"
+initial.k = "10000 mm^2/s^2"
+initial.epsilon = "50000000 mm^2/s^3"
+initial.omega = "1 1/s"
+
+solver = App.ActiveDocument.CfdSolver
+solver.Label = "CfdSolver001"
+solver.MaxIterations = 2000
+solver.SteadyWriteInterval = 100
+solver.PurgeWrite = 0
+solver.MaxCFLNumber = 5.0
+solver.MaxInterfaceCFLNumber = 5.0
+solver.Parallel = True
+solver.ParallelCores = 4
+solver.TurbulenceRelaxation = 0.7
+solver.URelaxation = 0.7
+solver.pRelaxation = 0.3
+solver.rhoRelaxation = 0.5
+solver.energyRelaxation = 0.7
+solver.FluidNonOrthogonalCorrectors = 3
+solver.SolidEnergyRelaxation = 0.9
+solver.SolidNonOrthogonalCorrectors = 5
+App.ActiveDocument.recompute()
