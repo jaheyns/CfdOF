@@ -689,6 +689,14 @@ class CfdMeshTools:
             self.gmsh_settings['ClMin'] = self.clmin
             sols = (''.join((str(n+1) + ', ') for n in range(len(self.mesh_obj.Part.Shape.Solids)))).rstrip(', ')
             self.gmsh_settings['Solids'] = sols
+
+            # Each CHT mesh owns the volumes in its selected region geometry.
+            physics = CfdTools.getPhysicsModel(self.analysis)
+            is_cht = getattr(physics, 'Phase', None) == 'MultiRegion'
+            self.gmsh_settings['IsMultiRegion'] = is_cht
+            self.gmsh_settings['RegionVolumeMap'] = (
+                {CfdTools.getRegionName(self.mesh_obj): sols} if is_cht else {})
+
             self.gmsh_settings['BoundaryFaceMap'] = {}
             for k in range(len(self.patch_faces)):
                 for l in range(len(self.patch_faces[k])):

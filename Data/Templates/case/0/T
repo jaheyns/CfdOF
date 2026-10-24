@@ -48,7 +48,7 @@ boundaryField
     %(0%)
     {
         type            externalWallHeatFluxTemperature;
-        mode            coefficient;
+        mode            flux;
         q               uniform %(boundaries/%(0%)/HeatFlux%);
         kappaMethod     fluidThermo;
         value           $internalField;
