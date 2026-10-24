@@ -1,0 +1,47 @@
+%{%(system/FoundationChtModels%)
+%:True
+%{%(multiRegionFluidNames/0%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/%(multiRegionFluidNames/0%)";
+    object      fvConstraints;
+}
+
+limitT
+{
+    type            limitTemperature;
+    cellZone        all;
+    min             200;
+    max             5000;
+}
+
+%{%(meanVelocityForceEnabled%)
+%:True
+momentumSource
+{
+    type            meanVelocityForce;
+    cellZone        all;
+    Ubar            (%(meanVelocityForce/Ubar%));
+    relaxation      %(meanVelocityForce/Relaxation%);
+}
+%}
+%{%(meanVelocityForceCellZonesPresent%)
+%:True
+%{%(meanVelocityForceCellZones%)
+%{%(meanVelocityForceCellZones/%(0%)/PartNameList%)
+%(0%)MomentumSource
+{
+    type            meanVelocityForce;
+    cellZone        %(0%);
+    Ubar            (%(meanVelocityForceCellZones/%(1%)/Ubar%));
+    relaxation      %(meanVelocityForceCellZones/%(1%)/Relaxation%);
+}
+%}
+%}
+%}
+%} system/%(0%)/fvConstraints
+%}

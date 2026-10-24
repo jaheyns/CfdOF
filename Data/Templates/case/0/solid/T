@@ -80,7 +80,8 @@ boundaryField
 
 %}
 
-%{%(multiRegionSplitMeshBoundaryEntries%)
+%{%(multiRegionUseSplitMeshRegions%)
+%:True
     %(multiRegionSolidNames/%(0%)%)_to_%(multiRegionFluidNames/0%)
     {
         type            compressible::turbulentTemperatureCoupledBaffleMixed;

@@ -807,6 +807,223 @@ class BoundaryFaceAssignmentTest(unittest.TestCase):
             FreeCAD.closeDocument(doc.Name)
 
 
+class SteadyChtTemplateTest(unittest.TestCase):
+    def setUp(self):
+        from CfdOF.TemplateBuilder import TemplateBuilder
+
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.builder = TemplateBuilder.__new__(TemplateBuilder)
+        self.builder.case_path = self.temp_dir.name
+        self.builder.template_path = os.path.join(home_path, 'Data', 'Templates', 'case')
+        self.builder.settings = {
+            'multiRegionFluidNames': ['cooling_air'],
+            'multiRegionSolidNames': ['solid'],
+            'physics': {
+                'Time': 'Steady',
+                'Turbulence': 'Laminar',
+                'TurbulenceModel': 'None',
+            },
+            'solver': {
+                'SolverName': 'chtMultiRegionSimpleFoam',
+                'ConvergenceTol': 1e-5,
+                'FluidNonOrthogonalCorrectors': 1,
+                'SolidNonOrthogonalCorrectors': 0,
+                'URelaxation': 0.7,
+                'energyRelaxation': 0.7,
+                'pRelaxation': 0.3,
+                'rhoRelaxation': 0.3,
+                'SolidEnergyRelaxation': 0.7,
+            },
+        }
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def _build_fluid_file(self, name):
+        self.assertEqual(self.builder.buildFile('system/fluid/' + name, []), '')
+        with open(os.path.join(self.temp_dir.name, 'system', 'cooling_air', name)) as stream:
+            return stream.read()
+
+    def test_solver_time_selection(self):
+        from types import SimpleNamespace
+        writer = CfdCaseWriterFoam.CfdCaseWriterFoam.__new__(CfdCaseWriterFoam.CfdCaseWriterFoam)
+        writer.physics_model = SimpleNamespace(Phase='MultiRegion', Flow='NonIsothermal', Time='Steady')
+        self.assertEqual(writer.getSolverName(), 'chtMultiRegionSimpleFoam')
+        writer.physics_model.Time = 'Transient'
+        with self.assertRaisesRegex(RuntimeError, 'Only steady analysis is supported'):
+            writer.getSolverName()
+        writer.physics_model.Time = 'Steady'
+        writer.physics_model.Flow = 'Isothermal'
+        with self.assertRaisesRegex(RuntimeError, 'Only NonIsothermal flow is supported'):
+            writer.getSolverName()
+
+    def test_steady_cht_templates(self):
+
+        top_solution = self.builder.buildFile('system/fvSolution', [])
+        fluid_solution = self._build_fluid_file('fvSolution')
+        fluid_schemes = self._build_fluid_file('fvSchemes')
+
+        self.assertNotRegex(top_solution, r'\bPIMPLE\s*\{')
+        self.assertRegex(fluid_solution, r'SIMPLE\s*\{')
+        self.assertNotRegex(fluid_solution, r'\bPIMPLE\s*\{')
+        self.assertNotIn('"(rho|rhoFinal)"', fluid_solution)
+        self.assertRegex(fluid_schemes, r'ddtSchemes\s*\{\s*default\s+steadyState;')
+        self.assertNotIn('default         Euler;', fluid_schemes)
+
+        self.builder.buildFile('system/solid/fvSolution', [])
+        self.builder.buildFile('system/solid/fvSchemes', [])
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSolution')) as stream:
+            solid_solution = stream.read()
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSchemes')) as stream:
+            solid_schemes = stream.read()
+        self.assertRegex(solid_solution, r'SIMPLE\s*\{')
+        self.assertNotRegex(solid_solution, r'\bPIMPLE\s*\{')
+        self.assertRegex(solid_schemes, r'ddtSchemes\s*\{\s*default\s+steadyState;')
+        self.assertNotIn('default         Euler;', solid_schemes)
+
+    def test_foundation_steady_cht_templates(self):
+        self.builder.settings['system'] = {'FoundationChtModels': True, 'SolidEnergyField': 'e'}
+        self.assertRegex(self.builder.buildFile('system/fvSolution', []), r'PIMPLE\s*\{')
+        self.assertRegex(self._build_fluid_file('fvSolution'), r'PIMPLE\s*\{')
+        self.assertRegex(self._build_fluid_file('fvSchemes'), r'ddtSchemes\s*\{\s*default\s+steadyState;')
+        self.builder.buildFile('system/solid/fvSolution', [])
+        with open(os.path.join(self.temp_dir.name, 'system', 'solid', 'fvSolution')) as stream:
+            self.assertRegex(stream.read(), r'PIMPLE\s*\{')
+
+
+class MultiRegionRemeshTest(unittest.TestCase):
+    def test_solver_remeshes_all_regions_before_solving(self):
+        from types import SimpleNamespace
+        from unittest.mock import Mock, patch
+        from CfdOF.Solve import TaskPanelCfdSolverControl
+
+        panel = TaskPanelCfdSolverControl.TaskPanelCfdSolverControl.__new__(
+            TaskPanelCfdSolverControl.TaskPanelCfdSolverControl)
+        panel.analysis_object = SimpleNamespace(
+            NeedsMeshRewrite=True, NeedsMeshRerun=True, NeedsCaseRewrite=True)
+        panel.form = Mock()
+        panel.store = Mock()
+        panel.consoleMessage = Mock()
+        panel.write_input_file_handler = Mock()
+        meshes = [Mock(), Mock()]
+        mesh_tools = [Mock(), Mock()]
+        started = []
+        panel.startNextMesh = lambda: started.append(panel.pending_meshes.pop(0))
+
+        with patch.object(CfdTools, 'getMeshObjects', return_value=meshes), \
+                patch.object(CfdMeshTools, 'CfdMeshTools', side_effect=mesh_tools), \
+                patch.object(TaskPanelCfdSolverControl.QtGui.QMessageBox, 'question',
+                             return_value=TaskPanelCfdSolverControl.QtGui.QMessageBox.Yes):
+            panel.runSolverProcess()
+
+        for tools in mesh_tools:
+            tools.writeMesh.assert_called_once()
+        self.assertEqual(started, mesh_tools[:1])
+        self.assertTrue(panel.analysis_object.NeedsMeshRerun)
+        panel.runSolverProcess = Mock()
+        panel.mesherFinished(0)
+        self.assertEqual(started, mesh_tools)
+        panel.runSolverProcess.assert_not_called()
+        self.assertTrue(panel.analysis_object.NeedsMeshRerun)
+        panel.mesherFinished(0)
+        self.assertFalse(panel.analysis_object.NeedsMeshRerun)
+        panel.runSolverProcess.assert_called_once()
+
+
+class ExplicitRegionBoundaryTest(unittest.TestCase):
+    def setUp(self):
+        from types import SimpleNamespace
+        self.document = FreeCAD.newDocument('ExplicitRegionBoundaryTest')
+        self.solid = self.document.addObject('Part::Box', 'SolidRegion')
+        self.fluid = self.document.addObject('Part::Box', 'FluidRegion')
+        self.document.recompute()
+        self.writer = CfdCaseWriterFoam.CfdCaseWriterFoam.__new__(CfdCaseWriterFoam.CfdCaseWriterFoam)
+        self.writer.mesh_objs = [SimpleNamespace(Part=obj, PartSubShape='', RegionRole=role)
+                                 for obj, role in ((self.solid, 'solid'), (self.fluid, 'fluid'))]
+        self.writer._getMeshRegionType = lambda mesh: mesh.RegionRole
+        # Use real geometry, but keep this unit test independent of analysis setup.
+        for mesh, obj in zip(self.writer.mesh_objs, (self.solid, self.fluid)):
+            mesh.Name = obj.Name
+            mesh.Label = obj.Label
+        self.writer.settings = {'boundaries': {}}
+
+    def tearDown(self):
+        FreeCAD.closeDocument(self.document.Name)
+
+    def boundary(self, label, obj, face='Face1', **attributes):
+        from types import SimpleNamespace
+        boundary = SimpleNamespace(Label=label, ShapeRefs=[(obj, (face,))],
+                                   BoundaryType='wall', BoundarySubType='fixedWall', **attributes)
+        self.writer.settings['boundaries'][label] = {}
+        return boundary
+
+    def test_explicit_ownership_with_coincident_regions(self):
+        wall = self.boundary('SolidWall', self.solid)
+        self.writer.bc_group = [wall]
+        self.writer.processMultiRegionBoundaries()
+        self.assertIn('SolidWall', self.writer.settings['multiRegionSolidBoundariesByRegion']['SolidRegion'])
+        self.assertNotIn('SolidWall', self.writer.settings['multiRegionFluidBoundaries'])
+
+    def test_unmeshed_geometry_is_not_inferred(self):
+        other = self.document.addObject('Part::Box', 'Unmeshed')
+        self.document.recompute()
+        self.writer.bc_group = [self.boundary('UnassignedWall', other)]
+        with self.assertRaisesRegex(ValueError, 'exactly one meshed region'):
+            self.writer.processMultiRegionBoundaries()
+
+    def test_default_fluid_boundary_needs_no_selected_faces(self):
+        wall = self.boundary('DefaultWall', self.fluid, DefaultBoundary=True)
+        wall.ShapeRefs = []
+        self.writer.bc_group = [wall]
+        self.writer.processMultiRegionBoundaries()
+        self.assertIn('DefaultWall', self.writer.settings['multiRegionFluidBoundaries'])
+        self.assertNotIn('DefaultWall', self.writer.settings['multiRegionSolidBoundaries'])
+
+    def test_invalid_face_references_raise(self):
+        for face in ('Face999', 'Edge1'):
+            with self.subTest(face=face), self.assertRaisesRegex(ValueError, 'boundary face reference|not a face'):
+                CfdCaseWriterFoam._faces_from_shape_refs([(self.solid, (face,))])
+        with self.assertRaisesRegex(ValueError, 'missing geometry'):
+            CfdCaseWriterFoam._faces_from_shape_refs([(None, ('Face1',))])
+
+    def test_only_explicit_partners_are_coupled(self):
+        interface = object()
+        a = self.boundary('SideA', self.solid, InterfaceObject=interface,
+                          RegionName='SolidRegion', PartnerBoundaryLabels=['SideB'])
+        b = self.boundary('SideB', self.fluid, InterfaceObject=interface,
+                          RegionName='FluidRegion', PartnerBoundaryLabels=['SideA'])
+        other_interface = object()
+        c = self.boundary('SideC', self.solid, InterfaceObject=other_interface,
+                          RegionName='SolidRegion', PartnerBoundaryLabels=['SideD'])
+        d = self.boundary('SideD', self.fluid, InterfaceObject=other_interface,
+                          RegionName='FluidRegion', PartnerBoundaryLabels=['SideC'])
+        for boundary in (a, b, c, d):
+            boundary.BoundarySubType = 'regionCoupledWall'
+        self.writer.bc_group = [a, b, c, d]
+        self.writer.processMultiRegionBoundaries()
+        couples = self.writer.settings['multiRegionNonConformalCouples'].values()
+        self.assertEqual({frozenset((pair['MasterPatch'], pair['SlavePatch'])) for pair in couples},
+                         {frozenset(('SideA', 'SideB')), frozenset(('SideC', 'SideD'))})
+        b.PartnerBoundaryLabels = []
+        with self.assertRaisesRegex(ValueError, 'invalid interface partner'):
+            self.writer.processMultiRegionBoundaries()
+
+    def test_coupled_wall_requires_stored_pair(self):
+        wall = self.boundary('UnpairedWall', self.solid)
+        wall.BoundarySubType = 'regionCoupledWall'
+        self.writer.bc_group = [wall]
+        with self.assertRaisesRegex(ValueError, 'no explicit interface pair'):
+            self.writer.processMultiRegionBoundaries()
+
+    def test_boundary_can_select_multiple_regions(self):
+        wall = self.boundary('SharedWall', self.solid)
+        wall.ShapeRefs.append((self.fluid, ('Face1',)))
+        self.writer.bc_group = [wall]
+        self.writer.processMultiRegionBoundaries()
+        for kind in ('Solid', 'Fluid'):
+            self.assertIn('SharedWall', self.writer.settings['multiRegion' + kind + 'Boundaries'])
+
+
 def compareInpFiles(file_name1, file_name2):
     file1 = open(file_name1, 'r')
     f1 = file1.readlines()
