@@ -5,6 +5,7 @@
 import FreeCAD
 from CfdOF import CfdTools
 from CfdOF.CfdTools import addObjectProperty
+from CfdOF.Solve import CfdRegionCoupledInterface
 
 if FreeCAD.GuiUp:
     import FreeCADGui
@@ -384,6 +385,30 @@ def touchingPartnersForSource(source_obj, touching_pairs, object_map=None):
     return partners
 
 
+def generateInterfacePairs(source_to_region_obj, touching_pairs, tolerance=1e-5):
+    interface_pairs = []
+    for source_a, source_b in touching_pairs:
+        region_obj_a = source_to_region_obj[source_a]
+        region_obj_b = source_to_region_obj[source_b]
+        region_name_a = CfdRegionCoupledInterface.getRegionName(region_obj_a)
+        region_name_b = CfdRegionCoupledInterface.getRegionName(region_obj_b)
+        for face_id_a, face_a in enumerate(region_obj_a.Shape.Faces, 1):
+            for face_id_b, face_b in enumerate(region_obj_b.Shape.Faces, 1):
+                if not _faces_are_paired(face_a, face_b, tolerance):
+                    continue
+                interface_pairs.append(CfdRegionCoupledInterface.makeInterfacePair(
+                    region_name_a,
+                    region_obj_a,
+                    "Face{}".format(face_id_a),
+                    region_name_b,
+                    region_obj_b,
+                    "Face{}".format(face_id_b),
+                ))
+    if not interface_pairs:
+        raise ValueError("No paired interface faces were found between generated regions")
+    return interface_pairs
+
+
 def _default_region_roles(source_objects):
     roles = {}
     for index, source_obj in enumerate(source_objects):
@@ -501,7 +526,7 @@ def generateInterfaceFaceRefs(region_objects, tolerance=1e-5):
 
 
 def createInterfaceNccRegions(source_objects=None, analysis_obj=None, region_roles=None, interface_obj=None):
-    """Create root-level per-region interface shapes.
+    """Create per-region interface shapes inside the analysis and one interface object.
 
     The selected/source objects remain unchanged. For each source object, CfdOF
     retains that source as the base and applies each touching or overlapping
@@ -548,9 +573,22 @@ def createInterfaceNccRegions(source_objects=None, analysis_obj=None, region_rol
 
     _restore_generated_region_references(doc, dependent_references, source_to_region_obj)
 
+    if interface_obj is None:
+        interface = CfdRegionCoupledInterface.makeCfdRegionCoupledInterface("InterfaceRegionCoupledInterface")
+        interface.Label = "InterfaceRegionCoupledInterface"
+    else:
+        interface = interface_obj
+    interface.RegionObjects = slice_objects
+    interface.RegionNames = [CfdRegionCoupledInterface.getRegionName(obj) for obj in slice_objects]
+    interface.ShapeRefs, interface.InterfacePairs = CfdRegionCoupledInterface.generatePairedTouchingFaceData(
+        slice_objects
+    )
+    if interface not in analysis_obj.Group:
+        analysis_obj.addObject(interface)
+
     analysis_obj.NeedsMeshRewrite = True
     analysis_obj.NeedsMeshRerun = True
     analysis_obj.NeedsCaseRewrite = True
 
     doc.recompute()
-    return None, slice_objects, None
+    return None, slice_objects, interface
