@@ -29,6 +29,18 @@ SIMPLE
     pRefCell    0;
 }
 
+%{%(system/FoundationChtModels%)
+%:True
+PIMPLE
+{
+    nOuterCorrectors 1;
+    nCorrectors 2;
+    nNonOrthogonalCorrectors %(solver/FluidNonOrthogonalCorrectors%);
+    pRefValue 0;
+    pRefCell 0;
+}
+%}
+
 solvers
 {
     "(p_rgh|pcorr)"

@@ -5,6 +5,9 @@
 import glob
 import os
 import re
+import shutil
+import subprocess
+import sys
 
 
 PARALLEL = False
@@ -12,6 +15,24 @@ PARALLEL = False
 %:True
 PARALLEL = True
 %}
+
+REGION_MESHES = [
+%{%(multiRegionMeshDirs%)
+    ("%(0%)", "%(multiRegionMeshDirs/%(0%)/MeshDir%)"),
+%}
+]
+
+COUPLES = [
+%{%(multiRegionNonConformalCouplesPresent%)
+%:True
+%{%(multiRegionNonConformalCouples%)
+    ("%(multiRegionNonConformalCouples/%(0%)/MasterRegion%)",
+     "%(multiRegionNonConformalCouples/%(0%)/MasterPatch%)",
+     "%(multiRegionNonConformalCouples/%(0%)/SlaveRegion%)",
+     "%(multiRegionNonConformalCouples/%(0%)/SlavePatch%)"),
+%}
+%}
+]
 
 
 def read_regions():
@@ -28,11 +49,157 @@ def boundary_file(region):
     return os.path.join("constant", region, "polyMesh", "boundary")
 
 
+def copy_region_meshes():
+    for region, mesh_dir in REGION_MESHES:
+        source = os.path.join(mesh_dir, "constant", "polyMesh")
+        destination = os.path.join("constant", region, "polyMesh")
+        if not os.path.isdir(source):
+            raise RuntimeError(
+                "Mesh for region '{}' was not found at '{}'. Run that region's Allmesh first.".format(
+                    region, source
+                )
+            )
+        if os.path.isdir(destination):
+            shutil.rmtree(destination)
+        os.makedirs(os.path.dirname(destination), exist_ok=True)
+        shutil.copytree(source, destination)
+
+        global_gravity = os.path.join("constant", "g")
+        if os.path.isfile(global_gravity):
+            with open(global_gravity) as fid:
+                gravity = fid.read()
+            gravity = re.sub(
+                r'location\s+"constant"\s*;',
+                'location    "constant/' + region + '";',
+                gravity,
+            )
+            with open(os.path.join("constant", region, "g"), "w") as fid:
+                fid.write(gravity)
+
+
+def create_patch_blocks(contents):
+    patches_match = re.search(r"\npatches\s*\(", contents)
+    if not patches_match:
+        return []
+    blocks = []
+    index = patches_match.end()
+    depth = 0
+    start = None
+    while index < len(contents):
+        character = contents[index]
+        if character == "{":
+            if depth == 0:
+                start = index
+            depth += 1
+        elif character == "}":
+            depth -= 1
+            if depth == 0 and start is not None:
+                blocks.append(contents[start:index + 1])
+                start = None
+        elif character == ")" and depth == 0:
+            break
+        index += 1
+    return blocks
+
+
+def block_matches_patches(block, names):
+    match = re.search(r"\n\s*patches\s*\((.*?)\)\s*;", block, re.S)
+    if not match:
+        return False
+    patterns = re.findall(r'"([^"]+)"|([A-Za-z0-9_.*+-]+)', match.group(1))
+    return any(
+        re.fullmatch(quoted or unquoted, name)
+        for quoted, unquoted in patterns
+        for name in names
+    )
+
+
+def write_region_create_patch_dict(region):
+    global_dict = os.path.join("system", "createPatchDict")
+    with open(global_dict) as fid:
+        contents = fid.read()
+    with open(boundary_file(region)) as fid:
+        boundary = fid.read()
+    names = set(re.findall(r"\n\s*([A-Za-z_][A-Za-z0-9_]*)\s*\n\s*\{", boundary))
+    patches_match = re.search(r"\npatches\s*\(", contents)
+    if not patches_match:
+        raise RuntimeError("No patches list found in '{}'".format(global_dict))
+    blocks = [
+        block for block in create_patch_blocks(contents)
+        if block_matches_patches(block, names)
+    ]
+    system_dir = os.path.join("system", region)
+    os.makedirs(system_dir, exist_ok=True)
+    region_dict = os.path.join(system_dir, "createPatchDict")
+    with open(region_dict, "w") as fid:
+        fid.write(contents[:patches_match.start()])
+        fid.write("\npatches\n(\n")
+        for block in blocks:
+            fid.write(block + "\n")
+        fid.write(");\n\n// ************************************************************************* //\n")
+    return os.path.abspath(region_dict)
+
+
+def create_region_patches():
+    for region, _mesh_dir in REGION_MESHES:
+        region_dict = write_region_create_patch_dict(region)
+        subprocess.check_call([
+            "createPatch", "-region", region, "-dict", region_dict, "-overwrite"
+        ])
+
+
+def mapping_method():
+    version = os.environ.get("WM_PROJECT_VERSION", "")
+    if not os.environ.get("FOAM_API") and (
+        version == "dev" or (version.isdigit() and 13 <= int(version) < 1000)
+    ):
+        return "method", "intersection"
+    return "sampleMode", "nearestPatchFaceAMI"
+
+
+def replace_patch_block(contents, patch, neighbour_region, neighbour_patch):
+    method_keyword, method = mapping_method()
+    pattern = re.compile(
+        r"(\n\s*" + re.escape(patch) + r"\s*\n\s*\{)(.*?)(\n\s*\})",
+        re.S,
+    )
+    match = pattern.search(contents)
+    if not match:
+        raise RuntimeError("Patch '{}' was not found in boundary file".format(patch))
+    body = match.group(2)
+    for keyword in ("type", "sampleMode", "sampleRegion", "samplePatch",
+                    "method", "neighbourRegion", "neighbourPatch", "transformType"):
+        body = re.sub(r"\n\s*" + keyword + r"\s+\w+\s*;", "", body)
+    entries = [("type", "mappedWall"), (method_keyword, method)]
+    if method_keyword == "method":
+        entries.extend([("neighbourRegion", neighbour_region),
+                        ("neighbourPatch", neighbour_patch), ("transformType", "none")])
+    else:
+        entries.extend([("sampleRegion", neighbour_region), ("samplePatch", neighbour_patch)])
+    body = ''.join("\n        {:16s}{};".format(key, value) for key, value in entries) + body
+    return contents[:match.start()] + match.group(1) + body + match.group(3) + contents[match.end():]
+
+
+def couple_region_patches():
+    for master_region, master_patch, slave_region, slave_patch in COUPLES:
+        for region, patch, neighbour_region, neighbour_patch in (
+            (master_region, master_patch, slave_region, slave_patch),
+            (slave_region, slave_patch, master_region, master_patch),
+        ):
+            path = boundary_file(region)
+            with open(path) as fid:
+                contents = fid.read()
+            contents = replace_patch_block(contents, patch, neighbour_region, neighbour_patch)
+            with open(path, "w") as fid:
+                fid.write(contents)
+
+
 def update_sample_mode(path):
-    sample_mode = os.environ.get("CFDOF_MAPPED_WALL_SAMPLE_MODE", "nearestPatchFaceAMI")
+    method_keyword, method = mapping_method()
     with open(path) as fid:
         contents = fid.read()
-    contents = re.sub(r"sampleMode\s+\w+\s*;", "sampleMode      " + sample_mode + ";", contents)
+    contents = re.sub(r"\b(?:sampleMode|method)\s+\w+\s*;",
+                      method_keyword + "      " + method + ";", contents)
     with open(path, "w") as fid:
         fid.write(contents)
 
@@ -48,6 +215,20 @@ def patch_names(path, mapped):
     if mapped:
         return [name for name in all_patches if name in mapped_patches]
     return [name for name in all_patches if name not in mapped_patches]
+
+
+def patch_type(path, patch):
+    with open(path) as fid:
+        contents = fid.read()
+    match = re.search(
+        r"\n\s*" + re.escape(patch) + r"\s*\n\s*\{(.*?)\n\s*\}",
+        contents,
+        re.S,
+    )
+    if not match:
+        return None
+    type_match = re.search(r"\btype\s+(\w+)\s*;", match.group(1))
+    return type_match.group(1) if type_match else None
 
 
 def has_patch(contents, patch):
@@ -108,23 +289,39 @@ def add_interface_fields(region, patches, is_fluid):
                 add_patch_entry(path, patch, ["type            zeroGradient;"])
 
 
-def add_default_solid_fields(region, patches):
+def add_default_solid_fields(region, boundary_path, patches):
     field_dir = os.path.join("0", region)
     if not os.path.isdir(field_dir):
         return
     for patch in patches:
+        mesh_patch_type = patch_type(boundary_path, patch)
+        constraint_patch = mesh_patch_type in ("empty", "symmetry", "symmetryPlane", "wedge")
         for path in glob.glob(os.path.join(field_dir, "*")):
             field = os.path.basename(path)
             if field == "T":
-                add_patch_entry(path, patch, ["type            zeroGradient;"])
+                if constraint_patch:
+                    add_patch_entry(path, patch, ["type            " + mesh_patch_type + ";"])
+                else:
+                    add_patch_entry(path, patch, ["type            zeroGradient;"])
             elif field == "p":
-                add_patch_entry(path, patch, [
-                    "type            calculated;",
-                    "value           $internalField;",
-                ])
+                if constraint_patch:
+                    add_patch_entry(path, patch, ["type            " + mesh_patch_type + ";"])
+                else:
+                    add_patch_entry(path, patch, [
+                        "type            calculated;",
+                        "value           $internalField;",
+                    ])
 
 
 def main():
+    if len(sys.argv) > 1:
+        if sys.argv[1] != "meshes":
+            raise ValueError("Unknown preparation stage '{}'".format(sys.argv[1]))
+        copy_region_meshes()
+        create_region_patches()
+        couple_region_patches()
+        return
+
     fluid_regions, solid_regions = read_regions()
     for region in fluid_regions + solid_regions:
         path = boundary_file(region)
@@ -140,7 +337,7 @@ def main():
         if not os.path.isfile(path):
             continue
         add_interface_fields(region, patch_names(path, mapped=True), is_fluid=False)
-        add_default_solid_fields(region, patch_names(path, mapped=False))
+        add_default_solid_fields(region, path, patch_names(path, mapped=False))
 
 
 if __name__ == "__main__":

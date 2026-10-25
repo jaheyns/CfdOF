@@ -10,7 +10,15 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+%{%(system/FoundationChtModels%)
+%:True
+PIMPLE
+{
+    nOuterCorrectors 1;
+}
+%:False
 // (intentionally empty - solver settings are in system/<region>/fvSolution)
+%}
 
 // ************************************************************************* //
 %:default

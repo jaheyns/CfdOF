@@ -4,6 +4,7 @@
 # SPDX-FileCopyrightText: © 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>
 # SPDX-FileCopyrightText: © 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>
 # SPDX-FileCopyrightText: © 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>
+# SPDX-FileCopyrightText: © 2026 Kavin Teenakul <andythe_great@protonmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################
@@ -239,12 +240,12 @@ class TaskPanelCfdSolverControl:
                 
                 if self.analysis_object.NeedsMeshRewrite or self.analysis_object.NeedsMeshRerun:
                     from CfdOF.Mesh import CfdMeshTools
-                    mesh_obj = CfdTools.getMeshObject(self.analysis_object)
-                    cart_mesh = CfdMeshTools.CfdMeshTools(mesh_obj)
-                    cart_mesh.progressCallback = self.consoleMessage
+                    self.pending_meshes = [CfdMeshTools.CfdMeshTools(mesh)
+                                           for mesh in CfdTools.getMeshObjects(self.analysis_object)]
                     if self.analysis_object.NeedsMeshRewrite:
-                        #Write mesh
-                        cart_mesh.writeMesh()
+                        for cart_mesh in self.pending_meshes:
+                            cart_mesh.progressCallback = self.consoleMessage
+                            cart_mesh.writeMesh()
                         self.analysis_object.NeedsMeshRewrite = False
                         self.analysis_object.NeedsMeshRerun = True
 
@@ -252,27 +253,8 @@ class TaskPanelCfdSolverControl:
                     self.write_input_file_handler()
 
                 if self.analysis_object.NeedsMeshRerun:
-                    # Run mesher
-                    self.solver_object.Proxy.solver_process = CfdConsoleProcess(
-                        finished_hook=self.mesherFinished,
-                        stdout_hook=self.gotOutputLines,
-                        stderr_hook=self.gotErrorLines)
-
-                    cart_mesh.error = False
-                    if CfdTools.getFoamRuntime() == "MinGW" or CfdTools.getFoamRuntime().startswith('BlueCFD'):
-                        cmd = CfdTools.makeRunCommand('Allmesh.bat', source_env=False)
-                    else:
-                        cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.mesh_case_dir, source_env=False)
-                    env_vars = CfdTools.getRunEnvironment()
-                    self.solver_object.Proxy.solver_process.start(cmd, working_dir=cart_mesh.mesh_case_dir, env_vars=env_vars)
-                    if self.solver_object.Proxy.solver_process.waitForStarted():
-                        # Setting solve button to inactive to ensure that two instances of the same simulation aren't started
-                        # simultaneously
-                        self.form.pb_write_inp.setEnabled(False)
-                        self.form.pb_run_solver.setEnabled(False)
-                        self.form.terminateSolver.setEnabled(True)
-                        self.consoleMessage("Mesher started ...")
-                        return
+                    self.startNextMesh()
+                    return
             else:
                 self.Start = time.time()
 
@@ -322,6 +304,28 @@ class TaskPanelCfdSolverControl:
             self.consoleMessage("Error starting solver", 'Error')
         QApplication.restoreOverrideCursor()
 
+    def startNextMesh(self):
+        cart_mesh = self.pending_meshes.pop(0)
+        cart_mesh.error = False
+        self.solver_object.Proxy.solver_process = CfdConsoleProcess(
+            finished_hook=self.mesherFinished,
+            stdout_hook=self.gotOutputLines,
+            stderr_hook=self.gotErrorLines)
+        if CfdTools.getFoamRuntime() == "MinGW" or CfdTools.getFoamRuntime().startswith('BlueCFD'):
+            cmd = CfdTools.makeRunCommand('Allmesh.bat', source_env=False)
+        else:
+            cmd = CfdTools.makeRunCommand('./Allmesh', cart_mesh.mesh_case_dir, source_env=False)
+        env_vars = CfdTools.getRunEnvironment()
+        self.solver_object.Proxy.solver_process.start(
+            cmd, working_dir=cart_mesh.mesh_case_dir, env_vars=env_vars)
+        if self.solver_object.Proxy.solver_process.waitForStarted():
+            self.form.pb_write_inp.setEnabled(False)
+            self.form.pb_run_solver.setEnabled(False)
+            self.form.terminateSolver.setEnabled(True)
+            self.consoleMessage("Mesher started: {}".format(cart_mesh.mesh_obj.Label))
+        else:
+            self.mesherFinished(1)
+
     def killSolverProcess(self):
         if CfdTools.getFoamRuntime() == "PosixDocker":
             FreeCADGui.doCommand("from CfdOF import CfdConsoleProcess")
@@ -345,6 +349,9 @@ class TaskPanelCfdSolverControl:
         self.form.terminateSolver.setEnabled(False)
 
     def mesherFinished(self, exit_code):
+        if exit_code == 0 and self.pending_meshes:
+            self.startNextMesh()
+            return
         self.form.pb_write_inp.setEnabled(True)
         self.form.pb_run_solver.setEnabled(True)
         self.form.terminateSolver.setEnabled(False)
@@ -353,6 +360,7 @@ class TaskPanelCfdSolverControl:
             self.analysis_object.NeedsMeshRerun = False
             self.runSolverProcess()
         else:
+            self.pending_meshes = []
             self.consoleMessage("Mesher exited with error", 'Error')
 
     def gotOutputLines(self, lines):

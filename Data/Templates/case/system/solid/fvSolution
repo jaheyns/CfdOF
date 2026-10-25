@@ -18,13 +18,21 @@ SIMPLE
 
     residualControl
     {
-        h               %(solver/ConvergenceTol%);
+        %(system/SolidEnergyField%)               %(solver/ConvergenceTol%);
     }
 }
 
+%{%(system/FoundationChtModels%)
+%:True
+PIMPLE
+{
+    nNonOrthogonalCorrectors %(solver/SolidNonOrthogonalCorrectors%);
+}
+%}
+
 solvers
 {
-    h
+    %(system/SolidEnergyField%)
     {
         solver           GAMG;
         tolerance        1e-8;
@@ -38,9 +46,9 @@ solvers
         mergeLevels      1;
     }
 
-    hFinal
+    %(system/SolidEnergyField%)Final
     {
-        $h;
+        $%(system/SolidEnergyField%);
         relTol          0;
     }
 }
@@ -49,7 +57,7 @@ relaxationFactors
 {
     equations
     {
-        h               %(solver/SolidEnergyRelaxation%);
+        %(system/SolidEnergyField%)               %(solver/SolidEnergyRelaxation%);
     }
 }
 
