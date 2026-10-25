@@ -72,8 +72,10 @@ class TaskPanelCfdFluidBoundary:
         self.form.buttonGroupPorous.setId(self.form.radioButtonPorousScreen, 1)
 
         # Boundary types
-        self.form.comboBoundaryType.addItems(CfdFluidBoundary.BOUNDARY_NAMES)
-        bi = indexOrDefault(CfdFluidBoundary.BOUNDARY_TYPES, self.obj.BoundaryType, 0)
+        solid_boundary = bool(getattr(obj, 'SolidBoundary', False))
+        self.form.comboBoundaryType.addItems(
+            CfdFluidBoundary.BOUNDARY_NAMES[:1] if solid_boundary else CfdFluidBoundary.BOUNDARY_NAMES)
+        bi = 0 if solid_boundary else indexOrDefault(CfdFluidBoundary.BOUNDARY_TYPES, self.obj.BoundaryType, 0)
         self.form.comboBoundaryType.currentIndexChanged.connect(self.comboBoundaryTypeChanged)
         self.form.comboBoundaryType.setCurrentIndex(bi)
         self.comboBoundaryTypeChanged()
@@ -226,7 +228,14 @@ class TaskPanelCfdFluidBoundary:
 
         # Face list selection panel - modifies obj.ShapeRefs passed to it
         self.faceSelector = CfdFaceSelectWidget.CfdFaceSelectWidget(self.form.faceSelectWidget,
-                                                                    self.obj, True, True, False)
+                                                                    self.obj, not getattr(obj, 'SolidBoundary', False), True, False)
+
+        if getattr(obj, 'SolidBoundary', False):
+            self.form.setWindowTitle("Solid boundary")
+            self.form.comboSubtype.setVisible(False)
+            self.form.labelSubtype.setVisible(False)
+            self.form.labelBoundaryDescription.setText("External solid thermal boundary")
+            self.form.checkBoxDefaultBoundary.setVisible(False)
 
         self.updateUI()
 
@@ -260,6 +269,10 @@ class TaskPanelCfdFluidBoundary:
 
         alpha_enabled = CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][4]
         self.form.volumeFractionsFrame.setVisible(alpha_enabled and len(self.material_objs) > 1)
+        if getattr(self.obj, 'SolidBoundary', False):
+            self.form.basicFrame.setVisible(False)
+            self.form.turbulenceFrame.setVisible(False)
+            self.form.volumeFractionsFrame.setVisible(False)
 
         if not self.physics_model.Flow == 'Isothermal' and CfdFluidBoundary.BOUNDARY_UI[type_index][subtype_index][5]:
             self.form.thermalFrame.setVisible(True)

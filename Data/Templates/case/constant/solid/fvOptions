@@ -1,5 +1,7 @@
 %{%(solver/SolverName%)
 %:chtMultiRegionSimpleFoam
+%{%(system/FoundationChtModels%)
+%:False
 %{%(multiRegionSolidNames%)
 %[_header%]
 FoamFile
@@ -26,4 +28,5 @@ heatSource
 
 // ************************************************************************* //
 %} constant/%(multiRegionSolidNames/%(0%)%)/fvOptions
+%}
 %}
