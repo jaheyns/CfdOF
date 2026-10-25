@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: © 2026 Kavin Teenakul <andythe_great@protonmail.com>
+
+import FreeCAD as App
+import Part
+
+
+document_name = "microchip_cooling_ncc"
+
+if document_name in App.listDocuments():
+    App.closeDocument(document_name)
+doc = App.newDocument(document_name)
+App.setActiveDocument(doc.Name)
+
+
+def make_box(name, label, length, width, height, placement):
+    obj = doc.addObject("Part::Box", name)
+    obj.Label = label
+    obj.Length = "{} mm".format(length)
+    obj.Width = "{} mm".format(width)
+    obj.Height = "{} mm".format(height)
+    obj.Placement.Base = App.Vector(*placement)
+    return obj
+
+
+Box = make_box("Box", "room", 120, 120, 100, (0, 0, 0))
+Box001 = make_box("Box001", "PCB", 100, 100, 1, (11, 10, 0))
+Box002 = make_box("Box002", "microchip", 30, 30, 1, (46, 45, 1))
+
+# Heat sink: 30 x 30 x 3 mm base plus seven 1 mm thick fins, then placed on
+# top of the microchip. Keep object names aligned with the original demo.
+Box003 = make_box("Box003", "Cube", 30, 30, 3, (0, 0, 0))
+fin_pitch = 29.0 / 6.0
+Fins = [
+    make_box("Box{:03d}".format(4 + i), "Cube{:03d}".format(i + 1), 30, 1, 12, (0, fin_pitch * i, 0))
+    for i in range(7)
+]
+
+Fusion = doc.addObject("Part::MultiFuse", "Fusion")
+Fusion.Label = "heat_sink"
+Fusion.Shapes = [Box003] + Fins
+Fusion.Placement.Base = App.Vector(46, 45, 2)
+
+# Fan case: square 30 x 30 x 10 mm duct with a 28 mm diameter cylindrical hole.
+outer = Part.makeBox(30, 30, 10, App.Vector(-15, -15, 0))
+inner = Part.makeCylinder(14, 10, App.Vector(0, 0, 0))
+Body = doc.addObject("Part::Feature", "Body")
+Body.Label = "fan_case"
+Body.Shape = outer.cut(inner)
+Body.Placement.Base = App.Vector(61, 60, 14)
+
+doc.recompute()
+
+for obj in Fins + [Box003]:
+    if getattr(obj, "ViewObject", None):
+        obj.ViewObject.Visibility = False
+
+for obj in (Box, Box001, Box002, Fusion, Body):
+    if getattr(obj, "ViewObject", None):
+        obj.ViewObject.Visibility = True
+
+doc.recompute()
