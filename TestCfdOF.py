@@ -757,6 +757,30 @@ class GmshRegionVolumeTest(unittest.TestCase):
             FreeCAD.closeDocument(doc.Name)
 
 
+class NccGeometryBackendTest(unittest.TestCase):
+    def test_touching_regions_preserve_source_geometry(self):
+        from CfdOF.Solve import CfdInterfaceNccRegions
+
+        doc = FreeCAD.newDocument('NccGeometryBackendTest')
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+            CfdTools.setActiveAnalysis(analysis)
+            first = doc.addObject('Part::Box', 'FirstRegion')
+            second = doc.addObject('Part::Box', 'SecondRegion')
+            second.Placement.Base.x = 10
+            doc.recompute()
+            original_volumes = [obj.Shape.Volume for obj in (first, second)]
+            self.assertEqual(CfdInterfaceNccRegions.findTouchingShapePairs([first, second]),
+                             [(first, second)])
+            _group, regions, _interface = CfdInterfaceNccRegions.createInterfaceNccRegions([first, second])
+            self.assertEqual([region.SourceObject for region in regions], [first, second])
+            self.assertTrue(all(region in analysis.Group for region in regions))
+            self.assertTrue(all(region.Shape.isValid() for region in regions))
+            self.assertEqual([obj.Shape.Volume for obj in (first, second)], original_volumes)
+        finally:
+            FreeCAD.closeDocument(doc.Name)
+
+
 class ChtTemperatureTemplateTest(unittest.TestCase):
     def render_fields(self, foundation=False):
         from CfdOF.TemplateBuilder import TemplateBuilder
