@@ -231,6 +231,60 @@ def getCfdBoundaryGroup(analysis_object):
     return getModelsOfType(analysis_object, 'CfdFluidBoundary')
 
 
+def getRegionCoupledInterfaceGroup(analysis_object):
+    return getModelsOfType(analysis_object, 'CfdRegionCoupledInterface')
+
+
+def getCfdBoundaryGroupWithRegionInterfaces(analysis_object):
+    boundaries = list(getCfdBoundaryGroup(analysis_object))
+    for interface_obj in getRegionCoupledInterfaceGroup(analysis_object):
+        if hasattr(interface_obj.Proxy, 'makeBoundaryObjects'):
+            boundaries.extend(interface_obj.Proxy.makeBoundaryObjects(interface_obj))
+    return boundaries
+
+
+def validateBoundaryFaceAssignments(boundaries):
+    """Reject competing boundary objects on the same referenced geometry face."""
+    owners = {}
+    object_faces = {}
+    for boundary in boundaries:
+        for obj, subnames in boundary.ShapeRefs:
+            object_shape = obj.Shape
+            object_key = (obj.Document.Name, obj.Name)
+            if object_key not in object_faces:
+                face_indices = {}
+                # Hash buckets avoid full face scans; isSame resolves hash collisions.
+                for index, face in enumerate(object_shape.Faces, 1):
+                    face_indices.setdefault(face.hashCode(), []).append((index, face))
+                object_faces[object_key] = face_indices
+            face_indices = object_faces[object_key]
+            for subname in subnames or ('',):
+                shape = object_shape.getElement(subname) if subname else object_shape
+                for face in shape.Faces:
+                    face_index = next(index for index, candidate in face_indices[face.hashCode()]
+                                      if candidate.isSame(face))
+                    key = (obj.Document.Name, obj.Name, face_index)
+                    previous = owners.get(key)
+                    if previous is not None and previous is not boundary:
+                        raise ValueError("Duplicate boundary assignment: '{}:Face{}' is assigned to both '{}' "
+                                         "and '{}'. Remove the conflicting face assignment.".format(
+                                             obj.Label, face_index, previous.Label, boundary.Label))
+                    owners[key] = boundary
+
+
+def getBoundaryPatchPrefix(boundary, index):
+    """Keep generated interface patch names independent of boundary list order."""
+    if hasattr(boundary, 'InterfaceObject'):
+        return 'patch_' + boundary.Label
+    return 'patch_' + str(index + 1)
+
+
+def boundaryToDict(obj):
+    if hasattr(obj, 'toDict'):
+        return obj.toDict()
+    return propsToDict(obj)
+
+
 def isPlanar(shape):
     """
     Return whether the shape is a planar face

@@ -37,6 +37,7 @@ from CfdOF.Solve import CfdInitialiseFlowField
 from CfdOF.Solve import CfdFluidMaterial
 from CfdOF.Mesh import CfdMesh
 from CfdOF.Solve import CfdFluidBoundary
+from CfdOF.Solve import CfdRegionCoupledInterface
 from CfdOF import CfdTools
 from CfdOF.Solve import CfdCaseWriterFoam
 from CfdOF.Mesh import CfdMeshTools
@@ -85,6 +86,10 @@ class BlockTest(unittest.TestCase):
         self.analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
         CfdTools.setActiveAnalysis(self.analysis)
         self.active_doc.recompute()
+
+    def test_fluid_boundary_has_no_region_override(self):
+        boundary = CfdFluidBoundary.makeCfdFluidBoundary('boundary')
+        self.assertNotIn('RegionName', boundary.PropertiesList)
 
     def createNewSolver(self):
         self.solver_object = CfdSolverFoam.makeCfdSolverFoam()
@@ -136,6 +141,7 @@ class BlockTest(unittest.TestCase):
         self.inlet_boundary = CfdFluidBoundary.makeCfdFluidBoundary('inlet')
         self.analysis.addObject(self.inlet_boundary)
         bc_set = self.inlet_boundary
+        self.assertNotIn('RegionName', bc_set.PropertiesList)
         bc_set.BoundaryType = 'inlet'
         bc_set.BoundarySubType = 'uniformVelocityInlet'
         bc_set.Ux = 1
@@ -781,6 +787,45 @@ class NccGeometryBackendTest(unittest.TestCase):
             FreeCAD.closeDocument(doc.Name)
 
 
+class BoundaryFaceAssignmentTest(unittest.TestCase):
+    def test_solid_and_face_references_are_checked_together(self):
+        from types import SimpleNamespace
+        doc = FreeCAD.newDocument('SolidBoundaryAssignmentTest')
+        try:
+            shape = doc.addObject('Part::Box', 'Box')
+            doc.recompute()
+            solid = SimpleNamespace(Label='SolidBoundary', ShapeRefs=[(shape, ('Solid1',))])
+            face = SimpleNamespace(Label='FaceBoundary', ShapeRefs=[(shape, ('Face6',))])
+            with self.assertRaisesRegex(ValueError, 'Duplicate boundary assignment'):
+                CfdTools.validateBoundaryFaceAssignments([solid, face])
+            other_shape = doc.addObject('Part::Box', 'OtherBox')
+            doc.recompute()
+            face.ShapeRefs = [(other_shape, ('Face6',))]
+            CfdTools.validateBoundaryFaceAssignments([solid, face])
+        finally:
+            FreeCAD.closeDocument(doc.Name)
+
+    def test_duplicate_face_assignments_are_errors(self):
+        from types import SimpleNamespace
+        doc = FreeCAD.newDocument('DuplicateBoundaryTest')
+        try:
+            shape = doc.addObject('Part::Box', 'Box')
+            doc.recompute()
+            first = SimpleNamespace(Label='FirstBoundary', ShapeRefs=[(shape, ('Face1',))])
+            second = SimpleNamespace(Label='SecondBoundary', ShapeRefs=[(shape, ('Face1',))])
+            with self.assertRaisesRegex(ValueError, "Duplicate boundary assignment.*FirstBoundary.*SecondBoundary"):
+                CfdTools.validateBoundaryFaceAssignments([first, second])
+            second.ShapeRefs = [(shape, ('',))]
+            with self.assertRaisesRegex(ValueError, 'Duplicate boundary assignment'):
+                CfdTools.validateBoundaryFaceAssignments([first, second])
+            second.ShapeRefs = [(shape, ('Face2',))]
+            CfdTools.validateBoundaryFaceAssignments([first, second])
+            first.ShapeRefs.append((shape, ('Face1',)))
+            CfdTools.validateBoundaryFaceAssignments([first, second])
+        finally:
+            FreeCAD.closeDocument(doc.Name)
+
+
 class ChtTemperatureTemplateTest(unittest.TestCase):
     def render_fields(self, foundation=False):
         from CfdOF.TemplateBuilder import TemplateBuilder
@@ -890,6 +935,11 @@ class RegionNamingTest(unittest.TestCase):
                 self.assertEqual(CfdTools.getRegionName(SimpleNamespace(
                     Part=source, PartSubShape='Solid2')), label + '_Solid2')
 
+    def test_interface_patch_prefix_preserves_label(self):
+        from types import SimpleNamespace
+        boundary = SimpleNamespace(Label='interface_heat_sink_to_chip', InterfaceObject=object())
+        self.assertEqual(CfdTools.getBoundaryPatchPrefix(boundary, 3), 'patch_interface_heat_sink_to_chip')
+        self.assertEqual(CfdTools.getBoundaryPatchPrefix(SimpleNamespace(Label='wall'), 3), 'patch_4')
 
 
 def compareInpFiles(file_name1, file_name2):
