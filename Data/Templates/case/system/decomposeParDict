@@ -20,7 +20,39 @@ constraints
     {
         type preserveBaffles;
     }
+%{%(createPatchesForPeriodics%)
+%:True
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam
+%{%(createPeriodics%)
+    preservePatches_%(0%)
+    {
+        type preservePatches;
+        patches ( %(0%)_master %(0%)_slave );
+        enabled true;
+    }
+%}
+%}
+%}
 }
+%:False
+%{%(createPatchesForPeriodics%)
+%:True
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam
+constraints
+{
+%{%(createPeriodics%)
+    preservePatches_%(0%)
+    {
+        type preservePatches;
+        patches ( %(0%)_master %(0%)_slave );
+        enabled true;
+    }
+%}
+}
+%}
+%}
 %}
 
 // ************************************************************************* //
