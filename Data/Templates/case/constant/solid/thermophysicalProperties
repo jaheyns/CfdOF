@@ -16,11 +16,26 @@ thermoType
 {
     type            heSolidThermo;
     mixture         pureMixture;
+%{%(system/FoundationChtModels%)
+%:True
+    transport       constIsoSolid;
+%:False
     transport       constIso;
+%}
+%{%(system/FoundationChtModels%)
+%:True
+    thermo          eConst;
+%:False
     thermo          hConst;
+%}
     equationOfState rhoConst;
     specie          specie;
+%{%(system/FoundationChtModels%)
+%:True
+    energy          sensibleInternalEnergy;
+%:False
     energy          sensibleEnthalpy;
+%}
 }
 
 mixture
@@ -36,7 +51,12 @@ mixture
     }
     thermodynamics
     {
+%{%(system/FoundationChtModels%)
+%:True
+        Cv              %(solidProperties/%(0%)/Cp%);
+%:False
         Cp              %(solidProperties/%(0%)/Cp%);
+%}
         Hf              0;
     }
     equationOfState
