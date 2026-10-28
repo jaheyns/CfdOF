@@ -221,10 +221,7 @@ $PNAME = "p"
 %{%(solver/Parallel%)
 %:True
 # Parallel decomposition
-if( !(Test-Path -PathType Container processor0) )
-{
-    runCommand decomposePar -force
-}
+runCommand decomposePar -force
 
 # Pick up number of parallel processes
 $NPROC = foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict
