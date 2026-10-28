@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TaskPanelCfdMRF</class>
+ <widget class="QWidget" name="TaskPanelCfdMRF">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>528</width>
+    <height>469</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Multi-reference frame (MRF)</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="leftMargin">
+      <number>8</number>
+     </property>
+     <property name="topMargin">
+      <number>8</number>
+     </property>
+     <property name="rightMargin">
+      <number>8</number>
+     </property>
+     <property name="bottomMargin">
+      <number>8</number>
+     </property>
+
+     <item>
+      <layout class="QHBoxLayout" name="LayoutSpeed">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Rotation speed (rpm)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Gui::InputField" name="InputFieldSpeed">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="format" stdset="0">
+          <number>0</number>
+         </property>
+        </widget>
+	   </item>
+	  </layout>
+     </item>
+     <item>
+      <widget class="QLabel" name="LabelCoR">
+       <property name="text">
+        <string>Centre of rotation (X, Y, Z)</string>
+       </property>
+      </widget>
+     </item>
+	 <item>
+      <layout class="QHBoxLayout" name="LayoutCoR">
+       <item>
+        <widget class="Gui::InputField" name="InputFieldCoRX">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true">mm</string>
+         </property>
+         <property name="format" stdset="0">
+          <number>0</number>
+         </property>
+        </widget>
+	   </item>
+       <item>
+        <widget class="Gui::InputField" name="InputFieldCoRY">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true">mm</string>
+         </property>
+         <property name="format" stdset="0">
+          <number>0</number>
+         </property>
+        </widget>
+	   </item>
+       <item>
+        <widget class="Gui::InputField" name="InputFieldCoRZ">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true">mm</string>
+         </property>
+         <property name="format" stdset="0">
+          <number>0</number>
+         </property>
+        </widget>
+	   </item>
+	  </layout>
+	 </item>
+     <item>
+      <widget class="QLabel" name="LabelAxis">
+       <property name="text">
+        <string>Rotational axis (X, Y, Z)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="LayoutAxis">
+       <item>
+        <widget class="Gui::InputField" name="InputFieldAxisX">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="format" stdset="0">
+          <number>0</number>
+         </property>
+        </widget>
+	   </item>
+       <item>
+        <widget class="Gui::InputField" name="InputFieldAxisY">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="format" stdset="0">
+          <number>0</number>
+         </property>
+        </widget>
+	   </item>
+       <item>
+        <widget class="Gui::InputField" name="InputFieldAxisZ">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string notr="true">0</string>
+         </property>
+         <property name="singleStep" stdset="0">
+          <double>1</double>
+         </property>
+         <property name="unit" stdset="0">
+          <string notr="true"/>
+         </property>
+         <property name="format" stdset="0">
+          <number>0</number>
+         </property>
+        </widget>
+	   </item>
+	  </layout>
+     </item>
+     <item>
+      <widget class="QWidget" name="faceSelectWidget" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Gui::InputField</class>
+   <extends>QLineEdit</extends>
+   <header>Gui/InputField.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>InputFieldSpeed</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

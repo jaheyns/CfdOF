@@ -1,0 +1,12 @@
+from CfdOF.Solve import CfdMRF
+from CfdOF import CfdTools
+CfdTools.getActiveAnalysis().addObject(CfdMRF.makeCfdMRF())
+App.ActiveDocument.MRF.Speed = 60.00000
+App.ActiveDocument.MRF.Axis = App.Vector (0.0, 0.0, -1.0)
+FreeCAD.ActiveDocument.MRF.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Body'), ('Solid1',))]
+FreeCAD.ActiveDocument.recompute()
+
+# set the fan bc to be inside the MRF region
+App.ActiveDocument.CfdFluidBoundary003.InsideMRFRegion = True
+FreeCAD.ActiveDocument.recompute()

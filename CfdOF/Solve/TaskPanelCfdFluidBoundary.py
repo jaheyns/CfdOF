@@ -53,6 +53,7 @@ class TaskPanelCfdFluidBoundary:
 
         self.material_objs = material_objs
         self.analysis_obj = CfdTools.getParentAnalysisObject(obj)
+        self.physics_obj = CfdTools.getPhysicsModel(self.analysis_obj)
 
         # Store values which are changed on the fly for visual update
         self.ShapeRefsOrig = list(self.obj.ShapeRefs)
@@ -205,6 +206,7 @@ class TaskPanelCfdFluidBoundary:
         self.form.inputTurbulentViscosity.setToolTip("Turbulent viscosity")
 
         self.form.checkBoxDefaultBoundary.setChecked(self.obj.DefaultBoundary)
+        self.form.checkBoxInsideMRFRegion.setChecked(self.obj.InsideMRFRegion)
 
         self.form.radioButtonCart.toggled.connect(self.updateUI)
         self.form.radioButtonMagNormal.toggled.connect(self.updateUI)
@@ -304,6 +306,14 @@ class TaskPanelCfdFluidBoundary:
                 self.form.translationalFrame.setVisible(True)
         else:
             self.form.periodicFrame.setVisible(False)
+
+        self.MRF_objs = CfdTools.getMRFGroup(self.analysis_obj)
+        if self.physics_obj.Time == 'Transient' and self.MRF_objs\
+            and type_index == 0 \
+            and (subtype_index == 0 or subtype_index == 1): # if the subtype is noSlip or sli
+            self.form.checkBoxInsideMRFRegion.setVisible(True)
+        else:
+            self.form.checkBoxInsideMRFRegion.setVisible(False)
 
     def comboBoundaryTypeChanged(self):
         index = self.form.comboBoundaryType.currentIndex()
@@ -527,6 +537,8 @@ class TaskPanelCfdFluidBoundary:
             for b in boundaries:
                 if b.Name != self.obj.Name and b.DefaultBoundary:
                     FreeCADGui.doCommand("FreeCAD.ActiveDocument.{}.DefaultBoundary = False".format(b.Name))
+
+        storeIfChanged(self.obj, 'InsideMRFRegion', self.form.checkBoxInsideMRFRegion.isChecked())
 
         FreeCADGui.doCommand("FreeCAD.ActiveDocument.recompute()")
 
