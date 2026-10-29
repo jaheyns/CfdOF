@@ -1,5 +1,5 @@
 %{%(solver/SolverName%)
-%:interFoam multiphaseInterFoam
+%:interFoam multiphaseInterFoam chtMultiRegionSimpleFoam
 %:default
 %[_header%]
 FoamFile
