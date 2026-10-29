@@ -5,6 +5,7 @@
 # SPDX-FileCopyrightText: © 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>
 # SPDX-FileCopyrightText: © 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>
 # SPDX-FileCopyrightText: © 2022 Jonathan Bergh <bergh.jonathan@gmail.com>
+# SPDX-FileCopyrightText: © 2026 Kavin Teenakul <andythe_great@protonmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################
@@ -30,6 +31,7 @@
 
 import os
 import os.path
+import re
 import glob
 import shutil
 import tempfile
@@ -156,6 +158,30 @@ def getMeshObject(analysis_object):
     return models[0] if len(models) else None
 
 
+def getMeshObjects(analysis_object):
+    return getModelsOfType(
+        analysis_object if analysis_object else FreeCAD.activeDocument().Objects,
+        'CfdMesh',
+    )
+
+
+def getRegionName(obj):
+    """Derive the region name from selected geometry without modifying its label."""
+    source_obj = getattr(obj, 'SourceObject', None)
+    if source_obj is not None:
+        return getRegionName(source_obj)
+    part_obj = getattr(obj, 'Part', None)
+    if part_obj is not None:
+        sub_shape = getattr(obj, 'PartSubShape', '')
+        if sub_shape:
+            return "{}_{}".format(part_obj.Label, sub_shape)
+        return getRegionName(part_obj)
+    shape_refs = getattr(obj, 'ShapeRefs', [])
+    if shape_refs:
+        return getRegionName(shape_refs[0][0])
+    return obj.Label
+
+
 def getPorousZoneObjects(analysis_object):
     return getModelsOfType(analysis_object, 'CfdPorousZone')
 
@@ -166,7 +192,7 @@ def getInitialisationZoneObjects(analysis_object):
 
 def getZoneObjects(analysis_object):
     from CfdOF.Solve.CfdZone import CfdZone
-    return [i for i in analysis_object.Group if isinstance(i.Proxy, CfdZone)]
+    return [i for i in analysis_object.Group if isinstance(getattr(i, 'Proxy', None), CfdZone)]
 
 
 def getInitialConditions(analysis_object):
@@ -174,7 +200,16 @@ def getInitialConditions(analysis_object):
 
 
 def getMaterials(analysis_object):
-    return [i for i in analysis_object.Group if i.isDerivedFrom('App::MaterialObjectPython')]
+    from CfdOF.Solve.CfdSolidMaterial import CfdSolidMaterial
+    return [i for i in analysis_object.Group
+            if i.isDerivedFrom('App::MaterialObjectPython')
+            and not isinstance(getattr(i, 'Proxy', None), CfdSolidMaterial)]
+
+
+def getSolidMaterials(analysis_object):
+    from CfdOF.Solve.CfdSolidMaterial import CfdSolidMaterial
+    return [i for i in analysis_object.Group
+            if isinstance(getattr(i, 'Proxy', None), CfdSolidMaterial)]
 
 
 def getSolver(analysis_object):
@@ -194,6 +229,60 @@ def getSolverSettings(solver):
 
 def getCfdBoundaryGroup(analysis_object):
     return getModelsOfType(analysis_object, 'CfdFluidBoundary')
+
+
+def getRegionCoupledInterfaceGroup(analysis_object):
+    return getModelsOfType(analysis_object, 'CfdRegionCoupledInterface')
+
+
+def getCfdBoundaryGroupWithRegionInterfaces(analysis_object):
+    boundaries = list(getCfdBoundaryGroup(analysis_object))
+    for interface_obj in getRegionCoupledInterfaceGroup(analysis_object):
+        if hasattr(interface_obj.Proxy, 'makeBoundaryObjects'):
+            boundaries.extend(interface_obj.Proxy.makeBoundaryObjects(interface_obj))
+    return boundaries
+
+
+def validateBoundaryFaceAssignments(boundaries):
+    """Reject competing boundary objects on the same referenced geometry face."""
+    owners = {}
+    object_faces = {}
+    for boundary in boundaries:
+        for obj, subnames in boundary.ShapeRefs:
+            object_shape = obj.Shape
+            object_key = (obj.Document.Name, obj.Name)
+            if object_key not in object_faces:
+                face_indices = {}
+                # Hash buckets avoid full face scans; isSame resolves hash collisions.
+                for index, face in enumerate(object_shape.Faces, 1):
+                    face_indices.setdefault(face.hashCode(), []).append((index, face))
+                object_faces[object_key] = face_indices
+            face_indices = object_faces[object_key]
+            for subname in subnames or ('',):
+                shape = object_shape.getElement(subname) if subname else object_shape
+                for face in shape.Faces:
+                    face_index = next(index for index, candidate in face_indices[face.hashCode()]
+                                      if candidate.isSame(face))
+                    key = (obj.Document.Name, obj.Name, face_index)
+                    previous = owners.get(key)
+                    if previous is not None and previous is not boundary:
+                        raise ValueError("Duplicate boundary assignment: '{}:Face{}' is assigned to both '{}' "
+                                         "and '{}'. Remove the conflicting face assignment.".format(
+                                             obj.Label, face_index, previous.Label, boundary.Label))
+                    owners[key] = boundary
+
+
+def getBoundaryPatchPrefix(boundary, index):
+    """Keep generated interface patch names independent of boundary list order."""
+    if hasattr(boundary, 'InterfaceObject'):
+        return 'patch_' + boundary.Label
+    return 'patch_' + str(index + 1)
+
+
+def boundaryToDict(obj):
+    if hasattr(obj, 'toDict'):
+        return obj.toDict()
+    return propsToDict(obj)
 
 
 def isPlanar(shape):
