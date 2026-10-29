@@ -178,6 +178,23 @@ else
 fi
 
 %}
+%{%(multiRegionEnabled%)
+%:True
+# Split the combined mesh into its fluid and solid regions
+runCommand splitMeshRegions -cellZonesOnly -overwrite
+
+%{%(meanVelocityForceCellZonesPresent%)
+%:True
+# Create mean velocity force cell zones inside the fluid region mesh
+runCommand topoSet -region %(multiRegionFluidNames/0%) -dict "$PWD/system/%(multiRegionFluidNames/0%)/topoSetMeanVelocityForceZonesDict"
+
+%}
+# Complete the interface patch and field setup created by splitMeshRegions
+env -u PYTHONPATH -u PYTHONHOME python3 prepareMultiRegion.py
+status=$?
+if [ ! $status -eq 0 ]; then exit $status; fi
+
+%}
 %{%(initialisationZonesPresent%)
 %:True
 # Set internal fields according to setFieldsDict
@@ -220,13 +237,25 @@ PNAME=p
 %}
 %{%(solver/Parallel%)
 %:True
+%{%(multiRegionEnabled%)
+%:True
+# Parallel decomposition for all CHT regions
+for region in $(ls -d constant/*/polyMesh 2>/dev/null | cut -d/ -f2); do
+    mkdir -p system/$region
+    cp system/decomposeParDict system/$region/decomposeParDict
+done
+runCommand decomposePar -allRegions -force
+%:False
 # Parallel decomposition
 runCommand decomposePar -force
+%}
 
 # Pick up number of parallel processes
 NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
 
 %{%(dynamicMeshEnabled%)
+%:False
+%{%(multiRegionEnabled%)
 %:False
 %{%(createPatchesForPeriodics%)
 %:False
@@ -234,6 +263,7 @@ NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDic
 %:False
 # Mesh renumbering
 runParallel $NPROC renumberMesh -overwrite
+%}
 %}
 %}
 %:True
@@ -257,6 +287,8 @@ fi
 %}
 %{%(initialValues/PotentialFlow%)
 %:True
+%{%(multiRegionEnabled%)
+%:False
 # Initialise flow
 %{%(bafflesPresent%)
 %:True
@@ -275,6 +307,7 @@ runParallel $NPROC potentialFoam -initialiseUBCs -pName $PNAME
 # Remove phi with wrong units
 rm -f processor*/0/phi
 %}
+%}
 
 %}
 # Run application in parallel
@@ -291,6 +324,13 @@ then
     runParallel $NPROC foamRun -solver incompressibleVoF
 %:multiphaseInterFoam
     runParallel $NPROC foamRun -solver incompressibleMultiphaseVoF
+%:chtMultiRegionSimpleFoam
+    if command -v chtMultiRegionSimpleFoam > /dev/null 2>&1
+    then
+        runParallel $NPROC chtMultiRegionSimpleFoam
+    else
+        runParallel $NPROC foamMultiRun
+    fi
 %:default
     runParallel $NPROC %(solver/SolverName%)
 %}
@@ -300,12 +340,15 @@ fi
 %:False
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(multiRegionEnabled%)
+%:False
 %{%(createPatchesForPeriodics%)
 %:False
 %{%(MovingMeshRegionsPresent%)
 %:False
 # Mesh renumbering
 runCommand renumberMesh -overwrite
+%}
 %}
 %}
 %:True
@@ -315,6 +358,8 @@ runCommand renumberMesh -overwrite
 
 %{%(initialValues/PotentialFlow%)
 %:True
+%{%(multiRegionEnabled%)
+%:False
 # Initialise flow
 %{%(bafflesPresent%)
 %:True
@@ -333,6 +378,7 @@ runCommand potentialFoam -initialiseUBCs -pName $PNAME
 # Remove phi with wrong units
 rm -f 0/phi
 %}
+%}
 
 %}
 # Run application
@@ -349,6 +395,13 @@ then
     runCommand foamRun -solver incompressibleVoF
 %:multiphaseInterFoam
     runCommand foamRun -solver incompressibleMultiphaseVoF
+%:chtMultiRegionSimpleFoam
+    if command -v chtMultiRegionSimpleFoam > /dev/null 2>&1
+    then
+        runCommand chtMultiRegionSimpleFoam
+    else
+        runCommand foamMultiRun
+    fi
 %:default
     runCommand %(solver/SolverName%)
 %}
@@ -356,4 +409,3 @@ else
     runCommand %(solver/SolverName%)
 fi
 %}
-
