@@ -1,0 +1,24 @@
+%{%(system/FoundationChtModels%)
+%:True
+%{%(multiRegionSolidNames%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant/%(multiRegionSolidNames/%(0%)%)";
+    object      fvModels;
+}
+
+%{%(solidProperties/%(0%)/HeatGenerationActive%)
+%:true
+heatSource
+{
+    type            heatSource;
+    cellZone        all;
+    q               %(solidProperties/%(0%)/HeatGeneration%);
+}
+%}
+%} constant/%(multiRegionSolidNames/%(0%)%)/fvModels
+%}

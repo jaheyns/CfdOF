@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- SPDX-FileCopyrightText: © 2026 Kavin Teenakul <andythe_great@protonmail.com> -->
+<svg
+   width="64"
+   height="64"
+   viewBox="0 0 64 64"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="solid_boundary.svg"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs5" />
+  <sodipodi:namedview
+     id="namedview5"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="6.5859375"
+     inkscape:cx="23.610913"
+     inkscape:cy="37.124555"
+     inkscape:window-width="1239"
+     inkscape:window-height="1080"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg5" />
+  <path
+     d="m 11.5,21.721006 22,-12.0000005 22,12.0000005 -22,12 z"
+     fill="#dddddd"
+     stroke="#333333"
+     stroke-width="3"
+     stroke-linejoin="round"
+     id="path1" />
+  <path
+     d="m 11.5,21.721006 22,12 v 26 l -22,-13 z"
+     fill="#888888"
+     stroke="#333333"
+     stroke-width="3"
+     stroke-linejoin="round"
+     id="path2"
+     style="fill:#e9a23b;fill-opacity:1" />
+  <path
+     d="m 33.5,33.721006 22,-12 v 25 l -22,13 z"
+     fill="#e9a23b"
+     stroke="#333333"
+     stroke-width="3"
+     stroke-linejoin="round"
+     id="path3"
+     style="fill:#868686;fill-opacity:1" />
+  <path
+     d="M 7.7439455,23.999999 V 7.9999994 a 5,5 0 0 1 9.9999995,0 V 23.999999 a 9,9 0 1 1 -9.9999995,0 z"
+     fill="#ffffff"
+     stroke="#333333"
+     stroke-width="3"
+     id="path4"
+     style="stroke-width:2.2;stroke-dasharray:none" />
+  <path
+     d="m 12.743945,10.999999 v 21"
+     stroke="#cc3333"
+     stroke-width="4"
+     stroke-linecap="round"
+     id="path5" />
+  <circle
+     cx="12.743943"
+     cy="32"
+     r="5"
+     fill="#cc3333"
+     id="circle5" />
+</svg>

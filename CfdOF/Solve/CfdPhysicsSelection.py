@@ -4,6 +4,7 @@
 # SPDX-FileCopyrightText: © 2017 Oliver Oxtoby (CSIR) <ooxtoby@csir.co.za>
 # SPDX-FileCopyrightText: © 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>
 # SPDX-FileCopyrightText: © 2022 Jonathan Bergh <bergh.jonathan@gmail.com>
+# SPDX-FileCopyrightText: © 2026 Kavin Teenakul <andythe_great@protonmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################
@@ -146,7 +147,7 @@ class CfdPhysicsModel:
         if addObjectProperty(
             obj,
             "Phase",
-            ["Single", "FreeSurface"],
+            ["Single", "FreeSurface", "MultiRegion"],
             "App::PropertyEnumeration",
             "Physics modelling",
             QT_TRANSLATE_NOOP("App::Property", "Type of phases present"),

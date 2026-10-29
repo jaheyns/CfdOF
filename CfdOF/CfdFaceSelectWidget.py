@@ -3,6 +3,7 @@
 # SPDX-FileCopyrightText: © 2017 Johan Heyns (CSIR) <jheyns@csir.co.za>
 # SPDX-FileCopyrightText: © 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>
 # SPDX-FileCopyrightText: © 2019 Oliver Oxtoby <oliveroxtoby@gmail.com>
+# SPDX-FileCopyrightText: © 2026 Kavin Teenakul <andythe_great@protonmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################
@@ -253,6 +254,10 @@ class CfdFaceSelectWidget:
             return
         selected_object = FreeCAD.getDocument(doc_name).getObject(obj_name)
         if not hasattr(selected_object, 'Shape') or selected_object.Shape.isNull():
+            return
+        if self.selection_mode_solid and not self.allow_obj_sel and not sub and not as_is:
+            for index in range(len(selected_object.Shape.Solids)):
+                self.addSelection(doc_name, obj_name, 'Solid{}'.format(index + 1), selected_point)
             return
 
         # On double click of a shape, sub is None and obj is the shape

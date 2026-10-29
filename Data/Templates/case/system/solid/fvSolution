@@ -1,0 +1,66 @@
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam
+%{%(multiRegionSolidNames%)
+%[_header%]
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system/%(multiRegionSolidNames/%(0%)%)";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+SIMPLE
+{
+    nNonOrthogonalCorrectors %(solver/SolidNonOrthogonalCorrectors%);
+
+    residualControl
+    {
+        %(system/SolidEnergyField%)               %(solver/ConvergenceTol%);
+    }
+}
+
+%{%(system/FoundationChtModels%)
+%:True
+PIMPLE
+{
+    nNonOrthogonalCorrectors %(solver/SolidNonOrthogonalCorrectors%);
+}
+%}
+
+solvers
+{
+    %(system/SolidEnergyField%)
+    {
+        solver           GAMG;
+        tolerance        1e-8;
+        relTol           0.1;
+        smoother         symGaussSeidel;
+        nPreSweeps       0;
+        nPostSweeps      2;
+        cacheAgglomeration on;
+        agglomerator     faceAreaPair;
+        nCellsInCoarsestLevel 10;
+        mergeLevels      1;
+    }
+
+    %(system/SolidEnergyField%)Final
+    {
+        $%(system/SolidEnergyField%);
+        relTol          0;
+    }
+}
+
+relaxationFactors
+{
+    equations
+    {
+        %(system/SolidEnergyField%)               %(solver/SolidEnergyRelaxation%);
+    }
+}
+
+// ************************************************************************* //
+%} system/%(multiRegionSolidNames/%(0%)%)/fvSolution
+%}
