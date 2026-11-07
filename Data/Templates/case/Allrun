@@ -43,7 +43,30 @@ then
     source "$FOAMDIR/etc/bashrc"
 fi
 
+%{%(solver/SolverName%)
+%:chtMultiRegionSimpleFoam
+# Select CHT dictionaries from the active OpenFOAM environment.
+CHT_FOUNDATION=false
+if [ -z "${FOAM_API:-}" ] && { [ "$WM_PROJECT_VERSION" = dev ] || { [[ "$WM_PROJECT_VERSION" =~ ^[0-9]+$ ]] && [ "$WM_PROJECT_VERSION" -ge 13 ] && [ "$WM_PROJECT_VERSION" -lt 1000 ]; }; }
+then
+    CHT_FOUNDATION=true
+    CHT_VARIANT=foundation
+else
+    CHT_VARIANT=esi
+fi
+%{%(multiRegionSolidNames%)
+runCommand rm -f constant/%(multiRegionSolidNames/%(0%)%)/fvOptions constant/%(multiRegionSolidNames/%(0%)%)/fvModels
+%}
+%{%(multiRegionFluidNames%)
+runCommand rm -f constant/%(multiRegionFluidNames/%(0%)%)/fvOptions system/%(multiRegionFluidNames/%(0%)%)/fvConstraints
+%}
+runCommand cp -r "system/chtVariants/$CHT_VARIANT/constant/." constant/
+runCommand cp -r "system/chtVariants/$CHT_VARIANT/system/." system/
+
+%}
 # Copy mesh from mesh case dir if available
+%{%(multiRegionUseSplitMeshRegions%)
+%:True
 MESHDIR="%(meshDir%)"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
@@ -54,6 +77,7 @@ then
     echo "Fatal error: Unable to find mesh in directory $MESHDIR" 1>&2
     exit 1
 fi
+%}
 
 # Detect available turbulence lib
 if [ -f "$FOAM_LIBBIN/libmomentumTransportModels.so" ] || [ -f "$FOAM_LIBBIN/libmomentumTransportModels.dll" ]
@@ -149,7 +173,10 @@ fi
 
 %}
 # Update patch name and type
+%{%(multiRegionUseSplitMeshRegions%)
+%:True
 runCommand createPatch -overwrite
+%}
 
 %{%(createPatchesForPeriodics%)
 %:True
@@ -176,6 +203,31 @@ then
 else
 	runCommand topoSet -dict system/topoSetZonesDict
 fi
+
+%}
+%{%(multiRegionEnabled%)
+%:True
+%{%(multiRegionUseSplitMeshRegions%)
+%:True
+# Split the combined mesh into its fluid and solid regions
+runCommand splitMeshRegions -cellZonesOnly -overwrite
+%:False
+# Copy and configure the independently generated region meshes
+env -u PYTHONPATH -u PYTHONHOME python3 prepareMultiRegion.py meshes
+status=$?
+if [ ! $status -eq 0 ]; then exit $status; fi
+%}
+
+%{%(meanVelocityForceCellZonesPresent%)
+%:True
+# Create mean velocity force cell zones inside the fluid region mesh
+runCommand topoSet -region %(multiRegionFluidNames/0%) -dict "$PWD/system/%(multiRegionFluidNames/0%)/topoSetMeanVelocityForceZonesDict"
+
+%}
+# Complete the region interface patch and field setup
+env -u PYTHONPATH -u PYTHONHOME python3 prepareMultiRegion.py
+status=$?
+if [ ! $status -eq 0 ]; then exit $status; fi
 
 %}
 %{%(initialisationZonesPresent%)
@@ -220,13 +272,25 @@ PNAME=p
 %}
 %{%(solver/Parallel%)
 %:True
+%{%(multiRegionEnabled%)
+%:True
+# Parallel decomposition for all CHT regions
+for region in $(ls -d constant/*/polyMesh 2>/dev/null | cut -d/ -f2); do
+    mkdir -p system/$region
+    cp system/decomposeParDict system/$region/decomposeParDict
+done
+runCommand decomposePar -allRegions -force
+%:False
 # Parallel decomposition
 runCommand decomposePar -force
+%}
 
 # Pick up number of parallel processes
 NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDict)
 
 %{%(dynamicMeshEnabled%)
+%:False
+%{%(multiRegionEnabled%)
 %:False
 %{%(createPatchesForPeriodics%)
 %:False
@@ -234,6 +298,7 @@ NPROC=$(foamDictionary -entry "numberOfSubdomains" -value system/decomposeParDic
 %:False
 # Mesh renumbering
 runParallel $NPROC renumberMesh -overwrite
+%}
 %}
 %}
 %:True
@@ -257,6 +322,8 @@ fi
 %}
 %{%(initialValues/PotentialFlow%)
 %:True
+%{%(multiRegionEnabled%)
+%:False
 # Initialise flow
 %{%(bafflesPresent%)
 %:True
@@ -275,6 +342,7 @@ runParallel $NPROC potentialFoam -initialiseUBCs -pName $PNAME
 # Remove phi with wrong units
 rm -f processor*/0/phi
 %}
+%}
 
 %}
 # Run application in parallel
@@ -291,6 +359,13 @@ then
     runParallel $NPROC foamRun -solver incompressibleVoF
 %:multiphaseInterFoam
     runParallel $NPROC foamRun -solver incompressibleMultiphaseVoF
+%:chtMultiRegionSimpleFoam
+if $CHT_FOUNDATION
+then
+    runParallel $NPROC foamMultiRun
+else
+    runParallel $NPROC chtMultiRegionSimpleFoam
+fi
 %:default
     runParallel $NPROC %(solver/SolverName%)
 %}
@@ -300,12 +375,15 @@ fi
 %:False
 %{%(dynamicMeshEnabled%)
 %:False
+%{%(multiRegionEnabled%)
+%:False
 %{%(createPatchesForPeriodics%)
 %:False
 %{%(MovingMeshRegionsPresent%)
 %:False
 # Mesh renumbering
 runCommand renumberMesh -overwrite
+%}
 %}
 %}
 %:True
@@ -315,6 +393,8 @@ runCommand renumberMesh -overwrite
 
 %{%(initialValues/PotentialFlow%)
 %:True
+%{%(multiRegionEnabled%)
+%:False
 # Initialise flow
 %{%(bafflesPresent%)
 %:True
@@ -333,6 +413,7 @@ runCommand potentialFoam -initialiseUBCs -pName $PNAME
 # Remove phi with wrong units
 rm -f 0/phi
 %}
+%}
 
 %}
 # Run application
@@ -349,6 +430,13 @@ then
     runCommand foamRun -solver incompressibleVoF
 %:multiphaseInterFoam
     runCommand foamRun -solver incompressibleMultiphaseVoF
+%:chtMultiRegionSimpleFoam
+if $CHT_FOUNDATION
+then
+    runCommand foamMultiRun
+else
+    runCommand chtMultiRegionSimpleFoam
+fi
 %:default
     runCommand %(solver/SolverName%)
 %}
@@ -356,4 +444,3 @@ else
     runCommand %(solver/SolverName%)
 fi
 %}
-
