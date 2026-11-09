@@ -466,13 +466,13 @@ def startDocker():
 
 def checkPodmanMachineRunning():
     print("Checking podman machine running")
-    cmd = "podman machine list"
+    cmd = "podman machine list".split(" ")
     proc = QtCore.QProcess()
-    proc.start(cmd)
+    proc.start(cmd[0],cmd[1:])
     proc.waitForFinished()
     line = ""
     while proc.canReadLine():
-        line = str(proc.readLine().data(), encoding="utf-8")
+        line = str(proc.readLine().data(), encoding="utf-8").strip()
         if len(line)>0:
             print(line)
     if "Currently running" in line:
@@ -487,13 +487,13 @@ def checkPodmanMachineRunning():
 
 def startPodmanMachine():
     print("Attempting podman machine start")
-    cmd = "podman machine start"
+    cmd = "podman machine start".split(" ")
     proc = QtCore.QProcess()
-    proc.start(cmd)
+    proc.start(cmd[0],cmd[1:])
     proc.waitForFinished()
     line = ""
     while proc.canReadLine():
-        line = str(proc.readLine().data(), encoding="utf-8")
+        line = str(proc.readLine().data(), encoding="utf-8").strip()
         if len(line)>0:
             print(line)
 
@@ -825,7 +825,10 @@ def makeRunCommand(cmd, dir=None, source_env=True, linux_shell=False):
     if getFoamRuntime() == "PosixDocker":
         prefs = getPreferencesLocation()
         if dir:
-            cd = cd.replace(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""),'/tmp').replace('\\','/')
+            if FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", "") in cd:
+                cd = cd.replace(FreeCAD.ParamGet(prefs).GetString("DefaultOutputPath", ""),'/tmp').replace('\\','/')
+            else:
+                cd = 'cd /tmp &&'
 
     if getFoamRuntime().startswith("BlueCFD"):
         # Set-up necessary for running a command - only needs doing once, but to be safe...
