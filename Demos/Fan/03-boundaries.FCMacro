@@ -1,0 +1,31 @@
+from CfdOF.Solve import CfdFluidBoundary
+from CfdOF import CfdTools
+# open top
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary.Label = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundaryType = 'inlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary.BoundarySubType = 'uniformVelocityInlet'
+App.ActiveDocument.CfdFluidBoundary.Uz = '-100.0 mm/s'
+FreeCAD.ActiveDocument.CfdFluidBoundary.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face1',))]
+# outlet
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary001.Label = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundaryType = 'outlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.BoundarySubType = 'staticPressureOutlet'
+FreeCAD.ActiveDocument.CfdFluidBoundary001.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face3',))]
+# side walls
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary002.Label = 'wall'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.BoundarySubType = 'slipWall'
+FreeCAD.ActiveDocument.CfdFluidBoundary002.ShapeRefs = [
+(FreeCAD.ActiveDocument.getObject('Boolean'), ('Face2',))]
+# fan wall
+CfdTools.getActiveAnalysis().addObject(CfdFluidBoundary.makeCfdFluidBoundary())
+App.ActiveDocument.CfdFluidBoundary003.Label = 'wall'
+App.ActiveDocument.CfdFluidBoundary003.DefaultBoundary = True
+
+# set the initiale pressure values to be copied from the outlet
+App.ActiveDocument.InitialiseFields.BoundaryP = FreeCAD.ActiveDocument.CfdFluidBoundary001
+FreeCAD.ActiveDocument.recompute()

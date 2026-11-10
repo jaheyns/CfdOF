@@ -1,0 +1,15 @@
+from CfdOF import CfdAnalysis
+from CfdOF import CfdTools
+analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+CfdTools.setActiveAnalysis(analysis)
+from CfdOF.Solve import CfdPhysicsSelection
+analysis.addObject(CfdPhysicsSelection.makeCfdPhysicsSelection())
+from CfdOF.Solve import CfdFluidMaterial
+analysis.addObject(CfdFluidMaterial.makeCfdFluidMaterial('FluidProperties'))
+from CfdOF.Solve import CfdInitialiseFlowField
+analysis.addObject(CfdInitialiseFlowField.makeCfdInitialFlowField())
+from CfdOF.Solve import CfdSolverFoam
+analysis.addObject(CfdSolverFoam.makeCfdSolverFoam())
+App.ActiveDocument.PhysicsModel.Time = 'Transient'
+App.ActiveDocument.PhysicsModel.Turbulence = 'RANS'
+FreeCAD.ActiveDocument.recompute()
