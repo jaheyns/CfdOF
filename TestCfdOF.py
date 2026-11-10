@@ -5,6 +5,7 @@
 # SPDX-FileCopyrightText: © 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>
 # SPDX-FileCopyrightText: © 2021 Oliver Oxtoby <oliveroxtoby@gmail.com>
 # SPDX-FileCopyrightText: © 2022 Jonathan Bergh <bergh.jonathan@gmail.com>
+# SPDX-FileCopyrightText: © 2026 Kavin Teenakul <andythe_great@protonmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################
@@ -44,6 +45,7 @@ from CfdOF.Solve import CfdRunnableFoam
 import tempfile
 import unittest
 import os
+import re
 import shutil
 
 # ***************************************************************************
@@ -545,6 +547,117 @@ class WaterPouringTest(unittest.TestCase, MacroTest):
 
     def tearDown(self):
         self.closeDoc()
+
+
+class ChtTemperatureTemplateTest(unittest.TestCase):
+    def render_fields(self, foundation=False):
+        from CfdOF.TemplateBuilder import TemplateBuilder
+
+        walls = {}
+        for thermal_type in ('fixedValue', 'zeroGradient', 'fixedGradient', 'totalPower', 'heatTransferCoeff'):
+            walls[thermal_type + '_wall'] = {
+                'BoundaryType': 'wall', 'BoundarySubType': 'fixedWall',
+                'ThermalBoundaryType': thermal_type, 'Temperature': 350,
+                'HeatFlux': 120, 'Power': 35, 'HeatTransferCoeff': 10,
+            }
+        walls['coupled_wall'] = {
+            'BoundaryType': 'wall', 'BoundarySubType': 'regionCoupledWall',
+            'ThermalBoundaryType': 'zeroGradient',
+        }
+        for constraint in ('symmetry', 'cyclic', 'empty', 'wedge'):
+            walls[constraint + '_boundary'] = {
+                'BoundaryType': 'constraint', 'BoundarySubType': constraint,
+            }
+        fluid_boundaries = dict(walls)
+        for boundary_type in ('inlet', 'outlet', 'open'):
+            fluid_boundaries[boundary_type + '_boundary'] = {
+                'BoundaryType': boundary_type, 'Temperature': 310,
+            }
+        settings = {
+            'solver': {'SolverName': 'chtMultiRegionSimpleFoam'},
+            'system': {'FoundationChtModels': foundation, 'FoamVersion': '14' if foundation else '2606'},
+            'initialValues': {'Temperature': 293},
+            'boundaries': fluid_boundaries,
+            'multiRegionFluidNames': ['cooling_air'],
+            'multiRegionSolidNames': ['solid_a', 'solid_b'],
+            'multiRegionFluidBoundariesByRegion': {'cooling_air': fluid_boundaries},
+            'multiRegionSolidBoundariesByRegion': {'solid_a': walls, 'solid_b': walls},
+            'multiRegionUseSplitMeshRegions': False,
+        }
+        with tempfile.TemporaryDirectory(prefix='cfdof-temperature-templates-') as output:
+            builder = TemplateBuilder.__new__(TemplateBuilder)
+            builder.case_path = output
+            builder.template_path = os.path.join(home_path, 'Data', 'Templates', 'case')
+            builder.settings = settings
+            for kind in ('fluid', 'solid'):
+                self.assertEqual(builder.buildFile('0/' + kind + '/T', []), '')
+            fields = {}
+            for region in ('cooling_air', 'solid_a', 'solid_b'):
+                with open(os.path.join(output, '0', region, 'T')) as stream:
+                    fields[region] = stream.read()
+            self.assertFalse(os.path.exists(os.path.join(output, '0', 'fluid')))
+            self.assertFalse(os.path.exists(os.path.join(output, '0', 'solid')))
+            return fields
+
+    def test_fluid_and_solid_temperature_boundaries(self):
+        for foundation in (False, True):
+            for region, temperature in self.render_fields(foundation).items():
+                with self.subTest(foundation=foundation, region=region):
+                    self.assertIn('internalField   uniform 293;', temperature)
+                    kappa_method = 'fluidThermo' if region == 'cooling_air' else 'solidThermo'
+
+                    def patch(name):
+                        match = re.search(r'\n\s*' + re.escape(name) + r'\s*\{([^{}]*)\}', temperature)
+                        self.assertIsNotNone(match, name)
+                        return match.group(1)
+
+                    for thermal_type, expected_type in (
+                            ('fixedValue', 'fixedValue'), ('zeroGradient', 'zeroGradient'),
+                            ('fixedGradient', 'externalWallHeatFluxTemperature'),
+                            ('totalPower', 'externalWallHeatFluxTemperature'),
+                            ('heatTransferCoeff', 'externalWallHeatFluxTemperature')):
+                        body = patch(thermal_type + '_wall')
+                        self.assertRegex(body, r'type\s+' + expected_type + ';')
+                        if thermal_type in ('fixedValue', 'zeroGradient'):
+                            self.assertNotIn('kappaMethod', body)
+                        else:
+                            self.assertRegex(body, r'kappaMethod\s+' + kappa_method + ';')
+                            self.assertRegex(body, r'value\s+\$internalField;')
+                        if thermal_type == 'fixedValue':
+                            self.assertRegex(body, r'value\s+uniform 350;')
+                        elif thermal_type == 'fixedGradient':
+                            self.assertRegex(body, r'mode\s+flux;')
+                            self.assertRegex(body, r'q\s+uniform 120;')
+                        elif thermal_type == 'totalPower':
+                            self.assertRegex(body, r'mode\s+power;')
+                            self.assertRegex(body, r'Q\s+35;')
+                        elif thermal_type == 'heatTransferCoeff':
+                            self.assertRegex(body, r'mode\s+coefficient;')
+                            self.assertRegex(body, r'Ta\s+constant 350;')
+                            self.assertRegex(body, r'h\s+uniform 10;')
+                    self.assertIn('turbulentTemperatureCoupledBaffleMixed', patch('coupled_wall'))
+                    self.assertRegex(patch('coupled_wall'), r'kappaMethod\s+' + kappa_method + ';')
+                    for constraint in ('symmetry', 'cyclic', 'empty', 'wedge'):
+                        self.assertRegex(patch(constraint + '_boundary'), r'type\s+' + constraint + ';')
+                    if region == 'cooling_air':
+                        for boundary_type in ('inlet', 'outlet', 'open'):
+                            self.assertRegex(patch(boundary_type + '_boundary'), r'type\s+inletOutlet;')
+
+
+class RegionNamingTest(unittest.TestCase):
+    def test_region_labels_are_not_modified(self):
+        from types import SimpleNamespace
+        for label in ('fan_case', 'heat_sink', 'chip2', 'region_3'):
+            with self.subTest(label=label):
+                source = SimpleNamespace(Label=label)
+                self.assertEqual(CfdTools.getRegionName(source), label)
+                self.assertEqual(CfdTools.getRegionName(SimpleNamespace(SourceObject=source)), label)
+                self.assertEqual(CfdTools.getRegionName(SimpleNamespace(Part=source)), label)
+                self.assertEqual(CfdTools.getRegionName(SimpleNamespace(
+                    ShapeRefs=[(source, ('Solid1',))])), label)
+                self.assertEqual(CfdTools.getRegionName(SimpleNamespace(
+                    Part=source, PartSubShape='Solid2')), label + '_Solid2')
+
 
 
 def compareInpFiles(file_name1, file_name2):
