@@ -5,6 +5,7 @@
 # SPDX-FileCopyrightText: © 2017 Alfred Bogaers (CSIR) <abogaers@csir.co.za>
 # SPDX-FileCopyrightText: © 2021 Oliver Oxtoby <oliveroxtoby@gmail.com>
 # SPDX-FileCopyrightText: © 2022 Jonathan Bergh <bergh.jonathan@gmail.com>
+# SPDX-FileCopyrightText: © 2026 Kavin Teenakul <andythe_great@protonmail.com>
 # SPDX-FileNotice: Part of the CfdOF addon.
 
 ################################################################################
@@ -44,6 +45,7 @@ from CfdOF.Solve import CfdRunnableFoam
 import tempfile
 import unittest
 import os
+import re
 import shutil
 
 # ***************************************************************************
@@ -545,6 +547,325 @@ class WaterPouringTest(unittest.TestCase, MacroTest):
 
     def tearDown(self):
         self.closeDoc()
+
+
+@unittest.skipUnless(FreeCAD.GuiUp, "Mesh shape selection requires the GUI")
+class MeshShapeSelectionTest(unittest.TestCase):
+    def test_missing_mesh_case_name_gets_unique_default(self):
+        doc = FreeCAD.newDocument('LegacyMeshCaseNameTest')
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+            CfdTools.setActiveAnalysis(analysis)
+            shape = doc.addObject('Part::Box', 'Shape')
+            doc.recompute()
+            meshes = []
+            for _ in range(3):
+                mesh = CfdMesh.makeCfdMesh()
+                analysis.addObject(mesh)
+                mesh.Part = shape
+                meshes.append(mesh)
+            meshes[1].removeProperty('CaseName')
+            meshes[2].removeProperty('CaseName')
+            for index, mesh in enumerate(meshes, 1):
+                tools = CfdMeshTools.CfdMeshTools(mesh)
+                self.assertEqual(mesh.CaseName, 'meshCase{}'.format(index))
+                self.assertEqual(tools.case_name, mesh.CaseName)
+            meshes[2].CaseName = 'custom mesh.name-'
+            CfdMeshTools.CfdMeshTools(meshes[2])
+            self.assertEqual(meshes[2].CaseName, 'custom mesh.name-')
+            meshes[2].removeProperty('CaseName')
+            meshes[2].Proxy.onDocumentRestored(meshes[2])
+            self.assertEqual(meshes[2].CaseName, 'meshCase3')
+        finally:
+            FreeCAD.closeDocument(doc.Name)
+
+    def test_mesh_case_name_is_preserved(self):
+        from CfdOF.Mesh import TaskPanelCfdMesh
+
+        doc = FreeCAD.newDocument('MeshCaseNameTest')
+        panel = None
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+            CfdTools.setActiveAnalysis(analysis)
+            shape = doc.addObject('Part::Box', 'Shape')
+            doc.recompute()
+            first = CfdMesh.makeCfdMesh()
+            analysis.addObject(first)
+            first.Part = shape
+            second = CfdMesh.makeCfdMesh()
+            analysis.addObject(second)
+            self.assertEqual(first.CaseName, 'meshCase1')
+            self.assertEqual(second.CaseName, 'meshCase2')
+            self.assertEqual(CfdMesh.nextMeshCaseName(doc), 'meshCase3')
+            FreeCADGui.Selection.clearSelection()
+            first.CaseName = 'custom mesh.name-'
+            panel = TaskPanelCfdMesh.TaskPanelCfdMesh(first)
+            self.assertEqual(panel.editMeshCaseName.text(), first.CaseName)
+            for name in ('meshCase1', ' heat sink mesh.- ', ''):
+                panel.editMeshCaseName.setText(name)
+                panel.store()
+                self.assertEqual(first.CaseName, name)
+                self.assertEqual(panel.editMeshCaseName.text(), name)
+                tools = CfdMeshTools.CfdMeshTools(first)
+                tools.getFilePaths('/tmp/mesh-name-test')
+                self.assertEqual(tools.case_name, name)
+                self.assertEqual(tools.mesh_case_dir, os.path.join('/tmp/mesh-name-test', name))
+                self.assertEqual(first.CaseName, name)
+        finally:
+            if panel is not None:
+                panel.Timer.stop()
+                panel.form.close()
+            FreeCADGui.Selection.clearSelection()
+            FreeCAD.closeDocument(doc.Name)
+
+    def test_mesh_without_selected_shape(self):
+        doc = FreeCAD.newDocument("MeshWithoutShapeTest")
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+            CfdTools.setActiveAnalysis(analysis)
+            FreeCADGui.Selection.clearSelection()
+            command = CfdMesh.CommandCfdMeshFromShape()
+            self.assertTrue(command.IsActive())
+            command.Activated()
+            mesh = CfdTools.getMesh(analysis)
+            self.assertIsNone(mesh.Part)
+            self.assertNotIn('RegionType', mesh.PropertiesList)
+            panel = mesh.ViewObject.Proxy.taskd
+            self.assertFalse(hasattr(panel, 'regionFrame'))
+            self.assertEqual(panel.form.cb_shape.currentData(), "")
+            self.assertTrue(panel.form.pb_write_mesh.isEnabled())
+            self.assertTrue(panel.form.pb_run_mesh.isEnabled())
+            for button in (panel.form.pb_write_mesh, panel.form.pb_run_mesh):
+                panel.console_message_cart = ''
+                button.click()
+                self.assertIn("Select a shape before meshing.", panel.form.te_output.toPlainText())
+            FreeCADGui.ActiveDocument.resetEdit()
+
+            shape = doc.addObject("Part::Box", "ChosenShape")
+            doc.recompute()
+            FreeCADGui.Selection.addSelection(mesh)
+            command.Activated()
+            panel = mesh.ViewObject.Proxy.taskd
+            panel.form.cb_shape.setCurrentIndex(panel.form.cb_shape.findData(shape.Name))
+            self.assertIs(mesh.Part, shape)
+            panel.form.cb_shape.setCurrentIndex(0)
+            self.assertIsNone(mesh.Part)
+            self.assertIsNone(mesh.Proxy.cart_mesh)
+        finally:
+            if FreeCADGui.ActiveDocument.getInEdit():
+                FreeCADGui.ActiveDocument.resetEdit()
+            FreeCADGui.Selection.clearSelection()
+            FreeCAD.closeDocument(doc.Name)
+
+    def test_mesh_shape_selection(self):
+        from CfdOF.Mesh import TaskPanelCfdMesh
+
+        doc = FreeCAD.newDocument("MeshShapeSelectionTest")
+        panels = []
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis("CfdAnalysis")
+            first = doc.addObject("Part::Box", "First")
+            second = doc.addObject("Part::Cylinder", "Second")
+            first.Label = second.Label = "Duplicate label"
+            doc.addObject("Part::Feature", "Empty")
+            doc.recompute()
+            mesh = CfdMesh.makeCfdMesh()
+            analysis.addObject(mesh)
+            mesh.Part = first
+            mesh.PartSubShape = "Solid1"
+
+            FreeCADGui.Selection.clearSelection()
+            panel = TaskPanelCfdMesh.TaskPanelCfdMesh(mesh)
+            panels.append(panel)
+            combo = panel.form.cb_shape
+            self.assertEqual(combo.count(), 3)
+            self.assertEqual(combo.currentData(), first.Name)
+            self.assertEqual(mesh.PartSubShape, "Solid1")
+            combo.setCurrentIndex(combo.findData(second.Name))
+            self.assertIs(mesh.Part, second)
+            self.assertEqual(mesh.PartSubShape, "")
+            self.assertIs(mesh.Proxy.cart_mesh.part_obj, second)
+            panel.Timer.stop()
+            panel.form.close()
+
+            FreeCADGui.Selection.addSelection(first, "Face1")
+            panel = TaskPanelCfdMesh.TaskPanelCfdMesh(mesh)
+            panels.append(panel)
+            self.assertEqual(panel.form.cb_shape.currentData(), first.Name)
+            self.assertIs(mesh.Part, first)
+            panel.Timer.stop()
+            panel.form.close()
+
+            FreeCADGui.Selection.clearSelection()
+            FreeCADGui.Selection.addSelection(mesh)
+            panel = TaskPanelCfdMesh.TaskPanelCfdMesh(mesh)
+            panels.append(panel)
+            self.assertEqual(panel.form.cb_shape.currentData(), first.Name)
+            self.assertIs(mesh.Part, first)
+        finally:
+            for panel in panels:
+                panel.Timer.stop()
+                panel.form.close()
+            FreeCADGui.Selection.clearSelection()
+            FreeCAD.closeDocument(doc.Name)
+
+
+class GmshRegionVolumeTest(unittest.TestCase):
+    def test_volumes_follow_explicit_mesh_geometry(self):
+        import Part
+        from CfdOF.Solve import CfdSolidMaterial
+
+        doc = FreeCAD.newDocument('ExplicitGmshRegionTest')
+        try:
+            analysis = CfdAnalysis.makeCfdAnalysis('CfdAnalysis')
+            CfdTools.setActiveAnalysis(analysis)
+            physics = CfdPhysicsSelection.makeCfdPhysicsSelection()
+            analysis.addObject(physics)
+            physics.Phase = 'MultiRegion'
+            selected = doc.addObject('Part::Feature', 'SelectedRegion')
+            selected.Shape = Part.makeCompound([
+                Part.makeBox(10, 10, 10), Part.makeBox(10, 10, 10, FreeCAD.Vector(20, 0, 0))])
+            overlapping = doc.addObject('Part::Feature', 'OtherRegion')
+            overlapping.Shape = selected.Shape.copy()
+            material = CfdSolidMaterial.makeCfdSolidMaterial('SolidProperties')
+            material.ShapeRefs = [(overlapping, ('Solid1',))]
+            analysis.addObject(material)
+            mesh = CfdMesh.makeCfdMesh()
+            analysis.addObject(mesh)
+            mesh.MeshUtility = 'gmsh'
+            mesh.Part = selected
+            doc.recompute()
+            with tempfile.TemporaryDirectory(prefix='cfdof-explicit-gmsh-') as output:
+                analysis.OutputPath = output
+                for subshape, volumes in (('', '1, 2'), ('Solid2', '1')):
+                    mesh.PartSubShape = subshape
+                    tools = CfdMeshTools.CfdMeshTools(mesh)
+                    tools.writeMesh()
+                    name = CfdTools.getRegionName(mesh)
+                    self.assertEqual(tools.gmsh_settings['RegionVolumeMap'], {name: volumes})
+                    with open(tools.temp_file_geo) as stream:
+                        self.assertIn('Physical Volume ("{}") = {{{}}};'.format(name, volumes), stream.read())
+                self.assertEqual(material.ShapeRefs[0][0], overlapping)
+                self.assertEqual(tuple(material.ShapeRefs[0][1]), ('Solid1',))
+                physics.Phase = 'Single'
+                tools.writeMesh()
+                self.assertFalse(tools.gmsh_settings['IsMultiRegion'])
+                self.assertEqual(tools.gmsh_settings['RegionVolumeMap'], {})
+                with open(tools.temp_file_geo) as stream:
+                    self.assertIn('Physical Volume ("Internal")', stream.read())
+        finally:
+            FreeCAD.closeDocument(doc.Name)
+
+
+class ChtTemperatureTemplateTest(unittest.TestCase):
+    def render_fields(self, foundation=False):
+        from CfdOF.TemplateBuilder import TemplateBuilder
+
+        walls = {}
+        for thermal_type in ('fixedValue', 'zeroGradient', 'fixedGradient', 'totalPower', 'heatTransferCoeff'):
+            walls[thermal_type + '_wall'] = {
+                'BoundaryType': 'wall', 'BoundarySubType': 'fixedWall',
+                'ThermalBoundaryType': thermal_type, 'Temperature': 350,
+                'HeatFlux': 120, 'Power': 35, 'HeatTransferCoeff': 10,
+            }
+        walls['coupled_wall'] = {
+            'BoundaryType': 'wall', 'BoundarySubType': 'regionCoupledWall',
+            'ThermalBoundaryType': 'zeroGradient',
+        }
+        for constraint in ('symmetry', 'cyclic', 'empty', 'wedge'):
+            walls[constraint + '_boundary'] = {
+                'BoundaryType': 'constraint', 'BoundarySubType': constraint,
+            }
+        fluid_boundaries = dict(walls)
+        for boundary_type in ('inlet', 'outlet', 'open'):
+            fluid_boundaries[boundary_type + '_boundary'] = {
+                'BoundaryType': boundary_type, 'Temperature': 310,
+            }
+        settings = {
+            'solver': {'SolverName': 'chtMultiRegionSimpleFoam'},
+            'system': {'FoundationChtModels': foundation, 'FoamVersion': '14' if foundation else '2606'},
+            'initialValues': {'Temperature': 293},
+            'boundaries': fluid_boundaries,
+            'multiRegionFluidNames': ['cooling_air'],
+            'multiRegionSolidNames': ['solid_a', 'solid_b'],
+            'multiRegionFluidBoundariesByRegion': {'cooling_air': fluid_boundaries},
+            'multiRegionSolidBoundariesByRegion': {'solid_a': walls, 'solid_b': walls},
+            'multiRegionUseSplitMeshRegions': False,
+        }
+        with tempfile.TemporaryDirectory(prefix='cfdof-temperature-templates-') as output:
+            builder = TemplateBuilder.__new__(TemplateBuilder)
+            builder.case_path = output
+            builder.template_path = os.path.join(home_path, 'Data', 'Templates', 'case')
+            builder.settings = settings
+            for kind in ('fluid', 'solid'):
+                self.assertEqual(builder.buildFile('0/' + kind + '/T', []), '')
+            fields = {}
+            for region in ('cooling_air', 'solid_a', 'solid_b'):
+                with open(os.path.join(output, '0', region, 'T')) as stream:
+                    fields[region] = stream.read()
+            self.assertFalse(os.path.exists(os.path.join(output, '0', 'fluid')))
+            self.assertFalse(os.path.exists(os.path.join(output, '0', 'solid')))
+            return fields
+
+    def test_fluid_and_solid_temperature_boundaries(self):
+        for foundation in (False, True):
+            for region, temperature in self.render_fields(foundation).items():
+                with self.subTest(foundation=foundation, region=region):
+                    self.assertIn('internalField   uniform 293;', temperature)
+                    kappa_method = 'fluidThermo' if region == 'cooling_air' else 'solidThermo'
+
+                    def patch(name):
+                        match = re.search(r'\n\s*' + re.escape(name) + r'\s*\{([^{}]*)\}', temperature)
+                        self.assertIsNotNone(match, name)
+                        return match.group(1)
+
+                    for thermal_type, expected_type in (
+                            ('fixedValue', 'fixedValue'), ('zeroGradient', 'zeroGradient'),
+                            ('fixedGradient', 'externalWallHeatFluxTemperature'),
+                            ('totalPower', 'externalWallHeatFluxTemperature'),
+                            ('heatTransferCoeff', 'externalWallHeatFluxTemperature')):
+                        body = patch(thermal_type + '_wall')
+                        self.assertRegex(body, r'type\s+' + expected_type + ';')
+                        if thermal_type in ('fixedValue', 'zeroGradient'):
+                            self.assertNotIn('kappaMethod', body)
+                        else:
+                            self.assertRegex(body, r'kappaMethod\s+' + kappa_method + ';')
+                            self.assertRegex(body, r'value\s+\$internalField;')
+                        if thermal_type == 'fixedValue':
+                            self.assertRegex(body, r'value\s+uniform 350;')
+                        elif thermal_type == 'fixedGradient':
+                            self.assertRegex(body, r'mode\s+flux;')
+                            self.assertRegex(body, r'q\s+uniform 120;')
+                        elif thermal_type == 'totalPower':
+                            self.assertRegex(body, r'mode\s+power;')
+                            self.assertRegex(body, r'Q\s+35;')
+                        elif thermal_type == 'heatTransferCoeff':
+                            self.assertRegex(body, r'mode\s+coefficient;')
+                            self.assertRegex(body, r'Ta\s+constant 350;')
+                            self.assertRegex(body, r'h\s+uniform 10;')
+                    self.assertIn('turbulentTemperatureCoupledBaffleMixed', patch('coupled_wall'))
+                    self.assertRegex(patch('coupled_wall'), r'kappaMethod\s+' + kappa_method + ';')
+                    for constraint in ('symmetry', 'cyclic', 'empty', 'wedge'):
+                        self.assertRegex(patch(constraint + '_boundary'), r'type\s+' + constraint + ';')
+                    if region == 'cooling_air':
+                        for boundary_type in ('inlet', 'outlet', 'open'):
+                            self.assertRegex(patch(boundary_type + '_boundary'), r'type\s+inletOutlet;')
+
+
+class RegionNamingTest(unittest.TestCase):
+    def test_region_labels_are_not_modified(self):
+        from types import SimpleNamespace
+        for label in ('fan_case', 'heat_sink', 'chip2', 'region_3'):
+            with self.subTest(label=label):
+                source = SimpleNamespace(Label=label)
+                self.assertEqual(CfdTools.getRegionName(source), label)
+                self.assertEqual(CfdTools.getRegionName(SimpleNamespace(SourceObject=source)), label)
+                self.assertEqual(CfdTools.getRegionName(SimpleNamespace(Part=source)), label)
+                self.assertEqual(CfdTools.getRegionName(SimpleNamespace(
+                    ShapeRefs=[(source, ('Solid1',))])), label)
+                self.assertEqual(CfdTools.getRegionName(SimpleNamespace(
+                    Part=source, PartSubShape='Solid2')), label + '_Solid2')
+
 
 
 def compareInpFiles(file_name1, file_name2):
