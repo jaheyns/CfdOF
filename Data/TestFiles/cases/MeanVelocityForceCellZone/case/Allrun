@@ -34,7 +34,7 @@ then
 fi
 
 # Copy mesh from mesh case dir if available
-MESHDIR="../meshCase"
+MESHDIR="../meshCase1"
 if [ -f "$MESHDIR"/constant/polyMesh/faces ]
 then
     rm -rf constant/polyMesh
@@ -106,4 +106,3 @@ then
 else
     runParallel $NPROC pimpleFoam
 fi
-
