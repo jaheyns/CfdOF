@@ -1,0 +1,21 @@
+%{%(boundaries/%(0%)/ThermalBoundaryType%)
+%:fixedValue
+        type        fixedValue;
+        value       uniform %(boundaries/%(0%)/Temperature%);
+%:zeroGradient
+        type        zeroGradient;
+        value       $internalField;
+%:fixedGradient
+        type            externalWallHeatFluxTemperature;
+        mode            flux;
+        q               uniform %(boundaries/%(0%)/HeatFlux%);
+%:totalPower
+        type            externalWallHeatFluxTemperature;
+        mode            power;
+        Q               %(boundaries/%(0%)/Power%);
+%:heatTransferCoeff
+        type            externalWallHeatFluxTemperature;
+        mode            coefficient;
+        Ta              constant %(boundaries/%(0%)/Temperature%);
+        h               uniform %(boundaries/%(0%)/HeatTransferCoeff%);
+%}

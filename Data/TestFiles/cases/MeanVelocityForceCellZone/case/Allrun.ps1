@@ -24,7 +24,7 @@ function runParallel([int]$NumProcs, [string]$cmd)
 $PSDefaultParameterValues['Out-File:Encoding'] = 'ascii'
 
 # Copy mesh from mesh case dir if available
-$MESHDIR = "../meshCase"
+$MESHDIR = "../meshCase1"
 if( Test-Path -PathType Leaf $MESHDIR/constant/polyMesh/faces )
 {
     rm -ErrorAction SilentlyContinue -Recurse -Force constant/polyMesh
