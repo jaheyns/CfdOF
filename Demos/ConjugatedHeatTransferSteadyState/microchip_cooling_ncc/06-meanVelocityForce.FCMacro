@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: © 2026 Kavin Teenakul <andythe_great@protonmail.com>
+
+import FreeCAD as App
+
+from CfdOF import CfdTools
+from CfdOF.Solve import CfdMeanVelocityForce
+
+fan = App.ActiveDocument.addObject("Part::Cylinder", "Cylinder")
+fan.Label = "fan"
+fan.Radius = "12 mm"
+fan.Height = "10 mm"
+fan.Placement.Base = App.ActiveDocument.Body.Placement.Base
+
+force = CfdMeanVelocityForce.makeCfdMeanVelocityForce()
+CfdTools.getActiveAnalysis().addObject(force)
+force.SelectionMode = "cellZone"
+force.ShapeRefs = [(fan, ("Solid1",))]
+force.Direction = App.Vector(0, 0, 1)
+force.Ubar = App.Vector(0, 0, 0.5)
+force.Relaxation = 0.2
+App.ActiveDocument.recompute()
+if App.GuiUp:
+    fan.ViewObject.Visibility = False
+    force.ViewObject.Visibility = False
